@@ -1,0 +1,1280 @@
+/* BREEDING NEEDS AML
+/* by Julián Ramírez-V
+/* May 2009
+/*
+/* This version also calculates global changes on land areas for suitability classes.
+/*
+/*
+/* 1. Set up a "base" run (with normal parameters) using all climate change models and current data.
+/* Calculate the change in suitability.
+/*
+/* 2. Change one parameter at a time (i.e. Tmin, Topmin, Topmax, Tmax, Rmin, Ropmin, Ropmax, Rmax) 
+/* and determine the same change in suitability.
+/*
+/* 3. Calculate the change of the change (altered - base). This will give the following possiblities:
+/*   a. If altered and base have a negative change but altered presented better results (change in suit is nearer to zero), 
+/*     then the value (alt-base) will be positive, indicating a positive impact of the parameter.
+/*   b. If altered and base have a negative change but "base" has a suit_chg nearer to zero, then the difference 
+/*     (alt-base) will be negative, signifying that it's better to be at base and not altered.
+/*   c. Altered is below 0 and base is above 0. This will give a negative value indicating that base is better
+/*   d. Altered is above 0 and base is below 0. This will give a positive value indicating altered is better.
+/*   e. Both are positive but base is greater. This will give a negative value indicating base is better.
+/*   f. Both are positive but altered is greater. This will give a positive value indicating altered is better.
+/*
+/* 4. From all "changes of changes" determine the maximum value, this will say which is the best value
+/* around all changes in parameters.
+/*
+/* 5. Determine the run that showed such value (just a correspondence conditional)
+/*
+/* 6. The final map will show the number of the run that showed the best difference
+/* (maximum change in the suitability change, and then you will only need to relate
+/* a couple of tables to determine which parameter and how should it be bred).
+
+&terminal 9999
+&if [show program] NE GRID &then GRID
+&sys cls
+&messages &off
+
+/* Setting up the base settings
+
+&amlpath .
+&s rootdir [show &amlpath]
+
+&ty
+&s cropname [response 'Type the name of the crop (without spacing)']
+&ty
+&s areaharv [response 'Type the path to the ISPAM surface']
+&ty
+&s mask [response 'Type the path to the analysis mask']
+&ty
+&s runsdir [response 'Type the path to the folder where you want your initial runs outputs']
+&ty
+&s rootout [response 'Type the path to the folder where you want your breeding needs outputs'] /*%rootdir%\bneeds_outputs
+&s cropdir %runsdir%\%cropname%
+&s cropshort [substr %cropname% 1 4]
+
+&if not [exists %runsdir% -dir] &then &sys md %runsdir%
+&if not [exists %cropdir% -dir] &then &sys md %cropdir%
+
+&ty 
+&ty This is the main menu of the breeding needs program
+&ty
+&ty     1. Tmin                     2. Topmin
+&ty     3. Topmax                   4. Tmax
+&ty     5. Tmin and Tmax            6. Topmin and Topmax
+&ty     7. Rmin                     8. Ropmin
+&ty     9. Ropmax                  10. Rmax
+&ty    11. Rmin and Rmax           12. Ropmin and Ropmax
+&ty    13. Ropmin and Topmax (NEW!)
+&ty
+
+&ty
+&s brd_parm [response 'Type the number of the option you want to process (parameter(s) you want to breed)']
+&ty
+&s runs_numb [response 'Type the number of runs you want to perform (if couped pls write one sided number)']
+&ty
+&ty Type the step with which you want to change the parameter
+&s increment [response 'Precipiation in percent and Temperatures in degC * 10']
+
+&call define_parameters
+
+&call create_run_file
+
+&ty
+&s clim_cinput [response 'Type the path to current climate files']
+&ty
+&s clim_finput [response 'Type the path to future climate files']
+
+&call run_by_csv
+
+&call calculate_breeding_needs
+
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine calculate_breeding_needs
+	
+	&s outdir_bn %rootout%\%cropname%_%fldname_par%
+	&s outdir_mods %outdir_bn%\chg_grids
+	&s outdir_difs %outdir_bn%\vectors
+	&s outdir_resl %outdir_bn%\results
+	&s outdir_futg %outdir_bn%\future
+	
+	&if not [exists %rootout% -dir] &then &sys md %rootout%
+	&if not [exists %outdir_bn% -dir] &then &sys md %outdir_bn%
+	&if not [exists %outdir_mods% -workspace] &then arc cw %outdir_mods%
+	&if not [exists %outdir_difs% -workspace] &then arc cw %outdir_difs%
+	&if not [exists %outdir_resl% -workspace] &then arc cw %outdir_resl%
+	&if not [exists %outdir_futg% -workspace] &then arc cw %outdir_futg%
+	
+	&ty -------------------------------------------------------------------
+	&ty ---------------- BREEDING NEEDS CALCULATOR v1.0 -------------------
+	&ty -------------------------------------------------------------------
+	&ty -------------------------------------------------------------------
+	&ty
+	&ty
+	&ty --------------------------
+	&ty ---- Model properties ----
+	&ty ---- Crop: %cropname%
+	&ty ---- Runs: %runs_numb%
+	&ty ---- Bpar: %fldname_par%
+	&ty ---- Step: %increment% ('%, dC*10)'
+	&ty ---- Output: %outdir_bn%
+	&ty --------------------------
+	
+	/* Calculating baseline stuff (check if the folder is ok)
+	
+	&ty
+	&ty Calculating changes of changes and maximum of those
+	&ty
+	
+	&ty Performing baseline calculation
+	
+	SETWINDOW %mask% %mask%
+	SETCELL %mask%
+	SETMASK %mask%
+	
+	&if [exists %outdir_mods%\%cropshort%_0 -grid] &then kill %outdir_mods%\%cropshort%_0 all
+	%outdir_mods%\%cropshort%_0 = %cropdir%\%cropname%0\chg_vectors\_summary\suit_chg
+	
+	&if [exists %outdir_futg%\%cropshort%_0 -grid] &then kill %outdir_futg%\%cropshort%_0 all
+	%outdir_futg%\%cropshort%_0 = %cropdir%\%cropname%0\chg_vectors\_summary\fut_mean
+	
+	&s toreclass %cropshort%_0
+	&s outreclss reclass_0
+	&s runtoprint base_run
+	
+	&ty Calculating areas
+	&call area_calc
+	
+	SETWINDOW %mask% %mask%
+	SETCELL %mask%
+	SETMASK %mask%
+	
+	&if [exists %outdir_resl%\max_of_chgs -grid] &then kill %outdir_resl%\max_of_chgs all
+	%outdir_resl%\max_of_chgs = 0
+	
+	/* Starting the runs (first calculates the changes of changes and then computes the maximum value of chgs)
+	
+	&do run = 1 &to %runs_numb%
+		
+		SETWINDOW %mask% %mask%
+		SETCELL %mask%
+		SETMASK %mask%
+	
+		&ty Performing for run %run%
+		
+		&if [exists %outdir_mods%\%cropshort%_%run% -grid] &then kill %outdir_mods%\%cropshort%_%run% all
+		%outdir_mods%\%cropshort%_%run% = %cropdir%\%cropname%%run%\chg_vectors\_summary\suit_chg
+		
+		&if [exists %outdir_difs%\%cropshort%_%run% -grid] &then kill %outdir_difs%\%cropshort%_%run% all
+		%outdir_difs%\%cropshort%_%run% = CON((%outdir_mods%\%cropshort%_%run% - %outdir_mods%\%cropshort%_0) > 0, %outdir_mods%\%cropshort%_%run% - %outdir_mods%\%cropshort%_0, -1)
+		
+		&if [exists %outdir_futg%\%cropshort%_%run% -grid] &then kill %outdir_futg%\%cropshort%_%run% all
+		%outdir_futg%\%cropshort%_%run% = %cropdir%\%cropname%%run%\chg_vectors\_summary\fut_mean
+		
+		RESET
+		
+		&s toreclass %cropshort%_%run%
+		&s outreclss reclass_%run%
+		&s runtoprint run_%run%
+		
+		&ty Calculating areas
+		&call area_calc
+		
+		RESET
+		SETWINDOW %mask% %mask%
+		SETCELL %mask%
+		SETMASK %mask%
+		
+		&if [exists %outdir_resl%\temp -grid] &then kill %outdir_resl%\temp all
+		%outdir_resl%\temp = CON(%outdir_difs%\%cropshort%_%run% > %outdir_resl%\max_of_chgs, %outdir_difs%\%cropshort%_%run%, %outdir_resl%\max_of_chgs)
+		
+		&if [exists %outdir_resl%\max_of_chgs -grid] &then kill %outdir_resl%\max_of_chgs all
+		%outdir_resl%\max_of_chgs = %outdir_resl%\temp
+		
+		&if [exists %outdir_resl%\temp -grid] &then kill %outdir_resl%\temp all
+	&end
+	
+	/* Now determining to which run that maximum value belongs
+	
+	SETWINDOW %mask% %mask%
+	SETCELL %mask%
+	SETMASK %mask%
+	
+	&ty
+	&ty Now determining to which run does the maximum change belong
+	&ty
+	
+	&ty Performing base run
+	
+	&if [exists %outdir_resl%\chg_max_run -grid] &then kill %outdir_resl%\chg_max_run all
+	%outdir_resl%\chg_max_run = 0
+	
+	&do run = 1 &to %runs_numb%
+		
+		&ty Performing for run %run%
+		
+		&if [exists %outdir_resl%\temp_%run% -grid] &then kill %outdir_resl%\temp_%run% all
+		%outdir_resl%\temp_%run% = CON(%outdir_resl%\max_of_chgs == %outdir_difs%\%cropshort%_%run%, %run%, %outdir_resl%\chg_max_run)
+		
+		&if [exists %outdir_resl%\chg_max_run -grid] &then kill %outdir_resl%\chg_max_run all
+		%outdir_resl%\chg_max_run = %outdir_resl%\temp_%run%
+		
+		&if [exists %outdir_resl%\temp_%run% -grid] &then kill %outdir_resl%\temp_%run% all
+		
+	&end
+	
+	&ty
+	&ty Cutting results to the GT 50 mask at baserun
+	
+	&s maskchg %cropdir%\%cropname%0\chg_vectors\_summary\chg_mask
+	
+	SETWINDOW %mask% %mask%
+	SETMASK %maskchg%
+	SETCELL %maskchg%
+	
+	&if [exists %outdir_resl%\chg_max_run_m -grid] &then kill %outdir_resl%\chg_max_run_m all
+	%outdir_resl%\chg_max_run_m = %outdir_resl%\chg_max_run
+	
+	&if [exists %outdir_resl%\max_of_chgs_m -grid] &then kill %outdir_resl%\max_of_chgs_m all
+	%outdir_resl%\max_of_chgs_m = %outdir_resl%\max_of_chgs
+	
+	&call calc_benefited_areas
+	
+	&if [show program] EQ GRID &then QUIT
+	&if [exists log -file] &then &sys del log
+	
+	&ty
+	&ty Finished with calculations
+	&ty Check results!
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine define_parameters
+	&ty
+	&s hascsv [response 'If you have a csv file with the data pls type the name (with ext and path), if not just press enter']
+	&if [null %hascsv%] &then
+		&do
+			&ty
+			&ty Please type all the EcoCrop base parameters
+			&ty
+			&ty Growing season duration (days)
+			&ty
+			&s Gmin [response 'Minimum']
+			&s Gmax [response 'Maximum']
+			&ty
+			&ty Temperature thresholds (C deg * 10)
+			&ty
+			&s Tkmp [response 'Death']
+			&s Tmin [response 'Minimum absolute']
+			&s Topmin [response 'Minimum optimum']
+			&s Topmax [response 'Maximum optimum']
+			&s Tmax [response 'Maximum absolute']
+			&ty
+			&ty Precipitation thresholds (mm)
+			&ty
+			&s Rmin [response 'Minimum absolute']
+			&s Ropmin [response 'Minimum optimum']
+			&s Ropmax [response 'Maximum optimum']
+			&s Rmax [response 'Maximum absolute']
+		&end
+	&else
+		&do
+			&s open_init_csv [OPEN %hascsv% OPENSTATCSV -READ]
+			&if %OPENSTATCSV% NE 0 &then
+				&do
+					&ty The file %hascsv% couldnt be opened or doesnt exist
+					&return
+				&end
+			&else
+				&do
+					&s read_zer_rec [READ %open_init_csv% READSTATUSCSV]
+					
+					/*(Cropname,Gmin,Gmax,Tkmp,Tmin,Topmin,Topmax,Tmax,Rmin,Ropmin,Ropmax,Rmax)
+					
+					&s cropproc [extract 1 %read_zer_rec%]
+					
+					/* Growing season parameters
+					&s Gmin = [extract 2 %read_zer_rec%]
+					&s Gmax = [extract 3 %read_zer_rec%]
+					
+					/* Temperature parameters (all multiplied by 10)
+					&s Tkmp = [extract 4 %read_zer_rec%]
+					&s Tmin = [extract 5 %read_zer_rec%]
+					&s Topmin = [extract 6 %read_zer_rec%]
+					&s Topmax = [extract 7 %read_zer_rec%]
+					&s Tmax = [extract 8 %read_zer_rec%]
+					
+					/* Precipitation parameters
+					&s Rmin = [extract 9 %read_zer_rec%]
+					&s Ropmin = [extract 10 %read_zer_rec%]
+					&s Ropmax = [extract 11 %read_zer_rec%]
+					&s Rmax = [extract 12 %read_zer_rec%]
+				&end
+				&s close_init_csv [CLOSE %open_init_csv%]
+		&end
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine create_run_file
+	&if %brd_parm% EQ 1 &then
+		&do
+			&s par_tb Tmin
+			&s fldname_par %par_tb%
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by -%increment% (max chg -%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Tmin% - %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%modval%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 2 &then
+		&do
+			&s par_tb Topmin
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by -%increment% (max chg -%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Topmin% - %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%modval%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 3 &then
+		&do
+			&s par_tb Topmax
+			&s fldname_par %par_tb%
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by +%increment% (max chg +%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Topmax% + %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%modval%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 4 &then
+		&do
+			&s par_tb Tmax
+			&s fldname_par %par_tb%
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by +%increment% (max chg +%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Tmax% + %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%modval%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 5 &then
+		&do
+			&s par_tb1 Tmin
+			&s par_tb2 Tmax
+			&s fldname_par %par_tb1%_%par_tb2%
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb1% and %par_tb2% %runs_numb% times by +-%increment% (max chg +-%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&s runs_numb [calc %runs_numb% * 2]
+			
+			&do mdf = 1 &to %runs_numb%
+				&if %mdf% <= [calc %runs_numb% / 2] &then
+					&do
+						&s modval [calc %Tmin% - %increment% * %mdf%]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%modval%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+					&end
+				&else
+					&do
+						&s modval [calc %Tmax% + %increment% * [calc %mdf% - [calc %runs_numb% / 2]]]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%modval%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+					&end
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 6 &then
+		&do
+			&s par_tb1 Topmin
+			&s par_tb2 Topmax
+			&s fldname_par %par_tb1%_%par_tb2%
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb1% and %par_tb2% %runs_numb% times by +-%increment% (max chg +-%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&s runs_numb [calc %runs_numb% * 2]
+			
+			&do mdf = 1 &to %runs_numb%
+				&if %mdf% <= [calc %runs_numb% / 2] &then
+					&do
+						&s modval [calc %Topmin% - %increment% * %mdf%]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%modval%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+					&end
+				&else
+					&do
+						&s modval [calc %Topmax% + %increment% * [calc %mdf% - [calc %runs_numb% / 2]]]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%modval%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+					&end
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 7 &then
+		&do
+			&s par_tb Rmin
+			&s fldname_par %par_tb%
+			&s increment [calc %Rmin% * [calc %increment% / 100]]
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by -%increment% (max chg -%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Rmin% - %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%modval%,%Ropmin%,%Ropmax%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 8 &then
+		&do
+			&s par_tb Ropmin
+			&s fldname_par %par_tb%
+			&s increment [calc %Ropmin% * [calc %increment% / 100]]
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by -%increment% (max chg -%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Ropmin% - %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%modval%,%Ropmax%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 9 &then
+		&do
+			&s par_tb Ropmax
+			&s fldname_par %par_tb%
+			&s increment [calc %Ropmax% * [calc %increment% / 100]]
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by +%increment% (max chg +%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Ropmin% + %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%modval%,%Rmax%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 10 &then
+		&do
+			&s par_tb Rmax
+			&s fldname_par %par_tb%
+			&s increment [calc %Rmax% * [calc %increment% / 100]]
+			&s final_bound [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb% %runs_numb% times by +%increment% (max chg +%final_bound%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&do mdf = 1 &to %runs_numb%
+				&s modval [calc %Rmax% + %increment% * %mdf%]
+				&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%modval%]
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 11 &then
+		&do
+			&s par_tb1 Rmin
+			&s par_tb2 Rmax
+			&s fldname_par %par_tb1%_%par_tb2%
+			&s increment1 [calc %Rmin% * [calc %increment% / 100]]
+			&s increment2 [calc %Rmax% * [calc %increment% / 100]]
+			&s final_bound1 [calc %increment1% * %runs_numb%]
+			&s final_bound2 [calc %increment2% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb1% and %par_tb2% %runs_numb% times by -%increment1% and +%increment2% (max chg -%final_bound1% and +%final_bound2%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&s runs_numb [calc %runs_numb% * 2]
+			
+			&do mdf = 1 &to %runs_numb%
+				&if %mdf% <= [calc %runs_numb% / 2] &then
+					&do
+						&s modval [calc %Rmin% - %increment1% * %mdf%]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%modval%,%Ropmin%,%Ropmax%,%Rmax%]
+					&end
+				&else
+					&do
+						&s modval [calc %Rmax% + %increment2% * [calc %mdf% - [calc %runs_numb% / 2]]]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%modval%]
+					&end
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 12 &then
+		&do
+			&s par_tb1 Ropmin
+			&s par_tb2 Ropmax
+			&s fldname_par %par_tb1%_%par_tb2%
+			&s increment1 [calc %Ropmin% * [calc %increment% / 100]]
+			&s increment2 [calc %Ropmax% * [calc %increment% / 100]]
+			&s final_bound1 [calc %increment1% * %runs_numb%]
+			&s final_bound2 [calc %increment2% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb1% and %par_tb2% %runs_numb% times by -%increment1% and +%increment2% (max chg -%final_bound1% and +%final_bound2%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&s runs_numb [calc %runs_numb% * 2]
+			
+			&do mdf = 1 &to %runs_numb%
+				&if %mdf% <= [calc %runs_numb% / 2] &then
+					&do
+						&s modval [calc %Ropmin% - %increment1% * %mdf%]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%modval%,%Ropmax%,%Rmax%]
+					&end
+				&else
+					&do
+						&s modval [calc %Ropmax% + %increment2% * [calc %mdf% - [calc %runs_numb% / 2]]]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%modval%,%Rmax%]
+					&end
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else &if %brd_parm% EQ 13 &then
+		&do
+			&s par_tb1 Ropmin
+			&s par_tb2 Topmax
+			&s fldname_par %par_tb1%_%par_tb2%
+			&s increment1 [calc %Ropmin% * [calc %increment% / 100]]
+			/*&s increment2 [calc %Ropmax% * [calc %increment% / 100]]
+			&s final_bound1 [calc %increment1% * %runs_numb%]
+			&s final_bound2 [calc %increment% * %runs_numb%]
+			&ty
+			&ty Attempting to modify %par_tb1% and %par_tb2% %runs_numb% times by -%increment1% and +%increment% (max chg -%final_bound1% and +%final_bound2%)
+			&ty
+			
+			&s openfile [OPEN %cropdir%\run_%cropshort%.csv OPENSTATUS -WRITE]
+			&s writeline [WRITE %openfile% %cropname%0,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+			
+			&s runs_numb [calc %runs_numb% * 2]
+			
+			&do mdf = 1 &to %runs_numb%
+				&if %mdf% <= [calc %runs_numb% / 2] &then
+					&do
+						&s modval [calc %Ropmin% - %increment1% * %mdf%]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%Topmax%,%Tmax%,%Rmin%,%modval%,%Ropmax%,%Rmax%]
+					&end
+				&else
+					&do
+						&s modval [calc %Topmax% + %increment% * [calc %mdf% - [calc %runs_numb% / 2]]]
+						/*&s modval [calc %Ropmax% + %increment2% * [calc %mdf% - [calc %runs_numb% / 2]]]
+						&s writeline [WRITE %openfile% %cropname%%mdf%,%Gmin%,%Gmax%,%Tkmp%,%Tmin%,%Topmin%,%modval%,%Tmax%,%Rmin%,%Ropmin%,%Ropmax%,%Rmax%]
+					&end
+			&end
+			&s closefile [CLOSE %openfile%]
+		&end
+	&else
+		&do
+			&ty The option was invalid. Try again, bailing out...
+			QUIT
+			QUIT
+		&end
+
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine run_by_csv
+	&sys cls
+	&ty 
+	&s csv_file %cropdir%\run_%cropshort%.csv
+	&s typedir %cropdir%
+	&ty
+	
+	&s opencsv [OPEN %csv_file% OPENSTATUS -READ]
+	&if %OPENSTATUS% NE 0 &then
+		&do
+			&ty The file %csv_file% couldnt be opened or doesnt exist
+			&return
+		&end
+	&else
+		&do
+			&s read_rec [READ %opencsv% READSTATUS]
+			&s cropnumber 1
+			&do &while %READSTATUS% EQ 0
+				
+				&call logoff
+				
+				/*(Cropname,Gmin,Gmax,Tkmp,Tmin,Topmin,Topmax,Tmax,Rmin,Ropmin,Ropmax,Rmax)
+				
+				&s cropproc [extract 1 %read_rec%]
+				
+				&s outdir_crop %typedir%\%cropproc%
+				&if not [exists %outdir_crop% -dir] &then &sys md %outdir_crop%
+				
+				/* Growing season parameters
+				&s Gmin = [extract 2 %read_rec%]
+				&s Gmax = [extract 3 %read_rec%]
+				
+				/* Temperature parameters (all multiplied by 10)
+				&s Tkmp = [extract 4 %read_rec%]
+				&s Tmin = [extract 5 %read_rec%]
+				&s Topmin = [extract 6 %read_rec%]
+				&s Topmax = [extract 7 %read_rec%]
+				&s Tmax = [extract 8 %read_rec%]
+				
+				/* Precipitation parameters
+				&s Rmin = [extract 9 %read_rec%]
+				&s Ropmin = [extract 10 %read_rec%]
+				&s Ropmax = [extract 11 %read_rec%]
+				&s Rmax = [extract 12 %read_rec%]
+				
+				/* Performing the EcoCrop model
+				
+				/* Processing current
+				
+				&s condition current
+				&s model worldclim
+				
+				&s outdir %outdir_crop%\%condition%
+				&if not [exists %outdir% -workspace] &then arc cw %outdir%
+				
+				&call define_climate
+				&call param_file
+				
+				arc w %outdir%
+				&sys cls
+				
+				&call core_program
+				
+				&sys del log
+				arc w %rootdir%
+				
+				/* Processing future
+				
+				&s condition future
+				&s outdir_c %outdir_crop%\%condition%
+				&if not [exists %outdir_c% -dir] &then &sys md %outdir_c%
+				
+				&s modlist [listfile %clim_finput%\* -dir]
+				&s nmod [token %modlist% -count]
+				
+				&do m = 1 &to %nmod%
+					&s modelname [extract %m% %modlist%]
+					&s model %modelname%
+					
+					&s outdir %outdir_c%\%modelname%
+					&if not [exists %outdir% -workspace] &then arc cw %outdir%
+					
+					&call define_climate
+					&call param_file
+					
+					arc w %outdir%
+					&sys cls
+					
+					&call core_program
+					
+					&sys del log
+					arc w %rootdir%
+				&end
+				
+				&call calc_chg_vector
+				
+				&ty
+				&ty Done for crop %cropproc%
+				&ty
+				
+				&s read_rec [READ %opencsv% READSTATUS]
+				&s cropnumber 1
+				
+			&end
+		&end
+		&s closecsv [CLOSE %opencsv%]
+	
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine define_climate
+	&if %condition% EQ current &then &s clim_input %clim_cinput%
+	&else &s clim_input %clim_finput%\%modelname%
+	
+	&s prec = %clim_input%\prec_
+	&s tmean = %clim_input%\tmean_
+	&s tmini = %clim_input%\tmin_
+	&s tmaxi = %clim_input%\tmax_
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine param_file
+	&s create_modl_file [OPEN %outdir%\ecocrop.model OPENSTATUS2 -WRITE]
+	&s writerow [WRITE %create_modl_file% 'CLIMATE_FILES: '%clim_input%]
+	&s writerow [WRITE %create_modl_file% 'CROP: '%cropproc%]
+	&s writerow [WRITE %create_modl_file% 'GMIN: '%Gmin%]
+	&s writerow [WRITE %create_modl_file% 'GMAX: '%Gmax%]
+	&s writerow [WRITE %create_modl_file% 'TKMP: '%Tkmp%]
+	&s writerow [WRITE %create_modl_file% 'TMIN: '%Tmin%]
+	&s writerow [WRITE %create_modl_file% 'TOPMIN: '%Topmin%]
+	&s writerow [WRITE %create_modl_file% 'TOPMAX: '%Topmax%]
+	&s writerow [WRITE %create_modl_file% 'TMAX: '%Tmax%]
+	&s writerow [WRITE %create_modl_file% 'RMIN: '%Rmin%]
+	&s writerow [WRITE %create_modl_file% 'ROPMIN: '%Ropmin%]
+	&s writerow [WRITE %create_modl_file% 'ROPMAX: '%Ropmax%]
+	&s writerow [WRITE %create_modl_file% 'RMAX: '%Rmax%]
+	&s close_modl_file [CLOSE %create_modl_file%]
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine core_program
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty XXXXXXXXXXX MODEL PARAMETERS XXXXXXXXXXX
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty XXXXXXXXXXX CONDITION = %condition% (%model%)
+	&ty XXXXXXXXXXX CROP = %cropproc%
+	&ty XXXXXXXXXXX GMIN = %Gmin%
+	&ty XXXXXXXXXXX GMAX = %Gmax%
+	&ty XXXXXXXXXXX TKMP = %Tkmp%
+	&ty XXXXXXXXXXX TMIN = %Tmin%
+	&ty XXXXXXXXXXX TOPMIN = %Topmin%
+	&ty XXXXXXXXXXX TOPMAX = %Topmax%
+	&ty XXXXXXXXXXX TMAX = %Tmax%
+	&ty XXXXXXXXXXX RMIN = %Rmin%
+	&ty XXXXXXXXXXX ROPMIN = %Ropmin%
+	&ty XXXXXXXXXXX ROPMAX = %Ropmax%
+	&ty XXXXXXXXXXX RMAX = %Rmax%
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty
+	&pause 'Starting the process' &seconds 2
+	
+	&s minadapt 0
+	&s maxadapt 1
+	&s tminprom [calc [calc %Tmin% + %Topmin%] * 0.5]
+	&s adaptprom [calc [calc %minadapt% + %maxadapt%] * 0.5]
+	
+	/* Calculating regression model between Rmin and Ropmin
+	
+	&s rminprom [calc [calc %Rmin% + %Ropmin%] * 0.5]
+	&s slopermin = [calc [calc [calc [calc %Rmin% - %rminprom%] * [calc %minadapt% - %adaptprom%]] + [calc [calc %Ropmin% - %rminprom%] * [calc %maxadapt% - %adaptprom%]]] / [calc [calc [calc %Rmin% - %rminprom%] * [calc %Rmin% - %rminprom%]] + [calc [calc %Ropmin% - %rminprom%] * [calc %Ropmin% - %rminprom%]]]]
+	&s interrmin = [calc %minadapt% - [calc %slopermin% * %Rmin%]]
+	
+	/* Calculating regression model between Ropmax and Rmax
+	
+	&s rmaxprom [calc [calc %Rmax% + %Ropmax%] * 0.5]
+	&s slopermax = [calc [calc [calc [calc %Ropmax% - %rmaxprom%] * [calc %maxadapt% - %adaptprom%]] + [calc [calc %Rmax% - %rmaxprom%] * [calc %minadapt% - %adaptprom%]]] / [calc [calc [calc %Ropmax% - %rmaxprom%] * [calc %Ropmax% - %rmaxprom%]] + [calc [calc %Rmax% - %rmaxprom%] * [calc %Rmax% - %rmaxprom%]]]]
+	&s interrmax = [calc %minadapt% - [calc %slopermax% * %Rmax%]]
+	
+	/* Grid parameters
+	&s mask %prec%1
+	
+	setwindow %mask% %mask%
+	setmask %mask%
+	setcell %mask%
+	
+	/* Calculating average duration of growing season
+	&s Gavg = [round [calc [calc %Gmin% + %Gmax%] / 60]]
+	&s Gavgp = [round [calc [calc %Gmin% + %Gmax%] / 60]]
+	
+	/* Calculating killing temperature threshold (plus 4ºC * 10)
+	&s Tkill = [calc %Tkmp% + 40]
+	
+	&ty
+	&ty Duration of the growing season in months is %Gavg% (%Gavgp%)
+	&ty Computing for 12 possible growing seasons
+	&ty
+	
+	/* Performing iterations to calculate suitability
+	
+	&do i = 1 &to 12
+		&s start.month = [calc %i%]
+		&s end.month = [calc [calc %i% + %Gavg%] - 1]
+		&s end.month.p = [calc [calc %i% + %Gavgp%] - 1]
+		
+		&ty
+		&ty GS %i% (%start.month% to %end.month%)
+		&ty Temperature iteration
+		
+		/* Evaluating for temperature
+		
+		&if [exists %outdir%\tsuit_%i%_1 -grid] &then kill %outdir%\tsuit_%i%_1
+		&s div1 [calc 1 / [calc %Topmin% - %Tmin%]]
+		&s div2 [calc 1 / [calc %Tmax% - %Topmax%]]
+		
+		DOCELL
+			IF (%tmini%%i% < %Tkill%) %outdir%\tsuit_%i%_1 = 0
+			ELSE IF (%tmean%%i% < %Tmin%) %outdir%\tsuit_%i%_1 = 0
+			ELSE IF (%tmean%%i% < %Topmin%) %outdir%\tsuit_%i%_1 = 1 - ((%Topmin% - %tmean%%i%) * %div1%)
+			ELSE IF (%tmean%%i% < %Topmax%) %outdir%\tsuit_%i%_1 = 1
+			ELSE IF (%tmean%%i% < %Tmax%) %outdir%\tsuit_%i%_1 = (%Tmax% - %tmean%%i%) * %div2%
+			ELSE %outdir%\tsuit_%i%_1 = 0
+		END
+		
+		&do j = %start.month% &to %end.month.p%
+			&s r.end.mth [calc %j%]
+			&if %r.end.mth% GT 12 &then &s r.end.mth [calc %r.end.mth% - 12]
+					
+			&if %j% = %start.month% &then
+				&do
+					&s listpgrids = %prec%%r.end.mth%
+				&end
+			&else
+				&do
+					&s listpgrids = %listpgrids%,%prec%%r.end.mth%
+				&end		
+		&end
+		
+		&ty Rainfall of growing period
+		
+		&if [exists gp_rain_%i% -grid] &then kill gp_rain_%i% all
+		gp_rain_%i% = SUM(%listpgrids%)
+		
+		/* Evaluating for precipitation
+		
+		&ty Precipitation iteration
+		
+		&if [exists %outdir%\prec_suit_%i% -grid] &then kill %outdir%\prec_suit_%i% all
+		
+		DOCELL
+			IF (%outdir%\gp_rain_%i% < %Rmin%) %outdir%\prec_suit_%i% = 0
+			ELSE IF (%outdir%\gp_rain_%i% >= %Rmin% & %outdir%\gp_rain_%i% <= %Ropmin%) %outdir%\prec_suit_%i% = (%slopermin%) * %outdir%\gp_rain_%i% + (%interrmin%)
+			ELSE IF (%outdir%\gp_rain_%i% > %Ropmin% & %outdir%\gp_rain_%i% < %Ropmax%) %outdir%\prec_suit_%i% = 1
+			ELSE IF (%outdir%\gp_rain_%i% >= %Ropmax% & %outdir%\gp_rain_%i% <= %Rmax%) %outdir%\prec_suit_%i% = (%slopermax%) * %outdir%\gp_rain_%i% + (%interrmax%)
+			ELSE IF (%outdir%\gp_rain_%i% > %Rmax%) %outdir%\prec_suit_%i% = 0
+			ELSE %outdir%\prec_suit_%i% = -9999
+		END
+		
+	&end
+	
+	&ty
+	&ty
+	&ty Minimum cumulated temperature and rainfall suitability
+	
+	&do i = 1 &to 12
+		&s start.month = [calc %i%]
+		&s end.month = [calc [calc %i% + %Gavg%] - 1]
+		
+		&ty GS %i% (%start.month% to %end.month%)
+		
+		&if [exists %outdir%\ecot_%i% -grid] &then kill %outdir%\ecot_%i% all
+		%outdir%\ecot_%i% = 1
+		
+		&if [exists %outdir%\ecop_%i% -grid] &then kill %outdir%\ecop_%i% all
+		%outdir%\ecop_%i% = 0
+		
+		&do j = %start.month% &to %end.month%
+			&s r.end.mth [calc %j%]
+			&if %r.end.mth% GT 12 &then &s r.end.mth [calc %r.end.mth% - 12]
+			&s r.nxt.mth [calc %r.end.mth% + 1]
+			
+			&if [exists %outdir%\ecot_%r.nxt.mth% -grid] &then kill %outdir%\ecot_%r.nxt.mth% all
+			%outdir%\ecot_%r.nxt.mth% = CON(%outdir%\tsuit_%r.end.mth%_1 < %outdir%\ecot_%r.end.mth%, %outdir%\tsuit_%r.end.mth%_1, %outdir%\ecot_%r.end.mth%)
+			
+			&if [exists %outdir%\ecop_%r.nxt.mth% -grid] &then kill %outdir%\ecop_%r.nxt.mth% all
+			%outdir%\ecop_%r.nxt.mth% = CON(%outdir%\prec_suit_%r.end.mth% > %outdir%\ecop_%r.end.mth%, %outdir%\prec_suit_%r.end.mth%, %outdir%\ecop_%r.end.mth%)
+			
+			&if %j% EQ %start.month% &then 
+				&do
+					&s listecot ecot_%r.end.mth%,ecot_%r.nxt.mth%
+					&s listecop ecop_%r.end.mth%,ecop_%r.nxt.mth%
+				&end
+			&else 
+				&do
+					&s listecot %listecot%,ecot_%r.nxt.mth%
+					&s listecop %listecop%,ecop_%r.nxt.mth%
+				&end
+		&end
+		
+		&if [exists %outdir%\ecotf_%i% -grid] &then kill %outdir%\ecotf_%i% all
+		%outdir%\ecotf_%i% = MIN(%listecot%)
+		
+		&if [exists %outdir%\ecopf_%i% -grid] &then kill %outdir%\ecopf_%i% all
+		%outdir%\ecopf_%i% = MAX(%listecop%)
+		
+		&if %i% EQ 1 &then
+			&do
+				&s listecocrop ecotf_%i%
+				&s listecocropp ecopf_%i%
+			&end
+		&else 
+			&do
+				&s listecocrop %listecocrop%,ecotf_%i%
+				&s listecocropp %listecocropp%,ecopf_%i%
+			&end
+	&end
+	
+	&ty 
+	&ty 
+	&ty Performing final calculations
+	&ty 
+	
+	&ty Precipitation suitability
+	&if [exists p_suitability -grid] &then kill p_suitability all
+	p_suitability = INT(FLOOR(MAX(%listecocropp%) * 100 + 0.5))
+	
+	&ty Temperature suitability
+	&if [exists t_suitability -grid] &then kill t_suitability all
+	t_suitability = INT(FLOOR(MAX(%listecocrop%) * 100 + 0.5))
+	
+	&ty Overall suitability
+	&if [exists suitability -grid] &then kill suitability all
+	suitability = INT(FLOOR((MAX(%listecocrop%) * MAX(%listecocropp%)) * 100 + 0.5))
+	
+	/* Clean up directory
+	
+	&ty
+	&ty Cleaning up the calculations directory
+	
+	&do i = 1 &to 12
+		&if [exists %outdir%\gp_rain_%i% -grid] &then kill %outdir%\gp_rain_%i% all
+		&if [exists %outdir%\tsuit_%i%_1 -grid] &then kill %outdir%\tsuit_%i%_1 all
+		&if [exists %outdir%\prec_suit_%i% -grid] &then kill %outdir%\prec_suit_%i% all
+		&if [exists %outdir%\ecot_%i% -grid] &then kill %outdir%\ecot_%i% all
+		&if [exists %outdir%\ecop_%i% -grid] &then kill %outdir%\ecop_%i% all
+		&if [exists %outdir%\ecotf_%i% -grid] &then kill %outdir%\ecotf_%i% all
+		&if [exists %outdir%\ecopf_%i% -grid] &then kill %outdir%\ecopf_%i% all
+	&end
+	
+	&if [exists %outdir%\ecot_13 -grid] &then kill %outdir%\ecot_13 all
+	&if [exists %outdir%\ecop_13 -grid] &then kill %outdir%\ecop_13 all
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine calc_chg_vector
+	RESET
+	&s chg_out %outdir_crop%\chg_vectors
+	
+	&ty Calculating GT50 area and cutting suitability prediction
+	&ty Current
+	
+	&if not [exists %chg_out% -dir] &then &sys md %chg_out%
+	
+	&if not [exists %chg_out%\current -workspace] &then arc cw %chg_out%\current
+	
+	&if [exists %chg_out%\current\suit_gt50 -grid] &then kill %chg_out%\current\suit_gt50 all
+	%chg_out%\current\suit_gt50 = SETNULL(%outdir_crop%\current\suitability < 50, %outdir_crop%\current\suitability)
+	
+	&if [exists %chg_out%\current\mask_gt50 -grid] &then kill %chg_out%\current\mask_gt50 all
+	%chg_out%\current\mask_gt50 = SETNULL(%outdir_crop%\current\suitability < 50, 1)
+	
+	&ty Future
+	
+	&s modlist [listfile %outdir_c%\* -dir]
+	&s nmod [token %modlist% -count]
+	
+	&do md = 1 &to %nmod%
+		&s modname [extract %md% %modlist%]
+		&s modpred_dir %outdir_c%\%modname%
+		
+		&s modcalc_dir %chg_out%\%modname%
+		&if not [exists %modcalc_dir% -workspace] &then arc cw %modcalc_dir%
+		
+		&if [exists %modcalc_dir%\suit_gt50 -grid] &then kill %modcalc_dir%\suit_gt50 all
+		%modcalc_dir%\suit_gt50 = SETNULL(%modpred_dir%\suitability < 50, %modpred_dir%\suitability)
+		
+		&if [exists %modcalc_dir%\mask_gt50 -grid] &then kill %modcalc_dir%\mask_gt50 all
+		%modcalc_dir%\mask_gt50 = SETNULL(%modpred_dir%\suitability < 50, 1)
+		
+		&if [exists %modcalc_dir%\mask_chg -grid] &then kill %modcalc_dir%\mask_chg all
+		%modcalc_dir%\mask_chg = MERGE(%modcalc_dir%\mask_gt50, %chg_out%\current\mask_gt50)
+		
+		SETWINDOW %modcalc_dir%\mask_chg %modcalc_dir%\mask_chg
+		SETMASK %modcalc_dir%\mask_chg
+		SETCELL %modcalc_dir%\mask_chg
+		
+		&if [exists %modcalc_dir%\suit_chg -grid] &then kill %modcalc_dir%\suit_chg all
+		%modcalc_dir%\suit_chg = %modpred_dir%\suitability - %outdir_crop%\current\suitability
+		
+		RESET
+		
+		&if %md% EQ 1 &then &s listsuitgrids %modname%\suitability
+		&else &s listsuitgrids %listsuitgrids%,%modname%\suitability
+		
+	&end
+	
+	&ty Calculating summary changes
+	
+	arc w %outdir_c%
+	
+	&s summarydir %chg_out%\_summary
+	&if not [exists %chg_out%\_summary -workspace] &then arc cw %chg_out%\_summary
+	
+	&if [exists %summarydir%\fut_mean -grid] &then kill %summarydir%\fut_mean all
+	%summarydir%\fut_mean = INT(FLOOR(MEAN(%listsuitgrids%) + 0.5))
+	
+	&if [exists %summarydir%\fut_gt50 -grid] &then kill %summarydir%\fut_gt50 all
+	%summarydir%\fut_gt50 = SETNULL(%summarydir%\fut_mean < 50, %summarydir%\fut_mean)
+	
+	&if [exists %summarydir%\fut_gt50_msk -grid] &then kill %summarydir%\fut_gt50_msk all
+	%summarydir%\fut_gt50_msk = SETNULL(%summarydir%\fut_mean < 50, 1)
+	
+	&if [exists %summarydir%\chg_mask -grid] &then kill %summarydir%\chg_mask all
+	%summarydir%\chg_mask = MERGE(%summarydir%\fut_gt50_msk, %chg_out%\current\mask_gt50)
+	
+	&if [exists %summarydir%\suit_chg -grid] &then kill %summarydir%\suit_chg all
+	%summarydir%\suit_chg = %summarydir%\fut_mean - %outdir_crop%\current\suitability
+	
+	&if [exists %summarydir%\temp1 -grid] &then kill %summarydir%\temp1 all
+	%summarydir%\temp1 = STD(%listsuitgrids%)
+	
+	&if [exists %summarydir%\temp2 -grid] &then kill %summarydir%\temp2 all
+	%summarydir%\temp2 = MEAN(%listsuitgrids%)
+	
+	&if [exists %summarydir%\fut_cv -grid] &then kill %summarydir%\fut_cv
+	%summarydir%\fut_cv = CON((%summarydir%\temp1 / (%summarydir%\temp2 + 1) * 100) > 100, 100, INT(FLOOR((%summarydir%\temp1 / (%summarydir%\temp2 + 1) * 100) + 0.5)))
+	
+	&if [exists %summarydir%\temp1 -grid] &then kill %summarydir%\temp1 all
+	&if [exists %summarydir%\temp2 -grid] &then kill %summarydir%\temp2 all
+	
+	SETWINDOW %summarydir%\chg_mask %summarydir%\chg_mask
+	SETMASK %summarydir%\chg_mask
+	SETCELL %summarydir%\chg_mask
+	
+	&if [exists %summarydir%\suit_g50_chg -grid] &then kill %summarydir%\suit_g50_chg all
+	%summarydir%\suit_g50_chg = %summarydir%\fut_mean - %outdir_crop%\current\suitability
+	
+	&if [exists %summarydir%\suit_g50_cv -grid] &then kill %summarydir%\suit_g50_cv
+	%summarydir%\suit_g50_cv = %summarydir%\fut_cv
+	
+	RESET
+	
+	&sys del log
+	
+	arc w %rootdir%
+	
+	&ty
+	&ty Done with vectors
+	&ty
+	
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine area_calc
+	
+	RESET
+	SETWINDOW %mask% %mask%
+	SETCELL %outdir_futg%\%toreclass%
+	SETMASK %mask%
+
+	DOCELL
+		IF (%outdir_futg%\%toreclass% <= 10) %outdir_futg%\%outreclss% = 1
+		ELSE IF (%outdir_futg%\%toreclass% > 10 & %outdir_futg%\%toreclass% <= 20) %outdir_futg%\%outreclss% = 2
+		ELSE IF (%outdir_futg%\%toreclass% > 20 & %outdir_futg%\%toreclass% <= 30) %outdir_futg%\%outreclss% = 3
+		ELSE IF (%outdir_futg%\%toreclass% > 30 & %outdir_futg%\%toreclass% <= 40) %outdir_futg%\%outreclss% = 4
+		ELSE IF (%outdir_futg%\%toreclass% > 40 & %outdir_futg%\%toreclass% <= 50) %outdir_futg%\%outreclss% = 5
+		ELSE IF (%outdir_futg%\%toreclass% > 50 & %outdir_futg%\%toreclass% <= 60) %outdir_futg%\%outreclss% = 6
+		ELSE IF (%outdir_futg%\%toreclass% > 60 & %outdir_futg%\%toreclass% <= 70) %outdir_futg%\%outreclss% = 7
+		ELSE IF (%outdir_futg%\%toreclass% > 70 & %outdir_futg%\%toreclass% <= 80) %outdir_futg%\%outreclss% = 8
+		ELSE IF (%outdir_futg%\%toreclass% > 80 & %outdir_futg%\%toreclass% <= 90) %outdir_futg%\%outreclss% = 9
+		ELSE IF (%outdir_futg%\%toreclass% > 90) %outdir_futg%\%outreclss% = 10
+		ELSE %outdir_futg%\%outreclss% = -9999
+	END
+	
+	RESET
+	
+	SETWINDOW %areaharv% %areaharv%
+	SETMASK %areaharv%
+	SETCELL %outdir_futg%\%outreclss%
+	
+	&if [exists %outdir_futg%\%outreclss%_c -grid] &then kill %outdir_futg%\%outreclss%_c all
+	%outdir_futg%\%outreclss%_c = %outdir_futg%\%outreclss%
+	
+	RESET
+	SETMASK %mask%
+	
+	&if [exists %outdir_futg%\%outreclss%_o -grid] &then kill %outdir_futg%\%outreclss%_o all
+	%outdir_futg%\%outreclss%_o = CON(ISNULL(%areaharv%), %outdir_futg%\%outreclss%)
+	
+	&do rec_grid &list global cropped notcropped
+		
+		&if %rec_grid% EQ global &then &s rgrid %outreclss%
+		&else &if %rec_grid% EQ cropped &then &s rgrid %outreclss%_c
+		&else &s rgrid %outreclss%_o
+		
+		arc w %outdir_futg%
+		
+		&s clslist [listunique %rgrid% -VAT VALUE]
+		&s nclss [token %clslist% -count]
+		
+		&if [null %clslist%] &then
+			&do
+				&s listvals NULL
+				&s listclss NULL
+			&end
+		&else
+			&do
+				&do cls = 1 &to %nclss% /*10
+					QUIT
+					TABLES
+					SEL %rgrid%.VAT
+					&s print_value [show RECORD %cls% ITEM COUNT]
+					&s print_class [show RECORD %cls% ITEM VALUE]
+					QUIT
+					GRID
+					
+					&if %cls% EQ 1 &then
+						&do
+							&s listvals %print_value%
+							&s listclss %print_class%
+						&end
+					&else
+						&do
+							&s listvals %listvals%,%print_value%
+							&s listclss %listclss%,%print_class%
+						&end
+				&end
+			&end
+		
+		arc w %rootdir%
+		
+		&s createstatfile [OPEN %outdir_bn%\change_in_areas_%rec_grid%.txt OPENSTAT -APPEND]
+		
+		&if %outreclss% EQ reclass_0 OR %outreclss%_c EQ reclass_0_c OR %outreclss%_o EQ reclass_0_o &then 
+			&do
+				&s writeresult [WRITE %createstatfile% RUN,%listclss%]
+				&s writeresult [WRITE %createstatfile% %runtoprint%,%listvals%]
+			&end
+		&else &s writeresult [WRITE %createstatfile% %runtoprint%,%listvals%]
+		
+		&s closestatfile [CLOSE %createstatfile%]
+		
+	&end
+	
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine calc_benefited_areas
+	
+	&ty Calculating benefited areas
+	
+	&do rns = 0 &to %runs_numb%
+		
+		RESET
+		
+		&if [exists %outdir_resl%\temp -grid] &then kill %outdir_resl%\temp all
+		%outdir_resl%\temp = CON(%outdir_resl%\chg_max_run_m == %rns%, %areaharv%)
+		
+		&if [exists %outdir_resl%\temp2 -grid] &then kill %outdir_resl%\temp2 all
+		%outdir_resl%\temp2 = CON(%outdir_resl%\chg_max_run_m == %rns%, 1)
+		
+		&describe %outdir_resl%\temp
+		&if %GRD$STDV% EQ -2 &then
+			&do
+				&s valtowrite NULL
+				&if [exists %outdir_resl%\temp -grid] &then kill %outdir_resl%\temp all
+				&if [exists %outdir_resl%\temp2 -grid] &then kill %outdir_resl%\temp2 all
+			&end
+		&else
+			&do
+				&if [exists %outdir_resl%\ispam_%rns% -grid] &then kill %outdir_resl%\ispam_%rns% all
+				%outdir_resl%\ispam_%rns% = ZONALSUM(%outdir_resl%\temp2, %outdir_resl%\temp, DATA)
+				
+				&if [exists %outdir_resl%\temp -grid] &then kill %outdir_resl%\temp all
+				&if [exists %outdir_resl%\temp2 -grid] &then kill %outdir_resl%\temp2 all
+				
+				&describe %outdir_resl%\ispam_%rns%
+				&s valtowrite [calc %GRD$ZMAX%]
+			&end
+			
+		&s createstatfile [OPEN %outdir_bn%\benefited_areas_ispam_in.txt OPENSTAT -APPEND]
+		
+		&if %rns% EQ 0 &then
+			&do
+				&s writeresult [WRITE %createstatfile% TRAIT,AREA]
+				&s writeresult [WRITE %createstatfile% %rns%,%valtowrite%]
+			&end
+		&else &s writeresult [WRITE %createstatfile% %rns%,%valtowrite%]
+		
+		&s closestatfile [CLOSE %createstatfile%]
+		
+		&if [exists %outdir_resl%\ispam_%rns% -grid] &then kill %outdir_resl%\ispam_%rns% all
+	&end
+	
+	&if [exists %outdir_resl%\ispam_out -grid] &then kill %outdir_resl%\ispam_out all
+	%outdir_resl%\ispam_out = CON(ISNULL(%areaharv%), %outdir_resl%\chg_max_run_m)
+	
+	arc w %outdir_resl%
+	
+	&do outgrid &list ispam_out chg_max_run_m
+		
+		&s listvals [listunique %outgrid% -VAT VALUE]
+		&s valnmb [token %listvals% -count]
+		
+		&do rns = 1 &to %valnmb%
+			QUIT
+			TABLES
+			SEL %outgrid%.VAT
+			&s print_value [show RECORD %rns% ITEM COUNT]
+			&s print_class [show RECORD %rns% ITEM VALUE]
+			QUIT
+			GRID
+		
+			&s createstatfile [OPEN %outdir_bn%\benefited_areas_%outgrid%.txt OPENSTAT -APPEND]
+		
+			&if %rns% EQ 1 &then 
+				&do
+					&s writeresult [WRITE %createstatfile% TRAIT,AREA]
+					&s writeresult [WRITE %createstatfile% %print_class%,%print_value%]
+				&end
+			&else &s writeresult [WRITE %createstatfile% %print_class%,%print_value%]
+		
+			&s closestatfile [CLOSE %createstatfile%]
+		&end
+	&end
+	
+	arc w %rootdir%
+	
+&return
+/* ----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
+&routine logoff
+	&if [show program] EQ GRID &then QUIT
+	&if [exists log -file] &then &sys del log
+	&if [show program] NE GRID &then GRID
+	/*&sys process -p grid.exe realtime
+	/*&sys process -a grid.exe 00100000
+&return
