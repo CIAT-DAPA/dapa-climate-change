@@ -1,0 +1,214 @@
+/* This aml processes the MRI data using gdal and other stuff
+
+&args period
+&terminal 9999
+&messages &off
+&if [SHOW PROGRAM] NE GRID &then GRID
+&sys cls
+
+&if [null %period%] &then
+	&do
+		&ty
+		&ty Wrong command syntax. Please try again...
+		&ty Command syntax should be '&RUN ProcessMRIData.aml PERIOD'
+		&ty
+		&ty PERIOD could be SP0A, SF0A, SN0A
+		&return
+	&end
+&else
+	&do
+		&s basedir Y:\MRI_data\MRI_outputs
+		&s period_path %basedir%\%period%
+		
+		/* LISTING THE FOLDERS INSIDE THE INPUT DIR
+		
+		&s datelist [LISTFILE %period_path%\OUT_* -DIR %basedir%\datelist_%period%.list]
+		&s ndates [CALC %datelist%]
+		
+		&s tempdir F:\MRITMP\%period%
+		&s outdir X:\MRI_grids\%period%
+		&if not [exists %outdir% -dir] &then &sys md %outdir%
+		
+		&ty
+		&ty Processing %ndates% dates
+		
+		&s dateopen [OPEN %basedir%\datelist_%period%.list OPENSTATUS -READ]
+		
+		&do dt = 1 &to %ndates%
+			
+			&s dayofyear [READ %dateopen% READSTATUS]
+			&s date [AFTER %dayofyear% _]
+			
+			&if [exists %outdir%\%dayofyear%\done.txt -file] &then
+				&do
+					&ty Date %date% done!
+				&end
+			&else
+				&do
+					&call logoff
+					
+					&if not [exists %outdir%\%dayofyear% -dir] &then &sys md %outdir%\%dayofyear% 
+					
+					&s year [SUBSTR %date% 1 4]
+					&s month [SUBSTR %date% 5 2]
+					&s day [SUBSTR %date% 7 2]
+					
+					&s listncfiles [LISTFILE %period_path%\%dayofyear%\*.nc -FILE %period_path%\filelist_%dt%.list]
+					&s nfiles [calc %listncfiles%] /*[TOKEN %listncfiles% -COUNT]
+					
+					&s opennclist [OPEN %period_path%\filelist_%dt%.list OPENSTATUS2 -READ]
+					
+					&do nf = 1 &to %nfiles%
+						
+						RESET
+						
+						&s filename [READ %opennclist% READSTATUS2] /*[EXTRACT %nf% %listncfiles%]
+						&s filenoext [BEFORE %filename% .nc]
+						
+						&s prefix [SUBSTR %filenoext% 1 13] /*0_sfc_avr_day_01
+						&s dayofmth [SUBSTR %filenoext% 15 2]
+						
+						&ty
+						&ty     .->Processing %filename%
+						
+						&ty     .->GDAL translate
+						
+						&sys gdal_translate -of AAIGrid %period_path%\%dayofyear%\%filename% %tempdir%\temp.asc /*%period_path%\%dayofyear%\temp.asc
+						
+						&ty     .->Fixing header
+						
+						&sys awk -f fixheader.awk %tempdir%\temp.asc > %tempdir%\%filenoext%.asc
+						&sys rename %tempdir%\temp.asc.aux.xml %filenoext%.asc.aux.xml
+						&s delstat [DELETE %tempdir%\temp.asc -FILE]
+						
+						&ty     .->ASCII to GRID
+						
+						&if [EXISTS %tempdir%\temp -GRID] &then KILL %tempdir%\temp ALL
+						%tempdir%\temp = ASCIIGRID(%tempdir%\%filenoext%.asc, FLOAT)
+						
+						&ty     .->Compressing oldies
+						
+						/*&sys 7za a -tzip %period_path%\%dayofyear%\%filename%.zip %period_path%\%dayofyear%\%filename%
+						/*&sys 7za a -tzip %tempdir%\%filenoext%.zip %tempdir%\%filenoext%.asc
+						/*&sys 7za a -tzip %tempdir%\%filenoext%.zip %tempdir%\%filenoext%.asc.aux.xml
+						
+						/*&s delstat [DELETE %period_path%\%dayofyear%\%filename% -FILE]
+						&s delstat [DELETE %tempdir%\%filenoext%.asc -FILE]
+						&s delstat [DELETE %tempdir%\%filenoext%.asc.aux.xml -FILE]
+						
+						/*&s copystat [COPY %tempdir%\%filenoext%.zip %period_path%\%dayofyear%\%filenoext%.zip -FILE]
+						/*&s delstat [DELETE %tempdir%\%filenoext%.zip -FILE]
+						
+						&ty     .->Rotation
+						
+						&if [EXISTS %tempdir%\temp_r -GRID] &then KILL %tempdir%\temp_r ALL
+						%tempdir%\temp_r = ROTATE(%tempdir%\temp, 180)
+						
+						&ty     .->Mirroring
+						
+						&if [EXISTS %tempdir%\temp_rm -GRID] &then KILL %tempdir%\temp_rm ALL
+						%tempdir%\temp_rm = MIRROR(%tempdir%\temp_r)
+						&if [EXISTS %tempdir%\temp_r -GRID] &then KILL %tempdir%\temp_r ALL
+						
+						&describe %tempdir%\temp
+						
+						&ty     .->Shifting
+						
+						&if [EXISTS %tempdir%\temp_rms -GRID] &then KILL %tempdir%\temp_rms ALL
+						%tempdir%\temp_rms = SHIFT(%tempdir%\temp_rm, %GRD$XMIN%, %GRD$YMIN%)
+						&if [EXISTS %tempdir%\temp_rm -GRID] &then KILL %tempdir%\temp_rm ALL
+						
+						&s xmin [CALC %GRD$XMIN%]
+						&s xmid [CALC %xmin% + 180]
+						&s xmax [CALC %GRD$XMAX%]
+						&s ymin [CALC %GRD$YMIN%]
+						&s ymax [CALC %GRD$YMAX%]
+						
+						&ty     .->Dividing
+						
+						SETWINDOW %xmin% %ymin% %xmid% %ymax% %tempdir%\temp_rms
+						
+						&if [EXISTS %tempdir%\temp_rms1 -GRID] &then KILL %tempdir%\temp_rms1 ALL
+						%tempdir%\temp_rms1 = %tempdir%\temp_rms
+						
+						SETWINDOW %xmid% %ymin% %xmax% %ymax% %period_path%\%dayofyear%\temp_rms
+						
+						&if [EXISTS %tempdir%\temp_rms2 -GRID] &then KILL %tempdir%\temp_rms2 ALL
+						%tempdir%\temp_rms2 = %tempdir%\temp_rms
+						&if [EXISTS %tempdir%\temp_rms -GRID] &then KILL %tempdir%\temp_rms ALL
+						
+						RESET
+						
+						&ty     .->Shifting parts
+						
+						&if [EXISTS %tempdir%\temp_rms1s -GRID] &then KILL %tempdir%\temp_rms1s ALL
+						%tempdir%\temp_rms1s = SHIFT(%tempdir%\temp_rms1, 180, %ymin%)
+						&if [EXISTS %tempdir%\temp_rms1 -GRID] &then KILL %tempdir%\temp_rms1 ALL
+						
+						&if [EXISTS %tempdir%\temp_rms2s -GRID] &then KILL %tempdir%\temp_rms2s ALL
+						%tempdir%\temp_rms2s = SHIFT(%tempdir%\temp_rms2, 0, %ymin%)
+						&if [EXISTS %tempdir%\temp_rms2 -GRID] &then KILL %tempdir%\temp_rms2 ALL
+						
+						&ty     .->Merging parts
+						
+						&if [EXISTS %tempdir%\almost -GRID] &then KILL %tempdir%\almost ALL
+						%tempdir%\almost = MERGE(%tempdir%\temp_rms1s, %tempdir%\temp_rms2s)
+						
+						&if [EXISTS %tempdir%\temp_rms1s -GRID] &then KILL %tempdir%\temp_rms1s ALL
+						&if [EXISTS %tempdir%\temp_rms2s -GRID] &then KILL %tempdir%\temp_rms2s ALL
+						
+						&ty     .->Final shift
+						
+						&if [EXISTS %tempdir%\finalgrid -GRID] &then KILL %tempdir%\finalgrid ALL
+						%tempdir%\finalgrid = SHIFT(%tempdir%\almost, -180, -90)
+						&if [EXISTS %tempdir%\almost -GRID] &then KILL %tempdir%\almost ALL
+						
+						&if %prefix% EQ 0_sfc_max_day &then &s outname tmax_%dayofmth%
+						&else &if %prefix% EQ 1_sfc_max_day &then &s outname wsmax_%dayofmth%
+						&else &if %prefix% EQ 2_sfc_max_day &then &s outname prmax_%dayofmth%
+						&else &if %prefix% EQ 0_sfc_min_day &then &s outname tmin_%dayofmth%
+						&else &if %prefix% EQ 0_sfc_avr_day &then &s outname prec_%dayofmth%
+						&else &if %prefix% EQ 1_sfc_avr_day &then &s outname tmean_%dayofmth%
+						
+						SETWINDOW %tempdir%\finalgrid %tempdir%\finalgrid
+						
+						&ty     .->Finalizing
+						
+						&if %outname% EQ tmin OR %outname% EQ tmax OR %outname% EQ tmean &then
+							&do
+								&if [EXISTS %outdir%\%dayofyear%\%outname% -GRID] &then KILL %outdir%\%dayofyear%\%outname% ALL
+								%outdir%\%dayofyear%\%outname% = %tempdir%\finalgrid - 272.15
+							&end
+						&else
+							&do
+								&if [EXISTS %outdir%\%dayofyear%\%outname% -GRID] &then KILL %outdir%\%dayofyear%\%outname% ALL
+								%outdir%\%dayofyear%\%outname% = %tempdir%\finalgrid
+							&end
+						
+						&if [EXISTS %tempdir%\finalgrid -GRID] &then KILL %tempdir%\finalgrid ALL
+						&if [EXISTS %tempdir%\temp -GRID] &then KILL %tempdir%\temp ALL
+						
+					&end
+					
+					&ty     .->Date done!
+					&s logcreate [LISTFILE %outdir%\%dayofyear%\* -grid %outdir%\%dayofyear%\done.txt]
+				
+				&end
+			
+		&end
+		
+		&s closefile [CLOSE %dateopen%]
+		&s delstat [DELETE %basedir%\datelist_%period%.list -FILE]
+		
+		&ty     .->Done!!
+		
+	&end
+&if [SHOW PROGRAM] EQ GRID &then QUIT
+&sys DEL LOG
+&return
+/*----------------------------------------------------
+&routine logoff
+	&if [SHOW PROGRAM] EQ GRID &then QUIT
+	&sys DEL LOG
+	&if [SHOW PROGRAM] NE GRID &then GRID
+&return

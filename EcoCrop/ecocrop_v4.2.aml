@@ -1,0 +1,899 @@
+/* AML script to calculate suitability using the EcoCrop model.
+/* The model is already implemented in DIVA-GIS (Hijmans et al., 2005),
+/* but this implementation in Arc/Info intend to be the first step in the
+/* climate change analysis via EcoCrop to asssess breeding needs.
+
+/* This modification uses the model and climate change datasets
+/* and then computes the most limiting factor using a Monte-Carlo approach
+
+/* This version calculates stipples using change vectors
+
+/* by Julián Ramírez
+/* 23-April-2009
+
+&terminal 9999
+&messages &off
+&if [show program] NE GRID &then GRID
+&sys cls
+&s startcond [show &PT ALL]
+&s starttime [extract 1 %startcond%]
+
+/* Setting up directories
+&amlpath .
+&s rootdir [show &amlpath]
+
+/* Defining climate files input dir
+
+&ty
+&ty THE FAO ECOCROP MODEL IMPLEMENTATION
+&ty
+&ty
+&ty Choose the type of approximation
+&ty
+&ty 1. Calculation only for current conditions
+&ty 2. Calculation for current and future (2020) conditions
+&ty 3. Calculation for current and future (2050) conditions
+&ty 4. Quit the program
+&ty
+&s first_option [response 'Type the number of the option']
+&ty
+
+&if [type %first_option%] EQ -1 &then
+	&do
+		&if %first_option% EQ 1 &then
+			&do
+				&ty You have chosen option 1 (current conditions)
+				&ty
+				&ty Define your climate files input directory
+				&ty
+				
+				&s clim_cinput [response 'Type the path']
+				
+				&sys cls
+				&call main_program
+			&end
+		&else &if %first_option% EQ 2 &then
+			&do
+				&ty You have chosen option 2 (current and 2020)
+				&ty
+				&ty Define your climate directories
+				&ty
+				
+				&s clim_cinput [response 'Type the path (current)']
+				&ty
+				&s clim_finput [response 'Type the path (2020)']
+				
+				&sys cls
+				&call main_program
+			&end
+		&else &if %first_option% EQ 3 &then
+			&do
+				&ty You have chosen option 3 (current and 2050)
+				&ty
+				&ty Define your climate directories
+				&ty
+				
+				&s clim_cinput [response 'Type the path (current)']
+				&ty
+				&s clim_finput [response 'Type the path (2050)']
+				
+				&sys cls
+				&call main_program
+			&end
+		&else &if %first_option% EQ 4 &then
+			&do
+				&ty You have chosen option 4. Now quitting...
+				&pause '' &seconds 1
+				&ty 
+				&call exit_program
+			&end
+		&else
+			&do
+				&ty You have typed an invalid option. Now quitting...
+				&pause '' &seconds 1
+				&ty 
+				&call exit_program
+			&end
+			
+		&if [show program] EQ GRID &then QUIT
+		&sys del log
+		w %rootdir%
+		&messages &on
+		&sys cls
+	&end
+&else
+	&do
+		&ty You have typed an invalid option. Now quitting...
+		&pause '' &seconds 1
+		&ty 
+		&call exit_program
+		&if [show program] EQ GRID &then QUIT
+		&sys del log
+		w %rootdir%
+		&if [exists log -file] &then &sys del log
+		&messages &on
+		&sys cls
+		&call control_run
+	&end
+
+&return
+/* ---------------------------------------------------------------
+&routine main_program
+&ty
+&ty
+&ty Now choose a processing option:
+&ty
+&ty 1. Process one single crop by typing the different parameters
+&ty 2. Use a csv file without header
+&ty    (Cropname,Gmin,Gmax,Tkmp,Tmin,Topmin,Topmax,Tmax,Rmin,Ropmin,Ropmax,Rmax)
+&ty    (Temperatures in Celsius * 10, precipitations in mm)
+&ty 3. Quit the program
+&ty
+&ty
+&s option [response 'Type the number of the option']
+&ty
+
+&if [type %option%] EQ -1 &then
+	&do
+		&if %option% EQ 1 &then
+			&do
+				&ty You have chosen option 1. Now loading the program...
+				&pause '' &seconds 1
+				&ty 
+				&call run_by_manual_input
+			&end
+		&else &if %option% EQ 2 &then
+			&do
+				&ty You have chosen option 2. Now loading the program...
+				&pause '' &seconds 1
+				&ty 
+				&call run_by_csv
+			&end
+		&else &if %option% EQ 3 &then
+			&do
+				&ty You have chosen option 3. Now quitting...
+				&pause '' &seconds 1
+				&ty 
+				&call exit_program
+			&end
+		&else
+			&do
+				&ty You have typed an invalid option. Now quitting...
+				&pause '' &seconds 1
+				&ty 
+				&call exit_program
+			&end
+		
+		&if [show program] EQ GRID &then QUIT
+		&sys del log
+		w %rootdir%
+		&messages &on
+		&sys cls
+	&end
+&else
+	&do
+		&ty You have typed an invalid option. Now quitting...
+		&pause '' &seconds 1
+		&ty 
+		&call exit_program
+		&if [show program] EQ GRID &then QUIT
+		&sys del log
+		w %rootdir%
+		&if [exists log -file] &then &sys del log
+		&messages &on
+		&sys cls
+	&end
+&return
+/* ---------------------------------------------------------------
+&routine run_by_manual_input
+	&sys cls
+	&ty
+	&s cropproc [response 'Type the name of the crop (without spacing)']
+	&s typedir [response 'Type the path where you want the outputs']
+	
+	&s outdir_crop %typedir%\%cropproc%
+	&if not [exists %outdir_crop% -dir] &then &sys md %outdir_crop%
+	
+	&ty
+	&ty Growing season duration (days)
+	&ty
+	&s Gmin [response 'Minimum']
+	&s Gmax [response 'Maximum']
+	&ty
+	&ty Temperature thresholds (C deg * 10)
+	&ty
+	&s Tkmp [response 'Death']
+	&s Tmin [response 'Minimum absolute']
+	&s Topmin [response 'Minimum optimum']
+	&s Topmax [response 'Maximum optimum']
+	&s Tmax [response 'Maximum absolute']
+	&ty
+	&ty Precipitation thresholds (mm)
+	&ty
+	&s Rmin [response 'Minimum absolute']
+	&s Ropmin [response 'Minimum optimum']
+	&s Ropmax [response 'Maximum optimum']
+	&s Rmax [response 'Maximum absolute']
+	
+	&ty
+	&pause 'Finished typing crop parameters' &seconds 1
+	&ty
+	
+	&if %first_option% EQ 1 &then
+		&do
+			
+			/* Processing only current
+			
+			&s condition current
+			&s model worldclim
+			&s outdir %outdir_crop%\%condition%
+			&if not [exists %outdir% -dir] &then &sys md %outdir%
+			&call define_climate
+			&call param_file
+			arc w %outdir%
+			&sys cls
+			&call core_program
+			&sys del log
+			arc w %rootdir%
+		&end
+	&else &if %first_option% EQ 2 &then
+		&do
+			/* Processing current
+			
+			&s condition current
+			&s model worldclim
+			&s outdir %outdir_crop%\%condition%
+			&if not [exists %outdir% -dir] &then &sys md %outdir%
+			&call define_climate
+			&call param_file
+			arc w %outdir%
+			&sys cls
+			&call core_program
+			&sys del log
+			arc w %rootdir%
+			
+			/* Processing future
+			
+			&s condition fut_2020
+			&s outdir_c %outdir_crop%\%condition%
+			&if not [exists %outdir_c% -dir] &then &sys md %outdir_c%
+			
+			&s modlist [listfile %clim_finput%\* -dir]
+			&s nmod [token %modlist% -count]
+			&do m = 1 &to %nmod%
+				&s modelname [extract %m% %modlist%]
+				&s model %modelname%
+				&s outdir %outdir_c%\%modelname%
+				&if not [exists %outdir% -workspace] &then arc cw %outdir%
+				&call define_climate
+				&call param_file
+				arc w %outdir%
+				&sys cls
+				&call core_program
+				&sys del log
+				arc w %rootdir%
+			&end
+			
+			&ty
+			&ty Calculating change vectors
+			&ty
+			&call calc_chg_vector
+		&end
+	&else
+		&do
+			/* Processing current
+			
+			&s condition current
+			&s model worldclim
+			&s outdir %outdir_crop%\%condition%
+			&if not [exists %outdir% -dir] &then &sys md %outdir%
+			&call define_climate
+			&call param_file
+			arc w %outdir%
+			&sys cls
+			&call core_program
+			&sys del log
+			arc w %rootdir%
+			
+			/* Processing future
+			
+			&s condition fut_2050
+			&s outdir_c %outdir_crop%\%condition%
+			&if not [exists %outdir_c% -dir] &then &sys md %outdir_c%
+			
+			&s modlist [listfile %clim_finput%\* -dir]
+			&s nmod [token %modlist% -count]
+			&do m = 1 &to %nmod%
+				&s modelname [extract %m% %modlist%]
+				&s model %modelname%
+				&s outdir %outdir_c%\%modelname%
+				&if not [exists %outdir% -workspace] &then arc cw %outdir%
+				&call define_climate
+				&call param_file
+				arc w %outdir%
+				&sys cls
+				&call core_program
+				&sys del log
+				arc w %rootdir%
+			&end
+			
+			&ty
+			&ty Calculating change vectors
+			&ty
+			&call calc_chg_vector
+		&end
+	
+	&ty
+	&ty Done for crop %cropproc%!
+	&ty
+	
+&return
+/* ---------------------------------------------------------------
+&routine run_by_csv
+	&sys cls
+	&ty 
+	&s csv_file [response 'Type the name of the csv file (including path and extension)']
+	&s typedir [response 'Type the path where you want the outputs']
+	&ty
+	
+	&s opencsv [OPEN %csv_file% OPENSTATUS -READ]
+	&if %OPENSTATUS% NE 0 &then
+		&do
+			&ty The file %csv_file% couldnt be opened or doesnt exist
+			&return
+		&end
+	&else
+		&do
+			&s read_rec [READ %opencsv% READSTATUS]
+			&s cropnumber 1
+			&do &while %READSTATUS% EQ 0
+				
+				/*(Cropname,Gmin,Gmax,Tkmp,Tmin,Topmin,Topmax,Tmax,Rmin,Ropmin,Ropmax,Rmax)
+				
+				&s cropproc [extract 1 %read_rec%]
+				
+				&s outdir_crop %typedir%\%cropproc%
+				&if not [exists %outdir_crop% -dir] &then &sys md %outdir_crop%
+				
+				/* Growing season parameters
+				&s Gmin = [extract 2 %read_rec%]
+				&s Gmax = [extract 3 %read_rec%]
+				
+				/* Temperature parameters (all multiplied by 10)
+				&s Tkmp = [extract 4 %read_rec%]
+				&s Tmin = [extract 5 %read_rec%]
+				&s Topmin = [extract 6 %read_rec%]
+				&s Topmax = [extract 7 %read_rec%]
+				&s Tmax = [extract 8 %read_rec%]
+				
+				/* Precipitation parameters
+				&s Rmin = [extract 9 %read_rec%]
+				&s Ropmin = [extract 10 %read_rec%]
+				&s Ropmax = [extract 11 %read_rec%]
+				&s Rmax = [extract 12 %read_rec%]
+				
+				/* Choosing within the different processing options
+				
+				&if %first_option% EQ 1 &then
+					&do
+						
+						/* Processing only current
+						
+						&s condition current
+						&s model worldclim
+						&s outdir %outdir_crop%\%condition%
+						&if not [exists %outdir% -workspace] &then arc cw %outdir%
+						&call define_climate
+						&call param_file
+						arc w %outdir%
+						&sys cls
+						&call core_program
+						&sys del log
+						arc w %rootdir%
+					&end
+				&else &if %first_option% EQ 2 &then
+					&do
+						/* Processing current
+						
+						&s condition current
+						&s model worldclim
+						&s outdir %outdir_crop%\%condition%
+						&if not [exists %outdir% -workspace] &then arc cw %outdir%
+						&call define_climate
+						&call param_file
+						arc w %outdir%
+						&sys cls
+						&call core_program
+						&sys del log
+						arc w %rootdir%
+						
+						/* Processing future
+						
+						&s condition fut_2020
+						&s outdir_c %outdir_crop%\%condition%
+						&if not [exists %outdir_c% -dir] &then &sys md %outdir_c%
+						
+						&s modlist [listfile %clim_finput%\* -dir]
+						&s nmod [token %modlist% -count]
+						&do m = 1 &to %nmod%
+							&s modelname [extract %m% %modlist%]
+							&s model %modelname%
+							&s outdir %outdir_c%\%modelname%
+							&if not [exists %outdir% -workspace] &then arc cw %outdir%
+							&call define_climate
+							&call param_file
+							arc w %outdir%
+							&sys cls
+							&call core_program
+							&sys del log
+							arc w %rootdir%
+						&end
+						
+						&call calc_chg_vector
+					&end
+				&else
+					&do
+						/* Processing current
+						
+						&s condition current
+						&s model worldclim
+						&s outdir %outdir_crop%\%condition%
+						&if not [exists %outdir% -workspace] &then arc cw %outdir%
+						&call define_climate
+						&call param_file
+						arc w %outdir%
+						&sys cls
+						&call core_program
+						&sys del log
+						arc w %rootdir%
+						
+						/* Processing future
+						
+						&s condition fut_2050
+						&s outdir_c %outdir_crop%\%condition%
+						&if not [exists %outdir_c% -dir] &then &sys md %outdir_c%
+						
+						&s modlist [listfile %clim_finput%\* -dir]
+						&s nmod [token %modlist% -count]
+						&do m = 1 &to %nmod%
+							&s modelname [extract %m% %modlist%]
+							&s model %modelname%
+							&s outdir %outdir_c%\%modelname%
+							&if not [exists %outdir% -workspace] &then arc cw %outdir%
+							&call define_climate
+							&call param_file
+							arc w %outdir%
+							&sys cls
+							&call core_program
+							&sys del log
+							arc w %rootdir%
+						&end
+						
+						&call calc_chg_vector
+					&end
+				
+				&ty
+				&ty Done for crop %cropproc%
+				&ty
+				
+				&s read_rec [READ %opencsv% READSTATUS]
+				&s cropnumber 1
+				
+				&call logoff
+				
+			&end
+		&end
+		&s closecsv [CLOSE %opencsv%]
+	
+&return
+/* ---------------------------------------------------------------
+&routine core_program
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty XXXXXXXXXXX MODEL PARAMETERS XXXXXXXXXXX
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty XXXXXXXXXXX CONDITION = %condition% (%model%)
+	&ty XXXXXXXXXXX CROP = %cropproc%
+	&ty XXXXXXXXXXX GMIN = %Gmin%
+	&ty XXXXXXXXXXX GMAX = %Gmax%
+	&ty XXXXXXXXXXX TKMP = %Tkmp%
+	&ty XXXXXXXXXXX TMIN = %Tmin%
+	&ty XXXXXXXXXXX TOPMIN = %Topmin%
+	&ty XXXXXXXXXXX TOPMAX = %Topmax%
+	&ty XXXXXXXXXXX TMAX = %Tmax%
+	&ty XXXXXXXXXXX RMIN = %Rmin%
+	&ty XXXXXXXXXXX ROPMIN = %Ropmin%
+	&ty XXXXXXXXXXX ROPMAX = %Ropmax%
+	&ty XXXXXXXXXXX RMAX = %Rmax%
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	&ty
+	&pause 'Starting the process' &seconds 2
+	
+	&s minadapt 0
+	&s maxadapt 1
+	&s tminprom [calc [calc %Tmin% + %Topmin%] * 0.5]
+	&s adaptprom [calc [calc %minadapt% + %maxadapt%] * 0.5]
+	
+	/* Calculating regression model between Rmin and Ropmin
+	
+	&s rminprom [calc [calc %Rmin% + %Ropmin%] * 0.5]
+	&s slopermin = [calc [calc [calc [calc %Rmin% - %rminprom%] * [calc %minadapt% - %adaptprom%]] + [calc [calc %Ropmin% - %rminprom%] * [calc %maxadapt% - %adaptprom%]]] / [calc [calc [calc %Rmin% - %rminprom%] * [calc %Rmin% - %rminprom%]] + [calc [calc %Ropmin% - %rminprom%] * [calc %Ropmin% - %rminprom%]]]]
+	&s interrmin = [calc %minadapt% - [calc %slopermin% * %Rmin%]]
+	
+	/* Calculating regression model between Ropmax and Rmax
+	
+	&s rmaxprom [calc [calc %Rmax% + %Ropmax%] * 0.5]
+	&s slopermax = [calc [calc [calc [calc %Ropmax% - %rmaxprom%] * [calc %maxadapt% - %adaptprom%]] + [calc [calc %Rmax% - %rmaxprom%] * [calc %minadapt% - %adaptprom%]]] / [calc [calc [calc %Ropmax% - %rmaxprom%] * [calc %Ropmax% - %rmaxprom%]] + [calc [calc %Rmax% - %rmaxprom%] * [calc %Rmax% - %rmaxprom%]]]]
+	&s interrmax = [calc %minadapt% - [calc %slopermax% * %Rmax%]]
+	
+	/* Grid parameters
+	&s mask %prec%1
+	
+	setwindow %mask% %mask%
+	setmask %mask%
+	setcell %mask%
+	
+	/* Calculating average duration of growing season
+	&s Gavg = [round [calc [calc %Gmin% + %Gmax%] / 60]]
+	&s Gavgp = [round [calc [calc %Gmin% + %Gmax%] / 60]]
+	
+	/* Calculating killing temperature threshold (plus 4ºC * 10)
+	&s Tkill = [calc %Tkmp% + 40]
+	
+	&ty
+	&ty Duration of the growing season in months is %Gavg% (%Gavgp%)
+	&ty Computing for 12 possible growing seasons
+	&ty
+	
+	/* Performing iterations to calculate suitability
+	
+	&do i = 1 &to 12
+		&s start.month = [calc %i%]
+		&s end.month = [calc [calc %i% + %Gavg%] - 1]
+		&s end.month.p = [calc [calc %i% + %Gavgp%] - 1]
+		
+		&ty
+		&ty GS %i% (%start.month% to %end.month%)
+		&ty Temperature iteration
+		
+		/* Evaluating for temperature
+		
+		&if [exists %outdir%\tsuit_%i%_1 -grid] &then kill %outdir%\tsuit_%i%_1
+		&s div1 [calc 1 / [calc %Topmin% - %Tmin%]]
+		&s div2 [calc 1 / [calc %Tmax% - %Topmax%]]
+		
+		DOCELL
+			IF (%tmini%%i% < %Tkill%) %outdir%\tsuit_%i%_1 = 0
+			ELSE IF (%tmean%%i% < %Tmin%) %outdir%\tsuit_%i%_1 = 0
+			ELSE IF (%tmean%%i% < %Topmin%) %outdir%\tsuit_%i%_1 = 1 - ((%Topmin% - %tmean%%i%) * %div1%)
+			ELSE IF (%tmean%%i% < %Topmax%) %outdir%\tsuit_%i%_1 = 1
+			ELSE IF (%tmean%%i% < %Tmax%) %outdir%\tsuit_%i%_1 = (%Tmax% - %tmean%%i%) * %div2%
+			ELSE %outdir%\tsuit_%i%_1 = 0
+		END
+		
+		&do j = %start.month% &to %end.month.p%
+			&s r.end.mth [calc %j%]
+			&if %r.end.mth% GT 12 &then &s r.end.mth [calc %r.end.mth% - 12]
+					
+			&if %j% = %start.month% &then
+				&do
+					&s listpgrids = %prec%%r.end.mth%
+				&end
+			&else
+				&do
+					&s listpgrids = %listpgrids%,%prec%%r.end.mth%
+				&end		
+		&end
+		
+		&ty Rainfall of growing period
+		
+		&if [exists gp_rain_%i% -grid] &then kill gp_rain_%i% all
+		gp_rain_%i% = SUM(%listpgrids%)
+		
+		/* Evaluating for precipitation
+		
+		&ty Precipitation iteration
+		
+		&if [exists %outdir%\prec_suit_%i% -grid] &then kill %outdir%\prec_suit_%i% all
+		
+		DOCELL
+			IF (%outdir%\gp_rain_%i% < %Rmin%) %outdir%\prec_suit_%i% = 0
+			ELSE IF (%outdir%\gp_rain_%i% >= %Rmin% & %outdir%\gp_rain_%i% <= %Ropmin%) %outdir%\prec_suit_%i% = (%slopermin%) * %outdir%\gp_rain_%i% + (%interrmin%)
+			ELSE IF (%outdir%\gp_rain_%i% > %Ropmin% & %outdir%\gp_rain_%i% < %Ropmax%) %outdir%\prec_suit_%i% = 1
+			ELSE IF (%outdir%\gp_rain_%i% >= %Ropmax% & %outdir%\gp_rain_%i% <= %Rmax%) %outdir%\prec_suit_%i% = (%slopermax%) * %outdir%\gp_rain_%i% + (%interrmax%)
+			ELSE IF (%outdir%\gp_rain_%i% > %Rmax%) %outdir%\prec_suit_%i% = 0
+			ELSE %outdir%\prec_suit_%i% = -9999
+		END
+		
+	&end
+	
+	&ty
+	&ty
+	&ty Minimum cumulated temperature and rainfall suitability
+	
+	&do i = 1 &to 12
+		&s start.month = [calc %i%]
+		&s end.month = [calc [calc %i% + %Gavg%] - 1]
+		
+		&ty GS %i% (%start.month% to %end.month%)
+		
+		&if [exists %outdir%\ecot_%i% -grid] &then kill %outdir%\ecot_%i% all
+		%outdir%\ecot_%i% = 1
+		
+		&if [exists %outdir%\ecop_%i% -grid] &then kill %outdir%\ecop_%i% all
+		%outdir%\ecop_%i% = 0
+		
+		&do j = %start.month% &to %end.month%
+			&s r.end.mth [calc %j%]
+			&if %r.end.mth% GT 12 &then &s r.end.mth [calc %r.end.mth% - 12]
+			&s r.nxt.mth [calc %r.end.mth% + 1]
+			
+			&if [exists %outdir%\ecot_%r.nxt.mth% -grid] &then kill %outdir%\ecot_%r.nxt.mth% all
+			%outdir%\ecot_%r.nxt.mth% = CON(%outdir%\tsuit_%r.end.mth%_1 < %outdir%\ecot_%r.end.mth%, %outdir%\tsuit_%r.end.mth%_1, %outdir%\ecot_%r.end.mth%)
+			
+			&if [exists %outdir%\ecop_%r.nxt.mth% -grid] &then kill %outdir%\ecop_%r.nxt.mth% all
+			%outdir%\ecop_%r.nxt.mth% = CON(%outdir%\prec_suit_%r.end.mth% > %outdir%\ecop_%r.end.mth%, %outdir%\prec_suit_%r.end.mth%, %outdir%\ecop_%r.end.mth%)
+			
+			&if %j% EQ %start.month% &then 
+				&do
+					&s listecot ecot_%r.end.mth%,ecot_%r.nxt.mth%
+					&s listecop ecop_%r.end.mth%,ecop_%r.nxt.mth%
+				&end
+			&else 
+				&do
+					&s listecot %listecot%,ecot_%r.nxt.mth%
+					&s listecop %listecop%,ecop_%r.nxt.mth%
+				&end
+		&end
+		
+		&if [exists %outdir%\ecotf_%i% -grid] &then kill %outdir%\ecotf_%i% all
+		%outdir%\ecotf_%i% = MIN(%listecot%)
+		
+		&if [exists %outdir%\ecopf_%i% -grid] &then kill %outdir%\ecopf_%i% all
+		%outdir%\ecopf_%i% = MAX(%listecop%)
+		
+		&if %i% EQ 1 &then
+			&do
+				&s listecocrop ecotf_%i%
+				&s listecocropp ecopf_%i%
+			&end
+		&else 
+			&do
+				&s listecocrop %listecocrop%,ecotf_%i%
+				&s listecocropp %listecocropp%,ecopf_%i%
+			&end
+	&end
+	
+	&ty 
+	&ty 
+	&ty Performing final calculations
+	&ty 
+	
+	&ty Precipitation suitability
+	&if [exists p_suitability -grid] &then kill p_suitability all
+	p_suitability = INT(FLOOR(MAX(%listecocropp%) * 100 + 0.5))
+	
+	&ty Temperature suitability
+	&if [exists t_suitability -grid] &then kill t_suitability all
+	t_suitability = INT(FLOOR(MAX(%listecocrop%) * 100 + 0.5))
+	
+	&ty Overall suitability
+	&if [exists suitability -grid] &then kill suitability all
+	suitability = INT(FLOOR((MAX(%listecocrop%) * MAX(%listecocropp%)) * 100 + 0.5))
+	
+	/* Clean up directory
+	
+	&ty
+	&ty Cleaning up the calculations directory
+	
+	&do i = 1 &to 12
+		&if [exists %outdir%\gp_rain_%i% -grid] &then kill %outdir%\gp_rain_%i% all
+		&if [exists %outdir%\tsuit_%i%_1 -grid] &then kill %outdir%\tsuit_%i%_1 all
+		&if [exists %outdir%\prec_suit_%i% -grid] &then kill %outdir%\prec_suit_%i% all
+		&if [exists %outdir%\ecot_%i% -grid] &then kill %outdir%\ecot_%i% all
+		&if [exists %outdir%\ecop_%i% -grid] &then kill %outdir%\ecop_%i% all
+		&if [exists %outdir%\ecotf_%i% -grid] &then kill %outdir%\ecotf_%i% all
+		&if [exists %outdir%\ecopf_%i% -grid] &then kill %outdir%\ecopf_%i% all
+	&end
+	
+	&if [exists %outdir%\ecot_13 -grid] &then kill %outdir%\ecot_13 all
+	&if [exists %outdir%\ecop_13 -grid] &then kill %outdir%\ecop_13 all
+&return
+/* ---------------------------------------------------------------
+&routine exit_program
+	&ty Bailing out...
+	&if [exists log -file] &then &sys del log
+&return
+/* ---------------------------------------------------------------
+&routine param_file
+	&s create_modl_file [OPEN %outdir%\ecocrop.model OPENSTATUS2 -WRITE]
+	&s writerow [WRITE %create_modl_file% 'CLIMATE_FILES: '%clim_input%]
+	&s writerow [WRITE %create_modl_file% 'CROP: '%cropproc%]
+	&s writerow [WRITE %create_modl_file% 'GMIN: '%Gmin%]
+	&s writerow [WRITE %create_modl_file% 'GMAX: '%Gmax%]
+	&s writerow [WRITE %create_modl_file% 'TKMP: '%Tkmp%]
+	&s writerow [WRITE %create_modl_file% 'TMIN: '%Tmin%]
+	&s writerow [WRITE %create_modl_file% 'TOPMIN: '%Topmin%]
+	&s writerow [WRITE %create_modl_file% 'TOPMAX: '%Topmax%]
+	&s writerow [WRITE %create_modl_file% 'TMAX: '%Tmax%]
+	&s writerow [WRITE %create_modl_file% 'RMIN: '%Rmin%]
+	&s writerow [WRITE %create_modl_file% 'ROPMIN: '%Ropmin%]
+	&s writerow [WRITE %create_modl_file% 'ROPMAX: '%Ropmax%]
+	&s writerow [WRITE %create_modl_file% 'RMAX: '%Rmax%]
+	&s close_modl_file [CLOSE %create_modl_file%]
+&return
+/* ---------------------------------------------------------------
+&routine calc_chg_vector
+	RESET
+	&s chg_out %outdir_crop%\chg_vectors
+	
+	&ty Calculating GT50 area and cutting suitability prediction
+	&ty Current
+	
+	&if not [exists %chg_out% -dir] &then &sys md %chg_out%
+	
+	&if not [exists %chg_out%\current -workspace] &then arc cw %chg_out%\current
+	
+	&if [exists %chg_out%\current\suit_gt50 -grid] &then kill %chg_out%\current\suit_gt50 all
+	%chg_out%\current\suit_gt50 = SETNULL(%outdir_crop%\current\suitability < 50, %outdir_crop%\current\suitability)
+	
+	&if [exists %chg_out%\current\mask_gt50 -grid] &then kill %chg_out%\current\mask_gt50 all
+	%chg_out%\current\mask_gt50 = SETNULL(%outdir_crop%\current\suitability < 50, 1)
+	
+	&ty Future
+	
+	&s modlist [listfile %outdir_c%\* -dir]
+	&s nmod [token %modlist% -count]
+	&do md = 1 &to %nmod%
+		&s modname [extract %md% %modlist%]
+		&s modpred_dir %outdir_c%\%modname%
+		
+		&s modcalc_dir %chg_out%\%modname%
+		&if not [exists %modcalc_dir% -workspace] &then arc cw %modcalc_dir%
+		
+		&if [exists %modcalc_dir%\suit_gt50 -grid] &then kill %modcalc_dir%\suit_gt50 all
+		%modcalc_dir%\suit_gt50 = SETNULL(%modpred_dir%\suitability < 50, %modpred_dir%\suitability)
+		
+		&if [exists %modcalc_dir%\mask_gt50 -grid] &then kill %modcalc_dir%\mask_gt50 all
+		%modcalc_dir%\mask_gt50 = SETNULL(%modpred_dir%\suitability < 50, 1)
+		
+		&if [exists %modcalc_dir%\mask_chg -grid] &then kill %modcalc_dir%\mask_chg all
+		%modcalc_dir%\mask_chg = MERGE(%modcalc_dir%\mask_gt50, %chg_out%\current\mask_gt50)
+		
+		&if [exists %modcalc_dir%\suit_chg_nc -grid] &then kill %modcalc_dir%\suit_chg_nc all
+		%modcalc_dir%\suit_chg_nc = %modpred_dir%\suitability - %outdir_crop%\current\suitability
+		
+		SETWINDOW %modcalc_dir%\mask_chg %modcalc_dir%\mask_chg
+		SETMASK %modcalc_dir%\mask_chg
+		SETCELL %modcalc_dir%\mask_chg
+		
+		&if [exists %modcalc_dir%\suit_chg -grid] &then kill %modcalc_dir%\suit_chg all
+		%modcalc_dir%\suit_chg = %modpred_dir%\suitability - %outdir_crop%\current\suitability
+		
+		RESET
+		
+		&if %md% EQ 1 &then &s listsuitgrids %modname%\suitability
+		&else &s listsuitgrids %listsuitgrids%,%modname%\suitability
+		
+	&end
+	
+	&ty Calculating summary changes
+	
+	arc w %outdir_c%
+	
+	&s summarydir %chg_out%\_summary
+	&if not [exists %chg_out%\_summary -workspace] &then arc cw %chg_out%\_summary
+	
+	&if [exists %summarydir%\fut_mean -grid] &then kill %summarydir%\fut_mean all
+	%summarydir%\fut_mean = INT(FLOOR(MEAN(%listsuitgrids%) + 0.5))
+	
+	&if [exists %summarydir%\fut_gt50 -grid] &then kill %summarydir%\fut_gt50 all
+	%summarydir%\fut_gt50 = SETNULL(%summarydir%\fut_mean < 50, %summarydir%\fut_mean)
+	
+	&if [exists %summarydir%\fut_gt50_msk -grid] &then kill %summarydir%\fut_gt50_msk all
+	%summarydir%\fut_gt50_msk = SETNULL(%summarydir%\fut_mean < 50, 1)
+	
+	&if [exists %summarydir%\chg_mask -grid] &then kill %summarydir%\chg_mask all
+	%summarydir%\chg_mask = MERGE(%summarydir%\fut_gt50_msk, %chg_out%\current\mask_gt50)
+	
+	&if [exists %summarydir%\suit_chg -grid] &then kill %summarydir%\suit_chg all
+	%summarydir%\suit_chg = %summarydir%\fut_mean - %outdir_crop%\current\suitability
+	
+	&if [exists %summarydir%\temp1 -grid] &then kill %summarydir%\temp1 all
+	%summarydir%\temp1 = STD(%listsuitgrids%)
+	
+	&if [exists %summarydir%\temp2 -grid] &then kill %summarydir%\temp2 all
+	%summarydir%\temp2 = MEAN(%listsuitgrids%)
+	
+	&if [exists %summarydir%\fut_cv -grid] &then kill %summarydir%\fut_cv
+	%summarydir%\fut_cv = CON((%summarydir%\temp1 / (%summarydir%\temp2 + 1.0) * 100) > 100, 100, INT(FLOOR((%summarydir%\temp1 / (%summarydir%\temp2 + 1.0) * 100) + 0.5)))
+	
+	&if [exists %summarydir%\temp1 -grid] &then kill %summarydir%\temp1 all
+	&if [exists %summarydir%\temp2 -grid] &then kill %summarydir%\temp2 all
+	
+	/*Alternative calculation of confidence (to test direction of the change vector)
+	
+	&ty Calculating stipples (accordance of vectors)
+	
+	&s modlist [listfile %outdir_c%\* -dir]
+	&s nmod [token %modlist% -count]
+	
+	&do md = 1 &to %nmod%
+		&s modname [extract %md% %modlist%]
+		&s modpred_dir %outdir_c%\%modname%
+		
+		&if [exists %summarydir%\temp -grid] &then kill %summarydir%\temp all
+		%summarydir%\temp = CON(%summarydir%\suit_chg < 0 & %chg_out%\%modname%\suit_chg_nc < 0, 1, CON(%summarydir%\suit_chg > 0 & %chg_out%\%modname%\suit_chg_nc > 0, 1, CON(%summarydir%\suit_chg == 0 & %chg_out%\%modname%\suit_chg_nc == 0, 1, 0)))
+		
+		&if %md% EQ 1 &then
+			&do
+				&if [exists %summarydir%\stipples_nm -grid] &then kill %summarydir%\stipples_nm all
+				%summarydir%\stipples_nm = %summarydir%\temp
+				&if [exists %summarydir%\temp -grid] &then kill %summarydir%\temp all
+			&end
+		&else
+			&do
+				&if [exists %summarydir%\temp2 -grid] &then kill %summarydir%\temp2 all
+				%summarydir%\temp2 = %summarydir%\temp + %summarydir%\stipples_nm
+				
+				&if [exists %summarydir%\stipples_nm -grid] &then kill %summarydir%\stipples_nm all
+				%summarydir%\stipples_nm = %summarydir%\temp2
+				
+				&if [exists %summarydir%\temp -grid] &then kill %summarydir%\temp all
+				&if [exists %summarydir%\temp2 -grid] &then kill %summarydir%\temp2 all
+			&end
+	&end
+	
+	&if [exists %summarydir%\stipples -grid] &then kill %summarydir%\stipples all
+	%summarydir%\stipples = INT(FLOOR((%summarydir%\stipples_nm * 0.1) / (%nmod% * 0.1) * 100 + 0.5))
+	
+	SETWINDOW %summarydir%\chg_mask %summarydir%\chg_mask
+	SETMASK %summarydir%\chg_mask
+	SETCELL %summarydir%\chg_mask
+	
+	&if [exists %summarydir%\suit_g50_chg -grid] &then kill %summarydir%\suit_g50_chg all
+	%summarydir%\suit_g50_chg = %summarydir%\fut_mean - %outdir_crop%\current\suitability
+	
+	&if [exists %summarydir%\suit_g50_cv -grid] &then kill %summarydir%\suit_g50_cv
+	%summarydir%\suit_g50_cv = %summarydir%\fut_cv
+	
+	&if [exists %summarydir%\stipples_g50 -grid] &then kill %summarydir%\stipples_g50 all
+	%summarydir%\stipples_g50 = %summarydir%\stipples
+	
+	RESET
+	
+	&sys del log
+	
+	arc w %rootdir%
+	
+	&ty
+	&ty Done with vectors
+	&ty
+	
+&return
+/* ---------------------------------------------------------------
+&routine define_climate
+	&if %condition% EQ current &then &s clim_input %clim_cinput%
+	&else &s clim_input %clim_finput%\%modelname%
+	
+	&s prec = %clim_input%\prec_
+	&s tmean = %clim_input%\tmean_
+	&s tmini = %clim_input%\tmin_
+	&s tmaxi = %clim_input%\tmax_
+&return
+/* ---------------------------------------------------------------
+&routine control_run
+	&s endcond [show &PT ALL]
+	&s endtime [extract 1 %endcond%]
+	
+	&s createcontrol.file [open %outdir_crop%\control.file openstatus3 -write]
+	&s writecond [write %createcontrol.file% START' 'TIME:' '%starttime%]
+	&s writecond [write %createcontrol.file% END' 'TIME:' '%endtime%]
+	&s closecontrol.file [close %createcontrol.file%]
+&return
+/* ---------------------------------------------------------------
+&routine logoff
+	&if [show program] EQ GRID &then QUIT
+	&if [exists log -file] &then &sys del log
+	&if [show program] NE GRID &then GRID
+&return
