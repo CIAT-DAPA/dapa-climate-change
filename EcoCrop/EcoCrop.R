@@ -33,17 +33,44 @@ suitCalc <- function(TaList, TnList, TxList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin
 	
 	suitFun <- function(dataPixel) {
 		
+		PptDataPixel <- dataPixel[1:12]
+		TavDataPixel <- dataPixel[13:24]
+		TxDataPixel <- dataPixel[25:36}
+		TnDataPixel <- dataPixel[37:48]
+		
+		tSuit <- rep(NA, 12)
+		cumPpt <- rep(NA, 12)
+		
 		for (i in 1:12) {
 			start.month <- i
 			end.month <- i + Gavg - 1
 			
 			#Temp. iteration
 			
-			PptDataPixel <- dataPixel[1:12]
-			TavDataPixel <- dataPixel[13:24]
-			TxDataPixel <- dataPixel[25:36}
-			TnDataPixel <- dataPixel[37:48]
+			if (TnDataPixel[i] < Tkill) {
+				tSuit[i] <- 0
+			} else if (TavDataPixel[i] < Tmin) {
+				tSuit[i] <- 0
+			} else if (TavDataPixel[i] < Topmin) {
+				tSuit[i] <- 1 - ((Topmin - TavDataPixel[i]) * (1 / (Topmin - Tmin)))
+			} else if (TavDataPixel[i] < Topmax) {
+				tSuit[i] <- 1
+			} else if (TavDataPixel[i] < Tmax) {
+				tSuit[i] <- (Tmax - TavDataPixel[i]) * (1 / (Tmax - Topmax))
+			} else {
+				tSuit[i] <- 0
+			}
 			
+			#Ppt growing season
+			
+			end.mth.p <- end.month
+			if (end.mth.p > 12) {
+				end.mth.p <- end.mth.p - 12
+			}
+			
+			cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
+			
+			#Precipitation iteration
 			
 			
 		}
