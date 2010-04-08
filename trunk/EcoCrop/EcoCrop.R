@@ -29,4 +29,6 @@ suitCalc <- function(Gmin=90,Gmax=90,Tkill=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35
 	Gavg <- mean(c(Gmin, Gmax))
 	
 	
+	
+	
 }
