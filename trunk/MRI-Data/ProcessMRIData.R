@@ -46,8 +46,8 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 			}
 			
 			year <- substr(dte, 1, 4)
-			month <- substr(dte, 5, 2)
-			day <- substr(dte, 7, 2)
+			month <- substr(dte, 5, 6)
+			day <- substr(dte, 7, 8)
 			
 			ncFileList <- list.files(inDateDir, pattern=".nc")
 			
@@ -56,7 +56,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 				fileNoExt <- strsplit(fileName, ".n")[[1]][1]
 				
 				prefix <- substr(fileNoExt, 1, 13)
-				dom <- substr(fileNoExt, 15, 2)
+				dom <- substr(fileNoExt, 15, 16)
 				
 				cat("Processing", fileName, "\n")
 				
