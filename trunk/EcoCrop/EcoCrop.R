@@ -1,11 +1,14 @@
 #This R script computes the EcoCrop suitability index based on a set of parameters
 
-suitCalc <- function(TaList, TnList, TxList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600) {
+suitCalc <- function(TaList, TnList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='', cropname='') {
 	minAdapt <- 0
 	maxAdapt <- 1
 	
-	#Calculating regression models between Rmin-Ropmin and Ropmax-Rmax
+	#Creating the stack of the whole list of variables
 	
+	climateStack <- stack(TaList, TnList, PrList)
+	
+	#Erase this
 	Gmin <- 90
 	Gmax <- 90
 	Tkmp <- 0
@@ -17,6 +20,9 @@ suitCalc <- function(TaList, TnList, TxList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin
 	Ropmin <- 300
 	Ropmax <- 400
 	Rmax <- 600
+	#Until here
+	
+	#Calculating regression models between Rmin-Ropmin and Ropmax-Rmax
 	
 	rainLeftReg <- lsfit(x=c(Rmin,Ropmin), y=c(0,1))
 	rainLeftM <- rainLeftReg$coefficients[2]
@@ -35,8 +41,7 @@ suitCalc <- function(TaList, TnList, TxList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin
 		
 		PptDataPixel <- dataPixel[1:12]
 		TavDataPixel <- dataPixel[13:24]
-		TxDataPixel <- dataPixel[25:36}
-		TnDataPixel <- dataPixel[37:48]
+		TnDataPixel <- dataPixel[25:36]
 		
 		tSuit <- rep(NA, 12)
 		pSuit <- rep(NA, 12)
@@ -130,7 +135,37 @@ suitCalc <- function(TaList, TnList, TxList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin
 		tempFinSuit <- round(max(ecotf * 100))
 		finSuit <- round((max(ecopt) * max(ecotf)) * 100)
 		
+		res <- c(precFinSuit, tempFinSuit, finSuit)
+		return(res)
 	}
+	
+	pSuitName <- paste(outfolder, "//", cropname, "_psuitability.grd", sep="")
+	tSuitName <- paste(outfolder, "//", cropname, "_tsuitability.grd", sep="")
+	fSuitName <- paste(outfolder, "//", cropname, "_suitability.grd", sep="")
+	
+	pSuitRaster <- raster(climateStack, 0)
+	filename(pSuitRaster) <- pSuitName
+	
+	tSuitRaster <- raster(climateStack, 0)
+	filename(tSuitRaster) <- tSuitName
+	
+	fSuitRaster <- raster(climateStack, 0)
+	filename(fSuitRaster) <- fSuitName
+	
+	pb <- pbCreate(nrow(climateStack), type='text', style=3)
+	for (rw in 1:nrow(climateStack)) {
+		rowVals <- getValues(climateStack, rw)
+		
+		RasVals <- apply(rowVals, 1, suitFun)
+		
+		#Here you need to figure out how does this come out and then divide the values into the stuff you need to fill the rasters.
+		
+		pSuitRaster <- setValues(pSuitRaster, RasVals, rw)
+		pSuitRaster <- writeRaster(pSuitRaster, pSuitName, format='raster', overwrite=TRUE)
+		
+		pbStep(pb, rw)
+	}
+	pbClose(pb)
 	
 	
 }
