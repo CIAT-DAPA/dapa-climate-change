@@ -84,37 +84,42 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 					outFile <- paste(outDateDir, "/tmean_", dom, ".asc", sep="")
 				}
 				
-				tmpFile <- paste(tmpDir, "/temp.asc", sep="")
-				tmpFileCom <- paste(tmpDir, "/temp.asc.aux.xml", sep="")
-				
-				system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
-				
-				cat("Loading the data \n")
-				
-				loadData <- scan(tmpFile, skip=7)
-				
-				rs <- raster(nrow=960, ncol=1920, xmn=0, xmx=360)
-				rs[] <- loadData
-				
-				rm(loadData)
-				
-				rs <- flip(rs, 'y')
-				rs <- rotate(rs)
-				
-				if (outVarType == "temptr") {
-					rs <- rs - 272.15
-					rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
-					file.remove(tmpFile)
-					file.remove(tmpFileCom)
+				gzFileName <- paste(outFile, ".gz", sep="")
+				if (!file.exists(gzFileName)) {
+					
+					tmpFile <- paste(tmpDir, "/temp.asc", sep="")
+					tmpFileCom <- paste(tmpDir, "/temp.asc.aux.xml", sep="")
+					
+					system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
+					
+					cat("Loading the data \n")
+					
+					loadData <- scan(tmpFile, skip=7)
+					
+					rs <- raster(nrow=960, ncol=1920, xmn=0, xmx=360)
+					rs[] <- loadData
+					
+					rm(loadData)
+					
+					rs <- flip(rs, 'y')
+					rs <- rotate(rs)
+					
+					if (outVarType == "temptr") {
+						rs <- rs - 272.15
+						rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
+						file.remove(tmpFile)
+						file.remove(tmpFileCom)
+					} else {
+						rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
+						file.remove(tmpFile)
+						file.remove(tmpFileCom)
+					}
+					
+					rm(rs)
+					system(paste("gzip", outFile))
 				} else {
-					rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
-					file.remove(tmpFile)
-					file.remove(tmpFileCom)
+					cat("The file", gzFileName, "already exists \n")
 				}
-				
-				rm(rs)
-				system(paste("gzip", outFile))
-				
 			}
 			
 			con <- file(verFile, "w")
