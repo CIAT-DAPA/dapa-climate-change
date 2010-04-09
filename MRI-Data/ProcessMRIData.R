@@ -57,15 +57,51 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 				cat("GDAL translate \n")
 				
 				inFile <- paste(inDateDir, "//", fileName, sep="")
-				outFile <- paste(outDateDir, "//", fileName, sep="")
 				
-				system(paste("gdal_translate", "-of", "AAIGrid", inFile, outFile))
+				if (prefix == "0_sfc_max_day") {
+					outVarType <- "temptr"
+					outFile <- paste(outDateDir, "//tmax_", dom, ".asc", sep="")
+				} else if (prefix == "1_sfc_max_day") {
+					outVarType <- "windsp"
+					outFile <- paste(outDateDir, "//wsmax_", dom, ".asc", sep="")
+				} else if (prefix == "2_sfc_max_day") {
+					outVarType <- "precip"
+					outFile <- paste(outDateDir, "//prmax_", dom, ".asc", sep="")
+				} else if (prefix == "0_sfc_min_day") {
+					outVarType <- "temptr"
+					outFile <- paste(outDateDir, "//tmin_", dom, ".asc", sep="")
+				} else if (prefix == "0_sfc_avr_day") {
+					outVarType <- "precip"
+					outFile <- paste(outDateDir, "//prec_", dom, ".asc", sep="")
+				} else if (prefix == "0_sfc_avr_day") {
+					outVarType <- "temptr"
+					outFile <- paste(outDateDir, "//tmean_", dom, ".asc", sep="")
+				}
+				
+				tmpFile <- paste(outDateDir, "//temp.asc", sep="")
+				
+				system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
 				
 				cat("Loading the data \n")
 				
+				loadData <- scan(tmpFile, skip=7)
 				
+				rs <- raster(nrow=960, ncol=1920, xmn=0, xmx=360)
+				rs[] <- loadData
 				
+				rm(loadData)
 				
+				rs <- flip(rs, 'y')
+				rs <- rotate(rs)
+				
+				if (outVarType == "temptr") {
+					rs <- rs - 272.15
+					rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
+					file.remove(tmpFile)
+				} else {
+					rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
+					file.remove(tmpFile)
+				}
 				
 			}
 			
