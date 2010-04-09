@@ -12,7 +12,7 @@ p8Calc <- function(rlist, rlist2, outfile, format='') {
 	}
 	
 	if (!file.exists(outfile)) {
-			cat("", "\n", "Precipitation of driest quarter (P17)", "\n")
+			cat("", "\n", "Mean temperature of wettest quarter (P8)", "\n")
 			
 			PpTaStack <- stack(c(rlist, rlist2))
 			
