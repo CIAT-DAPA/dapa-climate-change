@@ -1,6 +1,9 @@
 # This R script processes the MRI data using gdal and other stuff
 #Available periods are SP0A, SF0A, and SN0A
 
+require(rgdal)
+require(raster)
+
 cat("Available periods are SP0A, SF0A, and SN0A \n")
 cat("\n")
 cat("Run as procMRIData(baseDir, tmpDir, outDir, period)\n")
