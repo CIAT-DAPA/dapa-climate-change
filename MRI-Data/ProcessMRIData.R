@@ -84,7 +84,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 					outFile <- paste(outDateDir, "/tmean_", dom, ".asc", sep="")
 				}
 				
-				tmpFile <- paste(outDateDir, "/temp.asc", sep="")
+				tmpFile <- paste(tmpDir, "/temp.asc", sep="")
 				
 				system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
 				
