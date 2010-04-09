@@ -1,6 +1,9 @@
 # This R script processes the MRI data using gdal and other stuff
-
 #Available periods are SP0A, SF0A, and SN0A
+
+cat("Available periods are SP0A, SF0A, and SN0A \n")
+cat("\n")
+cat("Run as procMRIData(baseDir, tmpDir, outDir, period)\n")
 
 procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	
@@ -103,7 +106,15 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 					file.remove(tmpFile)
 				}
 				
+				rm(rs)
+				system(paste("gzip", outFile))
+				
 			}
+			
+			con <- file(verFile, "w")
+			textToWrite <- paste("These files were processed on", date())
+			writeLines(textToWrite, con)
+			close(con)
 			
 		}
 		
