@@ -85,6 +85,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 				}
 				
 				tmpFile <- paste(tmpDir, "/temp.asc", sep="")
+				tmpFileCom <- paste(tmpDir, "/temp.asc.aux.xml", sep="")
 				
 				system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
 				
@@ -104,9 +105,11 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 					rs <- rs - 272.15
 					rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
 					file.remove(tmpFile)
+					file.remove(tmpFileCom)
 				} else {
 					rs <- writeRaster(rs, outFile, overwrite=T, format='ascii')
 					file.remove(tmpFile)
+					file.remove(tmpFileCom)
 				}
 				
 				rm(rs)
