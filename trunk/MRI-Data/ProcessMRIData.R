@@ -10,7 +10,7 @@ cat("Run as procMRIData(baseDir, tmpDir, outDir, period)\n")
 
 procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	
-	periodPath <- paste(baseDir, "//", period, sep="")
+	periodPath <- paste(baseDir, "/", period, sep="")
 	if (!file.exists(periodPath)) {
 		error("The folder", periodPath, "does not exist \n")
 	}
@@ -33,14 +33,14 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	for (doy in dateList) {
 		dte <- strsplit(doy, "_")[[1]][2]
 		
-		verFile <- paste(outDir, "//", doy, "//done.txt", sep="")
+		verFile <- paste(outDir, "/", doy, "/done.txt", sep="")
 		if (file.exists(verFile)) {
 			cat("Date", dte, "done! \n")
 		} else {
 			
-			inDateDir <- paste(periodPath, "//", dte, sep="")
+			inDateDir <- paste(periodPath, "/", doy, sep="")
 			
-			outDateDir <- paste(outDir, "//", doy, sep="")
+			outDateDir <- paste(outDir, "/", dte, sep="")
 			if (file.exists(outDateDir)) {
 				dir.create(outDateDir)
 			}
@@ -62,29 +62,29 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 				
 				cat("GDAL translate \n")
 				
-				inFile <- paste(inDateDir, "//", fileName, sep="")
+				inFile <- paste(inDateDir, "/", fileName, sep="")
 				
 				if (prefix == "0_sfc_max_day") {
 					outVarType <- "temptr"
-					outFile <- paste(outDateDir, "//tmax_", dom, ".asc", sep="")
+					outFile <- paste(outDateDir, "/tmax_", dom, ".asc", sep="")
 				} else if (prefix == "1_sfc_max_day") {
 					outVarType <- "windsp"
-					outFile <- paste(outDateDir, "//wsmax_", dom, ".asc", sep="")
+					outFile <- paste(outDateDir, "/wsmax_", dom, ".asc", sep="")
 				} else if (prefix == "2_sfc_max_day") {
 					outVarType <- "precip"
-					outFile <- paste(outDateDir, "//prmax_", dom, ".asc", sep="")
+					outFile <- paste(outDateDir, "/prmax_", dom, ".asc", sep="")
 				} else if (prefix == "0_sfc_min_day") {
 					outVarType <- "temptr"
-					outFile <- paste(outDateDir, "//tmin_", dom, ".asc", sep="")
+					outFile <- paste(outDateDir, "/tmin_", dom, ".asc", sep="")
 				} else if (prefix == "0_sfc_avr_day") {
 					outVarType <- "precip"
-					outFile <- paste(outDateDir, "//prec_", dom, ".asc", sep="")
+					outFile <- paste(outDateDir, "/prec_", dom, ".asc", sep="")
 				} else if (prefix == "0_sfc_avr_day") {
 					outVarType <- "temptr"
-					outFile <- paste(outDateDir, "//tmean_", dom, ".asc", sep="")
+					outFile <- paste(outDateDir, "/tmean_", dom, ".asc", sep="")
 				}
 				
-				tmpFile <- paste(outDateDir, "//temp.asc", sep="")
+				tmpFile <- paste(outDateDir, "/temp.asc", sep="")
 				
 				system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
 				
