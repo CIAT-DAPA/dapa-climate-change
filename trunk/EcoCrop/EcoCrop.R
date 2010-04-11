@@ -4,19 +4,19 @@
 
 makeLogFile <- function(filePathName, climPath, cropname, Gmin, Gmax, Tkmp, Tmin, Topmin, Topmax, Tmax, Rmin, Ropmin, Ropmax, Rmax) {
 	con <- file(filePathName, "w")
-	writeLines("CLIMATE_FILES:", climPath)
-	writeLines("CROP:", cropname)
-	writeLines("GMIN:", Gmin)
-	writeLines("GMAX:", Gmax)
-	writeLines("TKMP:", Tkmp)
-	writeLines("TMIN:", Tmin)
-	writeLines("TOPMIN:", Topmin)
-	writeLines("TOPMAX:", Topmax)
-	writeLines("TMAX:", Tmax)
-	writeLines("RMIN:", Rmin)
-	writeLines("ROPMIN:", Ropmin)
-	writeLines("ROPMAX:", Ropmax)
-	writeLines("RMAX:", Rmax)
+	writeLines(paste("CLIMATE_FILES:", climPath), con)
+	writeLines(paste("CROP:", cropname), con)
+	writeLines(paste("GMIN:", Gmin), con)
+	writeLines(paste("GMAX:", Gmax), con)
+	writeLines(paste("TKMP:", Tkmp), con)
+	writeLines(paste("TMIN:", Tmin), con)
+	writeLines(paste("TOPMIN:", Topmin), con)
+	writeLines(paste("TOPMAX:", Topmax), con)
+	writeLines(paste("TMAX:", Tmax), con)
+	writeLines(paste("RMIN:", Rmin), con)
+	writeLines(paste("ROPMIN:", Ropmin), con)
+	writeLines(paste("ROPMAX:", Ropmax), con)
+	writeLines(paste("RMAX:", Rmax), con)
 	close(con)
 }
 
@@ -51,9 +51,9 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	
 	#Creating the stack of the whole list of variables
 	
-	TaStack <- stack(paste(climPath, "//tmean_", c(1:12), sep=""))
-	TnStack <- stack(paste(climPath, "//tmin_", c(1:12), sep=""))
-	PrStack <- stack(paste(climPath, "//tmax_", c(1:12), sep=""))
+	TaStack <- stack(paste(climPath, "//tmean_", c(1:12), ".asc", sep=""))
+	TnStack <- stack(paste(climPath, "//tmin_", c(1:12), ".asc", sep=""))
+	PrStack <- stack(paste(climPath, "//tmax_", c(1:12), ".asc", sep=""))
 	
 	climateStack <- stack(TaStack, TnStack, PrStack)
 	
