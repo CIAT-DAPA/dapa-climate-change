@@ -1,6 +1,6 @@
 #This R script computes the EcoCrop suitability index based on a set of parameters
 
-out <- suitCalc(climPath='C:/CIAT_work/_tools/BioCalc_test', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='C:/CIAT_work/_tools/EcoCrop_test', cropname='bean')
+#out <- suitCalc(climPath='C:/CIAT_work/_tools/BioCalc_test', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='C:/CIAT_work/_tools/EcoCrop_test', cropname='bean')
 
 makeLogFile <- function(filePathName, ...) {
 	con <- file(filePathName, "w")
