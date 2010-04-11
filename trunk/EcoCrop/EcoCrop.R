@@ -1,22 +1,63 @@
 #This R script computes the EcoCrop suitability index based on a set of parameters
 
-talst <- paste("tmean_", c(1:12), ".asc", sep="")
-tnlst <- paste("tmin_", c(1:12), ".asc", sep="")
-prlst <- paste("prec_", c(1:12), ".asc", sep="")
+out <- suitCalc(climPath='C:/CIAT_work/_tools/BioCalc_test', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='C:/CIAT_work/_tools/EcoCrop_test', cropname='bean')
 
-out <- suitCalc(talst, tnlst, prlst, Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='C:/CIAT_work/_tools/EcoCrop_test', cropname='bean')
+makeLogFile <- function(filePathName, ...) {
+	con <- file(filePathName, "w")
+	writeLines("CLIMATE_FILES:", climPath)
+	writeLines("CROP:", cropname)
+	writeLines("GMIN:", Gmin)
+	writeLines("GMAX:", Gmax)
+	writeLines("TKMP:", Tkmp)
+	writeLines("TMIN:", Tmin)
+	writeLines("TOPMIN:", Topmin)
+	writeLines("TOPMAX:", Topmax)
+	writeLines("TMAX:", Tmax)
+	writeLines("RMIN:", Rmin)
+	writeLines("ROPMIN:", Ropmin)
+	writeLines("ROPMAX:", Ropmax)
+	writeLines("RMAX:", Rmax)
+	close(con)
+}
 
-suitCalc <- function(TaList, TnList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='', cropname='') {
+suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='', cropname='') {
 	minAdapt <- 0
 	maxAdapt <- 1
 	
+	#Checking climPath folder for consistency
+	
+	if (!file.exists(climPath)) {
+		stop("The specified folder where the climate files should be does not exist, please check...")
+	}
+	
+	#Checking climate files for existence
+	
+	for (i in 1:12) {
+		if (!file.exists(paste(climPath, "//tmean_", i, ".asc", sep=""))) {
+			stop("Error mean temperature for month ", i, ": file does not exist")
+		} else if (!file.exists(paste(climPath, "//tmin_", i, ".asc", sep=""))) {
+			stop("Error min temperature for month ", i, ": file does not exist")
+		} else if (!file.exists(paste(climPath, "//prec_", i, ".asc", sep=""))) {
+			stop("Error precipitation for month ", i, ": file does not exist")
+		}
+	}
+	
+	cat("Input file verification successful \n")
+	
+	#Creating the log file
+	
+	logFileName <- paste(outfolder, "//parameters.model", sep="")
+	createLog <- makeLogFile(logFileName, climPath, cropname, Gmin, Gmax, Tkmp, Tmin, Topmin, Topmax, Tmax, Rmin, Ropmin, Ropmax, Rmax)
+	
 	#Creating the stack of the whole list of variables
 	
-	TaStack <- stack(TaList)
-	TnStack <- stack(TnList)
-	PrStack <- stack(PrList)
+	TaStack <- stack(paste(climPath, "//tmean_", c(1:12), sep=""))
+	TnStack <- stack(paste(climPath, "//tmin_", c(1:12), sep=""))
+	PrStack <- stack(paste(climPath, "//tmax_", c(1:12), sep=""))
 	
 	climateStack <- stack(TaStack, TnStack, PrStack)
+	
+	#Multiplying temperatures by 10
 	
 	Tkmp <- Tkmp * 10
 	Tmin <- Tmin * 10
@@ -38,6 +79,8 @@ suitCalc <- function(TaList, TnList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topm
 	Tkill <- Tkmp + 40
 	
 	cat("Growing season is", Gavg, "\n")
+	
+	#This is the function that evaluates the suitability in a pixel basis
 	
 	suitFun <- function(dataPixel) {
 		if(is.na(dataPixel[1])) {
@@ -151,6 +194,8 @@ suitCalc <- function(TaList, TnList, PrList, Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topm
 			return(res)
 		}
 	}
+	
+	#Final grid naming and creation
 	
 	pSuitName <- paste(outfolder, "//", cropname, "_psuitability.grd", sep="")
 	tSuitName <- paste(outfolder, "//", cropname, "_tsuitability.grd", sep="")
