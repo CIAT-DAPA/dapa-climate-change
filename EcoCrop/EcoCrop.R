@@ -44,6 +44,44 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	
 	cat("Input file verification successful \n")
 	
+	#Checking parameters for consistency
+	
+	if (class(Gmin) != "numeric") {
+		stop("Inappropriate class of the Gmin parameter")
+	} else if (class(Gmax) != "numeric") {
+		stop("Inappropriate class of the Gmax parameter")
+	} else if (class(Tkmp) != "numeric") {
+		stop("Inappropriate class of the Tkmp parameter")
+	} else if (class(Tmin) != "numeric") {
+		stop("Inappropriate class of the Tmin parameter")
+	} else if (class(Topmin) != "numeric") {
+		stop("Inappropriate class of the Topmin parameter")
+	} else if (class(Topmax) != "numeric") {
+		stop("Inappropriate class of the Topmax parameter")
+	} else if (class(Tmax) != "numeric") {
+		stop("Inappropriate class of the Tmax parameter")
+	} else if (class(Rmin) != "numeric") {
+		stop("Inappropriate class of the Rmin parameter")
+	} else if (class(Ropmin) != "numeric") {
+		stop("Inappropriate class of the Ropmin parameter")
+	} else if (class(Ropmax) != "numeric") {
+		stop("Inappropriate class of the Ropmax parameter")
+	} else if (class(Rmax) != "numeric") {
+		stop("Inappropriate class of the Rmax parameter")
+	}
+	
+	#Checking parameters for consistency part 2
+	
+	if (Gmin > 365) {
+		stop("Gmin cannot be greater than 365")
+	}
+	
+	#Checking if outfolder does exist, and creating it if necessary
+	
+	if (!file.exists(outfolder)) {
+		dir.create(outfolder, recursive=T)
+	}
+	
 	#Creating the log file
 	
 	logFileName <- paste(outfolder, "//parameters.model", sep="")
