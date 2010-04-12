@@ -12,15 +12,19 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	
 	periodPath <- paste(baseDir, "/", period, sep="")
 	if (!file.exists(periodPath)) {
-		stop("The folder", periodPath, "does not exist \n")
+		error("The folder", periodPath, "does not exist \n")
 	}
 	
-	if (!file.exists(tmpDir)) {
-		dir.create(tmpDir, recursive=T)
+	tmpPeriodDir <- paste(tmpDir, "/", period, sep="")
+	
+	if (!file.exists(tmpPeriodDir)) {
+		dir.create(tmpPeriodDir, recursive=T)
 	}
+	
+	outPeriodDir <- paste(outDir, "/", period, sep="")
 	
 	if (!file.exists(outDir)) {
-		dir.create(outDir, recursive=T)
+		dir.create(outPeriodDir, recursive=T)
 	}
 	
 	#Listing folders in the input folder
@@ -33,14 +37,14 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	for (doy in dateList) {
 		dte <- strsplit(doy, "_")[[1]][2]
 		
-		verFile <- paste(outDir, "/", doy, "/done.txt", sep="")
+		verFile <- paste(outPeriodDir, "/", doy, "/done.txt", sep="")
 		if (file.exists(verFile)) {
 			cat("Date", dte, "done! \n")
 		} else {
 			
 			inDateDir <- paste(periodPath, "/", doy, sep="")
 			
-			outDateDir <- paste(outDir, "/", doy, sep="")
+			outDateDir <- paste(outPeriodDir, "/", doy, sep="")
 			if (!file.exists(outDateDir)) {
 				dir.create(outDateDir, recursive=T)
 			}
@@ -87,8 +91,8 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 				gzFileName <- paste(outFile, ".gz", sep="")
 				if (!file.exists(gzFileName)) {
 					
-					tmpFile <- paste(tmpDir, "/temp.asc", sep="")
-					tmpFileCom <- paste(tmpDir, "/temp.asc.aux.xml", sep="")
+					tmpFile <- paste(tmpPeriodDir, "/temp.asc", sep="")
+					tmpFileCom <- paste(tmpPeriodDir, "/temp.asc.aux.xml", sep="")
 					
 					system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
 					
