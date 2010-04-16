@@ -91,8 +91,20 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 				gzFileName <- paste(outFile, ".gz", sep="")
 				if (!file.exists(gzFileName)) {
 					
+					if (file.exists(outFile)) {
+						file.remove(outFile)
+					}
+					
 					tmpFile <- paste(tmpPeriodDir, "/temp.asc", sep="")
 					tmpFileCom <- paste(tmpPeriodDir, "/temp.asc.aux.xml", sep="")
+					
+					if (file.exists(tmpFile)) {
+						file.remove(tmpFile)
+					}
+					
+					if (file.exists(tmpFileCom)) {
+						file.remove(tmpFileCom)
+					}
 					
 					system(paste("gdal_translate", "-of", "AAIGrid", inFile, tmpFile))
 					
