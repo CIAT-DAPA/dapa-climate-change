@@ -69,22 +69,22 @@ GCMSmoothIntp <- function(intZonesDir, baseDir, outputDir, nCols=3, nRows=3, sce
 			boxYMin <- yAbsMax - (rowNr * spacingY)
 			boxYMax <- yAbsMax - ((rowNr - 1) * spacingY)
 			
-			xMin <- boxXMin - 20
+			xMin <- boxXMin - 15
 			if (xMin < xAbsMin) {
 				xMin <- xAbsMin
 			}
 			
-			xMax <- boxXMax + 20
+			xMax <- boxXMax + 15
 			if (xMax > xAbsMax) {
 				xMax <- xAbsMax
 			}
 			
-			yMin <- boxYMin - 20
+			yMin <- boxYMin - 15
 			if (yMin < yAbsMin) {
 				yMin <- yAbsMin
 			}
 			
-			yMax <- boxYMax + 20
+			yMax <- boxYMax + 15
 			if (yMax > yAbsMax) {
 				yMax <- yAbsMax
 			}
