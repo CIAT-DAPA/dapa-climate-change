@@ -12,7 +12,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	
 	periodPath <- paste(baseDir, "/", period, sep="")
 	if (!file.exists(periodPath)) {
-		error("The folder", periodPath, "does not exist \n")
+		stop("The folder", periodPath, "does not exist \n")
 	}
 	
 	tmpPeriodDir <- paste(tmpDir, "/", period, sep="")
