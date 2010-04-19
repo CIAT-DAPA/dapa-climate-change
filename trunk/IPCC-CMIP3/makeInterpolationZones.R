@@ -13,13 +13,13 @@ yAbsMax <- 90
 maxLon <- 360
 maxLat <- 150
 
-nRowCuts <- 3
-nColCuts <- 3
+#nRowCuts <- 3
+#nColCuts <- 4
 
-rowSize <- maxLat / nRowCuts
-colSize <- maxLon / nColCuts
-
-makeIntZones <- function(inputDir, outputDir) {
+makeIntZones <- function(inputDir, outputDir, nRowCuts=3, nColCuts=4) {
+	
+	rowSize <- maxLat / nRowCuts
+	colSize <- maxLon / nColCuts
 	
 	if (!file.exists(outputDir)) {
 		dir.create(outputDir, recursive=T)
