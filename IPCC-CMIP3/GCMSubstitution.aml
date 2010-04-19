@@ -1,0 +1,150 @@
+/*Julian Ramirez, dawnpatrolmustaine@gmail.com
+
+&args scenario
+&sys cls
+&messages &off
+/*&echo &on
+
+&if [null %scenario%] &then &return Not valid scenario
+
+&if [show program] ne GRID &then GRID
+
+&amlpath .
+&s amldir [show &amlpath]
+
+&s rootdir F:\climate_change\IPCC_CMIP3
+&s scendir %rootdir%\%scenario%
+
+&s rootout %scendir%\average
+&if not [exists %rootout% -dir] &then &sys md %rootout%
+
+&s modout %scendir%\filled
+&if not [exists %modout% -dir] &then &sys md %modout% 
+
+&s perlist [listfile %scendir%\average\*_* -dir]
+&s nper [token %perlist% -count]
+
+&do per = 1 &to %nper%
+	&s period [extract %per% %perlist%]
+	
+	&ty
+	&ty Period %period%
+	
+	&if not [exists %rootout%\%period%\done_subs.txt -file] &then
+		&do
+			
+			&s varlist [listfile %scendir%\average\%period%\*_01.asc -file]
+			&s nvars [token %varlist% -count]
+			
+			&do var = 1 &to %nvars%
+				&if [exists log -file] &then &s delstat [delete log -file]
+				
+				&s variable [extract %var% %varlist%]
+				&s tmpstr [before %variable% .]
+				&s varname [before %tmpstr% _]
+				
+				&ty Variable %varname%
+				
+				&do m = 1 &to 12
+					&if %m% < 10 &then &s mth 0%m%
+					&else &s mth %m%
+					
+					&ty
+					&ty Month %mth% 
+					
+					&s infile %rootout%\%period%\%varname%_%mth%
+					
+					&s modlist [listfile %scendir%\*_* -dir]
+					&s nmod [token %modlist% -count]
+					
+					&s mdl 1
+					
+					&do mod = 1 &to %nmod%
+						
+						&s modname [extract %mod% %modlist%]
+						
+						&s modelmask %scendir%\%modname%\multiyr_avgs\%period%\prec_01
+						
+						&ty Model %modname%
+						
+						&if not [exists %modout%\%modname% -dir] &then &sys md %modout%\%modname%
+						&if not [exists %modout%\%modname%\%period% -dir] &then &sys md %modout%\%modname%\%period%
+						
+						&s outfile %modout%\%modname%\%period%\%varname%_%mth%
+						&s inmodfile %scendir%\%modname%\multiyr_avgs\%period%\%varname%_%mth%
+						
+						SETWINDOW %modelmask% %modelmask%
+						SETMASK %modelmask%
+						SETCELL %modelmask%
+						
+						&if %varname% EQ prec &then
+							&do
+								&if [exists %outfile% -grid] &then kill %outfile% all
+								%outfile% = %inmodfile%
+								
+								&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+								%outfile%.asc = GRIDASCII(%outfile%)
+							&end
+						&else &if %varname% EQ tmean &then
+							&do
+								&if [exists %outfile% -grid] &then kill %outfile% all
+								%outfile% = %inmodfile%
+								
+								&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+								%outfile%.asc = GRIDASCII(%outfile%)
+							&end
+						&else &if %varname% EQ tmax &then
+							&do
+								&if not [exists %inmodfile% -grid] &then
+									&do
+										&if [exists %outfile% -grid] &then kill %outfile% all
+										%outfile% = %scendir%\%modname%\multiyr_avgs\%period%\tmean_%mth% + ((%rootout%\%period%\tmax_%mth% - %rootout%\%period%\tmin_%mth%) * 0.5)
+										
+										&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+										%outfile%.asc = GRIDASCII(%outfile%)
+									&end
+								&else
+									&do
+										&if [exists %outfile% -grid] &then kill %outfile% all
+										%outfile% = %inmodfile%
+										
+										&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+										%outfile%.asc = GRIDASCII(%outfile%)
+									&end
+							&end
+						&else &if %varname% EQ tmin &then
+							&do
+								&if not [exists %inmodfile% -grid] &then
+									&do
+										&if [exists %outfile% -grid] &then kill %outfile% all
+										%outfile% = %scendir%\%modname%\multiyr_avgs\%period%\tmean_%mth% - ((%rootout%\%period%\tmax_%mth% - %rootout%\%period%\tmin_%mth%) * 0.5)
+										
+										&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+										%outfile%.asc = GRIDASCII(%outfile%)
+									&end
+								&else
+									&do
+										&if [exists %outfile% -grid] &then kill %outfile% all
+										%outfile% = %inmodfile%
+										
+										&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+										%outfile%.asc = GRIDASCII(%outfile%)
+									&end
+							&end
+						
+					&end
+					
+				&end
+				
+			&end
+			
+			&s lstf [listfile %rootout%\%period%\* -grid %rootout%\%period%\done_subs.txt]
+			
+		&end
+	
+&end
+
+&if [show program] EQ GRID &then QUIT
+&if [exists log -file] &then &s delstat [delete log -file]
+&ty Done!
+&messages &on

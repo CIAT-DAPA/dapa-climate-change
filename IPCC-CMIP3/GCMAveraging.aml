@@ -1,0 +1,142 @@
+/*Julian Ramirez, dawnpatrolmustaine@gmail.com
+
+&args scenario
+&sys cls
+&messages &off
+/*&echo &on
+
+&if [null %scenario%] &then &return Not valid scenario
+
+&if [show program] ne GRID &then GRID
+
+&amlpath .
+&s amldir [show &amlpath]
+
+&s rootdir F:\climate_change\IPCC_CMIP3
+&s scendir %rootdir%\%scenario%
+
+&s rootout %scendir%\average
+&if not [exists %rootout% -dir] &then &sys md %rootout%
+
+&s perlist [listfile %scendir%\bccr_bcm2_0\multiyr_avgs\*_* -dir]
+&s nper [token %perlist% -count]
+
+&do per = 1 &to %nper%
+	&s period [extract %per% %perlist%]
+	
+	&ty
+	&ty Period %period%
+	
+	&s outperiod %rootout%\%period%
+	&if not [exists %outperiod% -dir] &then &sys md %outperiod%
+	
+	&if not [exists %outperiod%\done.txt -file] &then
+		&do
+			
+			&s openfile [OPEN %outperiod%\nmod_averages.txt OPENSTATUS -WRITE]
+			&s writerow [WRITE %openfile% PERIOD'	'VARIABLE'	'MONTH'	'NMOD]
+			
+			&s varlist [listfile %scendir%\bccr_bcm2_0\multiyr_avgs\%period%\*_01.asc -file]
+			&s nvars [token %varlist% -count]
+			
+			&do var = 1 &to %nvars%
+				&if [exists log -file] &then &s delstat [delete log -file]
+				
+				&s variable [extract %var% %varlist%]
+				&s tmpstr [before %variable% .]
+				&s varname [before %tmpstr% _]
+				
+				&ty Variable %varname%
+				
+				&do m = 1 &to 12
+					&if %m% < 10 &then &s mth 0%m%
+					&else &s mth %m%
+					
+					&ty
+					&ty Month %mth% 
+					
+					&s outfile %outperiod%\%varname%_%mth%
+					
+					&s modlist [listfile %scendir%\*_* -dir]
+					&s nmod [token %modlist% -count]
+					
+					&s mdl 1
+					
+					&do mod = 1 &to %nmod%
+						
+						&s modname [extract %mod% %modlist%]
+						
+						&ty Model %modname%
+						
+						&s infile %scendir%\%modname%\multiyr_avgs\%period%\%varname%_%mth%
+						
+						&if %mdl% EQ 1 &then
+							&do
+								&if [exists %infile%.asc -file] &then
+									&do
+										RESET
+										
+										&if [exists %infile% -grid] &then kill %infile% all
+										%infile% = ASCIIGRID(%infile%.asc, FLOAT)
+										
+										&if [exists %outfile% -grid] &then kill %outfile% all
+										%outfile% = %infile%
+										
+										&s mdl [calc %mdl% + 1]
+									&end
+							&end
+						&else
+							&do
+								&if [exists %infile%.asc -file] &then
+									&do
+										&if [exists %infile% -grid] &then kill %infile% all
+										%infile% = ASCIIGRID(%infile%.asc, FLOAT)
+										
+										SETWINDOW %outfile% %outfile%
+										SETMASK OFF
+										SETCELL MINOF
+										
+										&if [exists %outperiod%\temp -grid] &then kill %outperiod%\temp all
+										%outperiod%\temp = %infile% + %outfile%
+										
+										&if [exists %outfile% -grid] &then kill %outfile% all
+										%outfile% = %outperiod%\temp
+										&if [exists %outperiod%\temp -grid] &then kill %outperiod%\temp all
+										
+										RESET
+										&s mdl [calc %mdl% + 1]
+									&end
+								
+							&end
+						
+					&end
+					
+					&ty Averaging for [calc %mdl% - 1] models
+					
+					&if [exists %outperiod%\temp -grid] &then kill %outperiod%\temp all
+					%outperiod%\temp = %outfile% / [calc %mdl% - 1]
+					
+					&if [exists %outfile% -grid] &then kill %outfile% all
+					%outfile% = %outperiod%\temp
+					&if [exists %outperiod%\temp -grid] &then kill %outperiod%\temp all
+					
+					&if [exists %outfile%.asc -file] &then &s delstat [delete %outfile%.asc -file]
+					%outfile%.asc = GRIDASCII(%outfile%)
+					
+					&s writerow [WRITE %openfile% %period%'	'%varname%'	'%mth%'	'[calc %mdl% - 1]]
+					
+				&end
+				
+			&end
+			
+			&s closefile [CLOSE %openfile%]
+			&s lstf [listfile %outperiod%\* -grid %outperiod%\done.txt]
+			
+		&end
+	
+&end
+
+&if [show program] EQ GRID &then QUIT
+&if [exists log -file] &then &s delstat [delete log -file]
+&ty Done!
+&messages &on

@@ -1,0 +1,29 @@
+source("GCMSmoothSplineInterpolation.R")
+
+otdir <- "/data3/jramirez/DeltaStationProcess/GCMInterpolations"
+izdir <- "/data3/jramirez/DeltaStationProcess/splittedIntZones"
+indir <- "/mnt/GeoData/climate_change/IPCC_CMIP3"
+
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='bccr_bcm2_0') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='bccr_bcm2_0') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='bccr_bcm2_0') -G1
+
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='cccma_cgcm3_1_t47') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='cccma_cgcm3_1_t47') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='cccma_cgcm3_1_t47') -G1
+
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='cccma_cgcm3_1_t63') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='cccma_cgcm3_1_t63') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='cccma_cgcm3_1_t63') -G2
+
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='cnrm_cm3') -G2
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='cnrm_cm3') -G2
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='cnrm_cm3') -G2
+
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='csiro_mk3_0') -G2
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='csiro_mk3_0') -G2
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='csiro_mk3_0') -G2
+
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='csiro_mk3_5') -G2
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='csiro_mk3_5') 
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='csiro_mk3_5') 

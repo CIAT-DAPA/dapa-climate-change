@@ -1,0 +1,96 @@
+/*Julian Ramirez, dawnpatrolmustaine@gmail.com
+
+&args scenario
+&sys cls
+&messages &off
+/*&echo &on
+
+&if [null %scenario%] &then &return Not valid scenario
+
+&if [show program] ne GRID &then GRID
+
+&amlpath .
+&s amldir [show &amlpath]
+
+&s rootdir F:\climate_change\IPCC_CMIP3
+&s scendir %rootdir%\%scenario%
+
+&s rootout %scendir%\anomalies
+&if not [exists %rootout% -dir] &then &sys md %rootout%
+
+&s modlist [listfile %scendir%\filled\*_* -dir]
+&s nmod [token %modlist% -count]
+
+&do mod = 1 &to %nmod%
+	&s modname [extract %mod% %modlist%]
+	
+	&ty
+	&ty Processing model %modname%
+	
+	&if not [exists %rootout%\%modname%\done.txt -file] &then
+		&do
+	
+			&if not [exists %rootout%\%modname% -dir] &then &sys md %rootout%\%modname% 
+			
+			&s tslist [listfile %scendir%\filled\%modname%\*_* -dir]
+			&s nts [token %tslist% -count]
+			
+			&do ts = 1 &to %nts%
+				&s timeslice [extract %ts% %tslist%]
+				
+				&if not [exists %rootout%\%modname%\%timeslice% -dir] &then &sys md %rootout%\%modname%\%timeslice% 
+				
+				&ty Period %timeslice%
+				
+				&do m = 1 &to 12
+					&if %m% < 10 &then &s mth 0%m%
+					&else &s mth %m%
+					
+					&ty Month %m%
+					
+					/* Precipitation
+					
+					&if [exists %rootout%\%modname%\%timeslice%\prec_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\prec_%m% all
+					%rootout%\%modname%\%timeslice%\prec_%m% = %scendir%\filled\%modname%\%timeslice%\prec_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\prec_%mth%
+					
+					&if [exists %rootout%\%modname%\%timeslice%\prec_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\prec_%m%.asc -file]
+					%rootout%\%modname%\%timeslice%\prec_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\prec_%m%)
+					
+					/* Mean temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmean_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmean_%m% all
+					%rootout%\%modname%\%timeslice%\tmean_%m% = %scendir%\filled\%modname%\%timeslice%\tmean_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmean_%mth%
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmean_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmean_%m%.asc -file]
+					%rootout%\%modname%\%timeslice%\tmean_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmean_%m%)
+					
+					/* Minimum temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmin_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmin_%m% all
+					%rootout%\%modname%\%timeslice%\tmin_%m% = %scendir%\filled\%modname%\%timeslice%\tmin_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmin_%mth%
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmin_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmin_%m%.asc -file]
+					%rootout%\%modname%\%timeslice%\tmin_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmin_%m%)
+					
+					/* Maximum temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmax_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmax_%m% all
+					%rootout%\%modname%\%timeslice%\tmax_%m% = %scendir%\filled\%modname%\%timeslice%\tmax_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmax_%mth%
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmax_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmax_%m%.asc -file]
+					%rootout%\%modname%\%timeslice%\tmax_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmax_%m%)
+					
+				&end
+				
+			&end
+			
+		&end
+	
+	&s flst [listfile %rootout%\%modname%\* -dir %rootout%\%modname%\done.txt]
+		
+&end
+
+&if [show program] EQ GRID &then QUIT
+&if [exists log -file] &then &s delstat [delete log -file]
+&ty Done!
+&messages &on

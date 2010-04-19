@@ -1,0 +1,90 @@
+/*Julian Ramirez, dawnpatrolmustaine@gmail.com
+
+&args scenario
+&sys cls
+&messages &off
+/*&echo &on
+
+&if [null %scenario%] &then &return Not valid scenario
+
+&if [show program] ne GRID &then GRID
+
+&amlpath .
+&s amldir [show &amlpath]
+
+&s rootdir F:\climate_change\IPCC_CMIP3
+&s scendir %rootdir%\%scenario%
+
+&s currdir C:\CIAT_work\cc_impact_crops\5min_climatic_data\current
+
+&s mask F:\climate_change\masks\global
+
+&s rootout %scendir%\future
+&if not [exists %rootout% -dir] &then &sys md %rootout%
+
+&s modlist [listfile %scendir%\anomalies\*_* -dir]
+&s nmod [token %modlist% -count]
+
+&do mod = 1 &to %nmod%
+	&s modname [extract %mod% %modlist%]
+	
+	&ty
+	&ty Processing model %modname%
+	
+	&if not [exists %rootout%\%modname%\done.txt -file] &then
+		&do
+	
+			&if not [exists %rootout%\%modname% -dir] &then &sys md %rootout%\%modname% 
+			
+			&s tslist [listfile %scendir%\anomalies\%modname%\*_* -dir]
+			&s nts [token %tslist% -count]
+			
+			&do ts = 1 &to %nts%
+				&s timeslice [extract %ts% %tslist%]
+				
+				&if not [exists %rootout%\%modname%\%timeslice% -dir] &then &sys md %rootout%\%modname%\%timeslice% 
+				
+				&ty Period %timeslice%
+				
+				&do m = 1 &to 12
+					
+					setwindow %mask% %mask%
+					setmask %mask%
+					setcell %mask%
+					
+					&ty Month %m%
+					
+					/* Precipitation
+					
+					&if [exists %rootout%\%modname%\%timeslice%\prec_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\prec_%m% all
+					%rootout%\%modname%\%timeslice%\prec_%m% = int(floor(%currdir%\prec_%m% * abs(1 + ((%scendir%\anomalies\%modname%\%timeslice%\prec_%m% * 0.1) / ((%currdir%\prec_%m% + 1.0) * 0.1))) + 0.5))
+					
+					/* Mean temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmean_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmean_%m% all
+					%rootout%\%modname%\%timeslice%\tmean_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmean_%m% + (%currdir%\tmean_%m% * 0.1)) * 10 + 0.5))
+					
+					/* Minimum temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmin_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmin_%m% all
+					%rootout%\%modname%\%timeslice%\tmin_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmin_%m% + (%currdir%\tmin_%m% * 0.1)) * 10 + 0.5))
+					
+					/* Maximum temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmax_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmax_%m% all
+					%rootout%\%modname%\%timeslice%\tmax_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmax_%m% + (%currdir%\tmax_%m% * 0.1)) * 10 + 0.5))
+					
+				&end
+				
+			&end
+			
+		&end
+	
+	&s flst [listfile %rootout%\%modname%\* -dir %rootout%\%modname%\done.txt]
+		
+&end
+
+&if [show program] EQ GRID &then QUIT
+&if [exists log -file] &then &s delstat [delete log -file]
+&ty Done!
+&messages &on

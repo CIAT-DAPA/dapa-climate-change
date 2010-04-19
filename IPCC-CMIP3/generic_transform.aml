@@ -1,0 +1,131 @@
+&args inputdir inputascii outgridname ktoc
+&terminal 9999
+&messages &off
+&sys cls
+
+&if [null %inputdir%] OR [null %inputascii%] OR [null %outgridname%] OR [null %ktoc%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax. '&RUN INPUT_DIR INPUT_ASCII OUTPUT_NAME K_to_C'
+		&ty INPUT_ASCII should contain file extension
+		&ty K_to_C should be yes if you want your temperature data (in K) to be converted to Celsius (C)
+		&return
+	&end
+&else &if [LOCASE %ktoc%] EQ yes OR [LOCASE %ktoc%] EQ no &then
+	&do
+		&if [show program] NE GRID &then GRID
+		
+		&amlpath .
+		&s basedir [SHOW &amlpath]
+		
+		arc w %inputdir%
+		
+		&s filenoext [BEFORE %inputascii% .asc]
+		
+		&ty     .->ASCII to GRID
+		
+		&if [EXISTS %inputdir%\temp -GRID] &then KILL %inputdir%\temp ALL
+		%inputdir%\temp = ASCIIGRID(%inputdir%\%inputascii%, FLOAT)
+		
+		&ty     .->Compressing oldies
+		
+		&sys 7za a -tzip %inputdir%\%filenoext%.zip %inputdir%\%filenoext%.asc
+		/*&sys 7za a -tzip %inputdir%\%filenoext%.zip %inputdir%\%filenoext%.asc.aux.xml
+		
+		&s delstat [DELETE %inputdir%\%filenoext%.asc -FILE]
+		/*&s delstat [DELETE %inputdir%\%filenoext%.asc.aux.xml -FILE]
+		
+		&ty     .->Rotation
+		
+		&if [EXISTS %inputdir%\temp_r -GRID] &then KILL %inputdir%\temp_r ALL
+		%inputdir%\temp_r = ROTATE(%inputdir%\temp, 180)
+		
+		&ty     .->Mirroring
+		
+		&if [EXISTS %inputdir%\temp_rm -GRID] &then KILL %inputdir%\temp_rm ALL
+		%inputdir%\temp_rm = MIRROR(%inputdir%\temp_r)
+		&if [EXISTS %inputdir%\temp_r -GRID] &then KILL %inputdir%\temp_r ALL
+		
+		&describe %inputdir%\temp
+		
+		&ty     .->Shifting
+		
+		&if [EXISTS %inputdir%\temp_rms -GRID] &then KILL %inputdir%\temp_rms ALL
+		%inputdir%\temp_rms = SHIFT(%inputdir%\temp_rm, %GRD$XMIN%, %GRD$YMIN%)
+		&if [EXISTS %inputdir%\temp_rm -GRID] &then KILL %inputdir%\temp_rm ALL
+		
+		&s xmin [CALC %GRD$XMIN%]
+		&s xmid [CALC %xmin% + 180]
+		&s xmax [CALC %GRD$XMAX%]
+		&s ymin [CALC %GRD$YMIN%]
+		&s ymax [CALC %GRD$YMAX%]
+		
+		&ty     .->Dividing
+		
+		SETWINDOW %xmin% %ymin% %xmid% %ymax% %inputdir%\temp_rms
+		
+		&if [EXISTS %inputdir%\temp_rms1 -GRID] &then KILL %inputdir%\temp_rms1 ALL
+		%inputdir%\temp_rms1 = %inputdir%\temp_rms
+		
+		SETWINDOW %xmid% %ymin% %xmax% %ymax% %inputdir%\temp_rms
+		
+		&if [EXISTS %inputdir%\temp_rms2 -GRID] &then KILL %inputdir%\temp_rms2 ALL
+		%inputdir%\temp_rms2 = %inputdir%\temp_rms
+		&if [EXISTS %inputdir%\temp_rms -GRID] &then KILL %inputdir%\temp_rms ALL
+		
+		RESET
+		
+		&ty     .->Shifting parts
+		
+		&if [EXISTS %inputdir%\temp_rms1s -GRID] &then KILL %inputdir%\temp_rms1s ALL
+		%inputdir%\temp_rms1s = SHIFT(%inputdir%\temp_rms1, 180, %ymin%)
+		&if [EXISTS %inputdir%\temp_rms1 -GRID] &then KILL %inputdir%\temp_rms1 ALL
+		
+		&if [EXISTS %inputdir%\temp_rms2s -GRID] &then KILL %inputdir%\temp_rms2s ALL
+		%inputdir%\temp_rms2s = SHIFT(%inputdir%\temp_rms2, 0, %ymin%)
+		&if [EXISTS %inputdir%\temp_rms2 -GRID] &then KILL %inputdir%\temp_rms2 ALL
+		
+		&ty     .->Merging parts
+		
+		&if [EXISTS %inputdir%\almost -GRID] &then KILL %inputdir%\almost ALL
+		%inputdir%\almost = MERGE(%inputdir%\temp_rms1s, %inputdir%\temp_rms2s)
+		
+		&if [EXISTS %inputdir%\temp_rms1s -GRID] &then KILL %inputdir%\temp_rms1s ALL
+		&if [EXISTS %inputdir%\temp_rms2s -GRID] &then KILL %inputdir%\temp_rms2s ALL
+		
+		&ty     .->Final shift
+		
+		&if [EXISTS %inputdir%\finalgrid -GRID] &then KILL %inputdir%\finalgrid ALL
+		%inputdir%\finalgrid = SHIFT(%inputdir%\almost, -180, -90)
+		&if [EXISTS %inputdir%\almost -GRID] &then KILL %inputdir%\almost ALL
+		
+		&ty     .->Finalizing
+		
+		&if [LOCASE %ktoc%] EQ yes &then
+			&do
+				&if [EXISTS %inputdir%\%outgridname% -GRID] &then KILL %inputdir%\%outgridname% ALL
+				%inputdir%\%outgridname% = %inputdir%\finalgrid - 272.15
+			&end
+		&else
+			&do
+				&if [EXISTS %inputdir%\%outgridname% -GRID] &then KILL %inputdir%\%outgridname% ALL
+				%inputdir%\%outgridname% = %inputdir%\finalgrid
+			&end
+		
+		&if [EXISTS %inputdir%\finalgrid -GRID] &then KILL %inputdir%\finalgrid ALL
+		&if [EXISTS %inputdir%\temp -GRID] &then KILL %inputdir%\temp ALL
+		
+		&if [SHOW PROGRAM] EQ GRID &then QUIT
+		&if [EXISTS LOG -FILE] &then &s delstat [DELETE LOG -FILE]
+		&messages &on
+		w %basedir%
+		
+		&ty Done!
+	&end
+&else
+	&do
+		&ty
+		&ty K_to_C argument should be YES or NO. Please try again
+		&ty
+		&return
+	&end
