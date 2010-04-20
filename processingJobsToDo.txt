@@ -1,0 +1,92 @@
+AVOID datasets + SRES-A1B
+---------------------------------------------------------
+
+Priority 1: Multi year monthly data and bioclimatics (AAIGrid format) at 0.5 degree resolution for 30yr running means: 
+	-2010-2039 (2020):
+		-A1Bp50
+		-A1B_A16r2h: OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA
+	-2020-2049 (2030): 
+		-A1Bp50
+		-A1B_A16r2h
+		-A1B_A16r4l
+		-A1B_A16r5l
+		-A1B_A30r2h
+		-A1B_A30r5l
+	-2030-2059 (2040): 
+		-A1Bp50
+		-A1B_A16r2h
+		-A1B_A16r4l
+		-A1B_A16r5l
+		-A1B_A30r2h
+		-A1B_A30r5l
+	-2040-2069 (2050)
+		-A1Bp50
+		-A1B_A16r2h: OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA
+	-2050-2079 (2060): 
+		-A1Bp50
+		-A1B_A16r2h
+		-A1B_A16r4l
+		-A1B_A16r5l
+		-A1B_A30r2h
+		-A1B_A30r5l
+	-2060-2089 (2070): 
+		-A1Bp50
+		-A1B_A16r2h
+		-A1B_A16r4l
+		-A1B_A16r5l
+		-A1B_A30r2h
+		-A1B_A30r5l
+	-2070-2099 (2080)
+		-A1Bp50
+		-A1B_A16r2h: OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA
+
+This to be done on STMARIA via R
+Being currently processed on STMARIA via R
+
+Priority 2: Yearly monthly and bioclimatics (AAIGrid format) at 0.5 degree resolution
+	-20C3M
+	-A1Bp50
+	-A1B_A16r2h
+	-A1B_A16r4l
+	-A1B_A16r5l
+	-A1B_A30r2h
+	-A1B_A30r5l
+
+This to be done after the above on STMARIA via R
+
+
+CMIP3 datasets
+---------------------------------------------------------
+
+Priority 1: DeltaStation method for selected timeslices (2020, 2050, 2080) 2.5minute resolution for:
+	-SRES-A1B
+	-SRES-A2
+	-SRES-B1
+
+Being currently done in GENOMIX1 & GENOMIX2, using 12 different interpolation zones over the world. Hope that works.
+
+Priority 2: Disaggregation method on 30s data being done by Emmanuel for selected timeslices (2020, 2030, 2040, 2050, 2060, 2070, 2080):
+	-SRES-A1B
+	-SRES-A2
+	-SRES-B1
+
+Done by Emmanuel via Arc/Info and on his local machine
+
+Priority 3: Delta method to get 30s data for selected timeslices as for Tyndall (2020, 2030, 2040, 2050, 2060, 2070, 2080):
+	-SRES-A1B
+	-SRES-A2
+	-SRES-B1
+
+This to be done via Arc/Info on GISSDE
