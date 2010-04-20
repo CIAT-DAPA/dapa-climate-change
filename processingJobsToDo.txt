@@ -66,6 +66,14 @@ Priority 2: Yearly monthly and bioclimatics (AAIGrid format) at 0.5 degree resol
 
 This to be done after the above on STMARIA via R
 
+Priority 3: Resample 30s interpolations + bioclimatics + cons_mths + bio_chg at 2.5min, 5min and 10min for SRES-A1B
+
+This is to be done on local machine via ArcInfo. 
+
+Priority 4: Create asciis for the above and publish on webpage
+
+This is to be done on local machine via ArcInfo
+
 
 CMIP3 datasets
 ---------------------------------------------------------
