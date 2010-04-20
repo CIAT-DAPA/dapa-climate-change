@@ -52,8 +52,8 @@ Priority 1: Multi year monthly data and bioclimatics (AAIGrid format) at 0.5 deg
 		-A1B_A30r2h: OK!, stored on STMARIA
 		-A1B_A30r5l: OK!, stored on STMARIA
 
-This to be done on STMARIA via R
-Being currently processed on STMARIA via R
+...This to be done on STMARIA via R
+...Being currently processed on STMARIA via R
 
 Priority 2: Yearly monthly and bioclimatics (AAIGrid format) at 0.5 degree resolution
 	-20C3M
@@ -64,17 +64,18 @@ Priority 2: Yearly monthly and bioclimatics (AAIGrid format) at 0.5 degree resol
 	-A1B_A30r2h
 	-A1B_A30r5l
 
-This to be done after the above on STMARIA via R
+...This to be done after the above on STMARIA via R
+...Write the R-script to do this
 
 Priority 3: Resample 30s interpolations + bioclimatics + cons_mths + bio_chg at 2.5min, 5min and 10min for SRES-A1B
 
-This is to be done on local machine via ArcInfo.
-Currently RUNNING...
+...This is to be done on local machine via ArcInfo.
+...Currently RUNNING
 
 Priority 4: Create asciis for the above and publish on webpage
 
-This is to be done on local machine via ArcInfo
-Waiting for Priority 3 to finsih
+...This is to be done on local machine via ArcInfo
+...Waiting for Priority 3 to finsih
 
 
 CMIP3 datasets
@@ -85,18 +86,18 @@ Priority 1: DeltaStation method for selected timeslices (2020, 2050, 2080) 2.5mi
 	-SRES-A2
 	-SRES-B1
 
-Being currently done in GENOMIX1 & GENOMIX2, using 12 different interpolation zones over the world. Hope that works.
+...Being currently done in GENOMIX1 & GENOMIX2, using 12 different interpolation zones over the world. Hope that works.
 
 Priority 2: Disaggregation method on 30s data being done by Emmanuel for selected timeslices (2020, 2030, 2040, 2050, 2060, 2070, 2080):
 	-SRES-A1B
 	-SRES-A2
 	-SRES-B1
 
-Done by Emmanuel via Arc/Info and on his local machine
+...Being processed by Emmanuel via Arc/Info and on his local machine
 
 Priority 3: Delta method to get 30s data for selected timeslices as for Tyndall (2020, 2030, 2040, 2050, 2060, 2070, 2080):
 	-SRES-A1B
 	-SRES-A2
 	-SRES-B1
 
-This to be done via Arc/Info on GISSDE
+...This to be done via Arc/Info on GISSDE
