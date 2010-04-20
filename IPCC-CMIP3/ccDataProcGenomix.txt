@@ -5,8 +5,8 @@ izdir <- "/data3/jramirez/DeltaStationProcess/splittedIntZones-4x3"
 indir <- "/mnt/GeoData/climate_change/IPCC_CMIP3"
 
 output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='bccr_bcm2_0') -G2
-output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='bccr_bcm2_0')
-output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='bccr_bcm2_0')
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='bccr_bcm2_0') -G1
+output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2070_2099', model='bccr_bcm2_0') -G1
 
 output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='cccma_cgcm3_1_t47')
 output <- GCMSmoothIntp(izdir, indir, otdir, nCols=4, nRows=3, scenario='SRES_A1B', ts='2040_2069', model='cccma_cgcm3_1_t47')
