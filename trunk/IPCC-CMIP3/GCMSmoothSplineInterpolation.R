@@ -16,7 +16,9 @@ yAbsMax <- 90
 #intZonesDir <- "F://climateChangeInterpolations"
 #baseDir <- "X://climate_change//IPCC_CMIP3"
 
+cat("\n")
 cat("GCMSmoothIntp(intZonesDir, baseDir, outputDir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='bccr_bcm2_0') \n")
+cat("\n")
 
 GCMSmoothIntp <- function(intZonesDir, baseDir, outputDir, nCols=3, nRows=3, scenario='SRES_A1B', ts='2010_2039', model='bccr_bcm2_0') {
 	

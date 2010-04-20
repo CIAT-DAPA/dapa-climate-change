@@ -16,6 +16,10 @@ maxLat <- 150
 #nRowCuts <- 3
 #nColCuts <- 4
 
+cat("\n")
+cat("makeIntZones(inputDir, outputDir, nRowCuts=3, nColCuts=4) \n")
+cat("\n")
+
 makeIntZones <- function(inputDir, outputDir, nRowCuts=3, nColCuts=4) {
 	
 	rowSize <- maxLat / nRowCuts
