@@ -1,0 +1,133 @@
+/*	Model for calculating the number of consecutive months of a given value in climate data
+/*
+/*	Can be used for precipitation or temperature.  The user must define the threshold value 
+/*	when prompted
+/*	
+/*	Input data should be 12 grids of monthly climate of format:
+/*	
+/*	prec_01, prec_02......prec_12
+/*
+/*	or
+/*
+/*	tmax_01, tmax_02......tmax_12 etc.
+/*
+/*	Output file is named "prec"_cons_mths
+/*
+/*  by Andy Jarvis and Eduard Guevarra
+/*  	August 2004
+/*  a.jarvis@cgiar.org
+/*
+/* Corrections were implemented to the model on June 2008
+
+
+&args folder threshold
+&if [show program] NE GRID &then GRID
+&sys cls
+
+&SEVERITY &ERROR &IGNORE 
+&SEVERITY &WARNING &IGNORE 
+&MESSAGES &ON
+
+&terminal 9999
+
+/* Verify and delete temporal grids for starting the calculation
+
+&ty -------------------------------------------
+&ty ---------CONSECUTIVE DRY MONTHS------------
+&ty -----------CALCULATION v. 3.0--------------
+&ty -------------------------------------------
+
+&amlpath .
+&s curpath [show &amlpath]
+arc w %folder%
+
+&do i = 1 &to 23
+	&if [exists cons%i% -grid] &then kill cons%i% all
+	&if [EXISTS temp_%i% -grid] &then kill temp_%i% all
+&end
+
+/* Reclassify so that all grids have value of the month if greater than threshold, else 0
+
+&ty Reclassifying precipitation grids
+&ty
+
+&s grids := [listfile prec* -grid]
+&if [null %grids%] &then &type There are no climate files
+	&else
+		&do i := 1 &to 12
+			&sv name = [extract %i% %grids%]
+			&sv variable = [before %name% _]
+			&sv month = [after %name% _]
+			&if [EXISTS temp_%i% -grid] &then kill temp_%i% all
+			&ty Reclassifying month %month%
+			temp_%i% = con ( %name% < %threshold% , 1 , 0)
+			&ty
+		&end
+
+&ty Creating the continuous series
+&ty
+
+&do j = 1 &to 11
+	&s k [calc %j% + 12]
+	&ty Creating grid %k% from month %j%
+	temp_%k% = temp_%j%
+	&ty
+&end
+
+/* Create continuous monthly rainfall series
+
+&s monthcounter = 1
+
+&do i = 1 &to 23
+	&ty Processing month %i% of the continuous series
+	&if %monthcounter% EQ 1 &then
+		&do
+			cons%i% = con(temp_%i% == 1, 1, 0)
+			&s conslist = cons%i%
+		&end
+	&if %monthcounter% GT 1 &then
+		&do
+			&s prevmonth [calc %monthcounter% - 1]
+			cons%i% = con(temp_%i% == 1, cons%prevmonth% + 1, temp_%i%)
+			&s conslist = %conslist%, cons%i%
+		&end
+	&s monthcounter [calc %monthcounter% + 1]
+	&ty
+&end
+
+/* Calculating final number of consecutive dry months
+
+&ty Now calculating maximum consecutive dry months...
+&if [exists cons_mths_t -grid] &then kill cons_mths_t all
+cons_mths_t = max(%conslist%)
+&if [exists cons_mths -grid] &then kill cons_mths all
+cons_mths = con(cons_mths_t == 23, 12, cons_mths_t)
+&if [exists cons_mths_t -grid] &then kill cons_mths_t all
+&ty Consecutive dry months calculation done!!!
+&ty
+
+/* Cleaning up workspace
+
+&pause 'Now cleaning workspace. Please wait...' &seconds 1
+&ty
+&messages &off
+&do i := 1 &to 23
+	&if [EXISTS temp_%i% -grid] &then kill temp_%i% all
+	&if [exists cons%i% -grid] &then kill cons%i% all
+&end
+
+&do i := 1 &to 12
+	&if %i% GT 9 &then &s pgrid = prec_%i%
+	&else &s pgrid = prec_0%i%
+	&if [exists %pgrid% -grid] &then kill %pgrid% all
+&end
+
+&messages &on
+&ty MAXIMUM CONSECUTIVE DRY MONTHS DONE!!!
+&ty
+
+&s delstat [delete log -file]
+
+arc w %curpath%
+&if [show program] EQ GRID &then QUIT
+&return

@@ -1,5 +1,5 @@
-&args rootdir scenario
-&if [null %scenario%] or [null %rootdir%] &then &return Use scenario and/or root_folder argument
+&args rootdir /*scenario
+&if [null %rootdir%] &then &return Use scenario and/or root_folder argument
 &terminal 9999
 &sys cls
 
@@ -14,33 +14,35 @@
 	&else &if %resol% EQ 5 &then &s outdir %rootdir%\Global_5min
 	&else &s outdir %rootdir%\Global_10min
 	
-	&do year &list 2020 2050 2080
-		/*&do scenario &list A2a B2a
+	&if not [exists %outdir% -dir] &then &sys md %outdir%
+	
+	&s modellist [listfile %rootdir%\Global_30s\* -dir]
+	&s nmodels [token %modellist% -count]
+	
+	&do md = 1 &to %nmodels%
+		
+		&s modname [extract %md% %modellist%]
+		
+		&s outmoddir %outdir%\%modname%
+		&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
+		
+		&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
 			
-			&s modellist [listfile %rootdir%\Global_30s\%year%\%scenario%\* -dir]
-			&s nmodels [token %modellist% -count]
+			&s outmodyeardir %outmoddir%\%year%
+			&if not [exists %outmodyeardir% -dir] &then &sys md %outmodyeardir%
 			
-			&do md = 1 &to %nmodels%
-				
-				&s modname [extract %md% %modellist%]
-				&ty
-				&ty Model %modname% (%scenario%, %year%, %resol%)
-				&ty Fixing cons months
-				
-				&if not [exists %rootdir%\Global_30s\%year%\%scenario%\%modname%\cons_mths -grid] &then
-					&do
-						copy %rootdir%\Global_30s\%year%\%scenario%\%modname%\cons_mths\cons_mths %rootdir%\Global_30s\%year%\%scenario%\%modname%\tmp_mths
-				
-						&if [exists %rootdir%\Global_30s\%year%\%scenario%\%modname%\cons_mths -dir] &then &s delstat [DELETE %rootdir%\Global_30s\%year%\%scenario%\%modname%\cons_mths -DIR]
-				
-						rename %rootdir%\Global_30s\%year%\%scenario%\%modname%\tmp_mths cons_mths
-					&end
-				&r resample_GCM %rootdir%\Global_30s\%year%\%scenario%\%modname% %outdir%\%year%\%scenario%\%modname% %resol% NEAREST
-				
-				&sys dir /d /b /o %outdir%\%year%\%scenario%\* > %outdir%\%year%\%scenario%\moddone.txt
-				
-			&end
+			&ty
+			&ty Model %modname% (%year%, %resol%)
+			&ty Fixing cons months
 			
-		/*&end
+			&if not [exists %rootdir%\Global_30s\%modname%\%year%\cons_mths -grid] &then
+				&do
+					&r consMthsCalc_v3.aml %rootdir%\Global_30s\%modname%\%year% 100
+				&end
+			&r resample_GCM.aml %rootdir%\Global_30s\%modname%\%year% %outmodyeardir% %resol% NEAREST
+			
+			&sys dir /d /b /o %outdir%\%modname%\%year%\* > %outdir%\%modname%\moddone_%year%.txt
+		&end
+		
 	&end
 &end
