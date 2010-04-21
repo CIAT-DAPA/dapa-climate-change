@@ -1,0 +1,106 @@
+/* This aml calculates tmin and tmax anomalies based on dtr and tmean data
+/* Written by Julián Ramírez
+/* CIAT, Cali, Colombia, June 2009
+
+&args inputdir modname outdir mask timeslice wcldir tempdir
+&terminal 9999
+&sys cls
+&severity &warning &ignore
+&severity &error &ignore
+&messages &off
+
+&if [null %inputdir%] OR [null %modname%] OR [null %outdir%] OR [null %mask%] OR [null %timeslice%] OR [null %wcldir%] OR [null %tempdir%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax, please use
+		&ty '&r multi_year_mean.aml INPUT_DIR MODEL_NAME OUTDIR MASK TIME_SLICE WCL_DIR TEMPORAL_DIR'
+		&ty available timeslices are 2020s 2030s 2040s 2050s 2060s 2080s
+		&ty MASK should be both name and path of to the mask
+		&ty INPUT_DIR should contain folders of models
+		&ty WCL_DIR should contain current monthly grids
+		&ty TEMPORAL_DIR is a local folder where calculations will be done
+		
+		&ty
+		&return
+	&end
+
+&if [show program] NE GRID &then GRID
+&amlpath .
+&s rootdir [show &amlpath]
+
+&if not [exists %outdir% -DIR] &then &sys md %outdir%
+&if not [exists %outdir%\%modname% -DIR] &then &sys md %outdir%\%modname%
+&if not [exists %outdir%\%modname%\%timeslice% -DIR] &then &sys md %outdir%\%modname%\%timeslice%
+
+&ty
+&ty Processing model %modname%
+
+arc w %outdir%\%modname%\%timeslice%	
+
+/* LEER GRIDS DE ENTRADA
+
+&s tmin_c = %wcldir%\tmin_
+&s tmax_c = %wcldir%\tmax_
+&s prec_c = %wcldir%\prec_
+&s dtn = %inputdir%\%modname%\%timeslice%\tmin_
+&s dtx = %inputdir%\%modname%\%timeslice%\tmax_
+&s dpr = %inputdir%\%modname%\%timeslice%\prec_
+
+/* GRIDS DE SALIDA
+
+&s tmin_m = %tempdir%\tmin_ /*%outdir%\%modname%\%timeslice%\tmin_
+&s tmax_m = %tempdir%\tmax_ /*%outdir%\%modname%\%timeslice%\tmax_
+&s prec_m = %tempdir%\prec_ /*%outdir%\%modname%\%timeslice%\prec_
+&s tmean_m = %tempdir%\tmean_ /*%outdir%\%modname%\%timeslice%\tmean_
+
+&do i = 1 &to 12
+
+	&ty
+	&ty   ->.Processing month %i%
+	
+	setwindow %mask%
+	setmask %mask%
+	setcell %mask%
+	
+	&ty   ->.Calculating tmin
+	&ty        Processing minimum temperature
+	
+	&if [exist %tmin_m%%i% -grid] &then &ty Grid exists /*kill %tmin_m%%i% all
+	&else %tmin_m%%i% = int(floor((%tmin_c%%i% + %dtn%%i% * 0.1) + 0.5))
+	&ty copying
+	&if [exists %outdir%\%modname%\%timeslice%\tmin_%i% -grid] &then kill %outdir%\%modname%\%timeslice%\tmin_%i% all
+	COPY %tmin_m%%i% %outdir%\%modname%\%timeslice%\tmin_%i% 
+	
+	&ty        Processing maximum temperature
+	&if [exist %tmax_m%%i% -grid] &then &ty Grid exists /*kill %tmax_m%%i% all
+	&else %tmax_m%%i% = int(floor((%tmax_c%%i% + %dtx%%i% * 0.1) + 0.5))
+	&ty copying
+	&if [exists %outdir%\%modname%\%timeslice%\tmax_%i% -grid] &then kill %outdir%\%modname%\%timeslice%\tmax_%i% all
+	COPY %tmax_m%%i% %outdir%\%modname%\%timeslice%\tmax_%i% 
+	
+	&ty        Processing total precipitation
+	&if [exist %prec_m%%i% -grid] &then &ty Grid exists /*kill %prec_m%%i% all
+	&else %prec_m%%i% = int(floor((%prec_c%%i% * abs(1 + ((%dpr%%i% * 0.01) / (%prec_c%%i% + 1)))) + 0.5))
+	&ty copying
+	&if [exists %outdir%\%modname%\%timeslice%\prec_%i% -grid] &then kill %outdir%\%modname%\%timeslice%\prec_%i% all
+	COPY %prec_m%%i% %outdir%\%modname%\%timeslice%\prec_%i%
+	
+	&ty        Processing mean temperature
+	&if [exist %tmean_m%%i% -grid] &then &ty Grid exists /*kill %tmean_m%%i% all
+	&else %tmean_m%%i% = int(floor(((%tmin_m%%i% + %tmax_m%%i%) * 0.5 ) + 0.5))
+	&ty copying
+	&if [exists %outdir%\%modname%\%timeslice%\tmean_%i% -grid] &then kill %outdir%\%modname%\%timeslice%\tmean_%i% all
+	COPY %tmean_m%%i% %outdir%\%modname%\%timeslice%\tmean_%i%
+	
+	&ty        Cleaning up
+	&if [exist %tmin_m%%i% -grid] &then kill %tmin_m%%i% all
+	&if [exist %tmax_m%%i% -grid] &then kill %tmax_m%%i% all
+	&if [exist %prec_m%%i% -grid] &then kill %prec_m%%i% all
+	&if [exist %tmean_m%%i% -grid] &then kill %tmean_m%%i% all
+	
+&end
+
+QUIT
+&sys del log
+w %rootdir%
+&if [exists log -file] &then &sys del log
