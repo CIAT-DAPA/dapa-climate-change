@@ -102,3 +102,4 @@ Priority 3: Standard delta method to get 30s data for selected timeslices as for
 
 ...This to be done via Arc/Info on GISSDE
 ...Write the AML code based on existing code for interpolations but fixing the input file stuff
+...Now processing on GISSDE
