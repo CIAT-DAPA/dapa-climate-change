@@ -86,7 +86,7 @@ Priority 1: DeltaStation method for selected timeslices (2020, 2050, 2080) 2.5mi
 	-SRES-A2
 	-SRES-B1
 
-...Being currently done in GENOMIX1 & GENOMIX2, using 12 different interpolation zones over the world. Hope that works.
+...Being currently processed in GENOMIX1 & GENOMIX2, using 12 different interpolation zones over the world. Hope that works.
 
 Priority 2: Disaggregation method on 30s data being done by Emmanuel for selected timeslices (2020, 2030, 2040, 2050, 2060, 2070, 2080):
 	-SRES-A1B
@@ -95,9 +95,10 @@ Priority 2: Disaggregation method on 30s data being done by Emmanuel for selecte
 
 ...Being processed by Emmanuel via Arc/Info and on his local machine
 
-Priority 3: Delta method to get 30s data for selected timeslices as for Tyndall (2020, 2030, 2040, 2050, 2060, 2070, 2080):
+Priority 3: Standard delta method to get 30s data for selected timeslices as for Tyndall (2020, 2030, 2040, 2050, 2060, 2070, 2080):
 	-SRES-A1B
 	-SRES-A2
 	-SRES-B1
 
 ...This to be done via Arc/Info on GISSDE
+...Write the AML code
