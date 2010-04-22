@@ -2,22 +2,25 @@ source("averageClimates.R")
 idr <- "E:/AVOID_scenarios/input"
 odr <- "E:/AVOID_scenarios/output"
 
-op <- averageClimates(30, 2035, idr, odr, "A1Bp50")
-op <- averageClimates(30, 2045, idr, odr, "A1Bp50")
-op <- averageClimates(30, 2065, idr, odr, "A1Bp50")
-op <- averageClimates(30, 2075, idr, odr, "A1Bp50")
+op <- averageClimates(30, 2025, idr, odr, "A1Bp50") -proc
+op <- averageClimates(30, 2035, idr, odr, "A1Bp50") -proc
+op <- averageClimates(30, 2045, idr, odr, "A1Bp50") -proc
+op <- averageClimates(30, 2055, idr, odr, "A1Bp50") -proc
+op <- averageClimates(30, 2065, idr, odr, "A1Bp50") -proc
+op <- averageClimates(30, 2075, idr, odr, "A1Bp50") -proc
+op <- averageClimates(30, 2085, idr, odr, "A1Bp50") -proc
 
-op <- averageClimates(30, 2035, idr, odr, "A1B_A16r2h") -proc
-op <- averageClimates(30, 2045, idr, odr, "A1B_A16r2h") -proc
-op <- averageClimates(30, 2065, idr, odr, "A1B_A16r2h") -proc
-op <- averageClimates(30, 2075, idr, odr, "A1B_A16r2h") -proc
+op <- averageClimates(30, 2035, idr, odr, "A1B_A16r2h") -done
+op <- averageClimates(30, 2045, idr, odr, "A1B_A16r2h") -done
+op <- averageClimates(30, 2065, idr, odr, "A1B_A16r2h") -done
+op <- averageClimates(30, 2075, idr, odr, "A1B_A16r2h") -done
 
-op <- averageClimates(30, 2035, idr, odr, "A1B_A16r4l") -proc
-op <- averageClimates(30, 2045, idr, odr, "A1B_A16r4l") -proc
-op <- averageClimates(30, 2065, idr, odr, "A1B_A16r4l") -proc
-op <- averageClimates(30, 2075, idr, odr, "A1B_A16r4l") -proc
+op <- averageClimates(30, 2035, idr, odr, "A1B_A16r4l") -done
+op <- averageClimates(30, 2045, idr, odr, "A1B_A16r4l") -done
+op <- averageClimates(30, 2065, idr, odr, "A1B_A16r4l") -done
+op <- averageClimates(30, 2075, idr, odr, "A1B_A16r4l") -done
 
-op <- averageClimates(30, 2035, idr, odr, "A1B_A16r5l")
+op <- averageClimates(30, 2035, idr, odr, "A1B_A16r5l") -proc
 op <- averageClimates(30, 2045, idr, odr, "A1B_A16r5l")
 op <- averageClimates(30, 2065, idr, odr, "A1B_A16r5l")
 op <- averageClimates(30, 2075, idr, odr, "A1B_A16r5l")
