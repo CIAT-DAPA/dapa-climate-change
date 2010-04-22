@@ -66,6 +66,7 @@ Priority 2: Yearly monthly and bioclimatics (AAIGrid format) at 0.5 degree resol
 
 ...This to be done after the above on STMARIA via R
 ...Write the R-script to do this
+...Script done, waiting for the above to finish to run it
 
 Priority 3: Resample 30s interpolations + bioclimatics + cons_mths + bio_chg at 2.5min, 5min and 10min for SRES-A1B
 
@@ -102,4 +103,4 @@ Priority 3: Standard delta method to get 30s data for selected timeslices as for
 
 ...This to be done via Arc/Info on GISSDE
 ...Write the AML code based on existing code for interpolations but fixing the input file stuff
-...Now processing on GISSDE
+...Now processing on GISSDE, NINA & PINTA
