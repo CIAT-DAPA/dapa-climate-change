@@ -56,7 +56,7 @@
 		&end
 		
 		&do vartype &list bio cons prec tmax tmean tmin
-			&ty   -> .Compressing %vartype%s
+			&ty   -> .Compressing %vartype%
 		
 			&sys 7za a -tzip %outputfolder%\%vartype%_grd.zip %outputfolder%\%vartype%
 			&s delstat [DELETE %outputfolder%\%vartype% -DIR]
