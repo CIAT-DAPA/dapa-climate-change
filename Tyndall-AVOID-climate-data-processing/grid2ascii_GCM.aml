@@ -1,0 +1,91 @@
+&args inputfolder switch
+&terminal 9999
+/*&sys cls
+&messages &off
+
+&if [null %inputfolder%] OR [null %switch%] &then
+	&do
+		&sys cls
+		&ty
+		&ty Incorrect command syntax
+		&ty
+		&ty Run the command as: '&RUN INPUT_FOLDER COMPRESS'
+		&ty
+		&ty INPUT_FOLDER:   Folder where your grids are located
+		&ty
+		&ty COMPRESS:       Write YES if you want to compress your
+		&ty                 outputs into a zipfile (you will need 7zip)
+		&ty                 to save hard disk space or NO whether you
+		&ty                 want to leave them uncompressed
+		&ty
+		&ty Note:           your ascii grids will be created in
+		&ty                 a folder named _asciis inside your input
+		&ty                 folder.
+		&ty
+		&return
+	&end
+
+&if [locase %switch%] EQ yes OR [locase %switch%] EQ no &then
+	&do
+
+		&amlpath .
+		&s basedir [show &amlpath]
+		
+		&s outputfolder %inputfolder%\_asciis
+		&if not [exists %outputfolder% -dir] &then &sys md %outputfolder%
+		
+		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
+		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+		
+		&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
+		&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
+		
+		&if %OPENSTATUS% NE 0 &then
+			&do
+				&ty
+				&ty The file %basedir%\listgrids.list does not exist or cannot be opened
+				&return
+			&end
+		&else
+			&do
+				&do i = 1 &to %gridlist%
+					&s gridname [READ %openlist% READSTATUS]
+					
+					&s vartype [before %gridname% _]
+					
+					&ty
+					&ty   -> .Processing %gridname%
+					
+					&if [exists %outputfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outputfolder%\%gridname%.prj -file]
+					&if [exists %outputfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outputfolder%\%gridname%.asc -file] /* &ty Output grid exists
+					GRIDASCII %inputfolder%\%gridname% %outputfolder%\%gridname%.asc
+					
+					&if [locase %switch%] EQ yes &then
+						&do
+							&sys 7za a %outputfolder%\%vartype%_asc.zip %outputfolder%\%gridname%.asc
+							&if [exists %outputfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outputfolder%\%gridname%.asc -file]
+							&if [exists %outputfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outputfolder%\%gridname%.prj -file]
+						&end
+					&else &ty No compressing selected
+					
+				&end
+			&end
+		&s closefile [close %openlist%]
+		&if [show program] EQ GRID &then QUIT
+		
+	&end
+&else
+	&do
+		&sys cls
+		&ty
+		&ty You need to type YES or NO in the COMPRESS argument
+		&ty Bailing out...
+		&ty 
+		&return
+	&end
+
+&if [exists %outputfolder%\listgrids.list -file] &then &sys del %outputfolder%\listgrids.list
+&if [exists %basedir%\log -file] &then &sys del %basedir%\log
+&ty
+&ty Process done!
