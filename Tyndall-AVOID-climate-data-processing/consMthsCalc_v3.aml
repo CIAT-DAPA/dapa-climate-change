@@ -116,11 +116,11 @@ cons_mths = con(cons_mths_t == 23, 12, cons_mths_t)
 	&if [exists cons%i% -grid] &then kill cons%i% all
 &end
 
-&do i := 1 &to 12
-	&if %i% GT 9 &then &s pgrid = prec_%i%
-	&else &s pgrid = prec_0%i%
-	&if [exists %pgrid% -grid] &then kill %pgrid% all
-&end
+/*&do i := 1 &to 12
+/*	&if %i% GT 9 &then &s pgrid = prec_%i%
+/*	&else &s pgrid = prec_0%i%
+/*	&if [exists %pgrid% -grid] &then kill %pgrid% all
+/*&end
 
 &messages &on
 &ty MAXIMUM CONSECUTIVE DRY MONTHS DONE!!!

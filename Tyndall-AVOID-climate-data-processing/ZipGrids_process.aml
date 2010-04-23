@@ -27,12 +27,13 @@
 			&ty
 			&ty Model %modname% (%year%, %resol%)
 			
-			&if not [exists %outdir%\%modname%\%year%_AsciiZip_done.txt -file] &then
+			&if not [exists %outdir%\%modname%\%year%_ZipGrids_done.txt -file] &then
 				&do
 					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*_grd.zip
 					&r ZipGrids_GCM.aml %outdir%\%modname%\%year%
-					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*_grd.zip -file %outdir%\%modname%\%year%_AsciiZip_done.txt]
+					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*_grd.zip -file %outdir%\%modname%\%year%_ZipGrids_done.txt]
 				&end
 					
 		&end
+	&end
 &end
