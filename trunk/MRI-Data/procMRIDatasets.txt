@@ -1,0 +1,8 @@
+source("ProcessMRIData.R")
+tdir <- "/data3/jramirez/MRIData/temporals"
+bdir <- "/mnt/GIS-HD710/MRI_data/MRI_outputs"
+odir <- "/data3/jramirez/MRIData/finishedGrids"
+
+otp <- procMRIData(bdir, tdir, odir, "SP0A")
+otp <- procMRIData(bdir, tdir, odir, "SF0A")
+otp <- procMRIData(bdir, tdir, odir, "SN0A")
