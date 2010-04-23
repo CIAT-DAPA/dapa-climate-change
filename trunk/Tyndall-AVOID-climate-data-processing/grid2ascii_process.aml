@@ -1,5 +1,5 @@
-&args rootdir scenario
-&if [null %scenario%] or [null %rootdir%] &then &return Use scenario and/or root_folder argument
+&args rootdir /*scenario
+&if [null %rootdir%] &then &return Use scenario and/or root_folder argument
 &terminal 9999
 &sys cls
 
@@ -15,27 +15,27 @@
 	&else &if %resol% EQ 5min &then &s outdir %rootdir%\Global_5min
 	&else &s outdir %rootdir%\Global_10min
 	
-	&do year &list 2020 2050 2080
-		/*&do scenario &list A2a B2a
-			
-			&s modellist [listfile %rootdir%\Global_30s\%year%\%scenario%\* -dir]
-			&s nmodels [token %modellist% -count]
-			
-			&do md = 1 &to %nmodels%
+	&s modellist [listfile %rootdir%\Global_30s\* -dir]
+	&s nmodels [token %modellist% -count]
+	
+	&do md = 1 &to %nmodels%
+	
+		&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
 				
-				&s modname [extract %md% %modellist%]
+				&s modellist [listfile %rootdir%\Global_30s\%year%\%scenario%\* -dir]
+				&s nmodels [token %modellist% -count]
+					
 				&ty
-				&ty Model %modname% (%scenario%, %year%, %resol%)
+				&ty Model %modname% (%year%, %resol%)
 				
-				&if not [exists %outdir%\%modname%_%year%_%scenario%_done.txt -file] &then
+				&if not [exists %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt -file] &then
 					&do
-						&if [exists %outdir%\%year%\%scenario%\%modname%\_asciis -dir] &then &sys del %outdir%\%year%\%scenario%\%modname%\_asciis\*.zip
-						&r grid2ascii_GCM.aml %outdir%\%year%\%scenario%\%modname% YES
-						&s verfile [listfile %outdir%\%year%\%scenario%\%modname%\_asciis\*.zip -file %outdir%\%modname%_%year%_%scenario%_done.txt]
+						&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*.zip
+						&r grid2ascii_GCM.aml %outdir%\%modname%\%year% YES
+						&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt]
 					&end
-				
-			&end
+					
+		&end
 			
-		/*&end
 	&end
 &end

@@ -1,0 +1,32 @@
+&s indir G:\Tyndall_data\A1B\30yrAverages\Global_30s
+
+&s scenario A1B
+
+&s openfile [open %indir%\describeAll.txt openstat -write]
+
+&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
+	&do model &list cccma_cgcm31 csiro_mk30 ipsl_cm4 mpi_echam5 ncar_ccsm30 ukmo_hadcm3 ukmo_hadgem1
+		
+		&ty %model% %year%
+		
+		&do i = 1 &to 19
+			&describe %indir%\%model%\%year%\bio_%i%
+			&s writefile [write bio_%i% %GRD$MEAN%'	'%GRD$STDV]
+		&end
+		
+		&do i = 1 &to 12
+			&describe %indir%\%model%\%year%\tmin_%i%
+			&s writefile [write tmin_%i% %GRD$MEAN%'	'%GRD$STDV]
+			
+			&describe %indir%\%model%\%year%\tmax_%i%
+			&s writefile [write tmax_%i% %GRD$MEAN%'	'%GRD$STDV]
+			
+			&describe %indir%\%model%\%year%\tmean_%i%
+			&s writefile [write tmean_%i% %GRD$MEAN%'	'%GRD$STDV]
+			
+			&describe %indir%\%model%\%year%\prec_%i%
+			&s writefile [write prec_%i% %GRD$MEAN%'	'%GRD$STDV]
+		&end
+		
+	&end
+&end
