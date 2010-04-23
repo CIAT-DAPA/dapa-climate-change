@@ -1,0 +1,50 @@
+&args inputdir wcldir anomdir variable month
+&terminal 9999
+&if [show program] EQ GRID &then QUIT
+&sys cls
+
+&if [null %inputdir%] or [null %wcldir%] or [null %anomdir%] or [null %variable%] or [null %month%] &then
+	&do
+		&ty
+		&ty Incorrect syntax, please do try:
+		&ty '&r inputdir wcldir anomdir variable month'
+		&ty
+		&return
+	&end
+
+&ty
+&ty Calculating missing grid from anomalies
+
+&ty
+&ty -----------------------------
+&ty GRIDNAME: %variable%_%month%
+&ty LOCATION: %inputdir%
+&ty ----------------------------- 
+
+&if not [exists %wcldir%\%variable%_%month% -grid] &then
+	&do
+		&ty
+		&ty The current climate data file does not exist... exiting
+		&ty %wcldir%\%variable%_%month%
+		&ty
+		&return
+	&end
+
+&if not [exists %anomdir%\%variable%_%month% -grid] &then
+	&do
+		&ty
+		&ty The current climate data file does not exist... exiting
+		&ty %anomdir%\%variable%_%month%
+		&ty
+		&return
+	&end
+
+&if [exists %inputdir%\%variable%_%month% -grid] &then kill %inputdir%\%variable%_%month% all
+
+%tmin_m%%i% = int(floor((%tmin_c%%i% + %dtn%%i% * 0.1) + 0.5))
+
+%tmax_m%%i% = int(floor((%tmax_c%%i% + %dtx%%i% * 0.1) + 0.5))
+
+%prec_m%%i% = int(floor((%prec_c%%i% * abs(1 + ((%dpr%%i% * 0.01) / (%prec_c%%i% + 1)))) + 0.5))
+
+%tmean_m%%i% = int(floor(((%tmin_m%%i% + %tmax_m%%i%) * 0.5 ) + 0.5))

@@ -1,4 +1,5 @@
 &s indir S:\ClimateData\GCM_data\Global_30s
+&s indir2 Z:\Tyndall_data\A1b\myr_wcl
 &s outdir G:\Tyndall_data\A1B\30yrAverages\Global_30s
 
 &s scenario A1B
@@ -8,9 +9,32 @@
 		
 		&ty %model% %year%
 		
-		copy %indir%\%year%\%scenario%\%model%\prec_10 %outdir%\%model%\%year%s\prec_10
-		copy %indir%\%year%\%scenario%\%model%\prec_11 %outdir%\%model%\%year%s\prec_11
-		copy %indir%\%year%\%scenario%\%model%\prec_12 %outdir%\%model%\%year%s\prec_12
+		&if not [exists %indir%\%year%\%scenario%\%model%\prec_10 -grid] &then
+			&do
+				&if not [exists %outdir%\%model%\%year%s\prec_10 -grid] &then copy %indir2%\%model%\%year%s\prec_10 %outdir%\%model%\%year%s\prec_10
+			&end
+		&else
+			&do
+				&if not [exists %outdir%\%model%\%year%s\prec_10 -grid] &then copy %indir%\%year%\%scenario%\%model%\prec_10 %outdir%\%model%\%year%s\prec_10
+			&end
+		
+		&if not [exists %indir%\%year%\%scenario%\%model%\prec_11 -grid] &then
+			&do
+				&if not [exists %outdir%\%model%\%year%s\prec_11 -grid] &then copy %indir2%\%model%\%year%s\prec_11 %outdir%\%model%\%year%s\prec_11
+			&end
+		&else
+			&do
+				&if not [exists %outdir%\%model%\%year%s\prec_11 -grid] &then copy %indir%\%year%\%scenario%\%model%\prec_11 %outdir%\%model%\%year%s\prec_11
+			&end
+		
+		&if not [exists %indir%\%year%\%scenario%\%model%\prec_12 -grid] &then
+			&do
+				&if not [exists %outdir%\%model%\%year%s\prec_12 -grid] &then copy %indir2%\%model%\%year%s\prec_12 %outdir%\%model%\%year%s\prec_12
+			&end
+		&else
+			&do
+				&if not [exists %outdir%\%model%\%year%s\prec_12 -grid] &then copy %indir%\%year%\%scenario%\%model%\prec_12 %outdir%\%model%\%year%s\prec_12
+			&end
 		
 	&end
 &end

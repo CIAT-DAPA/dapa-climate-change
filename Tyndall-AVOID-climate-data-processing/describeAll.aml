@@ -10,22 +10,24 @@
 		&ty %model% %year%
 		
 		&do i = 1 &to 19
+			&ty bio%i%
 			&describe %indir%\%model%\%year%\bio_%i%
-			&s writefile [write bio_%i% %GRD$MEAN%'	'%GRD$STDV]
+			&s writefile [write %openfile% bio_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 		&end
 		
 		&do i = 1 &to 12
+			&ty month%i%
 			&describe %indir%\%model%\%year%\tmin_%i%
-			&s writefile [write tmin_%i% %GRD$MEAN%'	'%GRD$STDV]
+			&s writefile [write %openfile% tmin_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 			
 			&describe %indir%\%model%\%year%\tmax_%i%
-			&s writefile [write tmax_%i% %GRD$MEAN%'	'%GRD$STDV]
+			&s writefile [write %openfile% tmax_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 			
 			&describe %indir%\%model%\%year%\tmean_%i%
-			&s writefile [write tmean_%i% %GRD$MEAN%'	'%GRD$STDV]
+			&s writefile [write %openfile% tmean_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 			
 			&describe %indir%\%model%\%year%\prec_%i%
-			&s writefile [write prec_%i% %GRD$MEAN%'	'%GRD$STDV]
+			&s writefile [write %openfile% prec_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 		&end
 		
 	&end
