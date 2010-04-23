@@ -1,0 +1,73 @@
+&args inputfolder
+&terminal 9999
+/*&sys cls
+&messages &off
+
+&if [null %inputfolder%] &then
+	&do
+		&sys cls
+		&ty
+		&ty Incorrect command syntax
+		&ty
+		&ty Run the command as: '&RUN INPUT_FOLDER'
+		&ty
+		&ty INPUT_FOLDER:   Folder where your grids are located
+		&ty
+		&ty Note:           your compressed grids will be created in
+		&ty                 a folder named _asciis inside your input
+		&ty                 folder.
+		&ty
+		&return
+	&end
+
+&amlpath .
+&s basedir [show &amlpath]
+
+&s outputfolder %inputfolder%\_asciis
+&if not [exists %outputfolder% -dir] &then &sys md %outputfolder%
+  
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+  
+&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
+&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
+  
+&if %OPENSTATUS% NE 0 &then
+	&do
+		&ty
+		&ty The file %basedir%\listgrids.list does not exist or cannot be opened
+		&return
+	&end
+&else
+	&do
+		&do i = 1 &to %gridlist%
+			&s gridname [READ %openlist% READSTATUS]
+			
+			&s vartype [before %gridname% _]
+			
+			&ty
+			&ty   -> .Processing %gridname%
+			
+			&if not [exists %outputfolder%\%vartype% -dir] &then &sys md %outputfolder%\%vartype%
+			&if [exists %outputfolder%\%vartype%\%gridname% -grid] &then &ty Grid %gridname% exists
+			&else COPY %inputfolder%\%gridname% %outputfolder%\%vartype%\%gridname%
+			
+		&end
+		
+		&do vartype &list bio cons prec tmax tmean tmin
+			&ty   -> .Compressing %vartype%s
+		
+			&sys 7za a -tzip %outputfolder%\%vartype%_grd.zip %outputfolder%\%vartype%
+			&s delstat [DELETE %outputfolder%\%vartype% -DIR]
+		&end
+		
+	&end
+&s closefile [close %openlist%]
+&if [show program] EQ GRID &then QUIT
+
+&if [exists %outputfolder%\listgrids.list -file] &then &sys del %outputfolder%\listgrids.list
+&if [exists %basedir%\log -file] &then &sys del %basedir%\log
+&ty
+
+&ty Process done!
