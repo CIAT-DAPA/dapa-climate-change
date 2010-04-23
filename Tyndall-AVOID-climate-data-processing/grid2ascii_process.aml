@@ -1,5 +1,5 @@
 &args rootdir /*scenario
-&if [null %rootdir%] &then &return Use scenario and/or root_folder argument
+&if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
 &sys cls
 
@@ -22,9 +22,6 @@
 	
 		&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
 				
-				&s modellist [listfile %rootdir%\Global_30s\%year%\%scenario%\* -dir]
-				&s nmodels [token %modellist% -count]
-					
 				&ty
 				&ty Model %modname% (%year%, %resol%)
 				
