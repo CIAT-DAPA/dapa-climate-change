@@ -1,25 +1,41 @@
-&args inputdir wcldir anomdir variable month
+&args inputdir wcldir anomdir variable month procedure resol
 &terminal 9999
 &if [show program] EQ GRID &then QUIT
 &sys cls
 
-&if [null %inputdir%] or [null %wcldir%] or [null %anomdir%] or [null %variable%] or [null %month%] &then
+&if [null %inputdir%] or [null %wcldir%] or [null %anomdir%] or [null %variable%] or [null %month%] or [null %procedure%] or [null %resol%] &then
 	&do
 		&ty
 		&ty Incorrect syntax, please do try:
-		&ty '&r inputdir wcldir anomdir variable month'
+		&ty '&r fixMissedGrid.aml inputdir wcldir anomdir variable month procedure resolution'
+		&ty
+		&ty Procedure can be INTERPOLATION, FUTURE, RESAMPLE, ZIPGRID, ASCIIZIP
+		&ty
+		&ty When procedure is INTERPOLATION you need to specify a valid
+		&ty path to ANOMDIR, otherwise not.
+		&ty
+		&ty When procedure is RESAMPLE you need to specify the target
+		&ty resolution
+		&ty
+		&ty When procedure is ZIPGRID you dont need to specify
+		&ty the month (put # or whatever symbol you want)
 		&ty
 		&return
 	&end
 
 &ty
-&ty Calculating missing grid from anomalies
+&ty Calculating missing grid
 
 &ty
 &ty -----------------------------
 &ty GRIDNAME: %variable%_%month%
 &ty LOCATION: %inputdir%
 &ty ----------------------------- 
+
+&if [locase %procedure%] eq 'interpolation' &then
+	&do
+		&ty Fixing interpolation
+	&end
 
 &if not [exists %wcldir%\%variable%_%month% -grid] &then
 	&do
