@@ -1,0 +1,65 @@
+&args mask model baseout iniyear finyear
+&terminal 9999
+&sys cls
+&messages &off
+
+&if [null %mask%] OR [null %model%] OR [null %baseout%] OR [null %iniyear%] OR [null %finyear%] &then &return
+
+&if [show program] NE GRID &then GRID
+&amlpath .
+&s homedir [show &amlpath]
+
+&s basedir F:\Tyndall_data\A1b
+&s input_dir %basedir%\yearly_grids\%model%
+
+/*&s iniyear 2006
+/*&s finyear 2100
+
+&s outdir %baseout%\_extract
+&if not [exists %outdir% -dir] &then &sys md %outdir%
+
+&s createfile [OPEN %outdir%\%model%_%iniyear%_%finyear%.txt OPENSTATUS -WRITE]
+&s writerow [WRITE %createfile% YEAR'	'MONTH'	'VARIABLE'	'MEAN'	'STD'	'MAX'	'MIN]
+
+&do yr = %iniyear% &to %finyear%
+	&call logoff
+	&if [exists log -file] &then &sys del log
+	&ty
+	&ty .Processing year %yr%
+	
+	&do mth = 1 &to 12
+		
+		&ty   ->.Month %mth%
+		
+		&do variable &list tmp pre /*dtr
+			
+			SETWINDOW %mask% %mask%
+			SETMASK %mask%
+			SETCELL %mask%
+			
+			&ty     ->.Variable %variable%
+		
+			&if [exists %outdir%\tempgrid -grid] &then kill %outdir%\tempgrid all
+			%outdir%\tempgrid = %input_dir%\%yr%\%variable%_%mth%
+			
+			&describe %outdir%\tempgrid
+			
+			&s writerow [WRITE %createfile% %yr%'	'%mth%'	'%variable%'	'%GRD$MEAN%'	'%GRD$STDV%'	'%GRD$ZMAX%'	'%GRD$ZMIN%]
+			&if [exists %outdir%\tempgrid -grid] &then kill %outdir%\tempgrid all
+			
+		&end
+	&end
+&end
+
+&s closefile [CLOSE %createfile%]
+&if [show program] EQ GRID &then QUIT
+&sys del log
+&ty
+&ty Done!
+&return
+/* ----------------------------------------
+&routine logoff
+	&if [show program] EQ GRID &then QUIT
+	&if [exists log -file] &then &s delstat [DELETE log -file]
+	&if [show program] NE GRID &then GRID
+&return
