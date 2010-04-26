@@ -40,7 +40,9 @@
 &ty
 &ty Processing model %modname%
 
-&do ts &list 2010_2039 /*2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 /*2070_2099
+	
+	&if [show program] NE GRID &then GRID
 	
 	&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
 	arc w %tmpdir%
@@ -92,6 +94,8 @@
 			
 			&r consMthsCalc_v3.aml %tmpdir% %rootdir% 100
 			
+			&ty
+			&ty Now copying...
 			&s copystat [COPY %tmpdir% %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
 			&if %copystat% EQ 0 &then 
 				&do
@@ -108,6 +112,8 @@
 		&end
 	&else
 		&do
+			&ty
 			&ty This model (%modname%) and timeslice (%ts%) is already processed, trying the next one...
+			&ty
 		&end
 &end
