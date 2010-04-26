@@ -1,0 +1,35 @@
+/*This will prepare everything to run disaggregation methods, you will first need to connect the scripts folder and run this AML from
+/*the IPCC-CMIP3 folder
+
+&s climates_driveletter P:
+
+&ty
+&ty Connecting network paths
+/*&sys NET USE %scripts_driveletter% \\192.168.6.79\_scripts resetpass /USER:SIG-NT\jramirez /PERSISTENT:YES
+&sys NET USE %climates_driveletter% \\192.168.7.16\geodata disco666 /USER:jramirez /PERSISTENT:YES
+
+&ty
+&ty Creating local paths...
+&ty
+&ty localunit [response 'Type the letter of a local unit with enough space to store temporal data (~20GB). (example G:)']
+&ty
+
+&if not [exists %localunit%\Workspace -DIR] &then &sys md %localunit%\Workspace
+&if not [exists %localunit%\Workspace\processingTasks -DIR] &then &sys md %localunit%\Workspace\processingTasks
+&if not [exists %localunit%\Workspace\processingTasks\temporals -DIR] &then &sys md %localunit%\Workspace\processingTasks\temporals
+
+&ty
+&ty Copying input base datasets
+&ty
+
+&s copystat [copy %climates_driveletter%\climate_change\masks %localunit%\Workspace\processingTasks\masks -directory]
+&s copystat [copy %climates_driveletter%\climate_change\baseInfo\WCL30S2.zip %localunit%\Workspace\processingTasks\WCL30S2.zip -file]
+
+&ty
+&ty Uncompressing WCL datasets
+&ty
+
+&sys 7za e %localunit%\Workspace\processingTasks\WCL30S2.zip
+
+&ty
+&ty Configuration done!!!
