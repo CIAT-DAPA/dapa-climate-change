@@ -95,6 +95,7 @@ Priority 2: Disaggregation method on 30s data being done by Emmanuel for selecte
 	-SRES-B1
 
 ...Being processed by Emmanuel via Arc/Info and on his local machine
+...Script already done
 
 Priority 3: Standard delta method to get 30s data for selected timeslices as for Tyndall (2020, 2030, 2040, 2050, 2060, 2070, 2080):
 	-SRES-A1B

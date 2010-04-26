@@ -119,7 +119,6 @@ cons_mths = con(cons_mths_t == 23, 12, cons_mths_t)
 	&if [exists cons%i% -grid] &then kill cons%i% all
 &end
 
-&messages &on
 &ty MAXIMUM CONSECUTIVE DRY MONTHS DONE!!!
 &ty
 
