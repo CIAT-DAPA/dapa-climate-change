@@ -1,6 +1,9 @@
 /*This will prepare everything to run disaggregation methods, you will first need to connect the scripts folder and run this AML from
 /*the IPCC-CMIP3 folder
 
+&amlpath .
+&s basedir [show &amlpath]
+
 &s climates_driveletter P:
 
 &ty
@@ -11,7 +14,7 @@
 &ty
 &ty Creating local paths...
 &ty
-&ty localunit [response 'Type the letter of a local unit with enough space to store temporal data (~20GB). (example G:)']
+&s localunit [response 'Type the letter of a local unit with enough space to store temporal data (~20GB). (example G:)']
 &ty
 
 &if not [exists %localunit%\Workspace -DIR] &then &sys md %localunit%\Workspace
@@ -29,7 +32,10 @@
 &ty Uncompressing WCL datasets
 &ty
 
-&sys 7za e %localunit%\Workspace\processingTasks\WCL30S2.zip
+w %localunit%\Workspace\processingTasks
+&sys 7za e WCL30S2.zip
+
+w %basedir%
 
 &ty
 &ty Configuration done!!!
