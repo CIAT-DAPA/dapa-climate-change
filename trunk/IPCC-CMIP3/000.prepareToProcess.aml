@@ -26,14 +26,14 @@
 &ty
 
 &s copystat [copy %climates_driveletter%\climate_change\masks %localunit%\Workspace\processingTasks\masks -directory]
-&s copystat [copy %climates_driveletter%\climate_change\baseInfo\WCL30S2.zip %localunit%\Workspace\processingTasks\WCL30S2.zip -file]
+&s copystat [copy %climates_driveletter%\climate_change\baseInfo\WCL30S.zip %localunit%\Workspace\processingTasks\WCL30S.zip -file]
 
 &ty
 &ty Uncompressing WCL datasets
 &ty
 
 w %localunit%\Workspace\processingTasks
-&sys 7za e WCL30S2.zip
+&sys 7za e WCL30S.zip
 
 w %basedir%
 
