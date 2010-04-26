@@ -1,10 +1,11 @@
 /*This will prepare everything to run disaggregation methods, you will first need to connect the scripts folder and run this AML from
 /*the IPCC-CMIP3 folder
 
+&args climates_driveletter
 &amlpath .
 &s basedir [show &amlpath]
 
-&s climates_driveletter P:
+&if [null %climates_driveletter%] &then &return The climates_driveletter argument was not properly defined
 
 &ty
 &ty Connecting network paths
@@ -33,7 +34,7 @@
 &ty
 
 w %localunit%\Workspace\processingTasks
-&sys 7za e WCL30S.zip
+&sys 7za x WCL30S.zip
 
 w %basedir%
 
