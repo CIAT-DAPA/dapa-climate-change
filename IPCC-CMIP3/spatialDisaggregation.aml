@@ -1,0 +1,72 @@
+/* This aml calculates disaggregated future surfaces based on worldclim and GCM anomalies
+/* Written by Julián Ramírez
+/* CIAT, Cali, Colombia, April 2010
+
+&args inputdir wcldir modname outdir mask sres tmpdir
+&terminal 9999
+
+&sys cls
+&messages &off
+
+&if [null %inputdir%] OR [null %wcldir%] OR [null %modname%] OR [null %outdir%] OR [null %mask%] OR [null %sres%] OR [null %tmpdir%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax, please use
+		&ty '&r GCMDeltaMethodInterpolation.aml INPUT_DIR WCL_DIR MODEL_NAME OUTDIR MASK SRES_SCENARIO TEMPORAL_DIR'
+		&ty available timeslices are SRES SCENARIOS are SRES_A1B, SRES_A2, SRES_B1
+		&ty WCLDIR should be the path where all monthly worldclim files are stored (tmin, tmax, prec)
+		&ty MASK should be both name and path of to the mask
+		&ty INPUT_DIR should contain folders of SRES scenarios
+		&ty TEMPORAL_DIR is where all calculations will take place, then everything will be copied to OUTDIR
+		
+		&ty
+		&return
+	&end
+
+&if [show program] NE GRID &then GRID
+&amlpath .
+&s rootdir [show &amlpath]
+
+&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
+
+&if not [exists %outdir% -DIR] &then &sys md %outdir% /*same as indir
+&if not [exists %outdir%\%sres% -DIR] &then &sys md %outdir%\%sres%
+&if not [exists %outdir%\%sres%\disaggregated -DIR] &then &sys md %outdir%\%sres%\disaggregated
+&if not [exists %outdir%\%sres%\disaggregated\%modname% -DIR] &then &sys md %outdir%\%sres%\disaggregated\%modname%
+
+&ty
+&ty Processing model %modname%
+
+arc w %tmpdir%
+
+&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+	
+	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
+		&do
+			
+			&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then &sys md %outdir%\%sres%\disaggregated\%modname%\%ts%
+			
+			&do variable &list tmin tmax prec
+				&ty   ->.Processing variable %variable%
+				
+				&do month = 1 &to 12
+					&ty
+					&ty   ->.Processing month %month%
+					
+					&if not [exists %tmpdir%\%variable%_%month% -GRID] &then
+						&do
+							&if [exists %tmpdir%\%variable%_%month%a -GRID] &then kill %tmpdir%\%variable%_%month%a all
+							copy %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month% %variable%_%month%a
+							
+							%tmpdir%\%variable%_%month% = 
+						&end
+					
+					
+				&end
+			&end
+		&end
+	&else
+		&do
+			&ty This model (%modname%) and timeslice (%ts%) is already processed, trying the next one...
+		&end
+&end
