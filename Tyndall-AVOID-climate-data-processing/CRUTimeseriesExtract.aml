@@ -1,13 +1,15 @@
-&args mask baseout iniyear finyear
+&args maskpath maskname baseout iniyear finyear
 &terminal 9999
 &sys cls
 &messages &off
 
-&if [null %mask%] OR [null %baseout%] OR [null %iniyear%] OR [null %finyear%] &then &return
+&if [null %maskpath%] OR [null %maskname%] OR [null %baseout%] OR [null %iniyear%] OR [null %finyear%] &then &return
 
 &if [show program] NE GRID &then GRID
 &amlpath .
 &s homedir [show &amlpath]
+
+&s mask %maskpath%\%maskname%
 
 &s basedir Z:\Tyndall_data\20CM3
 &s input_dir %basedir%\yearly_grids
@@ -18,7 +20,7 @@
 &s outdir %baseout%\_extract
 &if not [exists %outdir% -dir] &then &sys md %outdir%
 
-&s createfile [OPEN %outdir%\20cm3_%iniyear%_%finyear%.txt OPENSTATUS -WRITE]
+&s createfile [OPEN %outdir%\20cm3_%maskname%_%iniyear%_%finyear%.txt OPENSTATUS -WRITE]
 &s writerow [WRITE %createfile% YEAR'	'MONTH'	'VARIABLE'	'MEAN'	'STD'	'MAX'	'MIN]
 
 &do yr = %iniyear% &to %finyear%
