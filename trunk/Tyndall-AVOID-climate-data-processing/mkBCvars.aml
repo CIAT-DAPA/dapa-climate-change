@@ -77,7 +77,7 @@
 &s program [locase [show program]]
 &if %program% ^= grid &then grid
 
-/*&amlpath .
+&amlpath .
 &s basedir [show &amlpath]
 
 arc w %folder%
