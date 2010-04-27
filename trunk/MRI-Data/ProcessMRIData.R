@@ -6,9 +6,9 @@ require(raster)
 
 cat("Available periods are SP0A, SF0A, and SN0A \n")
 cat("\n")
-cat("Run as procMRIData(baseDir, tmpDir, outDir, period)\n")
+cat("Run as procMRIData(baseDir, tmpDir, outDir, externalDir, period)\n")
 
-procMRIData <- function(baseDir, tmpDir, outDir, period) {
+procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 	
 	periodPath <- paste(baseDir, "/", period, sep="")
 	if (!file.exists(periodPath)) {
@@ -27,6 +27,12 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 		dir.create(outPeriodDir, recursive=T)
 	}
 	
+	outExPeriodDir <- paste(externalDir, "/", period, sep="")
+	
+	if (!file.exists(outExPeriodDir)) {
+		dir.create(outExPeriodDir, recursive=T)
+	}
+	
 	#Listing folders in the input folder
 	
 	dateList <- list.files(periodPath, pattern="OUT_")
@@ -37,7 +43,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 	for (doy in dateList) {
 		dte <- strsplit(doy, "_")[[1]][2]
 		
-		verFile <- paste(outPeriodDir, "/", doy, "/done.txt", sep="")
+		verFile <- paste(outExPeriodDir, "/", doy, "/done.txt", sep="")
 		if (file.exists(verFile)) {
 			cat("Date", dte, "done! \n")
 		} else {
@@ -48,6 +54,8 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 			if (!file.exists(outDateDir)) {
 				dir.create(outDateDir, recursive=T)
 			}
+			
+			outExDateDir <- paste(outExPeriodDir, "/", doy, sep="")
 			
 			year <- substr(dte, 1, 4)
 			month <- substr(dte, 5, 6)
@@ -137,6 +145,8 @@ procMRIData <- function(baseDir, tmpDir, outDir, period) {
 					cat("The file", gzFileName, "already exists \n")
 				}
 			}
+			
+			system(paste("mv", "-v", outDateDir, outExDateDir))
 			
 			con <- file(verFile, "w")
 			textToWrite <- paste("These files were processed on", date())
