@@ -39,7 +39,11 @@
 				&do
 					&r consMthsCalc_v3.aml %rootdir%\Global_30s\%modname%\%year% 100
 				&end
-			&r resample_GCM.aml %rootdir%\Global_30s\%modname%\%year% %outmodyeardir% %resol% NEAREST
+			
+			&if not [exists %outdir%\%modname%\moddone_%year%.txt -FILE] &then
+				&do
+					&r resample_GCM.aml %rootdir%\Global_30s\%modname%\%year% %outmodyeardir% %resol% NEAREST
+				&end
 			
 			&sys dir /d /b /o %outdir%\%modname%\%year%\* > %outdir%\%modname%\moddone_%year%.txt
 		&end
