@@ -1,4 +1,12 @@
-&s indir G:\Tyndall_data\A1B\30yrAverages\Global_30s
+&args indir
+&terminal 9999
+
+&severity &error &ignore
+&severity &warning &ignore
+
+&if [null %indir%] &then &return Please execute the command properly...
+
+/*&s indir G:\Tyndall_data\A1B\30yrAverages\Global_30s
 
 &s scenario A1B
 
@@ -10,13 +18,13 @@
 		&ty %model% %year%
 		
 		&do i = 1 &to 19
-			&ty bio%i%
+			&ty bio_%i%
 			&describe %indir%\%model%\%year%\bio_%i%
 			&s writefile [write %openfile% %year%'	'%model%'	'bio_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 		&end
 		
 		&do i = 1 &to 12
-			&ty month%i%
+			&ty month_%i%
 			&describe %indir%\%model%\%year%\tmin_%i%
 			&s writefile [write %openfile% %year%'	'%model%'	'tmin_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 			
@@ -32,3 +40,5 @@
 		
 	&end
 &end
+
+&s closefile [close %openfile%]
