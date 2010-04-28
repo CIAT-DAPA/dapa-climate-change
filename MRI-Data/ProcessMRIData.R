@@ -104,6 +104,14 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 				}
 				
 				gzFileName <- paste(outFile, ".gz", sep="")
+				
+				cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+				cat("FILE:", fileName,"\n")
+				cat("PREFIX:", prefix,"\n")
+				cat("VARTYPE:", outVarType,"\n")
+				cat("OUTFILE:", outFile,"\n")
+				cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+				
 				if (!file.exists(gzFileName)) {
 					
 					if (file.exists(outFile)) {
