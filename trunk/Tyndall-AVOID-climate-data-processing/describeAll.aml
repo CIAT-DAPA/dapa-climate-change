@@ -38,6 +38,9 @@
 			&s writefile [write %openfile% %year%'	'%model%'	'prec_%i%'	'%GRD$MEAN%'	'%GRD$STDV%]
 		&end
 		
+		&describe %indir%\%model%\%year%\cons_mths
+		&s writefile [write %openfile% %year%'	'%model%'	'cons_mths'	'%GRD$MEAN%'	'%GRD$STDV%]
+		
 	&end
 &end
 
