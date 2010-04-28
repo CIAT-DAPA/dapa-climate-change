@@ -61,7 +61,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 			month <- substr(dte, 5, 6)
 			day <- substr(dte, 7, 8)
 			
-			ncFileList <- list.files(inDateDir, pattern=".nc")
+			ncFileList <- c("0_sfc_max_01.nc", "1_sfc_max_01.nc", "2_sfc_max_01.nc", "0_sfc_min_01.nc", "0_sfc_avr_01.nc", "1_sfc_avr_01.nc") #list.files(inDateDir, pattern=".nc")
 			
 			for (fileName in ncFileList) {
 				
