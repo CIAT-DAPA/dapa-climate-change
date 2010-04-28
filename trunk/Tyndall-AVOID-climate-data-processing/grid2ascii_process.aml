@@ -19,7 +19,9 @@
 	&s nmodels [token %modellist% -count]
 	
 	&do md = 1 &to %nmodels%
-	
+		
+		&s modname [extract %md% %modellist%]
+		
 		&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
 				
 				&ty
