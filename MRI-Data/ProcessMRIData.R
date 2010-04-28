@@ -76,6 +76,13 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 				
 				inFile <- paste(inDateDir, "/", fileName, sep="")
 				
+				# - 0_sfc_max_day.nc: Maximum daily surface air temperature at 2m (K)
+				# - 1_sfc_max_day.nc: Maximum daily wind speed at 10m (m/s)
+				# - 2_sfc_max_day.nc: Total precipitation flux (kg/m2/s)
+				# - 0_sfc_min_day.nc: Minimum daily surface air temperature at 2m (K)
+				# - 0_sfc_avr_day.nc: Total precipitation flux (km/m2/s)
+				# - 1_sfc_avr_day.nc: Average daily surface air temperature at 2m (K)
+
 				if (prefix == "0_sfc_max_day") {
 					outVarType <- "temptr"
 					outFile <- paste(outDateDir, "/tmax_", dom, ".asc", sep="")
@@ -91,7 +98,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 				} else if (prefix == "0_sfc_avr_day") {
 					outVarType <- "precip"
 					outFile <- paste(outDateDir, "/prec_", dom, ".asc", sep="")
-				} else if (prefix == "0_sfc_avr_day") {
+				} else if (prefix == "1_sfc_avr_day") {
 					outVarType <- "temptr"
 					outFile <- paste(outDateDir, "/tmean_", dom, ".asc", sep="")
 				}
