@@ -57,7 +57,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 			
 			outExDateDir <- paste(outExPeriodDir, "/", doy, sep="")
 			if (!file.exists(outExDateDir)) {
-				dir.create(outExDateDir, recursive=T)
+				dir.create(outExDateDir, recursive=T, mode="0777")
 			}
 			
 			year <- substr(dte, 1, 4)
