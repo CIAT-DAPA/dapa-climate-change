@@ -146,7 +146,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 				}
 			}
 			
-			system(paste("mv", "-v", outDateDir, outExPeriodDir))
+			system(paste("cp", "-Rv", outDateDir, paste(outExPeriodDir, "/.", sep="")))
 			
 			con <- file(verFile, "w")
 			textToWrite <- paste("These files were processed on", date())
