@@ -65,7 +65,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 			
 			for (fileName in ncFileList) {
 				
-				fileNoExt <- strsplit(fileName, ".n")[[1]][1]
+				fileNoExt <- strsplit(fileName, ".nc")[[1]][1]
 				
 				prefix <- substr(fileNoExt, 1, 13)
 				dom <- substr(fileNoExt, 15, 16)
