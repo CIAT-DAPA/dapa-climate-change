@@ -56,6 +56,9 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 			}
 			
 			outExDateDir <- paste(outExPeriodDir, "/", doy, sep="")
+			if (!file.exists(outExDateDir)) {
+				dir.create(outExDateDir, recursive=T)
+			}
 			
 			year <- substr(dte, 1, 4)
 			month <- substr(dte, 5, 6)
@@ -146,7 +149,7 @@ procMRIData <- function(baseDir, tmpDir, outDir, externalDir, period) {
 				}
 			}
 			
-			system(paste("cp", "-Rpv", outDateDir, paste(outExPeriodDir, "/.", sep="")))
+			system(paste("cp", "-pv", paste(outDateDir, "/*.gz", sep=""), paste(outExDateDir, "/.", sep="")))
 			
 			con <- file(verFile, "w")
 			textToWrite <- paste("These files were processed on", date())
