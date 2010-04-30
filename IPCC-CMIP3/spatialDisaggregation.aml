@@ -40,7 +40,7 @@
 &ty
 &ty Processing model %modname%
 
-&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 /*2070_2099
+&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
 	
 	&if [show program] NE GRID &then GRID
 	
