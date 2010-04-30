@@ -31,9 +31,9 @@ op <- averageClimates(30, 2065, idr, odr, "A1B_A30r2h") -done
 op <- averageClimates(30, 2075, idr, odr, "A1B_A30r2h") -done
 
 op <- averageClimates(30, 2035, idr, odr, "A1B_A30r5l") -done
-op <- averageClimates(30, 2045, idr, odr, "A1B_A30r5l") -proc
-op <- averageClimates(30, 2065, idr, odr, "A1B_A30r5l") -proc
-op <- averageClimates(30, 2075, idr, odr, "A1B_A30r5l") -proc
+op <- averageClimates(30, 2045, idr, odr, "A1B_A30r5l") -done
+op <- averageClimates(30, 2065, idr, odr, "A1B_A30r5l") -done
+op <- averageClimates(30, 2075, idr, odr, "A1B_A30r5l") -done
 
 
 source("monthlyBaseVariables.R")
@@ -44,5 +44,5 @@ op <- monthlyCalc(idr, odr, "A1Bp50") -proc
 op <- monthlyCalc(idr, odr, "A1B_A16r2h") -proc
 op <- monthlyCalc(idr, odr, "A1B_A16r4l") -proc
 op <- monthlyCalc(idr, odr, "A1B_A16r5l") -proc
-op <- monthlyCalc(idr, odr, "A1B_A30r2h")
-op <- monthlyCalc(idr, odr, "A1B_A30r5l")
+op <- monthlyCalc(idr, odr, "A1B_A30r2h") -proc
+op <- monthlyCalc(idr, odr, "A1B_A30r5l") -proc

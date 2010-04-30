@@ -44,6 +44,8 @@ monthlyCalc <- function(inputAVOIDScen, outptAVOIDScen, scen) {
 		  for (GCM in gcmList) {
 			
 			cat("Model", GCM, "\n")
+			cat("Period", period, "\n")
+			cat("Scenario", scen, "\n")
 			
 			inGCMFolder <- paste(inFolder, "//", period, "//", GCM, sep="")
 			outFolder <- paste(outptAVOIDScen, "//", scen, "//", period, "//", GCM, sep="")
