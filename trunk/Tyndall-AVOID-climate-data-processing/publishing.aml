@@ -1,0 +1,50 @@
+&args rootdir outdir scenario type
+&if [null %scenario%] or [null %outdir%] or [null %rootdir%] or [null %type%] &then &return Use scenario and/or root_folder argument
+&terminal 9999
+&sys cls
+
+/*&s rootdir I:\Climate_data\GCM_data
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&do resol &list 2_5min 5min 10min /*30s
+	
+	&if %resol% EQ 2_5min &then &s indir %rootdir%\Global_2_5min
+	&else &if %resol% EQ 5min &then &s indir %rootdir%\Global_5min
+	&else &if %resol% EQ 30s &then &s indir %rootdir%\Global_30s
+	&else &s indir %rootdir%\Global_10min
+	
+	&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
+		&s modellist [listfile %indir%\* -dir]
+		&s nmodels [token %modellist% -count]
+		
+		&if not [exists %outdir%\%scenario%_%year% -dir] &then &sys md %outdir%\%scenario%_%year%
+		
+		&do md = 1 &to %nmodels%
+			
+			&s modname [extract %md% %modellist%]
+			&ty
+			&ty Model %modname% (%scenario%, %year%, %resol%)
+			&ty Publishing all the stuff
+			
+			&if not [exists %outdir%\%scenario%_%year%\%modname% -dir] &then &sys md %outdir%\%scenario%_%year%\%modname%
+			
+			&s delstsat [DELETE %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_bio_%resol%_%type%.zip -file]
+			&if not [exists %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_bio_%resol%_%type%.zip -file] &then &sys copy %indir%\%modname%\%year%\_asciis\bio_%type%.zip %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_bio_%resol%_%type%.zip
+			
+			&s delstat [DELETE %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_prec_%resol%_%type%.zip -file]
+			&if not [exists %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_prec_%resol%_%type%.zip -file] &then &sys copy %indir%\%modname%\%year%\_asciis\prec_%type%.zip %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_prec_%resol%_%type%.zip
+			
+			&s delstat [DELETE %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmean_%resol%_%type%.zip -file]
+			&if not [exists %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmean_%resol%_%type%.zip -file] &then &sys copy %indir%\%modname%\%year%\_asciis\tmean_%type%.zip %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmean_%resol%_%type%.zip
+			
+			&s delstat [DELETE %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmin_%resol%_%type%.zip -file]
+			&if not [exists %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmin_%resol%_%type%.zip -file] &then &sys copy %indir%\%modname%\%year%\_asciis\tmin_%type%.zip %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmin_%resol%_%type%.zip
+			
+			&s delstat [DELETE %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmax_%resol%_%type%.zip -file]
+			&if not [exists %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmax_%resol%_%type%.zip -file] &then &sys copy %indir%\%modname%\%year%\_asciis\tmax_%type%.zip %outdir%\%scenario%_%year%\%modname%\%modname%_%scenario%_%year%_tmax_%resol%_%type%.zip
+			
+		&end
+	&end
+&end
