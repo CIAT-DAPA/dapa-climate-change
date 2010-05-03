@@ -3,49 +3,49 @@ AVOID datasets + SRES-A1B
 
 Priority 1: Multi year monthly data and bioclimatics (AAIGrid format) at 0.5 degree resolution for 30yr running means: 
 	-2010-2039 (2020)
-		-A1Bp50: OK!, stored on STMARIA			
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
 		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A30r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A30r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 	-2020-2049 (2030)
-		-A1Bp50: OK!, stored on STMARIA
-		-A1B_A16r2h: OK!, stored on STMARIA
-		-A1B_A16r4l: OK!, stored on STMARIA
-		-A1B_A16r5l: OK!, stored on STMARIA
-		-A1B_A30r2h: OK!, stored on STMARIA
-		-A1B_A30r5l: OK!, stored on STMARIA
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
+		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 	-2030-2059 (2040)
-		-A1Bp50: OK!, stored on STMARIA
-		-A1B_A16r2h: OK!, stored on STMARIA
-		-A1B_A16r4l: OK!, stored on STMARIA
-		-A1B_A16r5l: OK!, stored on STMARIA
-		-A1B_A30r2h: OK!, stored on STMARIA
-		-A1B_A30r5l: OK!, stored on STMARIA
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
+		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 	-2040-2069 (2050)
-		-A1Bp50: OK!, stored on STMARIA
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
 		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A30r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A30r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 	-2050-2079 (2060)
-		-A1Bp50: OK!, stored on STMARIA
-		-A1B_A16r2h: OK!, stored on STMARIA
-		-A1B_A16r4l: OK!, stored on STMARIA
-		-A1B_A16r5l: OK!, stored on STMARIA
-		-A1B_A30r2h: OK!, stored on STMARIA
-		-A1B_A30r5l: OK!, stored on STMARIA
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
+		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 	-2060-2089 (2070)
-		-A1Bp50: OK!, stored on STMARIA
-		-A1B_A16r2h: OK!, stored on STMARIA
-		-A1B_A16r4l: OK!, stored on STMARIA
-		-A1B_A16r5l: OK!, stored on STMARIA
-		-A1B_A30r2h: OK!, stored on STMARIA
-		-A1B_A30r5l: OK!, stored on STMARIA
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
+		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
+		-A1B_A30r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
 	-2070-2099 (2080)
-		-A1Bp50: OK!, stored on STMARIA
+		-A1Bp50: OK!, stored on STMARIA			OK!, stored on STMARIA
 		-A1B_A16r2h: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A16r4l: OK!, stored on STMARIA		OK!, stored on STMARIA
 		-A1B_A16r5l: OK!, stored on STMARIA		OK!, stored on STMARIA
@@ -55,6 +55,7 @@ Priority 1: Multi year monthly data and bioclimatics (AAIGrid format) at 0.5 deg
 ...This to be done on STMARIA via R
 ...Being currently processed on STMARIA via R
 ...Create an script to describe all these grids and verify them
+...Creating the script
 
 Priority 2: Yearly monthly and bioclimatics (AAIGrid format) at 0.5 degree resolution
 	-20C3M

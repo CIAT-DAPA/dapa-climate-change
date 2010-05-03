@@ -40,9 +40,9 @@ source("monthlyBaseVariables.R")
 idr <- "E:/AVOID_scenarios/output"
 odr <- "E:/AVOID_scenarios/outputBio"
 
-op <- monthlyCalc(idr, odr, "A1Bp50") -proc
-op <- monthlyCalc(idr, odr, "A1B_A16r2h") -proc
-op <- monthlyCalc(idr, odr, "A1B_A16r4l") -proc
-op <- monthlyCalc(idr, odr, "A1B_A16r5l") -proc
-op <- monthlyCalc(idr, odr, "A1B_A30r2h") -proc
-op <- monthlyCalc(idr, odr, "A1B_A30r5l") -proc
+op <- monthlyCalc(idr, odr, "A1Bp50") -done
+op <- monthlyCalc(idr, odr, "A1B_A16r2h") -done
+op <- monthlyCalc(idr, odr, "A1B_A16r4l") -done
+op <- monthlyCalc(idr, odr, "A1B_A16r5l") -done
+op <- monthlyCalc(idr, odr, "A1B_A30r2h") -done
+op <- monthlyCalc(idr, odr, "A1B_A30r5l") -done
