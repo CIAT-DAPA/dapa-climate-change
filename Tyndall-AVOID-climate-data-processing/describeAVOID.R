@@ -17,8 +17,6 @@ describeAVOID <- function(inputAVOIDScen) {
 	
 	AVOIDList <- list.files(inputAVOIDScen)
 	
-	saveCounter <- 1
-	
 	for (scen in AVOIDList) {
 		
 		outMx <- matrix(ncol=8, nrow=(7*7*67))
@@ -31,7 +29,9 @@ describeAVOID <- function(inputAVOIDScen) {
 		outMxFileName <- paste(inFolder, "//", scen, "_Rasterdescription.csv", sep="")
 		
 		periodList <- list.files(inFolder)
-	   
+		
+		saveCounter <- 1
+		
 		for (period in periodList) {
 		  
 		  gcmList <- list.files(paste(inFolder, "//", period, sep=""), pattern="_")
