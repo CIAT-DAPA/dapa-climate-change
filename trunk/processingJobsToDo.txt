@@ -1,4 +1,4 @@
-sAVOID datasets + SRES-A1B
+AVOID datasets + SRES-A1B
 ---------------------------------------------------------
 
 Priority 1: Multi year monthly data and bioclimatics (AAIGrid format) at 0.5 degree resolution for 30yr running means: 
