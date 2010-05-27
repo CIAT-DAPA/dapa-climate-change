@@ -13,9 +13,10 @@ P:STMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 ipsl_
 
 P:PINTA -&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 miroc3_2_medres W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_12
 
-&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 miub_echo_g W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_13
-&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 mpi_echam5 W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_14
-&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 mri_cgcm2_3_2a W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_15
+P:STMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 miub_echo_g X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A2 E:\IPCC_CMIP3_process\temporals\PID_13
+P:STMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 mpi_echam5 X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A2 E:\IPCC_CMIP3_process\temporals\PID_14
+P:STMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 mri_cgcm2_3_2a X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A2 E:\IPCC_CMIP3_process\temporals\PID_15
+
 &r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ncar_ccsm3_0 W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_16
 &r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ncar_pcm1 W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_17
 &r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ukmo_hadcm3 W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_18
