@@ -90,9 +90,16 @@
 			&end
 			
 			arc w %rootdir%
-			&r mkBCvars.aml %tmpdir% %rootdir%
 			
-			&r consMthsCalc_v3.aml %tmpdir% %rootdir% 100
+			&if not [exists %tmpdir%\bio_19 -grid] &then
+				&do
+					&r mkBCvars.aml %tmpdir% %rootdir%
+				&end
+			
+			&if not [exists %tmpdir%\cons_mths -grid] &then
+				&do
+					&r consMthsCalc_v3.aml %tmpdir% %rootdir% 100
+				&end
 			
 			&ty
 			&ty Now copying...
