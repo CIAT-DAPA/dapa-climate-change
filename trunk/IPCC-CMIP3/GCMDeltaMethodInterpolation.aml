@@ -122,6 +122,6 @@ arc w %tmpdir%
 	&end
 &end
 QUIT
-&sys del log
+&if [exists log -file] &then &sys del log
 w %rootdir%
-&sys del log
+&if [exists log -file] &then &sys del log
