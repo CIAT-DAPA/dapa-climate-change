@@ -1,16 +1,16 @@
-abxsq   ERA15:Reanalysis       1979 1993
-adqcm   ERA40:Reanalysis       1957 2001
-erain   ERA-Interim:Reanalysis 1989   -
-ncepb   NCEP_R2:Reanalysis     1979 2004
-addfa   HadAM3P:Baseline#1     1960 1990
-addfb   HadAM3P:Baseline#2     1960 1990
-addfc   HadAM3P:Baseline#3     1960 1990
-addja   HadAM3P:SRES_A2#1      2070 2100
-addje   HadAM3P:SRES_A2#2      2070 2100
-addjf   HadAM3P:SRES_A2#3      2070 2100
-addjd   HadAM3P:SRES_B2        2070 2100
-aenwh   HadCM3Q0:SRES_A1B      1949 2099
-aexsa   HadCM3Q3:SRES_A1B      1949 2099
+abxsq   ERA15:Reanalysis       1979 1993*
+adqcm   ERA40:Reanalysis       1957 2001*
+erain   ERA-Interim:Reanalysis 1989   - *
+ncepb   NCEP_R2:Reanalysis     1979 2004*
+addfa   HadAM3P:Baseline#1     1960 1990*
+addfb   HadAM3P:Baseline#2     1960 1990*
+addfc   HadAM3P:Baseline#3     1960 1990*
+addja   HadAM3P:SRES_A2#1      2070 2100*
+addje   HadAM3P:SRES_A2#2      2070 2100*
+addjf   HadAM3P:SRES_A2#3      2070 2100*
+addjd   HadAM3P:SRES_B2        2070 2100*
+aenwh   HadCM3Q0:SRES_A1B      1949 2099*
+aexsa   HadCM3Q3:SRES_A1B      1949 2099*
 aexsb   HadCM3Q2:SRES_A1B      1949 2099
 aexsc   HadCM3Q4:SRES_A1B      1949 2099
 aexsd   HadCM3Q5:SRES_A1B      1949 2099
@@ -24,9 +24,11 @@ aexsm   HadCM3Q11:SRES_A1B     1949 2099
 aexsn   HadCM3Q12:SRES_A1B     1949 2099
 aexso   HadCM3Q13:SRES_A1B     1949 2099
 aexsp   HadCM3Q15:SRES_A1B     1949 2099
-aexsq   HadCM3Q16:SRES_A1B     1949 2099
+aexsq   HadCM3Q16:SRES_A1B     1949 2099*
 aexsr   HadCM3Q1:SRES_A1B      1949 2099
 echfa   ECHAM4:Baseline        1960 1990
-echja   ECHAM4:SRES_A2         1989 2100
-echjd   ECHAM4:SRES_B2         2069 2100
-echvc   ECHAM5:SRES_A1B        1950 2100
+echja   ECHAM4:SRES_A2         1989 2100*
+echjd   ECHAM4:SRES_B2         2069 2100*
+echvc   ECHAM5:SRES_A1B        1950 2100*
+
+*We have these
