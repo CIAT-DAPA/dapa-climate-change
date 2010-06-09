@@ -15,14 +15,14 @@
 	&else &if %resol% EQ 5min &then &s outdir %rootdir%\Global_5min
 	&else &s outdir %rootdir%\Global_10min
 	
-	&s modellist [listfile %rootdir%\Global_30s\csiro_mk30 -dir]  /* ipsl_cm4 mpi_echam5 ncar_ccsm30 ukmo_hadcm3 ukmo_hadgem1
+	&s modellist [listfile %rootdir%\Global_30s\ipsl_cm4 -dir]  /* ipsl_cm4 mpi_echam5 ncar_ccsm30 ukmo_hadcm3 ukmo_hadgem1
 	&s nmodels [token %modellist% -count]
 	
 	&do md = 1 &to %nmodels%
 		
 		&s modname [extract %md% %modellist%]
 		
-		&do year &list 2070s 2080s /*2020s 2030s 2040s 2050s 2060s 
+		&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s 
 				
 				&ty
 				&ty Model %modname% (%year%, %resol%)
