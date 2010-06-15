@@ -20,7 +20,7 @@ P:GISSDE -&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 miroc3
 P:STAMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 miub_echo_g X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A1B E:\IPCC_CMIP3_process\temporals\PID_18
 P:STAMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 mpi_echam5 X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A1B E:\IPCC_CMIP3_process\temporals\PID_19
 P:STAMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 mri_cgcm2_3_2a X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A1B E:\IPCC_CMIP3_process\temporals\PID_20
-&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ncar_ccsm3_0 W:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A1B G:\IPCC_CMIP3_process\temporals\PID_21
-&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ncar_pcm1 W:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A1B G:\IPCC_CMIP3_process\temporals\PID_22
-&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ukmo_hadcm3 W:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A1B G:\IPCC_CMIP3_process\temporals\PID_23
+P:GISSDE -&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ncar_ccsm3_0 W:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A1B G:\IPCC_CMIP3_process\temporals\PID_21
+P:STAMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 ncar_pcm1 X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A1B E:\IPCC_CMIP3_process\temporals\PID_22
+P:STAMARIA -&r GCMDeltaMethodInterpolation.aml X:\climate_change\IPCC_CMIP3 ukmo_hadcm3 X:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A1B E:\IPCC_CMIP3_process\temporals\PID_23
 &r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ukmo_hadgem1 W:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A1B G:\IPCC_CMIP3_process\temporals\PID_24
