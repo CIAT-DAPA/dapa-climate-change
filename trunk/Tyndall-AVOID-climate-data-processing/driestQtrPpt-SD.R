@@ -3,7 +3,7 @@
 # Version 0.1
 # Licence GPL v3
 
-driQtrRain- <- function(rlist, outfile, outfileSD, format='') {
+driQtrRain <- function(rlist, outfile, outfileSD, format='') {
 	
 	if (!is.list(rlist)) {
 		stop('First argument should be a list or rasters (prec)')
@@ -62,7 +62,7 @@ driQtrRain- <- function(rlist, outfile, outfileSD, format='') {
 						if (k > 12) {k <- k-12}
 						
 						assign(paste("q", wm, sep=""), PptDataPixel[i] + PptDataPixel[j] + PptDataPixel[k])
-						assign(paste("s", wm, sep=""), sd(PptDataPixel[i], PptDataPixel[j], PptDataPixel[k]))
+						assign(paste("s", wm, sep=""), sd(c(PptDataPixel[i], PptDataPixel[j], PptDataPixel[k])))
 					}
 					
 					dry1 <- q1

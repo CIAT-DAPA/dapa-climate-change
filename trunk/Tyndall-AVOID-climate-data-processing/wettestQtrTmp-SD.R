@@ -11,7 +11,7 @@ wetQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 		stop('Second argument should be a list or rasters (tmean)')
 	}
 	
-	if (!file.exists(outfile)) {
+	if (!file.exists(outfile) | !file.exists(outfileSD)) {
 			cat("", "\n", "Mean temperature of wettest quarter (P8) and STD", "\n")
 			
 			PpTaStack <- stack(c(rlist, rlist2))
@@ -77,7 +77,7 @@ wetQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 						if (k > 12) {k <- k-12}
 						
 						assign(paste("q", wm, sep=""), PptDataPixel[i] + PptDataPixel[j] + PptDataPixel[k])
-						assign(paste("t", wm, sep=""), sd(TavDataPixel[i],TavDataPixel[j],TavDataPixel[k]))
+						assign(paste("t", wm, sep=""), sd(c(TavDataPixel[i],TavDataPixel[j],TavDataPixel[k])))
 					}
 					
 					mnt1 <- 1
@@ -93,7 +93,7 @@ wetQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 					for (wm in 1:12) {
 						assign(paste("xx", wm, sep=""), if (wetm == wm) {get(paste("t", wm, sep=""))} else {-9999})
 					}
-					res <- round(max(xx1,xx2,xx3,xx4,xx5,xx6,xx7,xx8,xx9,xx10,xx11,xx12) / 3)
+					res <- round(max(xx1,xx2,xx3,xx4,xx5,xx6,xx7,xx8,xx9,xx10,xx11,xx12))
 					return(res)
 				}
 			}
@@ -112,7 +112,7 @@ wetQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 				p8 <- setValues(p8, RasVals, rw)
 				p8 <- writeRaster(p8, outfile, format=format, overwrite=TRUE)
 				
-				RasVals <- apply(rowVals, 1, p8fun)
+				RasVals <- apply(rowVals, 1, p8funsd)
 				p8sd <- setValues(p8sd, RasVals, rw)
 				p8sd <- writeRaster(p8sd, outfileSD, format=format, overwrite=TRUE)
 				
