@@ -11,7 +11,7 @@ driQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 		stop('Second argument should be a list or rasters (tmean)')
 	}
 	
-	if (!file.exists(outfile)) {
+	if (!file.exists(outfile) | !file.exists(outfileSD)) {
 			cat("", "\n", "Mean Temperature of Driest Quarter (P9) and STD", "\n")
 			
 			PpTaStack <- stack(c(rlist, rlist2))
@@ -63,7 +63,6 @@ driQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 				} else {
 					
 					q1 <- -9999
-					s1 <- -9999
 					mnt12 <- -9999
 					
 					for (wm in 1:12) {
@@ -78,8 +77,7 @@ driQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 						if (k > 12) {k <- k-12}
 						
 						assign(paste("q", wm, sep=""), PptDataPixel[i] + PptDataPixel[j] + PptDataPixel[k])
-						assign(paste("t", wm, sep=""), TavDataPixel[i] + TavDataPixel[j] + TavDataPixel[k])
-						assign(paste("s", wm, sep=""), sd(TavDataPixel[i],TavDataPixel[j],TavDataPixel[k]))
+						assign(paste("t", wm, sep=""), sd(c(TavDataPixel[i],TavDataPixel[j],TavDataPixel[k])))
 					}
 					
 					mnt1 <- 1
@@ -93,9 +91,9 @@ driQtrTmp <- function(rlist, rlist2, outfile, outfileSD, format='') {
 					drym <- mnt12
 					
 					for (wm in 1:12) {
-						assign(paste("yy", wm, sep=""), if (drym == wm) {get(paste("s", wm, sep=""))} else {-9999})
+						assign(paste("yy", wm, sep=""), if (drym == wm) {get(paste("t", wm, sep=""))} else {-9999})
 					}
-					res <- round(max(yy1,yy2,yy3,yy4,yy5,yy6,yy7,yy8,yy9,yy10,yy11,yy12) / 3)
+					res <- round(max(yy1,yy2,yy3,yy4,yy5,yy6,yy7,yy8,yy9,yy10,yy11,yy12))
 					return(res)
 				}
 			}
