@@ -80,7 +80,7 @@ for (sc in scen) {
 			
 			for (area in arList) {
 				arFileName <- paste(samDir, "/", area, sep="")
-				arName <- substring(area, nchar(area)-3)
+				arName <- substring(area, 1, nchar(area)-3)
 				
 				cat("Extracting for ", arName, "\n")
 				

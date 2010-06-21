@@ -1,0 +1,87 @@
+&args indir outdir timeslice gcmlist 
+&terminal 9999
+&sys cls
+&messages &off
+&if [show program] NE GRID &then GRID
+
+&amlpath .
+&s amldir [show &amlpath]
+
+&if [null %indir%] OR [null %gcmlist%] OR [null %timeslice%] OR [null %gcmlist%] &then
+	&do
+		&ty
+		&ty Wrong command syntax, run the AML appropriately
+		&ty '&RUN averageGCMAnomalies.aml INDIR OUTDIR TIMESLICE GCMLIST'
+		&return
+	&end
+
+&s varlist prec,tmin,tmax,tmean
+&s nvars [token %varlist% -count]
+
+&do v = 1 &to %nvars%
+	
+	&s varname [extract %v% %varlist%]
+	
+	&ty
+	&ty Processing %varname%
+	
+	&do i = 1 &to 12
+		
+		&ty Month %i%
+		
+		&s openlist [open %gcmlist% openstatus -read]
+		&s gcm [read %openlist% readstatus]
+		
+		&s gcmcounter 1
+		
+		&do &while %readstatus% EQ 0
+			
+			&ty GCM ... %gcm% (%gcmcounter%)
+			
+			&s indir_gcm %indir%\%gcm%
+			&s indir_gcm_ts %indir_gcm%\%timeslice%
+			
+			&s outdir_ts %outdir%\%timeslice%
+			&if not [exists %outdir_ts% -dir] &then &sys md %outdir_ts%
+			
+			&if %gcmcounter% EQ 1 &then
+				&do
+					
+					SETWINDOW %indir_gcm_ts%\%varname%_%i%
+					SETMASK OFF
+					SETCELL MINOF
+					
+					&if [exists %outdir_ts%\temp -grid] &then kill %outdir_ts%\temp all
+					%outdir_ts%\temp = %indir_gcm_ts%\%varname%_%i%
+				&end
+			&else
+				&do
+					
+					SETWINDOW %indir_gcm_ts%\%varname%_%i%
+					SETMASK OFF
+					SETCELL MINOF
+					
+					&if [exists %outdir_ts%\temp2 -grid] &then kill %outdir_ts%\temp2 all
+					%outdir_ts%\temp2 = %outdir_ts%\temp + %indir_gcm_ts%\%varname%_%i%
+					&if [exists %outdir_ts%\temp -grid] &then kill %outdir_ts%\temp all
+					%outdir_ts%\temp = %outdir_ts%\temp2
+					&if [exists %outdir_ts%\temp2 -grid] &then kill %outdir_ts%\temp2 all
+				&end
+			
+			&s gcm [read %openlist% readstatus]
+			&s gcmcounter [calc %gcmcounter% + 1]
+		&end
+		
+		&s closelist [close %openlist%]
+		
+		&ty #GCMs ... [calc %gcmcounter% - 1]
+		
+		&if [exists %outdir_ts%\%varname%_%i% -grid] &then kill %outdir_ts%\%varname%_%i% all
+		%outdir_ts%\%varname%_%i% = %outdir_ts%\temp / [calc %gcmcounter% - 1]
+		&if [exists %outdir_ts%\temp -grid] &then kill %outdir_ts%\temp all
+		
+	&end
+&end
+
+&if [show program] EQ GRID &then QUIT
+&if [exists log -file] &then &sys del log

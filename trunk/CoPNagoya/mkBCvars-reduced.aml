@@ -1,0 +1,238 @@
+/* MkBCvars.AML 
+/* /*
+/* Author Robert Hijmans
+/* January 2006  
+/* rhijmans@uclink.berkeley.edu
+/*
+/* Version 2.3
+/*
+/* This AML creates the 19 BIOCLIM variables from 
+/* monthly Tmin, Tmax, and Precipitation grids
+/* The results are rounded where integers would become reals
+/* (I assume that input values were multiplied by 10
+/* and stored as Integers to begin with)
+/* P2 is first multiplied by 10
+/* CVs are first multiplied by 100.
+/*
+/* rounding of "x" is done with "int(floor(x + 0.5))"
+/* because "int(x+0.5)" as suggested by ESRI (see INT in Arc Help), does not
+/* round negative numbers correctly (-2.6 -> -2 intstead of -3)
+/*
+/* You must change the first four lines (input files and output directory)
+/* If you do not have average temperature, create it with the lines that follow
+/*
+/* Also note that the AML removes some temporary grids if they exist 
+/* (the first "&do i = 0 &to 15" bit)
+/* Please make sure that you do not have files
+/* with those names that you want to keep.
+/*
+/* BIO1 = Annual Mean Temperature
+/* BIO2 = Mean Diurnal Range (Mean of monthly (max temp - min temp))
+/* BIO3 = Isothermality (P2/P7) (* 100)
+/* BIO4 = Temperature Seasonality (standard deviation *100)
+/* BIO5 = Max Temperature of Warmest Month
+/* BIO6 = Min Temperature of Coldest Month
+/* BIO7 = Temperature Annual Range (P5-P6)
+/* BIO8 = Mean Temperature of Wettest Quarter 
+/* BIO9 = Mean Temperature of Driest Quarter
+/* BIO10 = Mean Temperature of Warmest Quarter
+/* BIO11 = Mean Temperature of Coldest Quarter
+/* BIO12 = Annual Precipitation
+/* BIO13 = Precipitation of Wettest Month
+/* BIO14 = Precipitation of Driest Month
+/* BIO15 = Precipitation Seasonality (Coefficient of Variation)
+/* BIO16 = Precipitation of Wettest Quarter
+/* BIO17 = Precipitation of Driest Quarter
+/* BIO18 = Precipitation of Warmest Quarter
+/* BIO19 = Precipitation of Coldest Quarter
+/* 
+/* These summary Bioclimatic variables are after:
+/*   Nix, 1986. A biogeographic analysis of Australian elapid snakes. In: R. Longmore (ed.).
+/*      Atlas of elapid snakes of Australia. Australian Flora and Fauna Series 7.
+/*      Australian Government Publishing Service, Canberra.
+/*
+/* and Expanded following the ANUCLIM manual
+/*  
+/* 
+/* Temperature data is in units of  °C * 10 because that allows me to store the data as Integer values,
+/* (with 0.1 °C precision) which is more efficient than storing the data as Real values. 
+/* However, you will want to report the data in °C. Precipitation data is in mm.
+/* 
+/* 
+&args workspace outdir mask
+
+&amlpath .
+&s pdir [show &amlpath]
+
+&if [null %workspace%] or [null %outdir%] or [null %mask%] &then
+	&do
+		&ty
+		&ty INCORRECT SYNTAX
+		&ty Run the aml as: '&r mkBCvars.aml INPUT_FOLDER OUTPUT_FOLDER MASK'
+		&ty
+		&return
+	&end
+&else arc w %workspace%
+
+&TERMINAL 9999
+
+&s program [locase [show program]]
+&if %program% ^= grid &then grid
+
+&sv tn = tmin_
+&sv tx = tmax_
+&sv ta = tmean_
+&sv pt = prec_
+
+SETWINDOW %mask% %mask%
+SETMASK %mask%
+SETCELL %mask%
+
+/* if TAVG does not exist.....
+&do j = 1 &to 12
+  &if [EXISTS %ta%%j% -grid] &then &type %ta%%j%
+  &else %ta%%j% = (%tn%%j% + %tx%%j%) / 2
+&end
+
+&if [exists drym -grid] &then kill drym
+&if [exists wetm -grid] &then kill wetm
+
+&sv TAvar = %ta%1
+&sv TXvar = %tx%1
+&sv TNvar = %tn%1
+&sv PTvar = %pt%1
+
+&do j = 2 &to 12
+  &sv tavar = %tavar%,%ta%%j% 
+  &sv txvar = %txvar%,%tx%%j% 
+  &sv tnvar = %tnvar%,%tn%%j% 
+  &sv ptvar = %ptvar%,%pt%%j% 
+&end
+
+
+/* P1. Annual Mean Temperature 
+&if [exists p1 -grid] &then &type P1 exists
+&else
+&do
+  P1 = int(floor(mean(%tavar%) + 0.5))
+  &type P1 done 
+&end
+
+
+/* P4. Temperature Seasonality (standard deviation) 
+&if [exists p4 -grid] &then &type P4 exists
+&else
+&do
+  P4 = int(floor(100 * std(%tavar%) + 0.5))
+  &type P4 done
+&end
+
+/* P5. Max Temperature of Warmest Period 
+&if [exists p5 -grid] &then &type P5 exists
+&else
+&do
+  P5 = max(%txvar%)
+  &type P5 done
+&end
+
+/* P6. Min Temperature of Coldest Period 
+&if [exists p6 -grid] &then &type P6 exists
+&else
+&do
+  P6 = min(%tnvar%)
+  &type P6 done
+&end
+
+/* P12. Annual Precipitation 
+&if [exists p12 -grid] &then &type P12 exists
+&else
+&do
+  P12 = sum(%ptvar%)
+  &type P12 done
+&end
+
+/* P15. Precipitation Seasonality(Coefficient of Variation) 
+/* the "1 +" is to avoid strange CVs for areas where mean rainfaill is < 1)
+&if [exists p15 -grid] &then &type P15 exists
+&else
+&do
+  P15 = int(floor(100 * std(%ptvar%) / (1 + P12 / 12) + 0.5))
+  &type P15 done
+&end
+
+&do i = 1 &to 12
+  &sv j = %i%
+  &sv k = [calc %i% + 1]
+  &sv l = [calc %i% + 2]
+  &if %k% > 12 &then &sv k = [calc %k% - 12]
+  &if %l% > 12 &then &sv l = [calc %l% - 12]
+  q%i% = %pt%%j% + %pt%%k% + %pt%%l%
+  t%i% = %ta%%j% + %ta%%k% + %ta%%l%
+&end
+
+mnt0 = con(isnull(q1),0,100)
+mnt1 = setnull(mnt0 < 1, 1)
+wet1 = q1
+
+&do i = 1 &to 11
+  &sv j = [calc %i% + 1]
+/*  &type i = %i% and j = %j%
+  mnt%j% = con(q%j% > wet%i%, [calc %j%], mnt%i%)
+  wet%j% = con(q%j% > wet%i%, q%j%, wet%i%)
+&end
+wetm = mnt12
+
+/* P16. Precipitation of Wettest Quarter 
+&if [exists p16 -grid] &then &type P16 exists
+&else
+&do
+  P16 = wet12 
+  &type P16 done
+&end
+
+&do i = 1 &to 12
+  kill mnt%i%
+  kill wet%i%
+&end
+
+mnt1 = setnull(mnt0 < 1, 1)
+dry1 = q1
+
+&do i = 1 &to 11
+  &sv j = [calc %i% + 1]
+  mnt%j% = con(q%j% < dry%i%, [calc %j%], mnt%i%)
+  dry%j% = con(q%j% < dry%i%, q%j%, dry%i%)
+&end
+drym = mnt12
+
+/* P17. Precipitation of Driest Quarter 
+&if [exists p17 -grid] &then &type P17 exists
+&else
+&do
+  P17 = dry12 
+  &type P17 done
+&end
+
+&do i = 1 &to 12
+  kill mnt%i%
+  kill dry%i%
+  kill q%i%
+  kill t%i%
+&end
+kill mnt0
+kill wetm
+kill drym
+
+&do i = 1 &to 19
+  &if [exists p%i% -grid] &then 
+	&do
+		&if [exists %outdir%\bio_%i% -grid] &then kill %outdir%\bio_%i%
+		%outdir%\bio_%i% = p%i%
+		&if [exists %outdir%\p%i% -grid] &then kill %outdir%\p%i%
+	&end
+&end
+
+arc w %pdir%
+
+&type Done!
+&return

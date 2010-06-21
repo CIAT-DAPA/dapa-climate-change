@@ -1,0 +1,204 @@
+&args workdir outdir
+&terminal 9999
+&sys cls
+
+&if [null %workdir%] OR [null %outdir%] &then
+	&do
+		&ty
+		&ty Run the AML correctly, please... '&RUN WORKDIR OUTDIR'
+		&ty
+		&return
+	&end
+
+&amlpath .
+&s basedir [show &amlpath]
+
+&if [show program] NE GRID &then GRID
+
+/*&s workdir D:\bioclim_v2\us_bioclimate
+/*&s outdir = %workdir%\positive_tmp_mask
+
+&if not [exists %outdir% -workspace] &then arc cw %outdir%
+
+&s P = %workdir%\prec_
+&s T = %workdir%\tmean_
+&s Tn = %workdir%\tmin_
+&s Tx = %workdir%\tmax_
+
+&do i = 1 &to 12
+	&if [exists %workdir%\ptmean_mk_%i% -grid] &then kill %workdir%\ptmean_mk_%i% all
+	%workdir%\ptmean_mk_%i% = CON(%T%%i% > 0, 1, 0)
+	
+	&if [exists %workdir%\ptmean_%i% -grid] &then kill %workdir%\ptmean_%i% all
+	%workdir%\ptmean_%i% = %T%%i% * %workdir%\ptmean_mk_%i%
+	
+	&if [exists %workdir%\pprec_%i% -grid] &then kill %workdir%\pprec_%i% all
+	%workdir%\pprec_%i% = %P%%i% * %workdir%\ptmean_mk_%i%
+	
+	&if %i% EQ 1 &then
+		&do
+			&s ptemplist = ptmean_%i%
+			&s ppreclist = pprec_%i%
+		&end
+	&else
+		&do
+			&s ptemplist = %ptemplist%,ptmean_%i%
+			&s ppreclist = %ppreclist%,pprec_%i%
+		&end
+&end
+
+arc w %workdir%
+
+/* Annual positive temperature
+
+&if [exists %workdir%\tp -grid] &then kill %workdir%\tp all
+%workdir%\tp = SUM(%ptemplist%)
+
+/* Total annual positive rainfall
+
+&if [exists %workdir%\pp -grid] &then kill %workdir%\pp all
+%workdir%\pp = SUM(%ppreclist%)
+
+/* Ombrothermic index (Pp / Tp)
+
+&if [exists %outdir%\io -grid] &then kill %outdir%\io all
+%outdir%\io = CON(%workdir%\tp == 0, 0, INT(FLOOR((%workdir%\pp * 0.1) / (%workdir%\tp * 0.01) * 10 + 0.5)))
+
+arc w %basedir%
+
+/* -0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0
+/* CALCULATING IOD2
+/* -0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0
+
+/* FIRST. Find the driest consecutive three months (quarter)
+
+arc w %workdir%
+
+&do i = 1 &to 12
+	&s inim [calc %i%]
+	&s finm [calc %i% + 2]
+	
+	&do k = %inim% &to %finm%
+		&if %k% GT 12 &then &s m [calc %k% - 12]
+		&else &s m [calc %k%]
+		
+		&if %k% EQ %inim% &then 
+			&do
+				&s dri = %P%%m%
+				&s drit = %T%%m%
+			&end
+		&else	
+			&do
+				&s dri = %dri%,%P%%m%
+				&s drit = %drit%,%T%%m%
+			&end
+	&end
+	
+	&if [exists %workdir%\qtr_pr_%i% -grid] &then kill %workdir%\qtr_pr_%i% all
+	%workdir%\qtr_pr_%i% = sum(%dri%)
+	
+	&if %i% EQ 1 &then &s triplist = qtr_pr_%i%
+	&else &s triplist = %triplist%,qtr_pr_%i%
+	
+&end
+
+&if [exists %workdir%\mn_3mon_pre -grid] &then kill %workdir%\mn_3mon_pre all
+%workdir%\mn_3mon_pre = MIN(%triplist%)
+
+&do i = 1 &to 12
+	&if [exists %workdir%\tmp_qtr_%i% -grid] &then kill %workdir%\tmp_qtr_%i% all
+	%workdir%\tmp_qtr_%i% = CON(%workdir%\mn_3mon_pre == %workdir%\qtr_pr_%i%, %i%)
+	
+	&if %i% EQ 1 &then &s listq = tmp_qtr_%i%
+	&else &s listq = %listq%,tmp_qtr_%i%
+	
+&end
+
+&if [exists %workdir%\driest_3mon -grid] &then kill %workdir%\driest_3mon all
+%workdir%\driest_3mon = MERGE(%listq%)
+
+/* SECOND. Find the driest 2-month period in the driest quarter
+
+&do i = 1 &to 12
+	&s j [calc %i% + 1]
+	&if %j% GT 12 &then &s j [calc %j% - 12]
+	
+	&if [exists %workdir%\sm_prec_%i% -grid] &then kill %workdir%\sm_prec_%i% all
+	%workdir%\sm_prec_%i% = %P%%i% + %P%%j%
+&end
+
+&do i = 1 &to 12
+	&s j [calc %i% + 1]
+	&if %j% GT 12 &then &s j [calc %j% - 12]
+	
+	&if [exists %workdir%\driest_%i%or%j% -grid] &then kill %workdir%\driest_%i%or%j% all
+	%workdir%\driest_%i%or%j% = CON(%workdir%\driest_3mon == %i%, CON(%workdir%\sm_prec_%i% <= %workdir%\sm_prec_%j%, %i%, %j%), 0)
+	
+	&if %i% EQ 1 &then &s listdr = driest_%i%or%j%
+	&else &s listdr = %listdr%,driest_%i%or%j%
+&end
+
+&if [exists %workdir%\dry2mn_dry_qt -grid] &then kill %workdir%\dry2mn_dry_qt all
+%workdir%\dry2mn_dry_qt = SUM(%listdr%)
+
+/* THIRD. Ppd2, Tpd2, Iod2
+
+&do i = 1 &to 12
+	&s j [calc %i% + 1]
+	&if %j% GT 12 &then &s j [calc %j% - 12]
+	
+	&if [exists %workdir%\ppd2_%i% -grid] &then kill %workdir%\ppd2_%i% all
+	%workdir%\ppd2_%i% = CON(%workdir%\dry2mn_dry_qt == %i%, ((%workdir%\pprec_%i% + %workdir%\pprec_%j%) * 10), 0)
+	
+	&if [exists %workdir%\tpd2_%i% -grid] &then kill %workdir%\tpd2_%i% all
+	%workdir%\tpd2_%i% = CON(%workdir%\dry2mn_dry_qt == %i%, ((%workdir%\ptmean_%i% + %workdir%\ptmean_%j%) * 10), 0)
+		
+	&if %i% EQ 1 &then 
+		&do
+			&s listppd = ppd2_%i%
+			&s listtpd = tpd2_%i%
+		&end
+	&else
+		&do
+			&s listppd = %listppd%,ppd2_%i%
+			&s listtpd = %listtpd%,tpd2_%i%
+		&end
+&end
+
+&if [exists %workdir%\ppd2 -grid] &then kill %workdir%\ppd2 all
+%workdir%\ppd2 = SUM(%listppd%)
+
+&if [exists %workdir%\tpd2 -grid] &then kill %workdir%\tpd2 all
+%workdir%\tpd2 = SUM(%listtpd%)
+
+&if [exists %outdir%\iod2 -grid] &then kill %outdir%\iod2 all
+%outdir%\iod2 = INT(FLOOR(CON((%workdir%\ppd2 == 0 || %workdir%\tpd2 == 0), 0, (((%workdir%\ppd2 * 0.1) / (%workdir%\tpd2 * 0.01)) * 10)) + 0.5))
+
+&do i = 1 &to 12
+	&s j [calc %i% + 1]
+	&if %j% GT 12 &then &s j [calc %j% - 12]
+	
+	&if [exists %workdir%\ptmean_mk_%i% -grid] &then kill %workdir%\ptmean_mk_%i% all
+	&if [exists %workdir%\ptmean_%i% -grid] &then kill %workdir%\ptmean_%i% all
+	&if [exists %workdir%\pprec_%i% -grid] &then kill %workdir%\pprec_%i% all
+	&if [exists %workdir%\tmp_qtr_%i% -grid] &then kill %workdir%\tmp_qtr_%i% all
+	&if [exists %workdir%\qtr_pr_%i% -grid] &then kill %workdir%\qtr_pr_%i% all
+	&if [exists %workdir%\sm_prec_%i% -grid] &then kill %workdir%\sm_prec_%i% all
+	&if [exists %workdir%\driest_%i%or%j% -grid] &then kill %workdir%\driest_%i%or%j% all
+	&if [exists %workdir%\ppd2_%i% -grid] &then kill %workdir%\ppd2_%i% all
+	&if [exists %workdir%\tpd2_%i% -grid] &then kill %workdir%\tpd2_%i% all
+&end
+
+&if [exists %workdir%\driest_3mon -grid] &then kill %workdir%\driest_3mon all
+&if [exists %workdir%\dry2mn_dry_qt -grid] &then kill %workdir%\dry2mn_dry_qt all
+&if [exists %workdir%\mn_3mon_pre -grid] &then kill %workdir%\mn_3mon_pre all
+&if [exists %workdir%\pp -grid] &then kill %workdir%\pp all
+&if [exists %workdir%\tp -grid] &then kill %workdir%\tp all
+&if [exists %workdir%\tpd2 -grid] &then kill %workdir%\tpd2 all
+&if [exists %workdir%\ppd2 -grid] &then kill %workdir%\ppd2 all
+
+&sys del log
+
+arc w %basedir%
+&if [show program] EQ GRID &then QUIT
+&sys del log
