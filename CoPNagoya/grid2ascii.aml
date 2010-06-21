@@ -1,0 +1,75 @@
+&args indir outdir preffix
+&terminal 9999
+&sys cls
+&messages &off
+
+&if [null %indir%] OR [null %outdir%] OR [null %preffix%] &then
+	&do
+		&ty
+		&ty INCORRECT COMMAND SYNTAX
+		&ty TRY: &r grid2ascii.aml INPUT_DIR OUTPUT_DIR PREFFIX
+		&ty
+		&ty Note: Use ALL as preffix if you wish to process all the grids within your Input dir.
+		&ty
+		&messages &on
+		&return
+	&end
+&else
+	&do
+		&amlpath .
+		w [show &amlpath]
+		
+		&if [show program] NE GRID &then GRID
+		&if not [exists %outdir% -dir] &then &sys md %outdir%
+		
+		&if [locase %preffix%] EQ all &then &s gridlist [listfile %indir%\* -grid %outdir%\filelist.list]
+		&else &s gridlist [listfile %indir%\%preffix%* -grid %outdir%\filelist.list]
+		
+		&if %gridlist% EQ 0 &then
+			&do
+				&ty
+				&ty There are no gridfiles within your desired input folder. Bailing out...
+				&ty 
+				&if [show program] EQ GRID &then QUIT
+				&call cleandirs
+				&return
+			&end
+		&else
+			&do
+				&ty
+				&ty Preparing to process %gridlist% files
+				&ty
+				
+				&s openlist [OPEN %outdir%\filelist.list OPENSTATUS -READ]
+				
+				&do file = 1 &to %gridlist%
+					
+					&s gridname [READ %openlist% READSTATUS]
+					
+					&ty .-Creating ascii file %gridname% ([substr [calc %file% / %gridlist% * 100] 1 5]'%')
+					
+					&if [exists %outdir%\%gridname%.asc -file] &then &sys del %outdir%\%gridname%.asc
+					&if [exists %outdir%\%gridname%.prj -file] &then &sys del %outdir%\%gridname%.prj
+					%outdir%\%gridname%.asc = GRIDASCII(%indir%\%gridname%)
+					
+				&end
+				
+				&s closelist [CLOSE %openlist%]
+				&if [exists %outdir%\filelist.list -file] &then &sys del %outdir%\filelist.list
+				
+				&ty
+				&ty Done!
+				&ty
+				
+			&end
+	&end
+&call cleandirs
+&return
+/********************************************************************************
+&routine cleandirs
+	&if [show program] EQ GRID &then QUIT
+	&if [exists log -file] &then &sys del log
+	&if [exists %outdir%\filelist.list -file] &then &sys del %outdir%\filelist.list
+	&messages &on
+&return
+/********************************************************************************

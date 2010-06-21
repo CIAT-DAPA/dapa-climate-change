@@ -1,0 +1,11 @@
+bccr_bcm2_0
+csiro_mk3_0
+csiro_mk3_5
+gfdl_cm2_0
+gfdl_cm2_1
+giss_aom
+inm_cm3_0
+miroc3_2_hires
+miroc3_2_medres
+ncar_ccsm3_0
+ncar_pcm1
