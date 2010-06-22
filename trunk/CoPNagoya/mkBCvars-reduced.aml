@@ -64,6 +64,9 @@
 &amlpath .
 &s pdir [show &amlpath]
 
+&s program [locase [show program]]
+&if %program% ^= grid &then grid
+
 &if [null %workspace%] or [null %outdir%] or [null %mask%] &then
 	&do
 		&ty
@@ -75,9 +78,6 @@
 &else arc w %workspace%
 
 &TERMINAL 9999
-
-&s program [locase [show program]]
-&if %program% ^= grid &then grid
 
 &sv tn = tmin_
 &sv tx = tmax_
@@ -228,7 +228,7 @@ kill drym
 	&do
 		&if [exists %outdir%\bio_%i% -grid] &then kill %outdir%\bio_%i%
 		%outdir%\bio_%i% = p%i%
-		&if [exists %outdir%\p%i% -grid] &then kill %outdir%\p%i%
+		&if [exists p%i% -grid] &then kill p%i%
 	&end
 &end
 

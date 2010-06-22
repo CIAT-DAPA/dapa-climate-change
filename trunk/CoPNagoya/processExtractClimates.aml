@@ -1,0 +1,4 @@
+&r extractClimate C:\CIAT_work\COP_CONDESAN\backgrounds z2_col_25m.csv C:\CIAT_work\COP_CONDESAN\backgrounds z2_col_25m_clm.csv C:\CIAT_work\COP_CONDESAN\climateData\global\baseline\20C3M\WorldClim-30s-bioclim
+&r extractClimate C:\CIAT_work\COP_CONDESAN\backgrounds z3_ecu_25m.csv C:\CIAT_work\COP_CONDESAN\backgrounds z3_ecu_25m_clm.csv C:\CIAT_work\COP_CONDESAN\climateData\global\baseline\20C3M\WorldClim-30s-bioclim
+&r extractClimate C:\CIAT_work\COP_CONDESAN\backgrounds z4_per_25m.csv C:\CIAT_work\COP_CONDESAN\backgrounds z4_per_25m_clm.csv C:\CIAT_work\COP_CONDESAN\climateData\global\baseline\20C3M\WorldClim-30s-bioclim
+&r extractClimate C:\CIAT_work\COP_CONDESAN\backgrounds z5_bol_25m.csv C:\CIAT_work\COP_CONDESAN\backgrounds z5_bol_25m_clm.csv C:\CIAT_work\COP_CONDESAN\climateData\global\baseline\20C3M\WorldClim-30s-bioclim

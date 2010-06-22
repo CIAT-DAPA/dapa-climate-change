@@ -12,7 +12,7 @@
 	&do
 		&ty
 		&ty Incorrect command syntax, please use
-		&ty '&r spatialDisaggregation.aml INPUT_DIR WCL_DIR MODEL_NAME OUTDIR MASK SRES_SCENARIO TEMPORAL_DIR'
+		&ty '&r spatialDisaggregation.aml INPUT_DIR WCL_DIR OUTDIR MASK SRES_SCENARIO TEMPORAL_DIR'
 		&ty
 		&ty Available SRES SCENARIOS are SRES_A1B, SRES_A2, SRES_B1
 		&ty
