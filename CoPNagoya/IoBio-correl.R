@@ -11,7 +11,7 @@ outDir <- paste(bseDir, "/correlations", sep="")
 #Load the mask
 
 mskDir <- paste(bseDir, "/maskData/AAIGrids", sep="")
-msk <- paste(mskDir, "/and_2_5m.asc", sep="")
+msk <- paste(mskDir, "/andes_msk_25m.asc", sep="")
 msk <- raster(msk)
 
 #Extract a set of random points (10,000)
@@ -30,7 +30,7 @@ while (npts != 10000) {
 
 #Now extract the data for each grid
 
-grdDir <- paste(bseDir, "/climateData/andes/baseline/20C3M/WorldClim-2.5min-bioclim", sep="")
+grdDir <- paste(bseDir, "/climateData/andes/baseline/20C3M/WorldClim-2_5min-bioclim/1950_2000", sep="")
 grdList <- list.files(grdDir, pattern=".asc")
 gCount <- 1
 oMtx <- rpts
