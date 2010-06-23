@@ -35,7 +35,7 @@ createOccFiles <- function(occ, spL, clDir, outDir, i, j) {
 	
 	for (sp in spL$IDSpecies) {
 		
-		nspp <- j-i
+		nspp <- j-i+1
 		cat("Processing...", paste(round(spcounter/nspp*100,2),"% Completed", sep=""), "\n")
 		
 		spData <- occ[which(occ$IDSpecies == sp),]
@@ -47,6 +47,7 @@ createOccFiles <- function(occ, spL, clDir, outDir, i, j) {
 		spDataOut <- cbind(spData$IDSpecies, spData$Lon, spData$Lat)
 		
 		for (rst in rsL) {
+			cat("      ->Raster", rst, "\n")
 			rs <- paste(clDir, "/", rst, ".asc", sep="")
 			rs <- raster(rs)
 			
