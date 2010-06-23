@@ -22,11 +22,10 @@ require(raster)
 
 #Initial stuff
 
-inputDir <- "C://CIAT_work//GBIF_project//clampingTest"
-backgroundDir <- "C://CIAT_work//GBIF_project//backgroundFiles"
-inTrainClimDir <- paste(inputDir, "//5min_wcl_asciis", sep="") #"F://Clim_30s//5min_wcl_asciis"
-inProjClimDir <- "C://CIAT_work//FAO_top50//climatic_DATA"
-maxentApp <- "C://CIAT_work//GBIF_project//maxent332//maxent.jar"
+inputDir <- "C:/CIAT_work/COP_CONDESAN"
+backgroundDir <- "C:/CIAT_work/COP_CONDESAN/backgrounds"
+inProjClimDir <- paste(inputDir, "/climateData/andes/baseline/20C3M/WorldClim-2_5min-bioclim/1950_2000", sep="")
+maxentApp <- paste(inputDir, "/maxent332/maxent.jar", sep="")
 
 ###############################################################################################
 ###############################################################################################
@@ -35,14 +34,6 @@ maxentApp <- "C://CIAT_work//GBIF_project//maxent332//maxent.jar"
 ###############################################################################################
 
 source("bufferSpecies.R")
-
-###############################################################################################
-###############################################################################################
-# The extract environmental data function
-###############################################################################################
-###############################################################################################
-
-source("extractClimate.R")
 
 ###############################################################################################
 ###############################################################################################
@@ -72,21 +63,15 @@ theEntireProcess <- function(spID) {
   
   #1. Load species data
   
-  occFile <- paste(inputDir, "//occurrences//species_", spID, ".csv", sep="")
+  occFile <- paste(inputDir, "//occurrences//splitted-occurrence-files/", spID, ".csv", sep="")
   
   if (file.exists(occFile)) {
+	
+	#1.1 Load the data
     
-    #1.1 Check the number of occurrences and define the list of layers accordingly
-    
-   inData <- read.csv(occFile)
-   nOcc <- nrow(inData)
+	inData <- read.csv(occFile)
+	nOcc <- nrow(inData)
    
-   if (nOcc <= 40) {
-    layList <- c(1,4,12,15)
-   } else {
-    layList <- c(1,4,5,6,12,15,18,19)
-   }
-    
     #2. Extract environmental data for the species
     
     cat("Extracting climates for sample file \n")
