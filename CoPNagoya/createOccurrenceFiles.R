@@ -8,7 +8,7 @@ require(rgdal)
 require(sp)
 require(raster)
 
-createOccFiles <- function(occ, spL, clDir, outdir, i, j) {
+createOccFiles <- function(occ, spL, clDir, outDir, i, j) {
 	
 	#occ <- "./modeling-data/andean-species-data-sampleArea.csv"
 	#spL <- "./modeling-data/speciesListToModel.csv"
