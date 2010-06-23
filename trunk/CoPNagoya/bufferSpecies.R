@@ -5,15 +5,12 @@
 require(rgdal)
 require(raster)
 
-createBuffers <- function(spFile, spOutFile, bDist, resol) {
+createBuffers <- function(spFile, spOutFile, bDist, msk) {
   
-  nCol <- round(360 / resol)
-  nRow <- round(180 / resol)
-  
-  rs <- raster(ncol=nCol, nrow=nRow)
+  rs <- raster(msk)
   rs[] <- 1
   
-	#bDist must be in meters
+	#bDist must be in meters (300000) for 300km
 	
 	if (file.exists(spFile)) {
 		
@@ -21,11 +18,8 @@ createBuffers <- function(spFile, spOutFile, bDist, resol) {
 		
 		if (!file.exists(spOutFile)) {
 			spData <- read.csv(spFile)
-			
-			bb <- extent(-180, 180, -56, 84)
-      rs <- crop(rs, bb)
       
-      rsd <- distanceFromPoints(rs, spData[,2:3])
+			rsd <- distanceFromPoints(rs, spData[,2:3])
 			
 			rsdf <- rsd
 			rsdf[which(rsdf[] > bDist)] <- 0
@@ -36,7 +30,7 @@ createBuffers <- function(spFile, spOutFile, bDist, resol) {
 			rsdf <- writeRaster(rsdf, spOutFile, format='ascii', datatype='INT1U', overwrite=T)
 			rm(rsd)
 		} else {
-      rsdf <- raster(spOutFile)
+			rsdf <- raster(spOutFile)
 		}
 	} else {
 	 stop("The occurrence file does not exist")
