@@ -1,4 +1,4 @@
-source("/data3/jramirez/dapa-climate-change/trunk/CoPNagoya/createOccurrenceFiles.R")
+source("/data3/jramirez/dapa-climate-change-read-only/CoPNagoya/createOccurrenceFiles.R")
 
 occfile <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/andean-species-data-sampleArea.csv"
 splist <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/speciesListToModel.csv"

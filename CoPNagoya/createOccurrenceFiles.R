@@ -13,7 +13,9 @@ createOccFiles <- function(occ, spL, clDir, i, j) {
 	#occ <- "./modeling-data/andean-species-data-sampleArea.csv"
 	#spL <- "./modeling-data/speciesListToModel.csv"
 	#clDir <-  "C:/CIAT_work/COP_CONDESAN/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000"
-
+	
+	cat("\n")
+	
 	outDir <- "splitted-occurrence-files"
 	if (!file.exists(outDir)) {
 		dir.create(outDir)
@@ -21,8 +23,14 @@ createOccFiles <- function(occ, spL, clDir, i, j) {
 
 	spL <- read.csv(spL)[i:j,]
 	occ <- read.csv(occ)
-
+	
+	spcounter <- 1
+	
 	for (sp in spL$IDSpecies) {
+		
+		nspp <- j-i
+		cat("Processing...", paste(round(spcounter/nspp*100,2),"% Completed", sep=""), "\n")
+		
 		spData <- occ[which(occ$IDSpecies == sp),]
 		spData <- spData[which(spData$AndesADM0 == 1),]
 		coords <- cbind(spData$Lon,spData$Lat)
@@ -45,6 +53,7 @@ createOccFiles <- function(occ, spL, clDir, i, j) {
 		write.csv(spDataOut, csvName, row.names=F, quote=F)
 		rm(spDataOut)
 		
+		spcounter <- spcounter+1
 	}
 	return("Done")
 }
