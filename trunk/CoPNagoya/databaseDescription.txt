@@ -1,0 +1,117 @@
+/************************************************************************/
+/************************************************************************/
+/************************************************************************/
+
+CDC: Fields
+
+globaluniqueidentifier,
+idtaxones,
+cita,
+idconfiabilidad,
+fechaevaluacion,
+precisionregistrada,
+precisiontemporal,
+latitud,
+longitud,
+procedenciacoordenadas,
+alturamaxima,
+alturaminima,
+escala,
+descripcion,
+comentario,
+sensible,
+publicable,
+reino,
+phyllum,
+clase,
+orden,
+familia,
+genero,
+especie
+
+/************************************************************************/
+/************************************************************************/
+/************************************************************************/
+
+CONDESAN: Fields
+
+ID,
+ID_Especies,
+Orden,
+Nombre,
+ID_Registros,
+ID_Especie,
+País,
+Provincia/Departamento/Estado,
+Cantón/Provincia/Municipio/Dependencia federal,
+Altura,
+Sistema de coordenadas,
+UTM Este,
+UTM Norte/Sur,
+Longitud,
+Latitud,
+Calidad de Información
+
+/************************************************************************/
+/************************************************************************/
+/************************************************************************/
+
+GBIF: Fields
+
+id,
+Data publisher,
+Dataset,
+Collector name,
+Collector number,
+Field number,
+Date collected,
+Institution code,
+Collection code,
+Catalogue No,
+Basis of record,
+Identifier,
+Identification date,
+Author,
+Kingdom,
+Phylum,
+Class,
+Order,
+Family,
+Genus,
+Species,
+Country,
+Locality,
+County,
+State/Province,
+Latitude,
+Longitude,
+Coordinate precision,
+Min altitude,
+Max altitude,
+
+/************************************************************************/
+/************************************************************************/
+/************************************************************************/
+
+AnBiPlan-Database: CIAT, CONDESAN, BIRDLIFE
+
+Source
+Original-ID
+Original-Taxon-ID
+Taxon
+Kingdom
+Phylum
+Class
+Order
+Family
+Genus
+Species=Taxon
+Country,
+State/Province
+County
+Locality
+Altitude min
+Altitude max
+Altitude
+Latitude
+Longitude
