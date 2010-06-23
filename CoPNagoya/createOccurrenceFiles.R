@@ -28,38 +28,57 @@ createOccFiles <- function(occ, spL, clDir, outDir, i, j) {
 		j <- nrow(spL)
 	}
 	
+	cat("Loading occurrence files \n")
+	
 	spL <- spL[i:j,]
 	occ <- read.csv(occ)
+	occ <- occ[which(occ$AndesADM0 == 1),]
 	
 	spcounter <- 1
+	
+	occ <- occ[which(occ$IDSpecies %in% spL$IDSpecies),]
+	coords <- cbind(occ$Lon,occ$Lat)
+	
+	spDataOut <- cbind(occ$IDSpecies, occ$Lon, occ$Lat)
+	rsL <- c("bio_1","bio_4","bio_5","bio_6","bio_12","bio_15","bio_16","bio_17","io","iod2")
+	
+	cat("Extracting climate data \n")
+	
+	for (rst in rsL) {
+		cat("      ->Raster", rst, "\n")
+		rs <- paste(clDir, "/", rst, ".asc", sep="")
+		rs <- raster(rs)
+		
+		vls <- xyValues(rs, coords)
+		spDataOut <- cbind(spDataOut, vls)
+	}
+	
+	spDataOut <- as.data.frame(spDataOut)
+	names(spDataOut) <- c("taxon","lon","lat",rsL)
+	
+	#Cleaning the file
+	
+	cat("Cleaning the occurrences before printing \n")
+	
+	bCol <- 4
+	for (rst in rsL) {
+		cat("      ->Variable", rst, "\n")
+		spDataOut <- spDataOut[which(!is.na(spDataOut[,bCol])),]
+		bCol <- bCol + 1
+	}
+	
+	cat("Now printing \n")
 	
 	for (sp in spL$IDSpecies) {
 		
 		nspp <- j-i+1
-		cat("Processing...", paste(round(spcounter/nspp*100,2),"% Completed", sep=""), "\n")
+		cat("      ...", paste(round(spcounter/nspp*100,2),"% Completed", sep=""), "\n")
 		
-		spData <- occ[which(occ$IDSpecies == sp),]
-		spData <- spData[which(spData$AndesADM0 == 1),]
-		coords <- cbind(spData$Lon,spData$Lat)
+		spData <- spDataOut[which(spDataOut$taxon == sp),]
 		
-		rsL <- c("bio_1","bio_4","bio_5","bio_6","bio_12","bio_15","bio_16","bio_17","io","iod2")
-		
-		spDataOut <- cbind(spData$IDSpecies, spData$Lon, spData$Lat)
-		
-		for (rst in rsL) {
-			cat("      ->Raster", rst, "\n")
-			rs <- paste(clDir, "/", rst, ".asc", sep="")
-			rs <- raster(rs)
-			
-			vls <- xyValues(rs, coords)
-			spDataOut <- cbind(spDataOut, vls)
-		}
-		
-		spDataOut <- as.data.frame(spDataOut)
-		names(spDataOut) <- c("taxon","lon","lat",rsL)
 		csvName <- paste(outDir, "/", sp, ".csv", sep="")
-		write.csv(spDataOut, csvName, row.names=F, quote=F)
-		rm(spDataOut)
+		write.csv(spData, csvName, row.names=F, quote=F)
+		rm(spData)
 		
 		spcounter <- spcounter+1
 	}

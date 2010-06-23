@@ -1,11 +1,11 @@
 source("/data3/jramirez/dapa-climate-change-read-only/CoPNagoya/createOccurrenceFiles.R")
 
-occfile <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/andean-species-data-sampleArea.csv"
-splist <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/speciesListToModel.csv"
-climdir <-"/data3/jramirez/CoP_Nagoya/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000"
-outdir <-"/data3/jramirez/CoP_Nagoya/occurrences/splitted-occurrence-files"
+occ <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/andean-species-data-sampleArea.csv"
+spL <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/speciesListToModel.csv"
+clDir <-"/data3/jramirez/CoP_Nagoya/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000"
+outDir <-"/data3/jramirez/CoP_Nagoya/occurrences/splitted-occurrence-files"
 
-output <- createOccFiles(occfile, splist, climdir, outdir, 1, 4000)
-output <- createOccFiles(occfile, splist, climdir, outdir, 4001, 8000)
-output <- createOccFiles(occfile, splist, climdir, outdir, 8001, 12000)
+output <- createOccFiles(occ, spL, clDir, outDir, 1, 4000)
+output <- createOccFiles(occ, spL, clDir, outDir, 4001, 8000)
+output <- createOccFiles(occ, spL, clDir, outDir, 8001, 12000)
 
