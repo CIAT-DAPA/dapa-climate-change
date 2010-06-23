@@ -3,8 +3,9 @@ source("/data3/jramirez/dapa-climate-change-read-only/CoPNagoya/createOccurrence
 occfile <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/andean-species-data-sampleArea.csv"
 splist <-"/data3/jramirez/CoP_Nagoya/occurrences/modeling-data/speciesListToModel.csv"
 climdir <-"/data3/jramirez/CoP_Nagoya/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000"
+outdir <-"/data3/jramirez/CoP_Nagoya/occurrences/splitted-occurrence-files"
 
-output <- createOccFiles(occfile, splist, climdir, 1, 4000)
-output <- createOccFiles(occfile, splist, climdir, 4001, 8000)
-output <- createOccFiles(occfile, splist, climdir, 8001, 11675)
+output <- createOccFiles(occfile, splist, climdir, outdir, 1, 4000)
+output <- createOccFiles(occfile, splist, climdir, outdir, 4001, 8000)
+output <- createOccFiles(occfile, splist, climdir, outdir, 8001, 12000)
 

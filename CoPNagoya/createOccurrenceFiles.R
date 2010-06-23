@@ -8,7 +8,7 @@ require(rgdal)
 require(sp)
 require(raster)
 
-createOccFiles <- function(occ, spL, clDir, i, j) {
+createOccFiles <- function(occ, spL, clDir, outdir, i, j) {
 	
 	#occ <- "./modeling-data/andean-species-data-sampleArea.csv"
 	#spL <- "./modeling-data/speciesListToModel.csv"
@@ -16,12 +16,19 @@ createOccFiles <- function(occ, spL, clDir, i, j) {
 	
 	cat("\n")
 	
-	outDir <- "splitted-occurrence-files"
+	#outDir <- "splitted-occurrence-files"
 	if (!file.exists(outDir)) {
 		dir.create(outDir)
 	}
 
-	spL <- read.csv(spL)[i:j,]
+	spL <- read.csv(spL)
+	
+	if (j > nrow(spL)) {
+		cat("j is greater than number of taxa, using nrow instead \n")
+		j <- nrow(spL)
+	}
+	
+	spL <- spL[i:j,]
 	occ <- read.csv(occ)
 	
 	spcounter <- 1
