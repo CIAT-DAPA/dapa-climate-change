@@ -277,6 +277,7 @@ NagoyaProcess <- function(inputDir, ini, fin) {
 	sppC <- 1
 	
 	for (sp in spList) {
+		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
 		out <- theEntireProcess(sp, "LINUX", inputDir)
 		sppC <- sppC + 1
