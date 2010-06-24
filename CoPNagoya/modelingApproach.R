@@ -271,7 +271,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 		destName <- paste(destDir, "/mxe_outputs/sp-", spID, "/.", sep="")
 		if (Osys == "linux") {
 			system(paste("cp", "-rvf", outName, destName))
-			system(paste("rm", "-rvf", outName)
+			system(paste("rm", "-rvf", outName))
 		} else {
 			system(paste("copy", "/Y", outName, destName))
 			system(paste("del", outName))

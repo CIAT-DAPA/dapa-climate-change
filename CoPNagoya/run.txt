@@ -12,7 +12,8 @@ output <- createOccFiles(occ, spL, clDir, outDir, 8001, 12000)
 
 ##############################################
 
-source("modelingApproach.R" )
+require(raster)
+source("modelingApproach.R")
 idir <- "/data3/jramirez/CoP_Nagoya"
 ddir <- "/mnt/GeoData/COP_CONDESAN"
 
