@@ -9,3 +9,13 @@ output <- createOccFiles(occ, spL, clDir, outDir, 1, 4000)
 output <- createOccFiles(occ, spL, clDir, outDir, 4001, 8000)
 output <- createOccFiles(occ, spL, clDir, outDir, 8001, 12000)
 
+
+##############################################
+
+source("modelingApproach.R" )
+idir <- "/data3/jramirez/CoP_Nagoya"
+ddir <- "/mnt/GeoData/COP_CONDESAN"
+
+setOptions(overwrite=T)
+
+outp <- NagoyaProcess(idir, 1, 10)

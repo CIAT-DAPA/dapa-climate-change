@@ -294,7 +294,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 #setOptions(overwrite=T)
 #idir <- "C:/CIAT_work/COP_CONDESAN"
 #ddir <- "/mnt/GeoData/COP_CONDESAN"
-#outp <- NagoyaProcess(idir, 1, 10)
+#outp <- NagoyaProcess(idir, ddir, 1, 10)
 #setOptions(overwrite=T)
 
 NagoyaProcess <- function(inputDir, destDir, ini, fin) {
