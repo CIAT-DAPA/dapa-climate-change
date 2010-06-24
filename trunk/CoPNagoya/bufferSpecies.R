@@ -8,7 +8,7 @@ require(raster)
 createBuffers <- function(spFile, spOutFile, bDist, msk) {
   
   rs <- raster(msk)
-  rs[] <- 1
+  #rs[which(!is.na(rs[]))] <- 1
   
 	#bDist must be in meters (300000) for 300km
 	
