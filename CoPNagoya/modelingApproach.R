@@ -277,8 +277,6 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 			system(paste("del", outName))
 		}
 		
-		system(
-		
 		return("Done")
 	  } else {
 		cat("The occurrence file does not exist! \n")
