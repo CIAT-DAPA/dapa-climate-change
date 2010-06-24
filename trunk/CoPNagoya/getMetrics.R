@@ -6,10 +6,10 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   
   nFolds <- nFolds - 1
   
-  crossValMxrFile <- paste(crossValDir, "//maxentResults.csv", sep="")
+  crossValMxrFile <- paste(crossValDir, "/maxentResults.csv", sep="")
   crossValMxrData <- read.csv(crossValMxrFile)
   
-  runMxrFile <- paste(absRunDir, "//maxentResults.csv", sep="")
+  runMxrFile <- paste(absRunDir, "/maxentResults.csv", sep="")
   runMxrData <- read.csv(runMxrFile)
   
   #Number of samples
@@ -32,13 +32,13 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
     
     #Loading basic files
     
-    backPredFile <- paste(crossValDir, "//", foldSuffix, "_", fold, ".csv", sep="")
+    backPredFile <- paste(crossValDir, "/", foldSuffix, "_", fold, ".csv", sep="")
     backPredData <- read.csv(backPredFile)
     
-    samPredFile <- paste(crossValDir, "//", foldSuffix, "_", fold, "_samplePredictions.csv", sep="")
+    samPredFile <- paste(crossValDir, "/", foldSuffix, "_", fold, "_samplePredictions.csv", sep="")
     samPredData <- read.csv(samPredFile)
     
-    omRatesFile <- paste(crossValDir, "//", foldSuffix, "_", fold, "_omission.csv", sep="")
+    omRatesFile <- paste(crossValDir, "/", foldSuffix, "_", fold, "_omission.csv", sep="")
     omRatesData <- read.csv(omRatesFile)
     
     trainPreds <- samPredData$Logistic.prediction[which(samPredData$Test.or.train == "train")]
@@ -140,7 +140,7 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   metMatrix[1,25] <- allRMSQDAvg
   metMatrix[1,26] <- allRMSQDStd
   
-  outMetsFile <- paste(outMetDir, "//metrics.csv", sep="")
+  outMetsFile <- paste(outMetDir, "/metrics.csv", sep="")
   out <- write.csv(metMatrix, outMetsFile, quote=F, row.names=F)
   
   #Ten percentile threshold
@@ -189,7 +189,7 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   threshMatrix[1,12] <- rcbThreshAvg
   threshMatrix[1,13] <- rcbThreshStd
   
-  outThresholdFile <- paste(outMetDir, "//thresholds.csv", sep="")
+  outThresholdFile <- paste(outMetDir, "/thresholds.csv", sep="")
   out <- write.csv(threshMatrix, outThresholdFile, quote=F, row.names=F)
   return("Done!")
 }
