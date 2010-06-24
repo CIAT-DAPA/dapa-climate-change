@@ -268,7 +268,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 		close.connection(opnFile)
 		
 		#Now copy the files
-		destName <- paste(destDir, "/mxe_outputs/sp-", spID, "/.", sep="")
+		destName <- paste(destDir, "/mxe_outputs/.", sep="")
 		if (OSys == "linux") {
 			system(paste("cp", "-rvf", outName, destName))
 			system(paste("rm", "-rvf", outName))
