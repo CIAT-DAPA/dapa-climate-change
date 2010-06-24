@@ -117,16 +117,16 @@ theEntireProcess <- function(spID, OSys, inputDir) {
     
     if (nOcc >= 40) {
 		cat("Fitting the model... (10 VAR) \n")
-		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "//model", sep=""), "-P", "-X", "0", "nowarnings", "-z"), wait=TRUE)
+		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/model", sep=""), "-P", "-X", "0", "nowarnings", "-a", "-z"), wait=TRUE)
 		
 		cat("Crossvalidating the model...(10 VAR) \n")
-		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "//crossval", sep=""), "-P", "replicates=10", "replicatetype=crossvalidate", "nowarnings", "-z"), wait=TRUE)
+		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=10", "replicatetype=crossvalidate", "nowarnings", "-a", "-z"), wait=TRUE)
 	} else {
 		cat("Fitting the model... (6 VAR)\n")
-		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "//model", sep=""), "-N bio_5 -N bio_6 -N bio_16 -N bio_17", "-P", "-X", "0", "nowarnings", "-z"), wait=TRUE)
+		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/model", sep=""), "-N bio_5 -N bio_6 -N bio_16 -N bio_17", "-P", "-X", "0", "nowarnings", "-a", "-z"), wait=TRUE)
 		
 		cat("Crossvalidating the model... (6 VAR)\n")
-		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "//crossval", sep=""), "-N bio_5 -N bio_6 -N bio_16 -N bio_17", "-P", "replicates=10", "replicatetype=crossvalidate", "nowarnings", "-z"), wait=TRUE)
+		system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-N bio_5 -N bio_6 -N bio_16 -N bio_17", "-P", "replicates=10", "replicatetype=crossvalidate", "nowarnings", "-a", "-z"), wait=TRUE)
 	}
     
     if (file.exists(paste(outName, "/model/", spID,".lambdas", sep=""))) {
