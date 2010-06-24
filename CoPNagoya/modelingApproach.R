@@ -64,9 +64,9 @@ source("getMetrics.R")
 ###############################################################################################
 ###############################################################################################
 
-theEntireProcess <- function(spID, OSys, inputDir) {
+theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 	
-	verFile <- paste(inputDir, "/mxe_outputs/sp-", spID, "/ps-", spID, ".run", sep="")
+	verFile <- paste(destDir, "/mxe_outputs/sp-", spID, "/ps-", spID, ".run", sep="")
 	
 	if (!file.exists(verFile)) {
 		
@@ -267,6 +267,18 @@ theEntireProcess <- function(spID, OSys, inputDir) {
 		cat("Modeled on", date(), file=opnFile)
 		close.connection(opnFile)
 		
+		#Now copy the files
+		destName <- paste(destDir, "/mxe_outputs/sp-", spID, "/.", sep="")
+		if (Osys == "linux") {
+			system(paste("cp", "-rvf", outName, destName))
+			system(paste("rm", "-rvf", outName)
+		} else {
+			system(paste("copy", "/Y", outName, destName))
+			system(paste("del", outName))
+		}
+		
+		system(
+		
 		return("Done")
 	  } else {
 		cat("The occurrence file does not exist! \n")
@@ -279,10 +291,13 @@ theEntireProcess <- function(spID, OSys, inputDir) {
 
 #Initial stuff
 
+#setOptions(overwrite=T)
 #idir <- "C:/CIAT_work/COP_CONDESAN"
+#ddir <- "/mnt/GeoData/COP_CONDESAN"
 #outp <- NagoyaProcess(idir, 1, 10)
+#setOptions(overwrite=T)
 
-NagoyaProcess <- function(inputDir, ini, fin) {
+NagoyaProcess <- function(inputDir, destDir, ini, fin) {
 	
 	ufile <- paste(inputDir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")
 	ufile <- read.csv(ufile)
@@ -298,7 +313,7 @@ NagoyaProcess <- function(inputDir, ini, fin) {
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- theEntireProcess(sp, "LINUX", inputDir)
+		out <- theEntireProcess(sp, "LINUX", inputDir, destDir)
 		sppC <- sppC + 1
 	}
 	
