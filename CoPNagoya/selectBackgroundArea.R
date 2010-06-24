@@ -5,22 +5,30 @@
 require(rgdal)
 require(raster)
   
-selectBack <- function(occFile, outBackName, backFilesDir) {
+selectBack <- function(occFile, outBackName, msk, backFilesDir) {
+  
+  zones <- c(1:5)
+  countries <- c("ven","col","ecu","per","bol")
+  
+  zonM <- as.data.frame(cbind(zones,countries))
+  names(zonM) <- c("Zones", "Countries")
   
   if (file.exists(occFile)) {
     cat("Selecting...\n")
     spData <- read.csv(occFile)
     
-    globZonesFile <- paste(backFilesDir, "//backselection.asc", sep="")
-    globZones <- raster(globZonesFile)
+    #globZonesFile <- raster(msk) #paste(backFilesDir, "/backselection.asc", sep="")
+    globZones <- raster(msk)
     
     occZones <- xyValues(globZones, spData[,2:3])
     occZones <- occZones[which(!is.na(occZones[]))]
     uniqueOccZones <- unique(occZones)
-    
+	
     if (length(uniqueOccZones) == 1) {
       zone <- uniqueOccZones
-      backFile <- paste(backFilesDir, "//backsamples_z", zone, ".csv", sep="")
+	  ctry <- zonM$Countries[which(zonM$Zones == zone)]
+	  
+      backFile <- paste(backFilesDir, "/z", zone, "_", ctry, "_25m_clm.csv", sep="")
       backPts <- read.csv(backFile)
       finalBackPts <- backPts
       out <- write.csv(finalBackPts, outBackName, quote=F, row.names=F)
@@ -35,7 +43,9 @@ selectBack <- function(occFile, outBackName, backFilesDir) {
       zCounter <- 1
       
       for (zone in uniqueOccZones) {
-        backFile <- paste(backFilesDir, "//backsamples_z", zone, ".csv", sep="")
+		ctry <- zonM$Countries[which(zonM$Zones == zone)]
+        backFile <- paste(backFilesDir, "/z", zone, "_", ctry, "_25m_clm.csv", sep="")
+		
         backPts <- read.csv(backFile)
         if (zCounter == 1) {
           backPoints <- backPts
