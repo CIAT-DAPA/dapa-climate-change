@@ -317,8 +317,6 @@ NagoyaProcess <- function(inputDir, destDir, ini, fin) {
 		sppC <- sppC + 1
 	}
 	
-	#Now move the data
-	
 	return("Done!")
 	
 }
