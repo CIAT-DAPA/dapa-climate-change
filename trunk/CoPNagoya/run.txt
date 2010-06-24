@@ -19,4 +19,4 @@ ddir <- "/mnt/GeoData/COP_CONDESAN"
 
 setOptions(overwrite=T)
 
-outp <- NagoyaProcess(idir, 1, 10)
+outp <- NagoyaProcess(idir, ddir, 1, 10)
