@@ -10,7 +10,7 @@ output <- createOccFiles(occ, spL, clDir, outDir, 4001, 8000)
 output <- createOccFiles(occ, spL, clDir, outDir, 8001, 12000)
 
 
-##############################################
+############# LINUX ########################
 
 require(raster)
 source("modelingApproach.R")
@@ -19,8 +19,12 @@ ddir <- "/mnt/GeoData/COP_CONDESAN"
 
 setOptions(overwrite=T)
 
-outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="NT")
+outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="LINUX")
 
-idir <- "W:/COP_CONDESAN/mxe_outputs/sp-100001"
-odir <- "C:/CIAT_work/_tools/sp-100001"
-system(paste("xcopy", "/E", "/I", gsub("/", "\\\\", idir), gsub("/", "\\\\", odir)))
+############# NT ########################
+
+source("modelingApproach.R")
+idir <- "E:/CoP_Nagoya"
+ddir <- "X:/COP_CONDESAN"
+
+outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="NT")
