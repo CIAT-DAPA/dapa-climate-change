@@ -19,4 +19,8 @@ ddir <- "/mnt/GeoData/COP_CONDESAN"
 
 setOptions(overwrite=T)
 
-outp <- NagoyaProcess(idir, ddir, 1, 10)
+outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="NT")
+
+idir <- "W:/COP_CONDESAN/mxe_outputs/sp-100001"
+odir <- "C:/CIAT_work/_tools/sp-100001"
+system(paste("xcopy", "/E", "/I", gsub("/", "\\\\", idir), gsub("/", "\\\\", odir)))
