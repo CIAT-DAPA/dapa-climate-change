@@ -29,7 +29,7 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   someMets <- matrix(ncol=11, nrow=(nFolds+1))
   
   for (fold in 0:nFolds) {
-    cat("Fold", fold, "\n")
+    #cat("Fold", fold, "\n")
     #Loading basic files
     
     backPredFile <- paste(crossValDir, "/", foldSuffix, "_", fold, ".csv", sep="")
