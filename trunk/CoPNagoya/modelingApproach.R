@@ -68,6 +68,8 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 	
 	verFile <- paste(destDir, "/mxe_outputs/sp-", spID, "/ps-", spID, ".run", sep="")
 	
+	OSys <- tolower(OSys)
+	
 	if (!file.exists(verFile)) {
 		
 		if (file.exists(paste(inputDir, "/mxe_outputs/sp-", spID, sep=""))) {
@@ -248,8 +250,6 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 		
 		#Compressing everything within the projection dir
 		
-		OSys <- tolower(OSys)
-		
 		ftoZIP <- list.files(paste(outName, "/projections/", sep=""), pattern=".asc")
 		for (fz in ftoZIP) {
 			fName <- paste(outName, "/projections/", fz, sep="")
@@ -268,13 +268,16 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 		close.connection(opnFile)
 		
 		#Now copy the files
-		destName <- paste(destDir, "/mxe_outputs/.", sep="")
 		if (OSys == "linux") {
+			destName <- paste(destDir, "/mxe_outputs/.", sep="")
 			system(paste("cp", "-rvf", outName, destName))
 			system(paste("rm", "-rvf", outName))
 		} else {
-			system(paste("copy", "/Y", outName, destName))
-			system(paste("del", outName))
+			destName <- paste(destDir, "/mxe_outputs/sp-", spID, sep="")
+			idir <- gsub("/", "\\\\", outName)
+			odir <- gsub("/", "\\\\", destName)
+			system(paste("xcopy", "/E", "/I", idir, odir))
+			system(paste("rm", "-r", outName))
 		}
 		
 		return("Done")
@@ -292,10 +295,10 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 #setOptions(overwrite=T)
 #idir <- "C:/CIAT_work/COP_CONDESAN"
 #ddir <- "/mnt/GeoData/COP_CONDESAN"
-#outp <- NagoyaProcess(idir, ddir, 1, 10)
+#outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="NT")
 #setOptions(overwrite=T)
 
-NagoyaProcess <- function(inputDir, destDir, ini, fin) {
+NagoyaProcess <- function(inputDir, destDir, ini, fin, OSys="LINUX") {
 	
 	ufile <- paste(inputDir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")
 	ufile <- read.csv(ufile)
@@ -311,7 +314,7 @@ NagoyaProcess <- function(inputDir, destDir, ini, fin) {
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- theEntireProcess(sp, "LINUX", inputDir, destDir)
+		out <- theEntireProcess(sp, OSys, inputDir, destDir)
 		sppC <- sppC + 1
 	}
 	
