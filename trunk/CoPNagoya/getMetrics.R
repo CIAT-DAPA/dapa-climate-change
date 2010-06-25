@@ -29,7 +29,7 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   someMets <- matrix(ncol=11, nrow=(nFolds+1))
   
   for (fold in 0:nFolds) {
-    
+    cat("Fold", fold, "\n")
     #Loading basic files
     
     backPredFile <- paste(crossValDir, "/", foldSuffix, "_", fold, ".csv", sep="")
@@ -82,7 +82,11 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
     
     absDif <- abs(1-(Sens+Spec))
     
-    someMets[fold+1,11] <- logVals[which(absDif[] == min(absDif))]
+	if (length(logVals[which(absDif[] == min(absDif))]) > 1) {
+		someMets[fold+1,11] <- mean(logVals[which(absDif[] == min(absDif))])
+	} else {
+		someMets[fold+1,11] <- logVals[which(absDif[] == min(absDif))]
+	}
   }
   
   #Averaging the metrics

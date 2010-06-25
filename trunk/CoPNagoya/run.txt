@@ -19,12 +19,12 @@ ddir <- "/mnt/GeoData/COP_CONDESAN"
 
 setOptions(overwrite=T)
 
-outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="LINUX")
+outp <- NagoyaProcess(idir, ddir, 1, 12000, OSys="LINUX")
 
 ############# NT ########################
 
 source("modelingApproach.R")
-idir <- "E:/CoP_Nagoya"
+idir <- "C:/CoP_Nagoya"
 ddir <- "X:/COP_CONDESAN"
 
-outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="NT")
+outp <- NagoyaProcess(idir, ddir, 1, 12000, OSys="NT")
