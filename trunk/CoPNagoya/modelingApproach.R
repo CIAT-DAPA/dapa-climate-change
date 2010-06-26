@@ -95,7 +95,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 			inData <- read.csv(occFile)
 			nOcc <- nrow(inData)
 			
-			if (nOcc < 10) {
+			if (nOcc >= 10) {
 			
 				#3. Select background area
 				
