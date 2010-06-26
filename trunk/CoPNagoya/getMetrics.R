@@ -4,29 +4,34 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   
   cat("Metrics... \n")
   
-  nFolds <- nFolds - 1
-  
   crossValMxrFile <- paste(crossValDir, "/maxentResults.csv", sep="")
   crossValMxrData <- read.csv(crossValMxrFile)
   
   runMxrFile <- paste(absRunDir, "/maxentResults.csv", sep="")
   runMxrData <- read.csv(runMxrFile)
   
+  FoldsinFile <- nrow(crossValMxrData) - 1
+  
+  if (nFolds != FoldsinFile) {
+    nFolds <- FoldsinFile
+  }
+  
   #Number of samples
   
   totSamples <- runMxrData$X.Training.samples
-  trainSamples <- crossValMxrData$X.Training.samples[11]
-  testSamples <- crossValMxrData$X.Test.samples[11]
+  trainSamples <- crossValMxrData$X.Training.samples[nFolds+1]
+  testSamples <- crossValMxrData$X.Test.samples[nFolds+1]
   
   #AUC
   
-  trainAUCAvg <- crossValMxrData$Training.AUC[11]
-  trainAUCStd <- sd(crossValMxrData$Training.AUC[1:10])
-  testAUCAvg <- crossValMxrData$Test.AUC[11]
-  testAUCStd <- sd(crossValMxrData$Test.AUC[1:10])
+  trainAUCAvg <- crossValMxrData$Training.AUC[nFolds+1]
+  trainAUCStd <- sd(crossValMxrData$Training.AUC[1:nFolds])
+  testAUCAvg <- crossValMxrData$Test.AUC[nFolds+1]
+  testAUCStd <- sd(crossValMxrData$Test.AUC[1:nFolds])
   totalAUC <- runMxrData$Training.AUC
   
-  someMets <- matrix(ncol=11, nrow=(nFolds+1))
+  someMets <- matrix(ncol=11, nrow=(nFolds))
+  nFolds <- nFolds - 1
   
   for (fold in 0:nFolds) {
     #cat("Fold", fold, "\n")
@@ -89,6 +94,8 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
 	}
   }
   
+  nFolds <- nFolds + 1
+  
   #Averaging the metrics
   
   trainRAvg <- mean(someMets[,1])
@@ -148,8 +155,8 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   out <- write.csv(metMatrix, outMetsFile, quote=F, row.names=F)
   
   #Ten percentile threshold
-  tpThreshAvg <- crossValMxrData$X10.percentile.training.presence.logistic.threshold[11]
-  tpThreshStd <- sd(crossValMxrData$X10.percentile.training.presence.logistic.threshold[1:10])
+  tpThreshAvg <- crossValMxrData$X10.percentile.training.presence.logistic.threshold[nFolds+1]
+  tpThreshStd <- sd(crossValMxrData$X10.percentile.training.presence.logistic.threshold[1:nFolds])
   
   #Prevalence threshold
   prThreshAvg <- mean(someMets[,10])
@@ -159,16 +166,16 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   fxThresh <- 0.5
   
   #Maximum training sensitivity plus specificity
-  mspsThreshAvg <- mean(crossValMxrData$Maximum.training.sensitivity.plus.specificity.logistic.threshold[1:10])
-  mspsThreshStd <- sd(crossValMxrData$Maximum.training.sensitivity.plus.specificity.logistic.threshold[1:10])
+  mspsThreshAvg <- mean(crossValMxrData$Maximum.training.sensitivity.plus.specificity.logistic.threshold[1:nFolds])
+  mspsThreshStd <- sd(crossValMxrData$Maximum.training.sensitivity.plus.specificity.logistic.threshold[1:nFolds])
   
   #Equal training sensitivity and specificity
-  esasThreshAvg <- mean(crossValMxrData$Equal.training.sensitivity.and.specificity.logistic.threshold[1:10])
-  esasThreshStd <- sd(crossValMxrData$Equal.training.sensitivity.and.specificity.logistic.threshold[1:10])
+  esasThreshAvg <- mean(crossValMxrData$Equal.training.sensitivity.and.specificity.logistic.threshold[1:nFolds])
+  esasThreshStd <- sd(crossValMxrData$Equal.training.sensitivity.and.specificity.logistic.threshold[1:nFolds])
   
   #Balance training omission
-  btoThreshAvg <- mean(crossValMxrData$Balance.training.omission..predicted.area.and.threshold.value.logistic.threshold[1:10])
-  btoThreshStd <- sd(crossValMxrData$Balance.training.omission..predicted.area.and.threshold.value.logistic.threshold[1:10])
+  btoThreshAvg <- mean(crossValMxrData$Balance.training.omission..predicted.area.and.threshold.value.logistic.threshold[1:nFolds])
+  btoThreshStd <- sd(crossValMxrData$Balance.training.omission..predicted.area.and.threshold.value.logistic.threshold[1:nFolds])
   
   #ROC Curve based threshold (upper left corner prob.)
   rcbThreshAvg <- mean(someMets[,11])
