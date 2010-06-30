@@ -1,5 +1,7 @@
 /*Julian Ramirez, dawnpatrolmustaine@gmail.com
 
+/*AML to fill GCMs that do not have Tmin and Tmax data. Run this after GCMAveraging.aml, and run GCMAnomalies.aml after.
+
 &args scenario
 &sys cls
 &messages &off

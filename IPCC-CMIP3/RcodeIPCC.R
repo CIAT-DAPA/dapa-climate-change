@@ -1,16 +1,27 @@
 # Julian Ramirez, dawnpatrolmustaine@gmail.com
 # gcmdata <- NcToAscii(scenario="20C3M")
 
+#Code to transform NetCDF monthly datasets to ESRI Ascii raster files. This is the first script to run. This should be followed
+#by GCMVerification.R
+
+require(rgdal)
+require(raster)
+
 NcToAscii <- function(scenario='20C3M') {
+  
+  mths <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+  ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+  ndaymtx <- as.data.frame(cbind(mths, ndays))
+  names(ndaymtx) <- c("Month", "Ndays")
   
   if (!toupper(scenario) %in% c("20C3M","SRES_A1B","SRES_A2","SRES_B1")) {
     stop('Scenario', scenario, ' is not supported')
   }
   
-  gcm.char <- read.csv("F://climate_change//_scripts//gcm_chars.csv")
+  gcm.char <- read.csv("gcm_chars.csv")
   
-  basedir <- "F://climate_change//IPCC_CMIP3"
-  scendir <- paste(basedir, "//", scenario, sep="")
+  basedir <- "W:/climate_change/IPCC_CMIP3/"
+  scendir <- paste(basedir, "/", scenario, "/original", sep="")
   
   # Listing and looping the models
   
@@ -23,7 +34,7 @@ NcToAscii <- function(scenario='20C3M') {
     
     folder <- "multiyr_avgs"
     
-    workdir <- paste(scendir, "//", modname, "//", folder, sep="")
+    workdir <- paste(scendir, "/", modname, "/", folder, sep="")
     
     # Listing the periods to process
     
@@ -31,9 +42,9 @@ NcToAscii <- function(scenario='20C3M') {
     i <- 1
   
     for (period in perlist) {
-      datadir <- paste(workdir, "//", period, sep="")
-      filelist <- list.files(datadir, pattern="*.nc")
-      
+      datadir <- paste(workdir, "/", period, sep="")
+      filelist <- intersect(list.files(datadir, pattern=".nc"), list.files(datadir, pattern="prec_"))
+	  
       cat(paste("Processing period", period),"\n")
       	
       j <- 1
@@ -48,7 +59,10 @@ NcToAscii <- function(scenario='20C3M') {
         
         outasciiname <- paste(unlist(strsplit(filename, ".", fixed=T))[1], ".asc", sep="")
         varname <- unlist(strsplit(outasciiname, "_", fixed=T))[1]
-        
+        mth <- substring(unlist(strsplit(outasciiname, "_", fixed=T))[2], 1, 2)
+		
+		mlt <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
+		
         system(paste("gdal_translate -of AAIGrid -sds", filename, outasciiname, sep=" "))
         
         file.remove(paste(outasciiname, "1", sep=""))
@@ -80,11 +94,11 @@ NcToAscii <- function(scenario='20C3M') {
         rs2 <- raster(nrow=nRows, ncol=nCols, xmn=0, xmx=360, ymn=-90, ymx=90)
         rs2 <- resample(rs, rs2, method="ngb")
         
-        rs2 <- flip(rs2)
+        rs2 <- flip(rs2, direction="y")
         rs2 <- rotate(rs2)
         
         if (varname == "prec") {
-          rs2 <- rs2*86400
+          rs2 <- rs2*86400*(mlt)
         } else {
           rs2 <- rs2 - 272.15
         }
@@ -100,6 +114,6 @@ NcToAscii <- function(scenario='20C3M') {
     }
     m <- m + 1
   }
-  setwd("F://climate_change//_scripts")
+  setwd("C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3")
   return(gcm.char)
 }
