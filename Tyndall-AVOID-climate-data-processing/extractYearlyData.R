@@ -85,6 +85,6 @@ extractYearlyData <- function(indir, otdir, msk, iniYear, finYear) {
 	row.names(resmx) <- c(1:nrow(resmx))
 	resmx <- as.data.frame(resmx)
 	names(resmx) <- c("Site", "Year", "Month", "Variable", "MEAN", "STDEV", "MAX", "MIN")
-	otstats <- paste("F:/Workspace/Thailand-mike-laure/", zName, ".csv", sep="")
+	otstats <- paste("F:/Workspace/Thailand-mike-laure/", zName, "_", iniYear, "_", finYear, ".csv", sep="")
 	write.csv(resmx, otstats, row.names=F, quote=F)
 }
