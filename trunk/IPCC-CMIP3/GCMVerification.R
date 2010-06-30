@@ -1,6 +1,8 @@
 # Julian Ramirez, dawnpatrolmustaine@gmail.com
 # gcmdata <- NcToAscii(scenario="20C3M")
 
+#Script to create images from GCM data, run this after RcodeIPCC.R, and run GCMAveraging.aml after this script.
+
 CreateGCMImages <- function(scenario='20C3M') {
   
   if (!toupper(scenario) %in% c("20C3M","SRES_A1B","SRES_A2","SRES_B1")) {

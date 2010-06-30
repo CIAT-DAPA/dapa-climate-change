@@ -1,5 +1,8 @@
 /*Julian Ramirez, dawnpatrolmustaine@gmail.com
 
+/* AML to calculate an average climate scenario using all GCMs for further filling of tmin and tmax data
+/* Run this immediately after GCMVerification.R, and run GCMSubstitution.aml after this script.
+
 &args scenario
 &sys cls
 &messages &off

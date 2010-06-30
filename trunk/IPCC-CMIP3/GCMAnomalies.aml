@@ -1,5 +1,8 @@
 /*Julian Ramirez, dawnpatrolmustaine@gmail.com
 
+/*AML to calculate anomalies based on raw GCM data. This is the last AML, run this after GCMSubstitution.aml
+/*After doing this you can run any disaggregation or downscaling required.
+
 &args scenario
 &sys cls
 &messages &off
