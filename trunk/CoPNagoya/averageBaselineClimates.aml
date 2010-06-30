@@ -14,10 +14,11 @@
 		&ty '&RUN averageGCMAnomalies.aml INDIR OUTDIR TIMESLICE GCMLIST'
 		&if [show program] EQ GRID &then QUIT
 		&if [exists log -file] &then &sys del log
+		&ty
 		&return
 	&end
 
-&s varlist prec,tmin,tmax,tmean
+&s varlist prec,tmean
 &s nvars [token %varlist% -count]
 
 &do v = 1 &to %nvars%
@@ -28,6 +29,8 @@
 	&ty Processing %varname%
 	
 	&do i = 1 &to 12
+		
+		&if %i% LT 10 &then &s i 0%i%
 		
 		&ty Month %i%
 		
