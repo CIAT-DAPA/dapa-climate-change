@@ -3,19 +3,19 @@
 /*AML to calculate anomalies based on raw GCM data. This is the last AML, run this after GCMSubstitution.aml
 /*After doing this you can run any disaggregation or downscaling required.
 
-&args scenario
+&args scenario unit
 &sys cls
 &messages &off
 /*&echo &on
 
-&if [null %scenario%] &then &return Not valid scenario
+&if [null %scenario%] or [null %unit%] &then &return Not valid scenario
 
 &if [show program] ne GRID &then GRID
 
 &amlpath .
 &s amldir [show &amlpath]
 
-&s rootdir F:\climate_change\IPCC_CMIP3
+&s rootdir %unit%:\climate_change\IPCC_CMIP3
 &s scendir %rootdir%\%scenario%
 
 &s rootout %scendir%\anomalies
