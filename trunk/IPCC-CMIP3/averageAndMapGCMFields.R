@@ -1,5 +1,5 @@
 #Julian Ramirez, dawnpatrolmustaine@gmail.com
-#ot <- mapGCMFields(c(1,5,10,15,4), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_A1B", "anomalies", "2010_2039", xn=-80, xx=-50, yn=-30, yx=20, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp")
+#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_A1B", "anomalies", "2040_2069", xn=-83, xx=-66, yn=-21, yx=2, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F)
 
 require(sp)
 require(rgdal)
@@ -29,7 +29,7 @@ cat("IMPORTANT INFORMATION!!! \n")
 cat("\n")
 cat("The function mapGCMFields has become available, use it as follows \n")
 cat("\n")
-cat("mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, yn=-90, yx=90, wt=5, worldshapefile) \n")
+cat("mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, yn=-90, yx=90, wt=5, worldshapefile, temp=T, prec=T) \n")
 cat("\n")
 cat("\n")
 cat("Where: \n")
@@ -42,9 +42,11 @@ cat("*** [period] can be 2010_2039, 2020_2049, 2030_2059, 2040_2069, 2050_2079, 
 cat("*** [xn], [xx], [yn], [yx] are the limits (xmin, xmax, ymin, ymax) of the bounding box you intend to plot \n")
 cat("*** [wt] is the width in inches of the plot (multi-page PDF plots) \n")
 cat("*** [worldshapefile] is a shapefile of administrative boundaries of the world, not used if none provided \n")
+cat("*** [temp=T/F] logical, will map temperature data if TRUE \n")
+cat("*** [prec=T/F] logical, will map precipitation data if TRUE \n")
 cat("\n")
 
-mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30, xx=30, yn=-40, yx=40, wt=5, worldshapefile) {
+mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30, xx=30, yn=-40, yx=40, wt=5, worldshapefile, temp=T, prec=T) {
 	#Checking the list makes sense
 	
 	if (!is.numeric(gcmList)) {
@@ -138,6 +140,23 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		stop('Plot width too large, use values between 4 and 15 inches')
 	}
 	
+	#Selecting np based on variables switches
+	if (prec & temp) {
+		np <- 2
+		varList <- c("tmean", "prec")
+		suf <- "TP"
+	} else if (prec & !temp) {
+		np <- 1
+		varList <- c("prec")
+		suf <- "P"
+	} else if (!prec & temp) {
+		np <- 1
+		varList <- c("tmean")
+		suf <- "T"
+	} else if (!prec & !temp) {
+		stop("At least one of the variables needs to be ON")
+	}
+	
 	cat("\n")
 	cat("Selected models are: \n")
 	cat("\n")
@@ -152,11 +171,9 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	} else {
 		cat("World shapefile not provided, so wont be used... \n")
 	}
-
+	
 	inputDir <- paste(indir, "/", scenario, sep="")
 	typeDir <- paste(inputDir, "/", type, sep="")
-
-	varList <- c("tmean", "prec")
 
 	#Creating the base raster
 	cat("Creating the base raster... \n")
@@ -171,7 +188,6 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	rsa <- crop(rs, xt)
 	rel <- ncol(rsa)/nrow(rsa)
 	
-	np <- 2
 	ht <- wt/rel
 	ht <- ht/np
 	
@@ -181,7 +197,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 
 	#Creating the figure (PDF format)
 	cat("Creating the figure with characteristics... \n")
-	pdf(paste("Figs_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gsub("_","",scenario), "_", gsub("_", "-", period), ".pdf", sep=""), width=wt, height=ht, pointsize=pz)
+	pdf(paste("Figs_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".pdf", sep=""), width=wt, height=ht, pointsize=pz)
 	par(mfrow=c(1,np))
 
 	gcmctr <- 1
@@ -218,55 +234,73 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 					}
 				}
 				
-				if (vr == "tmean") {
+				if (prec & temp) {
+					if (vr == "tmean") {
+						p1 <- resVals / 12
+					} else {
+						p12 <- resVals
+					}
+				} else if (temp & !prec) {
 					p1 <- resVals / 12
-				} else {
+				} else if (!temp & prec) {
 					p12 <- resVals
+				} else {
+					stop("At least one of the variables needs to be ON")
 				}
 			}
 			
 			cat("   .Temperature and Rainfall rasters \n")
 			
-			p1r <- raster(rs)
-			p1r[] <- p1
-			p1r <- crop(p1r, xt)
-			rm(p1)
-			
-			p12r <- raster(rs)
-			p12r[] <- p12
-			p12r <- crop(p12r, xt)
-			rm(p12)
-			
-			cat("   .Plotting AMT raster \n")
-			plot(p1r, col=heat.colors(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Mean temperature (°C)")
-			if (file.exists(worldshapefile)) {
-				plot(sh, add=T)
+			if (temp) {
+				p1r <- raster(rs)
+				p1r[] <- p1
+				p1r <- crop(p1r, xt)
+				rm(p1)
+				cat("   .Plotting AMT raster \n")
+				plot(p1r, col=heat.colors(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Mean temperature (°C)")
+				if (file.exists(worldshapefile)) {
+					plot(sh, add=T)
+				}
 			}
 			
-			cat("   .Plotting TAR raster \n")
-			plot(p12r, col=rainbow(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Total precipitation (mm/year)")
-			if (file.exists(worldshapefile)) {
-				plot(sh, add=T)
+			if (prec) {
+				p12r <- raster(rs)
+				p12r[] <- p12
+				p12r <- crop(p12r, xt)
+				rm(p12)
+				cat("   .Plotting TAR raster \n")
+				plot(p12r, col=rainbow(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Total precipitation (mm/year)")
+				if (file.exists(worldshapefile)) {
+					plot(sh, add=T)
+				}
 			}
 			
 			if (gcmctr == 1) {
 				cat("   .MultiModel stack (1) \n")
-				assign(paste("p1m", gcmctr, sep=""), p1r)
-				p1List <- get(paste("p1m", gcmctr, sep=""))
-				rm(p1r)
+				if (temp) {
+					assign(paste("p1m", gcmctr, sep=""), p1r)
+					p1List <- get(paste("p1m", gcmctr, sep=""))
+					rm(p1r)
+				}
 				
-				assign(paste("p12m", gcmctr, sep=""), p12r)
-				p12List <- get(paste("p12m", gcmctr, sep=""))
-				rm(p12r)
+				if (prec) {
+					assign(paste("p12m", gcmctr, sep=""), p12r)
+					p12List <- get(paste("p12m", gcmctr, sep=""))
+					rm(p12r)
+				}
 			} else {
 				cat("   .MultiModel stack \n")
-				assign(paste("p1m", gcmctr, sep=""), p1r)
-				p1List <- c(p1List, get(paste("p1m", gcmctr, sep="")))
-				rm(p1r)
+				if (temp) {
+					assign(paste("p1m", gcmctr, sep=""), p1r)
+					p1List <- c(p1List, get(paste("p1m", gcmctr, sep="")))
+					rm(p1r)
+				}
 				
-				assign(paste("p12m", gcmctr, sep=""), p12r)
-				p12List <- c(p12List, get(paste("p12m", gcmctr, sep="")))
-				rm(p12r)
+				if (prec) {
+					assign(paste("p12m", gcmctr, sep=""), p12r)
+					p12List <- c(p12List, get(paste("p12m", gcmctr, sep="")))
+					rm(p12r)
+				}
 			}
 			
 			gcmctr <- gcmctr+1
@@ -281,35 +315,44 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	cat("Finalizing MultiModel calculations \n")
 
 	fun <- function(x) { sd(x) }
-
-	cat("   .Temperature mean \n")
-	p1m <- mean(stack(p1List))
-	cat("   .Temperature std \n")
-	p1sd <- calc(stack(p1List),fun)
-	cat("   .Precipitation mean \n")
-	p12m <- mean(stack(p12List))
-	cat("   .Precipitation std \n")
-	p12sd <- calc(stack(p12List),fun)
+	
+	if (temp) {
+		cat("   .Temperature mean \n")
+		p1m <- mean(stack(p1List))
+		cat("   .Temperature std \n")
+		p1sd <- calc(stack(p1List),fun)
+	}
+	
+	if (prec) {
+		cat("   .Precipitation mean \n")
+		p12m <- mean(stack(p12List))
+		cat("   .Precipitation std \n")
+		p12sd <- calc(stack(p12List),fun)
+	}
 
 	cat("\n")
 	cat("Plotting \n")
-
-	plot(p1m, col=heat.colors(1000), main="MultiModelMean", sub="Temperature (°C)")
-	if (file.exists(worldshapefile)) {
-		plot(sh, add=T)
+	
+	if (temp) {
+		plot(p1m, col=heat.colors(1000), main="MultiModelMean", sub="Temperature (°C)")
+		if (file.exists(worldshapefile)) {
+			plot(sh, add=T)
+		}
+		plot(p1sd, col=topo.colors(1000), main="MultiModelSD", sub="Temperature (°C)")
+		if (file.exists(worldshapefile)) {
+			plot(sh, add=T)
+		}
 	}
-	plot(p1sd, col=topo.colors(1000), main="MultiModelSD", sub="Temperature (°C)")
-	if (file.exists(worldshapefile)) {
-		plot(sh, add=T)
-	}
-
-	plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Precipitation (mm)")
-	if (file.exists(worldshapefile)) {
-		plot(sh, add=T)
-	}
-	plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Precipitation (mm)")
-	if (file.exists(worldshapefile)) {
-		plot(sh, add=T)
+	
+	if (prec) {
+		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Precipitation (mm)")
+		if (file.exists(worldshapefile)) {
+			plot(sh, add=T)
+		}
+		plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Precipitation (mm)")
+		if (file.exists(worldshapefile)) {
+			plot(sh, add=T)
+		}
 	}
 
 	dev.off()
