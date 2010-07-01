@@ -54,7 +54,7 @@ mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, y
 -wt: Numeric. Width in inches of the plot (multi-page PDF plots). Big numbers will cause the PDF to be very heavy, so in this script we have limited the width between 5 and 15 inches.
 -worldshapefile: String. Path to the shapefile of administrative boundaries of the world, not used if none provided or if the one provided does not exist in your file system.
 -temp: Logical (T/F). Will map temperature data if TRUE
--prec: Logical (T/F). Will map precipitation data if TRUE \n")
+-prec: Logical (T/F). Will map precipitation data if TRUE
 
 
 RESULT
@@ -64,6 +64,6 @@ A PDF file with each page containing the average predicted temperature and rainf
 
 Naming of the PDF file is done as follows:
 
-"Figs_[xn]WE[xx]WE[yn]NS[yx]NS_[type]_[scenario]_[period].pdf"
+"Figs_[xn]WE[xx]WE[yn]NS[yx]NS_[type]_[scenario]_[period]_[T/P/TP].pdf"
 
 Where the stuff in brackets are parameters of the function, explained in the USAGE section of this document.

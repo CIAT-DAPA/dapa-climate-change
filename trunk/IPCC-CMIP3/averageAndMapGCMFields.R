@@ -1,5 +1,5 @@
 #Julian Ramirez, dawnpatrolmustaine@gmail.com
-#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_A1B", "anomalies", "2040_2069", xn=-83, xx=-66, yn=-21, yx=2, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F)
+#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_B1", "anomalies", "2010_2039", xn=-83, xx=-66, yn=-21, yx=2, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F)
 
 require(sp)
 require(rgdal)
