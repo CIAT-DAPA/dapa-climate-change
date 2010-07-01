@@ -56,7 +56,7 @@
 					
 					&s infile %rootout%\%period%\%varname%_%mth%
 					
-					&s modlist [listfile %scendir%\*_* -dir]
+					&s modlist [listfile %scendir%\original\*_* -dir]
 					&s nmod [token %modlist% -count]
 					
 					&s mdl 1
