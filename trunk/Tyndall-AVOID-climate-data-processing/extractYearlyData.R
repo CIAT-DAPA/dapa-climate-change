@@ -9,7 +9,7 @@ extractYearlyData <- function(indir, msk, statsdir, iniYear, finYear) {
 	msk <- raster(msk)
 	
 	fnm <- gsub("/", "_", indir)
-	fnm <- substr(fnm, 3, nchar(fnm))
+	fnm <- substr(fnm, 4, nchar(fnm))
 	
 	coords <- xyFromCell(msk, which(!is.na(msk[])))
 	
@@ -49,6 +49,6 @@ extractYearlyData <- function(indir, msk, statsdir, iniYear, finYear) {
 	row.names(resmx) <- c(1:nrow(resmx))
 	resmx <- as.data.frame(resmx)
 	names(resmx) <- c("Site", "Year", "Month", "Variable", "MEAN", "STDEV", "MAX", "MIN")
-	otstats <- paste(statsdir, "/", zName, "_", iniYear, "_", finYear, ".csv", sep="")
+	otstats <- paste(statsdir, "/", zName, "_", fnm, "_", iniYear, "_", finYear, ".csv", sep="")
 	write.csv(resmx, otstats, row.names=F, quote=F)
 }
