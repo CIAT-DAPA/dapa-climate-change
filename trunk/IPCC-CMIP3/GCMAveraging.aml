@@ -8,7 +8,7 @@
 &messages &off
 /*&echo &on
 
-&if [null %scenario%] &then &return Not valid scenario
+&if [null %scenario%] or [null %unit%] &then &return Not valid scenario
 
 &if [show program] ne GRID &then GRID
 

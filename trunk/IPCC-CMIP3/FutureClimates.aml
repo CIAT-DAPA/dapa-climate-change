@@ -1,26 +1,26 @@
 /*Julian Ramirez, dawnpatrolmustaine@gmail.com
 
-/* This scripts performs a disaggregation to 5min, run it at any point. Though this is not necessary, since the 30s disaggregation will cover
+/* This script performs a disaggregation to 5min, run it at any point. Though this is not necessary, since the 30s disaggregation will cover
 /* for this one.
 
-&args scenario
+&args scenario unit
 &sys cls
 &messages &off
 /*&echo &on
 
-&if [null %scenario%] &then &return Not valid scenario
+&if [null %scenario%] or [null %unit%] &then &return Not valid scenario
 
 &if [show program] ne GRID &then GRID
 
 &amlpath .
 &s amldir [show &amlpath]
 
-&s rootdir F:\climate_change\IPCC_CMIP3
+&s rootdir %unit%:\climate_change\IPCC_CMIP3
 &s scendir %rootdir%\%scenario%
 
 &s currdir C:\CIAT_work\cc_impact_crops\5min_climatic_data\current
 
-&s mask F:\climate_change\masks\global
+&s mask %unit%:\climate_change\masks\global
 
 &s rootout %scendir%\future
 &if not [exists %rootout% -dir] &then &sys md %rootout%
