@@ -65,7 +65,7 @@
 						
 						&s modname [extract %mod% %modlist%]
 						
-						&s modelmask %scendir%\%modname%\multiyr_avgs\%period%\prec_01
+						&s modelmask %scendir%\original\%modname%\multiyr_avgs\%period%\prec_01
 						
 						&ty Model %modname%
 						

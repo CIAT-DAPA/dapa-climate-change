@@ -1,7 +1,11 @@
 # Julian Ramirez, dawnpatrolmustaine@gmail.com
-# gcmdata <- NcToAscii(scenario="20C3M")
+# gcmdata <- CreateGCMImages(scenario="20C3M")
 
 #Script to create images from GCM data, run this after RcodeIPCC.R, and run GCMAveraging.aml after this script.
+
+require(sp)
+require(rgdal)
+require(raster)
 
 CreateGCMImages <- function(scenario='20C3M') {
   
@@ -9,13 +13,13 @@ CreateGCMImages <- function(scenario='20C3M') {
     stop('Scenario', scenario, ' is not supported')
   }
   
-  imagedir <- paste("F://climate_change//_scripts//", scenario, sep="")
+  imagedir <- paste("W:/climate_change/_scripts/", scenario, sep="")
   if (!file.exists(imagedir)) {
     dir.create(imagedir)
   }
   
-  basedir <- "F://climate_change//IPCC_CMIP3"
-  scendir <- paste(basedir, "//", scenario, sep="")
+  basedir <- "W:/climate_change/IPCC_CMIP3"
+  scendir <- paste(basedir, "/", scenario, "/original", sep="")
   
   # Listing and looping the models
   
@@ -24,7 +28,7 @@ CreateGCMImages <- function(scenario='20C3M') {
   
   for (modname in modlist) {
     
-    outmoddir <- paste(imagedir, "//", modname, sep="")
+    outmoddir <- paste(imagedir, "/", modname, sep="")
     
     if (!file.exists(outmoddir)) {
       dir.create(outmoddir)
@@ -34,7 +38,7 @@ CreateGCMImages <- function(scenario='20C3M') {
     
     folder <- "multiyr_avgs"
     
-    workdir <- paste(scendir, "//", modname, "//", folder, sep="")
+    workdir <- paste(scendir, "/", modname, "/", folder, sep="")
     
     # Listing the periods to process
     
@@ -43,7 +47,7 @@ CreateGCMImages <- function(scenario='20C3M') {
   
     for (period in perlist) {
       
-      datadir <- paste(workdir, "//", period, sep="")
+      datadir <- paste(workdir, "/", period, sep="")
       filelist <- list.files(datadir, pattern="*.asc")
       
       toproc <- which(nchar(filelist) <= 12)
@@ -52,7 +56,7 @@ CreateGCMImages <- function(scenario='20C3M') {
       cat(paste("Processing period", period),"\n")
       setwd(datadir)
       
-      outdir <- paste(outmoddir, "//", period, sep="")
+      outdir <- paste(outmoddir, "/", period, sep="")
       if (!file.exists(outdir)) {
         dir.create(outdir)
       }
@@ -66,7 +70,7 @@ CreateGCMImages <- function(scenario='20C3M') {
         paste(unlist(strsplit(filename, ".", fixed=T))[1], ".asc", sep="")
         
         rs <- raster(filename)
-        jpeg(paste(outdir, "//", unlist(strsplit(filename, ".", fixed=T))[1], ".jpg", sep=""))
+        jpeg(paste(outdir, "/", unlist(strsplit(filename, ".", fixed=T))[1], ".jpg", sep=""))
         plot(rs)
         dev.off()
       }
@@ -75,6 +79,6 @@ CreateGCMImages <- function(scenario='20C3M') {
     }
     m <- m + 1
   }
-  setwd("F://climate_change//_scripts")
+  setwd("C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3")
   return("Done!")
 }
