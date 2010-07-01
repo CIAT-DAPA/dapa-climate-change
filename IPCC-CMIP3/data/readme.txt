@@ -39,7 +39,7 @@ mapGCMFields()
 
 With the following arguments:
 
-mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, yn=-90, yx=90, wt=5, worldshapefile)
+mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, yn=-90, yx=90, wt=5, worldshapefile, temp=T, prec=T)
 
 -gcmList: Numeric vector. Indicates the number of the GCMs to be displayed, eg. c(1,2,4,6,10,20). This list of GCMs will be automatically displayed after sourcing the script.
 -drive: String. Is the drive letter where the data is stored (eg. W:/). The standard structure the script will follow is [drive]/climate_change/IPCC_CMIP3/
@@ -53,6 +53,8 @@ mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, y
 -yx: Numeric. Maximum latitude of the bounding box (square area of the world) you want to graph. Should not be less than 90 degrees.
 -wt: Numeric. Width in inches of the plot (multi-page PDF plots). Big numbers will cause the PDF to be very heavy, so in this script we have limited the width between 5 and 15 inches.
 -worldshapefile: String. Path to the shapefile of administrative boundaries of the world, not used if none provided or if the one provided does not exist in your file system.
+-temp: Logical (T/F). Will map temperature data if TRUE
+-prec: Logical (T/F). Will map precipitation data if TRUE \n")
 
 
 RESULT
