@@ -61,27 +61,27 @@
 					
 					/* Mean temperature
 					
-					&if [exists %rootout%\%modname%\%timeslice%\tmean_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmean_%m% all
-					%rootout%\%modname%\%timeslice%\tmean_%m% = %scendir%\filled\%modname%\%timeslice%\tmean_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmean_%mth%
-					
-					&if [exists %rootout%\%modname%\%timeslice%\tmean_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmean_%m%.asc -file]
-					%rootout%\%modname%\%timeslice%\tmean_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmean_%m%)
-					
-					/* Minimum temperature
-					
-					&if [exists %rootout%\%modname%\%timeslice%\tmin_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmin_%m% all
-					%rootout%\%modname%\%timeslice%\tmin_%m% = %scendir%\filled\%modname%\%timeslice%\tmin_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmin_%mth%
-					
-					&if [exists %rootout%\%modname%\%timeslice%\tmin_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmin_%m%.asc -file]
-					%rootout%\%modname%\%timeslice%\tmin_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmin_%m%)
-					
-					/* Maximum temperature
-					
-					&if [exists %rootout%\%modname%\%timeslice%\tmax_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmax_%m% all
-					%rootout%\%modname%\%timeslice%\tmax_%m% = %scendir%\filled\%modname%\%timeslice%\tmax_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmax_%mth%
-					
-					&if [exists %rootout%\%modname%\%timeslice%\tmax_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmax_%m%.asc -file]
-					%rootout%\%modname%\%timeslice%\tmax_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmax_%m%)
+					/*&if [exists %rootout%\%modname%\%timeslice%\tmean_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmean_%m% all
+					/*%rootout%\%modname%\%timeslice%\tmean_%m% = %scendir%\filled\%modname%\%timeslice%\tmean_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmean_%mth%
+					/*
+					/*&if [exists %rootout%\%modname%\%timeslice%\tmean_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmean_%m%.asc -file]
+					/*%rootout%\%modname%\%timeslice%\tmean_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmean_%m%)
+					/*
+					/*/* Minimum temperature
+					/*
+					/*&if [exists %rootout%\%modname%\%timeslice%\tmin_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmin_%m% all
+					/*%rootout%\%modname%\%timeslice%\tmin_%m% = %scendir%\filled\%modname%\%timeslice%\tmin_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmin_%mth%
+					/*
+					/*&if [exists %rootout%\%modname%\%timeslice%\tmin_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmin_%m%.asc -file]
+					/*%rootout%\%modname%\%timeslice%\tmin_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmin_%m%)
+					/*
+					/*/* Maximum temperature
+					/*
+					/*&if [exists %rootout%\%modname%\%timeslice%\tmax_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmax_%m% all
+					/*%rootout%\%modname%\%timeslice%\tmax_%m% = %scendir%\filled\%modname%\%timeslice%\tmax_%mth% - %rootdir%\20C3M\filled\%modname%\1961_1990\tmax_%mth%
+					/*
+					/*&if [exists %rootout%\%modname%\%timeslice%\tmax_%m%.asc -file] &then &s delstat [delete %rootout%\%modname%\%timeslice%\tmax_%m%.asc -file]
+					/*%rootout%\%modname%\%timeslice%\tmax_%m%.asc = GRIDASCII(%rootout%\%modname%\%timeslice%\tmax_%m%)
 					
 				&end
 				
