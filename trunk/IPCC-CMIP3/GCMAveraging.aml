@@ -3,7 +3,7 @@
 /* AML to calculate an average climate scenario using all GCMs for further filling of tmin and tmax data
 /* Run this immediately after GCMVerification.R, and run GCMSubstitution.aml after this script.
 
-&args scenario
+&args scenario unit
 &sys cls
 &messages &off
 /*&echo &on
@@ -15,7 +15,7 @@
 &amlpath .
 &s amldir [show &amlpath]
 
-&s rootdir W:\climate_change\IPCC_CMIP3
+&s rootdir %unit%:\climate_change\IPCC_CMIP3
 &s scendir %rootdir%\%scenario%
 
 &s rootout %scendir%\average
