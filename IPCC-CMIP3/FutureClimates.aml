@@ -1,5 +1,8 @@
 /*Julian Ramirez, dawnpatrolmustaine@gmail.com
 
+/* This scripts performs a disaggregation to 5min, run it at any point. Though this is not necessary, since the 30s disaggregation will cover
+/* for this one.
+
 &args scenario
 &sys cls
 &messages &off

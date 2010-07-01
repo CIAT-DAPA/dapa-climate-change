@@ -7,7 +7,10 @@ extractYearlyData <- function(indir, msk, statsdir, iniYear, finYear) {
 	zName <- zName[length(zName)]
 	zName <- unlist(strsplit(zName, ".", fixed=T))[1]
 	msk <- raster(msk)
-
+	
+	fnm <- gsub("/", "_", indir)
+	fnm <- substr(fnm, 3, nchar(fnm))
+	
 	coords <- xyFromCell(msk, which(!is.na(msk[])))
 	
 	vars <- c("dtr","tmp","pre")

@@ -15,13 +15,13 @@
 &amlpath .
 &s amldir [show &amlpath]
 
-&s rootdir F:\climate_change\IPCC_CMIP3
+&s rootdir W:\climate_change\IPCC_CMIP3
 &s scendir %rootdir%\%scenario%
 
 &s rootout %scendir%\average
 &if not [exists %rootout% -dir] &then &sys md %rootout%
 
-&s perlist [listfile %scendir%\bccr_bcm2_0\multiyr_avgs\*_* -dir]
+&s perlist [listfile %scendir%\original\bccr_bcm2_0\multiyr_avgs\*_* -dir]
 &s nper [token %perlist% -count]
 
 &do per = 1 &to %nper%
@@ -39,7 +39,7 @@
 			&s openfile [OPEN %outperiod%\nmod_averages.txt OPENSTATUS -WRITE]
 			&s writerow [WRITE %openfile% PERIOD'	'VARIABLE'	'MONTH'	'NMOD]
 			
-			&s varlist [listfile %scendir%\bccr_bcm2_0\multiyr_avgs\%period%\*_01.asc -file]
+			&s varlist prec /*[listfile %scendir%\original\bccr_bcm2_0\multiyr_avgs\%period%\*_01.asc -file]
 			&s nvars [token %varlist% -count]
 			
 			&do var = 1 &to %nvars%
@@ -60,7 +60,7 @@
 					
 					&s outfile %outperiod%\%varname%_%mth%
 					
-					&s modlist [listfile %scendir%\*_* -dir]
+					&s modlist [listfile %scendir%\original\*_* -dir]
 					&s nmod [token %modlist% -count]
 					
 					&s mdl 1
@@ -71,7 +71,7 @@
 						
 						&ty Model %modname%
 						
-						&s infile %scendir%\%modname%\multiyr_avgs\%period%\%varname%_%mth%
+						&s infile %scendir%\original\%modname%\multiyr_avgs\%period%\%varname%_%mth%
 						
 						&if %mdl% EQ 1 &then
 							&do
