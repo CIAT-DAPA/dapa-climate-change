@@ -18,9 +18,9 @@
 &s rootdir %unit%:\climate_change\IPCC_CMIP3
 &s scendir %rootdir%\%scenario%
 
-&s currdir C:\CIAT_work\cc_impact_crops\5min_climatic_data\current
+&s currdir I:\Climate_data\WorldClim_data\Global_5min /*C:\CIAT_work\cc_impact_crops\5min_climatic_data\current
 
-&s mask %unit%:\climate_change\masks\global
+&s mask %unit%:\climate_change\masks\mask5m
 
 &s rootout %scendir%\future
 &if not [exists %rootout% -dir] &then &sys md %rootout%
@@ -64,18 +64,18 @@
 					
 					/* Mean temperature
 					
-					/*&if [exists %rootout%\%modname%\%timeslice%\tmean_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmean_%m% all
-					/*%rootout%\%modname%\%timeslice%\tmean_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmean_%m% + (%currdir%\tmean_%m% * 0.1)) * 10 + 0.5))
-					/*
-					/*/* Minimum temperature
-					/*
-					/*&if [exists %rootout%\%modname%\%timeslice%\tmin_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmin_%m% all
-					/*%rootout%\%modname%\%timeslice%\tmin_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmin_%m% + (%currdir%\tmin_%m% * 0.1)) * 10 + 0.5))
-					/*
-					/*/* Maximum temperature
-					/*
-					/*&if [exists %rootout%\%modname%\%timeslice%\tmax_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmax_%m% all
-					/*%rootout%\%modname%\%timeslice%\tmax_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmax_%m% + (%currdir%\tmax_%m% * 0.1)) * 10 + 0.5))
+					&if [exists %rootout%\%modname%\%timeslice%\tmean_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmean_%m% all
+					%rootout%\%modname%\%timeslice%\tmean_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmean_%m% + (%currdir%\tmean_%m% * 0.1)) * 10 + 0.5))
+					
+					/* Minimum temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmin_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmin_%m% all
+					%rootout%\%modname%\%timeslice%\tmin_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmin_%m% + (%currdir%\tmin_%m% * 0.1)) * 10 + 0.5))
+					
+					/* Maximum temperature
+					
+					&if [exists %rootout%\%modname%\%timeslice%\tmax_%m% -grid] &then kill %rootout%\%modname%\%timeslice%\tmax_%m% all
+					%rootout%\%modname%\%timeslice%\tmax_%m% = int(floor((%scendir%\anomalies\%modname%\%timeslice%\tmax_%m% + (%currdir%\tmax_%m% * 0.1)) * 10 + 0.5))
 					
 				&end
 				

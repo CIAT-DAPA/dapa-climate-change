@@ -39,7 +39,7 @@
 			&s openfile [OPEN %outperiod%\nmod_averages.txt OPENSTATUS -WRITE]
 			&s writerow [WRITE %openfile% PERIOD'	'VARIABLE'	'MONTH'	'NMOD]
 			
-			&s varlist prec_01.asc /*[listfile %scendir%\original\bccr_bcm2_0\multiyr_avgs\%period%\*_01.asc -file]
+			&s varlist [listfile %scendir%\original\bccr_bcm2_0\multiyr_avgs\%period%\*_01.asc -file]
 			&s nvars [token %varlist% -count]
 			
 			&do var = 1 &to %nvars%

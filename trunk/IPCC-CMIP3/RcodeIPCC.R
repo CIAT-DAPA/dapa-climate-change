@@ -7,7 +7,7 @@
 require(rgdal)
 require(raster)
 
-NcToAscii <- function(scenario='20C3M') {
+NcToAscii <- function(scenario='20C3M', drive="T") {
   
   mths <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
   ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
@@ -20,7 +20,7 @@ NcToAscii <- function(scenario='20C3M') {
   
   gcm.char <- read.csv("gcm_chars.csv")
   
-  basedir <- "W:/climate_change/IPCC_CMIP3/"
+  basedir <- paste(drive, ":/climate_change/IPCC_CMIP3/", sep="")
   scendir <- paste(basedir, "/", scenario, "/original", sep="")
   
   # Listing and looping the models
@@ -43,7 +43,8 @@ NcToAscii <- function(scenario='20C3M') {
   
     for (period in perlist) {
       datadir <- paste(workdir, "/", period, sep="")
-      filelist <- intersect(list.files(datadir, pattern=".nc"), list.files(datadir, pattern="prec_"))
+      #filelist <- intersect(list.files(datadir, pattern=".nc"), list.files(datadir, pattern="prec_")) #only for prec
+	  filelist <- list.files(datadir, pattern=".nc")
 	  
       cat(paste("Processing period", period),"\n")
       	
