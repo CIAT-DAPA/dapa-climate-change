@@ -35,7 +35,7 @@
 	&if not [exists %rootout%\%period%\done_subs.txt -file] &then
 		&do
 			
-			&s varlist prec_01.asc /*[listfile %scendir%\average\%period%\*_01.asc -file]
+			&s varlist [listfile %scendir%\average\%period%\*_01.asc -file]
 			&s nvars [token %varlist% -count]
 			
 			&do var = 1 &to %nvars%

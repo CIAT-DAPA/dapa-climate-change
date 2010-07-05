@@ -7,18 +7,18 @@ require(sp)
 require(rgdal)
 require(raster)
 
-CreateGCMImages <- function(scenario='20C3M') {
+CreateGCMImages <- function(scenario='20C3M', drive="T") {
   
   if (!toupper(scenario) %in% c("20C3M","SRES_A1B","SRES_A2","SRES_B1")) {
     stop('Scenario', scenario, ' is not supported')
   }
   
-  imagedir <- paste("W:/climate_change/_scripts/", scenario, sep="")
+  imagedir <- paste(drive, ":/climate_change/_scripts/", scenario, sep="")
   if (!file.exists(imagedir)) {
     dir.create(imagedir)
   }
   
-  basedir <- "W:/climate_change/IPCC_CMIP3"
+  basedir <- paste(drive, ":/climate_change/IPCC_CMIP3", sep="")
   scendir <- paste(basedir, "/", scenario, "/original", sep="")
   
   # Listing and looping the models
