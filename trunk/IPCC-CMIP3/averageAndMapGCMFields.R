@@ -1,5 +1,5 @@
 #Julian Ramirez, dawnpatrolmustaine@gmail.com
-#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_B1", "anomalies", "2010_2039", xn=-83, xx=-66, yn=-21, yx=2, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=T)
+#ot <- mapGCMFields(c(1,3,5,10), "F:/", "C:/CIAT_work/_tools/packageTesting/GCMFields", "SRES_A1B", "anomalies", "2010_2039", xn=-180, xx=180, yn=-90, yx=90, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
 
 require(sp)
 require(rgdal)
@@ -217,7 +217,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 			
 			for (vr in varList) {
 				
-				cat("   .Averaging over monthly \n")
+				cat("   .Averaging over monthly", vr,"\n")
 				
 				for (m in 1:12) {
 					
@@ -263,7 +263,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 					plot(sh, add=T)
 				}
 				if (writeRasterFiles) {
-					rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+					rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 					p1r <- writeRaster(p1r, rName, format='ascii', overwrite=T)
 					rm(rName)
 				}
@@ -280,8 +280,8 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 					plot(sh, add=T)
 				}
 				if (writeRasterFiles) {
-					rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
-					p12r <- writeRaster(p1r, rName, format='ascii', overwrite=T)
+					rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+					p12r <- writeRaster(p12r, rName, format='ascii', overwrite=T)
 					rm(rName)
 				}
 			}
@@ -345,44 +345,44 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	cat("Plotting \n")
 	
 	if (temp) {
-		plot(p1m, col=heat.colors(1000), main="MultiModelMean", sub="Temperature (°C)")
+		plot(p1m, col=heat.colors(1000), main="MultiModelMean", sub="Mean temperature (°C)")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
-		plot(p1sd, col=topo.colors(1000), main="MultiModelSD", sub="Temperature (°C)")
+		plot(p1sd, col=topo.colors(1000), main="MultiModelSD", sub="Deviation (°C)")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
 		
 		#Write the raster files based on input logical condition
 		if (writeRasterFiles) {
-			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p1m <- writeRaster(p1m, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
-			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p1sd <- writeRaster(p1sd, rName, format='ascii', overwrite=T)
 			rm(rName)
 		}
 	}
 	
 	if (prec) {
-		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Precipitation (mm)")
+		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Total precipitation (mm/year)")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
-		plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Precipitation (mm)")
+		plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Deviation (mm/year)")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
 		
 		#Write the raster files based on input logical condition
 		if (writeRasterFiles) {
-			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p12m <- writeRaster(p12m, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
-			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p12sd <- writeRaster(p12sd, rName, format='ascii', overwrite=T)
 			rm(rName)
 		}
@@ -392,4 +392,5 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 
 	cat("\n")
 	cat("Done! \n")
+	return(paste(procdir, "/Figs_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".pdf", sep=""))
 }
