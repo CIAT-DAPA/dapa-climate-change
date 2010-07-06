@@ -2,6 +2,9 @@
 #Reads dbf files and creates csv files with updated corresponding values (monthly) for each variable
 
 require(foreign)
+require(rgdal)
+require(sp)
+require(raster)
 
 wcDataUpdate <- function(scenario='SRES_A1B', model='bccr_bcm2_0') {
   
