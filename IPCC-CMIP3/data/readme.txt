@@ -55,6 +55,7 @@ mapGCMFields(gcmList, drive, procdir, scenario, type, period, xn=-180, xx=180, y
 -worldshapefile: String. Path to the shapefile of administrative boundaries of the world, not used if none provided or if the one provided does not exist in your file system.
 -temp: Logical (T/F). Will map temperature data if TRUE
 -prec: Logical (T/F). Will map precipitation data if TRUE
+-writeRasterFiles: Logical (T/F). Will write ESRI-ASCII files within procdir if TRUE
 
 
 RESULT
@@ -67,3 +68,5 @@ Naming of the PDF file is done as follows:
 "Figs_[xn]WE[xx]WE[yn]NS[yx]NS_[type]_[scenario]_[period]_[T/P/TP].pdf"
 
 Where the stuff in brackets are parameters of the function, explained in the USAGE section of this document.
+
+If writeRasterFiles=T, the script will write a raster for temperature (if temp=T) and a raster for precipitation (if prec=T) for each GCM, and a raster of the multi-model mean (MMM) and multi-model standard deviation (MMSD).
