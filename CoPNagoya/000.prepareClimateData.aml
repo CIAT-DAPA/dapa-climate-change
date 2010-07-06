@@ -1,0 +1,132 @@
+/* Run this aml if anything with regards of the climate data goes wrong and you need to re-generate it.
+/* Julian Ramirez-Villegas, June, 2010
+
+&args unit
+&terminal 9999
+&amlpath .
+&s amldir [show &amlpath]
+
+&if [null %unit%] &then &return Run the command appropriately
+
+&s andesmask %unit%:\COP_CONDESAN\maskData\ESRIGrids\andes_msk_25m
+&s andesctrmsk %unit%:\COP_CONDESAN\maskData\ESRIGrids\and0_25m
+
+
+/* Average GCM anomalies for the two periods, with the list of GCMs
+
+&r averageGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\anomalies 2010_2039 A1B-GCMLIST.txt
+&r averageGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\anomalies 2040_2069 A1B-GCMLIST.txt
+&r averageGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A2\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\anomalies 2010_2039 A2-GCMLIST.txt
+&r averageGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A2\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\anomalies 2040_2069 A2-GCMLIST.txt
+
+
+/* Calculate P1 and P12 for each of the anomalies folders
+
+w %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\anomalies\2010_2039
+GRID
+SETWINDOW prec_1 prec_1
+SETMASK prec_1
+SETCELL prec_1
+bio_1 = mean([listfile tmean_* -grid)
+bio_12 = sum([listfile prec_* -grid)
+QUIT
+
+w %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\anomalies\2040_2069
+GRID
+SETWINDOW prec_1 prec_1
+SETMASK prec_1
+SETCELL prec_1
+bio_1 = mean([listfile tmean_* -grid)
+bio_12 = sum([listfile prec_* -grid)
+QUIT
+
+w %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\anomalies\2010_2039
+GRID
+SETWINDOW prec_1 prec_1
+SETMASK prec_1
+SETCELL prec_1
+bio_1 = mean([listfile tmean_* -grid)
+bio_12 = sum([listfile prec_* -grid)
+QUIT
+
+w %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\anomalies\2040_2069
+GRID
+SETWINDOW prec_1 prec_1
+SETMASK prec_1
+SETCELL prec_1
+bio_1 = mean([listfile tmean_* -grid)
+bio_12 = sum([listfile prec_* -grid)
+QUIT
+
+w %amldir%
+
+
+/* Now the disaggregation
+
+&r spatialDisaggregation.aml %unit%:\COP_CONDESAN\climateData\global\future %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\WorldClim-2_5min-monthly %unit%:\COP_CONDESAN\climateData\andes\future %andesmask% SRES_A1B %unit%:\COP_CONDESAN\temporals\TMP001
+&r spatialDisaggregation.aml %unit%:\COP_CONDESAN\climateData\global\future %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\WorldClim-2_5min-monthly %unit%:\COP_CONDESAN\climateData\andes\future %andesmask% SRES_A2 %unit%:\COP_CONDESAN\temporals\TMP002
+
+
+/* GRID-to-ASCII
+
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2010_2039 bio
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2010_2039 io
+
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2040_2069 bio
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A1B\disaggregated\2040_2069 io
+
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2010_2039 bio
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2010_2039 io
+
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2040_2069 bio
+&r grid2ascii.aml %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2010_2039 %unit%:\COP_CONDESAN\climateData\andes\future\SRES_A2\disaggregated\2040_2069 io
+
+
+/* Now the standard deviation of anomalies (monthly
+
+&r stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\sd-anomalies 2010_2039 A1B-GCMLIST.txt
+&r stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\sd-anomalies 2040_2069 A1B-GCMLIST.txt
+&r stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A2\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\sd-anomalies 2010_2039 A2-GCMLIST.txt
+&r stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A2\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\sd-anomalies 2040_2069 A2-GCMLIST.txt
+
+
+/* The standard deviation of prec and tmean anomalies (yearly averages and totals)
+
+&r P1-P12-stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\sd-anomalies 2010_2039 A1B-GCMLIST.txt
+&r P1-P12-stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A1B\sd-anomalies 2040_2069 A1B-GCMLIST.txt
+&r P1-P12-stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A2\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\sd-anomalies 2010_2039 A2-GCMLIST.txt
+&r P1-P12-stdGCMAnomalies.aml %unit%:\climate_change\IPCC_CMIP3\SRES_A2\anomalies %unit%:\COP_CONDESAN\climateData\global\future\SRES_A2\sd-anomalies 2040_2069 A2-GCMLIST.txt
+
+
+/* Now the average baseline climates for the two set of GCMs
+
+&r averageBaselineClimates.aml %unit%:\climate_change\IPCC_CMIP3\20C3M\filled %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly 1961_1990 A1B-GCMLIST.txt
+&s rdir [RENAME %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly\1961_1990 %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly\1961_1990_11GCM -DIRECTORY]
+
+&r averageBaselineClimates.aml %unit%:\climate_change\IPCC_CMIP3\20C3M\filled %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly 1961_1990 A2-GCMLIST.txt
+&s rdir [RENAME %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly\1961_1990 %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly\1961_1990_9GCM -DIRECTORY]
+
+
+/* Calculate P1 and P12 for each of the anomalies folders
+
+w %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly\1961_1990_11GCM
+GRID
+SETWINDOW prec_01 prec_01
+SETMASK prec_01
+SETCELL prec_01
+prec = mean([listfile tmean_* -grid)
+tmean = sum([listfile prec_* -grid)
+QUIT
+
+w %unit%:\COP_CONDESAN\climateData\global\baseline\20C3M\GCM-monthly\1961_1990_9GCM
+GRID
+SETWINDOW prec_01 prec_01
+SETMASK prec_01
+SETCELL prec_01
+prec = mean([listfile tmean_* -grid)
+tmean = sum([listfile prec_* -grid)
+QUIT
+
+w %amldir%
+
+/* Finished

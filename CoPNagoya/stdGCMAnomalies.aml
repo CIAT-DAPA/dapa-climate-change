@@ -15,7 +15,7 @@
 		&return
 	&end
 
-&s varlist prec,tmean
+&s varlist prec,tmean,tmin,tmax
 &s nvars [token %varlist% -count]
 
 &do v = 1 &to %nvars%
