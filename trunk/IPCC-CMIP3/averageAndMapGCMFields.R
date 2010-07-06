@@ -1,5 +1,5 @@
 #Julian Ramirez, dawnpatrolmustaine@gmail.com
-#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_B1", "anomalies", "2010_2039", xn=-83, xx=-66, yn=-21, yx=2, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F)
+#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/dapa-climate-change/trunk/IPCC-CMIP3", "SRES_B1", "anomalies", "2010_2039", xn=-83, xx=-66, yn=-21, yx=2, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=T)
 
 require(sp)
 require(rgdal)
@@ -44,9 +44,10 @@ cat("*** [wt] is the width in inches of the plot (multi-page PDF plots) \n")
 cat("*** [worldshapefile] is a shapefile of administrative boundaries of the world, not used if none provided \n")
 cat("*** [temp=T/F] logical, will map temperature data if TRUE \n")
 cat("*** [prec=T/F] logical, will map precipitation data if TRUE \n")
+cat("*** [writeRasterFiles=T/F] logical, will write raster files for each model and the MMM if TRUE \n")
 cat("\n")
 
-mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30, xx=30, yn=-40, yx=40, wt=5, worldshapefile, temp=T, prec=T) {
+mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30, xx=30, yn=-40, yx=40, wt=5, worldshapefile, temp=T, prec=T, writeRasterFiles=T) {
 	#Checking the list makes sense
 	
 	if (!is.numeric(gcmList)) {
@@ -197,7 +198,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 
 	#Creating the figure (PDF format)
 	cat("Creating the figure with characteristics... \n")
-	pdf(paste("Figs_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".pdf", sep=""), width=wt, height=ht, pointsize=pz)
+	pdf(paste(procdir, "/Figs_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".pdf", sep=""), width=wt, height=ht, pointsize=pz)
 	par(mfrow=c(1,np))
 
 	gcmctr <- 1
@@ -261,6 +262,11 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 				if (file.exists(worldshapefile)) {
 					plot(sh, add=T)
 				}
+				if (writeRasterFiles) {
+					rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+					p1r <- writeRaster(p1r, rName, format='ascii', overwrite=T)
+					rm(rName)
+				}
 			}
 			
 			if (prec) {
@@ -272,6 +278,11 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 				plot(p12r, col=rainbow(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Total precipitation (mm/year)")
 				if (file.exists(worldshapefile)) {
 					plot(sh, add=T)
+				}
+				if (writeRasterFiles) {
+					rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+					p12r <- writeRaster(p1r, rName, format='ascii', overwrite=T)
+					rm(rName)
 				}
 			}
 			
@@ -342,6 +353,17 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
+		
+		#Write the raster files based on input logical condition
+		if (writeRasterFiles) {
+			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			p1m <- writeRaster(p1m, rName, format='ascii', overwrite=T)
+			rm(rName)
+			
+			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			p1sd <- writeRaster(p1sd, rName, format='ascii', overwrite=T)
+			rm(rName)
+		}
 	}
 	
 	if (prec) {
@@ -352,6 +374,17 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Precipitation (mm)")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
+		}
+		
+		#Write the raster files based on input logical condition
+		if (writeRasterFiles) {
+			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			p12m <- writeRaster(p12m, rName, format='ascii', overwrite=T)
+			rm(rName)
+			
+			rName <- paste(procdir, "/AIIGrid_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			p12sd <- writeRaster(p12sd, rName, format='ascii', overwrite=T)
+			rm(rName)
 		}
 	}
 
