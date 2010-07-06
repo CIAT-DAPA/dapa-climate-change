@@ -7,7 +7,7 @@
 &amlpath .
 &s amldir [show &amlpath]
 
-&if [null %indir%] OR [null %gcmlist%] OR [null %timeslice%] OR [null %gcmlist%] &then
+&if [null %indir%] OR [null %outdir%] OR [null %timeslice%] OR [null %gcmlist%] &then
 	&do
 		&ty
 		&ty Wrong command syntax, run the AML appropriately
