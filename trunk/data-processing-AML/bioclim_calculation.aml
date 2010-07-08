@@ -1,0 +1,39 @@
+/* This aml calculates tmin and tmax anomalies based on dtr and tmean data
+/* Written by Julián Ramírez
+/* CIAT, Cali, Colombia, June 2009
+
+&args inputdir modname timeslice tmpdir
+&terminal 9999
+&sys cls
+/*&severity &warning &ignore
+/*&severity &error &ignore
+/*&messages &off
+
+&if [null %inputdir%] OR [null %modname%] OR [null %timeslice%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax, please use
+		&ty '&r bioclim_calculation.aml INPUT_DIR MODEL_NAME TIME_SLICE'
+		&ty available timeslices are 2020s 2030s 2040s 2050s 2060s 2080s 2090s
+		&ty INPUT_DIR should contain folders of models
+		&ty
+		&return
+	&end
+
+&if [show program] NE GRID &then GRID
+&amlpath .
+&s rootdir [show &amlpath]
+
+&ty
+&ty Processing model %modname%
+
+arc w %tmpdir% /*%inputdir%\%modname%\%timeslice%
+
+&if not [exists mkBCvars.aml -file] &then &s copyfile [COPY %rootdir%\mkBCvars.aml mkBCvars.aml -FILE]
+&r mkBCvars.aml %inputdir%\%modname%\%timeslice%
+&if [EXISTS mkBCvars.aml -FILE] &then &s delstat [DELETE mkBCvars.aml -FILE]
+
+QUIT
+&sys del log
+w %rootdir%
+&if [exists log -file] &then &sys del log
