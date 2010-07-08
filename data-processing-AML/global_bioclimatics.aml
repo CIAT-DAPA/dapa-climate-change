@@ -1,0 +1,128 @@
+&terminal 9999
+&sys cls
+&if [show program] NE GRID &then GRID
+
+&s workdir G:\bioclim_v2\us_bioclimate
+&s out_pe = %workdir%\PE_monthly
+
+&if not [exists %out_pe% -workspace] &then arc cw %out_pe%
+
+&s T = %workdir%\us_daymet_alb83\us_month_av_temp\us_m_tmp_
+
+/* Thornthwaite's annual potential evapotranspiration (PE)
+
+&do i = 1 &to 12
+	&if [exists %out_pe%\index_%i% -grid] &then kill %out_pe%\index_%i% all
+	%out_pe%\index_%i% = int(floor(pow(((%T%%i% * 0.1) / 5), 1.514) * 10 + 0.5))
+	
+	&if [exists %out_pe%\a_%i% -grid] &then kill %out_pe%\a_%i% all
+	%out_pe%\a_%i% = int(floor((0.000000675 * pow(%out_pe%\index_%i% * 0.1, 3) - 0.0000771 * pow(%out_pe%\index_%i% * 0.1, 2) + 0.0179 * %out_pe%\index_%i% * 0.1 + 0.49239) * 10 + 0.5))
+	
+	&if [exists %out_pe%\PE_%i% -grid] &then kill %out_pe%\PE_%i% all
+	%out_pe%\PE_%i% = int(floor((1.6 * pow((%T%%i% / (%out_pe%\index_%i% * 0.1)), (%out_pe%\a_%i% * 0.1))) * 10 + 0.5))
+	
+	&if %i% EQ 1 &then &s list1 = %out_pe%\index_%i%
+	&else &s list1 = %list1%,%out_pe%\index_%i%
+&end
+
+&if [exists %workdir%\I -grid] &then kill %workdir%\I all
+%workdir%\I = SUM(%list1%)
+
+&if [exists %workdir%\a -grid] &then kill %workdir%\a all
+%workdir%\a = int(floor((0.000000675 * pow(%workdir%\I * 0.1, 3) - 0.0000771 * pow(%workdir%\I * 0.1, 2) + 0.0179 * %workdir%\I * 0.1 + 0.49239) * 10 + 0.5))
+
+&if [exists %workdir%\PE -grid] &then kill %workdir%\PE all
+%workdir%\PE = int(floor((1.6 * pow((%workdir%\T / (%workdir%\I * 0.1)), (%workdir%\a * 0.1))) * 10 + 0.5))
+
+/* Calculate Aridity Index (Iar)
+
+&if [exists %workdir%\Iar -grid] &then kill %workdir%\Iar all
+%workdir%\Iar = int(floor(((%workdir%\PE * 0.1) / %workdir%\P) * 10 + 0.5))
+
+/* Calculate diurnality index (Id)
+
+&if [exists %workdir%\Id -grid] &then kill %workdir%\Id all
+%workdir%\Id = %workdir%\Tcmax - %workdir%\Tcmin
+
+/* Calculate Thornthwaite's moisture index
+
+&if [exists %workdir%\IH -grid] &then kill %workdir%\IH all
+%workdir%\IH = int(floor(1000 * ((%workdir%\P - %workdir%\PE * 0.1) / (%workdir%\PE * 0.1)) + 0.5))
+
+/* Calculate warmest (summery) quarter Thornthwaite's PE
+
+&do i = 1 &to 12
+	&s j [calc %i% + 1]
+	&s k [calc %i% + 2]
+	&if %j% GT 12 &then &s j [calc %j% - 12]
+	&if %k% GT 12 &then &s k [calc %k% - 12]
+	
+	&if [exists %workdir%\tmp_pe_%i% -grid] &then kill %workdir%\tmp_pe_%i% all
+	%workdir%\tmp_pe_%i% = CON(%workdir%\warmst_qtr == %i%, %out_pe%\PE_%i% + %out_pe%\PE_%j% + %out_pe%\PE_%k%, -9999)
+	
+	&if %i% EQ 1 &then &s listg = %workdir%\tmp_pe_%i%
+	&else &s listg = %listg%,%workdir%\tmp_pe_%i%
+&end
+
+&if [exist %workdir%\PEs -grid] &then kill %workdir%\PEs all
+%workdir%\PEs = MAX(%listg%)
+
+/* Clean up
+
+&do i = 1 &to 12
+	&if [exists %workdir%\tmp_pe_%i% -grid] &then kill %workdir%\tmp_pe_%i% all
+&end
+
+/* Mediterranean-suit index (Im)
+
+&if [exists %workdir%\Im -grid] &then kill %workdir%\Im all
+%workdir%\Im = int(floor((%workdir%\PEs * 0.1) / %workdir%\Ps * 10 + 0.5))
+
+/* Annual ombro-evaporation index (Ioe)
+
+&if [exists %workdir%\Ioe -grid] &then kill %workdir%\Ioe all
+%workdir%\Ioe = int(floor(%workdir%\P / (%workdir%\PE * 0.1) * 10 + 0.5))
+
+/* Thermic index (It)
+
+&if [exists %workdir%\It -grid] &then kill %workdir%\It all
+%workdir%\It = (%workdir%\cap_m + %workdir%\lower_case_m + %workdir%\T)
+
+/* Compensed thermic index
+
+&if [exists %workdir%\Itc -grid] &then kill %workdir%\Itc all
+DOCELL
+IF (%workdir%\ic > 80 & %workdir%\ic <= 180) %workdir%\Itc = %workdir%\It
+ELSE IF (%workdir%\ic <= 80) %workdir%\Itc = %workdir%\It - 10 * (%workdir%\ic - 80)
+ELSE IF (%workdir%\ic > 180 & %workdir%\ic <= 210) %workdir%\Itc = %workdir%\It + 5 * (%workdir%\ic - 180)
+ELSE IF (%workdir%\ic > 210 & %workdir%\ic <= 280) %workdir%\Itc = %workdir%\It + 15 + 15 * (%workdir%\ic - 210)
+ELSE IF (%workdir%\ic > 280 & %workdir%\ic <= 460) %workdir%\Itc = %workdir%\It + 15 + 105 + 25 * (%workdir%\ic - 280)
+ELSE IF (%workdir%\ic > 460 & %workdir%\ic <= 650) %workdir%\Itc = %workdir%\It + 15 + 105 + 450 + 30 * (%workdir%\ic - 460)
+ELSE %workdir%\Itc = %workdir%\It
+END
+
+/* Calculate continentality progressive correction factor (fi)
+
+&if [exists %workdir%\fi -grid] &then kill %workdir%\fi all
+DOCELL
+IF (%workdir%\ic > 80 & %workdir%\ic <= 180) %workdir%\fi = 0
+ELSE IF (%workdir%\ic <= 80) %workdir%\fi = 10
+ELSE IF (%workdir%\ic > 180 & %workdir%\ic <= 210) %workdir%\fi = 5
+ELSE IF (%workdir%\ic > 210 & %workdir%\ic <= 280) %workdir%\fi = 15
+ELSE IF (%workdir%\ic > 280 & %workdir%\ic <= 460) %workdir%\fi = 25
+ELSE IF (%workdir%\ic > 460 & %workdir%\ic <= 650) %workdir%\fi = 30
+ELSE %workdir%\fi = 0
+END
+
+/* Calculate Itc compensation value
+
+&if [exists %workdir%\Ci -grid] &then kill %workdir%\Ci all
+DOCELL
+IF (%workdir%\ic > 80 & %workdir%\ic <= 180) %workdir%\Ci = 0
+ELSE IF (%workdir%\ic <= 80) %workdir%\Ci = (%workdir%\ic - 80) * 10
+ELSE IF (%workdir%\ic > 180 & %workdir%\ic <= 210) %workdir%\Ci = 5 * (%workdir%\ic - 180)
+ELSE IF (%workdir%\ic > 210 & %workdir%\ic <= 280) %workdir%\Ci = 15 + 15 * (%workdir%\ic - 210)
+ELSE IF (%workdir%\ic > 280 & %workdir%\ic <= 460) %workdir%\Ci = 15 + 105 + 25 * (%workdir%\ic - 280)
+ELSE IF (%workdir%\ic > 460 & %workdir%\ic <= 650) %workdir%\Ci = 15 + 105 + 450 + 30 * (%workdir%\ic - 460)
+ELSE %workdir%\Ci = 0
+END
