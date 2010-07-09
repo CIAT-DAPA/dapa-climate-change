@@ -27,6 +27,6 @@ source("modelingApproach.R")
 setOptions(overwrite=T)
 
 idir <- "E:/CoP_Nagoya"
-ddir <- "X:/COP_CONDESAN"
+ddir <- "L:/COP_CONDESAN"
 
 outp <- NagoyaProcess(idir, ddir, 1, 12000, OSys="NT")
