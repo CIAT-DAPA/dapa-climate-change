@@ -1,0 +1,67 @@
+ot <- wcDataUpdate(scenario='SRES_A1B', model='bccr_bcm2_0')				OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='cccma_cgcm3_1_t47')			OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='cccma_cgcm3_1_t63')			OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='cnrm_cm3')					OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='csiro_mk3_0')				OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='csiro_mk3_5')				OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='gfdl_cm2_0')					OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='gfdl_cm2_1')					OK!
+ot <- wcDataUpdate(scenario='SRES_A1B', model='giss_aom')					NINA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='giss_model_eh')				NINA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='giss_model_er')				NINA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='iap_fgoals1_0_g')			NINA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='ingv_echam4')				GISSDE
+ot <- wcDataUpdate(scenario='SRES_A1B', model='inm_cm3_0')					GISSDE
+ot <- wcDataUpdate(scenario='SRES_A1B', model='ipsl_cm4')					GISSDE
+ot <- wcDataUpdate(scenario='SRES_A1B', model='miroc3_2_hires')				GISSDE
+ot <- wcDataUpdate(scenario='SRES_A1B', model='miroc3_2_medres')			PINTA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='miub_echo_g')				PINTA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='mpi_echam5')					PINTA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='mri_cgcm2_3_2a')				PINTA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='ncar_ccsm3_0')				STMARIA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='ncar_pcm1')					STMARIA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='ukmo_hadcm3')				STMARIA
+ot <- wcDataUpdate(scenario='SRES_A1B', model='ukmo_hadgem1')				STMARIA
+
+
+ot <- wcDataUpdate(scenario='SRES_A2', model='bccr_bcm2_0')
+ot <- wcDataUpdate(scenario='SRES_A2', model='cccma_cgcm3_1_t47')
+ot <- wcDataUpdate(scenario='SRES_A2', model='cnrm_cm3')
+ot <- wcDataUpdate(scenario='SRES_A2', model='csiro_mk3_0')
+ot <- wcDataUpdate(scenario='SRES_A2', model='csiro_mk3_5')
+ot <- wcDataUpdate(scenario='SRES_A2', model='gfdl_cm2_0')
+ot <- wcDataUpdate(scenario='SRES_A2', model='gfdl_cm2_1')
+ot <- wcDataUpdate(scenario='SRES_A2', model='giss_model_er')
+ot <- wcDataUpdate(scenario='SRES_A2', model='ingv_echam4')
+ot <- wcDataUpdate(scenario='SRES_A2', model='inm_cm3_0')
+ot <- wcDataUpdate(scenario='SRES_A2', model='ipsl_cm4')
+ot <- wcDataUpdate(scenario='SRES_A2', model='miroc3_2_medres')
+ot <- wcDataUpdate(scenario='SRES_A2', model='miub_echo_g')
+ot <- wcDataUpdate(scenario='SRES_A2', model='mpi_echam5')
+ot <- wcDataUpdate(scenario='SRES_A2', model='mri_cgcm2_3_2a')
+ot <- wcDataUpdate(scenario='SRES_A2', model='ncar_ccsm3_0')
+ot <- wcDataUpdate(scenario='SRES_A2', model='ncar_pcm1')
+ot <- wcDataUpdate(scenario='SRES_A2', model='ukmo_hadcm3')
+ot <- wcDataUpdate(scenario='SRES_A2', model='ukmo_hadgem1')
+
+
+ot <- wcDataUpdate(scenario='SRES_B1', model='bccr_bcm2_0')
+ot <- wcDataUpdate(scenario='SRES_B1', model='cccma_cgcm3_1_t47')
+ot <- wcDataUpdate(scenario='SRES_B1', model='cccma_cgcm3_1_t63')
+ot <- wcDataUpdate(scenario='SRES_B1', model='cnrm_cm3')
+ot <- wcDataUpdate(scenario='SRES_B1', model='csiro_mk3_0')
+ot <- wcDataUpdate(scenario='SRES_B1', model='csiro_mk3_5')
+ot <- wcDataUpdate(scenario='SRES_B1', model='gfdl_cm2_0')
+ot <- wcDataUpdate(scenario='SRES_B1', model='gfdl_cm2_1')
+ot <- wcDataUpdate(scenario='SRES_B1', model='giss_aom')
+ot <- wcDataUpdate(scenario='SRES_B1', model='giss_model_er')
+ot <- wcDataUpdate(scenario='SRES_B1', model='iap_fgoals1_0_g')
+ot <- wcDataUpdate(scenario='SRES_B1', model='inm_cm3_0')
+ot <- wcDataUpdate(scenario='SRES_B1', model='ipsl_cm4')
+ot <- wcDataUpdate(scenario='SRES_B1', model='miroc3_2_hires')
+ot <- wcDataUpdate(scenario='SRES_B1', model='miroc3_2_medres')
+ot <- wcDataUpdate(scenario='SRES_B1', model='miub_echo_g')
+ot <- wcDataUpdate(scenario='SRES_B1', model='mpi_echam5')
+ot <- wcDataUpdate(scenario='SRES_B1', model='mri_cgcm2_3_2a')
+ot <- wcDataUpdate(scenario='SRES_B1', model='ncar_ccsm3_0')
+ot <- wcDataUpdate(scenario='SRES_B1', model='ukmo_hadcm3')
