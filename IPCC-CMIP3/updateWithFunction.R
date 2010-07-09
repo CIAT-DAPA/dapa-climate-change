@@ -14,11 +14,11 @@ wcDataUpdate <- function(scenario='SRES_A1B', model='bccr_bcm2_0') {
   
   # Folder with worldclim data
   
-  wcFolder <- "X://climate_change//_scripts"
+  wcFolder <- "L://climate_change//_scripts"
   
   # Folder with future anomalies
   
-  rootFolder <- "X://climate_change//IPCC_CMIP3"
+  rootFolder <- "L://climate_change//IPCC_CMIP3"
   
   scenDir <- paste(rootFolder, "//", scenario, sep="")
   modelDir <- paste(scenDir, "//anomalies", sep="")
