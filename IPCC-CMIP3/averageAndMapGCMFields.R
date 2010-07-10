@@ -1,4 +1,4 @@
-#Julian Ramirez, dawnpatrolmustaine@gmail.com
+#Julian Ramirez, dawnpatrolmustaine@gmail.com, July 2010
 #ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting", "SRES_A1B", "anomalies", "2010_2039", xn=-85, xx=-35, yn=-20, yx=13, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
 
 require(sp)
