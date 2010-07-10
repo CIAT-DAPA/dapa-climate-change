@@ -1,5 +1,5 @@
 #Julian Ramirez, dawnpatrolmustaine@gmail.com
-#ot <- mapGCMFields(c(1,3,5,10), "F:/", "C:/CIAT_work/_tools/packageTesting/GCMFields", "SRES_A1B", "anomalies", "2010_2039", xn=-180, xx=180, yn=-90, yx=90, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
+#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting", "SRES_A1B", "anomalies", "2010_2039", xn=-85, xx=-35, yn=-20, yx=13, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
 
 require(sp)
 require(rgdal)
@@ -193,16 +193,16 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	ht <- ht/np
 	
 	#Relationship between width and pointsize (change for smaller, or greater font size)
-	pzrel <- 9/12
+	pzrel <- 15/12
 	pz <- wt/pzrel
 
 	#Creating the figure (PDF format)
 	cat("Creating the figure with characteristics... \n")
 	pdf(paste(procdir, "/Figs_", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".pdf", sep=""), width=wt, height=ht, pointsize=pz)
-	par(mfrow=c(1,np))
+	par(mfrow=c(1,np), ps=pz)
 
 	gcmctr <- 1
-
+	
 	for (gcm in gcmChars$model) {
 		
 		cat("\n")
@@ -250,18 +250,27 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 				}
 			}
 			
+			#Assigning a title for each gcm
+			assign(paste("title", gcmctr, sep=""), toupper(paste(gsub("_", "-",gcm))))
+			
 			cat("   .Temperature and Rainfall rasters \n")
 			
 			if (temp) {
-				p1r <- raster(rs)
-				p1r[] <- p1
-				p1r <- crop(p1r, xt)
-				rm(p1)
-				cat("   .Plotting AMT raster \n")
-				plot(p1r, col=heat.colors(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Mean temperature (°C)")
-				if (file.exists(worldshapefile)) {
-					plot(sh, add=T)
+				assign(paste("p1r", gcmctr, sep=""), raster(rs))
+				assign(paste("p1r", gcmctr, sep=""), setValues(get(paste("p1r", gcmctr, sep="")), p1))
+				assign(paste("p1r", gcmctr, sep=""), crop(get(paste("p1r", gcmctr, sep="")), xt))
+				
+				if (gcmctr == 1) {
+					exVals <- getValues(get(paste("p1r", gcmctr, sep="")))
+					theListt <- exVals[which(!is.na(exVals))]
+				} else {
+					exVals <- getValues(get(paste("p1r", gcmctr, sep="")))
+					theListt <- c(theListt, exVals[which(!is.na(exVals))])
 				}
+				
+				rm(p1)
+				rm(exVals)
+				
 				if (writeRasterFiles) {
 					rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 					p1r <- writeRaster(p1r, rName, format='ascii', overwrite=T)
@@ -270,15 +279,20 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 			}
 			
 			if (prec) {
-				p12r <- raster(rs)
-				p12r[] <- p12
-				p12r <- crop(p12r, xt)
-				rm(p12)
-				cat("   .Plotting TAR raster \n")
-				plot(p12r, col=rainbow(1000), main=toupper(paste(gsub("_", "-",gcm))), sub="Total precipitation (mm/year)")
-				if (file.exists(worldshapefile)) {
-					plot(sh, add=T)
+				assign(paste("p12r", gcmctr, sep=""), raster(rs))
+				assign(paste("p12r", gcmctr, sep=""), setValues(get(paste("p12r", gcmctr, sep="")), p12))
+				assign(paste("p12r", gcmctr, sep=""), crop(get(paste("p12r", gcmctr, sep="")), xt))
+				
+				if (gcmctr == 1) {
+					exVals <- getValues(get(paste("p12r", gcmctr, sep="")))
+					theListp <- exVals[which(!is.na(exVals))]
+				} else {
+					exVals <- getValues(get(paste("p12r", gcmctr, sep="")))
+					theListp <- c(theListp, exVals[which(!is.na(exVals))])
 				}
+				
+				rm(p12)
+				rm(exVals)
 				if (writeRasterFiles) {
 					rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 					p12r <- writeRaster(p12r, rName, format='ascii', overwrite=T)
@@ -289,28 +303,20 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 			if (gcmctr == 1) {
 				cat("   .MultiModel stack (1) \n")
 				if (temp) {
-					assign(paste("p1m", gcmctr, sep=""), p1r)
-					p1List <- get(paste("p1m", gcmctr, sep=""))
-					rm(p1r)
+					p1List <- get(paste("p1r", gcmctr, sep=""))
 				}
 				
 				if (prec) {
-					assign(paste("p12m", gcmctr, sep=""), p12r)
-					p12List <- get(paste("p12m", gcmctr, sep=""))
-					rm(p12r)
+					p12List <- get(paste("p12r", gcmctr, sep=""))
 				}
 			} else {
 				cat("   .MultiModel stack \n")
 				if (temp) {
-					assign(paste("p1m", gcmctr, sep=""), p1r)
-					p1List <- c(p1List, get(paste("p1m", gcmctr, sep="")))
-					rm(p1r)
+					p1List <- c(p1List, get(paste("p1r", gcmctr, sep="")))
 				}
 				
 				if (prec) {
-					assign(paste("p12m", gcmctr, sep=""), p12r)
-					p12List <- c(p12List, get(paste("p12m", gcmctr, sep="")))
-					rm(p12r)
+					p12List <- c(p12List, get(paste("p12r", gcmctr, sep="")))
 				}
 			}
 			
@@ -330,6 +336,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	if (temp) {
 		cat("   .Temperature mean \n")
 		p1m <- mean(stack(p1List))
+		tzlim <- c(min(theListt), max(theListt))
 		cat("   .Temperature std \n")
 		p1sd <- calc(stack(p1List),fun)
 	}
@@ -337,15 +344,34 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	if (prec) {
 		cat("   .Precipitation mean \n")
 		p12m <- mean(stack(p12List))
+		pzlim <- c(min(theListp), max(theListp))
 		cat("   .Precipitation std \n")
 		p12sd <- calc(stack(p12List),fun)
 	}
-
+	
 	cat("\n")
 	cat("Plotting \n")
 	
+	totgcms <- gcmctr-1
+	
+	for (gcmctr in 1:totgcms) {
+		if (temp) {
+			plot(get(paste("p1r", gcmctr, sep="")), col=colorRampPalette(c('yellow', 'red'))(500), main=get(paste("title", gcmctr, sep="")), sub="Mean temperature (°C)", zlim=tzlim)
+			if (file.exists(worldshapefile)) {
+				plot(sh, add=T)
+			}
+		}
+		
+		if (prec) {
+			plot(get(paste("p12r", gcmctr, sep="")), col=rainbow(1000), main=get(paste("title", gcmctr, sep="")), sub="Total precipitation (mm/year)", zlim=pzlim)
+			if (file.exists(worldshapefile)) {
+				plot(sh, add=T)
+			}
+		}
+	}
+	
 	if (temp) {
-		plot(p1m, col=heat.colors(1000), main="MultiModelMean", sub="Mean temperature (°C)")
+		plot(p1m, col=colorRampPalette(c('yellow', 'red'))(500), main="MultiModelMean", sub="Mean temperature (°C)", zlim=tzlim)
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
@@ -367,7 +393,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	}
 	
 	if (prec) {
-		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Total precipitation (mm/year)")
+		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Total precipitation (mm/year)", zlim=pzlim)
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
