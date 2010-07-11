@@ -209,18 +209,15 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 							outRsName <- paste(outName, "/projections/", spID, "_", suffix, "_", theName, ".asc", sep="")
 							theRaster <- writeRaster(theRaster, outRsName, overwrite=T, format='ascii')
 							rm(theRaster)
+							
 						} else {
 						#Multi threshold PA surfaces for future scenarios (two mig. scenarios)
 						
 						#Null adaptation
 							cat("...", theName, "\n")
 							
-							BLsuffix <- gsub("/", "_", projectionList[1])
-							baselineRs <- raster(paste(outName, "/projections/", spID, "_", BLsuffix, "_", theName, ".asc", sep=""))
-							
 							theRaster <- prjRaster
-							theRaster <- theRaster * bufferRaster * baselineRs
-							rm(baselineRs)
+							theRaster <- theRaster * bufferRaster
 							
 							theRaster[which(theRaster[] < theVal)] <- 0
 							theRaster[which(theRaster[] != 0)] <- 1
@@ -228,7 +225,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 							outRsName <- paste(outName, "/projections/", spID, "_", suffix, "_", theName, "_NullAdap.asc", sep="")
 							theRaster <- writeRaster(theRaster, outRsName, overwrite=T, format='ascii')
 							rm(theRaster)
-							
+					  
 							#Full adaptation
 							theRaster <- prjRaster
 							theRaster[which(theRaster[] < theVal)] <- 0
