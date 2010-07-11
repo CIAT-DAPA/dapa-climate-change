@@ -162,6 +162,7 @@ speciesTurnover <- function(idir, type="plants", ini, fin) {
 						}
 						
 						rm(rs)
+						rm(BLrs)
 						#Calculating sum of species
 						if (sppC == 1) {
 							assign(paste("turnover_loss_", sres, "_", tsl, "_", threshold, sep=""), loss)
