@@ -46,7 +46,7 @@ source("zipRead.R")
 
 #idir <- "C:/CIAT_work/COP_CONDESAN"
 
-speciesTurnover <- function(idir, type="plants", ini, fin) {
+speciesTurnover <- function(bdir, idir, genID, OSys="LINUX") {
 	
 	#Checking if type is within the expected
 	if (!tolower(type) %in% c("plants", "aves")) {

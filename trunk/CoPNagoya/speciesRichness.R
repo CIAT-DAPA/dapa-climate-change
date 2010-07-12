@@ -34,8 +34,14 @@ source("zipRead.R")
 #[EXT] 			zip, gz
 
 
-speciesRichness <- function(idir, genID, OSys="LINUX") {
+speciesRichness <- function(bdir, idir, genID, OSys="LINUX") {
 	
+	#Reading the list of species
+	spFile <- paste(bdir, "/occurrences/modeling-data/", tolower(type), "-speciesListToModel.csv", sep="")
+	spListComplete <- read.csv(spFile)
+	nspp <- nrow(spListComplete)
+	
+	#Listing looping items
 	condList <- c("baseline", "future")
 	threList <- c("Prevalence", "TenPercentile")
 	migrList <- c("FullAdap", "NullAdap")
@@ -46,97 +52,108 @@ speciesRichness <- function(idir, genID, OSys="LINUX") {
 	}
 	
 	oGenFolder <- paste(idir, "/", fdGenName, sep="")
-	verF <- paste(o, "/ps-", spID, ".run", sep="")
+	verF <- paste(oGenFolder, "/ps-", genID, ".run", sep="")
 	
-	spList <- spListComplete[which(spListComplete$IDGenus == genID),]
+	if (!file.exists(verF)) {
 	
-	sppC <- 1
-	for (spp in spList) {
-		fdName <- paste("sp-", spp, sep="")
-		spFolder <- paste(idir, "/mxe_outputs/", fdName, sep="")
+		if (file.exists(oGenFolder)) {
+			cat("Removing previous stuff ... \n")
+			system(paste("rm", "-r", oGenFolder))
+		}
 		
-		#Performing only for existing folders
-		if (file.exists(spFolder)) {
-			cat("...Species", spp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
+		spList <- spListComplete$IDSpecies[which(spListComplete$IDGenus == genID)]
+		
+		cat("Processing", paste(length(spList)), "species \n")
+		
+		sppC <- 1
+		for (spp in spList) {
+			fdName <- paste("sp-", spp, sep="")
+			spFolder <- paste(bdir, "/mxe_outputs/", fdName, sep="")
 			
-			rsFolder <- paste(spFolder, "/projections", sep="")
-			
-			#Cycle through conditions
-			for (condition in condList) {
-				#cat("Performing for", condition, "\n")
+			#Performing only for existing folders
+			if (file.exists(spFolder)) {
+				cat("Species", spp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
 				
-				#Defining stuff to cycle after
-				if (condition == "baseline") {
-					sresList <- c("20C3M")
-					string <- "WorldClim-2_5min-bioclim"
-					tsList <- c("1950_2000")
-				} else {
-					sresList <- c("SRES_A1B", "SRES_A2")
-					string <- "disaggregated"
-					tsList <- c("2010_2039", "2040_2069")
-				}
+				rsFolder <- paste(spFolder, "/projections", sep="")
 				
-				#Cycle through the SRES list
-				for (sres in sresList) {
-					#cat("Performing for scenario", sres, "\n")
+				#Cycle through conditions
+				for (condition in condList) {
+					#cat("Performing for", condition, "\n")
 					
-					#Cycle through the time-slices
-					for (tsl in tsList) {
-						#cat("Performing for timeslice", tsl, "\n")
+					#Defining stuff to cycle after
+					if (condition == "baseline") {
+						sresList <- c("20C3M")
+						string <- "WorldClim-2_5min-bioclim"
+						tsList <- c("1950_2000")
+					} else {
+						sresList <- c("SRES_A1B", "SRES_A2")
+						string <- "disaggregated"
+						tsList <- c("2010_2039", "2040_2069")
+					}
+					
+					#Cycle through the SRES list
+					for (sres in sresList) {
+						#cat("Performing for scenario", sres, "\n")
 						
-						#Cycle through thresholds
-						for (threshold in threList) {
-							#cat("Performing for threshold", threshold, "\n")
+						#Cycle through the time-slices
+						for (tsl in tsList) {
+							#cat("Performing for timeslice", tsl, "\n")
 							
-							#Cycle through migration scenarios if future, else just load and comprise
-							if (condition == "baseline") {
+							#Cycle through thresholds
+							for (threshold in threList) {
+								#cat("Performing for threshold", threshold, "\n")
 								
-								#Filename: [SPID]_[CONDITION]_[SRES]_[STRING]_[TS]_[THRESH].[FORMAT].[EXT]
-								fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, ".asc.zip", sep="")
-								if (!file.exists(paste(rsFolder, "/", fName, sep=""))) {
-									fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, ".asc.gz", sep="")
-								}
-								
-								#Loading the raster
-								cat("Calculating:", paste(condition, "-", sres, "-", tsl, "-", threshold, sep=""), "\n")
-								rs <- zipRead(rsFolder, fName)
-								
-								#if sppC equals 1 then define this richness, else sum
-								if (sppC == 1) {
-									#cat("Calculating richness [1] \n")
-									assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, sep=""), rs)
-									rm(rs)
-								} else {
-									#cat("Calculating richness \n")
-									assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, sep=""), rs+get(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, sep="")))
-									rm(rs)
-								}
-								
-							} else {
-								
-								#Now cycle through migration scenarios
-								for (mig in migrList) {
-									#cat("Performing for mig. scenario", mig, "\n")
+								#Cycle through migration scenarios if future, else just load and comprise
+								if (condition == "baseline") {
 									
-									#Filename: [SPID]_[CONDITION]_[SRES]_[STRING]_[TS]_[THRESH]_[MIG].[FORMAT].[EXT]
-									fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, ".asc.zip", sep="")
+									#Filename: [SPID]_[CONDITION]_[SRES]_[STRING]_[TS]_[THRESH].[FORMAT].[EXT]
+									fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, ".asc.zip", sep="")
 									if (!file.exists(paste(rsFolder, "/", fName, sep=""))) {
-										fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, ".asc.gz", sep="")
+										fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, ".asc.gz", sep="")
 									}
 									
 									#Loading the raster
-									cat("Calculating:", paste(condition, "-", sres, "-", tsl, "-", threshold, "-", mig, sep=""), "\n")
+									#cat("Calculating:", paste(condition, "-", sres, "-", tsl, "-", threshold, sep=""), "\n")
 									rs <- zipRead(rsFolder, fName)
 									
-									#if sppC equals 1 then define this richness, else sum with previous richness
+									#if sppC equals 1 then define this richness, else sum
 									if (sppC == 1) {
 										#cat("Calculating richness [1] \n")
-										assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, sep=""), rs)
+										assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, sep=""), rs)
 										rm(rs)
 									} else {
 										#cat("Calculating richness \n")
-										assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, sep=""), rs+get(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, sep="")))
+										assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, sep=""), rs+get(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, sep="")))
 										rm(rs)
+									}
+									
+								} else {
+									
+									#Now cycle through migration scenarios
+									for (mig in migrList) {
+										#cat("Performing for mig. scenario", mig, "\n")
+										
+										#Filename: [SPID]_[CONDITION]_[SRES]_[STRING]_[TS]_[THRESH]_[MIG].[FORMAT].[EXT]
+										fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, ".asc.zip", sep="")
+										if (!file.exists(paste(rsFolder, "/", fName, sep=""))) {
+											fName <- paste(spp, "_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, ".asc.gz", sep="")
+										}
+										
+										#Loading the raster
+										#cat("Calculating:", paste(condition, "-", sres, "-", tsl, "-", threshold, "-", mig, sep=""), "\n")
+										rs <- zipRead(rsFolder, fName)
+										
+										#if sppC equals 1 then define this richness, else sum with previous richness
+										if (sppC == 1) {
+											#cat("Calculating richness [1] \n")
+											assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, sep=""), rs)
+											rm(rs)
+										} else {
+											#cat("Calculating richness \n")
+											assign(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, sep=""), rs+get(paste("richness_", condition, "_", sres, "_", string, "_", tsl, "_", threshold, "_", mig, sep="")))
+											rm(rs)
+										}
+										
 									}
 									
 								}
@@ -148,62 +165,60 @@ speciesRichness <- function(idir, genID, OSys="LINUX") {
 					}
 					
 				}
-				
+				sppC <- sppC+1
+			} else {
+				cat("The species", spp, "was not modeled \n")
 			}
-			sppC <- sppC+1
-		} else {
-			cat("The species", spp, "was not modeled \n")
 		}
-	}
 
-	objList <- ls(pattern="richness")
-	
-	#Writing ascii files
-	cat("\n")
-	cat("Writing summary rasters \n")
-	for (obj in objList) {
-		rName <- paste(fdGenName, "/", obj, sep="")
-		assign(obj, writeRaster(get(obj), rName, format='ascii', overwrite=T))
-		png(paste(rName, ".png", sep=""))
-		plot(get(obj))
-		dev.off()
-	}
-	
-	#Compressing them
-	cat("\n")
-	cat("Compressing summary rasters \n")
-	ftoZIP <- list.files(fdGenName, pattern=".asc")
-	for (fz in ftoZIP) {
-		fName <- paste(fdGenName, "/", fz, sep="")
-		if (OSys == "linux") {
-			system(paste("gzip", fName))
-		} else {
-			system(paste("7za", "a", "-bd", "-tgzip", paste(fName, ".gz", sep=""), fName))
-			file.remove(fName)
+		objList <- ls(pattern="richness")
+		
+		#Writing ascii files
+		cat("\n")
+		cat("Writing summary rasters \n")
+		for (obj in objList) {
+			rName <- paste(fdGenName, "/", obj, sep="")
+			assign(obj, writeRaster(get(obj), rName, format='ascii', overwrite=T))
+			png(paste(rName, ".png", sep=""))
+			plot(get(obj))
+			dev.off()
 		}
-	}
-	
-	#Run verification file
-	verFile <- paste(fdGenName, "/ps-", spID, ".run", sep="")
-	opnFile <- file(verFile, open="w")
-	cat("Calculated on", date(), file=opnFile)
-	close.connection(opnFile)
-	
-	#Now copy the files
-	if (OSys == "linux") {
-		destName <- paste(idir, "/.", sep="")
-		system(paste("cp", "-rvf", fdGenName, destName))
-		system(paste("rm", "-rvf", fdGenName))
+		
+		#Compressing them
+		cat("\n")
+		cat("Compressing summary rasters \n")
+		ftoZIP <- list.files(fdGenName, pattern=".asc")
+		for (fz in ftoZIP) {
+			fName <- paste(fdGenName, "/", fz, sep="")
+			if (OSys == "linux") {
+				system(paste("gzip", fName))
+			} else {
+				system(paste("7za", "a", "-bd", "-tgzip", paste(fName, ".gz", sep=""), fName))
+				file.remove(fName)
+			}
+		}
+		
+		#Run verification file
+		verFile <- paste(fdGenName, "/ps-", genID, ".run", sep="")
+		opnFile <- file(verFile, open="w")
+		cat("Calculated on", date(), file=opnFile)
+		close.connection(opnFile)
+		
+		#Now copy the files
+		if (OSys == "linux") {
+			destName <- paste(idir, "/.", sep="")
+			system(paste("cp", "-rvf", fdGenName, destName))
+			system(paste("rm", "-rvf", fdGenName))
+		} else {
+			destName <- oGenFolder
+			origindir <- fdGenName #gsub("/", "\\\\", )
+			destindir <- gsub("/", "\\\\", destName)
+			system(paste("xcopy", "/E", "/I", origindir, destindir))
+			system(paste("rm", "-r", fdGenName))
+		}
 	} else {
-		destName <- oGenFolder
-		origindir <- gsub("/", "\\\\", outName)
-		destindir <- gsub("/", "\\\\", destName)
-		system(paste("xcopy", "/E", "/I", origindir, destindir))
-		system(paste("rm", "-r", fdGenName))
+		cat("The species was already modeled \n")
 	}
-	
-	cat("\n")
-	cat("Done! \n")
 }
 
 ################################################################
@@ -226,11 +241,6 @@ richnessProcess <- function(idir, type, ini, fin, OSys="LINUX") {
 	grListComplete <- read.csv(grList)
 	ngen <- nrow(grListComplete)
 	
-	#Reading the list of species
-	spFile <- paste(idir, "/occurrences/modeling-data/", tolower(type), "-speciesListToModel.csv", sep="")
-	spListComplete <- read.csv(spFile)
-	nspp <- nrow(spListComplete)
-	
 	#Checking consistency of initial and final ngen
 	if (fin <= ini) {
 		stop("Final number of species is less than or equal to initial, please correct")
@@ -241,18 +251,18 @@ richnessProcess <- function(idir, type, ini, fin, OSys="LINUX") {
 		fin <- ngen
 	}
 	
-	gri <- spListComplete$IDGenus[ini]
-	grf <- spListComplete$IDGenus[fin]
+	gri <- grListComplete$IDGenus[ini]
+	grf <- grListComplete$IDGenus[fin]
 	
 	#Subselecting the genera
-	grList <- spListComplete$IDGenus[ini:fin]
+	grList <- grListComplete$IDGenus[ini:fin]
 	
 	odir <- paste(idir, "/summaries", sep="")
 	if (!file.exists(odir)) {
 		dir.create(odir)
 	}
 	
-	richdir <- paste(odir, "/", tolower(type), sep="")
+	richdir <- paste(odir, "/richness-", tolower(type), sep="")
 	if (!file.exists(richdir)) {
 		dir.create(richdir)
 	}
@@ -262,7 +272,7 @@ richnessProcess <- function(idir, type, ini, fin, OSys="LINUX") {
 		cat("\n")
 		cat("...Processing genus", gen, paste("...",round(genC/length(grList)*100,2),"%",sep=""), "\n")
 		
-		ot <- speciesRichness(richdir, gen, OSys=OSys)
+		ot <- speciesRichness(idir, richdir, gen, OSys=OSys)
 		genC <- genC+1
 	}
 }
