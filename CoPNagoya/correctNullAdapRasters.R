@@ -95,7 +95,7 @@ correctSpecies <- function(spp, OSys, idir) {
 						} else {
 							system(paste("gzip", rfileName))
 							file.copy(paste(rfileName, ".gz", sep=""), paste(rsFolder, "/", rfileName, ".gz", sep=""), overwrite=T)
-							file.remove(paste(rfileName, ".zip", sep=""))
+							file.remove(paste(rfileName, ".gz", sep=""))
 						}
 						
 					}
