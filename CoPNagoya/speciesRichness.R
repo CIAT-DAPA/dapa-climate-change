@@ -1,3 +1,4 @@
+#Julian Ramirez, July 11 2010
 require(rgdal)
 require(raster)
 
