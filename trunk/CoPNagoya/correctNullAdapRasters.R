@@ -57,7 +57,7 @@ correctSpecies <- function(spp, OSys, idir) {
 						#Filename: [SPID]_[CONDITION]_[SRES]_[STRING]_[TS]_[THRESH]_[MIG].[FORMAT].[EXT]
 						fName <- paste(spp, "_future_", sres, "_disaggregated_", tsl, "_", threshold, "_NullAdap.asc.zip", sep="")
 						if (!file.exists(paste(rsFolder, "/", fName, sep=""))) {
-							fName <- paste(spp, "_future_", sres, "_", string, "_", tsl, "_", threshold, "_NullAdap.asc.gz", sep="")
+							fName <- paste(spp, "_future_", sres, "_disaggregated_", tsl, "_", threshold, "_NullAdap.asc.gz", sep="")
 						}
 						
 						#Loading the raster
