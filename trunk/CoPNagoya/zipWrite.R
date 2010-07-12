@@ -13,9 +13,7 @@ zipRead <- function(rs, path, fname) {
 	
 	infname <- substring(fname, 1, nchar(fname)-nchar(ext)-1)
 
-	if (tolower(ext) == "zip") {
-		zz <- unz(infile, infname, "w")
-	} else if (ext == "gz") {
+	if (ext == "gz") {
 		zz <- gzfile(infile, "w")
 	} else {
 		stop("Not supported file type")
