@@ -125,8 +125,6 @@ speciesTurnover <- function(idir, type="plants", ini, fin) {
 						if (!file.exists(paste(rsFolder, "/", fName, sep=""))) {
 							fName <- paste(spp, "_", condition, "_", sres, "_disaggregated_", tsl, "_", threshold, "_FullAdap.asc.gz", sep="")
 						}
-						
-						#Loading the raster
 						rs <- zipRead(rsFolder, fName)
 						
 						#IF curr==1 & fut==0, loss=1, else loss=0 ........ this happens in a pixel when a species is lost
