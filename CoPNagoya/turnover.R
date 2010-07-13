@@ -79,7 +79,7 @@ speciesTurnover <- function(bdir, idir, genID, type, OSys="LINUX") {
 			
 			#Performing only for existing folders
 			if (file.exists(spFolder)) {
-				cat("Processing species", spp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
+				cat("Species", spp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
 				
 				rsFolder <- paste(spFolder, "/projections", sep="")
 				
