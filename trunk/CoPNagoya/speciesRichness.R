@@ -47,18 +47,19 @@ speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 	migrList <- c("FullAdap", "NullAdap")
 	
 	fdGenName <- paste("gn-", genID, sep="")
-	if (!file.exists(fdGenName)) {
-		dir.create(fdGenName)
-	}
 	
 	oGenFolder <- paste(idir, "/", fdGenName, sep="")
 	verF <- paste(oGenFolder, "/ps-", genID, ".run", sep="")
 	
 	if (!file.exists(verF)) {
-	
+		
 		if (file.exists(oGenFolder)) {
 			cat("Removing previous stuff ... \n")
 			system(paste("rm", "-r", oGenFolder))
+		}
+		
+		if (!file.exists(fdGenName)) {
+			dir.create(fdGenName)
 		}
 		
 		spList <- spListComplete$IDSpecies[which(spListComplete$IDGenus == genID)]
