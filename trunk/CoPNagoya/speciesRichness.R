@@ -217,7 +217,7 @@ speciesRichness <- function(bdir, idir, genID, OSys="LINUX") {
 			system(paste("rm", "-r", fdGenName))
 		}
 	} else {
-		cat("The species was already modeled \n")
+		cat("The genus was already modeled \n")
 	}
 }
 
