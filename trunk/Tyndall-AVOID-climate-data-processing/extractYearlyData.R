@@ -24,6 +24,7 @@ extractYearlyData <- function(indir, msk, statsdir, iniYear, finYear, writeOutpu
 	
 	#Extract the coordinates from which the data is to be extracted
 	coords <- xyFromCell(msk, which(!is.na(msk[])))
+	coordsAll <- xyFromCell(msk, 1:ncell(msk))
 	
 	#List the variables
 	vars <- c("dtr","tmp","pre")
@@ -66,8 +67,12 @@ extractYearlyData <- function(indir, msk, statsdir, iniYear, finYear, writeOutpu
 				#If writeOutputs is selected then mask the raster and write it
 				if (writeOutputs) {
 					
+					#Extracting ALL values from input raster
+					exValues <- xyValues(rs, coordsAll)
+					
 					#Cropping and masking the raster
-					rsc <- crop(rs, msk@extent)
+					rsc <- msk
+					rsc[] <- exValues
 					rsc <- mask(rsc, msk)
 					
 					#Writing the output raster
@@ -76,7 +81,7 @@ extractYearlyData <- function(indir, msk, statsdir, iniYear, finYear, writeOutpu
 					rm(rsc)
 				}
 				
-				#Extract raster values from loaded monthly raster
+				#Extract raster values from loaded monthly raster, and discarding NAs
 				resVals <- xyValues(rs, coords)
 				resVals <- resVals[which(!is.na(resVals))]
 				
