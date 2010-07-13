@@ -174,7 +174,6 @@ speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 		objList <- ls(pattern="richness")
 		
 		#Writing ascii files
-		cat("\n")
 		cat("Writing summary rasters \n")
 		for (obj in objList) {
 			rName <- paste(fdGenName, "/", obj, sep="")
@@ -185,7 +184,6 @@ speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 		}
 		
 		#Compressing them
-		cat("\n")
 		cat("Compressing summary rasters \n")
 		ftoZIP <- list.files(fdGenName, pattern=".asc")
 		for (fz in ftoZIP) {
