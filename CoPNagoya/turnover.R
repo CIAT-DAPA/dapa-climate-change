@@ -46,7 +46,7 @@ source("zipRead.R")
 
 #idir <- "C:/CIAT_work/COP_CONDESAN"
 
-speciesTurnover <- function(bdir, idir, genID, OSys="LINUX") {
+speciesTurnover <- function(bdir, idir, genID, type, OSys="LINUX") {
 	
 	#Reading the list of species
 	spFile <- paste(bdir, "/occurrences/modeling-data/", tolower(type), "-speciesListToModel.csv", sep="")
@@ -281,7 +281,7 @@ turnoverProcess <- function(idir, type, ini, fin, OSys="LINUX") {
 		cat("\n")
 		cat("...Processing genus", gen, paste("...",round(genC/length(grList)*100,2),"%",sep=""), "\n")
 		
-		ot <- speciesTurnover(idir, richdir, gen, OSys=OSys)
+		ot <- speciesTurnover(idir, richdir, gen, type, OSys=OSys)
 		genC <- genC+1
 	}
 }
