@@ -207,8 +207,8 @@ speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 		#Now copy the files
 		if (OSys == "linux") {
 			destName <- paste(idir, "/.", sep="")
-			system(paste("cp", "-rvf", fdGenName, destName))
-			system(paste("rm", "-rvf", fdGenName))
+			system(paste("cp", "-rf", fdGenName, destName))
+			system(paste("rm", "-rf", fdGenName))
 		} else {
 			destName <- oGenFolder
 			origindir <- fdGenName #gsub("/", "\\\\", )
