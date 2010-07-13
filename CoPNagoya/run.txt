@@ -55,7 +55,7 @@ setOptions(overwrite=T)
 
 ############# LINUX ########################
 source("speciesRichness.R")
-source("turnover")
+source("turnover.R")
 setOptions(overwrite=T)
 
 idir <- "/mnt/GeoData/COP_CONDESAN"
@@ -63,7 +63,7 @@ idir <- "/mnt/GeoData/COP_CONDESAN"
 ############# NT ########################
 
 source("speciesRichness.R")
-source("turnover")
+source("turnover.R")
 setOptions(overwrite=T)
 
 idir <- "L:/COP_CONDESAN"

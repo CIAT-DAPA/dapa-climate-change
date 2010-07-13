@@ -34,7 +34,7 @@ source("zipRead.R")
 #[EXT] 			zip, gz
 
 
-speciesRichness <- function(bdir, idir, genID, OSys="LINUX") {
+speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 	
 	#Reading the list of species
 	spFile <- paste(bdir, "/occurrences/modeling-data/", tolower(type), "-speciesListToModel.csv", sep="")
@@ -272,7 +272,7 @@ richnessProcess <- function(idir, type, ini, fin, OSys="LINUX") {
 		cat("\n")
 		cat("...Processing genus", gen, paste("...",round(genC/length(grList)*100,2),"%",sep=""), "\n")
 		
-		ot <- speciesRichness(idir, richdir, gen, OSys=OSys)
+		ot <- speciesRichness(idir, richdir, gen, type, OSys=OSys)
 		genC <- genC+1
 	}
 }
