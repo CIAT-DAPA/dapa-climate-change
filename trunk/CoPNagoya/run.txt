@@ -15,7 +15,6 @@ output <- createOccFiles(occ, spL, clDir, outDir, 8001, 12000)
 ############################################
 
 ############# LINUX ########################
-
 require(raster)
 source("modelingApproach.R")
 idir <- "/data3/jramirez/CoP_Nagoya"
@@ -26,7 +25,6 @@ setOptions(overwrite=T)
 outp <- NagoyaProcess(idir, ddir, 1, 12000, OSys="LINUX")
 
 ############# NT ########################
-
 source("modelingApproach.R")
 setOptions(overwrite=T)
 
@@ -34,6 +32,7 @@ idir <- "E:/CoP_Nagoya"
 ddir <- "L:/COP_CONDESAN"
 
 outp <- NagoyaProcess(idir, ddir, 1, 12000, OSys="NT")
+
 
 ############################################
 ########### NullAdap correction ############
@@ -46,6 +45,41 @@ setOptions(overwrite=T)
 
 ############# NT ########################
 source("correctNullAdapRasters.R")
+idir <- "L:/COP_CONDESAN"
+setOptions(overwrite=T)
+
+
+############################################
+########## Turnover and richness ###########
+############################################
+
+############# LINUX ########################
+source("speciesRichness.R")
+source("turnover")
+setOptions(overwrite=T)
+
+idir <- "/mnt/GeoData/COP_CONDESAN"
+
+############# NT ########################
+
+source("speciesRichness.R")
+source("turnover")
+setOptions(overwrite=T)
+
+idir <- "L:/COP_CONDESAN"
+
+
+############################################
+############## Impact Metrics ##############
+############################################
+
+############# LINUX ########################
+source("impactMetrics.R")
+idir <- "/mnt/GeoData/COP_CONDESAN"
+setOptions(overwrite=T)
+
+############# NT ########################
+source("impactMetrics.R")
 idir <- "L:/COP_CONDESAN"
 setOptions(overwrite=T)
 
