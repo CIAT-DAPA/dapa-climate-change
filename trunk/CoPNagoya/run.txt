@@ -70,6 +70,24 @@ idir <- "L:/COP_CONDESAN"
 
 
 ############################################
+########## Species verification ############
+############################################
+
+############# LINUX ########################
+
+source("speciesVerification.R")
+setOptions(overwrite=T)
+
+idir <- "/mnt/GeoData/COP_CONDESAN"
+
+############# NT ########################
+
+source("speciesVerification.R")
+setOptions(overwrite=T)
+
+idir <- "L:/COP_CONDESAN"
+
+############################################
 ############## Impact Metrics ##############
 ############################################
 
