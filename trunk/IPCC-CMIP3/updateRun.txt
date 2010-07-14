@@ -32,36 +32,36 @@ ot <- wcDataUpdate(scenario='SRES_A2', model='csiro_mk3_5')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='gfdl_cm2_0')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='gfdl_cm2_1')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='giss_model_er')				OK!
-ot <- wcDataUpdate(scenario='SRES_A2', model='ingv_echam4')					STMARIA
+ot <- wcDataUpdate(scenario='SRES_A2', model='ingv_echam4')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='inm_cm3_0')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='ipsl_cm4')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='miroc3_2_medres')				OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='miub_echo_g')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='mpi_echam5')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='mri_cgcm2_3_2a')				OK!
-ot <- wcDataUpdate(scenario='SRES_A2', model='ncar_ccsm3_0')				GISSDE
-ot <- wcDataUpdate(scenario='SRES_A2', model='ncar_pcm1')					NINA
-ot <- wcDataUpdate(scenario='SRES_A2', model='ukmo_hadcm3')					NINA
+ot <- wcDataUpdate(scenario='SRES_A2', model='ncar_ccsm3_0')				OK!
+ot <- wcDataUpdate(scenario='SRES_A2', model='ncar_pcm1')					OK!
+ot <- wcDataUpdate(scenario='SRES_A2', model='ukmo_hadcm3')					OK!
 ot <- wcDataUpdate(scenario='SRES_A2', model='ukmo_hadgem1')				NINA
 
 
-ot <- wcDataUpdate(scenario='SRES_B1', model='bccr_bcm2_0')					NINA
-ot <- wcDataUpdate(scenario='SRES_B1', model='cccma_cgcm3_1_t47')			PINTA
-ot <- wcDataUpdate(scenario='SRES_B1', model='cccma_cgcm3_1_t63')			PINTA
-ot <- wcDataUpdate(scenario='SRES_B1', model='cnrm_cm3')					PINTA
-ot <- wcDataUpdate(scenario='SRES_B1', model='csiro_mk3_0')					PINTA
+ot <- wcDataUpdate(scenario='SRES_B1', model='bccr_bcm2_0')					OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='cccma_cgcm3_1_t47')			OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='cccma_cgcm3_1_t63')			OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='cnrm_cm3')					OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='csiro_mk3_0')					OK!
 ot <- wcDataUpdate(scenario='SRES_B1', model='csiro_mk3_5')					STMARIA
-ot <- wcDataUpdate(scenario='SRES_B1', model='gfdl_cm2_0')					STMARIA
-ot <- wcDataUpdate(scenario='SRES_B1', model='gfdl_cm2_1')					STMARIA
-ot <- wcDataUpdate(scenario='SRES_B1', model='giss_aom')					GISSDE
-ot <- wcDataUpdate(scenario='SRES_B1', model='giss_model_er')				GISSDE
-ot <- wcDataUpdate(scenario='SRES_B1', model='iap_fgoals1_0_g')				GISSDE
-ot <- wcDataUpdate(scenario='SRES_B1', model='inm_cm3_0')
-ot <- wcDataUpdate(scenario='SRES_B1', model='ipsl_cm4')
-ot <- wcDataUpdate(scenario='SRES_B1', model='miroc3_2_hires')
-ot <- wcDataUpdate(scenario='SRES_B1', model='miroc3_2_medres')
-ot <- wcDataUpdate(scenario='SRES_B1', model='miub_echo_g')
-ot <- wcDataUpdate(scenario='SRES_B1', model='mpi_echam5')
-ot <- wcDataUpdate(scenario='SRES_B1', model='mri_cgcm2_3_2a')
-ot <- wcDataUpdate(scenario='SRES_B1', model='ncar_ccsm3_0')
-ot <- wcDataUpdate(scenario='SRES_B1', model='ukmo_hadcm3')
+ot <- wcDataUpdate(scenario='SRES_B1', model='gfdl_cm2_0')					OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='gfdl_cm2_1')					OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='giss_aom')					OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='giss_model_er')				OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='iap_fgoals1_0_g')				OK!
+ot <- wcDataUpdate(scenario='SRES_B1', model='inm_cm3_0')					NINA
+ot <- wcDataUpdate(scenario='SRES_B1', model='ipsl_cm4')					NINA
+ot <- wcDataUpdate(scenario='SRES_B1', model='miroc3_2_hires')				NINA
+ot <- wcDataUpdate(scenario='SRES_B1', model='miroc3_2_medres')				GISSDE
+ot <- wcDataUpdate(scenario='SRES_B1', model='miub_echo_g')					GISSDE
+ot <- wcDataUpdate(scenario='SRES_B1', model='mpi_echam5')					GISSDE
+ot <- wcDataUpdate(scenario='SRES_B1', model='mri_cgcm2_3_2a')				GISSDE
+ot <- wcDataUpdate(scenario='SRES_B1', model='ncar_ccsm3_0')				PINTA
+ot <- wcDataUpdate(scenario='SRES_B1', model='ukmo_hadcm3')					PINTA
