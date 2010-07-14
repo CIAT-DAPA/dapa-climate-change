@@ -58,7 +58,7 @@ verifySpecies <- function(spID, idir, fNameList, overwrite=T) {
 				}
 				
 				#If it's not a zip file then use gz extension
-				if (!file.exists(fName)) {
+				if (!file.exists(paste(prjFolder, "/", fName)) {
 					fName <- paste(spID, "_", f, ".asc.gz", sep="")
 					if (f == "buf-") {
 						fName <- paste(f, spID, ".asc.gz", sep="")
