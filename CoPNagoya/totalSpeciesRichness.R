@@ -181,7 +181,7 @@ speciesRichness <- function(idir, type, OSys="LINUX") {
 
 ################################################################
 
-richnessChange <- function(richDir, type, sres, period, threshold, adapescen, OSys="LINUX") {
+richnessChange <- function(richDir, type, sres, period, threshold, adapscen, OSys="LINUX") {
 	if (!tolower(type) %in% c("plants", "aves")) {
 		stop("Type is not supported, use plants or aves")
 	}
@@ -256,16 +256,3 @@ richnessChangeCalc <- function(idir) {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
