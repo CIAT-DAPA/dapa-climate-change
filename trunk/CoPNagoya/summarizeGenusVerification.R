@@ -29,7 +29,7 @@ summarizeMetrics <- function(idir="C:/CIAT_work/COP_CONDESAN", type='plants', ca
 		dir.create(odir)
 	}
 
-	gnFile <- paste(idir, "/occurrences/modeling-data/", tolower(type), "-genusListToModel.csv", sep="")
+	gnFile <- paste(idir, "/occurrences/modeling-data/", tolower(type), "-generaListToModel.csv", sep="")
 	gnListComplete <- read.csv(gnFile)
 
 	ngen <- nrow(gnListComplete)

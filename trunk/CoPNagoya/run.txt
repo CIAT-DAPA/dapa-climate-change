@@ -87,6 +87,26 @@ setOptions(overwrite=T)
 
 idir <- "L:/COP_CONDESAN"
 
+
+############################################
+########## Genera verification ############
+############################################
+
+############# LINUX ########################
+
+source("genusVerification.R")
+setOptions(overwrite=T)
+
+idir <- "/mnt/GeoData/COP_CONDESAN"
+
+############# NT ########################
+
+source("genusVerification.R")
+setOptions(overwrite=T)
+
+idir <- "L:/COP_CONDESAN"
+
+
 ############################################
 ############## Impact Metrics ##############
 ############################################
