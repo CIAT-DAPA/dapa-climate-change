@@ -259,7 +259,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					if (OSys == "linux") {
 						system(paste("gzip", fName))
 					} else {
-						system(paste("7za", "a", "-tzip", paste(fName, ".zip", sep=""), fName))
+						system(paste("7za", "a", "-tgzip", paste(fName, ".zip", sep=""), fName))
 						file.remove(fName)
 					}
 				}
