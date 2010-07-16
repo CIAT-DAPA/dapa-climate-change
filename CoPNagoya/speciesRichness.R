@@ -68,11 +68,14 @@ speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 		
 		sppC <- 1
 		for (spp in spList) {
+			#Verify whether the species has in fact a good model
+			isSel <- spListComplete$IsSelected[which(spListComplete$IDSpecies == spp)]
+			
 			fdName <- paste("sp-", spp, sep="")
 			spFolder <- paste(bdir, "/mxe_outputs/", fdName, sep="")
 			
 			#Performing only for existing folders
-			if (file.exists(spFolder)) {
+			if (file.exists(spFolder) & isSel == 1) {
 				cat("Species", spp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
 				
 				rsFolder <- paste(spFolder, "/projections", sep="")
@@ -168,7 +171,7 @@ speciesRichness <- function(bdir, idir, genID, type, OSys="LINUX") {
 				}
 				sppC <- sppC+1
 			} else {
-				cat("The species", spp, "was not modeled \n")
+				cat("The species", spp, "was not modeled or was not selected \n")
 			}
 		}
 
