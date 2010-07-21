@@ -33,7 +33,7 @@ recalculation <- function(idir, type, calctype, OSys) {
 	for (gen in genList$IDGenus) {
 		
 		cat("\n")
-		cat("...Processing genus", gen, paste("...",round(genC/length(genList)*100,2),"%",sep=""), "\n")
+		cat("...Processing genus", gen, paste("...",round(genC/length(genList$IDGenus)*100,2),"%",sep=""), "\n")
 		
 		#Name of the genus folder
 		genDir <- paste(summDir, "/gn-", gen, sep="")
