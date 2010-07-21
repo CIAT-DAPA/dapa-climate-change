@@ -41,18 +41,32 @@ recalculation <- function(idir, type, calctype, OSys) {
 		#Determining if the genus needs to be re-calculated
 		isDisc <- genList$IsDiscarded[which(genList$IDGenus == gen)]
 		
-		if (file.exists(genDir)) {
-			cat("Erasing the folder \n")
-			system(paste("rm", "-r", genDir))
-			if (isDisc == 0) {
-				cat("Re-calculating the genus \n")
-				ot <- speciesRichness(idir, summDir, gen, type, OSys=OSys)
+		#Checking whether the process is already done or not
+		verFile <- paste(genDir, "/rc-", gen, ".run", sep="")
+		
+		if (!file.exists(verFile)) {
+			if (file.exists(genDir)) {
+				cat("Erasing the folder \n")
+				system(paste("rm", "-r", genDir))
+				if (isDisc == 0) {
+					cat("Re-calculating the genus \n")
+					ot <- speciesRichness(idir, summDir, gen, type, OSys=OSys)
+					
+					#Run verification file
+					verFile <- paste(genDir, "/rc-", gen, ".run", sep="")
+					opnFile <- file(verFile, open="w")
+					cat("Recalculated on", date(), file=opnFile)
+					close.connection(opnFile)
+					
+				} else {
+					cat("The genus was finally discarded \n")
+				}
 			} else {
-				cat("The genus was finally discarded \n")
+				cat("The genus folder didnt exist anyway \n")
 			}
+			genC <- genC+1
 		} else {
-			cat("The genus folder didnt exist anyway \n")
+			cat("The genus was already corrected \n")
 		}
-		genC <- genC+1
 	}
 }
