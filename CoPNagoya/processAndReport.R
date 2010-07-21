@@ -2,7 +2,7 @@ require(rgdal)
 require(raster)
 require(maptools)
 
-source("C:/CIAT_work/_tools/dapa-climate-change/trunk/CoPNagoya/zipRead.R")
+source("zipRead.R")
 wdir <- getwd()
 #Basic stuff
 
