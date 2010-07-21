@@ -62,7 +62,20 @@ recalculation <- function(idir, type, calctype, OSys) {
 					cat("The genus was finally discarded \n")
 				}
 			} else {
-				cat("The genus folder didnt exist anyway \n")
+				cat("The genus folder didnt exist \n")
+				if (isDisc == 0) {
+					cat("Re-calculating the genus \n")
+					ot <- speciesRichness(idir, summDir, gen, type, OSys=OSys)
+					
+					#Run verification file
+					verFile <- paste(genDir, "/rc-", gen, ".run", sep="")
+					opnFile <- file(verFile, open="w")
+					cat("Recalculated on", date(), file=opnFile)
+					close.connection(opnFile)
+					
+				} else {
+					cat("The genus was finally discarded \n")
+				}
 			}
 			genC <- genC+1
 		} else {
