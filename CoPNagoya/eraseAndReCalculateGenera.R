@@ -53,6 +53,6 @@ recalculation <- function(idir, type, calctype, OSys) {
 		} else {
 			cat("The genus folder didnt exist anyway \n")
 		}
-		genC <- 1
+		genC <- genC+1
 	}
 }
