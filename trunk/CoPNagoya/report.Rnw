@@ -1,0 +1,135 @@
+\documentclass[a4paper]{article}
+\usepackage[cm]{fullpage}
+
+\title{Species modeling information}
+\author{Julian Ramirez}
+\begin{document}
+
+\maketitle
+
+\noindent This is a report for the CONDESAN-CIAT-BIRDLIFE Andean species modeling project. Below are some model 
+statistics and images of the distributions. \\
+
+\noindent AUC training and testing statistics come from 10-fold cross-validated Maxent runs. Variables used in the modeling
+include the total annual rainfall (P12) and annual mean temperature (P1), plus some extreme events and yearly variability
+in climates indicators (P4, P15, P16, P17), and the ombrothermic indices Io and Iod2
+
+<<>>=
+#read in the contribution and accuracy information
+metrics = read.csv("metrics.csv")
+names(metrics) <- c("VARIABLE", "VALUE")
+print(metrics)
+@
+
+\noindent Below are all the calculated thresholds for the selected species \\*
+
+<<>>=
+thresh = read.csv("thresholds.csv")
+thresh[1:13,2] = round(thresh[1:13,2],3) #round the values for printing
+names(thresh) <- c("THRESHOLD", "VALUE")
+print(thresh)
+@
+
+\noindent For the below distributions, the thresholds applied were the TenPercentile and Prevalence, obtained from the 
+10-cross validated runs. SD indicates standard deviation \\*
+
+\noindent The below table contains the impact assessment metrics over the species \\*
+
+<<>>=
+imets = read.csv("impactMetrics.csv")
+imets[1:16,2:5] = round(imets[1:16,2:5],2) #round the values for printing
+print(imets)
+@
+
+\noindent ARC: Absolute range change (percentage) \\*
+\noindent RI:  Increase in range size (percentage) \\*
+\noindent RD:  Decrease in range size (percentage) \\*
+\noindent PC:  Change in probability [MAX] \\*
+
+\begin{center}
+\newpage
+\section*{CURRENT PROBABILITIES (BASELINE)}
+The probabilistic distribution of the species with no thresholding and no buffering of the distribution \\*
+\includegraphics{Current-probability.png} \\*
+\newpage
+The current distribution of the species binned with the PREVALENCE threshold and cut with a 300km buffer around the input presence-only points\\*
+\includegraphics{Current-probability-prev.png} \\*
+\newpage
+The current distribution of the species binned with the TEN-PERCENTILE threshold and cut with a 300km buffer around the input presence-only points\\*
+\includegraphics{Current-probability-tenp.png} 
+
+\newpage
+\section*{FUTURE PROBABILITIES (SRES-A1B)}
+2020s (2010-2039) \\
+\includegraphics{future_SRES_A1B_disaggregated_2010_2039.png} \\
+\newpage
+2050s (2040-2069) \\
+\includegraphics{future_SRES_A1B_disaggregated_2040_2069.png} \\
+
+\newpage
+\section*{FUTURE THRESHOLDED PROBABILITIES (FULL ADAPTATION), SRES-A1B}
+2020s (2010-2039), Prevalence \\
+\includegraphics{future_SRES_A1B_disaggregated_2010_2039_Prevalence_FullAdap.png} \\
+\newpage
+2020s (2010-2039), Ten Percentile \\
+\includegraphics{future_SRES_A1B_disaggregated_2010_2039_TenPercentile_FullAdap.png} \\
+\newpage
+2050s (2040-2069) \\
+\includegraphics{future_SRES_A1B_disaggregated_2040_2069_Prevalence_FullAdap.png} \\
+\newpage
+2050s (2040-2069) \\
+\includegraphics{future_SRES_A1B_disaggregated_2040_2069_TenPercentile_FullAdap.png} \\
+
+\newpage
+\section*{FUTURE THRESHOLDED PROBABILITIES (NULL ADAPTATION), SRES-A1B}
+2020s (2010-2039), Prevalence \\
+\includegraphics{future_SRES_A1B_disaggregated_2010_2039_Prevalence_NullAdap.png} \\
+\newpage
+2020s (2010-2039), Ten Percentile \\
+\includegraphics{future_SRES_A1B_disaggregated_2010_2039_TenPercentile_NullAdap.png} \\
+\newpage
+2050s (2040-2069), Prevalence \\
+\includegraphics{future_SRES_A1B_disaggregated_2040_2069_Prevalence_NullAdap.png} \\
+\newpage
+2050s (2040-2069), Ten Percentile \\
+\includegraphics{future_SRES_A1B_disaggregated_2040_2069_TenPercentile_NullAdap.png} \\
+
+\newpage
+\section*{FUTURE PROBABILITIES (SRES-A2)}
+2020s (2010-2039) \\
+\includegraphics{future_SRES_A2_disaggregated_2010_2039.png} \\
+\newpage
+2050s (2040-2069) \\
+\includegraphics{future_SRES_A2_disaggregated_2040_2069.png} \\
+
+\newpage
+\section*{FUTURE THRESHOLDED PROBABILITIES (FULL ADAPTATION), SRES-A2}
+2020s (2010-2039), Prevalence \\
+\includegraphics{future_SRES_A2_disaggregated_2010_2039_Prevalence_FullAdap.png} \\
+\newpage
+2020s (2010-2039), Ten Percentile \\
+\includegraphics{future_SRES_A2_disaggregated_2010_2039_TenPercentile_FullAdap.png} \\
+\newpage
+2050s (2040-2069) \\
+\includegraphics{future_SRES_A2_disaggregated_2040_2069_Prevalence_FullAdap.png} \\
+\newpage
+2050s (2040-2069) \\
+\includegraphics{future_SRES_A2_disaggregated_2040_2069_TenPercentile_FullAdap.png} \\
+
+\newpage
+\section*{FUTURE THRESHOLDED PROBABILITIES (NULL ADAPTATION), SRES-A2}
+2020s (2010-2039), Prevalence \\
+\includegraphics{future_SRES_A2_disaggregated_2010_2039_Prevalence_NullAdap.png} \\
+\newpage
+2020s (2010-2039), Ten Percentile \\
+\includegraphics{future_SRES_A2_disaggregated_2010_2039_TenPercentile_NullAdap.png} \\
+\newpage
+2050s (2040-2069), Prevalence \\
+\includegraphics{future_SRES_A2_disaggregated_2040_2069_Prevalence_NullAdap.png} \\
+\newpage
+2050s (2040-2069), Ten Percentile \\
+\includegraphics{future_SRES_A2_disaggregated_2040_2069_TenPercentile_NullAdap.png} \\
+
+\end{center}
+
+\end{document}
