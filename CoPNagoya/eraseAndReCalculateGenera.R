@@ -63,9 +63,9 @@ recalculation <- function(idir, type, calctype, OSys) {
 			} else {
 				cat("The genus was finally discarded \n")
 			}
-			genC <- genC+1
 		} else {
 			cat("The genus was already corrected \n")
 		}
+		genC <- genC+1
 	}
 }
