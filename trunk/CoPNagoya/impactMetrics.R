@@ -85,7 +85,7 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 						
 						#Extract maximum probability
 						maxProbCurr <- max(BLrs[which(!is.na(BLrs[]))])
-						maxProbCell <- which(BLrs[] == maxProbCurr)
+						maxProbCell <- which(BLrs[] == maxProbCurr)[1]
 						maxProbCellX <- xFromCell(BLrs, maxProbCell)[1]
 						maxProbCellY <- yFromCell(BLrs, maxProbCell)[1]
 						
