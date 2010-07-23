@@ -21,10 +21,15 @@ report <- function(idir, spID, shp) {
 	sppDir <- paste(runsDir, "/sp-", spID, sep="")
 	
 	if (file.exists(sppDir)) {
-		cat("Processing species", spID)
+		cat("Processing species", spID, "\n")
 		#Defining and creating output folder
 		
 		odir <- paste(sppDir, "/report", sep="")
+		
+		if (file.exists(paste(odir, "/report.pdf", sep=""))) {
+			system(paste("rm", "-rf", odir)
+		}
+		
 		if (!file.exists(odir)) {
 			dir.create(odir)
 		}
@@ -164,10 +169,10 @@ report <- function(idir, spID, shp) {
 		file.copy("report.Rnw", paste(odir, "/report.Rnw", sep=""))
 		setwd(odir)
 		Sweave("report.Rnw")
-		system(paste("R", "CMD", "pdflatex", "report.tex"))
+		system(paste("R", "CMD", "pdflatex", "-quiet", "report.tex"))
 		setwd(wdir)
 	} else {
 		cat("The species was found to not exist, check or try again, or both?")
 	}
-	return("Done!")
+	return(paste(odir, "/report.pdf", sep=""))
 }
