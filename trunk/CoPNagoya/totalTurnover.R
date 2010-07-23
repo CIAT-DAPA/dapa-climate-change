@@ -53,7 +53,7 @@ speciesTurnover <- function(idir, type, OSys="LINUX") {
 		dir.create(oTurnFolder)
 	}
 	
-	gnList <- gnListComplete$IDGenus[1:3]
+	gnList <- gnListComplete$IDGenus
 	
 	cat("Processing", paste(length(gnList)), "genera \n")
 	
