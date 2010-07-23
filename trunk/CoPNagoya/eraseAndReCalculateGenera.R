@@ -3,6 +3,7 @@ require(raster)
 
 source("zipRead.R")
 source("speciesRichness.R")
+source("turnover.R")
 
 cat(" \n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
