@@ -169,7 +169,7 @@ report <- function(idir, spID, shp) {
 		file.copy("report.Rnw", paste(odir, "/report.Rnw", sep=""))
 		setwd(odir)
 		Sweave("report.Rnw")
-		system(paste("R", "CMD", "pdflatex", "-quiet", "report.tex"))
+		system(paste("R", "CMD", "pdflatex", "report.tex"))
 		setwd(wdir)
 	} else {
 		cat("The species was found to not exist, check or try again, or both?")
