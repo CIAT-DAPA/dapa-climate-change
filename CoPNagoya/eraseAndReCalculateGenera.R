@@ -51,8 +51,13 @@ recalculation <- function(idir, type, calctype, OSys) {
 			}
 			
 			if (isDisc == 0) {
-				cat("Re-calculating the genus \n")
-				ot <- speciesRichness(idir, summDir, gen, type, OSys=OSys)
+				if (tolower(calctype) == 'richness') {
+					cat("Re-calculating the genus -richness \n")
+					ot <- speciesRichness(idir, summDir, gen, type, OSys=OSys)
+				} else {
+					cat("Re-calculating the genus -turnover \n")
+					ot <- speciesTurnover(idir, summDir, gen, type, OSys=OSys)
+				}
 				
 				#Run verification file
 				verFile <- paste(genDir, "/rc-", gen, ".run", sep="")
