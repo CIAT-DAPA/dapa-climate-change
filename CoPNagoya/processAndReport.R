@@ -8,7 +8,7 @@ wdir <- getwd()
 
 #Creating the function
 
-report <- function(idir, spID) {
+report <- function(idir, spID, shp) {
 	cat("\n")
 	
 	#Defining and checking the runsDir
@@ -95,7 +95,7 @@ report <- function(idir, spID) {
 		#Read the shapefile (Andean countries)
 
 		cat("Reading world shapefile... \n")
-		worldshapefile <- "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp"
+		worldshapefile <- shp
 		sh <- readShapePoly(worldshapefile)
 
 		#Read the current dist and the current buffered dists (prev. and tenP.)
