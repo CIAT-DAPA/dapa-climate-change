@@ -27,7 +27,7 @@ report <- function(idir, spID, shp) {
 		odir <- paste(sppDir, "/report", sep="")
 		
 		if (file.exists(paste(odir, "/report.pdf", sep=""))) {
-			system(paste("rm", "-rf", odir)
+			system(paste("rm", "-rf", odir))
 		}
 		
 		if (!file.exists(odir)) {
