@@ -127,103 +127,135 @@ arc w %targetfolder%
 
 
 /* P1. Annual Mean Temperature 
-&if [exists p1 -grid] &then &type P1 exists
-&else
+&if not [exists bio_1 -grid] &then
 &do
-  P1 = int(floor(mean(%tavar%) + 0.5))
-  &type P1 done 
+	&if [exists p1 -grid] &then &type P1 exists
+	&else
+	&do
+	  P1 = int(floor(mean(%tavar%) + 0.5))
+	  &type P1 done 
+	&end
 &end
 
-
 /* P4. Temperature Seasonality (standard deviation) 
-&if [exists p4 -grid] &then &type P4 exists
-&else
+&if not [exists bio_4 -grid] &then
 &do
-  P4 = int(floor(100 * std(%tavar%) + 0.5))
-  &type P4 done
+	&if [exists p4 -grid] &then &type P4 exists
+	&else
+	&do
+	  P4 = int(floor(100 * std(%tavar%) + 0.5))
+	  &type P4 done
+	&end
 &end
 
 /* P5. Max Temperature of Warmest Period 
-&if [exists p5 -grid] &then &type P5 exists
-&else
+&if not [exists bio_5 -grid] &then
 &do
-  P5 = max(%txvar%)
-  &type P5 done
+	&if [exists p5 -grid] &then &type P5 exists
+	&else
+	&do
+	  P5 = max(%txvar%)
+	  &type P5 done
+	&end
 &end
 
 /* P6. Min Temperature of Coldest Period 
-&if [exists p6 -grid] &then &type P6 exists
-&else
+&if not [exists bio_6 -grid] &then
 &do
-  P6 = min(%tnvar%)
-  &type P6 done
+	&if [exists p6 -grid] &then &type P6 exists
+	&else
+	&do
+	  P6 = min(%tnvar%)
+	  &type P6 done
+	&end
 &end
 
 /* P7. Temperature Annual Range (P5-P6) 
-&if [exists p7 -grid] &then &type P7 exists
-&else
+&if not [exists bio_7 -grid] &then
 &do
-  P7 = P5 - P6
-  &type P7 done
+	&if [exists p7 -grid] &then &type P7 exists
+	&else
+	&do
+	  P7 = P5 - P6
+	  &type P7 done
+	&end
 &end
 
 /* P12. Annual Precipitation 
-&if [exists p12 -grid] &then &type P12 exists
-&else
+&if not [exists bio_12 -grid] &then
 &do
-  P12 = sum(%ptvar%)
-  &type P12 done
+	&if [exists p12 -grid] &then &type P12 exists
+	&else
+	&do
+	  P12 = sum(%ptvar%)
+	  &type P12 done
+	&end
 &end
 
 /* P13. Precipitation of Wettest Period 
-&if [exists p13 -grid] &then &type P13 exists
-&else
+&if not [exists bio_13 -grid] &then
 &do
-  P13 = max(%ptvar%)
-  &type P13 done
+	&if [exists p13 -grid] &then &type P13 exists
+	&else
+	&do
+	  P13 = max(%ptvar%)
+	  &type P13 done
+	&end
 &end
 
 /* P14. Precipitation of Driest Period 
-&if [exists p14 -grid] &then &type P14 exists
-&else
+&if not [exists bio_14 -grid] &then
 &do
-  P14 = min(%ptvar%)
-  &type P14 done
+	&if [exists p14 -grid] &then &type P14 exists
+	&else
+	&do
+	  P14 = min(%ptvar%)
+	  &type P14 done
+	&end
 &end
-
+	
 /* P15. Precipitation Seasonality(Coefficient of Variation) 
 /* the "1 +" is to avoid strange CVs for areas where mean rainfaill is < 1)
-&if [exists p15 -grid] &then &type P15 exists
-&else
+&if not [exists bio_15 -grid] &then
+	&if [exists p15 -grid] &then &type P15 exists
+	&else
+	&do
+	  P15 = int(floor(100 * std(%ptvar%) / (1 + P12 / 12) + 0.5))
+	  &type P15 done
+	&end
 &do
-  P15 = int(floor(100 * std(%ptvar%) / (1 + P12 / 12) + 0.5))
-  &type P15 done
-&end
 
-&do i = 1 &to 12
-  &if [exists rg%i% -grid] &then &type rg%i% exists
-  &else rg%i% = %tx%%i% - %tn%%i%
-&end
+&if not [exists bio_2 -grid] &then
+&do	
+	&do i = 1 &to 12
+	  &if [exists rg%i% -grid] &then &type rg%i% exists
+	  &else rg%i% = %tx%%i% - %tn%%i%
+	&end
 
-/* P2. Mean Diurnal Range(Mean(period max-min)) 
-&if [exists p2 -grid] &then &type P2 exists
-&else
-&do
-  P2 = int(floor(mean(rg1,rg2,rg3,rg4,rg5,rg6,rg7,rg8,rg9,rg10,rg11,rg12) + 0.5))
-  &type P2 done
+	/* P2. Mean Diurnal Range(Mean(period max-min)) 
+	&if [exists p2 -grid] &then &type P2 exists
+	&else
+	&do
+	  P2 = int(floor(mean(rg1,rg2,rg3,rg4,rg5,rg6,rg7,rg8,rg9,rg10,rg11,rg12) + 0.5))
+	  &type P2 done
+	&end
 &end
 
 /* P3. Isothermality (P2 / P7) 
-&if [exists p3 -grid] &then &type P3 exists
-&else
+&if not [exists bio_3 -grid] &then
 &do
-  P3 = int(floor(100 * P2 / P7) + 0.5)
-  &type P3 done
+	&if [exists p3 -grid] &then &type P3 exists
+	&else
+	&do
+	  P3 = int(floor(100 * P2 / P7) + 0.5)
+	  &type P3 done
+	&end
+&end
+	
+&do i = 1 &to 12
+  &if [exists rg%i% -grid] &then kill rg%i% all
 &end
 
-&do i = 1 &to 12
-  kill rg%i% 
-&end
 
 &do i = 1 &to 12
   &sv j = %i%
@@ -329,11 +361,14 @@ hot1 = t1
 hotm = mnt12
 
 /* P10 Mean Temperature of Warmest Quarter 
-&if [exists p10 -grid] &then &type P10 exists
-&else
+&if not [exists bio_10 -grid] &then
 &do
-  P10 = int(floor(hot12 / 3 + 0.5))
-  &type P10 done
+	&if [exists p10 -grid] &then &type P10 exists
+	&else
+	&do
+	  P10 = int(floor(hot12 / 3 + 0.5))
+	  &type P10 done
+	&end
 &end
 
 &do i = 1 &to 12
@@ -353,11 +388,14 @@ cld1 = t1
 cldm = mnt12
 
 /* P11 Mean Temperature of Coldest Quarter
-&if [exists p11 -grid] &then &type P11 exists
-&else
+&if not [exists bio_11 -grid] &then
 &do
-  P11 = int(floor(cld12 / 3 + 0.5))
-  &type P11 done
+	&if [exists p11 -grid] &then &type P11 exists
+	&else
+	&do
+	  P11 = int(floor(cld12 / 3 + 0.5))
+	  &type P11 done
+	&end
 &end
 
 &do i = 1 &to 12
@@ -411,8 +449,16 @@ kill tmp2
 &end
 
 &do i = 1 &to 19
-	&if [exists bio_%i% -grid] &then kill bio_%i% all
-  rename p%i% bio_%i%
+	&if [exists bio_%i% -grid] &then
+		&do
+			&if [exists p%i% -grid] &then
+				&do
+					kill bio_%i%
+					rename p%i% bio_%i%
+				&end
+		&end
+	&else
+		&if [exists p%i% -grid] &then rename p%i% bio_%i%
 &end
 
 &s delstat [delete log -file]
