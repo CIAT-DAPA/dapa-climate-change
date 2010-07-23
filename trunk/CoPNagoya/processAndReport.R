@@ -1,6 +1,7 @@
 require(rgdal)
 require(raster)
 require(maptools)
+gpclibPermit()
 
 source("zipRead.R")
 wdir <- getwd()
