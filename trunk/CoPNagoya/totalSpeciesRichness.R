@@ -112,7 +112,7 @@ speciesRichness <- function(idir, type, OSys="LINUX") {
 								}
 								
 							} else {
-								cat(condition, ".", sep="")
+								#cat(condition, ".", sep="")
 								#Now cycle through migration scenarios
 								for (mig in migrList) {
 									#cat("Performing for mig. scenario", mig, "\n")
