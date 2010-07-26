@@ -94,7 +94,7 @@ speciesTurnover <- function(idir, type, OSys="LINUX") {
 								rm(rs)
 							}
 						}
-						cat("\n")
+						#cat("\n")
 					}
 				}
 			}
