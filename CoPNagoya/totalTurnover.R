@@ -154,7 +154,7 @@ turnover <- function(turnDir, richDir, type, sres, period, threshold, OSys="LINU
 	
 	richness <- zipRead(richDir, paste("richness_baseline_20C3M_WorldClim-2_5min-bioclim_1950_2000_", threshold, ".asc.gz", sep=""))
 	gain <- zipRead(turnDir, paste("turnover_gain_", sres, "_", period, "_", threshold, ".asc.gz", sep=""))
-	loss <- zipRead(turnDir, paste("turnover_gain_", sres, "_", period, "_", threshold, ".asc.gz", sep=""))
+	loss <- zipRead(turnDir, paste("turnover_loss_", sres, "_", period, "_", threshold, ".asc.gz", sep=""))
 	
 	tover <- 100*(gain-loss)/(richness - gain)
 	

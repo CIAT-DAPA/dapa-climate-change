@@ -208,7 +208,7 @@ richnessChange <- function(richDir, type, sres, period, threshold, adapscen, OSy
 	futRich <- zipRead(richDir, paste("richness_future_", sres, "_disaggregated_", period, "_", threshold, "_", adapscen, ".asc.gz", sep=""))
 	
 	absChg <- futRich - curRich
-	perChg <- absRich / curRich * 100
+	perChg <- absChg / curRich * 100
 	
 	rsName <- paste(richDir, "/richness_abschg_", sres, "_", period, "_", threshold, "_", adapscen, ".asc", sep="")
 	absChg <- writeRaster(absChg, rsName, format='ascii', overwrite=T)
