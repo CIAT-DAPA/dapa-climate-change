@@ -22,7 +22,7 @@
 		
 		&s modname [extract %md% %modellist%]
 		
-		&do year &list 2020s 2030s 2040s /*2050s 2060s 2070s 2080s 
+		&do year &list 2050s 2060s 2070s 2080s /*2020s 2030s 2040s 2050s 2060s 2070s 2080s 
 				
 				&ty
 				&ty Model %modname% (%year%, %resol%)
