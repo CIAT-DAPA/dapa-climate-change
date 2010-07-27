@@ -168,7 +168,7 @@ turnover <- function(turnDir, richDir, type, sres, period, threshold, OSys="LINU
 		file.remove(oName)
 	}
 	
-	cat("Finished!")
+	cat("Finished! \n")
 	return("Done!")
 }
 
@@ -185,7 +185,7 @@ turnoverCalc <- function(idir) {
 		for (sres in sresList) {
 			for (tsl in tsList) {
 				for (threshold in threList) {
-					cat(".Performing for:", type, sres, tsl, threshold)
+					cat(".Performing for:", type, sres, tsl, threshold, "\n")
 					turnDir <- paste(idir, "/summaries/turnover-", tolower(type), "/all-genera", sep="")
 					richDir <- paste(idir, "/summaries/richness-", tolower(type), "/all-genera", sep="")
 					ot <- turnover(turnDir, richDir, type, sres, tsl, threshold, OSys='linux')

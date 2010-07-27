@@ -52,7 +52,7 @@ richVerification <- function(idir, type, calctype) {
 			
 			if (lth != 0) {
 				cat("**Error found, and being reported! \n")
-				cat(gen, per, file=zz)
+				cat(gen, per, "\n", file=zz)
 			}
 			
 		}
