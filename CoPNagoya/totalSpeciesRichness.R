@@ -246,7 +246,7 @@ richnessChangeCalc <- function(idir) {
 			for (tsl in tsList) {
 				for (threshold in threList) {
 					for (mig in migrList) {
-						cat(".Performing for:", type, sres, tsl, threshold, mig)
+						cat(".Performing for:", type, sres, tsl, threshold, mig, "\n")
 						richdir <- paste(idir, "/summaries/richness-", tolower(type), "/all-genera", sep="")
 						ot <- richnessChange(richdir, type, sres, tsl, threshold, mig, OSys='linux')
 					}
