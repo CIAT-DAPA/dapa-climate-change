@@ -3,19 +3,19 @@
 &terminal 9999
 &sys cls
 
-/*&s rootdir I:\Climate_data\GCM_data
+/*&s &r publishing.aml G:\Tyndall_data\A1Bp50\30yrAverages T:\data A1B asc
 
 &amlpath .
 &s bdir [show &amlpath]
 
-&do resol &list 2_5min 5min 10min /*30s
+&do resol &list 30s /*2_5min 5min 10min 
 	
 	&if %resol% EQ 2_5min &then &s indir %rootdir%\Global_2_5min
 	&else &if %resol% EQ 5min &then &s indir %rootdir%\Global_5min
 	&else &if %resol% EQ 30s &then &s indir %rootdir%\Global_30s
 	&else &s indir %rootdir%\Global_10min
 	
-	&do year &list 2020s 2030s 2040s 2050s 2060s 2070s 2080s
+	&do year &list 2030s 2040s 2050s 2060s 2070s 2080s /*2020s
 		&s modellist [listfile %indir%\* -dir]
 		&s nmodels [token %modellist% -count]
 		
