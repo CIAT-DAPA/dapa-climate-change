@@ -156,7 +156,7 @@ turnover <- function(turnDir, richDir, type, sres, period, threshold, OSys="LINU
 	gain <- zipRead(turnDir, paste("turnover_gain_", sres, "_", period, "_", threshold, ".asc.gz", sep=""))
 	loss <- zipRead(turnDir, paste("turnover_loss_", sres, "_", period, "_", threshold, ".asc.gz", sep=""))
 	
-	tover <- 100*(gain-loss)/(richness - gain)
+	tover <- 100*(gain+loss)/(richness + gain)
 	
 	oName <- paste(turnDir, "/turnover_", sres, "_", period, "_", threshold, ".asc", sep="")
 	tover <- writeRaster(tover, paste(oName), overwrite=T)
