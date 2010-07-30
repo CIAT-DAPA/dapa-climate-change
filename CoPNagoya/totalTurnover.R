@@ -174,7 +174,7 @@ turnover <- function(turnDir, richDir, type, sres, period, threshold, OSys="LINU
 
 #idir <- "L:/COP_CONDESAN"
 
-turnoverCalc <- function(idir) {
+turnoverCalc <- function(idir, OSys='linux') {
 	typeList <- c("aves", "plants")
 	threList <- c("Prevalence", "TenPercentile")
 	migrList <- c("FullAdap", "NullAdap")
@@ -188,7 +188,7 @@ turnoverCalc <- function(idir) {
 					cat(".Performing for:", type, sres, tsl, threshold, "\n")
 					turnDir <- paste(idir, "/summaries/turnover-", tolower(type), "/all-genera", sep="")
 					richDir <- paste(idir, "/summaries/richness-", tolower(type), "/all-genera", sep="")
-					ot <- turnover(turnDir, richDir, type, sres, tsl, threshold, OSys='linux')
+					ot <- turnover(turnDir, richDir, type, sres, tsl, threshold, OSys=tolower(OSys))
 				}
 			}
 		}
