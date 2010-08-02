@@ -49,5 +49,5 @@ P:GISNINA -&r GCMDeltaMethodInterpolation.aml L:\climate_change\IPCC_CMIP3 ncar_
 P:GISNINA -&r GCMDeltaMethodInterpolation.aml L:\climate_change\IPCC_CMIP3 ncar_pcm1 L:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A2 G:\IPCC_CMIP3_process\temporals\PID_41
 
 P:GISNINA -&r GCMDeltaMethodInterpolation.aml L:\climate_change\IPCC_CMIP3 ukmo_hadcm3 L:\climate_change\IPCC_CMIP3 G:\IPCC_CMIP3_process\masks\mask30s SRES_A2 G:\IPCC_CMIP3_process\temporals\PID_42
--&r GCMDeltaMethodInterpolation.aml W:\climate_change\IPCC_CMIP3 ukmo_hadgem1 W:\climate_change\IPCC_CMIP3 F:\IPCC_CMIP3_process\masks\mask30s SRES_A2 F:\IPCC_CMIP3_process\temporals\PID_43
+P:GISSTAMARIA -&r GCMDeltaMethodInterpolation.aml L:\climate_change\IPCC_CMIP3 ukmo_hadgem1 L:\climate_change\IPCC_CMIP3 E:\IPCC_CMIP3_process\masks\mask30s SRES_A2 E:\IPCC_CMIP3_process\temporals\PID_43
 
