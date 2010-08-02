@@ -1,0 +1,126 @@
+/* This program creates a SWD (sampling with data) file for a sample file in order to produce for maxent input
+/* Use this program to extract from 30 second datasets and produce a very reliable model and then you could project it
+/* to any geographic area, resolution or timeslice you may desire.
+
+/* Written by Julian Ramirez
+/* CIAT, August 2009
+
+&args inputdir samplefile outfolder outname climfolder
+&terminal 9999
+&sys cls
+
+/* Checking the syntax
+
+&if [null %inputdir%] OR [null %samplefile%] OR [null %outfolder%] OR [null %outname%] OR [null %climfolder%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax... please try again
+		&ty
+		&ty RUN AS: '&RUN extract_climates.aml INPUT_DIR SAMPLE_FILE OUTPUT_FOLDER OUTPUT_FILE_NAME CLIMATE_FILES_PATH'
+		&ty
+		&ty INPUT_DIR:         should be the path to the folder 
+		&ty                    containing a .csv sample file
+		&ty
+		&ty SAMPLE_FILE:       should be a .csv file with the 
+		&ty                    SPECIES,LON,LAT format (incl. extension)
+		&ty
+		&ty OUTPUT_FOLDER:     should be the path to the root folder
+		&ty                    where the output .csv SWD files will be saved
+		&ty
+		&ty OUTPUT_NAME:       should be the name of the output .csv file
+		&ty                    which will contain extracted SWD data
+		&ty                    (incl. extension)
+		&ty
+		&ty CLIMATE_FILES_FOLDER: should be the path to the folder 
+		&ty                    where driving variables ESRI-GRIDS are located
+		&ty
+		&return
+	&end
+&else /* Opening the files and extracting the baseline climatic data
+	&do
+		&if [show program] NE GRID &then GRID
+		
+		&ty
+		&ty File %inputdir%\%samplefile% selected
+		
+		/* Opening the input file
+		
+		&s openfile [OPEN %inputdir%\%samplefile% OPENSTATUS -READ]
+		&s row [READ %openfile% READSTATUS]
+		
+		/* Counting the number of records in the file
+		
+		&s rowcounter 1
+		&ty counting rows...
+		&do &while %READSTATUS% EQ 0
+			&s rowcounter [calc %rowcounter% + 1]
+			&s row [READ %openfile% READSTATUS]
+		&end
+		&s nrows [calc %rowcounter%]
+		&s closefile [CLOSE %openfile%]
+		&ty found %nrows% rows
+		
+		/* Re-opening the file
+		
+		&s openfile [OPEN %inputdir%\%samplefile% OPENSTATUS -READ]
+		&s row [READ %openfile% READSTATUS]
+		
+		/* Creating the output file
+		
+		&s openoutfile [OPEN %outfolder%\%outname% OPENSTATUS2 -WRITE]
+		
+		&s rowcounter 1
+		&s percompleted [calc %rowcounter% / %nrows% * 100]
+		
+		&s row [READ %openfile% READSTATUS]
+		
+		&ty working... please wait
+		
+		/* Extracting the data
+		
+		&do &while %READSTATUS% EQ 0
+			&s taxname [EXTRACT 1 %row%]
+			&s lon [EXTRACT 2 %row%]
+			&s lat [EXTRACT 3 %row%]
+			
+			&do i = 1 &to 19
+				&s value [SHOW CELLVALUE %climfolder%\bio_%i% %lon% %lat%]
+				
+				&if [type %value%] NE 1 &then
+					&do
+						&s qualstat 1
+						&if %i% EQ 1 &then &s listvals %value%
+						&else &s listvals %listvals%,%value%
+					&end
+				&else &s qualstat 0
+				
+				&if %rowcounter% EQ 1 AND %i% EQ 1 &then &s header taxon,lon,lat,bio_%i%
+				&else &if %rowcounter% EQ 1 AND %i% GT 1 &then &s header %header%,bio_%i%
+				
+			&end
+			
+			&if %rowcounter% EQ 1 &then &s writeheader [WRITE %openoutfile% %header%]
+			&if %qualstat% EQ 1 &then &s writerow [WRITE %openoutfile% %taxname%,%lon%,%lat%,%listvals%]
+			
+			&s rowcounter [CALC %rowcounter% + 1]
+			&s percompleted [calc %rowcounter% / %nrows% * 100]
+			
+			&s row [READ %openfile% READSTATUS]
+			
+			&if %rowcounter% GT 1 &then
+				&do
+					&sys cls
+					&ty
+					&ty File %inputdir%\%samplefile% selected
+					&ty working... please wait
+					&ty [SUBSTR %percompleted% 1 5] percent completed
+				&end
+		&end
+		
+		/* Closing and bailing out
+		
+		&s closefiles [CLOSE -ALL]
+		&if [SHOW program] EQ GRID &then QUIT
+		&if [EXISTS log -file] &then &s delstat [DELETE log -FILE]
+		&ty done.
+	&end
