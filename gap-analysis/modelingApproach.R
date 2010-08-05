@@ -24,7 +24,7 @@ require(raster)
 cat(" \n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-cat("XXXXXXXX CoP 10 at Nagoya (Japan) XXXXXXXXXX \n")
+cat("XXXXXXXXXX GAP ANALYSIS MODELING XXXXXXXXXX \n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
 
@@ -44,15 +44,7 @@ source("bufferSpecies.R")
 
 ###############################################################################################
 ###############################################################################################
-# The select background area function
-###############################################################################################
-###############################################################################################
-
-source("selectBackgroundArea.R")
-
-###############################################################################################
-###############################################################################################
-# The select background area function
+# The evaluation metrics and threshold calculation function
 ###############################################################################################
 ###############################################################################################
 
@@ -77,17 +69,17 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 			system(paste("rm", "-r", paste(inputDir, "/mxe_outputs/sp-", spID, sep="")))
 		}
 		
-		backgroundDir <- paste(inputDir, "/backgrounds", sep="")
-		inProjClimDir <- paste(inputDir, "/climateData/andes", sep="")
-		maxentApp <- paste(inputDir, "/maxent332/maxent.jar", sep="")
+		inProjClimDir <- paste(inputDir, "/climate_data", sep="")
+		maxentApp <- paste(inputDir, "/maxent333a/maxent.jar", sep="")
 		mskDir <- paste(inputDir, "/maskData/AAIGrids", sep="")
+		backoutdir <- paste(inputDir, "/background_selection", sep="")
 		
 		cat("Taxon ", spID, "\n")
 	  
 		#1. Load species data
 	  
-		occFile <- paste(inputDir, "/occurrences/splitted-occurrence-files/", spID, ".csv", sep="")
-	  
+		occFile <- paste(inputDir, "/occurrence_files/", spID, ".csv", sep="")
+		
 		if (file.exists(occFile)) {
 		
 			#1.1 Load the data
@@ -95,20 +87,11 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 			inData <- read.csv(occFile)
 			nOcc <- nrow(inData)
 			
-			if (nOcc >= 10) {
+			if (nOcc >= 0) {
 			
-				#3. Select background area
+				#3. Get background file name
 				
-				msk <- paste(mskDir, "/and0_ctr_30s.asc", sep="")
-				backoutdir <- paste(inputDir, "/background-files", sep="")
-				
-				if (!file.exists(backoutdir)) {
-					dir.create(backoutdir)
-				}
-				
-				backFile <- paste(backoutdir, "/bg-", spID, ".csv", sep="")
-				backGround <- selectBack(occFile, backFile, msk, backgroundDir)
-				backFileSwd <- paste(backoutdir, "/bg-", spID, ".csv", sep="")
+				backFileSwd <- paste(backoutdir, "/background_swd.csv", sep="")
 				
 				#4. Train the maxent model
 				
@@ -122,48 +105,41 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 				outName <- paste(outFolder, "/sp-", spID, sep="")
 				if (!file.exists(outName)) {
 					dir.create(outName)
-					dir.create(paste(outName, "/model", sep=""))
 					dir.create(paste(outName, "/crossval", sep=""))
 					dir.create(paste(outName, "/projections", sep=""))
 					dir.create(paste(outName, "/metrics", sep=""))
 				}
 				
-				if (nOcc >= 40) {
-					cat("Fitting the model... (10 VAR) \n")
-					system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/model", sep=""), "-P", "-X", "0", "nowarnings", "-a", "-z"), wait=TRUE)
-					
-					cat("Crossvalidating the model...(10 VAR) \n")
-					system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=10", "replicatetype=crossvalidate", "nowarnings", "-a", "-z"), wait=TRUE)
-				} else {
-					cat("Fitting the model... (6 VAR)\n")
-					system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/model", sep=""), "-N bio_5 -N bio_6 -N bio_16 -N bio_17", "-P", "-X", "0", "nowarnings", "-a", "-z"), wait=TRUE)
-					
-					cat("Crossvalidating the model... (6 VAR)\n")
-					system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-N bio_5 -N bio_6 -N bio_16 -N bio_17", "-P", "replicates=10", "replicatetype=crossvalidate", "nowarnings", "-a", "-z"), wait=TRUE)
-				}
+				cat("Crossvalidating the model... \n")
+				system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=25", "replicatetype=crossvalidate", "nowarnings", "-a", "-z"), wait=TRUE)
 				
-				if (file.exists(paste(outName, "/model/", spID,".lambdas", sep=""))) {
+				if (file.exists(paste(outName, "/crossval/", spID,".html", sep=""))) {
 					cat("Model done successfully!", "\n")
+					procSwitch <- T
+					
+					#Determine how many folds were finally performed
+					datafile <- read.csv(paste(outName, "/crossval/maxentResults.csv", sep=""))
+					nFolds <- nrow(datafile) - 1
+					
 				} else {
-					cat("Error in computing \n")
+					cat("Error in computing... erasing the folder \n")
+					system(paste("rm", "-rv", outName))
+					procSwitch <- F
 				}
 				
 				#5. Getting the metrics
 				
-				out <- getMetrics(paste(outName, "/crossval", sep=""), paste(spID), 10, paste(outName, "/model", sep=""), paste(outName, "/metrics", sep=""))
+				if (procSwitch) {
+					out <- getMetrics(paste(outName, "/crossval", sep=""), paste(spID), 10, paste(outName, "/model", sep=""), paste(outName, "/metrics", sep=""))
+				}
 				
-				#9. Create the buffer area
-				msk <- paste(mskDir, "/and0_25m.asc", sep="")
-				bufferOutGrid <- paste(outName, "/projections/buf-", spID, ".asc", sep="")
-				bfo <- createBuffers(occFile, bufferOutGrid, 300000, msk)
-				bufferRaster <- raster(bufferOutGrid)
-				
+				#Read the thresholds file				
 				threshFile <- paste(outName, "/metrics/thresholds.csv", sep="")
 				threshData <- read.csv(threshFile)
 				
 				#7. Projecting the model into the 21 future scenarios
 				
-				projectionList <- c("baseline/20C3M/WorldClim-2_5min-bioclim/1950_2000","future/SRES_A1B/disaggregated/2010_2039","future/SRES_A1B/disaggregated/2040_2069","future/SRES_A2/disaggregated/2010_2039","future/SRES_A2/disaggregated/2040_2069")
+				projectionList <- c("WorldClim-2_5min-bioclim")
 				
 				cat("Projecting the model...", "\n")
 				
@@ -173,18 +149,35 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					
 					cat("Performing ", prj, "\n")
 					
+					#Project each fold and then calculate the average and standard deviation
+					#Then threshold
+					
 					projLayers <- paste(inProjClimDir, "/", prj, sep="")
-					
 					suffix <- gsub("/", "_", prj)
-					outGrid <- paste(outName, "/projections/", spID, "_", suffix, sep="")
 					
-					lambdaFile <- paste(outName, "/model/", spID, ".lambdas", sep="")
+					for (fd in 1:nFolds) {
+						fdID <- fd-1
+						
+						outGrid <- paste(outName, "/projections/", spID, "_", suffix, "_f", fd, sep="")
+						lambdaFile <- paste(outName, "/model/", spID, "_", fdID, ".lambdas", sep="")
+						system(paste("java", "-mx512m", "-cp", maxentApp, "density.Project", lambdaFile, projLayers, outGrid, "nowarnings", "fadebyclamping", "-r", "-a", "-z"), wait=TRUE)
+						
+						assign(paste(prjRaster, "-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep="")))
+						
+						#Creating the list for the stack
+						if (fd == 1) {
+							otList <- get(paste(prjRaster, "-", fd,sep=""))
+						} else {
+							otList <- c(otList, get(paste(prjRaster, "-", fd,sep="")))
+						}
+					}
 					
-					system(paste("java", "-mx512m", "-cp", maxentApp, "density.Project", lambdaFile, projLayers, outGrid, "nowarnings", "fadebyclamping", "-r", "-a", "-z"), wait=TRUE)
+					fun <- function(x) { sd(x) }
+					distMean <- mean(stack(otList))
+					distStdv <- calc(stack(otList), fun)
 					
-					thslds <- c("TenPercentile_1", "Prevalence_3")
+					thslds <- c("UpperLeftROC")
 					
-					prjRaster <- raster(paste(outName, "/projections/", spID, "_", suffix, ".asc", sep=""))
 					
 					cat("Thresholding and buffering... \n")
 					
