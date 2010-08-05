@@ -577,18 +577,20 @@
 					
 			&if %j% = %start.month% &then
 				&do
-					&s listpgrids = %prec%%r.end.mth%
+					&s listpgrids = prec_%r.end.mth%
 				&end
 			&else
 				&do
-					&s listpgrids = %listpgrids%,%prec%%r.end.mth%
+					&s listpgrids = %listpgrids%,prec_%r.end.mth%
 				&end		
 		&end
 		
 		&ty Rainfall of growing period
 		
-		&if [exists gp_rain_%i% -grid] &then kill gp_rain_%i% all
-		gp_rain_%i% = SUM(%listpgrids%)
+		arc w %clim_input%
+		&if [exists %outdir%\gp_rain_%i% -grid] &then kill %outdir%\gp_rain_%i% all
+		%outdir%\gp_rain_%i% = SUM(%listpgrids%)
+		arc w %outdir%
 		
 		/* Evaluating for precipitation
 		
