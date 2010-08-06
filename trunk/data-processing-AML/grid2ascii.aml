@@ -16,6 +16,7 @@
 	&end
 &else
 	&do
+		&amlpath .
 		w [show &amlpath]
 		
 		&if [show program] NE GRID &then GRID
