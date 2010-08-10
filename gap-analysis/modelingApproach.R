@@ -56,6 +56,12 @@ source("getMetrics.R")
 ###############################################################################################
 ###############################################################################################
 
+inputDir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
+destDir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
+spID <- "Phaseolus_acutifolius"
+OSys <- "nt"
+
+
 theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 	
 	verFile <- paste(destDir, "/mxe_outputs/sp-", spID, "/ps-", spID, ".run", sep="")
@@ -130,10 +136,10 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 				#5. Getting the metrics
 				
 				if (procSwitch) {
-					out <- getMetrics(paste(outName, "/crossval", sep=""), paste(spID), 10, paste(outName, "/model", sep=""), paste(outName, "/metrics", sep=""))
+					out <- getMetrics(paste(outName, "/crossval", sep=""), paste(spID), 25, paste(outName, "/metrics", sep=""))
 				}
 				
-				#Read the thresholds file				
+				#Read the thresholds file
 				threshFile <- paste(outName, "/metrics/thresholds.csv", sep="")
 				threshData <- read.csv(threshFile)
 				
@@ -156,83 +162,55 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					suffix <- gsub("/", "_", prj)
 					
 					for (fd in 1:nFolds) {
+						cat(prjCount,".",sep="")
 						fdID <- fd-1
 						
 						outGrid <- paste(outName, "/projections/", spID, "_", suffix, "_f", fd, sep="")
-						lambdaFile <- paste(outName, "/model/", spID, "_", fdID, ".lambdas", sep="")
+						lambdaFile <- paste(outName, "/crossval/", spID, "_", fdID, ".lambdas", sep="")
 						system(paste("java", "-mx512m", "-cp", maxentApp, "density.Project", lambdaFile, projLayers, outGrid, "nowarnings", "fadebyclamping", "-r", "-a", "-z"), wait=TRUE)
 						
-						assign(paste(prjRaster, "-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep="")))
+						assign(paste("prjRaster-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep="")))
 						
 						#Creating the list for the stack
 						if (fd == 1) {
-							otList <- get(paste(prjRaster, "-", fd,sep=""))
+							otList <- get(paste("prjRaster-", fd,sep=""))
 						} else {
-							otList <- c(otList, get(paste(prjRaster, "-", fd,sep="")))
+							otList <- c(otList, get(paste("prjRaster-", fd,sep="")))
 						}
 					}
-					
+					cat("\n")
 					fun <- function(x) { sd(x) }
 					distMean <- mean(stack(otList))
 					distStdv <- calc(stack(otList), fun)
 					
+					#Writing this two rasters
+					distMean <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_EMN.asc", sep=""), format="ascii", overwrite=T)
+					distStdv <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
+					
+					#Thresholding and cutting to native areas
+					
 					thslds <- c("UpperLeftROC")
 					
+					thrNames <- names(threshData)
+					thePos <- which(thrNames == thslds)
+					theVal <- threshData[1,thePos]
 					
-					cat("Thresholding and buffering... \n")
+					cat("Thresholding... \n")
 					
-					procThr <- 1
-					for(thr in thslds) {
-						
-						theName <- strsplit(thr, "_")[[1]][1]
-						thePos <- as.numeric(strsplit(thr, "_")[[1]][2])
-						
-						theVal <- threshData[1,thePos]
-						
-						#Multi threshold PA surfaces for baseline
-						if (prjCount == 1) {
-							cat("...", theName, "\n")
-							
-							theRaster <- prjRaster
-							theRaster <- theRaster * bufferRaster
-							
-							theRaster[which(theRaster[] < theVal)] <- 0
-							theRaster[which(theRaster[] != 0)] <- 1
-							
-							outRsName <- paste(outName, "/projections/", spID, "_", suffix, "_", theName, ".asc", sep="")
-							theRaster <- writeRaster(theRaster, outRsName, overwrite=T, format='ascii')
-							rm(theRaster)
-						} else {
-						#Multi threshold PA surfaces for future scenarios (two mig. scenarios)
-						
-						#Null adaptation
-							cat("...", theName, "\n")
-							
-							BLsuffix <- gsub("/", "_", projectionList[1])
-							baselineRs <- raster(paste(outName, "/projections/", spID, "_", BLsuffix, "_", theName, ".asc", sep=""))
-							
-							theRaster <- prjRaster
-							theRaster <- theRaster * bufferRaster * baselineRs
-							rm(baselineRs)
-							
-							theRaster[which(theRaster[] < theVal)] <- 0
-							theRaster[which(theRaster[] != 0)] <- 1
-							
-							outRsName <- paste(outName, "/projections/", spID, "_", suffix, "_", theName, "_NullAdap.asc", sep="")
-							theRaster <- writeRaster(theRaster, outRsName, overwrite=T, format='ascii')
-							rm(theRaster)
-							
-							#Full adaptation
-							theRaster <- prjRaster
-							theRaster[which(theRaster[] < theVal)] <- 0
-							theRaster[which(theRaster[] != 0)] <- 1
-							
-							outRsName <- paste(outName, "/projections/", spID, "_", suffix, "_", theName, "_FullAdap.asc", sep="")
-							theRaster <- writeRaster(theRaster, outRsName, overwrite=T, format='ascii')
-							rm(theRaster)
-						}
-						procThr <- procThr + 1
-					}
+					distMeanPR <- distMean
+					distMeanPR[which(distMeanPR[] < theVal)] <- NA
+					
+					distMeanPA <- distMean
+					distMeanPA[which(distMeanPA[] < theVal] <- 0
+					distMeanPA[which(distMeanPA[] != 0] <- 1
+					
+					distStdvPR <- distStdv * distMeanPA
+					
+					#Now cut to native areas
+					
+					#Writing these two rasters
+					
+					
 					
 					if (file.exists(paste(outGrid, ".asc", sep=""))) {
 						cat("Projection is OK!", "\n")
