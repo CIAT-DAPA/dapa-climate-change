@@ -36,19 +36,12 @@ cat(" \n")
 
 ###############################################################################################
 ###############################################################################################
-#The buffer function
-###############################################################################################
-###############################################################################################
-
-source("bufferSpecies.R")
-
-###############################################################################################
-###############################################################################################
 # The evaluation metrics and threshold calculation function
 ###############################################################################################
 ###############################################################################################
 
 source("getMetrics.R")
+source("zipRead.R")
 
 ###############################################################################################
 ###############################################################################################
@@ -93,7 +86,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 			inData <- read.csv(occFile)
 			nOcc <- nrow(inData)
 			
-			if (nOcc >= 0) {
+			if (nOcc > 0) {
 			
 				#3. Get background file name
 				
@@ -179,11 +172,15 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 						}
 					}
 					cat("\n")
+					
+					cat("Calculating mean \n")
 					fun <- function(x) { sd(x) }
 					distMean <- mean(stack(otList))
+					cat("Calculating std \n")
 					distStdv <- calc(stack(otList), fun)
 					
 					#Writing this two rasters
+					cat("Writing rasters \n")
 					distMean <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_EMN.asc", sep=""), format="ascii", overwrite=T)
 					distStdv <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
 					
@@ -207,6 +204,8 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					distStdvPR <- distStdv * distMeanPA
 					
 					#Now cut to native areas
+					NAGrid <- 
+					
 					
 					#Writing these two rasters
 					
@@ -241,22 +240,9 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 				cat("Modeled on", date(), file=opnFile)
 				close.connection(opnFile)
 				
-				#Now copy the files
-				if (OSys == "linux") {
-					destName <- paste(destDir, "/mxe_outputs/.", sep="")
-					system(paste("cp", "-rvf", outName, destName))
-					system(paste("rm", "-rvf", outName))
-				} else {
-					destName <- paste(destDir, "/mxe_outputs/sp-", spID, sep="")
-					idir <- gsub("/", "\\\\", outName)
-					odir <- gsub("/", "\\\\", destName)
-					system(paste("xcopy", "/E", "/I", idir, odir))
-					system(paste("rm", "-r", outName))
-				}
-				
 				return("Done")
 			} else {
-				cat("Species with less than 10 datapoints, not to be modeled \n")
+				cat("Species with 0 datapoints, not to be modeled \n")
 			}
 		} else {
 			cat("The occurrence file does not exist! \n")
