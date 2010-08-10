@@ -43,29 +43,31 @@
 &do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
 	
 	&if [show program] NE GRID &then GRID
-	
-	&if [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then
-		&do
-			&ty
-			&ty Now copying to temporal...
-			&s copystat [COPY %outdir%\%sres%\disaggregated\%modname%\%ts% %tmpdir% -DIRECTORY]
-			&if %copystat% EQ 0 &then 
-				&do
-					&ty Successfully copied, starting the process (%modname%, %ts%)
-					&s delstat [DELETE %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
-				&end
-			&else
-				&do
-					&ty An error occurred during the copying process, erasing temporals and bailing out...
-					&s delstat [DELETE %tmpdir% -DIRECTORY]
-					&return
-				&end
+
+	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
+		&if [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then
+			&do
+				&ty
+				&ty Now copying to temporal...
+				&s copystat [COPY %outdir%\%sres%\disaggregated\%modname%\%ts% %tmpdir% -DIRECTORY]
+				&if %copystat% EQ 0 &then 
+					&do
+						&ty Successfully copied, starting the process (%modname%, %ts%)
+						&s delstat [DELETE %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+					&end
+				&else
+					&do
+						&ty An error occurred during the copying process, erasing temporals and bailing out...
+						&s delstat [DELETE %tmpdir% -DIRECTORY]
+						&return
+					&end
+			&end
+		&else
+			&do
+				&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
+			&end
 		&end
-	&else
-		&do
-			&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
-		&end
-	
+		
 	arc w %tmpdir%
 	
 	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
