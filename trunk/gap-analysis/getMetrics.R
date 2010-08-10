@@ -1,14 +1,11 @@
 #To get and store in a csv (comma separated values) file the set of evaluation metrics and the thresholds that are likely to be used for model development. This is specific for the case when you have presence-only data, and have used a cross-validation approach, plus a model building using all the data.
 
-getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
+getMetrics <- function(crossValDir, foldSuffix, nFolds, outMetDir) {
   
   cat("Metrics... \n")
   
   crossValMxrFile <- paste(crossValDir, "/maxentResults.csv", sep="")
   crossValMxrData <- read.csv(crossValMxrFile)
-  
-  runMxrFile <- paste(absRunDir, "/maxentResults.csv", sep="")
-  runMxrData <- read.csv(runMxrFile)
   
   FoldsinFile <- nrow(crossValMxrData) - 1
   
@@ -18,7 +15,7 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   
   #Number of samples
   
-  totSamples <- runMxrData$X.Training.samples
+  totSamples <- crossValMxrData$X.Training.samples[1] + crossValMxrData$X.Test.samples[1]
   trainSamples <- crossValMxrData$X.Training.samples[nFolds+1]
   testSamples <- crossValMxrData$X.Test.samples[nFolds+1]
   
@@ -28,7 +25,6 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   trainAUCStd <- sd(crossValMxrData$Training.AUC[1:nFolds])
   testAUCAvg <- crossValMxrData$Test.AUC[nFolds+1]
   testAUCStd <- sd(crossValMxrData$Test.AUC[1:nFolds])
-  totalAUC <- runMxrData$Training.AUC
   
   someMets <- matrix(ncol=11, nrow=(nFolds))
   nFolds <- nFolds - 1
@@ -121,8 +117,8 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   
   #The metrics matrix and output file
   
-  metMatrix <- as.data.frame(matrix(ncol=26, nrow=1))
-  names(metMatrix) <- c("NSamples", "TrainSamples", "TestSamples", "TrainAUC", "TrainAUCSD", "TestAUC", "TestAUCSD", "AUC", "TrainR", "TrainRSD", "TestR", "TestRSD", "AllR", "AllRSD", "TrainLogD", "TrainLogDSD", "TestLogD", "TestLogDSD", "AllLogD", "AllLogDSD", "TrainRMSQD", "TrainRMSQDSD", "TestRMSQD", "TestRMSQDSD", "AllRMSQD", "AllRMSQDSD")
+  metMatrix <- as.data.frame(matrix(ncol=25, nrow=1))
+  names(metMatrix) <- c("NSamples", "TrainSamples", "TestSamples", "TrainAUC", "TrainAUCSD", "TestAUC", "TestAUCSD", "TrainR", "TrainRSD", "TestR", "TestRSD", "AllR", "AllRSD", "TrainLogD", "TrainLogDSD", "TestLogD", "TestLogDSD", "AllLogD", "AllLogDSD", "TrainRMSQD", "TrainRMSQDSD", "TestRMSQD", "TestRMSQDSD", "AllRMSQD", "AllRMSQDSD")
   
   metMatrix[1,1] <- totSamples
   metMatrix[1,2] <- trainSamples
@@ -131,25 +127,24 @@ getMetrics <- function(crossValDir, foldSuffix, nFolds, absRunDir, outMetDir) {
   metMatrix[1,5] <- trainAUCStd
   metMatrix[1,6] <- testAUCAvg
   metMatrix[1,7] <- testAUCStd
-  metMatrix[1,8] <- totalAUC
-  metMatrix[1,9] <- trainRAvg
-  metMatrix[1,10] <- trainRStd
-  metMatrix[1,11] <- testRAvg
-  metMatrix[1,12] <- testRStd
-  metMatrix[1,13] <- allRAvg
-  metMatrix[1,14] <- allRStd
-  metMatrix[1,15] <- trainLDAvg
-  metMatrix[1,16] <- trainLDStd
-  metMatrix[1,17] <- testLDAvg
-  metMatrix[1,18] <- testLDStd
-  metMatrix[1,19] <- allLDAvg
-  metMatrix[1,20] <- allLDStd
-  metMatrix[1,21] <- trainRMSQDAvg
-  metMatrix[1,22] <- trainRMSQDStd
-  metMatrix[1,23] <- testRMSQDAvg
-  metMatrix[1,24] <- testRMSQDStd
-  metMatrix[1,25] <- allRMSQDAvg
-  metMatrix[1,26] <- allRMSQDStd
+  metMatrix[1,8] <- trainRAvg
+  metMatrix[1,9] <- trainRStd
+  metMatrix[1,10] <- testRAvg
+  metMatrix[1,11] <- testRStd
+  metMatrix[1,12] <- allRAvg
+  metMatrix[1,13] <- allRStd
+  metMatrix[1,14] <- trainLDAvg
+  metMatrix[1,15] <- trainLDStd
+  metMatrix[1,16] <- testLDAvg
+  metMatrix[1,17] <- testLDStd
+  metMatrix[1,18] <- allLDAvg
+  metMatrix[1,19] <- allLDStd
+  metMatrix[1,20] <- trainRMSQDAvg
+  metMatrix[1,21] <- trainRMSQDStd
+  metMatrix[1,22] <- testRMSQDAvg
+  metMatrix[1,23] <- testRMSQDStd
+  metMatrix[1,24] <- allRMSQDAvg
+  metMatrix[1,25] <- allRMSQDStd
   
   outMetsFile <- paste(outMetDir, "/metrics.csv", sep="")
   out <- write.csv(metMatrix, outMetsFile, quote=F, row.names=F)
