@@ -181,7 +181,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					distMean <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_EMN.asc", sep=""), format="ascii", overwrite=T)
 					cat("Calculating and writing std \n")
 					distStdv <- calc(stack(otList), fun)
-					distStdv <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
+					distStdv <- writeRaster(distStdv, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
 					
 					#Thresholding and cutting to native areas
 					
