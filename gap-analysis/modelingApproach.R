@@ -42,18 +42,13 @@ cat(" \n")
 
 source("getMetrics.R")
 source("zipRead.R")
+source("createChullBuffer.R")
 
 ###############################################################################################
 ###############################################################################################
 #Creating the big function
 ###############################################################################################
 ###############################################################################################
-
-inputDir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
-destDir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
-spID <- "Phaseolus_acutifolius"
-OSys <- "nt"
-
 
 theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 	
@@ -70,8 +65,9 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 		
 		inProjClimDir <- paste(inputDir, "/climate_data", sep="")
 		maxentApp <- paste(inputDir, "/maxent333a/maxent.jar", sep="")
-		mskDir <- paste(inputDir, "/maskData/AAIGrids", sep="")
+		mskDir <- paste(inputDir, "/masks", sep="")
 		backoutdir <- paste(inputDir, "/background_selection", sep="")
+		NADir <- paste(inputDir, "/native-areas/asciigrids", sep="")
 		
 		cat("Taxon ", spID, "\n")
 	  
@@ -155,14 +151,20 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					suffix <- gsub("/", "_", prj)
 					
 					for (fd in 1:nFolds) {
-						cat(prjCount,".",sep="")
+						cat(fd,".",sep="")
 						fdID <- fd-1
 						
 						outGrid <- paste(outName, "/projections/", spID, "_", suffix, "_f", fd, sep="")
 						lambdaFile <- paste(outName, "/crossval/", spID, "_", fdID, ".lambdas", sep="")
 						system(paste("java", "-mx512m", "-cp", maxentApp, "density.Project", lambdaFile, projLayers, outGrid, "nowarnings", "fadebyclamping", "-r", "-a", "-z"), wait=TRUE)
 						
-						assign(paste("prjRaster-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep="")))
+						if (file.exists(paste(outGrid, ".asc", sep=""))) {
+							cat("Projection is OK!", "\n")
+						} else {
+							cat("Error in projecting", "\n")
+						}
+						
+						assign(paste("prjRaster-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep=""), values=T))
 						
 						#Creating the list for the stack
 						if (fd == 1) {
@@ -173,15 +175,12 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					}
 					cat("\n")
 					
-					cat("Calculating mean \n")
+					cat("Calculating and writing mean probability raster \n")
 					fun <- function(x) { sd(x) }
 					distMean <- mean(stack(otList))
-					cat("Calculating std \n")
-					distStdv <- calc(stack(otList), fun)
-					
-					#Writing this two rasters
-					cat("Writing rasters \n")
 					distMean <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_EMN.asc", sep=""), format="ascii", overwrite=T)
+					cat("Calculating and writing std \n")
+					distStdv <- calc(stack(otList), fun)
 					distStdv <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
 					
 					#Thresholding and cutting to native areas
@@ -198,26 +197,33 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					distMeanPR[which(distMeanPR[] < theVal)] <- NA
 					
 					distMeanPA <- distMean
-					distMeanPA[which(distMeanPA[] < theVal] <- 0
-					distMeanPA[which(distMeanPA[] != 0] <- 1
+					distMeanPA[which(distMeanPA[] < theVal)] <- 0
+					distMeanPA[which(distMeanPA[] != 0)] <- 1
 					
 					distStdvPR <- distStdv * distMeanPA
 					
 					#Now cut to native areas
-					NAGrid <- 
+					#Verify if the native area exists, else create one using the buffered convex hull
 					
-					
-					#Writing these two rasters
-					
-					
-					
-					if (file.exists(paste(outGrid, ".asc", sep=""))) {
-						cat("Projection is OK!", "\n")
+					NAGridName <- paste(NADir, "/", spID, "/narea.asc.gz", sep="")
+					if (!file.exists(NAGridName)) {
+						cat("The native area does not exist, generating one \n")
+						NAGrid <- chullBuffer(occFile, paste(NADir, "/", spID, sep=""), 500000)
 					} else {
-						cat("Error in projecting", "\n")
+						cat("The native area exists, using it \n")
+						NAGrid <- zipRead(paste(NADir, "/", spID, sep=""), "narea.asc.gz")
 					}
-				  
-					rm(prjRaster)
+					
+					distMeanPA <- distMeanPA * NAGrid
+					distMeanPR <- distMeanPR * NAGrid
+					distStdvPR <- distStdvPR * NAGrid
+					
+					#Writing these rasters
+					
+					distMeanPA <- writeRaster(distMeanPA, paste(outName, "/projections/", spID, "_", suffix, "EMN_PA.asc", sep=""), format='ascii', overwrite=T)
+					distMeanPR <- writeRaster(distMeanPR, paste(outName, "/projections/", spID, "_", suffix, "EMN_PR.asc", sep=""), format='ascii', overwrite=T)
+					distStdvPR <- writeRaster(distStdvPR, paste(outName, "/projections/", spID, "_", suffix, "ESD_PR.asc", sep=""), format='ascii', overwrite=T)
+					
 					prjCount <- prjCount + 1
 				}
 				
@@ -250,6 +256,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 	} else {
 		cat("The species was already modeled \n")
 	}
+	return(outName)
 }
 
 #Initial stuff
@@ -260,20 +267,18 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 #outp <- NagoyaProcess(idir, ddir, 1, 10, OSys="NT")
 #setOptions(overwrite=T)
 
-NagoyaProcess <- function(inputDir, destDir, ini, fin, OSys="LINUX") {
+#inputDir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
+#destDir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
+#spID <- "Phaseolus_acutifolius"
+#OSys <- "nt"
+
+GapProcess <- function(inputDir, destDir, OSys="LINUX") {
 	
-	ufile <- paste(inputDir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")
-	ufile <- read.csv(ufile)
-	
-	if (fin > nrow(ufile)) {
-		cat("Final number is greater than nrow, using nrows instead \n")
-		fin <- nrow(ufile)
-	}
-	
-	spList <- ufile$IDSpecies[ini:fin]
+	spList <- list.files(paste(inputDir, "/occurrence_files", sep=""))
 	sppC <- 1
 	
 	for (sp in spList) {
+		sp <- unlist(strsplit(sp, ".", fixed=T))[1]
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
 		out <- theEntireProcess(sp, OSys, inputDir, destDir)
@@ -281,5 +286,4 @@ NagoyaProcess <- function(inputDir, destDir, ini, fin, OSys="LINUX") {
 	}
 	
 	return("Done!")
-	
 }

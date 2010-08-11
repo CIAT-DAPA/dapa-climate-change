@@ -1,8 +1,10 @@
+require(rgdal)
 require(raster)
 require(maptools)
 gpclibPermit()
 
 source("zipWrite.R")
+source("zipRead.R")
 
 createNARaster <- function(spID, inDir) {
 	cat("\n")
@@ -10,32 +12,40 @@ createNARaster <- function(spID, inDir) {
 	
 	inNADir <- paste(inDir, "/native-areas/polyshps", sep="")
 	outNADir <- paste(inDir, "/native-areas/asciigrids", sep="")
-	
-	if (!file.exists(outNADir)) {
-		dir.create(outNADir)
-	}
-	
 	outFolder <- paste(outNADir, "/", spID, sep="")
-	if (!file.exists(outFolder)) {
-		dir.create(outFolder)
-	}
 	
-	shpName <- paste(inNADir, "/", spID, "/narea.shp", sep="")
-	
-	#Reading polygon shapefile and mask
-	
-	cat("Reading and converting \n")
-	pol <- readShapePoly(shpName)
-	rs <- raster(paste(inDir, "/masks/mask.asc", sep=""))
-	
-	pa <- polygonsToRaster(pol, rs)
+	if (!file.exists(paste(outFolder, "/narea.asc.gz", sep=""))) {
+		
+		cat("Not processed, thus processing \n")
+		
+		if (!file.exists(outNADir)) {
+			dir.create(outNADir)
+		}
+		
+		if (!file.exists(outFolder)) {
+			dir.create(outFolder)
+		}
+		
+		shpName <- paste(inNADir, "/", spID, "/narea.shp", sep="")
+		
+		#Reading polygon shapefile and mask
+		
+		cat("Reading and converting \n")
+		pol <- readShapePoly(shpName)
+		rs <- raster(paste(inDir, "/masks/mask.asc", sep=""))
+		
+		pa <- polygonsToRaster(pol, rs)
 
-	pa[which(!is.na(pa[]))] <- 1
-	
-	cat("Writing output \n")
-	pa <- zipWrite(pa, outFolder, "narea.asc.gz")
-	
-	return(pa)
+		pa[which(!is.na(pa[]))] <- 1
+		pa[which(is.na(pa[]) & rs[] == 1)] <- 0
+		
+		cat("Writing output \n")
+		pa <- zipWrite(pa, outFolder, "narea.asc.gz")
+		return(pa)
+	} else {
+		cat("Already processed \n")
+		#pa <- zipRead(outFolder, "narea.asc.gz")
+	}
 }
 
 #Loop the species
