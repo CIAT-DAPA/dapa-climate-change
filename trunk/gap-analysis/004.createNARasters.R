@@ -3,8 +3,8 @@ require(raster)
 require(maptools)
 gpclibPermit()
 
-source("zipWrite.R")
-source("zipRead.R")
+source("000.zipWrite.R")
+source("000.zipRead.R")
 
 createNARaster <- function(spID, inDir) {
 	cat("\n")
