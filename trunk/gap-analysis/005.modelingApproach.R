@@ -208,7 +208,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					NAGridName <- paste(NADir, "/", spID, "/narea.asc.gz", sep="")
 					if (!file.exists(NAGridName)) {
 						cat("The native area does not exist, generating one \n")
-						NAGrid <- chullBuffer(occFile, paste(NADir, "/", spID, sep=""), 500000)
+						NAGrid <- chullBuffer(inputDir, occFile, paste(NADir, "/", spID, sep=""), 500000)
 					} else {
 						cat("The native area exists, using it \n")
 						NAGrid <- zipRead(paste(NADir, "/", spID, sep=""), "narea.asc.gz")
