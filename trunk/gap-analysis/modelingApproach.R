@@ -220,9 +220,9 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					
 					#Writing these rasters
 					
-					distMeanPA <- writeRaster(distMeanPA, paste(outName, "/projections/", spID, "_", suffix, "EMN_PA.asc", sep=""), format='ascii', overwrite=T)
-					distMeanPR <- writeRaster(distMeanPR, paste(outName, "/projections/", spID, "_", suffix, "EMN_PR.asc", sep=""), format='ascii', overwrite=T)
-					distStdvPR <- writeRaster(distStdvPR, paste(outName, "/projections/", spID, "_", suffix, "ESD_PR.asc", sep=""), format='ascii', overwrite=T)
+					distMeanPA <- writeRaster(distMeanPA, paste(outName, "/projections/", spID, "_", suffix, "_EMN_PA.asc", sep=""), format='ascii', overwrite=T)
+					distMeanPR <- writeRaster(distMeanPR, paste(outName, "/projections/", spID, "_", suffix, "_EMN_PR.asc", sep=""), format='ascii', overwrite=T)
+					distStdvPR <- writeRaster(distStdvPR, paste(outName, "/projections/", spID, "_", suffix, "_ESD_PR.asc", sep=""), format='ascii', overwrite=T)
 					
 					prjCount <- prjCount + 1
 				}
