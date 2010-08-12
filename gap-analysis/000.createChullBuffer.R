@@ -7,12 +7,12 @@ gpclibPermit()
 
 source("000.zipWrite.R")
 
-chullBuffer <- function(occFile, outFolder, buffDist) {
+chullBuffer <- function(inDir, occFile, outFolder, buffDist) {
 	
 	if (!file.exists(outFolder)) {
 		dir.create(outFolder)
 	}
-
+	
 	#Reading the occurrences
 	cat("Reading occurrences \n")
 	occ <- read.csv(occFile)
