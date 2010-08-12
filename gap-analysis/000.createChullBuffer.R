@@ -5,7 +5,7 @@ require(SDMTools)
 
 gpclibPermit()
 
-source("zipWrite.R")
+source("000.zipWrite.R")
 
 chullBuffer <- function(occFile, outFolder, buffDist) {
 	
