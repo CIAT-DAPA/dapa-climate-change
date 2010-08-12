@@ -9,6 +9,6 @@
 9. Script to calculate the distribution of the dist. range around the PCs			
 10. Script to calculate spp richness and max-STD on richness classes					
 11. Make NEW Table 3 and the list of HPT											
-12. Script to calculate "gap richness"
+12. Script to calculate "gap richness" based on this list
 13. Script to calculate distances to the nearest accession and summarize them		
 14. Script to calculate the max-STD on gap richness classes							
