@@ -256,7 +256,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 	} else {
 		cat("The species was already modeled \n")
 	}
-	return(outName)
+	return("Done!")
 }
 
 #Initial stuff
