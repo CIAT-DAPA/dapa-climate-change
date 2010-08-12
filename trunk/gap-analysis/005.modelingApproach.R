@@ -272,9 +272,16 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 #spID <- "Phaseolus_acutifolius"
 #OSys <- "nt"
 
-GapProcess <- function(inputDir, destDir, OSys="LINUX") {
+GapProcess <- function(inputDir, destDir, ini, fin, OSys="LINUX") {
 	
 	spList <- list.files(paste(inputDir, "/occurrence_files", sep=""))
+	if (fin > length(spList)) {
+		cat("The final number of spp is greater than the number of spp, using NSPP instead \n")
+		fin <- length(spList)
+	}
+	
+	spList <- spList[ini:fin]
+	
 	sppC <- 1
 	
 	for (sp in spList) {
