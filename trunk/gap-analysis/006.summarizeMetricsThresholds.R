@@ -13,11 +13,11 @@ cat(" \n")
 
 summarizeMetrics <- function(idir="C:/CIAT_work/COP_CONDESAN", ini, fin) {
 
-	#idir <- "C:/CIAT_work/COP_CONDESAN"
+	#idir <- "/mnt/GeoData/Gap-analysis/cwr-gap-analysis/gap-phaeolus/"
 	
 	#Setting the output directory
 	odir <- paste(idir, "/summaries", sep="")
-
+	
 	if (!file.exists(odir)) {
 		dir.create(odir)
 	}
