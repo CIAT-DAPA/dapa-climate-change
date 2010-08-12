@@ -132,7 +132,7 @@ GCMSmoothIntp <- function(intZonesDir, baseDir, outputDir, nCols=3, nRows=3, sce
 						
 						fit <- Tps(indvars, depvar, m=2)
 						
-						result <- interpolate(msk, fit, newdata=altGrid, progress="text")
+						result <- interpolate(altGrid, fit, xyOnly=F, progress="text")
 						result <- writeRaster(result, outGridName, format="ascii", overwrite=T)
 						
 					}
