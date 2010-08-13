@@ -126,127 +126,129 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 				
 				if (procSwitch) {
 					out <- getMetrics(paste(outName, "/crossval", sep=""), paste(spID), 25, paste(outName, "/metrics", sep=""))
-				}
-				
-				#Read the thresholds file
-				threshFile <- paste(outName, "/metrics/thresholds.csv", sep="")
-				threshData <- read.csv(threshFile)
-				
-				#7. Projecting the model into the 21 future scenarios
-				
-				projectionList <- c("WorldClim-2_5min-bioclim")
-				
-				cat("Projecting the model...", "\n")
-				
-				prjCount <- 1
-				
-				for (prj in projectionList) {
 					
-					cat("Performing ", prj, "\n")
+					#Read the thresholds file
+					threshFile <- paste(outName, "/metrics/thresholds.csv", sep="")
+					threshData <- read.csv(threshFile)
 					
-					#Project each fold and then calculate the average and standard deviation
-					#Then threshold
+					#7. Projecting the model into the 21 future scenarios
 					
-					projLayers <- paste(inProjClimDir, "/", prj, sep="")
-					suffix <- gsub("/", "_", prj)
+					projectionList <- c("WorldClim-2_5min-bioclim")
 					
-					for (fd in 1:nFolds) {
-						cat(fd,".",sep="")
-						fdID <- fd-1
+					cat("Projecting the model...", "\n")
+					
+					prjCount <- 1
+					
+					for (prj in projectionList) {
 						
-						outGrid <- paste(outName, "/projections/", spID, "_", suffix, "_f", fd, sep="")
-						lambdaFile <- paste(outName, "/crossval/", spID, "_", fdID, ".lambdas", sep="")
-						system(paste("java", "-mx512m", "-cp", maxentApp, "density.Project", lambdaFile, projLayers, outGrid, "nowarnings", "fadebyclamping", "-r", "-a", "-z"), wait=TRUE)
+						cat("Performing ", prj, "\n")
 						
-						if (file.exists(paste(outGrid, ".asc", sep=""))) {
-							cat("Projection is OK!", "\n")
+						#Project each fold and then calculate the average and standard deviation
+						#Then threshold
+						
+						projLayers <- paste(inProjClimDir, "/", prj, sep="")
+						suffix <- gsub("/", "_", prj)
+						
+						for (fd in 1:nFolds) {
+							cat(fd,".",sep="")
+							fdID <- fd-1
+							
+							outGrid <- paste(outName, "/projections/", spID, "_", suffix, "_f", fd, sep="")
+							lambdaFile <- paste(outName, "/crossval/", spID, "_", fdID, ".lambdas", sep="")
+							system(paste("java", "-mx512m", "-cp", maxentApp, "density.Project", lambdaFile, projLayers, outGrid, "nowarnings", "fadebyclamping", "-r", "-a", "-z"), wait=TRUE)
+							
+							if (file.exists(paste(outGrid, ".asc", sep=""))) {
+								cat("Projection is OK!", "\n")
+							} else {
+								cat("Error in projecting", "\n")
+							}
+							
+							assign(paste("prjRaster-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep=""), values=T))
+							
+							#Creating the list for the stack
+							if (fd == 1) {
+								otList <- get(paste("prjRaster-", fd,sep=""))
+							} else {
+								otList <- c(otList, get(paste("prjRaster-", fd,sep="")))
+							}
+						}
+						cat("\n")
+						
+						cat("Calculating and writing mean probability raster \n")
+						fun <- function(x) { sd(x) }
+						distMean <- mean(stack(otList))
+						distMean <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_EMN.asc", sep=""), format="ascii", overwrite=T)
+						cat("Calculating and writing std \n")
+						distStdv <- calc(stack(otList), fun)
+						distStdv <- writeRaster(distStdv, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
+						
+						#Thresholding and cutting to native areas
+						
+						thslds <- c("UpperLeftROC")
+						
+						thrNames <- names(threshData)
+						thePos <- which(thrNames == thslds)
+						theVal <- threshData[1,thePos]
+						
+						cat("Thresholding... \n")
+						
+						distMeanPR <- distMean
+						distMeanPR[which(distMeanPR[] < theVal)] <- NA
+						
+						distMeanPA <- distMean
+						distMeanPA[which(distMeanPA[] < theVal)] <- 0
+						distMeanPA[which(distMeanPA[] != 0)] <- 1
+						
+						distStdvPR <- distStdv * distMeanPA
+						
+						#Now cut to native areas
+						#Verify if the native area exists, else create one using the buffered convex hull
+						
+						NAGridName <- paste(NADir, "/", spID, "/narea.asc.gz", sep="")
+						if (!file.exists(NAGridName)) {
+							cat("The native area does not exist, generating one \n")
+							NAGrid <- chullBuffer(inputDir, occFile, paste(NADir, "/", spID, sep=""), 500000)
 						} else {
-							cat("Error in projecting", "\n")
+							cat("The native area exists, using it \n")
+							NAGrid <- zipRead(paste(NADir, "/", spID, sep=""), "narea.asc.gz")
 						}
 						
-						assign(paste("prjRaster-", fd,sep=""), raster(paste(outName, "/projections/", spID, "_", suffix, "_f", fd, ".asc", sep=""), values=T))
+						distMeanPA <- distMeanPA * NAGrid
+						distMeanPR <- distMeanPR * NAGrid
+						distStdvPR <- distStdvPR * NAGrid
 						
-						#Creating the list for the stack
-						if (fd == 1) {
-							otList <- get(paste("prjRaster-", fd,sep=""))
+						#Writing these rasters
+						
+						distMeanPA <- writeRaster(distMeanPA, paste(outName, "/projections/", spID, "_", suffix, "_EMN_PA.asc", sep=""), format='ascii', overwrite=T)
+						distMeanPR <- writeRaster(distMeanPR, paste(outName, "/projections/", spID, "_", suffix, "_EMN_PR.asc", sep=""), format='ascii', overwrite=T)
+						distStdvPR <- writeRaster(distStdvPR, paste(outName, "/projections/", spID, "_", suffix, "_ESD_PR.asc", sep=""), format='ascii', overwrite=T)
+						
+						prjCount <- prjCount + 1
+					}
+					
+					#Compressing everything within the projection dir
+					
+					ftoZIP <- list.files(paste(outName, "/projections/", sep=""), pattern=".asc")
+					for (fz in ftoZIP) {
+						fName <- paste(outName, "/projections/", fz, sep="")
+						if (OSys == "linux") {
+							system(paste("gzip", fName))
 						} else {
-							otList <- c(otList, get(paste("prjRaster-", fd,sep="")))
+							system(paste("7za", "a", "-tgzip", paste(fName, ".zip", sep=""), fName))
+							file.remove(fName)
 						}
 					}
-					cat("\n")
 					
-					cat("Calculating and writing mean probability raster \n")
-					fun <- function(x) { sd(x) }
-					distMean <- mean(stack(otList))
-					distMean <- writeRaster(distMean, paste(outName, "/projections/", spID, "_", suffix, "_EMN.asc", sep=""), format="ascii", overwrite=T)
-					cat("Calculating and writing std \n")
-					distStdv <- calc(stack(otList), fun)
-					distStdv <- writeRaster(distStdv, paste(outName, "/projections/", spID, "_", suffix, "_ESD.asc", sep=""), format="ascii", overwrite=T)
+					#Run verification file
+					verFile <- paste(outName, "/ps-", spID, ".run", sep="")
+					opnFile <- file(verFile, open="w")
+					cat("Modeled on", date(), file=opnFile)
+					close.connection(opnFile)
 					
-					#Thresholding and cutting to native areas
-					
-					thslds <- c("UpperLeftROC")
-					
-					thrNames <- names(threshData)
-					thePos <- which(thrNames == thslds)
-					theVal <- threshData[1,thePos]
-					
-					cat("Thresholding... \n")
-					
-					distMeanPR <- distMean
-					distMeanPR[which(distMeanPR[] < theVal)] <- NA
-					
-					distMeanPA <- distMean
-					distMeanPA[which(distMeanPA[] < theVal)] <- 0
-					distMeanPA[which(distMeanPA[] != 0)] <- 1
-					
-					distStdvPR <- distStdv * distMeanPA
-					
-					#Now cut to native areas
-					#Verify if the native area exists, else create one using the buffered convex hull
-					
-					NAGridName <- paste(NADir, "/", spID, "/narea.asc.gz", sep="")
-					if (!file.exists(NAGridName)) {
-						cat("The native area does not exist, generating one \n")
-						NAGrid <- chullBuffer(inputDir, occFile, paste(NADir, "/", spID, sep=""), 500000)
-					} else {
-						cat("The native area exists, using it \n")
-						NAGrid <- zipRead(paste(NADir, "/", spID, sep=""), "narea.asc.gz")
-					}
-					
-					distMeanPA <- distMeanPA * NAGrid
-					distMeanPR <- distMeanPR * NAGrid
-					distStdvPR <- distStdvPR * NAGrid
-					
-					#Writing these rasters
-					
-					distMeanPA <- writeRaster(distMeanPA, paste(outName, "/projections/", spID, "_", suffix, "_EMN_PA.asc", sep=""), format='ascii', overwrite=T)
-					distMeanPR <- writeRaster(distMeanPR, paste(outName, "/projections/", spID, "_", suffix, "_EMN_PR.asc", sep=""), format='ascii', overwrite=T)
-					distStdvPR <- writeRaster(distStdvPR, paste(outName, "/projections/", spID, "_", suffix, "_ESD_PR.asc", sep=""), format='ascii', overwrite=T)
-					
-					prjCount <- prjCount + 1
+					return("Done")
+				} else {
+					cat("Species with invalid maxent model, and thus not modeled \n")
 				}
-				
-				#Compressing everything within the projection dir
-				
-				ftoZIP <- list.files(paste(outName, "/projections/", sep=""), pattern=".asc")
-				for (fz in ftoZIP) {
-					fName <- paste(outName, "/projections/", fz, sep="")
-					if (OSys == "linux") {
-						system(paste("gzip", fName))
-					} else {
-						system(paste("7za", "a", "-tgzip", paste(fName, ".zip", sep=""), fName))
-						file.remove(fName)
-					}
-				}
-				
-				#Run verification file
-				verFile <- paste(outName, "/ps-", spID, ".run", sep="")
-				opnFile <- file(verFile, open="w")
-				cat("Modeled on", date(), file=opnFile)
-				close.connection(opnFile)
-				
-				return("Done")
 			} else {
 				cat("Species with 0 datapoints, not to be modeled \n")
 			}
