@@ -2,12 +2,11 @@ require(rgdal)
 require(raster)
 
 source("000.zipRead.R")
-source("000.zipWrite.R")
 
 # Script to calculate proportion of the dist. range with SD above 0.15 (ASD15)
 
-idir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
-spID <- "Phaseolus_acutifolius"
+#idir <- "F:/gap_analysis_publications/gap_phaseolus/modeling_data"
+#spID <- "Phaseolus_acutifolius"
 
 calcASD15 <- function(idir, spID) {
 	cat("Taxon", spID, "\n")
@@ -46,4 +45,38 @@ calcASD15 <- function(idir, spID) {
 	write.csv(dfOut, oFile, quote=F, row.names=F)
 	
 	return(dfOut)
+}
+
+summarizeASD15 <- function(idir) {
+	
+	odir <- paste(idir, "/summary-files", sep="")
+	if (!file.exists(odir)) {
+		dir.create(odir)
+	}
+	
+	spList <- list.files(paste(idir, "/occurrence_files", sep=""))
+	
+	sppC <- 1
+	for (spp in spList) {
+		spp <- unlist(strsplit(spp, ".", fixed=T))[1]
+		fdName <- paste("sp-", spp, sep="")
+		spFolder <- paste(idir, "/mxe_outputs/", fdName, sep="")
+		
+		if (file.exists(spFolder)) {
+			
+			metFile <- paste(spFolder, "/metrics/ASD15.csv", sep="")
+			metrics <- read.csv(metFile)
+			
+			if (sppC == 1) {
+				outSum <- metrics
+			} else {
+				outSum <- rbind(outSum, metrics)
+			}
+			sppC <- sppC + 1
+		}
+	}
+	
+	outFile <- paste(odir, "/ASD15.csv", sep="")
+	write.csv(outSum, outFile, quote=F, row.names=F)
+	
 }
