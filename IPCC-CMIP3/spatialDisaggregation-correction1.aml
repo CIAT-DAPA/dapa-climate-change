@@ -1,0 +1,149 @@
+/* This aml calculates disaggregated future surfaces based on worldclim and GCM anomalies
+/* Written by Julián Ramírez
+/* CIAT, Cali, Colombia, April 2010
+
+&args inputdir wcldir modname outdir mask sres tmpdir
+&terminal 9999
+
+&sys cls
+&messages &off
+
+&if [null %inputdir%] OR [null %wcldir%] OR [null %modname%] OR [null %outdir%] OR [null %mask%] OR [null %sres%] OR [null %tmpdir%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax, please use
+		&ty '&r spatialDisaggregation.aml INPUT_DIR WCL_DIR MODEL_NAME OUTDIR MASK SRES_SCENARIO TEMPORAL_DIR'
+		&ty
+		&ty Available SRES SCENARIOS are SRES_A1B, SRES_A2, SRES_B1
+		&ty
+		&ty WCLDIR should be the path where all monthly worldclim files are stored (tmin, tmax, prec)
+		&ty
+		&ty MASK should be both name and path of to the mask
+		&ty
+		&ty INPUT_DIR should contain folders of SRES scenarios
+		&ty
+		&ty TEMPORAL_DIR is where all calculations will take place, then everything will be copied to OUTDIR
+		
+		&ty
+		&return
+	&end
+
+&if [show program] NE GRID &then GRID
+&amlpath .
+&s rootdir [show &amlpath]
+
+&if not [exists %outdir% -DIR] &then &sys md %outdir% /*same as indir
+&if not [exists %outdir%\%sres% -DIR] &then &sys md %outdir%\%sres%
+&if not [exists %outdir%\%sres%\disaggregated -DIR] &then &sys md %outdir%\%sres%\disaggregated
+&if not [exists %outdir%\%sres%\disaggregated\%modname% -DIR] &then &sys md %outdir%\%sres%\disaggregated\%modname%
+
+&ty
+&ty Processing model %modname%
+
+&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+	
+	&if [show program] NE GRID &then GRID
+
+		&if [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then
+			&do
+				&ty
+				&ty Now copying to temporal...
+				&s copystat [COPY %outdir%\%sres%\disaggregated\%modname%\%ts% %tmpdir% -DIRECTORY]
+				&if %copystat% EQ 0 &then 
+					&do
+						&ty Successfully copied, starting the process (%modname%, %ts%)
+						&s delstat [DELETE %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+					&end
+				&else
+					&do
+						&ty An error occurred during the copying process, erasing temporals and bailing out...
+						&s delstat [DELETE %tmpdir% -DIRECTORY]
+						&return
+					&end
+			&end
+		&else
+			&do
+				&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
+			&end
+		&end
+		
+	arc w %tmpdir%
+	
+	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
+		&do
+			
+			/*&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then &sys md %outdir%\%sres%\disaggregated\%modname%\%ts%
+			
+			&do variable &list tmin tmax prec
+				&ty   ->.Processing variable %variable%
+				
+				&do month = 1 &to 12
+					&ty
+					&ty   ->.Processing month %month%
+					
+					&if not [exists %tmpdir%\%variable%_%month% -GRID] &then
+						&do
+							                   
+							SETWINDOW %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month% %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month%
+							SETMASK %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month%
+							SETCELL %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month%
+							
+							&if [exists %tmpdir%\%variable%_%month%a -GRID] &then kill %tmpdir%\%variable%_%month%a all
+							%tmpdir%\%variable%_%month%a = %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month% * 10
+							
+							SETWINDOW %mask% %mask%
+							SETMASK %mask%
+							SETCELL %mask%
+							
+							&if %variable% EQ prec &then
+								&do
+									&ty   ->.Precipitation
+									%tmpdir%\%variable%_%month% = int(floor((%wcldir%\%variable%_%month% * abs(1 + ((%tmpdir%\%variable%_%month%a * 0.1) / (%wcldir%\%variable%_%month% + 1)))) + 0.5))
+									&if [exists %tmpdir%\%variable%_%month%a -GRID] &then kill %tmpdir%\%variable%_%month%a all
+								&end
+							&else
+								&do
+									&ty   ->.Temperature (%variable%)
+									%tmpdir%\%variable%_%month% = int(floor((%wcldir%\%variable%_%month% + %tmpdir%\%variable%_%month%a) + 0.5))
+									&if [exists %tmpdir%\%variable%_%month%a -GRID] &then kill %tmpdir%\%variable%_%month%a all
+								&end
+						&end
+				&end
+			&end
+			
+			arc w %rootdir%
+			
+			&if not [exists %tmpdir%\bio_19 -grid] &then
+				&do
+					&r mkBCvars.aml %tmpdir% %rootdir%
+				&end
+			
+			&if not [exists %tmpdir%\cons_mths -grid] &then
+				&do
+					&r consMthsCalc_v3.aml %tmpdir% %rootdir% 100
+				&end
+			
+			&ty
+			&ty Now copying...
+			&s copystat [COPY %tmpdir% %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+			&if %copystat% EQ 0 &then 
+				&do
+					&ty Successfully done (%modname%, %ts%)!
+					&s outcheck [LISTFILE %outdir%\%sres%\disaggregated\%modname%\%ts%\* -GRID %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt]
+					&s delstat [DELETE %tmpdir% -DIRECTORY]
+				&end
+			&else
+				&do
+					&ty An error occurred during calculations, erasing and bailing out...
+					&s delstat [DELETE %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+					&return
+				&end
+			
+		&end
+	&else
+		&do
+			&ty
+			&ty This model (%modname%) and timeslice (%ts%) is already processed, trying the next one...
+			&ty
+		&end
+&end 
