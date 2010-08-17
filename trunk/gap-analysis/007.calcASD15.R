@@ -64,6 +64,8 @@ summarizeASD15 <- function(idir) {
 		
 		if (file.exists(spFolder)) {
 			
+			res <- calcASD15(idir, spp)
+			
 			metFile <- paste(spFolder, "/metrics/ASD15.csv", sep="")
 			metrics <- read.csv(metFile)
 			
