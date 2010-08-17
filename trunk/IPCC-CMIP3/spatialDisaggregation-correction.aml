@@ -58,7 +58,7 @@
 				&else
 					&do
 						&ty An error occurred during the copying process, erasing temporals and bailing out...
-						&s delstat [DELETE %tmpdir% -DIRECTORY]
+						/*&s delstat [DELETE %tmpdir% -DIRECTORY]
 						&return
 					&end
 			&end
@@ -66,8 +66,13 @@
 			&do
 				&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
 			&end
+	&else
+		&do
+			&ty
+			&ty This model (%modname%) and timeslice (%ts%) is already processed, trying the next one...
+			&ty
 		&end
-		
+	&end
 	arc w %tmpdir%
 	
 	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
