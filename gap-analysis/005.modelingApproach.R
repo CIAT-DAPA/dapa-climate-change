@@ -229,6 +229,7 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					#Compressing everything within the projection dir
 					
 					ftoZIP <- list.files(paste(outName, "/projections/", sep=""), pattern=".asc")
+					cat("Compressing... \n")
 					for (fz in ftoZIP) {
 						fName <- paste(outName, "/projections/", fz, sep="")
 						if (OSys == "linux") {
@@ -244,6 +245,20 @@ theEntireProcess <- function(spID, OSys, inputDir, destDir) {
 					opnFile <- file(verFile, open="w")
 					cat("Modeled on", date(), file=opnFile)
 					close.connection(opnFile)
+					
+					#Now copy the files
+					cat("Copying to output folder... \n")
+					if (OSys == "linux") {
+						destName <- paste(destDir, "/mxe_outputs/.", sep="")
+						system(paste("cp", "-rf", outName, destName))
+						system(paste("rm", "-rf", outName))
+					} else {
+						destName <- paste(destDir, "/mxe_outputs/sp-", spID, sep="")
+						idir <- gsub("/", "\\\\", outName)
+						odir <- gsub("/", "\\\\", destName)
+						system(paste("xcopy", "/E", "/I", idir, odir))
+						system(paste("rm", "-r", outName))
+					}
 					
 					return("Done")
 				} else {
