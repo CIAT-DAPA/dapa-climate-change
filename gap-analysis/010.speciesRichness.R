@@ -2,6 +2,7 @@ require(rgdal)
 require(raster)
 
 source("000.zipRead.R")
+source("000.zipWrite.R")
 
 #bdir <- "F:/gap_analysis_publications/gap_phaseolus"
 
