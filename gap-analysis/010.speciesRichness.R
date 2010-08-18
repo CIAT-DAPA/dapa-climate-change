@@ -8,7 +8,7 @@ source("000.zipRead.R")
 speciesRichness <- function(bdir) {
 	idir <- paste(bdir, "/modeling_data", sep="")
 	
-	spList <- read.csv(paste(idir, "/taxaForRichnes.csv.csv", sep=""))
+	spList <- read.csv(paste(idir, "/taxaForRichnes.csv", sep=""))
 
 	sppC <- 1
 	for (spp in spList$taxon) {
