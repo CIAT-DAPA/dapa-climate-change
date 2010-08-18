@@ -149,7 +149,7 @@ summarizeDR <- function(idir) {
 		spp <- unlist(strsplit(spp, ".", fixed=T))[1]
 		fdName <- paste("sp-", spp, sep="")
 		spFolder <- paste(idir, "/modeling_data/mxe_outputs/", fdName, sep="")
-		spOutFolder <- paste(ddir, "/", fdName, sep="")
+		spOutFolder <- paste(ddir, "/", spp, sep="")
 		
 		if (file.exists(spFolder)) {
 			
