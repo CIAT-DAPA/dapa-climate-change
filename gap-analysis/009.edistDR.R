@@ -175,7 +175,7 @@ summarizeDR <- function(idir) {
 		
 		if (file.exists(spFolder)) {
 			
-			res <- sizeDR(idir, spp)
+			res <- edistDR(idir, spp)
 			
 			metFile <- paste(spOutFolder, "/edist.csv", sep="")
 			metrics <- read.csv(metFile)
