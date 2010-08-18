@@ -8,7 +8,7 @@ bdir <- "F:/gap_analysis_publications/gap_phaseolus"
 speciesRichness <- function(bdir) {
 	idir <- paste(bdir, "/modeling_data", sep="")
 	
-	spList <- read.csv(paste(idir, "/richness-spList.csv", sep=""))
+	spList <- read.csv(paste(idir, "/taxaForRichnes.csv.csv", sep=""))
 
 	sppC <- 1
 	for (spp in spList$taxon) {
