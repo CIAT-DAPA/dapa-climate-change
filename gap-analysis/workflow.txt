@@ -1,15 +1,15 @@
-1. Train the maxent models for the whole set of taxa								RUNNING
-2. Script to make one single table from the thresholds.csv and metrics.csv files	
+1. Train the maxent models for the whole set of taxa								OK!
+2. Script to make one single table from the thresholds.csv and metrics.csv files	OK!
 	a. Write it																		OK!
-	b. Run it																		
-3. Script to calculate proportion of the dist. range with SD above 0.15 (ASD15)		
+	b. Run it																		OK!
+3. Script to calculate proportion of the dist. range with SD above 0.15 (ASD15)		OK!
 	a. Write it																		OK!
-	b. Run it																		
+	b. Run it																		OK!
 4. Transform PC grids into ASCIIs													OK!
 5. Script to calculate the size of the distributional range and size of the			
    CA50 of GA (in km pls)															
 	a. Write it																		OK!
-	b. Run it																		
+	b. Run it																		RUNNING
 7. Script to calculate the distribution of the G & H samples CA50, DR, convex hull,	
    and native areas around the two PCs												
 	a. Write it																		OK!
@@ -17,7 +17,7 @@
 8. Script to calculate spp richness and max-STD on richness classes					
 	a. Write it																		OK!
 	b. Run it																		
-9. Make NEW Table 3 and the list of HPT												
+9. Make NEW Table 3 and the list of HPT												In process
 10. Script to calculate "gap richness" based on this list							
 11. Script to calculate distances to the nearest population and summarize them		
 12. Script to calculate the max-STD on gap richness classes							
