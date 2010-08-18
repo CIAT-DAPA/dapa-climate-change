@@ -3,7 +3,7 @@ require(raster)
 
 source("000.zipRead.R")
 
-bdir <- "F:/gap_analysis_publications/gap_phaseolus"
+#bdir <- "F:/gap_analysis_publications/gap_phaseolus"
 
 speciesRichness <- function(bdir) {
 	idir <- paste(bdir, "/modeling_data", sep="")
