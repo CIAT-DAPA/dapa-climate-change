@@ -8,8 +8,8 @@ source("000.bufferPoints.R")
 #Calculate the size of the DR, of the convexhull in km2, of the native area, and of the herbarium samples
 #based on the area of the cells
 
-bdir <- "F:/gap_analysis_publications/gap_phaseolus"
-spID <- "Phaseolus_acutifolius"
+#bdir <- "F:/gap_analysis_publications/gap_phaseolus"
+#spID <- "Phaseolus_acutifolius"
 
 edistDR <- function(bdir, spID) {
 	
