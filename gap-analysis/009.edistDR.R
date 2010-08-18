@@ -164,7 +164,7 @@ summarizeDR <- function(idir) {
 		dir.create(odir)
 	}
 	
-	spList <- list.files(paste(idir, "/occurrence_files", sep=""))
+	spList <- list.files(paste(idir, "/modeling_data/occurrence_files", sep=""))
 	
 	sppC <- 1
 	for (spp in spList) {
