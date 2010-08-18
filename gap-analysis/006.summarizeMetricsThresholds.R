@@ -23,7 +23,7 @@ summarizeMetrics <- function(idir="C:/CIAT_work/COP_CONDESAN") {
 	}
 	
 	spList <- list.files(paste(idir, "/occurrence_files", sep=""))
-	nspp <- nrow(spListComplete)
+	nspp <- nrow(spList)
 	
 	sppC <- 1
 	sppCC <- 1

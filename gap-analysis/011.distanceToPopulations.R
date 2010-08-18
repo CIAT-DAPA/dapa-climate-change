@@ -11,6 +11,4 @@ xy <- occ[,2:3]
 
 msk <- paste(idir, "/masks/mask.asc", sep="")
 
-dgrid <- distanceFromPoints
-
-#distanceFromPoints
+dgrid <- distanceFromPoints(msk, xy)
