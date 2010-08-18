@@ -157,9 +157,9 @@ edistDR <- function(bdir, spID) {
 
 summarizeDR <- function(idir) {
 	
-	ddir <- paste(bdir, "/samples_calculations", sep="")
+	ddir <- paste(idir, "/samples_calculations", sep="")
 	
-	odir <- paste(idir, "/summary-files", sep="")
+	odir <- paste(idir, "/modeling_data/summary-files", sep="")
 	if (!file.exists(odir)) {
 		dir.create(odir)
 	}
