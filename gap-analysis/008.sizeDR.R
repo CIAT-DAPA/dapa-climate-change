@@ -39,12 +39,16 @@ sizeDR <- function(bdir, spID) {
 	#Size of the DR
 	cat("Reading raster files \n")
 	grd <- paste(spID, "_WorldClim-2_5min-bioclim_EMN_PA.asc.gz", sep="")
-	grd <- zipRead(projFolder, grd)
-	
-	cat("Size of the DR \n")
-	grd <- grd * mskArea
-	areaDR <- sum(grd[which(grd[] != 0)])
-	rm(grd)
+	if (file.exists(paste(projFolder, "/", grd, sep=""))) {
+		grd <- zipRead(projFolder, grd)
+		
+		cat("Size of the DR \n")
+		grd <- grd * mskArea
+		areaDR <- sum(grd[which(grd[] != 0)])
+		rm(grd)
+	} else {
+		areaDR <- NA
+	}
 	
 	#Size of the convex-hull
 	cat("Reading occurrences \n")
@@ -75,12 +79,16 @@ sizeDR <- function(bdir, spID) {
 	
 	cat("Reading native area \n")
 	naFolder <- paste(idir, "/native-areas/asciigrids/", spID, sep="")
-	grd <- zipRead(naFolder, "narea.asc.gz")
 	
-	cat("Size of the native area \n")
-	grd <- grd * mskArea
-	areaNA <- sum(grd[which(grd[] != 0)])
-	rm(grd)
+	if (file.exists(paste(naFolder, "/narea.asc.gz", sep=""))) {
+		grd <- zipRead(naFolder, "narea.asc.gz")
+		cat("Size of the native area \n")
+		grd <- grd * mskArea
+		areaNA <- sum(grd[which(grd[] != 0)])
+		rm(grd)
+	} else {
+		areaNA <- NA
+	}
 	
 	#Load all occurrences
 	allOcc <- read.csv(paste(bdir, "/samples/phaseolus_all.csv", sep=""))

@@ -39,91 +39,114 @@ edistDR <- function(bdir, spID) {
 	#Edist of the DR
 	cat("Reading presence/absence surface \n")
 	grd <- paste(spID, "_WorldClim-2_5min-bioclim_EMN_PA.asc.gz", sep="")
-	grd <- zipRead(projFolder, grd)
-	
-	cat("Env. distribution of the DR \n")
-	grda <- grd * pc1 #PC1
-	edistDR1 <- unique(grda[])
-	edistDR1 <- edistDR1[which(edistDR1 != 0 & !is.na(edistDR1))]
-	rm(grda)
-	
-	grda <- grd * pc2 #PC2
-	edistDR2 <- unique(grda[])
-	edistDR2 <- edistDR2[which(edistDR2 != 0 & !is.na(edistDR2))]
-	rm(grda)
-	
-	rm(grd)
+	if (file.exists(paste(projFolder, "/", grd, sep=""))) {
+		grd <- zipRead(projFolder, grd)
+		
+		cat("Env. distribution of the DR \n")
+		grda <- grd * pc1 #PC1
+		edistDR1 <- unique(grda[])
+		edistDR1 <- edistDR1[which(edistDR1 != 0 & !is.na(edistDR1))]
+		rm(grda)
+		
+		grda <- grd * pc2 #PC2
+		edistDR2 <- unique(grda[])
+		edistDR2 <- edistDR2[which(edistDR2 != 0 & !is.na(edistDR2))]
+		rm(grda)
+		
+		rm(grd)
+	} else {
+		edistDR1 <- NULL
+		edistDR2 <- NULL
+	}
 	
 	#Edist of the convex-hull
-	cat("Reading convex hull \n")
-	grd <- zipRead(paste(ddir, "/", spID, sep=""), "convex-hull.asc.gz")
-	
-	cat("Env. distribution of the convex hull \n")
-	grda <- grd * pc1
-	edistCH1 <- unique(grda[])
-	edistCH1 <- edistCH1[which(edistCH1 != 0 & !is.na(edistCH1))]
-	rm(grda)
-	
-	grda <- grd * pc2
-	edistCH2 <- unique(grda[])
-	edistCH2 <- edistCH2[which(edistCH2 != 0 & !is.na(edistCH2))]
-	
-	rm(grda)
-	rm(grd)
+	if (file.exists(paste(ddir, "/", spID, "/convex-hull.asc.gz", sep=""))) {
+		cat("Reading convex hull \n")
+		grd <- zipRead(paste(ddir, "/", spID, sep=""), "convex-hull.asc.gz")
+		
+		cat("Env. distribution of the convex hull \n")
+		grda <- grd * pc1
+		edistCH1 <- unique(grda[])
+		edistCH1 <- edistCH1[which(edistCH1 != 0 & !is.na(edistCH1))]
+		rm(grda)
+		
+		grda <- grd * pc2
+		edistCH2 <- unique(grda[])
+		edistCH2 <- edistCH2[which(edistCH2 != 0 & !is.na(edistCH2))]
+		
+		rm(grda)
+		rm(grd)
+	} else {
+		edistCH1 <- NULL
+		edistCH2 <- NULL
+	}
 	
 	#Edist of the native area
-	
-	cat("Reading native area \n")
 	naFolder <- paste(idir, "/native-areas/asciigrids/", spID, sep="")
-	grd <- zipRead(naFolder, "narea.asc.gz")
-	
-	cat("Env. distribution of the native area \n")
-	grda <- grd * pc1
-	edistNA1 <- unique(grda[])
-	edistNA1 <- edistNA1[which(edistNA1 != 0 & !is.na(edistNA1))]
-	rm(grda)
-	
-	grda <- grd * pc2
-	edistNA2 <- unique(grda[])
-	edistNA2 <- edistNA2[which(edistNA2 != 0 & !is.na(edistNA2))]
-	
-	rm(grda)
-	rm(grd)
+	if (file.exists(paste(naFolder, "/narea.asc.gz", sep=""))) {
+		cat("Reading native area \n")
+		grd <- zipRead(naFolder, "narea.asc.gz")
+		
+		cat("Env. distribution of the native area \n")
+		grda <- grd * pc1
+		edistNA1 <- unique(grda[])
+		edistNA1 <- edistNA1[which(edistNA1 != 0 & !is.na(edistNA1))]
+		rm(grda)
+		
+		grda <- grd * pc2
+		edistNA2 <- unique(grda[])
+		edistNA2 <- edistNA2[which(edistNA2 != 0 & !is.na(edistNA2))]
+		
+		rm(grda)
+		rm(grd)
+	} else {
+		edistNA1 <- NULL
+		edistNA2 <- NULL
+	}
 	
 	#Edist of the herbarium samples CA50
 	cat("Reading h-samples buffer \n")
-	grd <- zipRead(paste(ddir, "/", spID, sep=""), "hsamples-buffer.asc.gz")
-	
-	cat("Env. distribution of h-samples buffer \n")
-	grda <- grd * pc1
-	edistHB1 <- unique(grda[])
-	edistHB1 <- edistHB1[which(edistHB1 != 0 & !is.na(edistHB1))]
-	rm(grda)
-	
-	grda <- grd * pc2
-	edistHB2 <- unique(grda[])
-	edistHB2 <- edistHB2[which(edistHB2 != 0 & !is.na(edistHB2))]
-	
-	rm(grda)
-	rm(grd)
+	if (file.exists(paste(ddir, "/", spID, "/hsamples-buffer.asc.gz", sep=""))) {
+		grd <- zipRead(paste(ddir, "/", spID, sep=""), "hsamples-buffer.asc.gz")
+		
+		cat("Env. distribution of h-samples buffer \n")
+		grda <- grd * pc1
+		edistHB1 <- unique(grda[])
+		edistHB1 <- edistHB1[which(edistHB1 != 0 & !is.na(edistHB1))]
+		rm(grda)
+		
+		grda <- grd * pc2
+		edistHB2 <- unique(grda[])
+		edistHB2 <- edistHB2[which(edistHB2 != 0 & !is.na(edistHB2))]
+		
+		rm(grda)
+		rm(grd)
+	} else {
+		edistHB1 <- NULL
+		edistHB2 <- NULL
+	}
 	
 	#Size of the germplasm samples CA50
 	cat("Reading g-samples buffer \n")
-	grd <- zipRead(paste(ddir, "/", spID, sep=""), "gsamples-buffer.asc.gz")
-	
-	cat("Env. distribution of g-samples buffer \n")
-	grda <- grd * pc1
-	edistGB1 <- unique(grda[])
-	edistGB1 <- edistGB1[which(edistGB1 != 0 & !is.na(edistGB1))]
-	rm(grda)
-	
-	grda <- grd * pc2
-	edistGB2 <- unique(grda[])
-	edistGB2 <- edistGB2[which(edistGB2 != 0 & !is.na(edistGB2))]
-	
-	rm(grda)
-	rm(grd)
-	
+	if (file.exists(paste(ddir, "/", spID, "/gsamples-buffer.asc.gz", sep=""))) {
+		grd <- zipRead(paste(ddir, "/", spID, sep=""), "gsamples-buffer.asc.gz")
+		
+		cat("Env. distribution of g-samples buffer \n")
+		grda <- grd * pc1
+		edistGB1 <- unique(grda[])
+		edistGB1 <- edistGB1[which(edistGB1 != 0 & !is.na(edistGB1))]
+		rm(grda)
+		
+		grda <- grd * pc2
+		edistGB2 <- unique(grda[])
+		edistGB2 <- edistGB2[which(edistGB2 != 0 & !is.na(edistGB2))]
+		
+		rm(grda)
+		rm(grd)
+	} else {
+		edistGB1 <- NULL
+		edistGB2 <- NULL
+	}
 	#Writing results
 	outDF <- data.frame(DRDist.PC1=length(edistDR1), DRDist.PC2=length(edistDR2), CHDist.PC1=length(edistCH1), CHDist.PC2=length(edistCH2), NADist.PC1=length(edistNA1), NADist.PC2=length(edistNA2), HBDist.PC1=length(edistHB1), HBDist.PC2=length(edistHB2), GBDist.PC1=length(edistGB1), GBDist.PC2=length(edistGB2))
 	
