@@ -8,17 +8,20 @@
 4. Transform PC grids into ASCIIs													OK!
 5. Script to calculate the size of the distributional range and size of the			
    CA50 of GA (in km pls)															
-	a. Write it																		OK! (small fixes on non-existing files)
+	a. Write it																		OK!
 	b. Run it																		
 7. Script to calculate the distribution of the G & H samples CA50, DR, convex hull,	
    and native areas around the two PCs												
-	a. Write it																		OK! (small fixes on non-existing files)
+	a. Write it																		OK!
 	b. Run it																		
 8. Script to calculate spp richness and max-STD on richness classes					
+	a. Write it																		OK!
+	b. Run it																		
 9. Make NEW Table 3 and the list of HPT												
 10. Script to calculate "gap richness" based on this list							
-11. Script to calculate distances to the nearest accession and summarize them		
+11. Script to calculate distances to the nearest population and summarize them		
 12. Script to calculate the max-STD on gap richness classes							
+13. Fix P. lunatus																	OK!
 
 
 #Spearman correlation test
