@@ -5,8 +5,8 @@ source("000.zipWrite.R")
 
 setOptions(overwrite=T)
 
-bdir <- "F:/gap_analysis_publications/gap_phaseolus"
-spID <- "Phaseolus_acutifolius"
+#bdir <- "F:/gap_analysis_publications/gap_phaseolus"
+#spID <- "Phaseolus_acutifolius"
 
 populationDistance <- function(bdir, spID) {
 	idir <- paste(bdir, "/modeling_data", sep="")
