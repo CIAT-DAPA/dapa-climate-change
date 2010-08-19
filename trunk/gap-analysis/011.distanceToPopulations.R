@@ -30,7 +30,7 @@ populationDistance <- function(bdir, spID) {
 }
 
 summarizeDistances <- function(bdir) {
-	spList <- list.files(paste(idir, "/modeling_data/occurrence_files", sep=""))
+	spList <- list.files(paste(bdir, "/modeling_data/occurrence_files", sep=""))
 	sppC <- 1
 	
 	for (spp in spList) {
