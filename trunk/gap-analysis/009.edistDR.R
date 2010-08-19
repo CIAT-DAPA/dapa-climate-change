@@ -179,6 +179,7 @@ summarizeDR <- function(idir) {
 			
 			metFile <- paste(spOutFolder, "/edist.csv", sep="")
 			metrics <- read.csv(metFile)
+			metrics <- cbind(taxon=spp, metrics)
 			
 			if (sppC == 1) {
 				outSum <- metrics
