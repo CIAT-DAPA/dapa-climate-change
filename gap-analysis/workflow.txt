@@ -18,9 +18,9 @@
 	a. Write it																		OK!
 	b. Run it																		OK!
 9. Make NEW Table 3 and the list of HPT												OK!
-10. Script to calculate "gap richness" based on this list							In writing mode
+10. Script to calculate "gap richness" based on this list							Running
 11. Script to calculate distances to the nearest population for each taxon			Running
-12. Script to calculate the max. distance to nearest pop. aggreg. for HPS			In writing mode
+12. Script to calculate the max. distance to nearest pop. aggreg. for HPS			Running
 13. Script to calculate the max-STD on gap richness classes							In writing mode
 14. Fix P. lunatus																	OK!
 15. Mapping																			
