@@ -24,7 +24,9 @@
 13. Script to calculate the max-STD on gap richness classes							In writing mode
 14. Fix P. lunatus																	OK!
 15. Mapping																			
-16. Spearman correlation with DGD's validation										
+16. Spearman correlation with DGD's validation										OK!
+	a. Spearman R = 0.7430115 (p-value=4.504751e-15) (n=79)							OK!
+	b. Pearson R = 0.7394583 (p-value <= 0.001) (n=79)								OK!
 
 
 #Spearman correlation test
