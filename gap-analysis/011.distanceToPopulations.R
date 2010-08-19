@@ -19,7 +19,9 @@ populationDistance <- function(bdir, spID) {
 	msk <- raster(paste(idir, "/masks/mask.asc", sep=""))
 
 	dgrid <- distanceFromPoints(msk, xy)
+	dgrid[which(is.na(msk[]))] <- NA
 	dumm <- zipWrite(dgrid, spOutFolder, "pop-dist.asc.gz")
+	return(dgrid)
 }
 
 summarizeDistances <- function(bdir) {
@@ -31,7 +33,8 @@ summarizeDistances <- function(bdir) {
 		
 		cat("Processing taxon", spp, "\n")
 		
-		
+		dg <- populationDistance(bdir, spp)
 		
 	}
+	return(spList)
 }
