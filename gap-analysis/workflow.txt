@@ -13,16 +13,18 @@
 7. Script to calculate the distribution of the G & H samples CA50, DR, convex hull,	OK!
    and native areas around the two PCs												OK!
 	a. Write it																		OK!
-	b. Run it																		Running
-8. Script to calculate spp richness and max-STD on richness classes					
+	b. Run it																		OK!
+8. Script to calculate spp richness and max-STD on richness classes					OK!
 	a. Write it																		OK!
-	b. Run it																		Running
-9. Make NEW Table 3 and the list of HPT												In process (almost done)
-10. Script to calculate "gap richness" based on this list							
-11. Script to calculate distances to the nearest population and 					
-	summarize them (HPS)															
-12. Script to calculate the max-STD on gap richness classes							
-13. Fix P. lunatus																	OK!
+	b. Run it																		OK!
+9. Make NEW Table 3 and the list of HPT												OK!
+10. Script to calculate "gap richness" based on this list							In writing mode
+11. Script to calculate distances to the nearest population for each taxon			Running
+12. Script to calculate the max. distance to nearest pop. aggreg. for HPS			In writing mode
+13. Script to calculate the max-STD on gap richness classes							In writing mode
+14. Fix P. lunatus																	OK!
+15. Mapping																			
+16. Spearman correlation with DGD's validation										
 
 
 #Spearman correlation test
