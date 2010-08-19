@@ -30,6 +30,7 @@ speciesRichness <- function(bdir) {
 		isValid <- spList$ValidModel[spList$Taxon == paste(spp)]
 		
 		if (isValid == 1) {
+			exOcc <- T
 			cat("Load presence/absence raster and sd raster \n")
 			sppFolder <- paste(idir, "/mxe_outputs/sp-", spp, sep="")
 			projFolder <- paste(sppFolder, "/projections", sep="")
@@ -54,6 +55,8 @@ speciesRichness <- function(bdir) {
 				write.csv(tallOcc, paste(spOutFolder, "/samples.csv", sep=""), quote=F, row.names=F)
 				rm(tallOcc)
 				pagrid <- createBuffers(paste(spOutFolder, "/samples.csv", sep=""), spOutFolder, "samples-buffer.asc", 50000, paste(idir, "/masks/mask.asc", sep=""))
+			} else {
+				exOcc <- F
 			}
 		}
 		
