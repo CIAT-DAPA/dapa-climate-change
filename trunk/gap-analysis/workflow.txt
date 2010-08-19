@@ -6,20 +6,20 @@
 	a. Write it																		OK!
 	b. Run it																		OK!
 4. Transform PC grids into ASCIIs													OK!
-5. Script to calculate the size of the distributional range and size of the			
-   CA50 of GA (in km pls)															
+5. Script to calculate the size of the distributional range and size of the			OK!
+   CA50 of GA (in km pls)															OK!
 	a. Write it																		OK!
-	b. Run it																		RUNNING
-7. Script to calculate the distribution of the G & H samples CA50, DR, convex hull,	
-   and native areas around the two PCs												
+	b. Run it																		OK!
+7. Script to calculate the distribution of the G & H samples CA50, DR, convex hull,	OK!
+   and native areas around the two PCs												OK!
 	a. Write it																		OK!
-	b. Run it																		
+	b. Run it																		Running
 8. Script to calculate spp richness and max-STD on richness classes					
 	a. Write it																		OK!
-	b. Run it																		
-9. Make NEW Table 3 and the list of HPT												In process
+	b. Run it																		Running
+9. Make NEW Table 3 and the list of HPT												In process (almost done)
 10. Script to calculate "gap richness" based on this list							
-11. Script to calculate distances to the nearest population and 
+11. Script to calculate distances to the nearest population and 					
 	summarize them (HPS)															
 12. Script to calculate the max-STD on gap richness classes							
 13. Fix P. lunatus																	OK!
