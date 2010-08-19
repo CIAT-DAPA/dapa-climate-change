@@ -47,19 +47,19 @@ speciesRichness <- function(bdir) {
 
 	cat("Writing richness raster \n")
 	dumm <- zipWrite(sprich, outFolder, "species-richness.asc.gz")
-
+	
 	cat("Calculating mean sd raster \n")
-	sdmean <- sum(sdlist) / sprich
+	sdmean <- sum(stack(sdlist)) / sprich
 	cat("Writing \n")
 	dumm <- zipWrite(sdmean, outFolder, "species-richness-sdmean.asc.gz")
 
 	cat("Calculating max sd raster \n")
-	sdmax <- max(sdlist)
+	sdmax <- max(stack(sdlist))
 	cat("Writing \n")
 	dumm <- zipWrite(sdmax, outFolder, "species-richness-sdmax.asc.gz")
 
 	cat("Calculating min sd raster \n")
-	sdmin <- min(sdlist)
+	sdmin <- min(stack(sdlist))
 	cat("Writing \n")
 	dumm <- zipWrite(sdmin, outFolder, "species-richness-sdmin.asc.gz")
 

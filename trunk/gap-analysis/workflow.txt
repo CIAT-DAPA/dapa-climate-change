@@ -19,7 +19,8 @@
 	b. Run it																		
 9. Make NEW Table 3 and the list of HPT												In process
 10. Script to calculate "gap richness" based on this list							
-11. Script to calculate distances to the nearest population and summarize them		
+11. Script to calculate distances to the nearest population and 
+	summarize them (HPS)															
 12. Script to calculate the max-STD on gap richness classes							
 13. Fix P. lunatus																	OK!
 
