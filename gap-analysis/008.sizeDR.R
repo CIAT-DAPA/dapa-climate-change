@@ -153,7 +153,7 @@ summarizeDR <- function(idir) {
 		
 		if (file.exists(spFolder)) {
 			
-			#res <- sizeDR(idir, spp)
+			res <- sizeDR(idir, spp)
 			
 			metFile <- paste(spOutFolder, "/areas.csv", sep="")
 			metrics <- read.csv(metFile)
