@@ -69,9 +69,14 @@ gapRichness <- function(bdir) {
 			
 			assign(paste("sdgrid",sppC,sep=""), paste(spp, "_WorldClim-2_5min-bioclim_ESD_PR.asc.gz", sep=""))
 			assign(paste("sdgrid",sppC,sep=""), zipRead(projFolder, get(paste("sdgrid",sppC,sep=""))))
+			
+			assign(paste("dpgrid",sppC,sep=""), zipRead(spOutFolder, "pop-dist.asc.gz"))
+			assign(paste("dpgrid",sppC,sep=""), get(paste("dpgrid",sppC,sep="")) * pagrid)
 		} else if (file.exists(hbuffFile)) {
 			cat("Presence/absence surf. does not exist or is not reliable, using hsamples instead \n")
 			pagrid <- grd
+			assign(paste("dpgrid",sppC,sep=""), zipRead(spOutFolder, "pop-dist.asc.gz"))
+			assign(paste("dpgrid",sppC,sep=""), get(paste("dpgrid",sppC,sep="")) * pagrid)
 		} else {
 			cat("No PA surface, no HSamples, cannot map it out \n")
 		}
@@ -81,12 +86,14 @@ gapRichness <- function(bdir) {
 			if (isValid == 1 | file.exists(hbuffFile)) {
 				sprich <- pagrid
 				rm(pagrid)
+				dplist <- get(paste("dpgrid",sppC,sep=""))
 				rcount <- rcount + 1
 			}
 		} else {
 			if (isValid == 1 | file.exists(hbuffFile)) {
 				sprich <- sprich + pagrid
 				rm(pagrid)
+				dplist <- c(dplist, get(paste("dpgrid",sppC,sep="")))
 				rcount <- rcount + 1
 			}
 		}
@@ -110,6 +117,21 @@ gapRichness <- function(bdir) {
 	cat("Writing richness raster \n")
 	dumm <- zipWrite(sprich, outFolder, "gap-richness.asc.gz")
 	
+	cat("Calculating mean pdist raster \n")
+	dpmean <- sum(stack(dplist)) / sprich
+	cat("Writing \n")
+	dumm <- zipWrite(dpmean, outFolder, "gap-richness-dpmean.asc.gz")
+	
+	cat("Calculating max pdist raster \n")
+	dpmax <- max(stack(dplist))
+	cat("Writing \n")
+	dumm <- zipWrite(dpmax, outFolder, "gap-richness-dpmax.asc.gz")
+	
+	cat("Calculating min pdist raster \n")
+	dpmin <- min(stack(dplist))
+	cat("Writing \n")
+	dumm <- zipWrite(dpmin, outFolder, "gap-richness-dpmin.asc.gz")
+	
 	cat("Calculating mean sd raster \n")
 	sdmean <- sum(stack(sdlist)) / sprich
 	cat("Writing \n")
@@ -122,5 +144,5 @@ gapRichness <- function(bdir) {
 	
 	cat("Done! \n")
 
-	return(stack(sprich,sdmean,sdmax))
+	return(stack(sprich,sdmean,sdmax,dpmean,dpmax,dpmin))
 }
