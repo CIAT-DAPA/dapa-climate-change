@@ -39,7 +39,7 @@ gapRichness <- function(bdir) {
 		projFolder <- paste(sppFolder, "/projections", sep="")
 		
 		#Size of the herbarium samples CA50
-		cat("Size of the h-samples buffer \n")
+		cat("Calculating h-samples buffer \n")
 		tallOcc <- allOcc[which(allOcc$Taxon == paste(spp)),]
 		hOcc <- tallOcc[which(tallOcc$Sampletype == "H"),]
 		if (nrow(hOcc) != 0) {
@@ -62,10 +62,39 @@ gapRichness <- function(bdir) {
 		
 		hbuffFile <- paste(spOutFolder, "/hsamples-buffer.asc.gz", sep="")
 		
+		#Size of the genebank accessions CA50
+		cat("Calculating g-samples buffer \n")
+		gOcc <- tallOcc[which(tallOcc$Sampletype == "G"),]
+		if (nrow(gOcc) != 0) {
+			spOutFolder <- paste(ddir, "/", spp, sep="")
+			
+			if (!file.exists(paste(spOutFolder, "/gsamples-buffer.asc.gz", sep=""))) {
+				if (!file.exists(spOutFolder)) {
+					dir.create(spOutFolder)
+				}
+				gOcc <- as.data.frame(cbind(as.character(gOcc$Taxon), gOcc$Longitude, gOcc$Latitude))
+				names(gOcc) <- c("taxon", "lon", "lat")
+				
+				write.csv(gOcc, paste(spOutFolder, "/gsamples.csv", sep=""), quote=F, row.names=F)
+				rm(hOcc)
+				grd.ga <- createBuffers(paste(spOutFolder, "/gsamples.csv", sep=""), spOutFolder, "gsamples-buffer.asc", 50000, paste(idir, "/masks/mask.asc", sep=""))
+			} else {
+				grd.ga <- zipRead(spOutFolder, "gsamples-buffer.asc.gz")
+			}
+		}
+		
+		gbuffFile <- paste(spOutFolder, "/gsamples-buffer.asc.gz", sep="")
+		
+		#Presence absence surfaces
+		
 		if (isValid == 1) {
 			cat("Presence/absence surf. exists, using it \n")
 			pagrid <- paste(spp, "_WorldClim-2_5min-bioclim_EMN_PA.asc.gz", sep="")
 			pagrid <- zipRead(projFolder, pagrid)
+			
+			if (file. exists(gbuffFile)) {
+				pagrid[which(grd.ga[] == 1)] <- 0
+			}
 			
 			assign(paste("sdgrid",sppC,sep=""), paste(spp, "_WorldClim-2_5min-bioclim_ESD_PR.asc.gz", sep=""))
 			assign(paste("sdgrid",sppC,sep=""), zipRead(projFolder, get(paste("sdgrid",sppC,sep=""))))
@@ -75,6 +104,11 @@ gapRichness <- function(bdir) {
 		} else if (file.exists(hbuffFile)) {
 			cat("Presence/absence surf. does not exist or is not reliable, using hsamples instead \n")
 			pagrid <- grd
+			
+			if (file. exists(gbuffFile)) {
+				pagrid[which(grd.ga[] == 1)] <- 0
+			}
+			
 			assign(paste("dpgrid",sppC,sep=""), zipRead(spOutFolder, "pop-dist.asc.gz"))
 			assign(paste("dpgrid",sppC,sep=""), get(paste("dpgrid",sppC,sep="")) * pagrid)
 		} else {
