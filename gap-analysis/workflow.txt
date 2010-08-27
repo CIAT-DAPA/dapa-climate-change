@@ -18,12 +18,12 @@
 	a. Write it																		OK!
 	b. Run it																		OK!
 9. Make NEW Table 3 and the list of HPT												OK!
-10. Script to calculate "gap richness" based on this list							OK! (but need fixes with distances to nearest pops, so needs to re-run)
-11. Script to calculate distances to the nearest population for each taxon			Running
-12. Script to calculate the max. distance to nearest pop. aggreg. for HPS			to be implemented in 10
-13. Script to calculate the max-STD on gap richness classes							In writing mode
+10. Script to calculate "gap richness" based on this list							OK!
+11. Script to calculate distances to the nearest population for each taxon			OK!
+12. Script to calculate the max. distance to nearest pop. aggreg. for HPS			OK!
+13. Script to calculate the max-STD on gap richness classes							OK!
 14. Fix P. lunatus																	OK!
-15. Mapping																			
+15. Mapping																			OK!
 16. Spearman correlation with DGD's validation										OK!
 	a. Spearman R = 0.7430115 (p-value=4.504751e-15) (n=79)							OK!
 	b. Pearson R = 0.7394583 (p-value <= 0.001) (n=79)								OK!
