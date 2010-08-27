@@ -1,0 +1,98 @@
+/* &r rangeGCMAnomalies.aml F:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies F:\COP_CONDESAN\climateData\global\future\SRES_A1B\anomalies 2010_2039 A1B-GCMLIST.txt
+/* &r rangeGCMAnomalies.aml F:\climate_change\IPCC_CMIP3\SRES_A1B\anomalies F:\COP_CONDESAN\climateData\global\future\SRES_A1B\anomalies 2040_2069 A1B-GCMLIST.txt
+/* &r rangeGCMAnomalies.aml F:\climate_change\IPCC_CMIP3\SRES_A2\anomalies F:\COP_CONDESAN\climateData\global\future\SRES_A2\anomalies 2010_2039 A2-GCMLIST.txt
+/* &r rangeGCMAnomalies.aml F:\climate_change\IPCC_CMIP3\SRES_A2\anomalies F:\COP_CONDESAN\climateData\global\future\SRES_A2\anomalies 2040_2069 A2-GCMLIST.txt
+
+&args indir outdir timeslice gcmlist 
+&terminal 9999
+&sys cls
+&messages &off
+&if [show program] NE GRID &then GRID
+
+&amlpath .
+&s amldir [show &amlpath]
+
+&if [null %indir%] OR [null %gcmlist%] OR [null %timeslice%] OR [null %gcmlist%] &then
+	&do
+		&ty
+		&ty Wrong command syntax, run the AML appropriately
+		&ty '&RUN rangeGCMAnomalies.aml INDIR OUTDIR TIMESLICE GCMLIST'
+		&return
+	&end
+
+&s varlist prec,tmean,tmin,tmax
+&s nvars [token %varlist% -count]
+
+&do v = 1 &to %nvars%
+	
+	&s varname [extract %v% %varlist%]
+	
+	&ty
+	&ty Processing %varname%
+	
+	&do i = 1 &to 12
+		
+		&ty Month %i%
+		
+		&s openlist [open %gcmlist% openstatus -read]
+		&s gcm [read %openlist% readstatus]
+		
+		&s gcmcounter 1
+		
+		&do &while %readstatus% EQ 0
+			
+			&ty GCM ... %gcm% (%gcmcounter%)
+			
+			&s indir_gcm %indir%\%gcm%
+			&s indir_gcm_ts %indir_gcm%\%timeslice%
+			
+			&s outdir_ts %outdir%\%timeslice%
+			&if not [exists %outdir_ts% -dir] &then &sys md %outdir_ts%
+			
+			SETWINDOW %indir_gcm_ts%\%varname%_%i%
+			SETMASK OFF
+			SETCELL MINOF
+			
+			&if [exists %outdir_ts%\temp%gcmcounter% -grid] &then kill %outdir_ts%\temp%gcmcounter% all
+			%outdir_ts%\temp%gcmcounter% = %indir_gcm_ts%\%varname%_%i%
+			
+			&if %gcmcounter% EQ 1 &then
+				&do
+					&s glist temp%gcmcounter%
+				&end
+			&else
+				&do
+					&s glist %glist%,temp%gcmcounter%
+				&end
+			
+			&s gcm [read %openlist% readstatus]
+			&s gcmcounter [calc %gcmcounter% + 1]
+		&end
+		
+		&s closelist [close %openlist%]
+		
+		&ty #GCMs ... [calc %gcmcounter% - 1]
+		
+		arc w %outdir_ts%
+		
+		SETWINDOW temp1
+		SETMASK OFF
+		SETCELL MINOF
+		
+		&if [exists %outdir_ts%\mx_%varname%_%i% -grid] &then kill %outdir_ts%\mx_%varname%_%i% all
+		%outdir_ts%\mx_%varname%_%i% = MAX(%glist%)
+		
+		&if [exists %outdir_ts%\mn_%varname%_%i% -grid] &then kill %outdir_ts%\mn_%varname%_%i% all
+		%outdir_ts%\mn_%varname%_%i% = MIN(%glist%)
+		
+		arc w %amldir%
+		
+		&do gc = 1 &to %gcmcounter%
+			&if [exists %outdir_ts%\temp%gc% -grid] &then kill %outdir_ts%\temp%gc% all
+		&end
+		
+	&end
+&end
+
+&if [show program] EQ GRID &then QUIT
+&if [exists log -file] &then &sys del log
