@@ -23,6 +23,7 @@ source("zipRead.R")
 		#For increase it would be those pixels being == 0 in current and == 1 in the future
 		#For decrease it would be those pixels being == 1 in current and == 0 in the future
 		#For overall change you just need the number of pixels in current, and those in the future
+#4. Suitable area under all scenarios (use the calculated area *_area asciis in ./masks/AAIGrids)
 
 impactMetrics <- function(spp, idir, overwrite=T) {
 	mxoDir <- paste(idir, "/mxe_outputs", sep="")
