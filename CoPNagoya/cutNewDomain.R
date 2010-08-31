@@ -86,7 +86,7 @@ createVerFile <- function(wrd="Nothing", vfile) {
 }
 
 #Cut a single species
-cutDomainSpp <- function(ID, bdir) {
+cutDomainSpp <- function(ID, bdir, OSys="linux") {
 	
 	mxdir <- paste(bdir, "/mxe_outputs", sep="")
 	spDir <- paste(mxdir, "/sp-", ID, sep="")
@@ -107,6 +107,17 @@ cutDomainSpp <- function(ID, bdir) {
 				dir.create(corrDir)
 			}
 			
+			spTmpDir <- paste("sp-", ID, sep="")
+			if (file.exists(spTmpDir)) {
+				cat("Erasing temporal stuff \n")
+				system(paste("rm", "-rf", spTmpDir))
+			}
+			
+			if (!file.exists(spTmpDir)) {
+				dir.create(spTmpDir)
+				dir.create(paste(spTmpDir, "/_newDomain", sep=""))
+			}
+			
 			msk <- raster(paste(bdir, "/maskData/AAIGrids/andes_finalDomain_25m.asc", sep=""))
 			
 			sresList <- c("SRES_A1B", "SRES_A2")
@@ -117,7 +128,7 @@ cutDomainSpp <- function(ID, bdir) {
 			#Performing for baseline (probability raster)
 			for (thr in threshList) {
 				cat("Baseline:", thr, "\n")
-				rs <- cutDomainBL(ID, projDir, thresh=thr, msk, corrDir)
+				rs <- cutDomainBL(ID, projDir, thresh=thr, msk, paste(spTmpDir, "/_newDomain", sep=""))
 			}
 			
 			#Performing for future
@@ -126,15 +137,28 @@ cutDomainSpp <- function(ID, bdir) {
 					for (thr in threshList) {
 						if (is.na(thr)) {
 							cat("Future:", sr, per, thr, "\n")
-							rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=NA, msk, corrDir)
+							rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=NA, msk, paste(spTmpDir, "/_newDomain", sep=""))
 						} else {
 							for (mg in migList) {
 								cat("Future:", sr, per, thr, mg, "\n")
-								rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=mg, msk, corrDir)
+								rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=mg, msk, paste(spTmpDir, "/_newDomain", sep=""))
 							}
 						}
 					}
 				}
+			}
+			
+			#Now copy the files
+			if (OSys == "linux") {
+				destName <- paste(projDir, "/.", sep="")
+				system(paste("cp", "-rf", paste(spTmpDir, "/_newDomain", sep=""), destName))
+				system(paste("rm", "-rf", spTmpDir))
+			} else {
+				destName <- corrDir
+				origindir <- paste(spTmpDir, "\\_newDomain", sep="") #gsub("/", "\\\\", )
+				destindir <- gsub("/", "\\\\", destName)
+				system(paste("xcopy", "/E", "/I", origindir, destindir))
+				system(paste("rm", "-rf", spTmpDir))
 			}
 			
 			#Create verification file
@@ -165,7 +189,7 @@ cutDomain <- function(bdir, ini, fin, OSys="LINUX") {
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- cutDomainSpp(sp, bdir)
+		out <- cutDomainSpp(sp, bdir, OSys=tolower(OSys))
 		sppC <- sppC + 1
 	}
 	
