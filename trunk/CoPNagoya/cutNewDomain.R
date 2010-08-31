@@ -69,7 +69,7 @@ cutDomainFT <- function(ID, fdir, sres="SRES_A2", period="2010_2039", thresh=NA,
 		rs <- zipRead(fdir, fn)
 		rs <- cutPAGrid(rs, msk)
 	}
-	dumm <- zipWrite(rs, writeDir, fn)
+	dumm <- zipWrite(rs, writedir, fn)
 	return(rs)
 }
 
@@ -89,44 +89,59 @@ cutDomainSpp <- function(ID, bdir) {
 	projDir <- paste(spDir, "/projections", sep="")
 	corrDir <- paste(spDir, "/projections/_newDomain", sep="")
 	
-	if (!file.exists(corrDir)) {
-		dir.create(corrDir)
-	}
+	vf <- paste(spDir, "/ct-", ID, ".run", sep="")
 	
-	msk <- raster(paste(bdir, "/maskData/AAIGrids/and0_25m_area.asc", sep=""))
-	
-	sresList <- c("SRES_A1B", "SRES_A2")
-	periodList <- c("2010_2039", "2040_2069")
-	migList <- c("FullAdap", "NullAdap")
-	threshList <- c(NA, "Prevalence", "TenPercentile")
-	
-	#Performing for baseline (probability raster)
-	for (thr in threshList) {
-		cat("Baseline:", thr, "\n")
-		rs <- cutDomainBL(ID, projDir, thresh=thr, msk, corrDir)
-	}
-	
-	#Performing for future
-	for (sr in sresList) {
-		for (per in periodList) {
+	if (file.exists(spDir)) {
+		if (!file.exists(vf)) {
+			
+			if (file.exists(corrDir)) {
+				cat("Erasing previous stuff \n")
+				system(paste("rm", "-rf", corrDir))
+			}
+			
+			if (!file.exists(corrDir)) {
+				dir.create(corrDir)
+			}
+			
+			msk <- raster(paste(bdir, "/maskData/AAIGrids/andes_finalDomain_25m.asc", sep=""))
+			
+			sresList <- c("SRES_A1B", "SRES_A2")
+			periodList <- c("2010_2039", "2040_2069")
+			migList <- c("FullAdap", "NullAdap")
+			threshList <- c(NA, "Prevalence", "TenPercentile")
+			
+			#Performing for baseline (probability raster)
 			for (thr in threshList) {
-				if (is.na(thr)) {
-					cat("Future:", sr, per, thr, "\n")
-					rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=NA, msk, corrDir)
-				} else {
-					for (mg in migList) {
-						cat("Future:", sr, per, thr, mg, "\n")
-						rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=mg, msk, corrDir)
+				cat("Baseline:", thr, "\n")
+				rs <- cutDomainBL(ID, projDir, thresh=thr, msk, corrDir)
+			}
+			
+			#Performing for future
+			for (sr in sresList) {
+				for (per in periodList) {
+					for (thr in threshList) {
+						if (is.na(thr)) {
+							cat("Future:", sr, per, thr, "\n")
+							rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=NA, msk, corrDir)
+						} else {
+							for (mg in migList) {
+								cat("Future:", sr, per, thr, mg, "\n")
+								rs <- cutDomainFT(ID, projDir, sres=sr, period=per, thresh=thr, mig=mg, msk, corrDir)
+							}
+						}
 					}
 				}
 			}
+			
+			#Create verification file
+			theText <- "Cut made on"
+			isDone <- createVerFile(theText, vf)
+		} else {
+			cat("The taxon is already processed \n")
 		}
+	} else {
+		cat("The taxon was never modeled \n")
 	}
-	
-	#Create verification file
-	theText <- "Cut made on"
-	vf <- paste(spDir, "/ct-", ID, ".run", sep="")
-	isDone <- createVerFile(theText, vf)
 }
 
 #This is the entire process function
@@ -146,10 +161,9 @@ cutDomain <- function(bdir, ini, fin, OSys="LINUX") {
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- cutDomainSpp(sp, OSys, inputDir, destDir)
+		out <- cutDomainSpp(sp, bdir)
 		sppC <- sppC + 1
 	}
 	
 	return("Done!")
-	
 }
