@@ -114,11 +114,13 @@ idir <- "L:/COP_CONDESAN"
 ############# LINUX ########################
 source("cutNewDomain.R")
 bdir <- "/mnt/GeoData/COP_CONDESAN"
+ldir <- "/data3/jramirez/CoP_Nagoya"
 setOptions(overwrite=T)
 
 ############# NT ########################
 source("cutNewDomain.R")
 bdir <- "L:/COP_CONDESAN"
+ldir <- "E:/CoP_Nagoya"
 setOptions(overwrite=T)
 
 
