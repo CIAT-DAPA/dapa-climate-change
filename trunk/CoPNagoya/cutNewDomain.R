@@ -62,14 +62,16 @@ cutDomainFT <- function(ID, fdir, sres="SRES_A2", period="2010_2039", thresh=NA,
 	
 	if (is.na(thresh)) {
 		fn <- paste(ID, "_future_", sres, "_disaggregated_", period, ext, sep="")
+		fno <- paste(ID, "_future_", sres, "_disaggregated_", period, ".asc.gz", sep="")
 		rs <- zipRead(fdir, fn)
 		rs <- cutPRGrid(rs, msk)
 	} else {
 		fn <- paste(ID, "_future_", sres, "_disaggregated_", period, "_", thresh, "_", mig, ext, sep="")
+		fno <- paste(ID, "_future_", sres, "_disaggregated_", period, "_", thresh, "_", mig, ".asc.gz", sep="")
 		rs <- zipRead(fdir, fn)
 		rs <- cutPAGrid(rs, msk)
 	}
-	dumm <- zipWrite(rs, writedir, fn)
+	dumm <- zipWrite(rs, writedir, fno)
 	return(rs)
 }
 
