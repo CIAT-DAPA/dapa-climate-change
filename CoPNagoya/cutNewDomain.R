@@ -41,14 +41,16 @@ cutDomainBL <- function(ID, fdir, thresh=NA, msk, writedir) {
 	
 	if (is.na(thresh)) {
 		fn <- paste(ID, "_baseline_20C3M_WorldClim-2_5min-bioclim_1950_2000", ext, sep="")
+		fno <- paste(ID, "_baseline_20C3M_WorldClim-2_5min-bioclim_1950_2000", ".asc.gz", sep="")
 		rs <- zipRead(fdir, fn)
 		rs <- cutPRGrid(rs, msk)
 	} else {
 		fn <- paste(ID, "_baseline_20C3M_WorldClim-2_5min-bioclim_1950_2000_", thresh, ext, sep="")
+		fno <- paste(ID, "_baseline_20C3M_WorldClim-2_5min-bioclim_1950_2000_", thresh, ".asc.gz", sep="")
 		rs <- zipRead(fdir, fn)
 		rs <- cutPAGrid(rs, msk)
 	}
-	dumm <- zipWrite(rs, writedir, fn)
+	dumm <- zipWrite(rs, writedir, fno)
 	return(rs)
 }
 
