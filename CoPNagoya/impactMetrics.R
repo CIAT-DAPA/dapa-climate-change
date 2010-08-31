@@ -44,7 +44,9 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 			tsList <- c("2010_2039", "2040_2069")
 			migrList <- c("FullAdap", "NullAdap")
 			
-			rsFolder <- paste(spFolder, "/projections", sep="")
+			rsFolder <- paste(spFolder, "/projections/_newDomain", sep="")
+			
+			areaK <- raster(paste(idir, "/maskData/AAIGrids/and0_25m_area.asc", sep=""))
 			
 			scc <- 1
 			#Cycle through SRES
@@ -93,6 +95,11 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 						#Count number of cells (current)
 						areaCurr <- length(which(BLrst[] == 1))
 						
+						#Multiply binned surface by area and calculate the area
+						area <- areaK * BLrst
+						areaCurrKm2 <- sum(area[which(!is.na(area[]))])
+						rm(area)
+						
 						#Cycle through migration scenarios
 						for (mig in migrList) {
 							
@@ -114,6 +121,11 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 							#Count number of cells (future)
 							areaFut <- length(which(rst[] == 1))
 							
+							#Multiply binned surface by area and calculate the area
+							area <- areaK * rst
+							areaFutKm2 <- sum(area[which(!is.na(area[]))])
+							rm(area)
+							
 							#Increase in area npix(curr == 0 & futu == 1)
 							areaInc <- length(which(BLrst[] == 0 & rst[] == 1))
 							
@@ -122,7 +134,7 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 							
 							rm(rst)
 							
-							resRow <- data.frame(SPID=spp, SRES=sres, PERIOD=tsl, THRESH=threshold, MIGSCEN=mig, MPBaseline=maxProbCurr, MPCell=maxProbCell, MPCellX=maxProbCellX, MPCellY=maxProbCellY, MPFuture=maxProbFutu, MPFutureCorresp=maxProbCorr, AreaBaseline=areaCurr, AreaFuture=areaFut, AreaIncrease=areaInc, AreaDecrease=areaDec)
+							resRow <- data.frame(SPID=spp, SRES=sres, PERIOD=tsl, THRESH=threshold, MIGSCEN=mig, MPBaseline=maxProbCurr, MPCell=maxProbCell, MPCellX=maxProbCellX, MPCellY=maxProbCellY, MPFuture=maxProbFutu, MPFutureCorresp=maxProbCorr, AreaBaseline=areaCurr, AreaFuture=areaFut, AreaIncrease=areaInc, AreaDecrease=areaDec, RAreaCurr=areaCurrKm2, RAreaFut=areaFutKm2)
 							if (scc == 1) {
 								res <- resRow
 							} else {

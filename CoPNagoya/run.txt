@@ -108,6 +108,22 @@ idir <- "L:/COP_CONDESAN"
 
 
 ############################################
+############ Cut to new domain #############
+############################################
+
+############# LINUX ########################
+source("cutNewDomain.R")
+bdir <- "/mnt/GeoData/COP_CONDESAN"
+setOptions(overwrite=T)
+
+############# NT ########################
+source("cutNewDomain.R")
+bdir <- "L:/COP_CONDESAN"
+setOptions(overwrite=T)
+
+
+
+############################################
 ############## Impact Metrics ##############
 ############################################
 
