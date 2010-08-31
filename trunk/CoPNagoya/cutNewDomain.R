@@ -86,7 +86,7 @@ createVerFile <- function(wrd="Nothing", vfile) {
 }
 
 #Cut a single species
-cutDomainSpp <- function(ID, bdir, OSys="linux") {
+cutDomainSpp <- function(ID, bdir, ldir, OSys="linux") {
 	
 	mxdir <- paste(bdir, "/mxe_outputs", sep="")
 	spDir <- paste(mxdir, "/sp-", ID, sep="")
@@ -118,7 +118,7 @@ cutDomainSpp <- function(ID, bdir, OSys="linux") {
 				dir.create(paste(spTmpDir, "/_newDomain", sep=""))
 			}
 			
-			msk <- raster(paste(bdir, "/maskData/AAIGrids/andes_finalDomain_25m.asc", sep=""))
+			msk <- raster(paste(ldir, "/maskData/AAIGrids/andes_finalDomain_25m.asc", sep=""))
 			
 			sresList <- c("SRES_A1B", "SRES_A2")
 			periodList <- c("2010_2039", "2040_2069")
@@ -173,7 +173,7 @@ cutDomainSpp <- function(ID, bdir, OSys="linux") {
 }
 
 #This is the entire process function
-cutDomain <- function(bdir, ini, fin, OSys="LINUX") {
+cutDomain <- function(bdir, ldir, ini, fin, OSys="LINUX") {
 	
 	ufile <- paste(bdir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")
 	ufile <- read.csv(ufile)
@@ -189,7 +189,7 @@ cutDomain <- function(bdir, ini, fin, OSys="LINUX") {
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- cutDomainSpp(sp, bdir, OSys=tolower(OSys))
+		out <- cutDomainSpp(sp, bdir, ldir, OSys=tolower(OSys))
 		sppC <- sppC + 1
 	}
 	
