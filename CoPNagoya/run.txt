@@ -120,7 +120,7 @@ setOptions(overwrite=T)
 ############# NT ########################
 source("cutNewDomain.R")
 bdir <- "L:/COP_CONDESAN"
-ldir <- "E:/CoP_Nagoya"
+ldir <- "F:/CoP_Nagoya"
 setOptions(overwrite=T)
 
 
