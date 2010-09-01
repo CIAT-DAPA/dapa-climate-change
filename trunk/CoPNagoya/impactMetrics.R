@@ -25,7 +25,7 @@ source("zipRead.R")
 		#For overall change you just need the number of pixels in current, and those in the future
 #4. Suitable area under all scenarios (use the calculated area *_area asciis in ./masks/AAIGrids)
 
-impactMetrics <- function(spp, idir, overwrite=T) {
+impactMetrics <- function(spp, idir, areaK, overwrite=T) {
 	mxoDir <- paste(idir, "/mxe_outputs", sep="")
 	fdName <- paste("sp-", spp, sep="")
 	spFolder <- paste(mxoDir, "/", fdName, sep="")
@@ -45,8 +45,6 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 			migrList <- c("FullAdap", "NullAdap")
 			
 			rsFolder <- paste(spFolder, "/projections/_newDomain", sep="")
-			
-			areaK <- raster(paste(idir, "/maskData/AAIGrids/and0_25m_area.asc", sep=""))
 			
 			scc <- 1
 			#Cycle through SRES
@@ -162,7 +160,8 @@ impactMetrics <- function(spp, idir, overwrite=T) {
 
 
 ############################################################################
-#idir <- "C:/CIAT_work/COP_CONDESAN"
+#idir <- "L:/COP_CONDESAN"
+#ldir <- "F:/COP_CONDESAN"
 #ini <- 600
 #fin <- 610
 
@@ -181,13 +180,15 @@ impactProcess <- function(idir, ini, fin) {
 		fin <- nspp
 	}
 	
+	areaK <- raster(paste(idir, "/maskData/AAIGrids/and0_25m_area.asc", sep=""))
+	
 	spList <- ufile$IDSpecies[ini:fin]
 	sppC <- 1
 	
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- impactMetrics(sp, idir, overwrite=T)
+		out <- impactMetrics(sp, idir, areaK, overwrite=T)
 		sppC <- sppC + 1
 	}
 	return("Done!")
