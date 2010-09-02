@@ -86,7 +86,7 @@ createVerFile <- function(wrd="Nothing", vfile) {
 }
 
 #Cut a single species
-cutDomainSpp <- function(ID, bdir, ldir, OSys="linux") {
+cutDomainSpp <- function(ID, bdir, ldir, OSys="linux", ow=F) {
 	
 	mxdir <- paste(bdir, "/mxe_outputs", sep="")
 	spDir <- paste(mxdir, "/sp-", ID, sep="")
@@ -94,6 +94,10 @@ cutDomainSpp <- function(ID, bdir, ldir, OSys="linux") {
 	corrDir <- paste(spDir, "/projections/_newDomain", sep="")
 	
 	vf <- paste(spDir, "/ct-", ID, ".run", sep="")
+	
+	if (ow) {
+		file.remove(vf)
+	}
 	
 	if (file.exists(spDir)) {
 		if (!file.exists(vf)) {
@@ -173,7 +177,7 @@ cutDomainSpp <- function(ID, bdir, ldir, OSys="linux") {
 }
 
 #This is the entire process function
-cutDomain <- function(bdir, ldir, ini, fin, OSys="LINUX") {
+cutDomain <- function(bdir, ldir, ini, fin, OSys="LINUX", overwrite=F) {
 	
 	ufile <- paste(bdir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")
 	ufile <- read.csv(ufile)
@@ -189,7 +193,7 @@ cutDomain <- function(bdir, ldir, ini, fin, OSys="LINUX") {
 	for (sp in spList) {
 		cat("\n")
 		cat("...Species", sp, paste("...",round(sppC/length(spList)*100,2),"%",sep=""), "\n")
-		out <- cutDomainSpp(sp, bdir, ldir, OSys=tolower(OSys))
+		out <- cutDomainSpp(sp, bdir, ldir, OSys=tolower(OSys), ow=overwrite)
 		sppC <- sppC + 1
 	}
 	
