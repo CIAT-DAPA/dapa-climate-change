@@ -43,13 +43,13 @@ for year in range(inityear, finalyear + 1, 1):
                 InRaster = gp.workspace + '\\' + raster
                 OutRaster = dirtemp + "\\" + raster + ".asc"
                 gp.RasterToASCII_conversion(InRaster, OutRaster)
-                gp.delete_management(InRaster)
-                InZip = dirtemp + "\\" + raster + ".zip"
-                os.system('7za a' + InZip + " " + OutRaster)
-                OutZip = gp.workspace + '\\' + raster + ".zip"
-                shutil.copyfile(InZip, OutZip)
-                gp.delete_management(OutRaster)
-                gp.delete_management(InZip)
+##                gp.delete_management(InRaster)
+##                InZip = dirtemp + "\\" + raster + ".zip"
+##                os.system('7za a' + InZip + " " + OutRaster)
+##                OutZip = gp.workspace + '\\' + raster + ".zip"
+##                shutil.copyfile(InZip, OutZip)
+##                gp.delete_management(OutRaster)
+##                gp.delete_management(InZip)
                 
         else:
             gp.workspace = dirbase + "\\OUT_" + str(year) + str(month) + "010000"
@@ -61,12 +61,12 @@ for year in range(inityear, finalyear + 1, 1):
                 InRaster = gp.workspace + '\\' + raster
                 OutRaster = dirtemp + "\\" + raster + ".asc"
                 gp.RasterToASCII_conversion(InRaster, OutRaster)
-                gp.delete_management(InRaster)
-                InZip = dirtemp + "\\" + raster + ".zip"
-                os.system('7za a' + InZip + " " + OutRaster)
-                OutZip = gp.workspace + '\\' + raster + ".zip"
-                shutil.copyfile(InZip, OutZip)
-                gp.delete_management(OutRaster)
-                gp.delete_management(InZip)
+##                gp.delete_management(InRaster)
+##                InZip = dirtemp + "\\" + raster + ".zip"
+##                os.system('7za a' + InZip + " " + OutRaster)
+##                OutZip = gp.workspace + '\\' + raster + ".zip"
+##                shutil.copyfile(InZip, OutZip)
+##                gp.delete_management(OutRaster)
+##                gp.delete_management(InZip)
 
 print "Done!!!!"
