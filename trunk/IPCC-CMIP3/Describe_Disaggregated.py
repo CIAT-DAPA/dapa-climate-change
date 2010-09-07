@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_Disaggregated.py P:\climate_change\IPCC_CMIP3\ A1B D:\MRI_grids"
+	print "   - ie: python Describe_Disaggregated.py P:\climate_change\IPCC_CMIP3\ A1B G:\Workspace"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -25,7 +25,7 @@ print " DESCRIBE DISAGGREGATED "
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
-modellist = os.listdir(dirbase + "SRES_" + scenario + "\interpolations")
+modellist = os.listdir(dirbase + "SRES_" + scenario + "\disaggregated")
 
 if os.path.isfile(dirout + "\\Disaggregated_SRES_" + scenario + ".txt"):
     outFile = open(dirout + "\\Disaggregated_SRES_" + scenario + ".txt", "a")
@@ -36,8 +36,8 @@ outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\
 
 for model in modellist:
     for period in periodlist:
-        gp.workspace = dirbase + "SRES_" + scenario + "\interpolations" + "\\" + model + "\\" + period
-        print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\interpolations" + "\\" + model + "\\" + period
+        gp.workspace = dirbase + "SRES_" + scenario + "\disaggregated" + "\\" + model + "\\" + period
+        print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\disaggregated" + "\\" + model + "\\" + period
 
         rasters = gp.ListRasters("", "GRID")
         for raster in rasters:
