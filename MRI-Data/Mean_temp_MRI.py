@@ -32,9 +32,9 @@ gp.OverWriteOutput = 1
 os.system('cls')
 
 print "\n"
-print "~~~~~~~~~~~~~~~"
-print "   SUM GRIDS   "
-print "~~~~~~~~~~~~~~~"
+print "~~~~~~~~~~~~~~~~"
+print "   MEAN GRIDS   "
+print "~~~~~~~~~~~~~~~~"
 print "\n"
 
 for year in range(inityear, finalyear + 1, 1):
@@ -43,7 +43,7 @@ for year in range(inityear, finalyear + 1, 1):
 
 		if month < 10 and gp.Exists(dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + "0" + str(month) + "010000"):
 			gp.workspace = dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + "0" + str(month) + "010000"
-			print "--->...processing : " dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + "0" + str(month)
+			print "--->...processing : " + dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + "0" + str(month)
 
 			# Get a list of grids in the workspace of each folder
 			print "\t ..listing grids"
@@ -62,7 +62,7 @@ for year in range(inityear, finalyear + 1, 1):
 
 		if month > 9 and gp.Exists(dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month) + "010000"):
 			gp.workspace = dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month) + "010000"
-			print "--->... processing:" dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month)
+			print "--->... processing:" + dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month)
 
 			# Get a list of grids in the workspace of each folder
 			print "\t ..listing grids"
