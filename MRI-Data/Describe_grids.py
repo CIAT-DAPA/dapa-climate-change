@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_grids.py D:\MRI_grids\prec\SP0A 1979 2003 prec D:\MRI_grids\_describes"
+	print "   - ie: python Describe_grids.py E:\MRI_grids\tmean1\SP0A 1979 2003 tmean E:\MRI_grids\_describes"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -19,6 +19,8 @@ inityear = int(sys.argv[2])
 finalyear = int(sys.argv[3])
 variable = sys.argv[4]
 dirout = sys.argv[5]
+if not os.path.exists(dirout):
+	os.system('mkdir ' + dirout)
 
 os.system('cls')
 
