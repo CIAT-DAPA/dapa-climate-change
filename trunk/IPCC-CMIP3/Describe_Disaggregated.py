@@ -25,7 +25,7 @@ print " DESCRIBE DISAGGREGATED "
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
-modellist = os.listdir(dirbase + "SRES_" + scenario + "\disaggregated")
+modellist = os.listdir(dirbase + "SRES_" + scenario + "\\disaggregated")
 
 if os.path.isfile(dirout + "\\Disaggregated_SRES_" + scenario + ".txt"):
     outFile = open(dirout + "\\Disaggregated_SRES_" + scenario + ".txt", "a")
@@ -36,8 +36,8 @@ outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\
 
 for model in modellist:
     for period in periodlist:
-        gp.workspace = dirbase + "SRES_" + scenario + "\disaggregated" + "\\" + model + "\\" + period
-        print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\disaggregated" + "\\" + model + "\\" + period
+        gp.workspace = dirbase + "SRES_" + scenario + "\\disaggregated" + "\\" + model + "\\" + period
+        print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\disaggregated" + "\\" + model + "\\" + period
 
         rasters = gp.ListRasters("", "GRID")
         for raster in rasters:
