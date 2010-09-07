@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_Interpolated.py P:\climate_change\IPCC_CMIP3\ A1B D:\MRI_grids"
+	print "   - ie: python Describe_Interpolated.py P:\climate_change\IPCC_CMIP3\ A2 D:\MRI_grids"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
