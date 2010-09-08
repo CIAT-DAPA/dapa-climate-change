@@ -95,7 +95,7 @@ cutDomainSpp <- function(ID, bdir, ldir, OSys="linux", ow=F) {
 	
 	vf <- paste(spDir, "/ct-", ID, ".run", sep="")
 	
-	if (ow) {
+	if (ow & file.exists(vf)) {
 		file.remove(vf)
 	}
 	
