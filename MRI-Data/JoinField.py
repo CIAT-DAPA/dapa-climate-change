@@ -12,7 +12,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python Join_Field.py <dirbase> <inityear> <finalyear> <outdir>"
-	print "   - ie: python JoinField1.py C:\MRI_Analysis\Extracted\tmean_monthly 1979 1979 tmean"
+	print "   - ie: python JoinField.py E:\MRI_Analysis\Extracted\tmean_monthly 1979 2003 tmean"
 	sys.exit(1)
 
 dirbase =sys.argv[1]
