@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Mean_temp_MRI.py D:\MRI_grids 1979 2003 tmean SP0A"
+	print "   - ie: python Mean_temp_MRI.py E:\MRI_grids 1979 2003 tmax SP0A"
 	sys.exit(1)
 
 # Arguments
