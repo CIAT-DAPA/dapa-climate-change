@@ -48,6 +48,9 @@ valueByPolygon <- function(rs, datafile) {
 	pol <- unlist(shp@polygons)
 	npol <- length(pol)
 	
+	cat("\n")
+	cat("Found", npol, "polygons \n")
+	
 	polcounter <- 1
 	for (np in 1:npol) {
 		
@@ -55,6 +58,9 @@ valueByPolygon <- function(rs, datafile) {
 		nPol <- length(Pol@Polygons)
 		
 		for (nP in 1:nPol) {
+			
+			cat("\n")
+			cat("Subpol", nP, "from Pol", np, "\n")
 			
 			p <- Pol@Polygons[nP]
 			coords <- p[[1]]@coords
@@ -66,23 +72,31 @@ valueByPolygon <- function(rs, datafile) {
 			ymn <- min(coords[,2]) - (abs(max(coords[,2]) - min(coords[,2])) * 0.05)
 			
 			#ncols is fixed to 50
-			nc <- 50
-			res <- abs(xmx - xmn) / nc
-			nr <- round(abs(ymx - ymn) / res, 0)
+			cat("  .Create dummy grid \n")
+			nc <- 25
+			resol <- abs(xmx - xmn) / nc
+			nr <- round(abs(ymx - ymn) / resol, 0)
 			
 			msk <- raster(xmn=xmn, xmx=xmx, ymn=ymn, ymx=ymx, ncol=nc, nrow=nr)
 			msk[] <- 1
 			
-			plot(msk)
-			lines(coords[,1], coords[,2])
+			#plot(msk)
+			#lines(coords[,1], coords[,2])
+			
+			cat("  .Create grid from polygon \n")
 			
 			grd <- SpatialPolygons(list(Polygons(list(Polygon(coords)), 1)))
-			grd <- polygonsToRaster(grd, msk)
+			grd <- polygonsToRaster(grd, msk, silent=T)
 			
-			plot(grd, col='red', add=T)
+			cat("  .Extract the values \n")
 			
 			coords <- xyFromCell(msk, which(!is.na(grd[])))
 			values <- xyValues(rs, coords)
+			values <- values[which(!is.na(values))]
+			
+			#points(coords, pch=20, cex=0.3)
+			
+			cat("  .Finalising \n")
 			
 			res <- c(mean(values), max(values), min(values), sd(values))
 			
@@ -96,6 +110,8 @@ valueByPolygon <- function(rs, datafile) {
 		}
 	}
 	
+	cat("\n")
+	cat("Appending to shapefile database \n")
 	shpdata <- cbind(shpdata, resdata)
 	
 	return(shpdata)
