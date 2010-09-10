@@ -133,11 +133,13 @@ setOptions(overwrite=T)
 source("impactMetrics.R")
 idir <- "/mnt/GeoData/COP_CONDESAN"
 setOptions(overwrite=T)
+options(warn=2)
+
 
 ############# NT ########################
 source("impactMetrics.R")
 idir <- "L:/COP_CONDESAN"
 setOptions(overwrite=T)
-
+options(warn=2)
 
 
