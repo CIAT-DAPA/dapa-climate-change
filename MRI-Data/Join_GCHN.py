@@ -9,7 +9,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Join_GCHN.py D:\MRI_Analysis\Joined\prec_monthly 1979 1980 D:\MRI_Analysis\GHCN_Tables"
+	print "   - ie: python Join_GCHN.py D:\MRI_Analysis\Joined\prec_monthly_latin 1979 1980 D:\MRI_Analysis\GHCN_Tables\prec"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
