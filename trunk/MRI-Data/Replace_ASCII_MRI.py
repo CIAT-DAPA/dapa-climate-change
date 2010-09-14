@@ -31,9 +31,9 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 for year in range(inityear, finalyear + 1, 1):
     for month in range (1, 12 + 1, 1):
-        if month < 10:
+        if month < 10 and gp.Exists(dirout + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"):
             gp.workspace = dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"
-            print "\n---> Processing: " dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"
+            print "\n---> Processing: " + dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"
             
             rasters = gp.ListRasters(variable + "_0*", "GRID")
             for raster in rasters:
@@ -44,14 +44,15 @@ for year in range(inityear, finalyear + 1, 1):
                 InZip = gp.workspace + "\\" + raster + ".asc.gz"
                 os.system('7za a ' + InZip + " " + OutRaster)
                 OutZip = dirout + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000" + "\\" + raster + ".asc.gz"
-                os.remove(OutZip)
+                if os.path.isfile(OutZip):
+					os.remove(OutZip)
                 shutil.copyfile(InZip, OutZip)
                 gp.delete_management(OutRaster)
                 os.remove(InZip)
                 
-        else:
+        if month > 9 and gp.Exists(dirout + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000"):
             gp.workspace = dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000"
-            print "\n---> Processing: " dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000"
+            print "\n---> Processing: " + dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000"
             
             rasters = gp.ListRasters(variable + "_0*", "GRID")
             for raster in rasters:
@@ -60,9 +61,10 @@ for year in range(inityear, finalyear + 1, 1):
                 OutRaster = gp.workspace + "\\" + raster + ".asc"
                 gp.RasterToASCII_conversion(InRaster, OutRaster)
                 InZip = gp.workspace + "\\" + raster + ".asc.gz"
-                os.system('7za a' + InZip + " " + OutRaster)
+                os.system('7za a ' + InZip + " " + OutRaster)
                 OutZip = dirout + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000" + "\\" + raster + ".asc.gz"
-                os.remove(OutZip)
+                if os.path.isfile(OutZip):
+					os.remove(OutZip)
                 shutil.copyfile(InZip, OutZip)
                 gp.delete_management(OutRaster)
                 os.remove(InZip)
