@@ -71,8 +71,8 @@ setOptions(overwrite=T)
 idir <- "\\172.22.33.79\COP_CONDESAN"
 
 outp <- richnessProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="LINUX")
-outp <- turnoverProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="NT")
+outp <- turnoverProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="LINUX")
 
 outp <- richnessProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
-outp <- turnoverProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="NT")
+outp <- turnoverProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
 }}}
