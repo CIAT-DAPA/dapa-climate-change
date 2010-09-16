@@ -30,7 +30,9 @@ These folders contain all the information used in the modeling, and also contain
 
 The process started with the creation of the individual species occurrences files. You need to define a variable that points to the folder where everything is stored:
 
+{{{
 `base.folder <- "\\172.22.33.79\COP_CONDESAN"`
+}}}
 
 Now you need to set up additional folders for running the first script (`createOccurrenceFiles.R`):
 
@@ -41,4 +43,8 @@ clDir <- paste(idir, "/climateData/andesADM0/baseline/20C3M/WorldClim-30s-biocli
 outDir <- paste(idir, "/occurrences/splitted-occurrence-files", sep="")
 }}}
 
-Now simply source the script and run it
+Now simply source the script and run it appropriately:
+
+{{{
+output <- createOccFiles(occ, spL, clDir, outDir, Initial-species, Final-species)
+}}}
