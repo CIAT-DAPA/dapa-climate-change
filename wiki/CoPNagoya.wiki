@@ -34,11 +34,11 @@ The process started with the creation of the individual species occurrences file
 
 Now you need to set up additional folders for running the first script (`createOccurrenceFiles.R`):
 
-`occ <- paste(idir, "/occurrences/modeling-data/andean-species-data-sampleArea.csv", sep="")``*`
-`spL <- paste(idir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")`
-
-`clDir <- paste(idir, "/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000", sep="")`
-
-`outDir <- paste(idir, "/occurrences/splitted-occurrence-files", sep="")`
+{{{
+occ <- paste(idir, "/occurrences/modeling-data/andean-species-data-sampleArea.csv", sep="")
+spL <- paste(idir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")
+clDir <- paste(idir, "/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000", sep="")
+outDir <- paste(idir, "/occurrences/splitted-occurrence-files", sep="")
+}}}
 
 Now simply source the script and run it
