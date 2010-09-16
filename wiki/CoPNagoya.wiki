@@ -14,4 +14,4 @@ All the modeling inputs and outputs are stored into the network path \\172.22.33
   * *background-files:* Contains background files used in the modeling. Naming is done using the structure bg-_speciesID_.csv
   * *backgrounds:* Contains 10,000 background samples for each of the Andean countries. These domains were used for pseudo-absences selection, based on the occurrence rule (if a species has an occurrence within a country then 10,000 pseudo absences from that country are used).
   * *climateData:* Contains all current and future climate data used in the modeling. *andes* contains everything used for projection of maxent models, *andesADM0* contains 30s data used for maxent model training, and *global* contains global data used for uncertainties mapping and original GCM data.
-  * *correlations:* Contains the result of the correlation analysis done with the script _IoBio-correl.R_
+  * *correlations:* Contains the result of the correlation analysis done with the script _`IoBio-correl.R`_
