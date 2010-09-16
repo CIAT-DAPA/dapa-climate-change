@@ -31,3 +31,13 @@ These folders contain all the information used in the modeling, and also contain
 The process started with the creation of the individual species occurrences files. You need to define a variable that points to the folder where everything is stored:
 
 `base.folder <- "\\172.22.33.79\COP_CONDESAN"`
+
+Now you need to set up additional folders for running the first script (`createOccurrenceFiles.R`):
+
+`occ <- paste(idir, "/occurrences/modeling-data/andean-species-data-sampleArea.csv", sep="")`
+
+`spL <- paste(idir, "/occurrences/modeling-data/speciesListToModel.csv", sep="")`
+
+`clDir <- paste(idir, "/climateData/andesADM0/baseline/20C3M/WorldClim-30s-bioclim/1950_2000", sep="")`
+
+outDir <- paste(idir, "/occurrences/splitted-occurrence-files", sep="")`
