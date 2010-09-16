@@ -76,3 +76,9 @@ outp <- turnoverProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="L
 outp <- richnessProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
 outp <- turnoverProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
 }}}
+
+Now you need to perform the entire calculation (richness and turnover) for the whole set of genera under study. To do this you'll need to perform the following commands:
+
+{{{
+source("totalTurnover.R")
+}}}
