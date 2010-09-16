@@ -4,10 +4,10 @@
 
 This work was performed in view of the 10th Conference of Parties, to be held in Nagoya (Japan). Most of the scripting was done for the R statistical package (R version 2.11.1), and an additional part was done under ArcInfo Workstation (ESRI).
 
-The purpose of the work was to assess the impact of climate change on Andean plant and bird diversity, using current and future spatially explicit climatic datasets, a database of occurrences, and a niche modeling technique named Maxent. We gathered data from GBIF, CONDESAN and the CDC-UNALM (Peru), filtered such data and performed a thorough modeling 
+The purpose of the work was to assess the impact of climate change on Andean plant and bird diversity, using current and future spatially explicit climatic datasets, a database of occurrences, and a niche modeling technique named Maxent. We gathered data from GBIF, CONDESAN and the CDC-UNALM (Peru), filtered such data and performed a thorough modeling for a numerous set of species and then assessed the vulnerability of such species under different future climatic scenarios.
 
 
-= Details =
+= Modeling process =
 
 Add your content here.  Format your content with:
   * Text in *bold* or _italic_
