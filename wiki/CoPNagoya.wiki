@@ -24,3 +24,10 @@ All the modeling inputs and outputs are stored into the network path \\172.22.33
   * *raw-occurrence-data:* Original databases (GBIF, CONDESAN, CDC-UNALM)
 
 These folders contain all the information used in the modeling, and also contain the whole set of outputs analyzed in the publication.
+
+
+== Processing ==
+
+The process started with the creation of the individual species occurrences files. You need to define a variable that points to the folder where everything is stored:
+
+`base.folder <- "\\172.22.33.79\COP_CONDESAN"`
