@@ -61,4 +61,18 @@ ddir <- "\\172.22.33.79\COP_CONDESAN"
 outp <- NagoyaProcess(idir, ddir, Initial-Species, Final-Species, OSys="LINUX")
 }}}
 
-`idir` and `ddir` can be the same or different. `idir` can be local, but `ddir` should be always the network path.
+`idir` and `ddir` can be the same or different. For efficiency in the model runs, `idir` should be local, but `ddir` should be always the network path. If `idir` is to be local, input data should be placed there. Now you'll need to calculate turnover and richness at the genus level:
+
+{{{
+source("speciesRichness.R")
+source("turnover.R")
+setOptions(overwrite=T)
+
+idir <- "\\172.22.33.79\COP_CONDESAN"
+
+outp <- richnessProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="LINUX")
+outp <- turnoverProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="NT")
+
+outp <- richnessProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
+outp <- turnoverProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="NT")
+}}}
