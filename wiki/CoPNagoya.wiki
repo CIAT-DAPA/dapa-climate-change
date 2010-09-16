@@ -7,9 +7,8 @@ This work was performed in view of the 10th Conference of Parties, to be held in
 The purpose of the work was to assess the impact of climate change on Andean plant and bird diversity, using current and future spatially explicit climatic datasets, a database of occurrences, and a niche modeling technique named Maxent. We gathered data from GBIF, CONDESAN and the CDC-UNALM (Peru), filtered such data and performed a thorough modeling for a numerous set of species and then assessed the vulnerability of such species under different future climatic scenarios.
 
 
-= Modeling process =
+= Data structure =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+All the modeling inputs and outputs are stored into the network path \\172.22.33.79\COP_CONDESAN. Data contained in folders within this directory is as follows:
+
+  * *background-files:* 
