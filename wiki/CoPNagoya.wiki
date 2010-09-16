@@ -49,4 +49,16 @@ Now simply source the script and run it appropriately:
 output <- createOccFiles(occ, spL, clDir, outDir, Initial-species, Final-species)
 }}}
 
-Where initial species are numbers between 1 and the maximum number of taxa (11,012).
+Where initial species are numbers between 1 and the maximum number of taxa (11,012). Now you need to perform the initial modeling. To do so, type the following into the R console:
+
+{{{
+
+source("modelingApproach.R")
+setOptions(overwrite=T)
+
+idir <- "\\172.22.33.79\COP_CONDESAN"
+ddir <- "\\172.22.33.79\COP_CONDESAN"
+outp <- NagoyaProcess(idir, ddir, Initial-Species, Final-Species, OSys="LINUX")
+}}}
+
+`idir` and `ddir` can be the same or different. `idir` can be local, but `ddir` should be always the network path.
