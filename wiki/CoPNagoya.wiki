@@ -18,4 +18,4 @@ All the modeling inputs and outputs are stored into the network path \\172.22.33
   * *documents:* Contains relevant documents that have been shared
   * *maskData:* Contains shapefiles, ESRI grids and ASCII grids used for masking climate data and projections of maxent models
   * *maxent332:* Contains the maxent Java application
-  * *"mxe_outputs":* Contains all species models and projections. Each species is stored under a folder with its respective ID. Folders are named as `sp-speciesID`
+  * *mxe_outputs:* Contains all species models and projections. Each species is stored under a folder with its respective ID. Folders are named as `sp-speciesID`
