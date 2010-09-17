@@ -29,6 +29,7 @@ These folders contain all the information used in the modeling, and also contain
 
 == Processing ==
 
+===Occurrence files preparation===
 The process started with the creation of the individual species occurrences files. You need to define a variable that points to the folder where everything is stored:
 
 {{{
@@ -50,9 +51,13 @@ Now simply source the script and run it appropriately:
 output <- createOccFiles(occ, spL, clDir, outDir, Initial-species, Final-species)
 }}}
 
-Where initial species are numbers between 1 and the maximum number of taxa (11,012). Now you need to perform the initial modeling. To do so, type the following into the R console:
+Where initial species are numbers between 1 and the maximum number of taxa (11,012). 
 
 {{{
+
+===Modeling individual species===
+
+Now you need to perform the initial modeling. To do so, type the following into the R console:
 
 source("modelingApproach.R")
 setOptions(overwrite=T)
@@ -62,7 +67,12 @@ ddir <- "\\172.22.33.79/COP_CONDESAN"
 outp <- NagoyaProcess(idir, ddir, Initial-Species, Final-Species, OSys="LINUX")
 }}}
 
-`idir` and `ddir` can be the same or different. For efficiency in the model runs, `idir` should be local, but `ddir` should be always the network path. If `idir` is to be local, input data should be placed there. Now you'll need to calculate turnover and richness at the genus level:
+`idir` and `ddir` can be the same or different. For efficiency in the model runs, `idir` should be local, but `ddir` should be always the network path. If `idir` is to be local, input data should be placed there.
+
+
+===Calculating genus-level species richness and turnover===
+
+Now you'll need to calculate turnover and richness at the genus level:
 
 {{{
 source("speciesRichness.R")
@@ -77,6 +87,9 @@ outp <- turnoverProcess(idir, type='plants', Initial-Genus, Final-Genus, OSys="L
 outp <- richnessProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
 outp <- turnoverProcess(idir, type='aves', Initial-Genus, Final-Genus, OSys="LINUX")
 }}}
+
+
+===Calculate total species richness and turnover===
 
 Now you need to perform the entire calculation (richness and turnover) for the whole set of genera under study. To do this you'll need to perform the following commands:
 
@@ -95,6 +108,9 @@ outp <- richnessChange(idir)
 outp <- turnoverCalc(idir, OSys='LINUX')
 }}}
 
+
+===Calculate impact metrics for individual species===
+
 Now you can calculate the individual species impact metrics. These can be calculated using the following commands:
 
 {{{
@@ -105,6 +121,9 @@ options(warn=2)
 
 outp <- impactProcess(idir, Initial-Species, Final-Species)
 }}}
+
+
+===Summarize data===
 
 Now you can summarize the whole set of impact, accuracy and thresholding metrics. You just need to source the appropriate scripts as follows:
 
@@ -123,6 +142,8 @@ outp <- summarizeMetrics(idir, ini, fin)
 
 This will produce a big comma-separated-values for each of the type of metrics. Each with a different name.
 
+===New!: Cut to a new domain===
+
 Since the initial modeling was performed using a wrong mask (Andean mask), a script named `cutNewDomain.R` was created to do so. This script was already run for the whole set of species, but some errors seem to have occurred. These errors have not been detected (i.e. the species that have such errors). This script should be run as follows (in the case of further corrections to certain taxa).
 
 {{{
@@ -138,4 +159,8 @@ outp <- cutDomain(bdir, ldir, 1, 612, OSys='linux', overwrite=T)
 
 Despite `ldir` can be exactly the same as `bdir`, it is suggested that you use a different folder. Use a local with the same file structure as the remote one, with the appropriate masks placed within it.
 
+===Re-run impact metrics===
+
 After this you can just run again the impact metrics function and you'll be able to get updated results. If this script fails, it means you need to reprocess something. Check what species it failed and re-do the process it failed on.
+
+The files `runs.xls` and `run.txt` contain a brief of the processes that have been performed.
