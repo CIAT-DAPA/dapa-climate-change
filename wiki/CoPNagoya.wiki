@@ -9,7 +9,7 @@ The purpose of the work was to assess the impact of climate change on Andean pla
 
 == Data structure ==
 
-All the modeling inputs and outputs are stored into the network path \\172.22.33.79\COP_CONDESAN. Data contained in folders within this directory is as follows:
+All the modeling inputs and outputs are stored into the network path \\172.22.33.79/COP_CONDESAN. Data contained in folders within this directory is as follows:
 
   * *background-files:* Contains background files used in the modeling. Naming is done using the structure `bg-speciesID.csv`
   * *backgrounds:* Contains 10,000 background samples for each of the Andean countries. These domains were used for pseudo-absences selection, based on the occurrence rule (if a species has an occurrence within a country then 10,000 pseudo absences from that country are used).
@@ -32,7 +32,7 @@ These folders contain all the information used in the modeling, and also contain
 The process started with the creation of the individual species occurrences files. You need to define a variable that points to the folder where everything is stored:
 
 {{{
-base.folder <- "\\172.22.33.79\COP_CONDESAN"
+base.folder <- "\\172.22.33.79/COP_CONDESAN"
 }}}
 
 Now you need to set up additional folders for running the first script (`createOccurrenceFiles.R`):
@@ -57,8 +57,8 @@ Where initial species are numbers between 1 and the maximum number of taxa (11,0
 source("modelingApproach.R")
 setOptions(overwrite=T)
 
-idir <- "\\172.22.33.79\COP_CONDESAN"
-ddir <- "\\172.22.33.79\COP_CONDESAN"
+idir <- "\\172.22.33.79/COP_CONDESAN"
+ddir <- "\\172.22.33.79/COP_CONDESAN"
 outp <- NagoyaProcess(idir, ddir, Initial-Species, Final-Species, OSys="LINUX")
 }}}
 
@@ -83,7 +83,7 @@ Now you need to perform the entire calculation (richness and turnover) for the w
 {{{
 source("totalTurnover.R")
 source("totalSpeciesRichness.R")
-idir <- "\\172.22.33.79\COP_CONDESAN"
+idir <- "\\172.22.33.79/COP_CONDESAN"
 
 outp <- speciesRichness(idir, type='plants' , OSys='LINUX')
 outp <- speciesTurnover(idir, type='plants' , OSys='LINUX')
@@ -99,7 +99,7 @@ Now you can calculate the individual species impact metrics. These can be calcul
 
 {{{
 source("impactMetrics.R")
-idir <- "\\172.22.33.79\COP_CONDESAN"
+idir <- "\\172.22.33.79/COP_CONDESAN"
 setOptions(overwrite=T)
 options(warn=2)
 
@@ -112,7 +112,7 @@ Now you can summarize the whole set of impact, accuracy and thresholding metrics
 source("summarizeThresholds.R")
 source("summarizeImpactMetrics.R")
 
-idir <- "\\172.22.33.79\COP_CONDESAN"
+idir <- "\\172.22.33.79/COP_CONDESAN"
 
 outp <- summarizeThresholds(idir, ini, fin)
 outp <- summarizeMetrics(idir, ini, fin)
@@ -121,4 +121,17 @@ source("summarizeMetrics.R")
 outp <- summarizeMetrics(idir, ini, fin)
 }}}
 
-This will produce
+This will produce a big comma-separated-values for each of the type of metrics. Each with a different name.
+
+Since the initial modeling was performed using a wrong mask (Andean mask), a script named `cutNewDomain.R` was created to do so. This script was already run for the whole set of species, but some errors seem to have occurred. These errors have not been detected (i.e. the species that have such errors). This script should be run as follows (in the case of further corrections to certain taxa).
+
+{{{
+source("cutNewDomain.R")
+bdir <- "\\172.22.33.79/COP_CONDESAN"
+ldir <- bdir
+
+setOptions(overwrite=T)
+options(warn=2)
+
+outp <- cutDomain(bdir, ldir, 1, 612, OSys='linux', overwrite=T)
+}}}
