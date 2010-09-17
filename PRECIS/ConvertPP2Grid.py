@@ -12,7 +12,7 @@ if len(sys.argv) < 8:
 	print "\n Too few args"
 	print "   - Sintaxis: "
 	print "   - ie: python ConvertPP2Grid.py //mnt//GeoData-717//PrecisData//archive genam 00001 pa //mnt//GeoData-719//PrecisData//PRECIS_Grids// "
-	print "   - ie: python ConvertPP2Grid.py W:\PrecisData\archive genam 00001 pa W:\RCM_Data\ HadCM3Q0 SRES_A2"
+	print "   - ie: python ConvertPP2Grid.py D:\PrecisData\archive genam 00001 pa D:\RCM_Data\ HadCM3Q3 SRES_A1B"
 	sys.exit(1)
 
 # Notes:
@@ -40,9 +40,9 @@ scenario = sys.argv[7]
 os.system('cls')
 
 print "\n"
-print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-print "                     PP PRECIS TO GRID                      "
-print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+print "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+print "                          PP PRECIS TO GRID                        "
+print "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
 # Dictionary with single letter date stamp equivalences
@@ -56,7 +56,6 @@ monDc = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
 # Get a list of pp files into base dir
 ppList = glob.glob(dirbase + "\\" + runid + "\\" + str(variable) + "\\" + runid + "a." + type + "*" + variable + "*.pp")
 for pp in ppList:
-    print pp
 
     # Extact year of the file name
     decade = os.path.basename(pp)[9:10]
@@ -65,76 +64,76 @@ for pp in ppList:
     date = int(decDc [decade]) + int(year)
 
     #Creating outputs folders to nc files by years
-    diroutNC = dirout + "\\PRECIS_nc\\" + gcm + "\\" + scenario + "\\" + str(date)
+    diroutNC = dirout + "\\PRECIS_NC\\" + gcm + "\\" + scenario + "\\" + str(date)
     if not os.path.exists(diroutNC):
         os.system('mkdir ' + diroutNC)
 
     # Convert pp files to nc format and split into the daily files
     # Structure nc filenames: gcm_scenario_variable_YYYYMM.nc
     
-    print "Converting pp files to nc format and split into the daily files"
-    
-    if month < 10:
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month])
+    print "    > Converting pp files to nc format and split into the daily files\n"
+
+    if int(monDc [month]) < 10:
+        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month]) + "\n"
         outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month]) + ".nc"
-        os.system("convsh1.91 -i pp -o outnc")
-        print "    ---> Converted"
-
-        # Split into the daily files    
-        spltnc = 
-        os.system("cdo splitday " + outnc + " " + str(i) + "_sfc_" + gridtype + "_day_")
-        os.system("mv *.nc " + baseout + "//" + period + "//" + dayofyear + "//")
-        print "    ---> Splited"
-
-    else:
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month])
-        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + ".nc"
-        os.system("convsh1.91 -i pp -o outnc")
-        print "    ---> Converted"
-
-        # Split into the daily files
-        spltnc = 
-        os.system("cdo splitday " + outnc + " " + str(i) + "_sfc_" + gridtype + "_day_")
-        os.system("mv *.nc " + baseout + "//" + period + "//" + dayofyear + "//")
-        print "    ---> Splited"
-
-    print "    ---> Convert to nc and split done!!"
-
-    # Convert NETCDF files to ASCII format
-    # Structure nc filenames: gcm_scenario_variable_YYYYMM.asc
-
-    #Creating outputs folders to asc by years
-    diroutASC = dirout + "\\PRECIS_AAIGrid" + gcm + "\\" + scenario + "\\" + str(date)
-    if not os.path.exists(diroutASC):
-        os.system('mkdir ' + diroutASC) 
-    
-    print "Converting NETCDF files to AAIGrid format"
-
-    if month < 10:
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month])
-        outasc = 
-        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month]) + ".nc"
-        os.system("gdal_translate -of AAIGRID -sds " outnc + " " + baseout + "//" + period + "//" + dayofyear + "//" + str(i) + "_sfc_" + gridtype + "_day.asc")
-        print "    ---> Converted"
-
-    else:
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month])
-        outasc = 
-        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + ".nc"
-        os.system("gdal_translate -of AAIGRID -sds " + outnc + " " + baseout + "//" + period + "//" + dayofyear + "//" + str(i) + "_sfc_" + gridtype + "_day.asc")
-        print "     " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + " Converted"
-        print "    ---> Converted"
-
-	#		# Compressing NETCDF file
-	#		
-	#		os.system("gzip -f " + baseout + "//" + period + "//" + dayofyear + "//" + str(i) + "_sfc_" + gridtype + "_day.nc")
-	#
-	print '    .Day done!'
-    
-estructura outputs = W:\RCM_Data\HadCM3Q0\SRES_A2\1949\HadCM3Q0_SRES_A2_00001_194912.asc
-##    decada = out[3:4]
-##    #Convert pp to ASCII
-##    os.system("convsh1.91 -i pp -o .nc")
-
-##estructura = genama.pa f9dec .00001.pp
-
+        os.system("conv2nc.tlc " + pp + " " + str(i) + " " + outnc)
+        print "    ---> Converted\n"
+##
+##        # Split into the daily files    
+##        spltnc = 
+##        os.system("cdo splitday " + outnc + " " + str(i) + "_sfc_" + gridtype + "_day_")
+##        os.system("mv *.nc " + baseout + "//" + period + "//" + dayofyear + "//")
+##        print "    ---> Splited"
+##
+##    else:
+##        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month])
+##        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + ".nc"
+##        os.system("convsh1.91 -i pp -o outnc")
+##        print "    ---> Converted"
+##
+##        # Split into the daily files
+##        spltnc = 
+##        os.system("cdo splitday " + outnc + " " + str(i) + "_sfc_" + gridtype + "_day_")
+##        os.system("mv *.nc " + baseout + "//" + period + "//" + dayofyear + "//")
+##        print "    ---> Splited"
+##
+##    print "    ---> Convert to nc and split done!!"
+##
+##    # Convert NETCDF files to ASCII format
+##    # Structure nc filenames: gcm_scenario_variable_YYYYMM.asc
+##
+##    #Creating outputs folders to asc by years
+##    diroutASC = dirout + "\\PRECIS_AAIGrid" + gcm + "\\" + scenario + "\\" + str(date)
+##    if not os.path.exists(diroutASC):
+##        os.system('mkdir ' + diroutASC) 
+##    
+##    print "Converting NETCDF files to AAIGrid format"
+##
+##    if month < 10:
+##        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month])
+##        outasc = 
+##        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month]) + ".nc"
+##        os.system("gdal_translate -of AAIGRID -sds " outnc + " " + baseout + "//" + period + "//" + dayofyear + "//" + str(i) + "_sfc_" + gridtype + "_day.asc")
+##        print "    ---> Converted"
+##
+##    else:
+##        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month])
+##        outasc = 
+##        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + ".nc"
+##        os.system("gdal_translate -of AAIGRID -sds " + outnc + " " + baseout + "//" + period + "//" + dayofyear + "//" + str(i) + "_sfc_" + gridtype + "_day.asc")
+##        print "     " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + " Converted"
+##        print "    ---> Converted"
+##
+##	#		# Compressing NETCDF file
+##	#		
+##	#		os.system("gzip -f " + baseout + "//" + period + "//" + dayofyear + "//" + str(i) + "_sfc_" + gridtype + "_day.nc")
+##	#
+##	print '    .Day done!'
+##    
+##estructura outputs = W:\RCM_Data\HadCM3Q0\SRES_A2\1949\HadCM3Q0_SRES_A2_00001_194912.asc
+####    decada = out[3:4]
+####    #Convert pp to ASCII
+####    os.system("convsh1.91 -i pp -o .nc")
+##
+####estructura = genama.pa f9dec .00001.pp
+##
