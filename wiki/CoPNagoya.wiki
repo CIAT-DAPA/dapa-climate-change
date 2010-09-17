@@ -136,4 +136,6 @@ options(warn=2)
 outp <- cutDomain(bdir, ldir, 1, 612, OSys='linux', overwrite=T)
 }}}
 
+Despite `ldir` can be exactly the same as `bdir`, it is suggested that you use a different folder. Use a local with the same file structure as the remote one, with the appropriate masks placed within it.
+
 After this you can just run again the impact metrics function and you'll be able to get updated results. If this script fails, it means you need to reprocess something. Check what species it failed and re-do the process it failed on.
