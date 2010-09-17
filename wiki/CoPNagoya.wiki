@@ -135,3 +135,5 @@ options(warn=2)
 
 outp <- cutDomain(bdir, ldir, 1, 612, OSys='linux', overwrite=T)
 }}}
+
+After this you can just run again the impact metrics function and you'll be able to get updated results. If this script fails, it means you need to reprocess something. Check what species it failed and re-do the process it failed on.
