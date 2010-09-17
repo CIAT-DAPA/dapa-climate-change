@@ -22,6 +22,7 @@ All the modeling inputs and outputs are stored into the network path \\172.22.33
   * *occurrences:* Contains the species-specific occurrence files used for the modeling (folder `splitted-occurrence-files`). Important file within this folder is `speciesListToModel.csv`
   * *papers:* Relevant literature used in the research
   * *raw-occurrence-data:* Original databases (GBIF, CONDESAN, CDC-UNALM)
+  * *summaries:* This folder contains the impact, accuracy and thresholding metrics files concatenated in a single file, and the richness folders.
 
 These folders contain all the information used in the modeling, and also contain the whole set of outputs analyzed in the publication.
 
@@ -104,3 +105,20 @@ options(warn=2)
 
 outp <- impactProcess(idir, Initial-Species, Final-Species)
 }}}
+
+Now you can summarize the whole set of impact, accuracy and thresholding metrics. You just need to source the appropriate scripts as follows:
+
+{{{
+source("summarizeThresholds.R")
+source("summarizeImpactMetrics.R")
+
+idir <- "\\172.22.33.79\COP_CONDESAN"
+
+outp <- summarizeThresholds(idir, ini, fin)
+outp <- summarizeMetrics(idir, ini, fin)
+
+source("summarizeMetrics.R")
+outp <- summarizeMetrics(idir, ini, fin)
+}}}
+
+This will produce
