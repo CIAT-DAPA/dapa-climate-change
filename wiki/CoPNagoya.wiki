@@ -140,7 +140,7 @@ source("summarizeMetrics.R")
 outp <- summarizeMetrics(idir, ini, fin)
 }}}
 
-This will produce a big comma-separated-values for each of the type of metrics. Each with a different name.
+`ini` and `fin` correspond to numbers of taxa to be processed: say, if you want to process the first 100 taxa, you use `ini=1` and `fin=100`. But since this calculation is quite fast, you can do it to the whole set of taxa. This will produce a big comma-separated-values for each of the type of metrics. Each with a different name. 
 
 ===New!: Cut to a new domain===
 
@@ -154,7 +154,7 @@ ldir <- bdir
 setOptions(overwrite=T)
 options(warn=2)
 
-outp <- cutDomain(bdir, ldir, 1, 612, OSys='linux', overwrite=T)
+outp <- cutDomain(bdir, ldir, ini, fin, OSys='linux', overwrite=T)
 }}}
 
 Despite `ldir` can be exactly the same as `bdir`, it is suggested that you use a different folder. Use a local with the same file structure as the remote one, with the appropriate masks placed within it.
