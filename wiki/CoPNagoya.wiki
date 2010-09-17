@@ -93,3 +93,14 @@ outp <- speciesRichness(idir, type='aves' , OSys='LINUX')
 outp <- richnessChange(idir)
 outp <- turnoverCalc(idir, OSys='LINUX')
 }}}
+
+Now you can calculate the individual species impact metrics. These can be calculated using the following commands:
+
+{{{
+source("impactMetrics.R")
+idir <- "\\172.22.33.79\COP_CONDESAN"
+setOptions(overwrite=T)
+options(warn=2)
+
+outp <- impactProcess(idir, Initial-Species, Final-Species)
+}}}
