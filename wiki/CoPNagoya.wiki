@@ -81,8 +81,15 @@ Now you need to perform the entire calculation (richness and turnover) for the w
 
 {{{
 source("totalTurnover.R")
+source("totalSpeciesRichness.R")
 idir <- "\\172.22.33.79\COP_CONDESAN"
 
+outp <- speciesRichness(idir, type='plants' , OSys='LINUX')
 outp <- speciesTurnover(idir, type='plants' , OSys='LINUX')
+
 outp <- speciesTurnover(idir, type='aves' , OSys='LINUX')
+outp <- speciesRichness(idir, type='aves' , OSys='LINUX')
+
+outp <- richnessChange(idir)
+outp <- turnoverCalc(idir, OSys='LINUX')
 }}}
