@@ -29,6 +29,7 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069"
 modellist = os.listdir(dirbase + "\\SRES_" + scenario + "\\disaggregated")
+print "Available models: " + str(modellist)
 
 for model in modellist:
     for period in periodlist:
