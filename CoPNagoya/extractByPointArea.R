@@ -71,7 +71,7 @@ valueByPolygon <- function(rs, datafile) {
 			ymx <- max(coords[,2]) + (abs(max(coords[,2]) - min(coords[,2])) * 0.05)
 			ymn <- min(coords[,2]) - (abs(max(coords[,2]) - min(coords[,2])) * 0.05)
 			
-			#ncols is fixed to 50
+			#ncols is fixed to 25, for a more efficient calculation
 			cat("  .Create dummy grid \n")
 			nc <- 25
 			resol <- abs(xmx - xmn) / nc
