@@ -27,14 +27,16 @@ for (ct in calc) {
 		for (rsf in rsList) {
 			cat("...-...-", rsf, "\n")
 			
-			rs <- zipRead(rsDir, rsf)
-			ext <- valueByPolygon(rs, paste(shpDir, "/AP_CAN_EDIT_WGS84_SPart.shp", sep="")) #AP_CAN_BOL AP_CAN_EDIT_WGS84_SPart
-			
 			outFName <- gsub(".asc.gz", ".csv", rsf)
 			
-			write.csv(ext, paste(outMetricsDir, "/", outFName, sep=""), quote=F, row.names=F)
-			
-			rm(ext)
+			if (!file.exists(paste(outMetricsDir, "/", outFName, sep=""))) {
+				rs <- zipRead(rsDir, rsf)
+				ext <- valueByPolygon(rs, paste(shpDir, "/AP_CAN_EDIT_WGS84_SPart.shp", sep="")) #AP_CAN_BOL AP_CAN_EDIT_WGS84_SPart
+				
+				write.csv(ext, paste(outMetricsDir, "/", outFName, sep=""), quote=F, row.names=F)
+				
+				rm(ext)
+			}
 		}
 	}
 }
