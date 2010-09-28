@@ -1,5 +1,4 @@
 #Julian Ramirez, dawnpatrolmustaine@gmail.com, July 2010
-#ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting", "SRES_A1B", "anomalies", "2010_2039", xn=-85, xx=-35, yn=-20, yx=13, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
 
 #Add the stippling stuff (a point should appear where 80% of the models do agree in the direction of change)
 #Add the coefficient of variation
@@ -168,8 +167,13 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	}
 	cat("\n")
 	
-	#rCommand <- paste("gcmList=", , "drive=", procdir, scenario, type, period, xn=-30, xx=30, yn=-40, yx=40, wt=5, worldshapefile, plt="temp", writeRasterFiles=T)
-	
+	#Writing the command into a file
+	zz <- file(paste(procdir, "/cmd.R", sep=""), open="w")
+	cat("mapGCMFields(gcmList=c(", file=zz)
+	cat(gcmList,sep=",",file=zz)
+	cat("), drive='",drive,"', procdir='",procdir,"', scenario='",scenario,"', type='",type,"', period='",period,"', xn=", xn, ", xx=", xx, ", yn=", yn, ", yx=", yx, ", wt=", wt, ", worldshapefile='", worldshapefile, "', plt='", plt, "', writeRasterFiles=", writeRasterFiles, ")", sep="", file=zz)
+	close.connection(zz)
+		
 	if (file.exists(worldshapefile)) {
 		cat("Reading world shapefile... \n")
 		sh <- readShapePoly(worldshapefile)
@@ -268,8 +272,8 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 				rm(exVals)
 				
 				if (writeRasterFiles) {
-					rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
-					p1r <- writeRaster(p1r, rName, format='ascii', overwrite=T)
+					rName <- paste(procdir, "/AAIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+					assign(paste("p1r",gcmctr,sep=""), writeRaster(get(paste("p1r",gcmctr,sep="")), rName, format='ascii', overwrite=T))
 					rm(rName)
 				}
 			} else {
@@ -288,8 +292,8 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 				rm(p12)
 				rm(exVals)
 				if (writeRasterFiles) {
-					rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
-					p12r <- writeRaster(p12r, rName, format='ascii', overwrite=T)
+					rName <- paste(procdir, "/AAIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_", gcm, "_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+					assign(paste("p12r",gcmctr,sep=""), writeRaster(get(paste("p12r",gcmctr,sep="")), rName, format='ascii', overwrite=T))
 					rm(rName)
 				}
 			}
@@ -366,8 +370,8 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 				cells <- c(negCells, posCells, equCells)
 				
 				rs <- get(paste("p12r", gcmctr, sep=""))
+				rs[which(!is.na(rs[]))] <- 0
 				rs[cells] <- 1
-				rs[rs[-cells]] <- 0
 				
 				assign(paste("stpl",gcmctr,sep=""), rs)
 				rm(rs)
@@ -381,6 +385,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		}
 	}
 	
+	##################################
 	#Here is the stipples calculation.
 	if (plt == "prec" & type == "anomalies") {
 		cat("   .Stipples calculation \n")
@@ -407,41 +412,41 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
-		plot(p1cv, col=colorRampPalette(c('white', 'red'))(500), main="MultiModelCV", sub="Deviation (%)")
+		plot(p1cv, col=topo.colors(1000), main="MultiModelCV", sub="Deviation (%)")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
 		
 		#Write the raster files based on input logical condition
 		if (writeRasterFiles) {
-			rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AAIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p1m <- writeRaster(p1m, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
-			rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AAIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p1sd <- writeRaster(p1sd, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
-			rName <- paste(procdir, "/AIIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMCV_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AAIGrid_AMT", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMCV_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p1cv <- writeRaster(p1cv, rName, format='ascii', overwrite=T)
 			rm(rName)
 		}
 	} else {
-		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Total precipitation (mm/year)", zlim=pzlim)
+		plot(p12m, col=rainbow(1000), main="MultiModelMean", sub="Total precipitation (mm/year) - black dots represent areas where 80% or more GCMs agree in direction", zlim=pzlim)
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
 		if (type == "anomalies") {
 			points(cbind(pts$LON,pts$LAT), pch=20, col="black", cex=0.5)
 		}
-		plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Deviation (mm/year)")
+		plot(p12sd, col=topo.colors(1000), main="MultiModelSD", sub="Deviation (mm/year) - black dots represent areas where 80% or more GCMs agree in direction")
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
 		if (type == "anomalies") {
 			points(cbind(pts$LON,pts$LAT), pch=20, col="black", cex=0.5)
 		}
-		plot(p12cv, col=colorRampPalette(c('white', 'red'))(1000), main="MultiModelCV", sub="Deviation (%)", zlim=c(0,100))
+		plot(p12cv, col=topo.colors(1000), main="MultiModelCV", sub="Deviation (%) - black dots represent areas where 80% or more GCMs agree in direction", zlim=c(0,100))
 		if (file.exists(worldshapefile)) {
 			plot(sh, add=T)
 		}
@@ -449,7 +454,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 			points(cbind(pts$LON,pts$LAT), pch=20, col="black", cex=0.5)
 		}
 		if (type == "anomalies") {
-			plot(perstpl, col=colorRampPalette(c('white', 'red'))(1000), main="Stippling", sub="Agreement (%)", zlim=c(0,100))
+			plot(perstpl, col=topo.colors(1000), main="Stippling", sub="Agreement (%) - black dots represent areas where 80% or more GCMs agree in direction", zlim=c(0,100))
 			if (file.exists(worldshapefile)) {
 				plot(sh, add=T)
 			}
@@ -458,24 +463,24 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		
 		#Write the raster files based on input logical condition
 		if (writeRasterFiles) {
-			rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AAIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMM_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p12m <- writeRaster(p12m, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
-			rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AAIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMSD_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p12sd <- writeRaster(p12sd, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
-			rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMCV_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+			rName <- paste(procdir, "/AAIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMCV_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 			p12cv <- writeRaster(p12cv, rName, format='ascii', overwrite=T)
 			rm(rName)
 			
 			if (type == "anomalies") {
-				rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMPAG_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+				rName <- paste(procdir, "/AAIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMPAG_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 				perstpl <- writeRaster(perstpl, rName, format='ascii', overwrite=T)
 				rm(rName)
 				
-				rName <- paste(procdir, "/AIIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMNAG_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
+				rName <- paste(procdir, "/AAIGrid_TAR", xn, "WE", xx, "WE", yn, "NS", yx, "NS_", type, "_MMNAG_", gsub("_","",scenario), "_", gsub("_", "-", period), "_", suf, ".asc", sep="")
 				stpl <- writeRaster(stpl, rName, format='ascii', overwrite=T)
 				rm(rName)
 			}
