@@ -1,0 +1,14 @@
+Resampling Disaggregation
+--------------------------------------------
+
+198.93.225.57 -&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 10
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 5
+
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\IPCC_CMIP3_process\SRES_A2\resample_disaggregated 10
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\IPCC_CMIP3_process\SRES_A2\resample_disaggregated 2.5
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\IPCC_CMIP3_process\SRES_A2\resample_disaggregated 5
+
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\IPCC_CMIP3_process\SRES_B1\resample_disaggregated 10
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\IPCC_CMIP3_process\SRES_B1\resample_disaggregated 2.5
+&r resampling_disaggregation.aml L:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\IPCC_CMIP3_process\SRES_B1\resample_disaggregated 5
