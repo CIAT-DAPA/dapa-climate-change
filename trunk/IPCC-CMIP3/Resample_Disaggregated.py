@@ -12,7 +12,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python Resample_Disaggregated.py <dirbase> <scenario> <dirout> <resolution> <method>"
-	print "    - ie: python Resample_Disaggregated.py P:\climate_change\IPCC_CMIP3\ A1B F:\IPCC_CMIP3_process resolution method"
+	print "    - ie: python Resample_Disaggregated.py L:\climate_change\IPCC_CMIP3\ A1B G:\IPCC_CMIP3_process 2.5 NEAREST"
 	sys.exit(1)
 
 # ---------------------------------------------------------------------------
