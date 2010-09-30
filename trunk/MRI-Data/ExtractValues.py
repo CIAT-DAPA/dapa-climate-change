@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ExtractValues.py E:\MRI_grids E:\MRI_Analysis\Extracted\ E:\MRI_grids\mask\stations\tmean_latin.shp 1979 2003 tmean"
+	print "   - ie: python ExtractValues.py D:\MRI_grids D:\MRI_Analysis\Extracted\prec_anual D:\MRI_grids\mask\stations\prec.shp 1979 2003 prec"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -30,7 +30,7 @@ print "   EXTRACT VALUES   "
 print "~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
-gp.workspace = dirbase + "\\" + variable + "_monthly\\SP0A"
+gp.workspace = dirbase + "\\" + variable + "_anual\\SP0A"
 
 for year in range(inityear, finalyear + 1, 1):
 
@@ -43,7 +43,7 @@ for year in range(inityear, finalyear + 1, 1):
 
         # Set local variables
         InPointsFC = mask 
-        OutPointsFC = dirout + "\\tmean_monthly_latin\\" + ds
+        OutPointsFC = dirout + "\\" + ds
 
         # Check out Spatial Analyst extension license
         gp.CheckOutExtension("Spatial")
