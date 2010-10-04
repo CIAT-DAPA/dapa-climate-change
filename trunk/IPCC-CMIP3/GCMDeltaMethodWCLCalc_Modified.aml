@@ -54,7 +54,7 @@
 	&s prec_m = %tempdir%\prec_ /*%outdir%\%modname%\%timeslice%\prec_
 	&s tmean_m = %tempdir%\tmean_ /*%outdir%\%modname%\%timeslice%\tmean_
 
-	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
+	&if not [exists %outdir%\%modname%\%timeslice%_DeltaMethodWCLCalc_done.txt -file] &then
 	
 		&do i = 1 &to 12
 
