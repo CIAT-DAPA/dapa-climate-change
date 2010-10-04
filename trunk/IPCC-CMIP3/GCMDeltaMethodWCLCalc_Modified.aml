@@ -25,6 +25,7 @@
 &if [show program] NE GRID &then GRID
 &amlpath .
 &s rootdir [show &amlpath]
+&if not [exists %tempdir% -DIR] &then &sys md %tempdir%
 
 &do timeslice &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
 
@@ -80,31 +81,33 @@
 			&if [exist %tmean_m%%i% -grid] &then &ty Grid exists /*kill %tmean_m%%i% all
 			&else %tmean_m%%i% = int(floor(((%tmin_m%%i% + %tmax_m%%i%) * 0.5 ) + 0.5))
 
-			&if not [exists %tempdir%\bio_19 -grid] &then
-				&do
-					&r mkBCvars.aml %tempdir% %rootdir%
-				&end
+		&end
 			
-			&if not [exists %tempdir%\cons_mths -grid] &then
-				&do
-					&r consMthsCalc_v3.aml %tempdir% %rootdir% 100
-				&end
+		&if not [exists %tempdir%\bio_19 -grid] &then
+			&do
+				&r mkBCvars.aml %tempdir% %rootdir%
+			&end
 		
-			&ty
-			&ty Now copying...
-			&s copystat [COPY %tempdir% %outdir%\%modname%\%timeslice% -DIRECTORY]
-			&if %copystat% EQ 0 &then 
-				&do
-					&ty Successfully done (%modname%, %timeslice%)!
-					&s outcheck [LISTFILE %outdir%\%modname%\%timeslice%\* -GRID %outdir%\%modname%\%timeslice%_DeltaMethodWCLCalc_done.txt]
-					&s delstat [DELETE %tempdir% -DIRECTORY]
-				&end
-			&else
-				&do
-					&ty An error occurred during calculations, bailing out...
-					&s delstat [DELETE %outdir%\%modname%\%timeslice% -DIRECTORY]
-					&return
-				&end	
+		&if not [exists %tempdir%\cons_mths -grid] &then
+			&do
+				&r consMthsCalc_v3.aml %tempdir% %rootdir% 100
+			&end
+		
+		&ty
+		&ty Now copying...
+		&s copystat [COPY %tempdir% %outdir%\%modname%\%timeslice% -DIRECTORY]
+		&if %copystat% EQ 0 &then 
+			&do
+				&ty Successfully done (%modname%, %timeslice%)!
+				&s outcheck [LISTFILE %outdir%\%modname%\%timeslice%\* -GRID %outdir%\%modname%\%timeslice%_DeltaMethodWCLCalc_done.txt]
+				&s delstat [DELETE %tempdir% -DIRECTORY]
+			&end
+		&else
+			&do
+				&ty An error occurred during calculations, bailing out...
+				&s delstat [DELETE %outdir%\%modname%\%timeslice% -DIRECTORY]
+				&return
+			&end	
 	
 	
 	
