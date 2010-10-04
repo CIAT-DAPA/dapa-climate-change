@@ -2,7 +2,7 @@
 /* Written by Julián Ramírez
 /* CIAT, Cali, Colombia, June 2009
 
-&args inputdir modname outdir mask timeslice wcldir tempdir
+&args inputdir modname outdir mask wcldir tempdir
 &terminal 9999
 &sys cls
 &severity &warning &ignore
@@ -13,7 +13,6 @@
 	&do
 		&ty
 		&ty Incorrect command syntax, please use
-		&ty '&r multi_year_mean.aml INPUT_DIR MODEL_NAME OUTDIR MASK WCL_DIR TEMPORAL_DIR'
 		&ty MASK should be both name and path of to the mask
 		&ty INPUT_DIR should contain folders of models
 		&ty WCL_DIR should contain current monthly grids
