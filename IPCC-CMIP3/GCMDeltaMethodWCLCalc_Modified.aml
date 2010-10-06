@@ -25,31 +25,33 @@
 &if [show program] NE GRID &then GRID
 &amlpath .
 &s rootdir [show &amlpath]
-&if not [exists %tempdir% -DIR] &then &sys md %tempdir%
+
 &if not [exists %outdir% -DIR] &then &sys md %outdir%
 &if not [exists %outdir%\%modname% -DIR] &then &sys md %outdir%\%modname%	
 
 
 &do timeslice &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
 
-	/* LEER GRIDS DE ENTRADA
-
-	&s tmin_c = %wcldir%\tmin_
-	&s tmax_c = %wcldir%\tmax_
-	&s prec_c = %wcldir%\prec_
-	&s dtn = %inputdir%\%modname%\%timeslice%\tmin_
-	&s dtx = %inputdir%\%modname%\%timeslice%\tmax_
-	&s dpr = %inputdir%\%modname%\%timeslice%\prec_
-
-	/* GRIDS DE SALIDA
-
-	&s tmin_m = %tempdir%\tmin_ /*%outdir%\%modname%\%timeslice%\tmin_
-	&s tmax_m = %tempdir%\tmax_ /*%outdir%\%modname%\%timeslice%\tmax_
-	&s prec_m = %tempdir%\prec_ /*%outdir%\%modname%\%timeslice%\prec_
-	&s tmean_m = %tempdir%\tmean_ /*%outdir%\%modname%\%timeslice%\tmean_
-
 	&if not [exists %outdir%\%modname%\%timeslice%_DeltaMethodWCLCalc_done.txt -file] &then
 		&do
+		
+			/* LEER GRIDS DE ENTRADA
+	
+			&if not [exists %tempdir% -DIR] &then &sys md %tempdir%
+			&s tmin_c = %wcldir%\tmin_
+			&s tmax_c = %wcldir%\tmax_
+			&s prec_c = %wcldir%\prec_
+			&s dtn = %inputdir%\%modname%\%timeslice%\tmin_
+			&s dtx = %inputdir%\%modname%\%timeslice%\tmax_
+			&s dpr = %inputdir%\%modname%\%timeslice%\prec_
+
+			/* GRIDS DE SALIDA
+
+			&s tmin_m = %tempdir%\tmin_ /*%outdir%\%modname%\%timeslice%\tmin_
+			&s tmax_m = %tempdir%\tmax_ /*%outdir%\%modname%\%timeslice%\tmax_
+			&s prec_m = %tempdir%\prec_ /*%outdir%\%modname%\%timeslice%\prec_
+			&s tmean_m = %tempdir%\tmean_ /*%outdir%\%modname%\%timeslice%\tmean_
+
 			&ty
 			&ty Processing model %modname%, %timeslice%
 		
