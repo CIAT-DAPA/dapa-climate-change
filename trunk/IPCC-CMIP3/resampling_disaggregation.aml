@@ -1,14 +1,15 @@
-&args rootdir outfolder resol /*scenario
+&args rootdir outfolder tempdir resol /*scenario
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument
 &terminal 9999
 &sys cls
 
 /*&s rootdir L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
-/*&s outfolder G:\IPCC_CMIP3_proces\SRES_A1B\resample_disaggregated
+/*&s outfolder M:\climate_change\IPCC_CMIP3\SRES_A1B\resampled\disaggregated
 
 &amlpath .
 &s bdir [show &amlpath]
 
+&if not [exists %tempdir% -dir] &then &sys md %tempdir%
 
 &if %resol% EQ 2.5 &then &s outdir %outfolder%\Global_2_5min
 &else &if %resol% EQ 5 &then &s outdir %outfolder%\Global_5min
@@ -31,16 +32,33 @@
 		&s outmodyeardir %outmoddir%\%year%
 		&if not [exists %outmodyeardir% -dir] &then &sys md %outmodyeardir%
 		
-		&ty
-		&ty Model %modname% (%year%, %resol%)
-		
 		&if not [exists %outdir%\%modname%\moddone_%year%.txt -FILE] &then
 			&do
-				&r resample_GCM.aml %rootdir%\%modname%\%year% %outmodyeardir% %resol% NEAREST
-			&end
-		
-		&sys dir /d /b /o %outdir%\%modname%\%year%\* > %outdir%\%modname%\moddone_%year%.txt
+				&ty
+				&ty Model %modname% (%year%, %resol%)
+				&r resample_GCM.aml %rootdir%\%modname%\%year% %tempdir% %resol% NEAREST
 
+			&ty
+			&ty Now copying...
+			&s copystat [COPY %tempdir% %outmodyeardir% -DIRECTORY]
+			&if %copystat% EQ 0 &then 
+				&do
+					&ty Successfully done (%modname%, %year%)!
+					&s outcheck [LISTFILE %outmodyeardir%\* -GRID %outmoddir%\moddone_%year%.txt]
+					&s delstat [DELETE %tempdir% -DIRECTORY]
+				&end
+			&else
+				&do
+					&ty An error occurred during calculations, bailing out...
+					&s delstat [DELETE %outmodyeardir% -DIRECTORY]
+					&return
+				&end
+			&end
+		&else 
+			&do
+				&ty 
+				&ty Model %modname% (%year%, %resol%) processed
+			&end
 	&end
 	
 &end
