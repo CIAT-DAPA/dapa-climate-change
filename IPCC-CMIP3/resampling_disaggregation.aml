@@ -3,9 +3,6 @@
 &terminal 9999
 &sys cls
 
-/*&s rootdir L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
-/*&s outfolder G:\IPCC_CMIP3_proces\SRES_A1B\resample_disaggregated
-
 &amlpath .
 &s bdir [show &amlpath]
 
