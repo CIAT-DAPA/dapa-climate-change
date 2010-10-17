@@ -64,9 +64,90 @@ calibrationParameters <- function(dataset, gs=6, verbose=T) {
 		names(output)[length(names(output))] <- paste("GS",g,"_X",sep="")
 	}
 	if (verbose) cat("\n")
+	
+	#CALCULATE MEAN, MAX, MIN, MODE FOR EACH OF THE VARIABLES
+	dataTmpAll <- output[,grep(paste("GS", sep=""), names(output))]
+	
+	#Precipitation
+	if (verbose) {cat("Summarising prec \n")}
+	dataTmpPp <- dataTmpAll[,grep(paste("_P", sep=""), names(dataTmpAll))]
+	ppMean <- apply(dataTmpPp, 1, function(x){mean(x)})
+	output$MEAN_P <- ppMean
+	rm(ppMean)
+	ppMode <- apply(dataTmpPp, 1, modeCalc)
+	output$MODE_P <- ppMode
+	rm(ppMode)
+	ppMax <- apply(dataTmpPp, 1, function(x){max(x)})
+	output$MAX_P <- ppMax
+	rm(ppMax)
+	ppMin <- apply(dataTmpPp, 1, function(x){min(x)})
+	output$MIN_P <- ppMin
+	rm(ppMin)
+	rm(dataTmpPp)
+	
+	#Mean temperature
+	if (verbose) {cat("Summarising tmean \n")}
+	dataTmpTm <- dataTmpAll[,grep(paste("_T", sep=""), names(dataTmpAll))]
+	tmMean <- apply(dataTmpTm, 1, function(x){mean(x)})
+	output$MEAN_T <- tmMean
+	rm(tmMean)
+	tmMode <- apply(dataTmpTm, 1, modeCalc)
+	output$MODE_T <- tmMode
+	rm(tmMode)
+	tmMax <- apply(dataTmpTm, 1, function(x){max(x)})
+	output$MAX_T <- tmMax
+	rm(tmMax)
+	tmMin <- apply(dataTmpTm, 1, function(x){min(x)})
+	output$MIN_T <- tmMin
+	rm(tmMin)
+	rm(dataTmpTm)
+	
+	#Min temperature
+	if (verbose) {cat("Summarising tmin \n")}
+	dataTmpTn <- dataTmpAll[,grep(paste("_N", sep=""), names(dataTmpAll))]
+	tnMean <- apply(dataTmpTn, 1, function(x){mean(x)})
+	output$MEAN_N <- tnMean
+	rm(tnMean)
+	tnMode <- apply(dataTmpTn, 1, modeCalc)
+	output$MODE_N <- tnMode
+	rm(tnMode)
+	tnMax <- apply(dataTmpTn, 1, function(x){max(x)})
+	output$MAX_N <- tnMax
+	rm(tnMax)
+	tnMin <- apply(dataTmpTn, 1, function(x){min(x)})
+	output$MIN_N <- tnMin
+	rm(tnMin)
+	rm(dataTmpTn)
+	
+	#Max temperature
+	if (verbose) {cat("Summarising tmax \n")}
+	dataTmpTx <- dataTmpAll[,grep(paste("_X", sep=""), names(dataTmpAll))]
+	txMean <- apply(dataTmpTx, 1, function(x){mean(x)})
+	output$MEAN_X <- txMean
+	rm(txMean)
+	txMode <- apply(dataTmpTx, 1, modeCalc)
+	output$MODE_X <- txMode
+	rm(txMode)
+	txMax <- apply(dataTmpTx, 1, function(x){max(x)})
+	output$MAX_X <- txMax
+	rm(txMax)
+	txMin <- apply(dataTmpTx, 1, function(x){min(x)})
+	output$MIN_X <- txMin
+	rm(txMin)
+	rm(dataTmpTx)
+	
 	return(output)
 }
 
+modeCalc <- function(x) {
+	if (is.na(x[1])) {
+		return(NA)
+	} else {
+		dd <- density(x)
+		m <- dd$x[which.max(dd$y)]
+		return(m)
+	}
+}
 pgsCalc <- function(datapoint) {
 	if (is.na(datapoint[1])) {
 		res <- NA
@@ -75,7 +156,6 @@ pgsCalc <- function(datapoint) {
 	}
 	return(res)
 }
-
 tgsCalc <- function(datapoint) {
 	if (is.na(datapoint[1])) {
 		res <- NA

@@ -2,7 +2,8 @@
 #eejarv@leeds.ac.uk
 #Oct 2010
 
-#Find fitting parameters using the mode of the data
+#Find fitting parameters using the mode of the data and 20%, 40% and 45% distanced classes from the mode-class
+#Get also the average, or max, min, mode
 
 getParameters <- function(x.real, nb=200, plotit=T, plotdir="./img", gs=1, varname="prec") {
 	if (nb < 50) {warning("Imprecise results could come out when using less than 50 calibration classes")}
