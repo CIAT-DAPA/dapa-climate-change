@@ -48,10 +48,8 @@ pd <- histPlot(rs, gs="mode", plotdir="./img/", nb=20)
 #Get calibration parameters
 source("./src/getParameters.R")
 dataset <- read.csv("./data/calibration.csv")
-#for (gs in 1:12) {
-	gs <- 1
+for (gs in 1:12) {
 	plotdata <- dataset[,grep(paste("GS", gs, "_", sep=""), names(dataset))]
-	
 	varList <- c("prec", "tmean", "tmin", "tmax")
 	v <- 1
 	for (varn in varList) {
@@ -59,7 +57,7 @@ dataset <- read.csv("./data/calibration.csv")
 		if (v == 1 & gs == 1) {finalTable <- calPar} else {finalTable <- rbind(finalTable, calPar)}
 		v <- v+1
 	}
-#}
+}
 for (gs in c("MEAN", "MODE", "MAX", "MIN")) {
 	plotdata <- dataset[,grep(paste(gs, "_", sep=""), names(dataset))]
 	varList <- c("prec", "tmean", "tmin", "tmax")
@@ -89,8 +87,17 @@ for (g in lg) {
 
 #Running the model
 source("./src/EcoCrop.R")
-p <- read.csv("./data/calibration-parameters.csv")
-eco <- suitCalc(climPath='./data/climate', Gmin=180,Gmax=180,Tkmp=p$KILL[2],Tmin=p$MIN[2],Topmin=p$OPMIN[2],Topmax=p$OPMAX[2],Tmax=p$MAX[2],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='./data/runs', cropname='sorghum-tmean')
-eco <- suitCalc(climPath='./data/climate', Gmin=180,Gmax=180,Tkmp=p$KILL[3],Tmin=p$MIN[3],Topmin=p$OPMIN[3],Topmax=p$OPMAX[3],Tmax=p$MAX[3],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='./data/runs', cropname='sorghum-tmin')
-eco <- suitCalc(climPath='./data/climate', Gmin=180,Gmax=180,Tkmp=p$KILL[4],Tmin=p$MIN[4],Topmin=p$OPMIN[4],Topmax=p$OPMAX[4],Tmax=p$MAX[4],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='./data/runs', cropname='sorghum-tmax')
+for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) {
+	p <- read.csv("./data/calibration-parameters.csv")
+	p <- p[which(p$GS==gs),]
+	vl <- c("tmean","tmin","tmax")
+	for (rw in 2:4) {
+		eco <- suitCalc(climPath='./data/climate', Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='./data/runs', cropname=paste(gs,'-sorghum-',vl[rw-1],sep=""))
+		jpeg(paste("./data/runs/", gs, "-sorghum-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
+		plot(eco)
+		dev.off()
+	}
+}
+
+
 

@@ -2,8 +2,6 @@
 #eejarv@leeds.ac.uk
 #Oct 2010
 
-#Find fitting parameters using the mode of the data
-
 #This R script computes the EcoCrop suitability index based on a set of parameters
 
 require(rgdal)
