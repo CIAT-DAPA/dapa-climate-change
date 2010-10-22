@@ -85,7 +85,7 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	#Creating the stack of the whole list of variables
 	require(raster)
 	climPath <- "./data/climate"
-	climateStack <- stack(stack(paste(climPath, "/tmean_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/tmin_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/tmax_", c(1:12), ".asc", sep="")))
+	climateStack <- stack(stack(paste(climPath, "/tmean_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/tmin_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/prec_", c(1:12), ".asc", sep="")))
 	
 	#Calculating regression models between Rmin-Ropmin and Ropmax-Rmax
 	rainLeftReg <- lsfit(x=c(Rmin,Ropmin), y=c(0,1))
@@ -101,7 +101,7 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	#This is the function that evaluates the suitability in a pixel basis
 	suitFun <- function(dataPixel) {
 		if(is.na(dataPixel[1])) {
-			return(c(NA,NA,NA))
+			return(c(NA,NA,NA,NA,NA))
 		} else {
 			TavDataPixel <- dataPixel[1:12]
 			TnDataPixel <- dataPixel[13:24]
@@ -187,26 +187,29 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 				ecopf[i] <- max(ecop)
 			}
 			precFinSuit <- round(max(ecopf * 100))
+			if (precFinSuit == 0) {precFinGS <- 0} else {precFinGS <- max(which(ecopf == max(ecopf)))}
 			tempFinSuit <- round(max(ecotf * 100))
+			if (tempFinSuit == 0) {tempFinGS <- 0} else {tempFinGS <- max(which(ecotf == max(ecotf)))}
 			finSuit <- round((max(ecopf) * max(ecotf)) * 100)
-			res <- c(precFinSuit, tempFinSuit, finSuit)
+			res <- c(precFinSuit, tempFinSuit, finSuit, precFinGS, tempFinGS)
 			return(res)
 		}
 	}
 	
 	#Final grid naming and creation
 	pSuitName <- paste(outfolder, "/", cropname, "_psuitability.asc", sep="")
+	pGSName <- paste(outfolder, "/", cropname, "_pGS.asc", sep="")
 	tSuitName <- paste(outfolder, "/", cropname, "_tsuitability.asc", sep="")
+	tGSName <- paste(outfolder, "/", cropname, "_tGS.asc", sep="")
 	fSuitName <- paste(outfolder, "/", cropname, "_suitability.asc", sep="")
 	
-	pSuitRaster <- raster(climateStack, 0)
-	filename(pSuitRaster) <- pSuitName
-	tSuitRaster <- raster(climateStack, 0)
-	filename(tSuitRaster) <- tSuitName
-	fSuitRaster <- raster(climateStack, 0)
-	filename(fSuitRaster) <- fSuitName
+	pSuitRaster <- raster(climateStack, 0) #filename(pSuitRaster) <- pSuitName
+	pGSRaster <- raster(climateStack, 0) #filename(pGSRaster) <- pGSName
+	tSuitRaster <- raster(climateStack, 0) #filename(tSuitRaster) <- tSuitName
+	tGSRaster <- raster(climateStack, 0) #filename(tGSRaster) <- tGSName
+	fSuitRaster <- raster(climateStack, 0) #filename(fSuitRaster) <- fSuitName
 	
-	bs <- blockSize(climateStack, n=39, minblocks=2)
+	bs <- blockSize(climateStack, n=41, minblocks=2)
 	cat("(", bs$n, " chunks) \n", sep="")
 	pb <- pbCreate(bs$n, type='text', style=3)
 	for (b in 1:bs$n) {
@@ -215,20 +218,26 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 		precVecSuit <- rasVals[1,]
 		tempVecSuit <- rasVals[2,]
 		finlVecSuit <- rasVals[3,]
+		precVecGS <- rasVals[4,]
+		tempVecGS <- rasVals[5,]
 		rm(rasVals)
+		
 		iniCell <- 1+(bs$row[b]-1)*ncol(pSuitRaster)
 		finCell <- (bs$row[b]+bs$nrow[b]-1)*ncol(pSuitRaster)
-		pSuitRaster[iniCell:finCell] <- precVecSuit # <- setValues(pSuitRaster, precVecSuit, rw)
-		#pSuitRaster <- writeRaster(pSuitRaster, pSuitName, format='ascii', overwrite=TRUE)
-		tSuitRaster[iniCell:finCell] <- tempVecSuit #setValues(tSuitRaster, tempVecSuit, rw)
-		#tSuitRaster <- writeRaster(tSuitRaster, tSuitName, format='ascii', overwrite=TRUE)
-		fSuitRaster[iniCell:finCell] <- finlVecSuit #setValues(fSuitRaster, finlVecSuit, rw)
-		#fSuitRaster <- writeRaster(fSuitRaster, fSuitName, format='ascii', overwrite=TRUE)
+		pSuitRaster[iniCell:finCell] <- precVecSuit
+		tSuitRaster[iniCell:finCell] <- tempVecSuit
+		fSuitRaster[iniCell:finCell] <- finlVecSuit
+		pGSRaster[iniCell:finCell] <- precVecGS
+		tGSRaster[iniCell:finCell] <- tempVecGS
+		
 		pbStep(pb, b)
 	}
 	pbClose(pb)
 	pSuitRaster <- writeRaster(pSuitRaster, pSuitName, format='ascii', overwrite=TRUE)
+	pGSRaster <- writeRaster(pGSRaster, pGSName, format='ascii', overwrite=TRUE)
 	tSuitRaster <- writeRaster(tSuitRaster, tSuitName, format='ascii', overwrite=TRUE)
+	tGSRaster <- writeRaster(tGSRaster, tGSName, format='ascii', overwrite=TRUE)
 	fSuitRaster <- writeRaster(fSuitRaster, fSuitName, format='ascii', overwrite=TRUE)
-	return(stack(pSuitRaster, tSuitRaster, fSuitRaster))
+	
+	return(stack(pSuitRaster, pGSRaster, tSuitRaster, tGSRaster, fSuitRaster))
 }
