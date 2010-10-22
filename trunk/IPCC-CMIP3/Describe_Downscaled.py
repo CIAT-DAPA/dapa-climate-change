@@ -40,8 +40,7 @@ for model in modellist:
         print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\downscaled" + "\\" + model + "\\" + period
 
         rasters = gp.ListRasters("", "GRID")
-        rasterssort = rasters.sort()
-        for raster in rasterssort:
+        for raster in sorted(rasters):
             print raster
             MIN = gp.GetRasterProperties_management(raster, "MINIMUM")
             MAX = gp.GetRasterProperties_management(raster, "MAXIMUM")
