@@ -92,12 +92,56 @@ for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) {
 	p <- p[which(p$GS==gs),]
 	vl <- c("tmean","tmin","tmax")
 	for (rw in 2:4) {
-		eco <- suitCalc(climPath='./data/climate', Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='./data/runs', cropname=paste(gs,'-sorghum-',vl[rw-1],sep=""))
-		jpeg(paste("./data/runs/", gs, "-sorghum-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
-		plot(eco)
-		dev.off()
+		if (!file.exists(paste("./data/runs/", gs, "-sorghum-",vl[rw-1],"-suitability.jpg",sep=""))) {
+			eco <- suitCalc(climPath='./data/climate', Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='./data/runs', cropname=paste(gs,'-sorghum-',vl[rw-1],sep=""))
+			jpeg(paste("./data/runs/", gs, "-sorghum-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
+			plot(eco)
+			dev.off()
+		}
 	}
 }
 
+#Assess accuracy of each growing season and each parameter tuning
+source("./src/accuracy.R")
+test <- read.csv("./data/test.csv"); test <- cbind(test[,18], test[,17])
+train <- read.csv("./data/train.csv"); train <- cbind(train[,18], train[,17])
+parList <- read.csv("./data/calibration-parameters.csv")
+gsList <- unique(parList$GS)
+for (gs in gsList) {
+	pList <- parList[which(parList$GS==gs),][2:4,]
+	for (vr in pList$VARIABLE) {
+		for (suf in c("_p","_t","_")) {
+			cat("GS:", gs, "- VAR:", vr, "- SUF:", suf, "\n")
+			rs <- raster(paste("./data/runs/", gs, "-sorghum-", vr, suf, "suitability.asc", sep=""))
+			tem <- accMetrics(rs, test) #doing with test data
+			trm <- accMetrics(rs, train) #doing with training data
+			resrow <- data.frame(GS=gs, VARIABLE=vr, TYPE=paste(suf, "suitability", sep=""), TEST.AV.SUIT=tem$METRICS$SUIT, TEST.SD.SUIT=tem$METRICS$SUITSD, TEST.MAX.SUIT=tem$METRICS$SUITX, TEST.MIN.SUIT=tem$METRICS$SUITN, TEST.OMISSION.RATE=tem$METRICS$OMISSION_RATE, TEST.ERROR=tem$METRICS$RMSQE, TEST.ERR.DIST=tem$METRICS$ERR_DIST, TEST.MXE=tem$METRICS$MAX_ENT, TEST.SLOPE=tem$METRICS$SLOPE, TRAIN.AV.SUIT=trm$METRICS$SUIT, TRAIN.SD.SUIT=trm$METRICS$SUITSD, TRAIN.MAX.SUIT=trm$METRICS$SUITX, TRAIN.MIN.SUIT=trm$METRICS$SUITN, TRAIN.OMISSION.RATE=trm$METRICS$OMISSION_RATE, TRAIN.ERROR=trm$METRICS$RMSQE, TRAIN.ERR.DIST=trm$METRICS$ERR_DIST, TRAIN.MXE=trm$METRICS$MAX_ENT, TRAIN.SLOPE=trm$METRICS$SLOPE)
+			rescol <- data.frame(tem$MXE_CURVE, trm$MXE_CURVE)
+			names(rescol) <- c(paste("TEST.GS.",gs,sep=""), paste("TRAIN.GS.",gs,sep=""))
+			if (gs == gsList[1] & vr == pList$VARIABLE[1] & suf == "_p") {
+				rres <- resrow
+				cres <- cbind(SUIT=c(1:100), rescol)
+			} else {
+				rres <- rbind(rres, resrow)
+				cres <- cbind(cres, rescol)
+			}
+		}
+	}
+}
+write.csv(rres, "./data/accuracy-metrics.csv", row.names=F)
+write.csv(cres, "./data/entropy-curves.csv", row.names=F)
 
+#Buffer all points at 25km, 50km 100km, 200km, 300km, 400km, 500km, 750km, 1000km, 1500km, 2000km
+source("./src/bufferPoints.R")
+ds <- read.csv("./data/unique.csv"); ds <- cbind(ds[,18], ds[,17])
+rs <- "./data/climate/prec_1.asc"
+for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
+	if (!file.exists(paste("./data/buffered/bf-", bd, "km.asc", sep=""))) {
+		bf <- createBuffers(ds, rs, buffDist=bd*1000, method=1, verbose=T)
+		bf <- writeRaster(bf, paste("./data/buffered/bf-", bd, "km.asc", sep=""), format='ascii', overwrite=T)
+	}
+}
 
+#Method 1 started on "Thu Oct 21 08:34:26 2010", finished on "Thu Oct 21 09:48:18 2010", totalling 1 hour, 13 min, 52 sec (4432 sec)
+#Method 2 started on "Thu Oct 21 10:25:21 2010", finished on "Thu Oct 21 11:52:54 2010", totalling 1 hour, 27 min, 33 sec (5253 sec)
+#Difference was 0 hour, 13 min, 41 sec, favoring method 1

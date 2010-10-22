@@ -27,25 +27,32 @@ ent <- function(v) {
 	ev <- apply(th, 1, entCalc, v)
 	maxe <- max(ev)
 	slop <- (max(ev) - min(ev)) / 99
-	return(list(MXENT=maxe, SLOPE=slop))
+	return(list(MXENT=maxe, SLOPE=slop, MXE_CURVE=ev))
 }
 rmsqe <- function(v) {
 	v <- v*0.01
 	tv <- rep(1, times=length(v))
-	vx <- cbind(v, tv)
 	y <- (v-tv)^2; y <- sqrt(sum(y) / length(v))
 	return(y)
 }
+errDist <- function(v) {
+	v <- v*0.01
+	tv <- rep(0.5, times=length(v))
+	y <- (v-tv)^2
+	h <- hist(y^2, breaks=25, plot=F)
+	errD <- (length(which(h$counts[2:(length(h$counts)-1)] != 0))) / (length(h$counts)-2)
+	return(errD)
+}
+areaBeyond <- function(rs, v) {
+	#Nothing for the moment
+}
+
 accMetrics <- function(rs, x) {
 	v <- xyValues(rs, x)
 	v <- v[which(!is.na(v))]
 	or <- omissionRate(v)
 	err <- rmsqe(v)
+	ed <- errDist(v)
 	mxe <- ent(v)
-	return(list(OMISSION_RATE=or, RMSQE=err, MAX_ENT=mxe$MXENT, SLOPE=mxe$SLOPE))
+	return(list(METRICS=data.frame(SUIT=mean(v), SUITSD=sd(v), SUITX=max(v), SUITN=min(v), OMISSION_RATE=or, RMSQE=err, ERR_DIST=ed, MAX_ENT=mxe$MXENT, SLOPE=mxe$SLOPE), MXE_CURVE=mxe$MXE_CURVE))
 }
-
-ras <- raster("./data/runs/1-sorghum-tmin_tsuitability.asc")
-td <- read.csv("./data/test.csv")
-td <- cbind(td[,18], td[,17])
-m <- accMetrics(ras, td)
