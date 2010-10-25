@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "-ie: python Replace_ASCII_MRI.py G:\MRI_grids K:\MRIData\MRIAAIGrid 2015 2039 prec SN0A"
+	print "-ie: python Replace_ASCII_MRI.py F:\MRI_grids K:\MRIData\MRIAAIGrid 2079 2079 prec SF0A"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -30,12 +30,12 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
 for year in range(inityear, finalyear + 1, 1):
-    for month in range (1, 12 + 1, 1):
+    for month in range (11, 11 + 1, 1):
         if month < 10 and gp.Exists(dirout + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"):
             gp.workspace = dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"
             print "\n---> Processing: " + dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + "0" + str(month) + "010000"
             
-            rasters = gp.ListRasters(variable + "_0*", "GRID")
+            rasters = gp.ListRasters(variable + "_*", "GRID")
             for raster in rasters:
                 print raster
                 InRaster = gp.workspace + '\\' + raster
@@ -54,7 +54,7 @@ for year in range(inityear, finalyear + 1, 1):
             gp.workspace = dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000"
             print "\n---> Processing: " + dirbase + "\\" + variable + "\\" + scenario + "\\OUT_" + str(year) + str(month) + "010000"
             
-            rasters = gp.ListRasters(variable + "_0*", "GRID")
+            rasters = gp.ListRasters(variable + "_*", "GRID")
             for raster in rasters:
                 print raster
                 InRaster = gp.workspace + '\\' + raster
