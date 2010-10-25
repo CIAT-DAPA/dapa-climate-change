@@ -29,7 +29,7 @@ for (m in monthList) {
 
 compareAndPlot <- function(msk, gcmrs, wclrs, plotit=T, plotDir=".", plotName="dummy") {
 	cszGCM <- (gcmrs@extent@xmax - gcmrs@extent@xmin) / gcmrs@ncols
-	coords <- xyFromCell(gcmrs, 1:ncell(which(!is.na(msk[])))); coords <- as.matrix(cbind(coords[,1], coords[,2]))
+	coords <- xyFromCell(msk, which(!is.na(msk[]))); coords <- as.matrix(cbind(coords[,1], coords[,2]))
 	res <- apply(coords, 1, extractGCMCell, wclrs, cszGCM)
 	
 	#Now create a raster for each parameter
@@ -59,7 +59,7 @@ compareAndPlot <- function(msk, gcmrs, wclrs, plotit=T, plotDir=".", plotName="d
 	pd.n <- lims*fit.n$coefficients[2] + fit.n$coefficients[1]; pd.n <- cbind(lims, pd.n)
 	
 	if (plotit) {
-		jpeg(paste(plotDir, "/", plotname, ".jpg", sep=""))
+		jpeg(paste(plotDir, "/", plotName, ".jpg", sep=""))
 		plot(compMatrix$GCM, compMatrix$WCL.M,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
 		lines(pd.mf); #lines(pd, lty=2)
 		lines(pd.xf, col="red", lty=3); #lines(pd.m, lty=2); #abline(0,1,lty=2)
@@ -89,6 +89,6 @@ extractGCMCell <- function(x, rs, gcmRes) {
 	xy <- xyFromCell(bx, 1:ncell(bx))
 	wclVals <- xyValues(rs, xy)
 	wclVals <- wclVals[which(!is.na(wclVals))]
-	res <- c(mean(wclVals), max(wclVals), min(wclVals)) #data.frame(MEAN=mean(wclVals), MAX=max(wclVals), MIN=min(wclVals))
+	if (length(wclVals) == 0) {res <- c(NA, NA, NA)} else {res <- c(mean(wclVals), max(wclVals), min(wclVals))}
 }
 
