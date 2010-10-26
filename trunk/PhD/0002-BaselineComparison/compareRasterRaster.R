@@ -27,6 +27,11 @@ for (m in monthList) {
 	cp <- compareAndPlot(mk, rsb, rsa, plotit=T, plotDir=".", plotName="dummy")
 }
 
+createMask <- function(shp, msk) {
+	
+	shp <- polygonToRaster()
+}
+
 compareAndPlot <- function(msk, gcmrs, wclrs, plotit=T, plotDir=".", plotName="dummy") {
 	cszGCM <- (gcmrs@extent@xmax - gcmrs@extent@xmin) / gcmrs@ncols
 	coords <- xyFromCell(msk, which(!is.na(msk[]))); coords <- as.matrix(cbind(coords[,1], coords[,2]))
