@@ -13,7 +13,7 @@ gpclibPermit()
 createBuffers <- function(x, msk, buffDist=50000, method=1, verbose=F) {
 	occ <- as.data.frame(x)
 	names(occ) <- c("lon", "lat")
-	if (method == 1) {msk <- raster(msk); msk[which(!is.na(msk[]))] <- 0}
+	if (method == 1) {msk <- raster(msk); msk[which(!is.na(msk[]))] <- 0}; a.msk <- msk
 	if (verbose) cat("Buffering the points \n")
 	if (verbose) {pb <- pbCreate(nrow(occ), "text", style=3)}
 	for (pnt in 1:nrow(occ)) {
@@ -56,7 +56,8 @@ createBuffers <- function(x, msk, buffDist=50000, method=1, verbose=F) {
 		pa[which(is.na(msk[]))] <- NA
 		return(pa)
 	} else {
+		msk[which(is.na(a.msk[]))] <- NA
+		rm(a.msk)
 		return(msk)
 	}
-	
 }
