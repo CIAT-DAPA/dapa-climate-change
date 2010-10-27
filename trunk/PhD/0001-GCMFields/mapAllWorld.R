@@ -1,6 +1,8 @@
 source("averageAndMapGCMFields.R")
 
 ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting/newFeatures", "SRES_A1B", "anomalies", "2010_2039", xn=-120, xx=-72, yn=-8, yx=32, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", plt="prec", writeRasterFiles=T)
+ot <- mapGCMFields(c(1,2:24), "D:/", "C:/CIAT_work/Workspace/lcollet", "SRES_A1B", "anomalies", "2040_2069", xn=94, xx=110, yn=5, yx=20, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", plt="prec", writeRasterFiles=F)
+
 
 ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting/GCMFields", "SRES_A1B", "anomalies", "2010_2039", xn=-180, xx=180, yn=-90, yx=90, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
 ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting/GCMFields", "SRES_A1B", "anomalies", "2020_2049", xn=-180, xx=180, yn=-90, yx=90, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)
