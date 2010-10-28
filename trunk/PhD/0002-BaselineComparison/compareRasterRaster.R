@@ -14,71 +14,83 @@ compareRR <- function(gcmDir, gcm, wclDir, shpDir, outDir, vn="prec", divide=T, 
 	#Create country folder
 	outDir <- paste(outDir, "/", country, sep=""); if (!file.exists(outDir)) {dir.create(outDir)}
 	outDir <- paste(outDir, "/", gcm, sep=""); if (!file.exists(outDir)) {dir.create(outDir)}
-	#Loading basic data
-	gcmrsDir <- paste(gcmDir, "/", gcm, "/1961_1990", sep="")
-	sh <- readShapePoly(paste(shpDir, "/", country, "_adm/", country, "0.shp", sep=""))
-	mk <- raster(paste(gcmrsDir, "/prec_01.asc", sep=""))
-	#Creating the mask
-	mkRes <- (mk@extent@xmax - mk@extent@xmin) / mk@ncols
-	mk <- createMask(sh, mkRes); cat("Mask done! \n")
-	#Looping months
-	mcounter <- 1
-	for (m in monthList) {
-		cat("Month", m, "\n")
-		if (m < 10) {mth <- paste(0, m, sep="")} else {mth <- m}
-		#Loading the data (high resol baseline & GCM baseline)
-		rsa <- raster(paste(wclDir, "/", vn, "_", m, ext, sep=""))
-		rsb <- raster(paste(gcmrsDir, "/", vn, "_", mth, ext, sep="")); cat("Rasters loaded! \n")
-		#Performing the statistical comparison
-		cp <- compareAndPlot(mk, rsb, rsa, plotit=T, plotDir=outDir, plotName=paste(vn,"-",m,sep="")); cat("Comparison done! \n")
-		#Plotting the whole rasterstack
-		#par(mfrow=c(2,2))
-		#lims <- c(cp$RasterLayers@layers[[1]][], cp$RasterLayers@layers[[2]][], cp$RasterLayers@layers[[2]][], cp$RasterLayers@layers[[3]][], cp$RasterLayers@layers[[4]][])
-		#lims <- lims[which(!is.na(lims))]; lims <- c(min(lims), max(lims))
-		#cat("Writing rasters \n")
-		for (l in 1:length(cp$RasterLayers@layers)) {
-			ro <- writeRaster(raster(cp$RasterLayers,l), paste(outDir,"/",vn,"_",m,"-",cp$RasterLayer@layernames[l],sep=""), overwrite=T)
-			rm(ro)
-			#plot(raster(cp$RasterLayers,l), zlim=lims)
-			#plot(sh, add=T)
-		}
-		mt <- cbind(MONTH=rep(m, times=nrow(cp$Metrics)), cp$Metrics)
-		pdo <- cbind(MONTH=rep(m, times=nrow(cp$plotData)), cp$plotData)
-		if (length(monthList) > 1) {
-			if (mcounter == 1) {
-				#cat("Summarising (1) \n")
-				rsd <- rsb
-				rsc <- rsa
-				om <- mt
-				pdt <- pdo
-			} else {
-				#cat("Summarising (1+m) \n")
-				rsd <- rsd + rsb
-				rsc <- rsc + rsa
-				om <- rbind(om, mt)
-				pdt <- rbind(pdt, pdo)
+	lgname <- paste("log-", vn, sep="")
+	if (!file.exists(paste(outDir, "/", lgname, sep=""))) {
+		#Loading basic data
+		gcmrsDir <- paste(gcmDir, "/", gcm, sep="")
+		sh <- readShapePoly(paste(shpDir, "/", country, "_adm/", country, "0.shp", sep=""))
+		mk <- raster(paste(gcmrsDir, "/prec_01.asc", sep=""))
+		#Creating the mask
+		mkRes <- (mk@extent@xmax - mk@extent@xmin) / mk@ncols
+		mk <- createMask(sh, mkRes); cat("Mask done! \n")
+		#Looping months
+		mcounter <- 1
+		for (m in monthList) {
+			cat("Month", m, "\n")
+			if (m < 10) {mth <- paste(0, m, sep="")} else {mth <- m}
+			#Loading the data (high resol baseline & GCM baseline)
+			rsa <- raster(paste(wclDir, "/", vn, "_", m, ext, sep=""))
+			rsb <- raster(paste(gcmrsDir, "/", vn, "_", mth, ext, sep="")); cat("Rasters loaded! \n")
+			#Performing the statistical comparison
+			cp <- compareAndPlot(mk, rsb, rsa, plotit=T, plotDir=outDir, plotName=paste(vn,"-",m,sep="")); cat("Comparison done! \n")
+			#Plotting the whole rasterstack
+			#par(mfrow=c(2,2))
+			#lims <- c(cp$RasterLayers@layers[[1]][], cp$RasterLayers@layers[[2]][], cp$RasterLayers@layers[[2]][], cp$RasterLayers@layers[[3]][], cp$RasterLayers@layers[[4]][])
+			#lims <- lims[which(!is.na(lims))]; lims <- c(min(lims), max(lims))
+			#cat("Writing rasters \n")
+			for (l in 1:length(cp$RasterLayers@layers)) {
+				ro <- writeRaster(raster(cp$RasterLayers,l), paste(outDir,"/",vn,"_",m,"-",cp$RasterLayer@layernames[l],sep=""), overwrite=T)
+				rm(ro)
+				#plot(raster(cp$RasterLayers,l), zlim=lims)
+				#plot(sh, add=T)
 			}
+			mt <- cbind(MONTH=rep(m, times=nrow(cp$Metrics)), cp$Metrics)
+			pdo <- cbind(MONTH=rep(m, times=nrow(cp$plotData)), cp$plotData)
+			if (length(monthList) > 1) {
+				if (mcounter == 1) {
+					#cat("Summarising (1) \n")
+					rsd <- rsb
+					rsc <- rsa
+					om <- mt
+					pdt <- pdo
+				} else {
+					#cat("Summarising (1+m) \n")
+					rsd <- rsd + rsb
+					rsc <- rsc + rsa
+					om <- rbind(om, mt)
+					pdt <- rbind(pdt, pdo)
+				}
+			}
+			mcounter <- mcounter+1
 		}
-		mcounter <- mcounter+1
-	}
-	#cat("Summary \n")
-	if (divide) {
-		#cat("Averaging \n")
-		rsc <- rsc / length(monthList)
-		rsd <- rsd / length(monthList)
-	}
-	#Performing statistical comparison
-	cp <- compareAndPlot(mk, rsd, rsc, plotit=T, plotDir=outDir, plotName=paste(vn,"-total",sep="")); cat("Comparison done! \n")
-	for (l in 1:length(cp$RasterLayers@layers)) {
-		ro <- writeRaster(raster(cp$RasterLayers,l), paste(outDir,"/",vn,"_total-",cp$RasterLayer@layernames[l],sep=""), overwrite=T)
-		rm(ro)
-	}
-	mt <- cbind(MONTH=rep("total", times=nrow(cp$Metrics)), cp$Metrics); om <- rbind(om, mt)
-	pdo <- cbind(MONTH=rep("total", times=nrow(cp$plotData)), cp$plotData); pdt <- rbind(pdt, pdo)
-	#Writing metrics matrix
-	write.csv(om, paste(outDir,"/metrics.csv",sep=""), row.names=F)
-	write.csv(pdt, paste(outDir, "/plotData.csv", sep=""), row.names=F)
-	return(om)
+		#cat("Summary \n")
+		if (divide) {
+			#cat("Averaging \n")
+			rsc <- rsc / length(monthList)
+			rsd <- rsd / length(monthList)
+		}
+		#Performing statistical comparison
+		cp <- compareAndPlot(mk, rsd, rsc, plotit=T, plotDir=outDir, plotName=paste(vn,"-total",sep="")); cat("Comparison done! \n")
+		for (l in 1:length(cp$RasterLayers@layers)) {
+			ro <- writeRaster(raster(cp$RasterLayers,l), paste(outDir,"/",vn,"_total-",cp$RasterLayer@layernames[l],sep=""), overwrite=T)
+			rm(ro)
+		}
+		mt <- cbind(MONTH=rep("total", times=nrow(cp$Metrics)), cp$Metrics); om <- rbind(om, mt)
+		pdo <- cbind(MONTH=rep("total", times=nrow(cp$plotData)), cp$plotData); pdt <- rbind(pdt, pdo)
+		#Writing metrics matrix
+		write.csv(om, paste(outDir,"/metrics-", vn, ".csv",sep=""), row.names=F)
+		write.csv(pdt, paste(outDir, "/plotData-", vn, ".csv", sep=""), row.names=F)
+		createLog(outDir, lgname)
+		return(om)
+	} else {return("Task completed previously")}
+}
+
+createLog <- function(folder, name) {
+	zz <- file(paste(folder, "/", name, sep=""), open="w")
+	cat("Done on", date(), "\n", file=zz)
+	cat("Platform", version$platform, "\n", file=zz)
+	cat("Version", version$version.string, "\n", file=zz)
+	close(zz)
 }
 
 createMask <- function(shp, res) { #Function to create a mask
