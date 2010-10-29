@@ -33,9 +33,10 @@ for (ctry in cList) {
 #CRU
 #################################################################################
 #################################################################################
-md <- "G:/climate_change/IPCC_CMIP3/20C3M/filled"
+md <- "C:/Workspace/PhD-work/cru-wcl-gcm-comparison/gcm-data/20C3M/1961_1990"
+gcmList <- list.files(md)
 cd <- "C:/Workspace/PhD-work/cru-wcl-gcm-comparison/cru-data"
-shd <- "F:/Administrative_boundaries/SHP_files"
+shd <- "G:/Administrative_boundaries/SHP_files"
 
 cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "MLI", "BFA")
 jja <- "C:/Workspace/PhD-work/cru-wcl-gcm-comparison/cru-results/JJA"
