@@ -25,6 +25,22 @@ write.csv(rs, "./data/unique.csv", row.names=F, quote=T)
 write.csv(rs[which(rs$TEST_TRAIN == "TEST"),], "./data/test.csv", row.names=F, quote=T)
 write.csv(rs[which(rs$TEST_TRAIN == "TRAIN"),], "./data/train.csv", row.names=F, quote=T)
 
+#Buffer all points at 25km, 50km 100km, 200km, 300km, 400km, 500km, 750km, 1000km, 1500km, 2000km
+source("./src/bufferPoints.R")
+ds <- read.csv("./data/unique.csv"); ds <- cbind(ds[,18], ds[,17])
+rs <- "./data/climate/prec_1.asc"
+for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
+	if (!file.exists(paste("./data/buffered/bf-", bd, "km.asc", sep=""))) {
+		bf <- createBuffers(ds, rs, buffDist=bd*1000, method=1, verbose=T)
+		bf <- writeRaster(bf, paste("./data/buffered/bf-", bd, "km.asc", sep=""), format='ascii', overwrite=T)
+	}
+}
+
+#Method 1 started on "Thu Oct 21 08:34:26 2010", finished on "Thu Oct 21 09:48:18 2010", totalling 1 hour, 13 min, 52 sec (4432 sec)
+#Method 2 started on "Thu Oct 21 10:25:21 2010", finished on "Thu Oct 21 11:52:54 2010", totalling 1 hour, 27 min, 33 sec (5253 sec)
+#Difference was 0 hour, 13 min, 41 sec, favoring method 1
+
+
 #Extracting climate data
 source("./src/extractClimateData.R")
 rs <- read.csv("./data/unique.csv")
@@ -131,17 +147,3 @@ for (gs in gsList) {
 write.csv(rres, "./data/accuracy-metrics.csv", row.names=F)
 write.csv(cres, "./data/entropy-curves.csv", row.names=F)
 
-#Buffer all points at 25km, 50km 100km, 200km, 300km, 400km, 500km, 750km, 1000km, 1500km, 2000km
-source("./src/bufferPoints.R")
-ds <- read.csv("./data/unique.csv"); ds <- cbind(ds[,18], ds[,17])
-rs <- "./data/climate/prec_1.asc"
-for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
-	if (!file.exists(paste("./data/buffered/bf-", bd, "km.asc", sep=""))) {
-		bf <- createBuffers(ds, rs, buffDist=bd*1000, method=1, verbose=T)
-		bf <- writeRaster(bf, paste("./data/buffered/bf-", bd, "km.asc", sep=""), format='ascii', overwrite=T)
-	}
-}
-
-#Method 1 started on "Thu Oct 21 08:34:26 2010", finished on "Thu Oct 21 09:48:18 2010", totalling 1 hour, 13 min, 52 sec (4432 sec)
-#Method 2 started on "Thu Oct 21 10:25:21 2010", finished on "Thu Oct 21 11:52:54 2010", totalling 1 hour, 27 min, 33 sec (5253 sec)
-#Difference was 0 hour, 13 min, 41 sec, favoring method 1
