@@ -13,8 +13,6 @@
 
 &if not [exists %outdir% -dir] &then &sys md %outdir%
 
-&s modname [extract %md% %modellist%]
-
 &s outmoddir %outdir%\%modname%
 &if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
 
