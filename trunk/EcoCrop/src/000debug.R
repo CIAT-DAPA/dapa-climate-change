@@ -147,3 +147,15 @@ for (gs in gsList) {
 write.csv(rres, "./data/accuracy-metrics.csv", row.names=F)
 write.csv(cres, "./data/entropy-curves.csv", row.names=F)
 
+source("./src/areaFalse.R")
+for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
+	cat("Process started for BD", bd, "\n")
+	a <- raster("./data/area/cell-area.asc")
+	s <- raster("./data/runs/2-sorghum-tmin_suitability.asc")
+	b <- raster(paste("./data/buffered/bf-", bd, "km.asc", sep=""))
+	
+	m <- areaFalse(a,s,b)
+	m$DIST.KM <- rep(bd, times=nrow(m))
+	if (bd == 25) {mo <- m} else {mo <- rbind(mo, m)}
+}
+write.csv(mo, "./data/areaFalse.csv", row.names=F)
