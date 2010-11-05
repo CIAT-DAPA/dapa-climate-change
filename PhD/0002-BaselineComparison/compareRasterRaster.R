@@ -174,9 +174,10 @@ compareAndPlot <- function(msk, gcmrs, wclrs, plotit=T, plotDir=".", plotName="d
 	#cat("...Metrics \n")
 	rsq <- c(summary(fit.mf)$r.squared, summary(fit.xf)$r.squared, summary(fit.nf)$r.squared)
 	adj.rsq <- c(summary(fit.mf)$adj.r.squared, summary(fit.xf)$adj.r.squared, summary(fit.nf)$adj.r.squared)
+	slp <- c(fit.mf$coefficients, fit.xf$coefficients, fit.nf$coefficients)
 	rmsqe <- c(sqrt(sum((compMatrix$CL.M - compMatrix$GCM) ^ 2) / nrow(compMatrix)), sqrt(sum((compMatrix$CL.X - compMatrix$GCM) ^ 2) / nrow(compMatrix)), sqrt(sum((compMatrix$CL.N - compMatrix$GCM) ^ 2) / nrow(compMatrix)))
 	f <- c(summary(fit.mf)$fstatistic[1], summary(fit.xf)$fstatistic[1], summary(fit.nf)$fstatistic[1])
 	if (length(f) == 0) {f <- c(NA,NA,NA)}
-	m <- data.frame(VALUE=c("MEAN","MAX","MIN"), R2=rsq, ADJ.R2=adj.rsq, ERROR=rmsqe, F.STAT=f)
+	m <- data.frame(VALUE=c("MEAN","MAX","MIN"), R2=rsq, ADJ.R2=adj.rsq, SLOPE=slp, ERROR=rmsqe, F.STAT=f)
 	return(list(Metrics=m, RasterLayers=stk, plotData=compMatrix))
 }
