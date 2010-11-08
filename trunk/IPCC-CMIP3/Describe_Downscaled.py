@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_Downscaled.py M:\climate_change\IPCC_CMIP3\ A1B D:\Describes\Downscaled"
+	print "   - ie: python Describe_Downscaled.py M:\climate_change\IPCC_CMIP3\ A1B F:\IPCC_CMIP3_process"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -34,7 +34,7 @@ else:
 
 outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
-for model in modellist:
+for model in modellist[16:]:
     for period in periodlist:
         gp.workspace = dirbase + "SRES_" + scenario + "\downscaled" + "\\" + model + "\\" + period
         print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\downscaled" + "\\" + model + "\\" + period
@@ -47,7 +47,7 @@ for model in modellist:
             MEA = gp.GetRasterProperties_management(raster, "MEAN")
             STD = gp.GetRasterProperties_management(raster, "STD")
             CEX = gp.GetRasterProperties_management(raster, "CELLSIZEX")
-            outFile = open(dirout + "\\Interpolations_SRES_" + scenario + ".txt", "a")
+            outFile = open(dirout + "\\Downscaled_SRES_" + scenario + ".txt", "a")
             outFile.write(scenario + "\t" + model + "\t" + period + "\t" + raster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
 
 outFile.close()
