@@ -147,6 +147,18 @@ for (gs in gsList) {
 write.csv(rres, "./data/accuracy-metrics.csv", row.names=F)
 write.csv(cres, "./data/entropy-curves.csv", row.names=F)
 
+#Merge tmax & tmin runs
+d <- read.csv("./data/unique.csv")
+parList <- read.csv("./data/calibration-parameters.csv")
+gsList <- unique(parList$GS)
+for (gs in gsList) {
+	n <- raster(paste("./data/runs/", gs, "-sorghum-tmin_suitability.asc", sep=""))
+	x <- raster(paste("./data/runs/", gs, "-sorghum-tmax_suitability.asc", sep=""))
+	r <- suitMerge(n,x)
+	
+}
+
+
 source("./src/areaFalse.R")
 for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
 	cat("Process started for BD", bd, "\n")
