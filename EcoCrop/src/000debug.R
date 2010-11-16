@@ -1,4 +1,4 @@
-#Debugging scripts
+#Debugging script
 
 #Getting unique coordinates
 source("./src/getUniqueCoord.R")
