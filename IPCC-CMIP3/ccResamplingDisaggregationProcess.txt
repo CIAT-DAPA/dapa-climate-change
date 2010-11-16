@@ -15,10 +15,10 @@ Resampling Disaggregation
 198.93.225.57 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated iap_fgoals1_0_g G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
 198.93.225.57 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated ingv_echam4 G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
 198.93.225.57 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated inm_cm3_0 G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
--&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated ipsl_cm4 E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
--&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated miroc3_2_hires E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
--&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated miroc3_2_medres E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
--&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated miub_echo_g E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
+198.93.225.64 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated ipsl_cm4 G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
+198.93.225.64 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated miroc3_2_hires G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
+198.93.225.64 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated miroc3_2_medres G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
+198.93.225.64 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated miub_echo_g G:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated mpi_echam5 E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated mri_cgcm2_3_2a E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
 -&r resampling_disaggregation_mod.aml L:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated ncar_ccsm3_0 E:\IPCC_CMIP3_process\SRES_A1B\resample_disaggregated 2.5
