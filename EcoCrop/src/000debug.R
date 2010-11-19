@@ -148,26 +148,86 @@ write.csv(rres, "./data/accuracy-metrics.csv", row.names=F)
 write.csv(cres, "./data/entropy-curves.csv", row.names=F)
 
 #Merge tmax & tmin runs
+source("./src/suitMerge.R")
 d <- read.csv("./data/unique.csv")
 parList <- read.csv("./data/calibration-parameters.csv")
 gsList <- unique(parList$GS)
 for (gs in gsList) {
+	cat("GS:", gs, "\n")
 	n <- raster(paste("./data/runs/", gs, "-sorghum-tmin_suitability.asc", sep=""))
 	x <- raster(paste("./data/runs/", gs, "-sorghum-tmax_suitability.asc", sep=""))
 	r <- suitMerge(n,x)
 	
-}
-
-
-source("./src/areaFalse.R")
-for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
-	cat("Process started for BD", bd, "\n")
-	a <- raster("./data/area/cell-area.asc")
-	s <- raster("./data/runs/2-sorghum-tmin_suitability.asc")
-	b <- raster(paste("./data/buffered/bf-", bd, "km.asc", sep=""))
+	rs <- raster(r,1); rs <- writeRaster(rs, paste("./data/runs/", gs, "-sorghum-merged_suitability.asc", sep=""), overwrite=T, format='ascii')
+	pd <- raster(r,2); rs <- writeRaster(rs, paste("./data/runs/", gs, "-sorghum-mergedwhich_suitability.asc", sep=""), overwrite=T, format='ascii')
 	
-	m <- areaFalse(a,s,b)
-	m$DIST.KM <- rep(bd, times=nrow(m))
-	if (bd == 25) {mo <- m} else {mo <- rbind(mo, m)}
+	jpeg(paste("./data/runs/", gs, "-sorghum-merged_suitability.jpg", sep=""), quality=100, height=600, width=1800)
+	par(mfrow=c(1,2))
+	plot(rs, col=colorRampPalette(c("yellow","red"))(100))
+	points(d$Longitude, d$Latitude, pch=20, cex=0.7, col="blue")
+	plot(pd)
+	points(d$Longitude, d$Latitude, pch=20, cex=0.7, col="blue")
+	dev.off()
 }
-write.csv(mo, "./data/areaFalse.csv", row.names=F)
+
+#Accuracy metrics for the merged grids
+source("./src/accuracy.R")
+test <- read.csv("./data/test.csv"); test <- cbind(test[,18], test[,17])
+train <- read.csv("./data/train.csv"); train <- cbind(train[,18], train[,17])
+parList <- read.csv("./data/calibration-parameters.csv")
+gsList <- unique(parList$GS)
+for (gs in gsList) {
+	cat("GS:", gs, "\n")
+	rs <- raster(paste("./data/runs/", gs, "-sorghum-merged_suitability.asc", sep=""))
+	tem <- accMetrics(rs, test) #doing with test data
+	trm <- accMetrics(rs, train) #doing with training data
+	resrow <- data.frame(GS=gs, TEST.AV.SUIT=tem$METRICS$SUIT, TEST.SD.SUIT=tem$METRICS$SUITSD, TEST.MAX.SUIT=tem$METRICS$SUITX, TEST.MIN.SUIT=tem$METRICS$SUITN, TEST.OMISSION.RATE=tem$METRICS$OMISSION_RATE, TEST.ERROR=tem$METRICS$RMSQE, TEST.ERR.DIST=tem$METRICS$ERR_DIST, TEST.MXE=tem$METRICS$MAX_ENT, TEST.SLOPE=tem$METRICS$SLOPE, TRAIN.AV.SUIT=trm$METRICS$SUIT, TRAIN.SD.SUIT=trm$METRICS$SUITSD, TRAIN.MAX.SUIT=trm$METRICS$SUITX, TRAIN.MIN.SUIT=trm$METRICS$SUITN, TRAIN.OMISSION.RATE=trm$METRICS$OMISSION_RATE, TRAIN.ERROR=trm$METRICS$RMSQE, TRAIN.ERR.DIST=trm$METRICS$ERR_DIST, TRAIN.MXE=trm$METRICS$MAX_ENT, TRAIN.SLOPE=trm$METRICS$SLOPE)
+	rescol <- data.frame(tem$MXE_CURVE, trm$MXE_CURVE)
+	names(rescol) <- c(paste("TEST.GS.",gs,sep=""), paste("TRAIN.GS.",gs,sep=""))
+	if (gs == gsList[1]) {
+		rres <- resrow
+		cres <- cbind(SUIT=c(1:100), rescol)
+	} else {
+		rres <- rbind(rres, resrow)
+		cres <- cbind(cres, rescol)
+	}
+}
+write.csv(rres, "./data/accuracy-metrics-merged.csv", row.names=F)
+write.csv(cres, "./data/entropy-curves-merged.csv", row.names=F)
+
+#Area outside and inside different buffer sizes for merged suitability rasters
+source("./src/areaFalse.R")
+parList <- read.csv("./data/calibration-parameters.csv")
+gsList <- unique(parList$GS)
+for (gs in gsList) {
+	for (bd in c(25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000)) {
+		cat("Process started for BD", bd, "\n")
+		a <- raster("./data/area/cell-area.asc")
+		s <- raster(paste("./data/runs/", gs, "-sorghum-merged_suitability.asc", sep=""))
+		b <- raster(paste("./data/buffered/bf-", bd, "km.asc", sep=""))
+		
+		m <- areaFalse(a,s,b)
+		m <- data.frame(DIST.KM=bd, SUI.IN.AREA=m[2,2], SUI.IN.FRAC=m[2,3], SUI.OT.AREA=m[1,2], SUI.OT.FRAC=m[1,3], UNS.IN.AREA=m[4,2], UNS.IN.FRAC=m[4,3], UNS.OT.AREA=m[3,2], UNS.OT.FRAC=m[3,3])
+		
+		if (bd == 25) {mo <- m} else {mo <- rbind(mo, m)}
+	}
+	mo$TOTAL.IN <- mo$SUI.IN.AREA + mo$UNS.IN.AREA
+	mo$SUI.FRAC <- mo$SUI.IN.AREA / mo$TOTAL.IN
+	mo$UNS.FRAC <- mo$UNS.IN.AREA / mo$TOTAL.IN
+	mo$TOTAL.SUI <- mo$SUI.IN.AREA + mo$SUI.OT.AREA
+	mo$IN.FRAC <- mo$SUI.IN.AREA / mo$TOTAL.SUI
+	mo$OT.FRAC <- mo$SUI.OT.AREA / mo$TOTAL.SUI
+	mo$GS <- rep(gs, times=nrow(mo))
+	
+	if (gs == gsList[1]) {
+		mf <- mo
+	} else {
+		mf <- rbind(mf, mo)
+	}
+	
+}
+write.csv(mf, "./data/areaFalse.csv", row.names=F)
+
+
+
+
