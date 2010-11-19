@@ -6,6 +6,8 @@
 	#1. Test and train omission rates with S>0, for Psuit, Tsuit, Suit
 	#2. RMSQE from 1 vs 0/1 (S>0)
 	#3. Maximum entropy, entropy line slope
+	#4. Error distribution (edist) calculates a histogram of the error and then the percent 
+	#   of clases that are different to zero error.
 
 require(rgdal)
 require(raster)
@@ -38,7 +40,7 @@ rmsqe <- function(v) {
 errDist <- function(v) {
 	v <- v*0.01
 	tv <- rep(0.5, times=length(v))
-	y <- (v-tv)^2
+	y <- (v-tv)
 	h <- hist(y^2, breaks=25, plot=F)
 	errD <- (length(which(h$counts[2:(length(h$counts)-1)] != 0))) / (length(h$counts)-2)
 	return(errD)
@@ -48,7 +50,7 @@ areaBeyond <- function(rs, v) {
 }
 
 accMetrics <- function(rs, x) {
-	v <- xyValues(rs, x)
+	v <- extract(rs, x)
 	v <- v[which(!is.na(v))]
 	or <- omissionRate(v)
 	err <- rmsqe(v)

@@ -37,5 +37,6 @@ areaFalse <- function(a, s, b) {
 	auo <- sum(a.nsu.out[which(!is.na(a.nsu.out[]))]); fauo <- auo / ta
 
 	#plot(stack(a.sui.out, a.sui.in, a.nsu.in, a.nsu.out))
-	d <- data.frame(METRIC=c("SUI.OUT", "SUI.IN", "UNSUI.OUT", "UNSUI.IN"), AREA=c(aso, asi, auo, aui), FRACTION=c(faso, fasi, fauo, faui)) 
+	d <- data.frame(METRIC=c("SUI.OUT", "SUI.IN", "UNSUI.OUT", "UNSUI.IN"), AREA=c(aso, asi, auo, aui), FRACTION=c(faso, fasi, fauo, faui))
+	return(d)
 }
