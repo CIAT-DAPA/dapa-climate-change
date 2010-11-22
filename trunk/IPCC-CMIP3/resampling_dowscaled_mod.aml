@@ -1,0 +1,40 @@
+&args rootdir modname outfolder resol /*scenario
+&if [null %rootdir%] &then &return Use scenario and/or root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+
+
+&if %resol% EQ 2.5 &then &s outdir %outfolder%\Global_2_5min
+&else &if %resol% EQ 5 &then &s outdir %outfolder%\Global_5min
+&else &s outdir %outfolder%\Global_10min
+
+&if not [exists %outdir% -dir] &then &sys md %outdir%
+
+&s outmoddir %outdir%\%modname%
+&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
+
+&do year &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+	
+	&s outmodyeardir %outmoddir%\%year%
+	
+	&if not [exists %outdir%\%modname%\moddone_%year%.txt -FILE] &then
+		&do
+			&ty
+			&ty Model %modname% (%year%, %resol%)
+			&if not [exists %outmodyeardir% -dir] &then &sys md %outmodyeardir%
+			&r resample_GCM.aml %rootdir%\%modname%\%year% %outmodyeardir% %resol% NEAREST
+		&end
+	&else 
+		&do
+			&ty 
+			&ty Model %modname% (%year%, %resol%) processed
+		&end
+	
+	&sys dir /d /b /o %outdir%\%modname%\%year%\* > %outdir%\%modname%\moddone_%year%.txt
+
+&end
+	
+
