@@ -149,6 +149,8 @@ write.csv(cres, "./data/entropy-curves.csv", row.names=F)
 
 #Merge tmax & tmin runs
 source("./src/suitMerge.R")
+library(maptools)
+data(wrld_simpl)
 d <- read.csv("./data/unique.csv")
 parList <- read.csv("./data/calibration-parameters.csv")
 gsList <- unique(parList$GS)
@@ -159,13 +161,13 @@ for (gs in gsList) {
 	r <- suitMerge(n,x)
 	
 	rs <- raster(r,1); rs <- writeRaster(rs, paste("./data/runs/", gs, "-sorghum-merged_suitability.asc", sep=""), overwrite=T, format='ascii')
-	pd <- raster(r,2); rs <- writeRaster(rs, paste("./data/runs/", gs, "-sorghum-mergedwhich_suitability.asc", sep=""), overwrite=T, format='ascii')
+	pd <- raster(r,2); rs <- writeRaster(pd, paste("./data/runs/", gs, "-sorghum-mergedwhich_suitability.asc", sep=""), overwrite=T, format='ascii')
 	
 	jpeg(paste("./data/runs/", gs, "-sorghum-merged_suitability.jpg", sep=""), quality=100, height=600, width=1800)
 	par(mfrow=c(1,2))
-	plot(rs, col=colorRampPalette(c("yellow","red"))(100))
+	plot(rs, col=colorRampPalette(c("yellow","red"))(100)); plot(wrld_simpl, add=T)
 	points(d$Longitude, d$Latitude, pch=20, cex=0.7, col="blue")
-	plot(pd)
+	plot(pd); plot(wrld_simpl, add=T)
 	points(d$Longitude, d$Latitude, pch=20, cex=0.7, col="blue")
 	dev.off()
 }
@@ -228,6 +230,6 @@ for (gs in gsList) {
 }
 write.csv(mf, "./data/areaFalse.csv", row.names=F)
 
-
+#Now... the best predictions are MAX and MEAN, the best distributed is MEAN (according to the entropy curve)
 
 
