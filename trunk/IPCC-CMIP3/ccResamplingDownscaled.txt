@@ -23,9 +23,9 @@ Resampling Downscaled
 198.93.225.79 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled ingv_echam4 E:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 198.93.225.79 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled inm_cm3_0 E:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 198.93.225.79 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled ipsl_cm4 E:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
--&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled miroc3_2_hires G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
--&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled miroc3_2_medres G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
--&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled miub_echo_g G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
+198.93.225.57 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled miroc3_2_hires G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
+198.93.225.57 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled miroc3_2_medres G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
+198.93.225.57 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled miub_echo_g G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled mpi_echam5 G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled mri_cgcm2_3_2a G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled ncar_ccsm3_0 G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
