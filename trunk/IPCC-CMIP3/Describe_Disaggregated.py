@@ -34,7 +34,7 @@ else:
 
 outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
-for model in modellist:
+for model in modellist[5:10]:
     for period in periodlist:
         gp.workspace = dirbase + "SRES_" + scenario + "\\disaggregated" + "\\" + model + "\\" + period
         print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\disaggregated" + "\\" + model + "\\" + period
