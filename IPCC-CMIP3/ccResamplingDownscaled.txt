@@ -1,10 +1,11 @@
 Resampling Downscaled
 ---------------------
 
--&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 5
--&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 10
+198.93.225.57 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 5
+198.93.225.57 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 10
+198.93.225.64 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled G:\IPCC_CMIP3_process\SRES_A2\resample_downscaled 2.5
+198.93.225.64 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled G:\IPCC_CMIP3_process\SRES_A2\resample_downscaled 5
 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled G:\IPCC_CMIP3_process\SRES_A2\resample_downscaled 5
--&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled G:\IPCC_CMIP3_process\SRES_A2\resample_downscaled 10
 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_B1\downscaled G:\IPCC_CMIP3_process\SRES_B1\resample_downscaled 5
 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_B1\downscaled G:\IPCC_CMIP3_process\SRES_B1\resample_downscaled 10
 
@@ -33,8 +34,7 @@ Resampling Downscaled
 198.93.225.57 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled ukmo_hadcm3 G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 198.93.225.57 -&r resampling_downscaled_mod.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled ukmo_hadgem1 G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 2.5
 
-198.93.225.57 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 5
-198.93.225.57 -&r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\IPCC_CMIP3_process\SRES_A1B\resample_downscaled 10
+
 
 &r resampling_downscaled.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled G:\IPCC_CMIP3_process\SRES_A2\resample_downscaled 2.5
 
