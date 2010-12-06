@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Cells_Maps_MRI.py D:\MRI_Analysis\Maps 1979 2003 prec latin"
+	print "   - ie: python Cells_Maps_MRI.py D:\MRI_Analysis\Maps 1998 2003 tmean latin"
 	sys.exit(1)
 
 # Arguments
@@ -26,11 +26,12 @@ gp.CheckOutExtension("Spatial")
 os.system('cls')
 
 gp.workspace = dirbase
+gp.OverWriteOutput = 1
 
 print "\n"
-print "~~~~~~~~~~~~~~~"
-print "  CELLS MAPS   "
-print "~~~~~~~~~~~~~~~"
+print "~~~~~~~~~~~~~~"
+print "  CELLS MAPS  "
+print "~~~~~~~~~~~~~~"
 print "\n"
 
 dirtable = dirbase + "\\dbf"
@@ -87,5 +88,6 @@ for year in range(inityear, finalyear + 1, 1):
             gp.Idw_sa(inputFeatureDataset, attributeName, outputRaster, cell_size, IDW_power, IDW_neighborhood, Input_barrier_polyline_features)
 
             print "     ---> Interpolated " + metric + " " + variable + " " + str(degree) + " " + str(year)
+			print "\n"
 
 print "Done!!!!"
