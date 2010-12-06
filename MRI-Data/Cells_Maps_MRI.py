@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Cells_Maps_MRI.py D:\MRI_Analysis\Maps 1998 2003 tmean latin"
+	print "   - ie: python Cells_Maps_MRI.py D:\MRI_Analysis\Maps 1979 2003 prec world"
 	sys.exit(1)
 
 # Arguments
@@ -87,7 +87,6 @@ for year in range(inityear, finalyear + 1, 1):
             # Process: IDW
             gp.Idw_sa(inputFeatureDataset, attributeName, outputRaster, cell_size, IDW_power, IDW_neighborhood, Input_barrier_polyline_features)
 
-            print "     ---> Interpolated " + metric + " " + variable + " " + str(degree) + " " + str(year)
-			print "\n"
+            print "     ---> Interpolated " + metric + " " + variable + " " + str(degree) + " " + str(year) + "\n"
 
 print "Done!!!!"
