@@ -8,6 +8,9 @@ ot <- mapGCMFields(c(1,2:24), "G:/", "G:/Workspace/lcollet", "SRES_A1B", "anomal
 #SEE presentation
 ot <- mapGCMFields(c(1,2:24), "G:/", "F:/CCAFS/see-presentation", "SRES_A2", "anomalies", "2020_2049", xn=-20, xx=95, yn=-15, yx=35, wt=5, "F:/Administrative_boundaries/adminFiles/10m-admin-0-countries.shp", plt="prec", writeRasterFiles=F)
 ot <- mapGCMFields(c(1,2:24), "G:/", "F:/CCAFS/see-presentation", "SRES_A2", "anomalies", "2020_2049", xn=-20, xx=95, yn=-15, yx=35, wt=5, "F:/Administrative_boundaries/adminFiles/10m-admin-0-countries.shp", plt="temp", writeRasterFiles=F)
+#PNM paper
+ot <- mapGCMFields(c(1,2:24), "G:/", "D:/CCAFS/cc-fruits-paper", "SRES_A1B", "anomalies", "2010_2039", xn=-180, xx=180, yn=-90, yx=90, wt=5, "D:/Administrative_boundaries/adminFiles/10m-admin-0-countries.shp", plt="temp", writeRasterFiles=F)
+ot <- mapGCMFields(c(1,2:24), "G:/", "D:/CCAFS/cc-fruits-paper", "SRES_A1B", "anomalies", "2010_2039", xn=-180, xx=180, yn=-90, yx=90, wt=5, "D:/Administrative_boundaries/adminFiles/10m-admin-0-countries.shp", plt="prec", writeRasterFiles=F)
 
 #Whole world
 ot <- mapGCMFields(c(1,2:24), "F:/", "C:/CIAT_work/_tools/packageTesting/GCMFields", "SRES_A1B", "anomalies", "2010_2039", xn=-180, xx=180, yn=-90, yx=90, wt=5, "C:/CIAT_work/World_Shapefile/Countries/world_adm0.shp", temp=T, prec=F, writeRasterFiles=F)

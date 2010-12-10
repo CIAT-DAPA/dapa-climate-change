@@ -168,10 +168,15 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 	cat("\n")
 	
 	#Writing the command into a file
-	zz <- file(paste(procdir, "/cmd.R", sep=""), open="w")
+	if (!file.exists(paste(procdir, "/cmd.R", sep=""))) {
+		zz <- file(paste(procdir, "/cmd.R", sep=""), open="w")
+	} else {
+		zz <- file(paste(procdir, "/cmd.R", sep=""), open="a")
+	}
 	cat("mapGCMFields(gcmList=c(", file=zz)
 	cat(gcmList,sep=",",file=zz)
 	cat("), drive='",drive,"', procdir='",procdir,"', scenario='",scenario,"', type='",type,"', period='",period,"', xn=", xn, ", xx=", xx, ", yn=", yn, ", yx=", yx, ", wt=", wt, ", worldshapefile='", worldshapefile, "', plt='", plt, "', writeRasterFiles=", writeRasterFiles, ")", sep="", file=zz)
+	cat("\n",file=zz)
 	close.connection(zz)
 		
 	if (file.exists(worldshapefile)) {
@@ -234,7 +239,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 					if (type != "anomalies" & m < 10) {mth <- paste(0, m, sep="")} else {mth <- m}
 					
 					ras <- raster(paste(periodDir, "/", vr, "_", mth, ".asc", sep=""))
-					vals <- xyValues(ras, xy)
+					vals <- extract(ras, xy)
 					
 					if (m == 1) {
 						resVals <- vals
@@ -332,7 +337,8 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		p1m <- mean(stack(p1List))
 		tzlim <- c(min(theListt), max(theListt))
 		cat("   .Temperature std \n")
-		p1sd <- calc(stack(p1List),fun)
+		p1tmp <- calc(stack(p1List),fun)
+		p1sd <- raster(p1m); p1sd[] <- p1tmp[]; rm(p1tmp)
 		p1cv <- abs(p1sd / p1m) * 100
 		p1cv[which(p1cv[] > 100)] <- 100
 	} else {
@@ -340,7 +346,8 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		p12m <- mean(stack(p12List))
 		pzlim <- c(min(theListp), max(theListp))
 		cat("   .Precipitation std \n")
-		p12sd <- calc(stack(p12List),fun)
+		p12tmp <- calc(stack(p12List),fun)
+		p12sd <- raster(p12m); p12sd[] <- p12tmp[]; rm(p12tmp)
 		p12cv <- abs(p12sd / p12m) * 100
 		p12cv[which(p12cv[] > 100)] <- 100
 	}
@@ -393,7 +400,7 @@ mapGCMFields <- function(gcmList, drive, procdir, scenario, type, period, xn=-30
 		perstpl <- stpl / totgcms * 100
 		
 		coords <- xyFromCell(perstpl, 1:ncell(perstpl))
-		vals <- xyValues(perstpl, coords)
+		vals <- extract(perstpl, coords)
 		
 		stplMatrix <- cbind(1:ncell(perstpl), coords, vals)
 		stplMatrix <- as.data.frame(stplMatrix)
