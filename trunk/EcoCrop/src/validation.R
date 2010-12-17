@@ -24,22 +24,24 @@ require(maptools)
 require(raster)
 require(rgdal)
 
-shp <- readShapePoly("world-adm0-sorghum.shp")
-rsl <- raster("D:/_tools/dapa-climate-change/trunk/EcoCrop/data/runs/selected/MEAN-sorghum-merged_suitability.asc")
-field <- "ISPRES"
-naValue <- -9999
 extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 	#Extract data from shapefile
 	shpData <- shp@data
+	#Calculate physical area per pixel
+	a <- area(rsl); a[which(is.na(rsl[]))] <- NA
 	#Select analysis field and create output data frame
 	anField <- grep(field, colnames(shpData))
 	outmx <- cbind(as.numeric(rownames(shpData)), as.numeric(shpData[,anField])); outmx <- as.data.frame(outmx); names(outmx) <- c("ID",field)
 	outmx[which(outmx[,2] == naValue),2] <- NA
-	outmx$ME <- rep(NA,times=nrow(outmx))
-	outmx$SD <- rep(NA,times=nrow(outmx))
-	outmx$MX <- rep(NA,times=nrow(outmx))
-	outmx$MN <- rep(NA,times=nrow(outmx))
-	outmx$PS <- rep(NA,times=nrow(outmx))
+	outmx$ME <- rep(NA,times=nrow(outmx)) #average
+	outmx$MZ <- rep(NA,times=nrow(outmx)) #average without zeros
+	outmx$SD <- rep(NA,times=nrow(outmx)) #standard deviation
+	outmx$MX <- rep(NA,times=nrow(outmx)) #maximum
+	outmx$MN <- rep(NA,times=nrow(outmx)) #minimum
+	outmx$SM <- rep(NA,times=nrow(outmx)) #sum
+	outmx$PA <- rep(NA,times=nrow(outmx)) #physical area
+	outmx$SA <- rep(NA,times=nrow(outmx)) #suitable area
+	outmx$PS <- rep(NA,times=nrow(outmx)) #fraction suitable area
 	#Calculate resolution of rasterLayer
 	res <- (rsl@extent@xmax - rsl@extent@xmin)/(rsl@ncols)
 	#Process each polygon as a raster to extract suitability values
@@ -49,36 +51,47 @@ extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 		pol <- shp@polygons[p] #extract single polygon
 		sh <- SpatialPolygons(pol) #create SP object from extracted feature
 		rs <- createMask(sh, res) #create a raster from the SP object
-		a <- area(rs); a <- a*rs #calculate physical area per pixel
 		xy <- xyFromCell(rs, which(!is.na(rs[]))) #extract xy values from raster cells
 		if (nrow(xy) == 0) {
-			outmx[p,3:7] <- c(NA,NA,NA,NA,NA)
+			outmx[p,3:11] <- c(NA,NA,NA,NA,NA,NA,NA,NA,NA)
 		} else {
 			av <- extract(a, xy)
 			vl <- extract(rsl, xy)
 			sv <- (vl * 0.01) * av
 			av <- av[which(!is.na(av))]; vl <- vl[which(!is.na(vl))]; sv <- sv[which(!is.na(sv))] #get rid of NAs
-			if (length(vl) == 0) {outmx[p,3:7] <- c(NA,NA,NA,NA,NA)}
+			if (length(vl) == 0) {outmx[p,3:11] <- c(NA,NA,NA,NA,NA,NA,NA,NA,NA)}
 			else {
+				vl2 <- vl[which(vl != 0)]
+				if (length(vl2) == 0) {vl2m <- NA} else {vl2m <- mean(vl2)}
 				phyA <- sum(av) #calculate country physical area
 				suiA <- sum(sv) #calculate country suitable area
-				fraA <- suiA/phyA
-				outmx[p,3:7] <- c(mean(vl),sd(vl),max(vl),min(vl), fraA)
+				fraA <- suiA/phyA #fraction suitable
+				outmx[p,3:11] <- c(mean(vl),vl2m,sd(vl),max(vl),min(vl),sum(vl),phyA,suiA,fraA)
 			}
 		}
 	}
-	return(outmx)
+	outmx.final <- cbind(outmx,shpData)
+	return(outmx.final)
 }
 
-createMask <- function(shp, res) { #Function to create a mask from the shapefile
-	xn <- shp@bbox[1,1] - 2*res; if (xn < -180) {xn <- -180}
-	xx <- shp@bbox[1,2] + 2*res; if (xx > 180) {xx <- 180}
-	yn <- shp@bbox[2,1] - 2*res; if (yn < -90) {yn <- -90}
-	yx <- shp@bbox[2,2] + 2*res; if (yx > 90) {yx <- 90}
-	nc <- round((xx - xn) / res); xx <- (nc * res) + xn #calculating and readjusting ncols and xmax
-	nr <- round((yx - yn) / res); yx <- (nr * res) + yn #calculating and readjusting nrows and ymax
-	rs <- raster(xmn=xn, xmx=xx, ymn=yn, ymx=yx, ncol=nc, nrow=nr); rs[] <- 1
-	rs <- rasterize(shp, rs, silent=T, getCover=T) #getCover is TRUE to get the percent each cell is occupied by the polygon
-	rs[which(rs[] == 0)] <- NA; rs[which(!is.na(rs[]))] <- 1
-	return(rs)
+valMetrics <- function(mx, pres.field) {
+	anField <- grep(pres.field, colnames(mx))
+	if (length(anField != 1)) {anField <- anField[1]}
+	#sub-table for more specific metrics
+	met <- cbind(mx[,anField],mx$PS)
+	met <- met[which(!is.na(met[,1])),]; met <- met[which(!is.na(met[,2])),] #get rid of NAs
+	#true positive rate
+	ntp <- length(which(met[,2] > 0 & met[,1] == 1))
+	tpr <- ntp/length(which(met[,1] == 1))
+	#false negative rate
+	nfp <- length(which(met[,2] == 0 & met[,1] == 1))
+	fpr <- nfp/length(which(met[,1] == 1))
+	#true negative rate (if absences are available)
+	if (length(which(met[,1] == 0)) != 0) {
+		ntn <- length(which(met[,2] > 0 & met[,1] == 0))
+		tnr <- ntn / length(which(met[,1] == 0))
+	} else {tnr <- NA}
+	#object to return
+	met.final <- data.frame(TPR=tpr, FPR=fpr, TNR=tnr)
+	return(met.final)
 }
