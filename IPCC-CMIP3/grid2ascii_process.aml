@@ -1,0 +1,35 @@
+&args rootdir resol 
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+	
+&if %resol% EQ 30s &then &s outdir %rootdir%\Global_30s
+&else &if %resol% EQ 2.5min &then &s outdir %rootdir%\Global_2_5min
+&else &if %resol% EQ 5min &then &s outdir %rootdir%\Global_5min
+&else &s outdir %rootdir%\Global_10min
+
+&s modellist [listfile %outdir%\* -dir]
+&s nmodels [token %modellist% -count]
+
+&do md = 1 &to %nmodels%
+	
+	&s modname [extract %md% %modellist%]
+	
+	&do year &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+			
+			&ty
+			&ty Model %modname% (%year%, %resol%)
+			
+			&if not [exists %outdir%\%modname%\%year%_Grd2AsciiZip30s_done.txt -file] &then
+				&do
+					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*.zip
+					&r grid2ascii_GCM.aml %outdir%\%modname%\%year% YES
+					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Grd2AsciiZip30s_done.txt]
+				&end
+				
+	&end
+		
+&end
