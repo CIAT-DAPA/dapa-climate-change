@@ -6,12 +6,12 @@ Resampling Disaggregation
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 10min
 
--&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 30s
+198.93.225.57 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 30s
 198.93.225.72 -&r grid2ascii_process.aml N:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 2.5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 10min
 
--&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 30s
+198.93.225.57 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 30s
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 2.5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 10min
