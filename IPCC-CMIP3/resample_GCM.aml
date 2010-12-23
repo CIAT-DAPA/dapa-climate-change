@@ -35,7 +35,7 @@
 &ty          /\/\/\/\GCM MODELS RESAMPLE/\/\/\/\
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
-&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
+&s gridlist [listfile %inputfolder%\tm* -grid %outputfolder%\listgrids.list]
 &s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
