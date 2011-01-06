@@ -1,4 +1,4 @@
-&args inputfolder switch
+&args inputfolder outputfolder switch
 &terminal 9999
 /*&sys cls
 &messages &off
@@ -12,6 +12,8 @@
 		&ty Run the command as: '&RUN INPUT_FOLDER COMPRESS'
 		&ty
 		&ty INPUT_FOLDER:   Folder where your grids are located
+		&ty 
+		&ty	OUTPUT_FOLDER:	Folder where your asciis will be create
 		&ty
 		&ty COMPRESS:       Write YES if you want to compress your
 		&ty                 outputs into a zipfile (you will need 7zip)
@@ -30,16 +32,17 @@
 
 		&amlpath .
 		&s basedir [show &amlpath]
-		
-		&s outputfolder %inputfolder%\_asciis
-		&if not [exists %outputfolder% -dir] &then &sys md %outputfolder%
+
+		&s outfolder %outputfolder%\_asciis
+		&if not [exists %outfolder% -dir] &then &sys md %outfolder%
+
 		
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		
-		&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
-		&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
+		&s gridlist [listfile %inputfolder%\* -grid %outfolder%\listgrids.list]
+		&s openlist [OPEN %outfolder%\listgrids.list OPENSTATUS -READ]
 		
 		&if %OPENSTATUS% NE 0 &then
 			&do
@@ -57,15 +60,15 @@
 					&ty
 					&ty   -> .Processing %gridname%
 					
-					&if [exists %outputfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outputfolder%\%gridname%.prj -file]
-					&if [exists %outputfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outputfolder%\%gridname%.asc -file] /* &ty Output grid exists
-					GRIDASCII %inputfolder%\%gridname% %outputfolder%\%gridname%.asc
+					&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
+					&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file] /* &ty Output grid exists
+					GRIDASCII %inputfolder%\%gridname% %outfolder%\%gridname%.asc
 					
 					&if [locase %switch%] EQ yes &then
 						&do
-							&sys 7za a %outputfolder%\%vartype%_asc.zip %outputfolder%\%gridname%.asc
-							&if [exists %outputfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outputfolder%\%gridname%.asc -file]
-							&if [exists %outputfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outputfolder%\%gridname%.prj -file]
+							&sys 7za a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
+							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
+							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 						&end
 					&else &ty No compressing selected
 					
@@ -85,7 +88,25 @@
 		&return
 	&end
 
-&if [exists %outputfolder%\listgrids.list -file] &then &sys del %outputfolder%\listgrids.list
+&if [exists %outfolder%\listgrids.list -file] &then &sys del %outfolder%\listgrids.list
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
+
+&s infolder %inputfolder%\_asciis
+&if not [exists %infolder% -dir] &then &sys md %outfolder%
+
+&ty
+&ty   -> .Now copying...
+&s copystat [COPY %outfolder% %infolder% -DIRECTORY]
+&if %copystat% EQ 0 &then 
+	&do
+		&ty   -> .Successfully done!
+		&s delstat [DELETE %outputfolder% -DIRECTORY]
+	&end
+&else
+	&do
+		&ty   An error occurred during calculations, bailing out...
+		&return
+	&end
+
 &ty
 &ty Process done!
