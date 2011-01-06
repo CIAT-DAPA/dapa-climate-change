@@ -7,7 +7,7 @@ Grid to Ascii Disaggregation
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 10min
 
 198.93.225.57 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 30s
-198.93.225.72 -&r grid2ascii_process.aml N:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 2.5min
+198.93.225.64 -&r grid2ascii_process.aml N:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 2.5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 5min
 -&r grid2ascii_process.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 10min
 
