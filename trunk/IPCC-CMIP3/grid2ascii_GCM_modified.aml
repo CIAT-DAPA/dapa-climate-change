@@ -27,6 +27,9 @@
 		&return
 	&end
 
+&s outfolder %outputfolder%\_asciis
+&if not [exists %outfolder% -dir] &then &sys md %outfolder%
+
 
 &if [locase %switch%] EQ yes OR [locase %switch%] EQ no &then
 	&do
@@ -34,10 +37,6 @@
 		&amlpath .
 		&s basedir [show &amlpath]
 
-		&s outfolder %outputfolder%\_asciis
-		&if not [exists %outfolder% -dir] &then &sys md %outfolder%
-
-		
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
@@ -71,8 +70,10 @@
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 						&end
-					&else &ty No compressing selected
 					
+					
+
+						
 				&end
 			&end
 		&s closefile [close %openlist%]
@@ -92,16 +93,23 @@
 &if [exists %outfolder%\listgrids.list -file] &then &sys del %outfolder%\listgrids.list
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
 
-&ty
-&ty   -> .Now copying...
-
 &s finalfolder %outcopyfolder%\_asciis
 &if not [exists %finalfolder% -dir] &then &sys md %finalfolder%
 
-&s copystat [COPY %outfolder% %finalfolder% -DIRECTORY]
+&ty
+&ty   -> .Now copying...
+
+&s copystat [COPY %outfolder%\bio_asc.zip %finalfolder%\bio_asc.zip]
+&s copystat [COPY %outfolder%\cons_asc.zip %finalfolder%\cons_asc.zip]
+&s copystat [COPY %outfolder%\prec_asc.zip %finalfolder%\prec_asc.zip]
+&s copystat [COPY %outfolder%\tmax_asc.zip %finalfolder%\tmax_asc.zip]
+&s copystat [COPY %outfolder%\tmean_asc.zip %finalfolder%\tmean_asc.zip]
+&s copystat [COPY %outfolder%\tmin_asc.zip %finalfolder%\tmin_asc.zip]
+
 &if %copystat% EQ 0 &then 
 	&do
-		&ty   -> .Successfully done!
+		&ty
+		&ty   -> .Successfully copy!
 		&s delstat [DELETE %outputfolder% -DIRECTORY]
 	&end
 &else
