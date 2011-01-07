@@ -28,13 +28,13 @@ getUniqueCoord <- function(dataset, fields=c(2,3), resol=0.083333) {
 	rs <- raster(nrow=round(360/resol,0), ncol=round(180/resol,0))
 	rs[] <- 1:ncell(rs)
 	
-	vals <- xyValues(rs, onlyLatLon[,1:2]) 
+	vals <- extract(rs, onlyLatLon[,1:2])
 	onlyLatLon <- cbind(onlyLatLon, rep(NA,times=nrow(onlyLatLon)))
 	onlyLatLon[,3] <- vals
 	
 	rm(rs)
 	
-	onlyLatLon <- cbind(onlyLatLon, duplicated(onlyLatLon))
+	onlyLatLon <- cbind(onlyLatLon, duplicated(onlyLatLon[,3]))
 	urows <- which(onlyLatLon[,4] == 0)
 	drows <- which(onlyLatLon[,4] == 1)
 	
