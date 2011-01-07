@@ -30,7 +30,7 @@ extractMonthlyData <- function(wd="./data/climate", variable="prec", ext=".asc",
 	for (m in 1:12) {
 		if (verbose) cat(".",m," ",sep="")
 		rs <- raster(paste(wd, "/", variable, "_", m, ext, sep=""))
-		vec <- xyValues(rs, onlyLatLon)
+		vec <- extract(rs, onlyLatLon)
 		dataset$VEC <- vec
 		names(dataset)[length(names(dataset))] <- paste(toupper(variable),m,sep="")
 	}
