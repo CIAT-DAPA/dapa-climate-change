@@ -1,4 +1,4 @@
-&args rootdir outputdir copyfolder resol 
+&args rootdir outputdir resol /* copyfolder resol 
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
 &sys cls
@@ -16,10 +16,10 @@
 &else &if %resol% EQ 5min &then &s outdir %outputdir%\Global_5min
 &else &s outdir %outputdir%\Global_10min
 
-&if %resol% EQ 30s &then &s outcopyfolder %copyfolder%\Global_30s
-&else &if %resol% EQ 2.5min &then &s outcopyfolder %copyfolder%\Global_2_5min
-&else &if %resol% EQ 5min &then &s outcopyfolder %copyfolder%\Global_5min
-&else &s outcopyfolder %copyfolder%\Global_10min
+/* &if %resol% EQ 30s &then &s outcopyfolder %copyfolder%\Global_30s
+/* &else &if %resol% EQ 2.5min &then &s outcopyfolder %copyfolder%\Global_2_5min
+/* &else &if %resol% EQ 5min &then &s outcopyfolder %copyfolder%\Global_5min
+/* &else &s outcopyfolder %copyfolder%\Global_10min
 
 &s modellist [listfile %inputdir%\* -dir]
 &s nmodels [token %modellist% -count]
@@ -33,11 +33,11 @@
 			&ty
 			&ty Model %modname% (%year%, %resol%)
 			
-			&if not [exists %outcopyfolder%\%modname%\%year%_Grd2AsciiZip30s_done.txt -file] &then
+			&if not [exists %outdir%\%modname%\%year%_Grd2AsciiZip30s_done.txt -file] &then
 				&do
-					&if [exists %outcopyfolder%\%modname%\%year%\_asciis -dir] &then &sys del %outcopyfolder%\%modname%\%year%\_asciis\*.zip
-					&r grid2ascii_GCM_modified.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %outcopyfolder%\%modname%\%year% YES
-					&s verfile [listfile %outcopyfolder%\%modname%\%year%\_asciis\*.zip -file %outcopyfolder%\%modname%\%year%_Grd2AsciiZip30s_done.txt]
+					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*.zip
+					&r grid2ascii_GCM_modified.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% YES /* %outcopyfolder%\%modname%\%year% YES
+					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Grd2AsciiZip30s_done.txt]
 				&end
 				
 	&end
