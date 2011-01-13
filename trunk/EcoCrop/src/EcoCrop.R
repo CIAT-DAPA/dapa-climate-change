@@ -83,8 +83,6 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	createLog <- makeLogFile(logFileName, climPath, cropname, Gmin, Gmax, Tkmp, Tmin, Topmin, Topmax, Tmax, Rmin, Ropmin, Ropmax, Rmax)
 	
 	#Creating the stack of the whole list of variables
-	require(raster)
-	climPath <- "./data/climate"
 	climateStack <- stack(stack(paste(climPath, "/tmean_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/tmin_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/prec_", c(1:12), ".asc", sep="")))
 	
 	#Calculating regression models between Rmin-Ropmin and Ropmax-Rmax
