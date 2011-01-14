@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_MaskGCM.py L:\climate_change\IPCC_CMIP3 A1B G:\IPCC_CMIP3\mask\Centroamerica.shp G:\IPCC_CMIP3 2_5min Disaggregated"
+	print "   - ie: python Extract_MaskGCM.py F:\climate_change\IPCC_CMIP3 A1B F:\climate_change\IPCC_CMIP3\Masks\mask F:\climate_change\IPCC_CMIP3\Extracted 2_5min Downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -47,19 +47,20 @@ for model in modellist:
 
 		#Set workspace
         gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-        print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+        if os.path.exists(gp.workspace):
+			print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
-        diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+			diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
-        if not os.path.exists(diroutraster):
-            os.system('mkdir ' + diroutraster)
-			
-			#Get a list of raster in workspace
-            rasters = gp.ListRasters("", "GRID")
-            for raster in rasters:
-                print "    Extracting " + raster
-                OutRaster = diroutraster + "\\" + raster
-                gp.ExtractByMask_sa(raster, mask, OutRaster)
+			if not os.path.exists(diroutraster):
+				os.system('mkdir ' + diroutraster)
+				
+				#Get a list of raster in workspace
+				rasters = gp.ListRasters("", "GRID")
+				for raster in rasters:
+					print "    Extracting " + raster
+					OutRaster = diroutraster + "\\" + raster
+					gp.ExtractByMask_sa(raster, mask, OutRaster)
 				
         else:
             print "The model " + model + " " + period + " is already processed"
