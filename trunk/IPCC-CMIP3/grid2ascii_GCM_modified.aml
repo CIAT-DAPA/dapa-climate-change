@@ -1,4 +1,4 @@
-&args inputfolder outputfolder switch /* outcopyfolder switch
+&args inputfolder outputfolder outcopyfolder switch
 &terminal 9999
 /*&sys cls
 &messages &off
@@ -93,30 +93,30 @@
 &if [exists %outfolder%\listgrids.list -file] &then &sys del %outfolder%\listgrids.list
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
 
-/* &s finalfolder %outcopyfolder%\_asciis
-/* &if not [exists %finalfolder% -dir] &then &sys md %finalfolder%
+&s finalfolder %outcopyfolder%\_asciis
+&if not [exists %finalfolder% -dir] &then &sys md %finalfolder%
 
-/* &ty
-/* &ty   -> .Now copying...
+&ty
+&ty   -> .Now copying...
 
-/* &s copystat [COPY %outfolder%\bio_asc.zip %finalfolder%\bio_asc.zip]
-/* &s copystat [COPY %outfolder%\cons_asc.zip %finalfolder%\cons_asc.zip]
-/* &s copystat [COPY %outfolder%\prec_asc.zip %finalfolder%\prec_asc.zip]
-/* &s copystat [COPY %outfolder%\tmax_asc.zip %finalfolder%\tmax_asc.zip]
-/* &s copystat [COPY %outfolder%\tmean_asc.zip %finalfolder%\tmean_asc.zip]
-/* &s copystat [COPY %outfolder%\tmin_asc.zip %finalfolder%\tmin_asc.zip]
+&s copystat [COPY %outfolder%\bio_asc.zip %finalfolder%\bio_asc.zip]
+&s copystat [COPY %outfolder%\cons_asc.zip %finalfolder%\cons_asc.zip]
+&s copystat [COPY %outfolder%\prec_asc.zip %finalfolder%\prec_asc.zip]
+&s copystat [COPY %outfolder%\tmax_asc.zip %finalfolder%\tmax_asc.zip]
+&s copystat [COPY %outfolder%\tmean_asc.zip %finalfolder%\tmean_asc.zip]
+&s copystat [COPY %outfolder%\tmin_asc.zip %finalfolder%\tmin_asc.zip]
 
-/* &if %copystat% EQ 0 &then 
-	/* &do
-		/* &ty
-		/* &ty   -> .Successfully copy!
-		/* &s delstat [DELETE %outputfolder% -DIRECTORY]
-	/* &end
-/* &else
-	/* &do
-		/* &ty   An error occurred during calculations, bailing out...
-		/* &return
-	/* &end
+&if %copystat% EQ 0 &then 
+	&do
+		&ty
+		&ty   -> .Successfully copy!
+		&s delstat [DELETE %outputfolder% -DIRECTORY]
+	&end
+&else
+	&do
+		&ty   An error occurred during calculations, bailing out...
+		&return
+	&end
 
 &ty
 &ty Process done!
