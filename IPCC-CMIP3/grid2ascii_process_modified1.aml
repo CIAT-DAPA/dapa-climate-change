@@ -24,7 +24,7 @@
 &s modellist [listfile %inputdir%\* -dir]
 &s nmodels [token %modellist% -count]
 
-&do md = 1 &to %nmodels%
+&do md = 14 &to %nmodels%
 	
 	&s modname [extract %md% %modellist%]
 	
