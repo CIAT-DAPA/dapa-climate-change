@@ -32,7 +32,7 @@ futruns <- function(gcm="", bDir="F:/EcoCrop-development", gs=3, parlist="") {
 	}
 	
 	#Run the model (tmin & tmax)
-	p <- read.csv(paste(bDir, "/analyses/data/calibration-parameters.csv", sep=""))
+	p <- read.csv(parlist)
 	p <- p[which(p$GS==gs),]
 	for (rw in c(3,4)) {
 		eco <- suitCalc(climPath=aDir, Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder=oDir, cropname=paste(gs,'-sorghum-',p$VARIABLE[rw],sep=""))
