@@ -25,8 +25,8 @@ suitMerge <- function(rn, rx, rc, future=F) {
 		rs[which(rc[] == 0)] <- rn[which(rc[] == 0)]
 		rs[which(rc[] == 1)] <- rn[which(rc[] == 1)]
 		rs[which(rc[] == 2)] <- rx[which(rc[] == 2)]
-		rs[which(rc[] == 3 & rn[] == 0 & rx[] == 0)] <- 0
 		rs[which(rc[] == 3)] <- ((rn[which(rc[] == 3)] * rn[which(rc[] == 3)] * 0.01) + (rx[which(rc[] == 3)] * rx[which(rc[] == 3)] * 0.01)) / ((rn[which(rc[] == 3)] * 0.01) + (rx[which(rc[] == 3)] * 0.01))
+		rs[which(rc[] == 3 & rn[] == 0 & rx[] == 0)] <- 0
 		rs[which(rs[] > 100)] <- 100
 		return(rs)
 	}
