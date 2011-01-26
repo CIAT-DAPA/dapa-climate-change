@@ -6,6 +6,8 @@ source("./src/EcoCrop.R")
 source("./src/suitMerge.R")
 
 #This script is to be improved (make it more generic)
+#add a part to create a .projection file containing the info on the environmental data, etc
+#an overwrite parameter should be added
 
 futruns <- function(gcm="", bDir="F:/EcoCrop-development", gs=3, parlist="") {
 	#GCM data location and naming
@@ -18,7 +20,7 @@ futruns <- function(gcm="", bDir="F:/EcoCrop-development", gs=3, parlist="") {
 	rDir <- paste(bDir, "/analyses/runs-future", sep="")
 	if (!file.exists(rDir)) {dir.create(rDir)}
 	oDir <- paste(rDir, "/", gcm, sep="")
-
+	
 	#Uncompressing the ascii files
 	zDir <- paste(fDir, "/", gcm, "/", period, "/_asciis", sep="")
 	aDir <- paste(fDir, "/", gcm, "/", period, sep="")
@@ -35,10 +37,12 @@ futruns <- function(gcm="", bDir="F:/EcoCrop-development", gs=3, parlist="") {
 	p <- read.csv(parlist)
 	p <- p[which(p$GS==gs),]
 	for (rw in c(3,4)) {
-		eco <- suitCalc(climPath=aDir, Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder=oDir, cropname=paste(gs,'-sorghum-',p$VARIABLE[rw],sep=""))
-		jpeg(paste(oDir, "/", gs, "-sorghum-",p$VARIABLE[rw],"-suitability.jpg",sep=""), quality=100)
-		plot(eco)
-		dev.off()
+		if (!file.exists(paste(oDir, "/", gs, "-sorghum-", p$VARIABLE[rw], "_suitability.asc",sep=""))) {
+			eco <- suitCalc(climPath=aDir, Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder=oDir, cropname=paste(gs,'-sorghum-',p$VARIABLE[rw],sep=""))
+			jpeg(paste(oDir, "/", gs, "-sorghum-",p$VARIABLE[rw],"-suitability.jpg",sep=""), quality=100)
+			plot(eco)
+			dev.off()
+		}
 	}
 	#Merge suitability predictions
 	data(wrld_simpl)
@@ -47,7 +51,7 @@ futruns <- function(gcm="", bDir="F:/EcoCrop-development", gs=3, parlist="") {
 	ps <- raster(paste(bDir, "/analyses/runs/", gs, "-sorghum-mergedwhich_suitability.asc", sep=""))
 	r <- suitMerge(n,x, ps, future=T)
 	rs <- r; rs <- writeRaster(rs, paste(oDir, "/", gs, "-sorghum-merged_suitability.asc", sep=""), overwrite=T, format='ascii')
-	pd <- raster(ps); pd <- writeRaster(pd, paste(oDir, "/", gs, "-sorghum-mergedwhich_suitability.asc", sep=""), overwrite=T, format='ascii')
+	pd <- ps; pd <- writeRaster(pd, paste(oDir, "/", gs, "-sorghum-mergedwhich_suitability.asc", sep=""), overwrite=T, format='ascii')
 	jpeg(paste(oDir, "/", gs, "-sorghum-merged_suitability.jpg", sep=""), quality=100, height=600, width=1800)
 	par(mfrow=c(1,2))
 	plot(rs, col=colorRampPalette(c("yellow","red"))(100)); plot(wrld_simpl, add=T)
@@ -59,7 +63,7 @@ futruns <- function(gcm="", bDir="F:/EcoCrop-development", gs=3, parlist="") {
 	for (v in vList) {
 		fList <- list.files(aDir, pattern=v)
 		for (f in fList) {
-			file.remove(paste(aDir, "/", f, sep=""))
+			if (file.exists(paste(aDir, "/", f, sep=""))) {file.remove(paste(aDir, "/", f, sep=""))}
 		}
 	}
 }
