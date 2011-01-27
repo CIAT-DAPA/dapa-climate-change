@@ -8,14 +8,15 @@
 import os, sys, glob, string
 
 if len(sys.argv) < 8:
-	os.system('cls')
+	os.system('clear')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - ie linux: python ConvertPP2Ascii.py //mnt//GeoData-717//PrecisData//archive genam 00001 pa //data3//precis// HadCM3Q3 SRES_A1B"
+	print "   - ie linux: python ConvertPP2Ascii.py //data2//precis//Test//archive genam 00001 pa //data2//precis//RCM_Data HadCM3Q3 SRES_A1B"
 	sys.exit(1)
 
 # --------------------------------------------------------------------------------------------------------------------------
 # Notes:
+# You must call ". setvars" on home/precis before to run ConvertPP2Ascii.py script
 # dirbase:  Path pp files
 # runid:    The full list of runids are in trunk\dapa-climate-change\PRECIS\Progress_Runs_Precis.xls
 # variable: Variable in the PRECIS model, corresponding to the STASH code. The full list are in
@@ -41,6 +42,12 @@ dirout = sys.argv[5]
 gcm = sys.argv[6]
 scenario = sys.argv[7]
 
+# Create dirout folder
+
+if not os.path.exists(dirout):
+    os.system('mkdir ' + dirout)
+
+
 os.system('clear')
 
 print "\n"
@@ -59,94 +66,51 @@ decDc = {"e": 1940, "f": 1950, "g": 1960, "h": 1970, "i": 1980, "j": 1990, "k": 
 monDc = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, 
          "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
 
-# Get a list of pp files into base dir
+print "    > Converting pp files to ascii \n"
 
-ppList = glob.glob(dirbase + "\\" + runid + "\\" + str(variable) + "\\" + runid + "a." + type + "*" + variable + "*.pp")
+if type == "pa":
 
-for pp in ppList:
+  # Get a list of pp files into base dir
 
-    # Extact year of the file name
+#  ppList = sorted(glob.glob(dirbase + "//" + runid + "//" + str(variable) + "//" + runid + "a." + type + "*" + variable + "*.pp"))
+  ppList = glob.glob(dirbase + "//" + runid + "//" + str(variable) + "//" + runid + "a." + type + "*" + variable + "*.pp")
 
-    decade = os.path.basename(pp)[9:10]
-    year = os.path.basename(pp)[10:11]
-    month = os.path.basename(pp)[11:14]
-    date = int(decDc [decade]) + int(year)
+  for pp in ppList:
+      
+      # Extact year of the file name
 
-    #Creating outputs folders to nc files by years
+      decade = os.path.basename(pp)[9:10]
+      year = os.path.basename(pp)[10:11]
+      month = os.path.basename(pp)[11:14]
+      date = int(decDc [decade]) + int(year)
 
-    diroutNC = dirout + "\\PRECIS_NC\\" + gcm + "\\" + scenario + "\\" + str(date)
-    if not os.path.exists(diroutNC):
-        os.system('mkdir ' + diroutNC)
+      #Creating outputs folders to ascii files by years
 
-    if int(monDc [month]) < 10 and not os.path.exists(diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month]) + ".nc"):
+      diroutASC = dirout + "//" + scenario + "//" + gcm +  "//" + str(date) + "//" + "_ascii"
+      if not os.path.exists(diroutASC):
+          os.system('mkdir ' + diroutASC)
 
+      if int(monDc [month]) < 10 and not os.path.exists(diroutASC + "//" + variable + "_" + str(date) + "0" + str(monDc [month]) + ".asc"):
 
-        # Convert pp files to nc format and split into the daily files
-        # Structure nc filenames: gcm_scenario_variable_YYYYMM.nc
-   
-        print "    > Converting pp files to nc format and split into the daily files\n"
+          # Convert pp files to nc format and split into the daily files
+          # Structure ascii filenames: variable_YYYYMM.asc
         
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month])
-        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month])
-        os.system("conv2nc.tlc " + pp + " 1 " + outnc + ".nc")
-        print "    ---> Converted to NetCDF"
+          print "    ---> Processing " + gcm + " " + scenario + " " + variable + " " + str(date) + " " +  str(month)
+          outASC = diroutASC + "//" + variable + "_0" + str(monDc [month]) + ".asc"
 
-        # Split into the daily files
+          os.system("pp2ascii -f asciipp -O /data2/precis/precis182/tmp/pp2ascii.out -o " + outASC + " " + pp)
+          print "    ---> Converted to Ascii \n"
 
-        os.system("cdo splitday " + outnc + ".nc " + outnc)
-        os.remove(outnc + ".nc ")
-        print "    ---> Splited\n"
+      if int(monDc [month]) > 9 and not os.path.exists(diroutASC + "//" + variable + "_" + str(date) + str(monDc [month]) + ".asc"):
 
-        # Compress monthly NC files and remove
+          # Convert pp files to nc format and split into the daily files
+          # Structure nc filenames: gcm_scenario_variable_YYYYMM.nc
         
-        os.system("gzip -f " + outnc + ".nc ")
-        os.remove(outnc + ".nc ")
-        
-    if int(monDc [month]) > 9 and not os.path.exists(diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month]) + ".nc"):
+          print "    ---> Processing " + gcm + " " + scenario + " " + variable + " " + str(date) + " " +  str(month)
+          outASC = diroutASC + "//" + variable + "_" + str(monDc [month]) + ".asc"
+          
+          os.system("pp2ascii -f asciipp -O /data2/precis/precis182/tmp/pp2ascii.out -o " + outASC + " " + pp)
 
-        # Convert pp files to nc format and split into the daily files
-        # Structure nc filenames: gcm_scenario_variable_YYYYMM.nc
-   
-        print "    > Converting pp files to nc format and split into the daily files\n"
-        
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month])
-        outnc = diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + str(monDc [month])
-        os.system("conv2nc.tlc pp + " + " 1 " + outnc + ".nc")
-        print "    ---> Converted to NetCDF"
-
-        # Split into the daily files
-
-        os.system("cdo splitday " + outnc + ".nc " + outnc)
-        os.remove(outnc + ".nc ")
-        print "    ---> Splited\n"
-
-        # Compress monthly NC files and remove
-        
-        os.system("gzip -f " + outnc + ".nc ")
-        os.remove(outnc + ".nc ")
-
-
-    # Convert NETCDF files to ASCII format
-    # Structure nc filenames: gcm_scenario_variable_YYYYMMDD.asc
-
-    print "    > Converting nc files to ASCII format"
-    
-    #Creating outputs folders to asc by years
-    
-    diroutASC = dirout + "\\PRECIS_AAIGrid\\" + gcm + "\\" + scenario + "\\" +  str(date)
-    if not os.path.exists(diroutASC):
-        os.system('mkdir ' + diroutASC)
-
-    ncList = glob.glob(diroutNC + "\\" + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "0" + str(monDc [month] + "*.nc")    
-    for nc in ncList:
-
-        print "    ---> Processing " + gcm + "_" + scenario + "_" + variable + "_" + str(date) + "_" + str(monDc [month]
-        outASC = diroutASC + "\\" + os.path.basename(nc)[:-4] + ".asc"
-        os.system("gdal_translate -of AAIGRID -sds " + nc + " " + outASC)
-        print "    ---> Converted to ASCII"
-
-        # Remove daily NC files        
-        os.remove(nc)
-
+          print "    ---> Converted to Ascii \n"
 
 print "Done!!!"
