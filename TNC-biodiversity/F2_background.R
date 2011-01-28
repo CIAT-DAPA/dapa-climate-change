@@ -11,23 +11,50 @@
 # v.all: results of getValues() from biomes
 # no.background: the number of background points, default 10000
 
-get.background <- function(sp_id, biomes, v.all, no.background=10000)
+get.background <- function(path,continents, biomes,no.background=10000, make.swd=F, write.where=F)
 {
-  points <- read.csv(paste(dir.out,"/",sp_id,"/training/species.csv", sep=""))
+  points <- read.csv(paste(path, "/training/species.csv", sep=""))
+  coordinates(points) = ~lon+lat
 
-  v.ok <- unique(extract(biomes, points[,2:3])) # biomes from which to draw background points
-  v.ok <- v.ok[!is.na(v.ok)] # remove occurrence locations that are in no biome
-  v.new <- ifelse(match(v.all, v.ok),1,NA)
+  biomes.ok <- unique(over(points, biomes)[,2])
+  biomes.ok <- biomes.ok[!is.na(biomes.ok)]
 
-  if(any(!is.na(v.new))){
-     rr <- setValues(biomes, v.new) # create raster rr with regions were background points can be drawn from
-     bg <- sampleRandom(rr, no.background, sp=T)@coords
-     write.table("species,longitude,latitude",paste(dir.out,"/",sp_id,"/training/background.csv", sep=""),col.names=F, row.names=F,append=F, quote=F)
-     write.table(cbind("background", bg), paste(dir.out,"/",sp_id,"/training/background.csv",sep=""), col.names=F, row.names=F, sep=",", append=T, quote=F)
+  continents.ok <- unique(overlay(points,continents))
+  continents.ok <- continents.ok[!is.na(continents.ok)]
+   
 
-  } else {write(sp_id, paste(dir.out,"/no_bg_made.csv", sep=""), append=T)
-    system(paste("mv ",dir.out, "/", sp_id, " ", dir.error.bg, sep=""))
+  if(make.swd==T) {
   
+     if(nrow(take.bg.from)>0) {
+        
+        take.bg.from <- expand.grid(continents.ok, biomes.ok)
+
+        # random number between 1 and 20
+        rn <- sample(1:20,1)
+
+        files.to.load <- str_c(dir.bg,"/continent", take.bg.from[,1], "_biome", take.bg.from[,2], "sample", rn, ".txt")
+
+        bg.pts <- lapply(files.to.load, read.csv)
+        bg.pts <- ldply(bg.pts,rbind)
+
+        bg.pts <- bg.pts[sample(1:nrow(bg.pts),no.background),]
+
+
+         write.table("species,longitude,latitude",paste(dir.out,"/",sp_id,"/training/background.csv", sep=""),col.names=F, row.names=F,append=F, quote=F)
+           write.table(cbind("background", bg.pts), paste(dir.out,"/",sp_id,"/training/background.csv",sep=""), col.names=F, row.names=F, sep=",", append=T, quote=F)
+
+      } else {write(sp_id, paste(dir.out,"/no_bg_made.csv", sep=""), append=T)
+       system(paste("mv ",dir.out, "/", sp_id, " ", dir.error.bg, sep=""))
+     
+      }
    }
+   
+   if (write.where==T){
+
+      write(paste("biomes : ", paste(biomes.ok, collapse=","), sep=""), paste(path, "/info.txt",sep=""), append=T)
+      write(paste("continents : ", paste(continents.ok, collapse=","), sep=""), paste(path, "/info.txt", sep=""), append=T)
+
+   }
+  
   
 }
