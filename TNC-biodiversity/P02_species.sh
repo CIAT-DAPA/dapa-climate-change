@@ -18,4 +18,7 @@ do
    fi
 done < all.txt
 
+cd all
+ls -1 > species_list.txt
+
 

@@ -1,2 +1,2 @@
-system(str_c("java -cp ", dir.maxent, "/maxent.jar density.Getval ",dir.out,"/points_all.csv ", dir.env,"/bio??.asc > ",dir.out,"/all_points_swd.csv"),wait=T) 
+java -cp src/lib/maxent/maxent.jar density.Getval /mnt/GIS-HD716/TNC_global_plants/data/background/mxtest.csv /mnt/GIS-HD716/TNC_global_plants/data/env/bio??.asc > data/all_points_swd.csv 
 

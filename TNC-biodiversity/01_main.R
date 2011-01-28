@@ -7,13 +7,17 @@
 
 #--------------------------------------------------------------------#
 # workflow:
+# Data Preparation
+# ================
 
-# 1. Load the *.csv file with all global plant points
-# 2. Split the the files and make for each species a folder
-# 3. Create for each species a background file with 10000 background points
-# 4. Create a presence swd file
-# 5. Create a background swd file
-# 6. Train and run Maxent
+# * Split species file by species ID (script src/scripts/P02_species.sh
+# * Only consider species with 10 or more points (script: src/scripts/P02_species.sh)
+# * For each species create a folder and copy the training file into the folder.
+
+# * Create for each species a background file with 10000 background points
+# * Create a presence swd file
+# * Create a background swd file
+# * Train and run Maxent
 
 #--------------------------------------------------------------------#
 # load libraries
@@ -38,18 +42,35 @@ save(list=ls(), file=str_c(dir.out, "parameters.RData"))
 #    for each species. The function is located in the file ./src/scripts/F1_split_csv.R
 
 # Split databasae into single files for every species. To be done from bash shell.
+# Execute commands from P02_species.sh
 
-awk -F "," '{close(f);f=$1}{print > f".txt"}' World_filtered_Plantae.csv
+sp.list <- read.table(dir.sp.list,stringsAsFactors=F)
+n.part <- ceiling(nrow(sp.list)/10000)
+id.part <- rep(paste("part.",1:n.part,sep=""),each=10000)
+id.part <- id.part[1:nrow(sp.list)]
+sp.list$part <- id.part
 
+sfInit(parallel=sf.parallel, cpus=sf.cpus, type=sf.type)
+sfExport("write.species.csv")
+sfExport("dir.out")
+sfExport("dir.sp")
+sfExport("id.part")
+sfExport("sp.list")
 
-sp <- apply(species.files.raw,1,write.species.csv,log.file=log.make.species.csv, min.points=pts.min,dir.out=dir.out)
+system.time(sfSapply(sp.list[,1:2], function(i) write.species.csv(i,dir.species=dir.sp, dir.out=dir.out)))
+
+sfStop()
 
 #--------------------------------------------------------------------#
 # Create background files 
 
 # read shapefile for biomes and continents
-continents <- load(continents.path)
-biomes <- load(biomes.path)
+continents <- readShapePoly(continents.path)
+biomes <- readShapePoly(biomes.path)
+
+l <- lapply(list.files(dir.out, pattern="p.*"), function(x) data.frame(x, list.files(path=paste(dir.out, x, sep="/"), pattern="^[0-9].*.[0-9]$"), stringsAsFactors=F))
+ll <- ldply(l, rbind)
+paths <- str_c(dir.out,"/", ll[,1], "/", ll[,2])
 
 # extract backgrounds from wwf biomes task 10
 ### Export variables to workers
@@ -61,9 +82,9 @@ sfExport("continents")
 sfExport("me.no.background")
 sfExport("dir.out")
 sfExport("dir.error.bg")
-for (i in 1:length(sp))
-system.time(sfSapply(sp[[i]], function(i) get.background(sp_id=i, biomes=biomes, v.all=biomes.values, no.background=me.no.background)))
- 
+sfExport("dir.log") # need to be included in the function
+system.time(sfSapply(paths, function(i) get.background(path=i, continents=continents, biomes=biomes, write.where=T)))
+
 sfStop()
 
 
