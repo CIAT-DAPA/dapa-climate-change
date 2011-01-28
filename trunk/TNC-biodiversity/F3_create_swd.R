@@ -5,12 +5,12 @@
 #--------------------------------------------------------------------#
 # Workflow:
 # 1. Get list of all folders
-# 2. Split them into junks of 1000 species
+# 2. For each part
 #  a. Merge species
 #  b. Merge background
 #  c. Merge species and Background
 #  d. Get unique
-# 3. Merge junks
+# 3. Merge junks (maybe not)
 # 4. Extract swd
 # 5. Write swd for species and background for every species.
 
@@ -49,18 +49,6 @@ merge.point <- function(file.chunk, dir.out) {
    sp$key <- str_c(sp$lat, sp$lon, sep=":")   
    sp <- sp[!duplicated(sp$key),]
 
-   # do the same for bg
-   bg <- lapply(file.chunk, function(x) read.csv(str_c(dir.out,"/",x, "/training/background.csv")))
-   bg <- ldply(bg,rbind)
-   bg$key <- str_c(bg$lat, bg$lon, sep=":")   
-   bg <- bg[!duplicated(bg$key),]
-
-   names(bg) <- c("species", "lon", "lat", "key")
-   names(sp) <- c("species", "lon", "lat", "key")
-
-   both <- rbind(bg,sp)
-   both <- both[!duplicated(both$key),]
-
-   return(both)
+   return(sp)
 }
    
