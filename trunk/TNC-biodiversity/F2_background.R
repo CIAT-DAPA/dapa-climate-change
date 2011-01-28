@@ -53,7 +53,7 @@ get.background <- function(path,continents, biomes,no.background=10000, make.swd
 
       write(paste("biomes : ", paste(biomes.ok, collapse=","), sep=""), paste(path, "/info.txt",sep=""), append=T)
       write(paste("continents : ", paste(continents.ok, collapse=","), sep=""), paste(path, "/info.txt", sep=""), append=T)
-
+      write(paste(Sys.time(),path, " ok", sep="|"), paste(dir.log, "/where_from_bg.txt",sep=""), append=T)
    }
   
   
