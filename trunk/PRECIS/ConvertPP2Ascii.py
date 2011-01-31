@@ -5,20 +5,22 @@
 #-----------------------------------------------------------------------
 
 # Import system modules
-import os, sys, glob, string
+import os, sys, glob, string, shutil
 
 if len(sys.argv) < 8:
 	os.system('clear')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - ie linux: python ConvertPP2Ascii.py //data2//precis//Test//archive genam 00001 pa //data2//precis//RCM_Data HadCM3Q3 SRES_A1B"
+	print "   - ie linux: python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive gen 00001 pa /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q3 SRES_A1B"
+	print "/mnt/GIS-HD716/climate_change/RCM_Data"
 	sys.exit(1)
 
 # --------------------------------------------------------------------------------------------------------------------------
 # Notes:
-# You must call ". setvars" on home/precis before to run ConvertPP2Ascii.py script
+# You must call ". setvars" on home/precis before run ConvertPP2Ascii.py script
+# Change the tmpdir
 # dirbase:  Path pp files
-# runid:    The full list of runids are in trunk\dapa-climate-change\PRECIS\Progress_Runs_Precis.xls
+# runid:    First three letters of runid. The full list of runids are in trunk\dapa-climate-change\PRECIS\Progress_Runs_Precis.xls
 # variable: Variable in the PRECIS model, corresponding to the STASH code. The full list are in
 #           trunk\dapa-climate-change\PRECIS\Metereological_Variables_PRECIS.xlsx
 # type:     The time period over which the data gas been processed and the amount of data in the file.
@@ -42,11 +44,14 @@ dirout = sys.argv[5]
 gcm = sys.argv[6]
 scenario = sys.argv[7]
 
-# Create dirout folder
+# Create dirout and temporal folders
 
 if not os.path.exists(dirout):
     os.system('mkdir ' + dirout)
 
+tmpdir = "/data2/precis/Workspace"
+if not os.path.exists(tmpdir):
+  os.system('mkdir ' + tmpdir)
 
 os.system('clear')
 
@@ -68,49 +73,74 @@ monDc = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
 
 print "    > Converting pp files to ascii \n"
 
-if type == "pa":
+# Get a list of all runids 
 
-  # Get a list of pp files into base dir
+folList = glob.glob(dirbase + "/" + runid + "*")
 
-#  ppList = sorted(glob.glob(dirbase + "//" + runid + "//" + str(variable) + "//" + runid + "a." + type + "*" + variable + "*.pp"))
-  ppList = glob.glob(dirbase + "//" + runid + "//" + str(variable) + "//" + runid + "a." + type + "*" + variable + "*.pp")
+for fol in folList:
+
+  print "\n    > Searching  into  " + fol + "\n"
+
+  ppList = glob.glob(fol + "/" + str(variable) + "/" + fol.split("/")[-1] + "a." + type + "*." + variable + ".pp")
 
   for pp in ppList:
-      
-      # Extact year of the file name
+    
+    # Extact year of the file name
 
-      decade = os.path.basename(pp)[9:10]
-      year = os.path.basename(pp)[10:11]
-      month = os.path.basename(pp)[11:14]
-      date = int(decDc [decade]) + int(year)
+    decade = os.path.basename(pp)[9:10]
+    year = os.path.basename(pp)[10:11]
+    month = os.path.basename(pp)[11:14]
+    date = int(decDc [decade]) + int(year)
 
-      #Creating outputs folders to ascii files by years
+    #Creating outputs folders to ascii files by years
 
-      diroutASC = dirout + "//" + scenario + "//" + gcm +  "//" + str(date) + "//" + "_ascii"
-      if not os.path.exists(diroutASC):
-          os.system('mkdir ' + diroutASC)
+    if not os.path.exists(dirout + "/" + scenario):
+      os.system('mkdir ' + dirout + "/" + scenario)
 
-      if int(monDc [month]) < 10 and not os.path.exists(diroutASC + "//" + variable + "_" + str(date) + "0" + str(monDc [month]) + ".asc"):
+    if not os.path.exists(dirout + "/" + scenario + "/" + gcm):
+      os.system('mkdir ' + dirout + "/" + scenario + "/" + gcm)
 
-          # Convert pp files to nc format and split into the daily files
-          # Structure ascii filenames: variable_YYYYMM.asc
-        
-          print "    ---> Processing " + gcm + " " + scenario + " " + variable + " " + str(date) + " " +  str(month)
-          outASC = diroutASC + "//" + variable + "_0" + str(monDc [month]) + ".asc"
+    if not os.path.exists(dirout + "/" + scenario + "/" + gcm + "/daily_asciis"):
+      os.system('mkdir ' + dirout + "/" + scenario + "/" + gcm + "/daily_asciis")
 
-          os.system("pp2ascii -f asciipp -O /data2/precis/precis182/tmp/pp2ascii.out -o " + outASC + " " + pp)
-          print "    ---> Converted to Ascii \n"
+    diroutASC = dirout + "/" + scenario + "/" + gcm + "/daily_asciis/" + str(date)  
+    if not os.path.exists(diroutASC):
+      os.system('mkdir ' + diroutASC)
 
-      if int(monDc [month]) > 9 and not os.path.exists(diroutASC + "//" + variable + "_" + str(date) + str(monDc [month]) + ".asc"):
+    if int(monDc [month]) < 10 and not os.path.exists(diroutASC + "/" + variable + "_0" + str(monDc [month]) + ".asc"):
 
-          # Convert pp files to nc format and split into the daily files
-          # Structure nc filenames: gcm_scenario_variable_YYYYMM.nc
-        
-          print "    ---> Processing " + gcm + " " + scenario + " " + variable + " " + str(date) + " " +  str(month)
-          outASC = diroutASC + "//" + variable + "_" + str(monDc [month]) + ".asc"
-          
-          os.system("pp2ascii -f asciipp -O /data2/precis/precis182/tmp/pp2ascii.out -o " + outASC + " " + pp)
+      print "    ---> Processing " + gcm + " " + scenario + " " + variable + " " + str(date) + " " +  str(month)
 
-          print "    ---> Converted to Ascii \n"
+      # Remove a rm from pp fields
 
-print "Done!!!"
+      os.system("pprr -z -O /data2/precis/precis182/tmp/pprr.out -r 8 -e " + tmpdir + " -o " + os.path.basename(pp) + " " + pp)
+      print "    ---> Rim removed"
+
+      # Convert pp files to ascii format 
+      # Structure ascii filenames: variable_MM.asc
+
+      outASC = diroutASC + "/" + variable + "_0" + str(monDc [month]) + ".asc"
+      os.system("pp2ascii -f asciipp -O /data2/precis/precis182/tmp/pp2ascii.out -o " + outASC + " " + tmpdir + "/" + os.path.basename(pp))
+      print "    ---> Converted to Ascii \n"
+
+    if int(monDc [month]) > 9 and not os.path.exists(diroutASC + "/" + variable + "_" + str(monDc [month]) + ".asc"):
+
+      print "    ---> Processing " + gcm + " " + scenario + " " + variable + " " + str(date) + " " +  str(month)
+
+      # Remove a rm from pp fields
+
+      os.system("pprr -z -O /data2/precis/precis182/tmp/pprr.out -r 8 -e " + tmpdir + " -o " + os.path.basename(pp) + " " + pp)
+      print "    ---> Rim removed"
+
+      # Convert pp files to ascii format 
+      # Structure ascii filenames: variable_MM.asc
+
+      outASC = diroutASC + "/" + variable + "_" + str(monDc [month]) + ".asc"
+      os.system("pp2ascii -f asciipp -O /data2/precis/precis182/tmp/pp2ascii.out -o " + outASC + " " + tmpdir + "/" + os.path.basename(pp))
+      print "    ---> Converted to Ascii \n"
+
+#Remove temporal dir
+print "    > Removing temporal files"
+shutil.rmtree(tmpdir)
+
+print "    > Done!!!"
