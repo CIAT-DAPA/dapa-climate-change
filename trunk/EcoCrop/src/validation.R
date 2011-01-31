@@ -67,10 +67,14 @@ extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 				suiA <- sum(sv) #calculate country suitable area
 				fraA <- suiA/phyA #fraction suitable
 				outmx[p,3:11] <- c(mean(vl),vl2m,sd(vl),max(vl),min(vl),sum(vl),phyA,suiA,fraA)
+				rm(rs); rm(sh); rm(pol); rm(xy); rm(av); rm(vl); rm(sv); rm(av)
+				rm(phyA); rm(suiA); rm(fraA); rm(vl2); rm(vl2m)
+				gc()
 			}
 		}
 	}
 	outmx.final <- cbind(outmx,shpData)
+	rm(shpData); rm(a); rm(rsl); gc()
 	return(outmx.final)
 }
 
@@ -92,6 +96,7 @@ valMetrics <- function(mx, pres.field) {
 		tnr <- ntn / length(which(met[,1] == 0))
 	} else {tnr <- NA}
 	#object to return
+	rm(mx); rm(met); gc()
 	met.final <- data.frame(TPR=tpr, FPR=fpr, TNR=tnr)
 	return(met.final)
 }
