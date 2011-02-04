@@ -68,7 +68,7 @@ sfStop()
 continents <- readShapePoly(continents.path)
 biomes <- readShapePoly(biomes.path)
 
-l <- lapply(list.files(dir.out, pattern="p.*"), function(x) data.frame(x, list.files(path=paste(dir.out, x, sep="/"), pattern="^[0-9].*.[0-9]$"), stringsAsFactors=F))
+l <- lapply(list.files(dir.out, pattern="^p.*"), function(x) data.frame(x, list.files(path=paste(dir.out, x, sep="/"), pattern="^[0-9].*.[0-9]$"), stringsAsFactors=F))
 ll <- ldply(l, rbind)
 paths <- str_c(dir.out,"/", ll[,1], "/", ll[,2])
 
@@ -83,12 +83,77 @@ sfExport("me.no.background")
 sfExport("dir.out")
 sfExport("dir.error.bg")
 sfExport("dir.log") # need to be included in the function
+
+# for each species extract the biomes and continents were background points are located.
+
 system.time(sfSapply(paths, function(i) get.background(path=i, continents=continents, biomes=biomes, write.where=T)))
 
 sfStop()
 
+# Function to create a background swd file for each species
+# (Hector)
 
-## Make swd files 
-fl <- list.files(path=dir.out, pattern="^[0-9].*.[0-9]$")
-swd.by.chunks(files.list=fl, split.every=1000, dir.out=dir.out)
+
+## Make swd files all pressence points
+
+l <- lapply(list.files(dir.out, pattern="^p.*.[0-9]$"), function(x) data.frame(x, list.files(path=paste(dir.out, x, sep="/"), pattern="^[0-9].*.[0-9]$"), stringsAsFactors=F))
+ll <- ldply(l, rbind)
+paths <- str_c(dir.out,"/", ll[,1], "/", ll[,2], "/training/species.csv")
+
+swd.by.chunks(files.list=paths, split.every=1000)
+
+# to make the swd files with a global grid at 30 seconds used:
+
+# split outplut all into files only 1000 at a the time
+split points_all.csv -d -a 4 -l 500
+
+# make a tmp dir called swd
+mkdir swd
+mv x* swd/
+
+# use GRASS to extract for each of the files the swd values
+
+for i in `ls`
+do
+   if [ -f $i.swd ]
+   then
+      echo "$i exists already"
+   else
+      cat $i | awk -F, '{print $2,$3}' | r.what in=bio1,bio2,bio3,bio4,bio5,bio6,bio8,bio9,bio12,bio13,bio14,bio15,bio18,bio19 fs=" " > $i.swd
+      echo created $i
+   fi
+done
+
+# merge the files
+write("lon,lat,bio1,bio2,bio3,bio4,bio5,bio6,bio8,bio9,bio12,bio13,bio14,bio15,bio18,bio19", "occ_all_merged_swd.csv", append=F)
+for (i in list.files(pattern="*.swd")) {
+   write.table(read.table(i), "occ_all_merged_swd.csv", row.names=F, col.names=F, sep=",", quote=F, append=T)
+}
+
+
+#--------------------------------------------------------------------#
+# for each species extract the occurence swd values
+
+# read file with coordinates and swd values
+occ.swd <- read.csv(str_c(dir.out, "/occ_all_merged_swd.csv"))
+
+l <- lapply(list.files(dir.out, pattern="^p.*.[0-9]$"), function(x) data.frame(x, list.files(path=paste(dir.out, x, sep="/"), pattern="^[0-9].*.[0-9]$"), stringsAsFactors=F))
+ll <- ldply(l, rbind)
+paths <- str_c(dir.out,"/", ll[,1], "/", ll[,2])
+
+
+sfInit(parallel=sf.parallel, cpus=sf.cpus, type=sf.type)
+sfExport("get.species.swd")
+sfExport("dir.out")
+sfExport("occ.swd")
+
+# for each species extract the biomes and continents were background points are located.
+
+system.time(sfSapply(paths, function(i) get.background(path=i, continents=continents, biomes=biomes, write.where=T)))
+
+sfStop()
+
+#--------------------------------------------------------------------#
+# run Maxent
+
 
