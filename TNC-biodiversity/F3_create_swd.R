@@ -4,7 +4,6 @@
 # Date:     25.1.2011
 #--------------------------------------------------------------------#
 # Workflow:
-# 1. Get list of all folders
 # 2. For each part
 #  a. Merge species
 #  b. Merge background
@@ -15,36 +14,33 @@
 # 5. Write swd for species and background for every species.
 
 
-# Workflow:
-# 1. Get list of all folders
-fl <- list.files(path=dir.out, pattern="^[0-9].*.[0-9]$")
 
-swd.by.chunks <- function(files.list=fl, split.every=1000, dir.out=dir.out) {
+swd.by.chunks <- function(files.list=fl, split.every=1000,make.swd=F) {
 # 2. Split them into chunks of 1000 species
    f <- rep(1:ceiling(length(files.list)/split.every), each=split.every)[1:length(files.list)]
    files.splitted <- split(files.list,f)
    
    # call fuction merge.points
-   pts <- lapply(files.splitted,function(x) merge.points(x,dir.out=dir.out))
+   pts <- merge.point(unlist(files.splitted))
 
-# 3. Merge chunks
-   merged.chunks <- ldply(pts,rbind)
-   merged.chunks[!duplicated(merged.chunks$key),]
+# 3.only take unique points
+  pts <- pts[!duplicated(pts$key),]
 
 # 3a. write to a file
-   write.csv(merged.chunks[,c("species", "lon", "lat")], str_c(dir.out,"/points_all.csv"), row.names=F)
+   write.csv(pts[,c("key", "lon", "lat","specie_id")], str_c(dir.out,"/points_all.csv"), row.names=F,quote=F)
    
 # 4. Extract swd
+   if (make.swd==T)
    system(str_c("java -cp ", dir.maxent, "/maxent.jar density.Getval ",dir.out,"/points_all.csv ", dir.env,"/bio??.asc > ",dir.out,"/all_points_swd.csv"),wait=T) 
 
 
 # 5. Write swd for species and background for every species.
 }
 
-merge.point <- function(file.chunk, dir.out) {
+merge.point <- function(file.chunk) {
 
    # read all points were species if found
-   sp <- lapply(file.chunk, function(x) read.csv(str_c(dir.out,"/",x, "/training/species.csv")))
+   sp <- lapply(file.chunk,read.csv, stringsAsFactors=F)
    sp <- ldply(sp,rbind)
    sp$key <- str_c(sp$lat, sp$lon, sep=":")   
    sp <- sp[!duplicated(sp$key),]
