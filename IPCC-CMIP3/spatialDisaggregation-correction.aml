@@ -35,7 +35,8 @@
 &if not [exists %outdir% -DIR] &then &sys md %outdir% /*same as indir
 &if not [exists %outdir%\%sres% -DIR] &then &sys md %outdir%\%sres%
 &if not [exists %outdir%\%sres%\disaggregated -DIR] &then &sys md %outdir%\%sres%\disaggregated
-&if not [exists %outdir%\%sres%\disaggregated\%modname% -DIR] &then &sys md %outdir%\%sres%\disaggregated\%modname%
+&if not [exists %outdir%\%sres%\disaggregated\Global_30s -DIR] &then &sys md %outdir%\%sres%\disaggregated\Global_30s
+&if not [exists %outdir%\%sres%\disaggregated\Global_30s\%modname% -DIR] &then &sys md %outdir%\%sres%\disaggregated\Global_30s\%modname%
 
 &ty
 &ty Processing model %modname%
@@ -44,16 +45,16 @@
 	
 	&if [show program] NE GRID &then GRID
 
-	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
-		&if [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then
+	&if not [exists %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts%_disaggregation_done.txt -file] &then
+		&if [exists %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts% -DIR] &then
 			&do
 				&ty
 				&ty Now copying to temporal...
-				&s copystat [COPY %outdir%\%sres%\disaggregated\%modname%\%ts% %tmpdir% -DIRECTORY]
+				&s copystat [COPY %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts% %tmpdir% -DIRECTORY]
 				&if %copystat% EQ 0 &then 
 					&do
 						&ty Successfully copied, starting the process (%modname%, %ts%)
-						&s delstat [DELETE %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+						&s delstat [DELETE %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts% -DIRECTORY]
 					&end
 				&else
 					&do
@@ -75,10 +76,10 @@
 	&end
 	arc w %tmpdir%
 	
-	&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt -file] &then
+	&if not [exists %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts%_disaggregation_done.txt -file] &then
 		&do
 			
-			/*&if not [exists %outdir%\%sres%\disaggregated\%modname%\%ts% -DIR] &then &sys md %outdir%\%sres%\disaggregated\%modname%\%ts%
+			/*&if not [exists %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts% -DIR] &then &sys md %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts%
 			
 			&do variable &list tmin tmax prec
 				&ty   ->.Processing variable %variable%
@@ -131,17 +132,17 @@
 			
 			&ty
 			&ty Now copying...
-			&s copystat [COPY %tmpdir% %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+			&s copystat [COPY %tmpdir% %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts% -DIRECTORY]
 			&if %copystat% EQ 0 &then 
 				&do
 					&ty Successfully done (%modname%, %ts%)!
-					&s outcheck [LISTFILE %outdir%\%sres%\disaggregated\%modname%\%ts%\* -GRID %outdir%\%sres%\disaggregated\%modname%\%ts%_disaggregation_done.txt]
+					&s outcheck [LISTFILE %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts%\* -GRID %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts%_disaggregation_done.txt]
 					&s delstat [DELETE %tmpdir% -DIRECTORY]
 				&end
 			&else
 				&do
 					&ty An error occurred during calculations, erasing and bailing out...
-					&s delstat [DELETE %outdir%\%sres%\disaggregated\%modname%\%ts% -DIRECTORY]
+					&s delstat [DELETE %outdir%\%sres%\disaggregated\Global_30s\%modname%\%ts% -DIRECTORY]
 					&return
 				&end
 			
