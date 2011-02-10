@@ -6,7 +6,7 @@
 
 # required parameters
 
-# x: name of the file with the species presence records
+# x: path to the file with the species presence records
 
 # return
 # writes for each species (where # of unique occurrences >= min.Points) a directory with a csv and an info file. 
