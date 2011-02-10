@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------#
 # prepare species files
 
-# 1. split species file into by species id
+# 1. split species file into seperate file by each species id
 awk -F "," '{close(f);f=$1}{print > f".txt"}' World_filtered_Plantae.csv 
 
 
@@ -20,5 +20,4 @@ done < all.txt
 
 cd all
 ls -1 > species_list.txt
-
 
