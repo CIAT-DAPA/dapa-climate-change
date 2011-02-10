@@ -1,5 +1,5 @@
 ######################################################################
-# Funciton to run Maxent
+# Function to run Maxent
 # Johannes Signer (jmsigner@gmail.com)
 # 3.2.2011
 #--------------------------------------------------------------------#
@@ -11,9 +11,9 @@ dir.create(paste(dir.out,"/",sp_id,"/cross", sep=""))
 
 # train the model
 # flags:
-# -a autoron
+# -a autorun
 # -z dont show gui
-# -P dont do impoartnace of env variables
+# -P dont do importance of env variables
 system(paste("java -mx",max.ram,"m -jar ", dir.maxent, "/maxent.jar nowarnings outputdirectory=", dir.out,"/",sp_id, "/results samplesfile=",dir.out,"/",sp_id,"/training/species_swd.csv environmentallayers=",dir.out,"/",sp_id,"/training/background_swd.csv -a -z nopictures -P plots=false", sep=""),wait=T)
 					
 # crossvalidate

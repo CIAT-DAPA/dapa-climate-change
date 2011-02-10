@@ -33,8 +33,6 @@ swd.by.chunks <- function(files.list=fl, split.every=1000,make.swd=F) {
    if (make.swd==T)
    system(str_c("java -cp ", dir.maxent, "/maxent.jar density.Getval ",dir.out,"/points_all.csv ", dir.env,"/bio??.asc > ",dir.out,"/all_points_swd.csv"),wait=T) 
 
-
-# 5. Write swd for species and background for every species.
 }
 
 merge.point <- function(file.chunk) {
