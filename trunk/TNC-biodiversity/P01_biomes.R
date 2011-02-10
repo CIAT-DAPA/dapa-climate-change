@@ -36,7 +36,7 @@ do
 done
 
 #--------------------------------------------------------------------#
-# In R: for each biome in each region create 50 files with 100 points,
+# In R: for each biome in each region create 10 files with 10000 points,
 # with less points if the total number of points is only a few thousands
 
 for (con in 1:6) {
@@ -56,17 +56,5 @@ for (con in 1:6) {
 }
 
 #--------------------------------------------------------------------#
-# make swd files
 
-
-for i in `ls -1 | grep sample`
-do
-   if [ -f $i.swd ]
-   then
-      echo "$i exists already"
-   else
-      cat $i | awk -F, '{print $2,$3}' | r.what in=bio1,bio2,bio3,bio4,bio5,bio6,bio8,bio9,bio12,bio13,bio14,bio15,bio18,bio19 fs=" " > $i.swd
-      echo created $i
-   fi
-done
 
