@@ -1,5 +1,6 @@
-get.sp.swd <- function(path,all.pts=swd)
+get.sp.swd <- function(path,all.pts=swd, log)
 {
+  tryCatch({  
   # read the file with the x,y coordinates
   points <- read.csv(paste(path,"/training/species.csv",sep=""))
 
@@ -11,5 +12,8 @@ get.sp.swd <- function(path,all.pts=swd)
 
   # write the file again
   write.table(data,paste(path,"/training/training_swd.csv", sep=""), row.names=F, quote=F, sep=",")
-
+  write(paste(date(), path, "successfull"), log, append=T)
+  }, error=function(x) {
+  write(paste(date(), path, "error:", x), log, append=T)
+  })
 }
