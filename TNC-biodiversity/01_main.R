@@ -6,20 +6,27 @@
 ######################################################################
 
 #--------------------------------------------------------------------#
-# workflow:
+# Workflow:
 
-# 1. Split species file by species ID (script src/scripts3/P02_species.sh
-# 2. Only consider species with 10 or more points (script: src/scripts3/P02_species.sh)
-# 3. For each species create a folder and copy the file with all occurrence records in the training folder (script: src/scripts3/P02_species.sh)
-# 4. For each species look where presence and background points are located.
-# 5. For all species merge presence points, extract swd and split again. 
-# 6. Extract SWD from grids.
-# 7. Extract all points of each biome and continent and create for each biome 10 files with 10000 samples. (located in: src/scripts3/P01_biomes.R)
-
-# * Create for each species a background file with 10000 background points
-# * Create a presence swd file  
-# * Create a background swd file  (script src/scripts3/F7_make_background_points.R)
-# * Train and run Maxent
+# 1. Presence records:
+#   a. Split species file by species ID (script src/scripts3/P02_species.sh
+#   b. Only consider species with 10 or more points (script: src/scripts3/P02_species.sh)
+#   c. For each species create a folder and copy the file with all occurrence records in the training folder (script: src/scripts3/P02_species.sh)
+#   d. For each species look in which biome and continent presence points are located. This information is than used to extract bakcground points
+# 2. SWD: Presence Records
+#   a. For all species merge presence points, extract swd and split again. 
+#   b. Extract each value of each environmental variable
+#   c. Interpolate cases where the extraction (2b) has failed.
+#   d. Merge different environmental varialbes into one file
+#   e. For each species extract values of environmental variables at location where there are presence points
+# 3. SWD: Background records
+#   a. For each continent extract all values for each biome
+#   b. For each continent and biome take 10 times a random sample of 10.000 points
+#   c. Merge all files from 3b to gether
+#   d. Extract value at at each point from 3c for each environmental variabel
+#   e. Merge results from every variable into one file
+#   f. For each species extract background files, according to 1d.
+# 3. Run Maxent
 
 #--------------------------------------------------------------------#
 # load libraries
@@ -128,21 +135,82 @@ system.time(sfSapply(bio.vars, function(i) get.values.lg(ascii=i, where=where)))
 
 sfStop()
 
+#--------------------------------------------------------------------#
+# Background points
+
+  for i in bg.*.csv; do awk -F, '{print $7}' $i > $i.val.only; echo $i; done
+
+# coordinates
+awk -F, '{print $3 "," $4}' $i > bg.coordinates
+awk -F, '{print $3""$4}' $i > bg.keys
+
+
+
+echo "lon,lat,bio1,bio2,bio3,bio4,bio5,bio6,bio8,bio9,bio12,bio13,bio14,bio15,bio18,bio19" > bg.values.all.var.csv
+
+paste -d, bg.coordinates bg.keys bg.valuesbio1.asc.csv.val.only bg.valuesbio2.asc.csv.val.only bg.valuesbio3.asc.csv.val.only bg.valuesbio4.asc.csv.val.only bg.valuesbio5.asc.csv.val.only bg.valuesbio6.asc.csv.val.only  bg.valuesbio8.asc.csv.val.only bg.valuesbio9.asc.csv.val.only bg.valuesbio12.asc.csv.val.only bg.valuesbio13.asc.csv.val.only bg.valuesbio14.asc.csv.val.only bg.valuesbio15.asc.csv.val.only bg.valuesbio18.asc.csv.val.only bg.valuesbio19.asc.csv.val.only > bg.values.all.var.csv
+
+# for each sample assign the nececcsary points. 
+r <- read.csv("data/env/bg.values.all.var.csv", stringsAsFactors=F)
+fl <- list.files(path="data/background", pattern="*sample*", full=T) 
+
+sapply(fl, assign.swd.to.bg, all.pts=r)
+
+assign.swd.to.bg <- function(bg.file, all.pts) {
+   if(!file.exists(str_c(str_sub(bg.file, end=-5),"_swd.txt"))) {
+   a <- read.csv(bg.file, stringsAsFactors=F)
+   a$key <- paste(a$lon,a$lat, sep="")
+
+   if (length(which(complete.cases(a)==T))!=10000) a <- a[which(complete.cases(a)==T),]
+
+   a <- cbind(a[,1:3],all.pts[all.pts$lonlat %in% a$key,4:ncol(r)])
+   names(a) <- c("sp","lon","lat","bio1","bio2","bio3","bio4","bio5","bio6","bio8","bio9","bio12","bio13","bio14","bio15","bio18","bio19")
+   write.csv(a,str_c(str_sub(bg.file, end=-5),"_swd.txt"), row.names=F, quote=F)
+   print("..")
+  } else print(".")
+}
+
+
+#--------------------------------------------------------------------#
+# Presence points
+
+for i in filled.*; do awk -F, '{print $3}' $i > $i.val.only; echo $i; done
+awk -F, '{print $1 "," $2}' $i > filled.coordinates
+awk -F, '{print $1""$2}' $i > filled.keys
+
+paste -d, filled.coordinates filled.pr.valuesbio1.asc.csv.val.only filled.pr.valuesbio2.asc.csv.val.only filled.pr.valuesbio3.asc.csv.val.only filled.pr.valuesbio4.asc.csv.val.only filled.pr.valuesbio5.asc.csv.val.only filled.pr.valuesbio6.asc.csv.val.only  filled.pr.valuesbio8.asc.csv.val.only filled.pr.valuesbio9.asc.csv.val.only filled.pr.valuesbio12.asc.csv.val.only filled.pr.valuesbio13.asc.csv.val.only filled.pr.valuesbio14.asc.csv.val.only filled.pr.valuesbio15.asc.csv.val.only filled.pr.valuesbio18.asc.csv.val.only filled.pr.valuesbio19.asc.csv.val.only filled.key > filled.pr.values.all.var.csv
+
 
 #--------------------------------------------------------------------#
 
 # Function to create a background swd file for each species
 
-extract.bg <- function (path, no.bg.files,dir.bg)
+ll <- unlist(sapply(list.files(dir.out, pattern="part.*",full=T), list.files, full=T))
 
-  # a. load the info.txt file from each splitted species folder
-  # b. load the file that contents in which continent and biome the species is found 
-  # c. load backgorund files for given biomes and continents
-  # d. select points for background
-  # e. write a backgorund swd file
+# dir.log
+this.log <- str_c(dir.out, "/log_make_backgrounds.txt")
 
+sfInit(parallel=sf.parallel, cpus=sf.cpus, type=sf.type)
+sfExport("extract.bg")
+sfExport("dir.bg")
+sfExport("this.log")
+
+system.time(sfSapply(ll, function(x) extract.bg(x,no.bg=10, dir.bg=dir.bg, log=this.log))) # function located in F4...
+
+
+sfStop()
 
 #--------------------------------------------------------------------#
+# get swd for each species
+
+ll <- unlist(sapply(list.files(dir.out, pattern="part.*",full=T), list.files, full=T))
+all.points <- read.csv(paste(dir.env, "/species.swd/all_pts.csv", sep="")) # needs to be copied there firest. 
+
+# dir.log
+this.log <- str_c(dir.out, "/log_make_species_swd.txt")
+
+
+system.time(sapply(ll, function(x) get.sp.swd(x,all.pts=all.points, log=this.log))) # function located in F5 ...
 
 #--------------------------------------------------------------------#
 # run Maxent
