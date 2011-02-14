@@ -3,8 +3,6 @@
 &terminal 9999
 &sys cls
 
-/*&s rootdir I:\Climate_data\GCM_data
-
 &amlpath .
 &s bdir [show &amlpath]
 
@@ -15,7 +13,7 @@
 	&else &if %resol% EQ 5min &then &s outdir %rootdir%\Global_5min
 	&else &s outdir %rootdir%\Global_10min
 	
-	&s modellist [listfile %rootdir%\Global_30s\* -dir]
+	&s modellist [listfile %rootdir%\Global_2_5min\* -dir]
 	&s nmodels [token %modellist% -count]
 	
 	&do md = 1 &to %nmodels%
