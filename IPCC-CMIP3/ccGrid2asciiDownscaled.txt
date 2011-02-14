@@ -35,39 +35,14 @@ Grid to Ascii Disaggregation
 198.93.225.64 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 10min
 
 
-Compress Grid Downscaled
+Compress Grid 
 --------------------------------------------
 
-198.93.225.53 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled 30s
--&r grid2ascii_process_modified.aml N:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled 2.5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled 5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled 10min
+-&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled
+-&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\downscaled
+-&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\downscaled
 
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled 30s
--&r grid2ascii_process_modified.aml N:\climate_change\IPCC_CMIP3\SRES_A2\downscaled 2.5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled 5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled 10min
+-&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
+-&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated
+-&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated
 
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\downscaled 30s
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\downscaled 2.5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\downscaled 5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\downscaled 10min
-
-
-Compress Grid Disaggregation
---------------------------------------------
-
-198.93.225.53 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 30s
--&r grid2ascii_process_modified.aml N:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 2.5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 10min
-
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 30s
--&r grid2ascii_process_modified.aml N:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 2.5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 10min
-
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 30s
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 2.5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 5min
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 10min
