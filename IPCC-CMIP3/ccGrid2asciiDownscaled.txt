@@ -30,15 +30,15 @@ Grid to Ascii Disaggregation
 198.93.225.53 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated D:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 10min
 
 198.93.225.72 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated F:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 30s
-198.93.225.64 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 2.5min
-198.93.225.64 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 5min
-198.93.225.64 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 10min
+198.93.225.57 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 2.5min
+198.93.225.57 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 5min
+198.93.225.57 -&r grid2ascii_process_modified.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 10min
 
 
 Compress Grid 
 --------------------------------------------
 
--&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled
+198.93.225.57 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled
 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\downscaled
 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\downscaled
 
