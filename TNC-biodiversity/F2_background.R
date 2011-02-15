@@ -20,6 +20,7 @@ get.background <- function(path,continents, biomes,no.background=10000, make.swd
   biomes.ok <- biomes.ok[!is.na(biomes.ok)]
 
   continents.ok <- unique(overlay(points,continents))
+
   continents.ok <- continents.ok[!is.na(continents.ok)]
    
 

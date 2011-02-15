@@ -25,13 +25,15 @@ extract.bg <- function (path, no.bg.files,dir.bg, log) {
    for(i in continents) {
       for(j in biomes)  {
          sample <- sample(1:no.bg.files,1)
+         if (file.exists(paste(dir.bg,"/continent",i,"_biome",j,"sample",sample,"_swd.txt",sep=""))){
          if (count == 1)  {
-               results <- read.table(paste(dir.bg,"/continent",i,"_biome",j,"sample",sample,"_swd.txt",sep=""), sep=",", stringsAsFactors=F)
+               results <- read.table(paste(dir.bg,"/continent",i,"_biome",j,"sample",sample,"_swd.txt",sep=""), sep=",", stringsAsFactors=F, header=T)
             } else {
-               tmp <- read.table(paste(dir.bg,"/continent",i,"_biome",j,"sample",sample,"_swd.txt",sep=""), sep=",", stringsAsFactors=F)
+               tmp <- read.table(paste(dir.bg,"/continent",i,"_biome",j,"sample",sample,"_swd.txt",sep=""), sep=",", stringsAsFactors=F,header=T)
                results <- rbind(results, tmp)                      
             }
          count <- count+1     
+         }
       }
    } 
 
