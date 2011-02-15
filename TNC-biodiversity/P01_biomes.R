@@ -12,7 +12,7 @@
 # 2.) Mask for each ecoregion in that continent
 # 3.) Write xyz values 
 
-for continent in 1 2 3 4 5 6   
+for continent in 7
 do
    
    for biome in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 98 99
@@ -39,7 +39,7 @@ done
 # In R: for each biome in each region create 10 files with 10000 points,
 # with less points if the total number of points is only a few thousands
 
-for (con in 1:6) {
+for (con in 7) {
    for (biome in c(1:14,98,99)) {
       fn <- str_c("continent",con,"_biome",biome,".txt")
       if(file.exists(fn)) {
@@ -56,5 +56,26 @@ for (con in 1:6) {
 }
 
 #--------------------------------------------------------------------#
+# For Australia make background points
 
+# extract values using Maxent
+for i in `ls continent7*sample*.txt`
+do
+   out=`echo $i | sed s/.txt//`
 
+   java -cp ../../src/lib/maxent/maxent.jar density.Getval $i bio1_aus/b* > ${out}_swd.txt
+
+   echo $out
+
+done
+
+# Resort columns
+
+for i in `ls continent7*sample*swd.txt`
+do
+   cat $i | awk -F, 'BEGIN{OFS=","}{print $1,$2,$3, $10,$11,$12,$13,$14,$15,$16,$17,$4,$5,$6,$7,$8,$9}' > tmp.txt
+   mv -v tmp.txt $i
+
+done
+
+rm tmp.txt
