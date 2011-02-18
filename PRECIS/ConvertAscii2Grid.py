@@ -76,9 +76,9 @@ if type == "daily":
 							
 					# Split into daily files
 					print "         Spliting into daily files and converting to grids"
-					#splitLen = 128 
+					splitLen = 128 
 					#Uncomment this if the scenario is HadCM3Q3
-					splitLen = 129 
+					#splitLen = 129 
 
 					input = open(asc, "r").read().split("\n")
 
@@ -101,8 +101,8 @@ if type == "daily":
 						
 						outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")
 						#Note: If sceranio is HadCM3Q3 uncomment this..
-						outASC.write('NCOLS 135\nNROWS 127\nXLLCORNER -93.550025939941\nYLLCORNER -34.1700025200843\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n')
-						#outASC.write('NCOLS 140\nNROWS 126\nXLLCORNER -95.48999786377\nYLLCORNER -34.0599986314773\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n')
+						#outASC.write('NCOLS 135\nNROWS 127\nXLLCORNER -93.550025939941\nYLLCORNER -34.1700025200843\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n')
+						outASC.write('NCOLS 140\nNROWS 126\nXLLCORNER -95.48999786377\nYLLCORNER -34.0599986314773\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n')
 						outASC.close()
 						
 						tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "r")
