@@ -38,11 +38,11 @@ Grid to Ascii Disaggregation
 Compress Grid 
 --------------------------------------------
 
-198.93.225.57 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled
--&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\downscaled
--&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\downscaled
+198.93.225.57 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled G:\climate_change\IPCC_CMIP3\SRES_B1\downscaled
+198.93.225.57 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\downscaled G:\climate_change\IPCC_CMIP3\SRES_B1\downscaled
+198.93.225.79 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\downscaled E:\climate_change\IPCC_CMIP3\SRES_B1\downscaled
 
--&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
--&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated
--&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated
+198.93.225.64 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
+198.93.225.72 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
+198.93.225.72 -&r ZipGrids_process.aml O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated G:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated
 
