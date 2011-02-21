@@ -1,4 +1,4 @@
-&args rootdir /*scenario
+&args rootdir tmpfolder /*scenario
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument (&r ZipGrids_process.aml ROOT_FOLDER SCENARIO)
 &terminal 9999
 &sys cls
@@ -12,6 +12,11 @@
 	&else &if %resol% EQ 2.5min &then &s outdir %rootdir%\Global_2_5min
 	&else &if %resol% EQ 5min &then &s outdir %rootdir%\Global_5min
 	&else &s outdir %rootdir%\Global_10min
+	
+	&if %resol% EQ 30s &then &s temporalfolder %tmpfolder%\Global_30s
+	&else &if %resol% EQ 2.5min &then &s temporalfolder %tmpfolder%\Global_2_5min
+	&else &if %resol% EQ 5min &then &s temporalfolder %tmpfolder%\Global_5min
+	&else &s temporalfolder %tmpfolder%\Global_10min
 	
 	&s modellist [listfile %rootdir%\Global_2_5min\* -dir]
 	&s nmodels [token %modellist% -count]
@@ -28,7 +33,7 @@
 			&if not [exists %outdir%\%modname%\%year%_ZipGrids_done.txt -file] &then
 				&do
 					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*_grd.zip
-					&r ZipGrids_GCM.aml %outdir%\%modname%\%year%
+					&r ZipGrids_GCM.aml %outdir%\%modname%\%year% %temporalfolder%\%modname%\%year% 
 					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*_grd.zip -file %outdir%\%modname%\%year%_ZipGrids_done.txt]
 				&end
 					
