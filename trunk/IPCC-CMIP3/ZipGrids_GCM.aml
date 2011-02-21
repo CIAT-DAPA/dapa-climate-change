@@ -1,4 +1,4 @@
-&args inputfolder
+&args inputfolder tmpfolder
 &terminal 9999
 /*&sys cls
 &messages &off
@@ -23,9 +23,9 @@
 &amlpath .
 &s basedir [show &amlpath]
 
-&s outputfolder %inputfolder%\_asciis
+&s outputfolder %tmpfolder%\_asciis
 &if not [exists %outputfolder% -dir] &then &sys md %outputfolder%
-  
+
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 &ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
@@ -69,5 +69,33 @@
 &if [exists %outputfolder%\listgrids.list -file] &then &sys del %outputfolder%\listgrids.list
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
 &ty
+
+&s outcopyfolder %inputfolder%\_asciis
+&if not [exists %outcopyfolder% -dir] &then &sys md %outcopyfolder%
+
+&ty
+&ty   -> .Now copying...
+
+&s copystat [COPY %outputfolder%\bio_grd.zip %outcopyfolder%\bio_grd.zip]
+&s copystat [COPY %outputfolder%\cons_grd.zip %outcopyfolder%\cons_grd.zip]
+&s copystat [COPY %outputfolder%\prec_grd.zip %outcopyfolder%\prec_grd.zip]
+&s copystat [COPY %outputfolder%\tmax_grd.zip %outcopyfolder%\tmax_grd.zip]
+&s copystat [COPY %outputfolder%\tmean_grd.zip %outcopyfolder%\tmean_grd.zip]
+&s copystat [COPY %outputfolder%\tmin_grd.zip %outcopyfolder%\tmin_grd.zip]
+
+&if %copystat% EQ 0 &then 
+	&do
+		&ty
+		&ty   -> .Successfully copy!
+		&s delstat [DELETE %outputfolder% -DIRECTORY]
+	&end
+&else
+	&do
+		&ty   An error occurred during calculations, bailing out...
+		&return
+	&end
+
+&ty
+&ty Process done!
 
 &ty Process done!
