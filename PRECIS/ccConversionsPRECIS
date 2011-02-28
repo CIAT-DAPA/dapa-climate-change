@@ -23,19 +23,20 @@ python ConvertAscii2Grid_v1.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16 194
 
 Models
 -------------------------------------------------------------------------------------------------------------------------------------------
-addfa	HadRM3P	HadAM3P		Baseline	30	1/1/1960
-addfb	HadRM3P	HadAM3P		Baseline	30	1/1/1960
-addja	HadRM3P	HadAM3P		SRES A2	30	1/1/2070
-addjd	HadRM3P	HadAM3P		SRES B2	30	1/1/2070
-addje	HadRM3P	HadAM3P		SRES A2	30	1/1/2070
-addfc	HadRM3P	HadAM3P		Baseline	30	1/1/1960
-addjf	HadRM3P	HadAM3P		SRES A2		30	1/1/2070
-adqcm	HadRM3P	ERA40		Reanalisys	44	1/12/1957
-aenwh	HadRM3P	HadCM3Q0	SRES A1B	150	1/12/1949
-aexsq	HadRM3P	HadCM3Q16	SRES A1B	150	1/12/1949
-aexsa	HadRM3P	HadCM3Q3	SRES A1B	150	1/12/1949
-echvc	HadRM3P	ECHAM5		SRES A1B	151	1/1/1949
-erain	HadRM3P	ERA-Interim	Reanalisys	19	1/12/1988
-echja	HadRM3P	ECHAM4		SRES_A2				
-echjd	HadRM3P	ECHAM4		SRES_B2
-ncepb	HadRM3P	NCEP:R2		Reanalisys	25	1/1/1979
+ID	RCM	GCM		Scenario	Lentgh		Initial 	Date
+addfa	HadRM3P	HadAM3P		Baseline	30		1/1/1960	afa
+addfb	HadRM3P	HadAM3P		Baseline	30		1/1/1960	afb
+addja	HadRM3P	HadAM3P		SRES A2		30		1/1/2070	aja
+addjd	HadRM3P	HadAM3P		SRES B2		30		1/1/2070	ajd
+addje	HadRM3P	HadAM3P		SRES A2		30		1/1/2070	aje
+addfc	HadRM3P	HadAM3P		Baseline	30		1/1/1960	afc
+addjf	HadRM3P	HadAM3P		SRES A2		30		1/1/2070	ajf
+adqcm	HadRM3P	ERA40		Reanalisys	44		1/12/1957	adq
+aenwh	HadRM3P	HadCM3Q0	SRES A1B	150		1/12/1949	sre
+aexsq	HadRM3P	HadCM3Q16	SRES A1B	150		1/12/1949	gis
+aexsa	HadRM3P	HadCM3Q3	SRES A1B	150		1/12/1949	gen
+echvc	HadRM3P	ECHAM5		SRES A1B	151		1/1/1949	eca
+erain	HadRM3P	ERA-Interim	Reanalisys	19		1/12/1988	era
+echja	HadRM3P	ECHAM4		SRES_A2							ecb
+echjd	HadRM3P	ECHAM4		SRES_B2							ecc
+ncepb	HadRM3P	NCEP:R2		Reanalisys	25		1/1/1979	nce

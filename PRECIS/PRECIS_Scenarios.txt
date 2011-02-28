@@ -10,8 +10,8 @@ adqcm	HadRM3P	ERA40		Reanalisys	44	1/12/1957	adq
 aenwh	HadRM3P	HadCM3Q0	SRES A1B	150	1/12/1949	sre
 aexsq	HadRM3P	HadCM3Q16	SRES A1B	150	1/12/1949	gis
 aexsa	HadRM3P	HadCM3Q3	SRES A1B	150	1/12/1949	gen
-echvc	HadRM3P	ECHAM5		SRES A1B	151	1/1/1949
-erain	HadRM3P	ERA-Interim	Reanalisys	19	1/12/1988
-echja	HadRM3P	ECHAM4		SRES_A2				
-echjd	HadRM3P	ECHAM4		SRES_B2
-ncepb	HadRM3P	NCEP:R2		Reanalisys	25	1/1/1979
+echvc	HadRM3P	ECHAM5		SRES A1B	151	1/1/1949	eca
+erain	HadRM3P	ERA-Interim	Reanalisys	19	1/12/1988	era
+echja	HadRM3P	ECHAM4		SRES_A2						ecb
+echjd	HadRM3P	ECHAM4		SRES_B2						ecc
+ncepb	HadRM3P	NCEP:R2		Reanalisys	25	1/1/1979	nce
