@@ -1,13 +1,28 @@
 PRECIS CONVERSIONS
 
+ConvertPP2Ascii.py
+------------------------------------------------------------------------------------------------------------------------------------------
 Important: Always run ". setvars" in /home/precis. This script is storaged in the same path. 
 
 53 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive gen /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q3 SRES_A1B
 53 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive gis /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q16 SRES_A1B
-53 -python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive sre /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q0 SRES_A1B
+53 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive sre /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q0 SRES_A1B
 python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive eca /mnt/GIS-HD716/climate_change/RCM_Data ECHAM5 SRES_A1B
 
 
+ConvertAscii2Grid
+------------------------------------------------------------------------------------------------------------------------------------------
+python ConvertAscii2Grid_v1.py D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3 1959 2099 daily D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3
+python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1949 2099 daily L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0
+python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16 1949 2099 daily L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16
+
+python ConvertAscii2Grid_v1.py D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3 1959 2079 monthly D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3
+python ConvertAscii2Grid_v1.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1949 2099 monthly L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0
+python ConvertAscii2Grid_v1.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16 1949 2099 monthly L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16
+
+
+Models
+-------------------------------------------------------------------------------------------------------------------------------------------
 addfa	HadRM3P	HadAM3P		Baseline	30	1/1/1960
 addfb	HadRM3P	HadAM3P		Baseline	30	1/1/1960
 addja	HadRM3P	HadAM3P		SRES A2	30	1/1/2070
