@@ -52,104 +52,107 @@ if type == "daily":
 		if os.path.exists(gp.workspace):
 			print "  > Processing " + gp.workspace + "\n"
 			
+			# 1. Split into daily files
 			# Get a list of asciis in workspace
-			ascList = glob.glob(gp.workspace + "\\*.asc")
-			for asc in ascList:
+			# ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
+			# for asc in ascList:
 				
-				# Extact variable of the file name
-				variable = os.path.basename(asc).split("_")[0:1][0]
-				month = os.path.basename(asc).split("_")[-1][0:2]
+				# # Extact variable of the file name
+				# variable = os.path.basename(asc).split("_")[0:1][0]
+				# month = os.path.basename(asc).split("_")[-1][0:2]
 				
-				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
+				# if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
 					
-					print "\n         Processing " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
-					
-					# Create outputfolder to Grid files
-					diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(decVar [variable]) + "\\" + str(decVar [variable]) + "_" + str(month)
-					if not os.path.exists(diroutGrid):
-						#shutil.rmtree(diroutGrid)
-						os.system('mkdir ' + diroutGrid)
-					#else:
-						#os.system('mkdir ' + diroutGrid)
+					# print "\n         Spliting into daily files \n"
+					# print "\t" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
 							
-					# Split into daily files
-					print "         Spliting into daily files and converting to grids"
+					# # Defining the splitlen of asc plain text for cut these files
+					# if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
+						# splitLen = 127
+					# else:
+						# splitLen = 128 
 
-					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
-						splitLen = 128
-					else:
-						splitLen = 129 
+					# input = open(asc, "r").read().split("\n")
 
-					input = open(asc, "r").read().split("\n")
-
-					at = 1
+					# at = 1
 				
-					for lines in range(0, len(input), splitLen):
+					# for lines in range(0, len(input), splitLen):
 
-						# Get the list slice
-						outputData = input[lines:lines+splitLen]
+						# # Get the list slice
+						# outputData = input[lines:lines+splitLen]
 
-						# Now open a temporal text file, join the new slice with newlines and write it out. Then close the file.
-						if at < 10:
-							baseName = str(decVar [variable]) + "_" + str(month) + "0" + str(at)
-						else:
-							baseName = str(decVar [variable]) + "_" + str(month) + str(at)
+						# # Now open a temporal text file, join the new slice with newlines and write it out. Then close the file.
+						# if at < 10:
+							# baseName = str(decVar [variable]) + "_" + str(month) + "0" + str(at)
+						# else:
+							# baseName = str(decVar [variable]) + "_" + str(month) + str(at)
 						
-						tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "w")
-						tmpTXT.write("\n".join(outputData))
-						tmpTXT.close()
+						# tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "w")
+						# tmpTXT.write("\n".join(outputData))
+						# tmpTXT.close()
 						
-						outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")
-						outASC.write("NCOLS 135\nNROWS " + str(int(splitLen)-2) + "\nXLLCORNER -93.550025939941\nYLLCORNER -34.1700025200843\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n")
-						outASC.close()
+						# outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")
+						# outASC.write("NCOLS 135\nNROWS " + str(int(splitLen)-2) + "\nXLLCORNER -93.550025939941\nYLLCORNER -34.1700025200843\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n")
+						# outASC.close()
 						
-						tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "r")
-						tmpTXT.readline()
-						tmpTXT.readline()
+						# tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "r")
+						# tmpTXT.readline()
+						# tmpTXT.readline()
 
-						outASC = open(gp.workspace + "\\" + baseName + ".asc", "a")
+						# outASC = open(gp.workspace + "\\" + baseName + ".asc", "a")
 
-						for line in tmpTXT.readlines():
-							outASC.write(line)
+						# for line in tmpTXT.readlines():
+							# outASC.write(line)
 
-						tmpTXT.close()
-						outASC.close()
+						# tmpTXT.close()
+						# outASC.close()
 						
-						os.system("del " + gp.workspace + "\\" + baseName + ".txt")
+						# os.system("del " + gp.workspace + "\\" + baseName + ".txt")
 						
-						# Convert ASCII to Raster
-						
-						if at <> 31:
-							InAsc = gp.workspace + "\\" + baseName + ".asc"
-							OutGrid = diroutGrid + "\\" + baseName
-							gp.ASCIIToRaster_conversion(InAsc, OutGrid, "FLOAT")
+						# if at == 31:
+							# os.system("del " + gp.workspace + "\\" + str(decVar [variable]) + "_" + str(month) + "31.asc")
 							
-							InZip = gp.workspace + "\\" + str(decVar [variable]) + "_" + str(year) + str(month) + ".zip"
-							os.system("7za a " + InZip + " " + InAsc)
-							os.system("del " + InAsc)
-							
-						else:
-							os.system("del " + gp.workspace + "\\" + str(decVar [variable]) + "_" + str(month) + "31.asc")
-							
-						#Increase Counter
-						at += 1
-					
-					if str(month) == "12":
-						#Create check file
-						checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt", "w")
-						checkTXT.close()
-				
-					print "         Done!\n"
-				
-				else:
-					print "         Processed " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
-					
+						# #Increase Counter
+						# at += 1
+				# else:
+					# print "         Processed " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
 			
-			for asc in ascList:
-				# Compress input files
-				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
-				os.system("7za a " + InZipCom + " " + asc)
-				os.system("del " + asc)
+			# for asc in ascList:
+				# # Compress input files
+				# print "\n         Compressing input files \n"
+				# InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
+				# os.system("7za a " + InZipCom + " " + asc)
+				# os.system("del " + asc)
+			
+			# 2. Convert ASCII to Raster
+			print "\n         Converting Daily asciis to grids \n"
+			
+			ascdayList = sorted(glob.glob(gp.workspace + "\\*.asc"))
+			for ascday in ascdayList:
+									
+				# Create outputfolder to Grid files
+				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(ascday)[:-9] + "\\" + str(ascday)[:-6]
+				if not os.path.exists(diroutGrid):
+					#shutil.rmtree(diroutGrid)
+					os.system('mkdir ' + diroutGrid)
+				#else:
+					#os.system('mkdir ' + diroutGrid)
+				
+				OutGrid = diroutGrid + "\\" + str(ascday)[:-4]
+				#gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
+				print ascday
+				print OutGrid
+				
+				# InZip = gp.workspace + "\\" + str(ascday)[:-8] + str(year) + ".zip"
+				# os.system("7za a " + InZip + " " + InAsc)
+				# os.system("del " + InAsc)
+			
+				if str(ascday)[-8:-4] == "1230":
+					#Create check file
+					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(ascday)[:-8] + "done.txt", "w")
+					checkTXT.close()
+		
+			print "         Done!\n"
 					
 if type == "monthly":
 
@@ -161,7 +164,7 @@ if type == "monthly":
 			print "  > Processing " + gp.workspace + "\n"
 			
 			# Get a list of asciis in workspace
-			ascList = glob.glob(gp.workspace + "\\*.asc")
+			ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for asc in ascList:
 				print asc
 				# Extact variable of the file name
