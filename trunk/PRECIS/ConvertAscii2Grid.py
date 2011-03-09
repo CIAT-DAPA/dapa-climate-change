@@ -52,8 +52,9 @@ if type == "daily":
 		if os.path.exists(gp.workspace):
 			print "  > Processing " + gp.workspace + "\n"
 			
+			# 1. Split into daily files
 			# Get a list of asciis in workspace
-			ascList = glob.glob(gp.workspace + "\\*.asc")
+			ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for asc in ascList:
 				
 				# Extact variable of the file name
@@ -61,20 +62,12 @@ if type == "daily":
 				month = os.path.basename(asc).split("_")[-1][0:2]
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
-					
-					print "\n         Processing " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
-					
-					# Create outputfolder to Grid files
-					diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(decVar [variable]) + "\\" + str(decVar [variable]) + "_" + str(month)
-					if not os.path.exists(diroutGrid):
-						#shutil.rmtree(diroutGrid)
-						os.system('mkdir ' + diroutGrid)
-					#else:
-						#os.system('mkdir ' + diroutGrid)
-							
-					# Split into daily files
-					print "         Spliting into daily files and converting to grids"
 
+					
+					print "\n         Spliting into daily files \n"
+					print "\t" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
+							
+					# Defining the splitlen of asc plain text for cut these files
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
 						splitLen = 127
 					else:
@@ -117,40 +110,49 @@ if type == "daily":
 						
 						os.system("del " + gp.workspace + "\\" + baseName + ".txt")
 						
-						# Convert ASCII to Raster
-						
-						if at <> 31:
-							InAsc = gp.workspace + "\\" + baseName + ".asc"
-							OutGrid = diroutGrid + "\\" + baseName
-							gp.ASCIIToRaster_conversion(InAsc, OutGrid, "FLOAT")
-							
-							InZip = gp.workspace + "\\" + str(decVar [variable]) + "_" + str(year) + str(month) + ".zip"
-							os.system("7za a " + InZip + " " + InAsc)
-							os.system("del " + InAsc)
-							
-						else:
+						if at == 31:
 							os.system("del " + gp.workspace + "\\" + str(decVar [variable]) + "_" + str(month) + "31.asc")
 							
 						#Increase Counter
 						at += 1
-					
-					if str(month) == "12":
-						#Create check file
-						checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt", "w")
-						checkTXT.close()
-				
-					print "         Done!\n"
-				
 				else:
 					print "         Processed " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
-					
-			
+		
 			for asc in ascList:
 				# Compress input files
+				print "\n         Compressing input files \n"
 				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
 				os.system("7za a " + InZipCom + " " + asc)
 				os.system("del " + asc)
-					
+			
+			# 2. Convert ASCII to Raster
+			print "\n         Converting Daily asciis to grids \n"
+			
+			ascdayList = sorted(glob.glob(gp.workspace + "\\*.asc"))
+			for ascday in ascdayList:
+									
+				# Create outputfolder to Grid files
+				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(ascday)[:-9] + "\\" + str(ascday)[:-6]
+				if not os.path.exists(diroutGrid):
+					#shutil.rmtree(diroutGrid)
+					os.system('mkdir ' + diroutGrid)
+				#else:
+					#os.system('mkdir ' + diroutGrid)
+				
+				OutGrid = diroutGrid + "\\" + str(ascday)[:-4]
+				gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
+				
+				InZip = gp.workspace + "\\" + str(ascday)[:-8] + str(year) + ".zip"
+				os.system("7za a " + InZip + " " + InAsc)
+				os.system("del " + InAsc)
+			
+				if str(ascday)[-8:-4] == "1230":
+					#Create check file
+					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(ascday)[:-8] + "done.txt", "w")
+					checkTXT.close()
+		
+			print "         Done!\n"
+				
 if type == "monthly":
 
 	for year in range(inityear, finalyear + 1, 1):
