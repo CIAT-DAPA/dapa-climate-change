@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_GCMDownscaled.py O:\climate_change\IPCC_CMIP3\ F:\climate_change\IPCC_CMIP3\ 2_5min disaggregated YES"
+	print "   - ie: python Describe_GCMDownscaled.py M:\climate_change\IPCC_CMIP3\ F:\climate_change\IPCC_CMIP3\ 30s disaggregated YES"
 	print "   Syntax	: <code.py>, <dirbase>, <scenario>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -47,14 +47,14 @@ diroutDescribe = dirout + "\\_describes"
 if not os.path.exists(diroutDescribe):
     os.system('mkdir ' + diroutDescribe)
 
-txtDescribe = diroutDescribe + "\\SRES_" + scenario + "_" + type + "_" + str(resolution) + ".txt"
-if os.path.isfile(txtDescribe):
-    outFile = open(txtDescribe, "a")
-else:
-    outFile = open(txtDescribe, "w")
-outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
-
 for scenario in scenariolist:
+
+	txtDescribe = diroutDescribe + "\\SRES_" + scenario + "_" + type + "_" + str(resolution) + ".txt"
+	if os.path.isfile(txtDescribe):
+		outFile = open(txtDescribe, "a")
+	else:
+		outFile = open(txtDescribe, "w")
+	outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
 	modellist = sorted(os.listdir(dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 	
@@ -89,7 +89,7 @@ for scenario in scenariolist:
 							os.system('mkdir ' + diroutGraph)
 
 						graphOut =  diroutGraph + "\\" + raster + ".jpeg"
-						os.system("gdal_translate -of JPEG -q -outsize 10% 10% " + gp.workspace + "\\" + raster + " " + graphOut )
+						os.system("gdal_translate -of JPEG -outsize 10% 10% " + gp.workspace + "\\" + raster + " " + graphOut )
 
 			else:
 				print "\n---> Procesed: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
