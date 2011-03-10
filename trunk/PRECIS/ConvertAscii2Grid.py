@@ -12,19 +12,21 @@
 # Import system modules
 import os, arcgisscripting, sys, glob, string, shutil
 
-if len(sys.argv) < 6:
+if len(sys.argv) < 7:
 	os.system('clear')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python ConvertAscii2Grid.py D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1959 1959 daily D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0"
+	print "   - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1959 1959 daily D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0"
 	sys.exit(1)
 
 # Arguments
 dirbase = sys.argv[1]
-inityear = int(sys.argv[2])
-finalyear = int(sys.argv[3])
-type = sys.argv[4]
-dirout = sys.argv[5]
+inityear = int(sys.argv[3])
+finalyear = int(sys.argv[4])
+type = sys.argv[5]
+dirout = sys.argv[6]
+if not os.path.exists(dirout):
+	os.system('mkdir ' + dirout)	
 	
 # Dictionary with Standar diagnostic variables
 decVar = {"00001": "SurPress", "00024": "TSmean", "00024.max": "TSmax", "00024.min": "TSmin", "02204": "CloudAm", "03234": "SLHeat", "03236": "Tmean1_5", 
@@ -48,12 +50,22 @@ if type == "daily":
 	for year in range(inityear, finalyear + 1, 1):
     
 		# Set workspace
-		gp.workspace = dirbase + "\\" + type + "_asciis\\" + str(year)
-		if os.path.exists(gp.workspace):
+		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)):
+			
+			try:
+				if not os.path.exists(dirout + "\\" + type + "_asciis"):
+					os.system('mkdir ' + dirout + "\\" + type + "_asciis")
+				shutil.copytree(dirbase + "\\" + type + "_asciis\\" + str(year), dirout + "\\" + type + "_asciis\\" + str(year))
+			except: 
+				print "An error ocurrs while copied input ascii folder of " + str(year)
+				sys.exit(2)
+
+			gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
 			print "  > Processing " + gp.workspace + "\n"
 			
 			# 1. Split into daily files
 			# Get a list of asciis in workspace
+			print "\n        Spliting into daily files \n"
 			ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for asc in ascList:
 				
@@ -63,9 +75,7 @@ if type == "daily":
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
 
-					
-					print "\n         Spliting into daily files \n"
-					print "\t" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
+					print "\t" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " splited"
 							
 					# Defining the splitlen of asc plain text for cut these files
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
@@ -132,25 +142,50 @@ if type == "daily":
 			for ascday in ascdayList:
 									
 				# Create outputfolder to Grid files
-				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(ascday)[:-9] + "\\" + str(ascday)[:-6]
+				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + os.path.basename(ascday)[:-9] 
 				if not os.path.exists(diroutGrid):
 					#shutil.rmtree(diroutGrid)
 					os.system('mkdir ' + diroutGrid)
 				#else:
 					#os.system('mkdir ' + diroutGrid)
 				
-				OutGrid = diroutGrid + "\\" + str(ascday)[:-4]
-				gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
-				
-				InZip = gp.workspace + "\\" + str(ascday)[:-8] + str(year) + ".zip"
-				os.system("7za a " + InZip + " " + InAsc)
-				os.system("del " + InAsc)
-			
+				OutGrid = diroutGrid + "\\" + os.path.basename(ascday)[:-4]
+				if not gp.Exists(OutGrid):
+					gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
+					print "         " + os.path.basename(ascday)[:-4] + " converted"
+				else:
+					print "         " + os.path.basename(ascday)[:-4] + " converted"
+
 				if str(ascday)[-8:-4] == "1230":
 					#Create check file
-					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(ascday)[:-8] + "done.txt", "w")
+					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascday)[:-8] + "done.txt", "w")
 					checkTXT.close()
-		
+					
+			for ascday in ascdayList:
+			
+				InZip = gp.workspace + "\\" + os.path.basename(ascday)[:-8] + str(year) + ".zip"
+				os.system("7za a " + InZip + " " + ascday)
+				os.system("del " + ascday)
+			
+			try:
+				if not os.path.exists(dirbase + "\\" + type + "_grids"):
+					os.system('mkdir ' + dirbase + "\\" + type + "_grids")
+				shutil.copytree(dirout + "\\" + type + "_grids\\" + str(year), dirbase + "\\" + type + "_grids\\" + str(year))
+			except: 
+				print "An error ocurrs while copied output grid folder of " + str(year)
+				sys.exit(3)
+
+			try:
+				if not os.path.exists(dirbase + "\\" + type + "_asciis_compressed"):
+					os.system('mkdir ' + dirbase + "\\" + type + "_asciis_compressed")
+				shutil.copytree(dirout + "\\" + type + "_asciis\\" + str(year), dirbase + "\\" + type + "_asciis_compressed\\" + str(year))
+			except: 
+				print "Error copying output ascii folder of " + str(year)
+				sys.exit(4)
+			
+			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
+			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
+			
 			print "         Done!\n"
 				
 if type == "monthly":
