@@ -205,37 +205,40 @@ if type == "daily":
 if type == "monthly":
 
 	for year in range(inityear, finalyear + 1, 1):
-    
-		# Set workspace
-		gp.workspace = dirbase + "\\" + type + "_asciis\\" + str(year)
-		if os.path.exists(gp.workspace):
+			
+		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)) and not gp.Exists(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt"):	
+			
+			try:
+				print "\n         Copying inputs asciis... \n"
+				if not os.path.exists(dirout + "\\" + type + "_asciis"):
+					os.system('mkdir ' + dirout + "\\" + type + "_asciis")
+				shutil.copytree(dirbase + "\\" + type + "_asciis\\" + str(year), dirout + "\\" + type + "_asciis\\" + str(year))
+			except: 
+				print "An error ocurrs while copied input ascii folder of " + str(year)
+				sys.exit(2)
+			
+			# Set workspace
+			gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
+			
 			print "  > Processing " + gp.workspace + "\n"
 			
+			# 1. Editing input ascii text plane files
+			print "  > Editing ascii files to convert to ESRI-Asciis... \n"
+			
 			# Get a list of asciis in workspace
-			ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
+			ascList = glob.glob(gp.workspace + "\\*.asc")
 			for asc in ascList:
-				print asc
 				# Extact variable of the file name
 				variable = os.path.basename(asc).split("_")[0:1][0]
 				month = os.path.basename(asc).split("_")[-1][0:2]
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
-					
-					print "\n         Processing " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
-					
-					# Create outputfolder to Grid files
-					diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(decVar [variable]) 
-					if not os.path.exists(diroutGrid):
-						# shutil.rmtree(diroutGrid)
-						os.system('mkdir ' + diroutGrid)
-					# else:
-						# os.system('mkdir ' + diroutGrid)
-							
+						
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
 						splitLen = 128
 					else:
 						splitLen = 129 
-
+					
 					input = open(asc, "r").read().split("\n")
 
 					for lines in range(0, splitLen, splitLen):
@@ -251,7 +254,7 @@ if type == "monthly":
 						tmpTXT.write("\n".join(outputData))
 						tmpTXT.close()
 						
-						outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")
+						outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")					
 						outASC.write("NCOLS 135\nNROWS " + str(int(splitLen)-2) + "\nXLLCORNER -93.550025939941\nYLLCORNER -34.1700025200843\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n")
 						outASC.close()
 						
@@ -268,17 +271,27 @@ if type == "monthly":
 						outASC.close()
 						
 						os.system("del " + gp.workspace + "\\" + baseName + ".txt")
-						
-						# Convert ASCII to Raster
-						InAsc = gp.workspace + "\\" + baseName + ".asc"
-						OutGrid = diroutGrid + "\\" + baseName
-						gp.ASCIIToRaster_conversion(InAsc, OutGrid, "FLOAT")
-						
-						InZip = gp.workspace + "\\" + str(decVar [variable]) + "_" + str(year) + ".zip"
-						os.system("7za a " + InZip + " " + InAsc)
-						os.system("del " + InAsc)
+					
+					print "\n          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " edited"
+					
+					# 2. Convert ASCII to Raster
+					print " > Converting to grid...  \n"
+					
+					# Create outputfolder to Grid files
+					diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(decVar [variable]) 
+					if not os.path.exists(diroutGrid):
+						os.system('mkdir ' + diroutGrid)
+					
+					InAsc = gp.workspace + "\\" + baseName + ".asc"
+					OutGrid = diroutGrid + "\\" + baseName
+					gp.ASCIIToRaster_conversion(InAsc, OutGrid, "FLOAT")
+					
+					print "\n          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " converted"
+					
+					InZip = gp.workspace + "\\" + str(decVar [variable]) + "_" + str(year) + ".zip"
+					os.system("7za a " + InZip + " " + InAsc)
+					os.system("del " + InAsc)
 							
-
 					if str(month) == "12":
 						#Create check file
 						checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt", "w")
@@ -287,7 +300,7 @@ if type == "monthly":
 					print "         Done!\n"
 				
 				else:
-					print "         Processed " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
+					print "          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " processed"
 					
 			
 			for asc in ascList:
@@ -295,5 +308,35 @@ if type == "monthly":
 				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
 				os.system("7za a " + InZipCom + " " + asc)
 				os.system("del " + asc)
-				
-print "  > Process done!!!"
+			
+			try:
+				print "\n         > Copying out grids ... \n"
+				if not os.path.exists(dirbase + "\\" + type + "_grids"):
+					os.system('mkdir ' + dirbase + "\\" + type + "_grids")
+				shutil.copytree(dirout + "\\" + type + "_grids\\" + str(year), dirbase + "\\" + type + "_grids\\" + str(year))
+			except: 
+				print "An error ocurrs while copied output grid folder of " + str(year)
+				sys.exit(3)
+
+			try:
+				print "         > Copying asciis compresed ... \n"
+				if not os.path.exists(dirbase + "\\" + type + "_asciis_compressed"):
+					os.system('mkdir ' + dirbase + "\\" + type + "_asciis_compressed")
+				shutil.copytree(dirout + "\\" + type + "_asciis\\" + str(year), dirbase + "\\" + type + "_asciis_compressed\\" + str(year))
+			except: 
+				print "Error copying output ascii folder of " + str(year)
+				sys.exit(4)
+			
+			print "         > Removing intermediate folders ... \n"
+			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
+			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
+			
+			print "         > " + str(year) + " Done!\n"
+			#Create check file
+			checkTXT1 = open(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt", "w")
+			checkTXT1.close()
+		
+		else :
+			print "         > " + str(year) + " Done!\n"
+	
+	print "Processed all years!!\n"
