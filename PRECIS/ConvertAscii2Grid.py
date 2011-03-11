@@ -50,7 +50,9 @@ if type == "daily":
 	for year in range(inityear, finalyear + 1, 1):
     
 		# Set workspace
-		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)):
+		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)) and not gp.Exists(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt"):
+			
+			print "         > Processing " + str(year)
 			
 			try:
 				print "\n         Copying inputs asciis... \n"
@@ -62,11 +64,10 @@ if type == "daily":
 				sys.exit(2)
 
 			gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
-			print "  > Processing " + gp.workspace + "\n"
 			
 			# # 1. Split into daily files
 			# # Get a list of asciis in workspace
-			print "\n        Spliting into daily files \n"
+			print "\n        > Spliting into daily files ... \n"
 			ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for asc in ascList:
 				
@@ -76,7 +77,7 @@ if type == "daily":
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
 					
-					print "\t" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " splited"
+					print "\t  " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) 
 					
 					# Defining the splitlen of asc plain text for cut these files
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
@@ -127,17 +128,17 @@ if type == "daily":
 						#Increase Counter
 						at += 1
 				else:
-					print "         Processed " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
+					print "         " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " splited" 
 			
 			for asc in ascList:
 				# Compress input files
-				print "\n         Compressing input files \n"
+				print "\n         > Compressing compiled ascii input files ... \n"
 				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
 				os.system("7za a " + InZipCom + " " + asc)
 				os.system("del " + asc)
 			
 			# 2. Convert ASCII to Raster
-			print "\n         Converting Daily asciis to grids \n"
+			print "\n         > Converting Daily asciis to grids \n"
 			
 			ascdayList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for ascday in ascdayList:
@@ -153,15 +154,16 @@ if type == "daily":
 				OutGrid = diroutGrid + "\\" + os.path.basename(ascday)[:-4]
 				if not gp.Exists(OutGrid):
 					gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
-					print "         " + os.path.basename(ascday)[:-4] + " converted"
+					print "           " + os.path.basename(ascday)[:-4] + " converted"
 				else:
-					print "         " + os.path.basename(ascday)[:-4] + " converted"
+					print "           " + os.path.basename(ascday)[:-4] + " converted"
 
 				if str(ascday)[-8:-4] == "1230":
 					#Create check file
 					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascday)[:-8] + "done.txt", "w")
 					checkTXT.close()
-					
+			
+			print "\n         > Compressing Daily asciis ... \n"		
 			for ascday in ascdayList:	
 			
 				InZip = gp.workspace + "\\" + os.path.basename(ascday)[:-8] + str(year) + ".zip"
@@ -186,11 +188,17 @@ if type == "daily":
 				print "Error copying output ascii folder of " + str(year)
 				sys.exit(4)
 			
-			print "         > Removing temporal folders ... \n"
+			print "         > Removing intermediate folders ... \n"
 			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
 			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
 			
-			print "         >" + str(year) + " Done!\n"
+			print "         > " + str(year) + " Done!\n"
+			#Create check file
+			checkTXT1 = open(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt", "w")
+			checkTXT1.close()
+		
+		else :
+			print "         > " + str(year) + " Done!\n"
 	
 	print "Processed all years!!\n"
 					
