@@ -191,6 +191,8 @@ if type == "daily":
 			print "         > Removing intermediate folders ... \n"
 			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
 			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
+			shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
+			os.rename(dirbase + "\\" + type + "_asciis_compressed\\" + str(year), dirbase + "\\" + type + "_asciis\\" + str(year))
 			
 			print "         > " + str(year) + " Done!\n"
 			#Create check file
@@ -201,7 +203,7 @@ if type == "daily":
 			print "         > " + str(year) + " Done!\n"
 	
 	print "Processed all years!!\n"
-					
+
 if type == "monthly":
 
 	for year in range(inityear, finalyear + 1, 1):
@@ -274,41 +276,42 @@ if type == "monthly":
 					
 					print "\n          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " edited"
 					
-					# 2. Convert ASCII to Raster
-					print " > Converting to grid...  \n"
-					
-					# Create outputfolder to Grid files
-					diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + str(decVar [variable]) 
-					if not os.path.exists(diroutGrid):
-						os.system('mkdir ' + diroutGrid)
-					
-					InAsc = gp.workspace + "\\" + baseName + ".asc"
-					OutGrid = diroutGrid + "\\" + baseName
-					gp.ASCIIToRaster_conversion(InAsc, OutGrid, "FLOAT")
-					
-					print "\n          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " converted"
-					
-					InZip = gp.workspace + "\\" + str(decVar [variable]) + "_" + str(year) + ".zip"
-					os.system("7za a " + InZip + " " + InAsc)
-					os.system("del " + InAsc)
-							
-					if str(month) == "12":
-						#Create check file
-						checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt", "w")
-						checkTXT.close()
-				
-					print "         Done!\n"
-				
-				else:
-					print "          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " processed"
-					
-			
 			for asc in ascList:
 				# Compress input files
 				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
 				os.system("7za a " + InZipCom + " " + asc)
 				os.system("del " + asc)
+
+			# 2. Convert ASCII to Raster
+			print "\n         > Converting Monthly asciis to grids \n"
 			
+			ascmonthList = sorted(glob.glob(gp.workspace + "\\*.asc"))
+			for ascmonth in ascmonthList:
+									
+				# Create outputfolder to Grid files
+				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + os.path.basename(ascmonth)[:-9] 
+				if not os.path.exists(diroutGrid):
+					os.system('mkdir ' + diroutGrid)
+				
+				OutGrid = diroutGrid + "\\" + os.path.basename(ascmonth)[:-4]
+				if not gp.Exists(OutGrid):
+					gp.ASCIIToRaster_conversion(ascmonth, OutGrid, "FLOAT")
+					print "           " + os.path.basename(ascmonth)[:-4] + " converted"
+				else:
+					print "           " + os.path.basename(ascmonth)[:-4] + " converted"
+
+				if str(ascmonth)[-6:-4] == "12":
+					#Create check file
+					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascmonth)[:-6] + "done.txt", "w")
+					checkTXT.close()
+				
+			print "\n         > Compressing Daily asciis ... \n"	
+			for ascmonth in ascmonthList:	
+			
+				InZip = gp.workspace + "\\" + os.path.basename(ascmonth)[:-6] + str(year) + ".zip"
+				os.system("7za a " + InZip + " " + ascmonth)
+				os.system("del " + ascmonth)
+
 			try:
 				print "\n         > Copying out grids ... \n"
 				if not os.path.exists(dirbase + "\\" + type + "_grids"):
@@ -330,6 +333,8 @@ if type == "monthly":
 			print "         > Removing intermediate folders ... \n"
 			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
 			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
+			shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
+			os.rename(dirbase + "\\" + type + "_asciis_compressed\\" + str(year), dirbase + "\\" + type + "_asciis\\" + str(year))
 			
 			print "         > " + str(year) + " Done!\n"
 			#Create check file
