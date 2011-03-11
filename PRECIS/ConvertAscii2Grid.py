@@ -208,8 +208,8 @@ if type == "monthly":
 
 	for year in range(inityear, finalyear + 1, 1):
 			
-		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)) and not gp.Exists(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt"):	
-			
+		if not gp.Exists(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt"):	
+
 			try:
 				print "\n         Copying inputs asciis... \n"
 				if not os.path.exists(dirout + "\\" + type + "_asciis"):
@@ -235,7 +235,9 @@ if type == "monthly":
 				month = os.path.basename(asc).split("_")[-1][0:2]
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
-						
+					
+					print "\t  " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) 
+					
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
 						splitLen = 127
 					else:
@@ -333,8 +335,8 @@ if type == "monthly":
 			print "         > Removing intermediate folders ... \n"
 			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
 			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
-			shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
-			os.rename(dirbase + "\\" + type + "_asciis_compressed\\" + str(year), dirbase + "\\" + type + "_asciis\\" + str(year))
+			#shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
+			#os.rename(dirbase + "\\" + type + "_asciis_compressed\\" + str(year), dirbase + "\\" + type + "_asciis\\" + str(year))
 			
 			print "         > " + str(year) + " Done!\n"
 			#Create check file
