@@ -12,8 +12,8 @@
 # Import system modules
 import os, arcgisscripting, sys, glob, string, shutil
 
-if len(sys.argv) < 7:
-	os.system('clear')
+if len(sys.argv) < 6:
+	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
 	print "   - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1959 1959 daily D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0"
@@ -21,10 +21,10 @@ if len(sys.argv) < 7:
 
 # Arguments
 dirbase = sys.argv[1]
-inityear = int(sys.argv[3])
-finalyear = int(sys.argv[4])
-type = sys.argv[5]
-dirout = sys.argv[6]
+inityear = int(sys.argv[2])
+finalyear = int(sys.argv[3])
+type = sys.argv[4]
+dirout = sys.argv[5]
 if not os.path.exists(dirout):
 	os.system('mkdir ' + dirout)	
 	
@@ -53,6 +53,7 @@ if type == "daily":
 		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)):
 			
 			try:
+				print "\n         Copying inputs asciis... \n"
 				if not os.path.exists(dirout + "\\" + type + "_asciis"):
 					os.system('mkdir ' + dirout + "\\" + type + "_asciis")
 				shutil.copytree(dirbase + "\\" + type + "_asciis\\" + str(year), dirout + "\\" + type + "_asciis\\" + str(year))
@@ -63,8 +64,8 @@ if type == "daily":
 			gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
 			print "  > Processing " + gp.workspace + "\n"
 			
-			# 1. Split into daily files
-			# Get a list of asciis in workspace
+			# # 1. Split into daily files
+			# # Get a list of asciis in workspace
 			print "\n        Spliting into daily files \n"
 			ascList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for asc in ascList:
@@ -74,9 +75,9 @@ if type == "daily":
 				month = os.path.basename(asc).split("_")[-1][0:2]
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
-
+					
 					print "\t" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " splited"
-							
+					
 					# Defining the splitlen of asc plain text for cut these files
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
 						splitLen = 127
@@ -127,7 +128,7 @@ if type == "daily":
 						at += 1
 				else:
 					print "         Processed " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month)
-		
+			
 			for asc in ascList:
 				# Compress input files
 				print "\n         Compressing input files \n"
@@ -161,13 +162,14 @@ if type == "daily":
 					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascday)[:-8] + "done.txt", "w")
 					checkTXT.close()
 					
-			for ascday in ascdayList:
+			for ascday in ascdayList:	
 			
 				InZip = gp.workspace + "\\" + os.path.basename(ascday)[:-8] + str(year) + ".zip"
 				os.system("7za a " + InZip + " " + ascday)
 				os.system("del " + ascday)
-			
+
 			try:
+				print "\n         > Copying out grids ... \n"
 				if not os.path.exists(dirbase + "\\" + type + "_grids"):
 					os.system('mkdir ' + dirbase + "\\" + type + "_grids")
 				shutil.copytree(dirout + "\\" + type + "_grids\\" + str(year), dirbase + "\\" + type + "_grids\\" + str(year))
@@ -176,6 +178,7 @@ if type == "daily":
 				sys.exit(3)
 
 			try:
+				print "         > Copying asciis compresed ... \n"
 				if not os.path.exists(dirbase + "\\" + type + "_asciis_compressed"):
 					os.system('mkdir ' + dirbase + "\\" + type + "_asciis_compressed")
 				shutil.copytree(dirout + "\\" + type + "_asciis\\" + str(year), dirbase + "\\" + type + "_asciis_compressed\\" + str(year))
@@ -183,11 +186,14 @@ if type == "daily":
 				print "Error copying output ascii folder of " + str(year)
 				sys.exit(4)
 			
+			print "         > Removing temporal folders ... \n"
 			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
 			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
 			
-			print "         Done!\n"
-				
+			print "         >" + str(year) + " Done!\n"
+	
+	print "Processed all years!!\n"
+					
 if type == "monthly":
 
 	for year in range(inityear, finalyear + 1, 1):
@@ -282,4 +288,4 @@ if type == "monthly":
 				os.system("7za a " + InZipCom + " " + asc)
 				os.system("del " + asc)
 				
-print "  > Process done!!!"
+	print "  > Process done!!!"
