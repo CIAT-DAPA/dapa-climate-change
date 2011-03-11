@@ -130,9 +130,9 @@ if type == "daily":
 				else:
 					print "         >" + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " splited" 
 			
+			print "\n         > Compressing compiled ascii input files ... \n"
 			for asc in ascList:
-				# Compress input files
-				print "\n         > Compressing compiled ascii input files ... \n"
+				# Compress input files			
 				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
 				os.system("7za a " + InZipCom + " " + asc)
 				os.system("del " + asc)
