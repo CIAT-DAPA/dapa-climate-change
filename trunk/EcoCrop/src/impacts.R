@@ -211,3 +211,37 @@ iMetrix <- function(csr, fsr, shp, oDir, chggrid=T, impact=T, classes=T) {
 	}
 	return(list(IMPACT=outim, CLASSES=outop))
 }
+
+areaSuitable <- function(x, threshold=0) { #suitability and suitable-area change	
+	rs <- x #current
+	as <- area(rs); as[which(is.na(rs[]))] <- NA #calculate pixel area
+	a <- which(!is.na(rs[]) & rs[] > threshold) #cells > threshold
+	if (length(a) == 0) {sa <- NA} else {sa <- sum(as[a])}
+	return(sa)
+}
+
+#function to take countries and make mask and run all the above
+suitArea <- function(csr, shp) {
+	res <- (csr@extent@xmax - csr@extent@xmin)/(csr@ncols) #Resolution
+	#Looping polygons
+	nPol <- length(shp@polygons)
+	for (p in 1:nPol) {
+		cat("Pol", p, "\n")
+		cname <- shp@data$COUNTRY[p]
+		pol <- shp@polygons[p] #extract single polygon
+		sh <- SpatialPolygons(pol) #create SP object from extracted feature
+		rs <- createMask(sh, res) #create a raster from the SP object
+		xy <- xyFromCell(rs, which(!is.na(rs[]))) #extract xy values from raster cells
+		cv <- extract(csr, xy)
+		cu <- rs; cu[which(!is.na(cu[]))] <- cv; rm(cv)
+		#running impact functions
+		as.nz <- areaSuitable(cu, threshold=0) #impact for g0 mask
+		as.th <- areaSuitable(cu, threshold=50) #impact for g50 mask
+		asm <- c(as.nz, as.th) #merge both matrices
+		asm <- cbind(CID=rep(p,times=length(asm)), COUNTRY=rep(cname,times=length(asm)), THRESH=c(0,50), AREA.SUIT=asm)		
+		rm(cu); rm(rs); rm(pol); rm(sh); rm(xy); gc()
+		#create the matrix
+		if (p == 1) {outasm <- asm} else {outasm <- rbind(outasm, asm)}
+	}
+	return(outasm)
+}
