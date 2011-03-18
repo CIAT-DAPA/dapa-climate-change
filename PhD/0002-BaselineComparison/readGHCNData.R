@@ -2,7 +2,8 @@
 #University of Leeds / CIAT
 #17 March 2011
 
-rm(list=ls()); gc(); gc(T)
+rm.clean <- function() {rm(list=ls()); gc(); gc(T)}
+rm.clean()
 setwd("F:/PhD-work/climate-data-assessment/comparisons/input-data/ghcn-weather-stations/")
 
 #Reading weather stations
@@ -50,8 +51,59 @@ names(temp.st) <- temp.names
 temp.st.nw <- as.data.frame(cbind(ID=temp.st$ID, LAT=temp.st$LAT, LONG=temp.st$LONG, ALT=temp.st$ALT))
 write.csv(temp.st.nw, "./organized-data/ghcn_temp_stations.csv", row.names=F, quote=F)
 
+##############################################################
 #Reading weather data
+##############################################################
+rm.clean() #Clean memory
 
-#Precipitation file
+#Precipitation & temperature files format
 #01. ID station:        12 characters
 #02. Year:              4  characters
+#03-14 Jan-Dec:         5  characters each
+
+vn <- "prcp_adj"
+outvn <- "rain_adj"
+
+data.names <- c("ID","YEAR","JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC")
+data.widths <- c(12,4,rep(5,times=12))
+var.data <- read.fwf(paste("./raw-data/v2.", vn, sep=""), widths=data.widths)
+names(var.data) <- data.names
+
+#Filter out any rows before 1900
+#and clean the data from -9999 to NA, and from -8888 to 0
+var.data <- var.data[which(var.data$YEAR >= 1900),]
+for (i in 3:14) {
+  var.data[which(var.data[,i] == -9999),i] <- NA
+  var.data[which(var.data[,i] == -8888),i] <- 0
+}
+
+#First write this as a csv for easy reading
+write.csv(var.data, paste("./organized-data/ghcn_", outvn, "_data.csv", sep=""), row.names=F, quote=F)
+# var.data <- read.csv(paste("./organized-data/ghcn_", outvn, "data.csv", sep=""))
+
+#Number of stations
+stations <- unique(var.data$ID)
+n <- length(stations)
+
+#Create a dummy data frame with this number of stations and null in all years for merging
+out.data <- expand.grid(YEAR=c(1900:2009),ID=stations)
+
+#Merge this data frame with the loaded data, and write the output
+m <- merge(out.data, var.data, all.x=T)
+write.csv(m, paste("./organized-data/ghcn_", outvn, "_data_all.csv", sep=""), row.names=F, quote=F)
+# m <- read.csv(paste("./organized-data/ghcn_", outvn, "_data_all.csv", sep=""))
+
+#Splitting the dataset into per-station files
+od <- paste("./organized-data/", outvn, "-per-station", sep="")
+if (!file.exists(od)) {dir.create(od)}
+for (st in stations) {
+  st.data <- m[which(m$ID == st),]
+  write.csv(st.data, paste(od, "")
+}
+
+#Splitting the dataset into per-year files
+
+#############################################
+
+
+
