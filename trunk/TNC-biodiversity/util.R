@@ -1,4 +1,4 @@
-#### Set of funcitons to make life easier
+#### Set of functions to make life easier
 
 # inc(x,increment=1) increments x by a value increment, default is 1
 inc <- function(x,increment=1) eval.parent(substitute(x <- x + increment))

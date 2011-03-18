@@ -204,7 +204,7 @@ sfStop()
 # get swd for each species
 
 ll <- unlist(sapply(list.files(dir.out, pattern="part.*",full=T), list.files, full=T))
-all.points <- read.csv(paste(dir.env, "/species.swd/all_pts.csv", sep="")) # needs to be copied there firest. 
+all.points <- read.csv(paste(dir.env, "/species.swd/filled.pr.values.all.var.csv", sep="")) # needs to be copied there firest. 
 
 # dir.log
 this.log <- str_c(dir.out, "/log_make_species_swd.txt")
@@ -214,5 +214,40 @@ system.time(sapply(ll, function(x) get.sp.swd(x,all.pts=all.points, log=this.log
 
 #--------------------------------------------------------------------#
 # run Maxent
+sp <- unlist(sapply(list.files(dir.out, pattern="part.*",full=T), list.files, full=T))
 
+split.list <- rep(1:sum(cores),each=ceiling(length(sp)/sum(cores)), length.out=length(sp))
+per.core <- split(sp, split.list)
+t.count <- 1 # tmp count
+for (server in 1:length(servers))
+{
+  # save paramters
+  if(!file.exists(paste(dir.out,servers[server],sep="/"))) dir.create(paste(dir.out,servers[server],sep="/"))
+  for (core in 1:cores[server])
+  {
+    if(length(per.core)>=t.count)
+    {
+      # write species list    
+      write.table(per.core[[t.count]], paste(dir.out,"/",servers[server],"/species_list_core",core,".txt",sep=""), row.names=F, col.names=F, quote=F)
+      # write R batch file for each core
+      write(paste("# load params\n",
+        "load(\"",dir.out,"parameters.RData\")\n",
+        "# load data\n",
+        "files <- read.table(\"",dir.out,"/",servers[server],"/species_list_core",core,".txt\")\n",
+        "# prepare the log file\n",
+        "log.file <- \"",dir.out,"/log_run_me_", servers[server], "_core", core,".txt\"\n",
+        "write(\"sp_id;proc_time;finished_at\", log.file, append=F)\n",
+        "# run maxent\n",
+        "sapply(files[,1], function(i) run.maxent(path=i,max.ram=me.max.ram, dir.maxent=dir.maxent, no.replicates=me.no.replicates, replicate.type=me.replicate.type,log.file=log.file))",sep=""),
+        paste(dir.out,"/",servers[server],"/runmaxent_core",core,".R",sep=""))
+       t.count <- t.count+1
+    }
+  }
+}
+
+# Start for instances of R to run Maxent use:
+for i in 1 2 3 4 ; do screen -S core$i -d -m R CMD BATCH results/20110128/gbif/runmaxent_core$i.R ; done
+
+# -S name of screen session
+# - d -m to detach the screen session at start
 
