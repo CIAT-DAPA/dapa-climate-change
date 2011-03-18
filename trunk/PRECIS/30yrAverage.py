@@ -12,7 +12,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\monthly_grids D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages"
+	print "   - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\monthly_grids G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages"
 	sys.exit(1)
 
 # Arguments
@@ -53,12 +53,12 @@ for period in periodList:
 	# Variables to convert flux to mm/dia
 	for flux in fluxList:
 		for month in range(1, 12 + 1, 1):
-			if month < 10:
+			if month < 10 and not gp.Exists(diroutPeriod + "\\" + str(flux) + "_0" + str(month)):
 				lista = ""
 				print "\t   Processing " + str(flux) + "_0" + str(month) + "\n"
 				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + flux + "\\" + str(flux) + "_0" + str(month)) and not gp.Exists(diroutPeriod + "\\" + str(flux) + "_0" + str(month)):
+					if gp.Exists(dirbase + "\\" + str(year) + "\\" + flux + "\\" + str(flux) + "_0" + str(month)):
 						
 						raster = dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_0" + str(month)
 						print "\t  " + str(year) + " " + os.path.basename(raster)
@@ -75,12 +75,12 @@ for period in periodList:
 				gp.delete_management(TmpRaster)
 				print "\n\t   ..done! \n"
 				
-			else: 			
+			if month > 9 and not gp.Exists(diroutPeriod + "\\" + str(flux) + "_" + str(month)): 			
 				lista = ""
 				print "\t   Processing " + str(flux) + "_" + str(month) + "\n"
 				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_" + str(month)) and not gp.Exists(diroutPeriod + "\\" + str(flux) + "_" + str(month)):
+					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_" + str(month)):
 						
 						raster = dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_" + str(month)
 						print "\t  " + str(year) + " " + os.path.basename(raster)
@@ -100,12 +100,12 @@ for period in periodList:
 	# Variables to convert kelvin to celcius
 	for kelvin in kelvinList:
 		for month in range(1, 12 + 1, 1):
-			if month < 10:
+			if month < 10 and not gp.Exists(diroutPeriod + "\\" + str(kelvin) + "_0" + str(month)):
 				lista = ""
 				print "\t   Processing " + str(kelvin) + "_0" + str(month) + "\n"
 				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_0" + str(month)) and not gp.Exists(diroutPeriod + "\\" + str(kelvin) + "_0" + str(month)):
+					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_0" + str(month)):
 						
 						raster = dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_0" + str(month)
 						print "\t  " + str(year) + " " + os.path.basename(raster)
@@ -118,17 +118,17 @@ for period in periodList:
 				gp.CellStatistics_sa(LISTA, TmpRaster, "MEAN")
 				
 				OutRaster = diroutPeriod + "\\" + str(kelvin) + "_0" + str(month)
-				InExpression = TmpRaster + 273.15
+				InExpression = TmpRaster + " + 273.15"
 				gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
 				gp.delete_management(TmpRaster)
 				print "\n\t   ..done! \n"
 				
-			else: 
+			if month > 9 and not gp.Exists(diroutPeriod + "\\" + str(kelvin) + "_" + str(month)): 
 				lista = ""
 				print "\t   Processing " + str(kelvin) + "_" + str(month) + "\n"
 				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_" + str(month)) and not gp.Exists(diroutPeriod + "\\" + str(kelvin) + "_" + str(month)):
+					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_" + str(month)):
 						
 						raster = dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_" + str(month)
 						print "\t  " + str(year) + " " + os.path.basename(raster)
@@ -141,7 +141,7 @@ for period in periodList:
 				gp.CellStatistics_sa(LISTA, TmpRaster, "MEAN")
 				
 				OutRaster = diroutPeriod + "\\" + str(kelvin) + "_" + str(month)
-				InExpression = TmpRaster + 273.15
+				InExpression = TmpRaster + " + 273.15"
 				gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
 				gp.delete_management(TmpRaster)
 				print "\n\t   ..done! \n"
@@ -149,12 +149,12 @@ for period in periodList:
 	# Variables without convert
 	for variable in variableList:
 		for month in range(1, 12 + 1, 1):
-			if month < 10:
+			if month < 10 and not gp.Exists(diroutPeriod + "\\" + str(variable) + "_0" + str(month)):
 				lista = ""
 				print "\t   Processing " + str(variable) + "_0" + str(month) + "\n"
 				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_0" + str(month)) and not gp.Exists(diroutPeriod + "\\" + str(variable) + "_0" + str(month)):
+					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_0" + str(month)):
 						
 						raster = dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_0" + str(month)
 						print "\t  " + str(year) + " " + os.path.basename(raster)
@@ -167,12 +167,12 @@ for period in periodList:
 				gp.CellStatistics_sa(LISTA, OutRaster, "MEAN")
 				print "\n\t   ..done! \n"
 				
-			else: 
+			if month > 9 and not gp.Exists(diroutPeriod + "\\" + str(variable) + "_" + str(month)): 
 				lista = ""
 				print "\t   Processing " + str(variable) + "_" + str(month) + "\n"
 				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_" + str(month)) and not gp.Exists(diroutPeriod + "\\" + str(variable) + "_" + str(month)):
+					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_" + str(month)):
 						
 						raster = dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_" + str(month)
 						print "\t  " + str(year) + " " + os.path.basename(raster)
