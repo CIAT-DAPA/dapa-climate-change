@@ -210,8 +210,10 @@ if type == "monthly":
 			
 		if not gp.Exists(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt"):	
 
+			print "         > Processing " + str(year) + "\n"
+			
 			try:
-				print "\n         Copying inputs asciis... \n"
+				print "         Copying " + str(year) + " inputs asciis... \n"
 				if not os.path.exists(dirout + "\\" + type + "_asciis"):
 					os.system('mkdir ' + dirout + "\\" + type + "_asciis")
 				shutil.copytree(dirbase + "\\" + type + "_asciis\\" + str(year), dirout + "\\" + type + "_asciis\\" + str(year))
@@ -222,10 +224,10 @@ if type == "monthly":
 			# Set workspace
 			gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
 			
-			print "  > Processing " + gp.workspace + "\n"
+			
 			
 			# 1. Editing input ascii text plane files
-			print "  > Editing ascii files to convert to ESRI-Asciis... \n"
+			print "  > Editing " + str(year) + " ascii files to convert to ESRI-Asciis... \n"
 			
 			# Get a list of asciis in workspace
 			ascList = glob.glob(gp.workspace + "\\*.asc")
@@ -235,8 +237,6 @@ if type == "monthly":
 				month = os.path.basename(asc).split("_")[-1][0:2]
 				
 				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
-					
-					print "\t  " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) 
 					
 					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
 						splitLen = 127
@@ -276,7 +276,7 @@ if type == "monthly":
 						
 						os.system("del " + gp.workspace + "\\" + baseName + ".txt")
 					
-					print "\n          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " edited"
+					print "          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " edited"
 					
 			for asc in ascList:
 				# Compress input files
@@ -285,29 +285,29 @@ if type == "monthly":
 				os.system("del " + asc)
 
 			# 2. Convert ASCII to Raster
-			print "\n         > Converting Monthly asciis to grids \n"
+			print "\n         > Converting " + str(year) + " Monthly asciis to grids \n"
 			
 			ascmonthList = sorted(glob.glob(gp.workspace + "\\*.asc"))
 			for ascmonth in ascmonthList:
 									
 				# Create outputfolder to Grid files
-				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + os.path.basename(ascmonth)[:-9] 
+				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + os.path.basename(ascmonth)[:-7] 
 				if not os.path.exists(diroutGrid):
 					os.system('mkdir ' + diroutGrid)
 				
 				OutGrid = diroutGrid + "\\" + os.path.basename(ascmonth)[:-4]
 				if not gp.Exists(OutGrid):
 					gp.ASCIIToRaster_conversion(ascmonth, OutGrid, "FLOAT")
-					print "           " + os.path.basename(ascmonth)[:-4] + " converted"
+					print "           " + str(year) + " " + os.path.basename(ascmonth)[:-4] + " converted"
 				else:
-					print "           " + os.path.basename(ascmonth)[:-4] + " converted"
+					print "           " + str(year) + " " + os.path.basename(ascmonth)[:-4] + " converted"
 
 				if str(ascmonth)[-6:-4] == "12":
 					#Create check file
 					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascmonth)[:-6] + "done.txt", "w")
 					checkTXT.close()
 				
-			print "\n         > Compressing Daily asciis ... \n"	
+			print "\n         > Compressing " + str(year) + " Daily asciis ... \n"	
 			for ascmonth in ascmonthList:	
 			
 				InZip = gp.workspace + "\\" + os.path.basename(ascmonth)[:-6] + str(year) + ".zip"
@@ -315,7 +315,7 @@ if type == "monthly":
 				os.system("del " + ascmonth)
 
 			try:
-				print "\n         > Copying out grids ... \n"
+				print "\n         > Copying " + str(year) + " out grids ... \n"
 				if not os.path.exists(dirbase + "\\" + type + "_grids"):
 					os.system('mkdir ' + dirbase + "\\" + type + "_grids")
 				shutil.copytree(dirout + "\\" + type + "_grids\\" + str(year), dirbase + "\\" + type + "_grids\\" + str(year))
@@ -324,7 +324,7 @@ if type == "monthly":
 				sys.exit(3)
 
 			try:
-				print "         > Copying asciis compresed ... \n"
+				print "         > Copying " + str(year) + " asciis compresed ... \n"
 				if not os.path.exists(dirbase + "\\" + type + "_asciis_compressed"):
 					os.system('mkdir ' + dirbase + "\\" + type + "_asciis_compressed")
 				shutil.copytree(dirout + "\\" + type + "_asciis\\" + str(year), dirbase + "\\" + type + "_asciis_compressed\\" + str(year))
@@ -332,7 +332,7 @@ if type == "monthly":
 				print "Error copying output ascii folder of " + str(year)
 				sys.exit(4)
 			
-			print "         > Removing intermediate folders ... \n"
+			print "         > Removing " + str(year) + " intermediate folders ... \n"
 			shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
 			shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
 			#shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
