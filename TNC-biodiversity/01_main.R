@@ -27,6 +27,7 @@
 #   e. Merge results from every variable into one file
 #   f. For each species extract background files, according to 1d.
 # 3. Run Maxent
+# 4. Project current
 
 #--------------------------------------------------------------------#
 # load libraries
