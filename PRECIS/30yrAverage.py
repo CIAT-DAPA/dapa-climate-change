@@ -12,7 +12,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\monthly_grids G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages"
+	print "   - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\monthly_grids G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp1 G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages"
 	sys.exit(1)
 
 # Arguments
