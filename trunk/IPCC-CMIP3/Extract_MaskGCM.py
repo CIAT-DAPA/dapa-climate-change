@@ -45,39 +45,37 @@ print "Available models: " + str(modellist)
 for model in modellist:
     for period in periodlist:
 
-		#Set workspace
         gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
         if os.path.exists(gp.workspace) and not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done"):
-			
-			print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period
-			diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-			diroutascii = diroutraster + "\\_asciis"
+            print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period
+            diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+            diroutascii = diroutraster + "\\_asciis"
 
-			if not os.path.exists(diroutraster):
-				os.system('mkdir ' + diroutraster)
-				
-				#Get a list of raster in workspace
-				rasters = gp.ListRasters("", "GRID")
-				for raster in rasters:
-					print "    Extracting " + raster
-					OutRaster = diroutraster + "\\" + raster
-					gp.ExtractByMask_sa(raster, mask, OutRaster)
-					
-					if not os.path.exists(diroutascii):
-						os.system('mkdir ' + diroutascii)
-					
-					OutAscii = diroutascii + "\\" + OutRaster + ".asc"
-					print "    Converting " + OutAscii
-					gp.RasterToASCII_conversion(OutRaster, OutAscii)
-					InZip = diroutascii + "\\" + os.path.basename(OutRaster).split("_")[0] + "_asc.zip"
-					os.system('7za a ' + InZip + " " + OutAscii)
-					os.remove(OutAscii)
-			
-				print "Done!!"
-				checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done", "w")
-				checkTXT.close()
-		else:
-			print "The model " + model + " " + period + " is already processed"
-			print "Processing the next period \n"
+            if not os.path.exists(diroutraster):
+                os.system('mkdir ' + diroutraster)
+                
+                #Get a list of raster in workspace
+                rasters = gp.ListRasters("", "GRID")
+                for raster in rasters:
+                    print "    Extracting " + raster
+                    OutRaster = diroutraster + "\\" + raster
+                    gp.ExtractByMask_sa(raster, mask, OutRaster)
+                    
+                    if not os.path.exists(diroutascii):
+                        os.system('mkdir ' + diroutascii)
+                    
+                    OutAscii = diroutascii + "\\" + OutRaster + ".asc"
+                    print "    Converting " + OutAscii
+                    gp.RasterToASCII_conversion(OutRaster, OutAscii)
+                    InZip = diroutascii + "\\" + os.path.basename(OutRaster).split("_")[0] + "_asc.zip"
+                    os.system('7za a ' + InZip + " " + OutAscii)
+                    os.remove(OutAscii)
+            
+                print "Done!!"
+                checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done", "w")
+                checkTXT.close()
+        else:
+            print "The model " + model + " " + period + " is already processed"
+            print "Processing the next period \n"
 
 print "done!!!"    
