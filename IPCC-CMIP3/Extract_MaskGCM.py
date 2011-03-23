@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_MaskGCM.py F:\climate_change\IPCC_CMIP3 A1B F:\climate_change\IPCC_CMIP3\Masks\mask F:\climate_change\IPCC_CMIP3\Extracted 2_5min Downscaled"
+	print "   - ie: python Extract_MaskGCM.py O:\climate_change\IPCC_CMIP3 A1B F:\climate_change\_Masks\SouthAmerica.shp F:\climate_change\IPCC_CMIP3\SouthAmerica_Extract 2_5min downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -47,10 +47,11 @@ for model in modellist:
 
 		#Set workspace
         gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-        if os.path.exists(gp.workspace):
-			print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-
+        if os.path.exists(gp.workspace) and not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done"):
+			
+			print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period
 			diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+			diroutascii = diroutraster + "\\_asciis"
 
 			if not os.path.exists(diroutraster):
 				os.system('mkdir ' + diroutraster)
@@ -61,9 +62,22 @@ for model in modellist:
 					print "    Extracting " + raster
 					OutRaster = diroutraster + "\\" + raster
 					gp.ExtractByMask_sa(raster, mask, OutRaster)
-				
-        else:
-            print "The model " + model + " " + period + " is already processed"
-            print "Processing the next period \n"
+					
+					if not os.path.exists(diroutascii):
+						os.system('mkdir ' + diroutascii)
+					
+					OutAscii = diroutascii + "\\" + OutRaster + ".asc"
+					print "    Converting " + OutAscii
+					gp.RasterToASCII_conversion(OutRaster, OutAscii)
+					InZip = diroutascii + "\\" + os.path.basename(OutRaster).split("_")[0] + "_asc.zip"
+					os.system('7za a ' + InZip + " " + OutAscii)
+					os.remove(OutAscii)
+			
+				print "Done!!"
+				checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done", "w")
+				checkTXT.close()
+		else:
+			print "The model " + model + " " + period + " is already processed"
+			print "Processing the next period \n"
 
 print "done!!!"    
