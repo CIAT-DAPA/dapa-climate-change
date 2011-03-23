@@ -1,25 +1,33 @@
 PRECIS CONVERSIONS
 
-ConvertPP2Ascii.py
+Convert PP to Ascii
 ------------------------------------------------------------------------------------------------------------------------------------------
 Important: Always run ". setvars" in /home/precis. This script is storaged in the same path. 
 
 53 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive gen /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q3 SRES_A1B
 53 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive gis /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q16 SRES_A1B
 53 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive sre /mnt/GIS-HD716/climate_change/RCM_Data HadCM3Q0 SRES_A1B
-python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive eca /mnt/GIS-HD716/climate_change/RCM_Data ECHAM5 SRES_A1B
+72 - python ConvertPP2Ascii.py /mnt/GIS-HD717/PrecisData/archive eca /mnt/GIS-HD716/climate_change/RCM_Data ECHAM5 SRES_A1B
 
 
-ConvertAscii2Grid
+Convert Ascii to Grids
 ------------------------------------------------------------------------------------------------------------------------------------------
 57 - python ConvertAscii2Grid_v1.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3 1962 1962 daily G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3
-72 - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1949 1949 daily G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0
+72 - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1949 2099 daily F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0
 79 - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16 1949 2099 daily F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16
+python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\ECHAM5 1949 2099 daily F:\climate_change\RCM_Data\SRES_A1B\ECHAM5
 
-python ConvertAscii2Grid_v1.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3 1959 2079 monthly G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3
-64 - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1949 2099 monthly G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0
-64 - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16 1949 2099 monthly G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16
+53 - python ConvertAscii2Grid_v1.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3 1959 2079 monthly F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3
+79 - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1949 2099 monthly G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0
+python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16 1949 2099 monthly G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16
+python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\ECHAM5 1949 2099 monthly G:\climate_change\RCM_Data\SRES_A1B\ECHAM5
 
+30yr Averages
+-------------------------------------------------------------------------------------------------------------------------------------------
+72 - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\monthly_grids F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages
+python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16\monthly_grids F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16\30yrAverages
+72 - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16\monthly_grids F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16\30yrAverages_temp F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q16\30yrAverages
+python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\ECHAM5\monthly_grids F:\climate_change\RCM_Data\SRES_A1B\ECHAM5\30yrAverages_temp F:\climate_change\RCM_Data\SRES_A1B\ECHAM5\30yrAverages
 
 Models
 -------------------------------------------------------------------------------------------------------------------------------------------
