@@ -45,7 +45,7 @@ print "Available models: " + str(modellist)
 for model in modellist:
     for period in periodlist:
         gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-        if os.path.exists(gp.workspace) and not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done"):
+        if os.path.exists(gp.workspace) and not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done.txt"):
             print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
             diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
             diroutascii = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_asciis"
@@ -73,7 +73,7 @@ for model in modellist:
 
                 print "Done!!"
                 
-                checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done", "w")
+                checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done.txt", "w")
                 checkTXT.close()
         else:
             print "The model " + model + " " + period + " is already processed"
