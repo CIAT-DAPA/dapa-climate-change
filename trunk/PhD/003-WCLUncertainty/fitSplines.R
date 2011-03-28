@@ -36,6 +36,8 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
   
   for (fold in 1:nfolds) {
     
+    cat("Performing fold", fold, "\n")
+    
     cat("Selecting train and test data \n")
     #Selecting train and test data
     train <- sample(1:nrow(st.reg.10y), nrow(st.reg.10y)*train.per)
@@ -49,6 +51,8 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
     #Fold specific file creation
     for (tile in 1:3) {
       
+      cat("Analysing tile", tile, "\n")
+      
       #Read tile altitude raster
       cat("Reading tile-specific altitude raster \n")
       alt <- raster(paste(rDir, "/tile-", tile, "/altitude.asc", sep=""))
@@ -56,8 +60,6 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
       
       #Selecting stations
       st.sel.10y <- st[which(st.reg.10y$LONG >= xtt@xmin & st.reg.10y$LONG <= xtt@xmax & st.reg.10y$LAT >= xtt@ymin & st.reg.10y$LAT <= xtt@ymax),]
-      
-      cat("Performing fold", fold, "\n")
       
       #Output fold directory
       tDir <- paste(fDir, "/tile-", tile, sep=""); if (!file.exists(tDir)) {dir.create(tDir)}
