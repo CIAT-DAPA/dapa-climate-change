@@ -34,33 +34,34 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
   st.reg <- st[which(st$LONG >= xt@xmin & st$LONG <= xt@xmax & st$LAT >= xt@ymin & st$LAT <= xt@ymax),]
   st.reg.10y <- st.reg[which(st.reg$NYEARS >= 10),]
   
-  cat("Selecting train and test data \n")
-  #Selecting train and test data
-  train <- sample(1:nrow(st.reg.10y), nrow(st.reg.10y)*train.per)
-  st.reg.10y$TRAIN_TEST <- NA
-  st.reg.10y$TRAIN_TEST[train] <- "TRAIN"
-  st.reg.10y$TRAIN_TEST[-train] <- "TEST"
-  
-  for (tile in 1:3) {
+  for (fold in 1:nfolds) {
     
-    #Read tile altitude raster
-    cat("Reading tile-specific altitude raster \n")
-    alt <- raster(paste(rDir, "/tile-", tile, "/altitude.asc", sep=""))
-    xtt <- extent(msk)
-    
-    #Selecting stations
-    st.sel.10y <- st[which(st.reg.10y$LONG >= xtt@xmin & st.reg.10y$LONG <= xtt@xmax & st.reg.10y$LAT >= xtt@ymin & st.reg.10y$LAT <= xtt@ymax),]
+    cat("Selecting train and test data \n")
+    #Selecting train and test data
+    train <- sample(1:nrow(st.reg.10y), nrow(st.reg.10y)*train.per)
+    st.reg.10y$TRAIN_TEST <- NA
+    st.reg.10y$TRAIN_TEST[train] <- "TRAIN"
+    st.reg.10y$TRAIN_TEST[-train] <- "TEST"
     
     #Creating output directory
-    tDir <- paste(oDir, "/tile-", tile, sep=""); if (!file.exists(tDir)) {dir.create(tDir)}
+    fDir <- paste(oDir, "/fold-", fold, sep=""); if (!file.exists(fDir)) {dir.create(fDir)}
     
     #Fold specific file creation
-    for (fold in 1:nfolds) {
+    for (tile in 1:3) {
+      
+      #Read tile altitude raster
+      cat("Reading tile-specific altitude raster \n")
+      alt <- raster(paste(rDir, "/tile-", tile, "/altitude.asc", sep=""))
+      xtt <- extent(msk)
+      
+      #Selecting stations
+      st.sel.10y <- st[which(st.reg.10y$LONG >= xtt@xmin & st.reg.10y$LONG <= xtt@xmax & st.reg.10y$LAT >= xtt@ymin & st.reg.10y$LAT <= xtt@ymax),]
+      
       cat("Performing fold", fold, "\n")
       
       #Output fold directory
-      fDir <- paste(tDir, "/fold-", fold, sep=""); if (!file.exists(fDir)) {dir.create(fDir)}
-      setwd(fDir)
+      tDir <- paste(fDir, "/tile-", tile, sep=""); if (!file.exists(tDir)) {dir.create(tDir)}
+      setwd(tDir)
       
       #Input data file creation
       cat("Creating input files \n")
@@ -102,7 +103,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
       
       #Creating projection file
       cat("Projecting \n")
-      createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"/longitude.asc",sep=""),paste(rDir,"/latitude.asc",sep=""),paste(rDir,"/altitude.asc",sep="")))
+      createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"tile-", tile, "/longitude.asc",sep=""),paste(rDir,"tile-", tile,"/latitude.asc",sep=""),paste(rDir,"tile-", tile,"/altitude.asc",sep="")))
       #Running
       if (unix) {
         fw <- file(paste(vn, "_prj.sh", sep=""), open="w")
