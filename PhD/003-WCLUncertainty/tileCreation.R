@@ -45,8 +45,8 @@ createTiles <- function(rDir, stDir, oDir, vn="rain", ntiles=3, overlap=1500) {
       inirow <- 1 + nst.per.tile * (i - 1) - overlap
       finrow <- nrow(st)
     } else {
-      inirow <- 1 + nst.per.tile * (i - 1) - overlap/2
-      finrow <- nst.per.tile * i + overlap/2
+      inirow <- round(1 + nst.per.tile * (i - 1) - overlap/2)
+      finrow <- round(nst.per.tile * i + overlap/2)
     }
     
     lim.rows <- lat.sorted[inirow:finrow]
