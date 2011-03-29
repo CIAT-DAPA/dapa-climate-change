@@ -4,12 +4,12 @@
 require(raster); require(foreign); require(maptools)
 
 #Directories
-rDir <- "C:/CIAT_work/_tools/dapa-climate-change/trunk/PhD/003-WCLUncertainty"
-oDir <- "C:/CIAT_work/_tools/dapa-climate-change/trunk/PhD/003-WCLUncertainty/tiles"
-stDir <- "C:/CIAT_work/climate_change/IPCC_CMIP3_data/WC"
-overlap <- 1500
-ntiles <- 3
-vn <- "rain"
+#rDir <- "C:/CIAT_work/_tools/dapa-climate-change/trunk/PhD/003-WCLUncertainty"
+#oDir <- "C:/CIAT_work/_tools/dapa-climate-change/trunk/PhD/003-WCLUncertainty/tiles"
+#stDir <- "C:/CIAT_work/climate_change/IPCC_CMIP3_data/WC"
+#overlap <- 1500
+#ntiles <- 3
+#vn <- "rain"
 
 createTiles <- function(rDir, stDir, oDir, vn="rain", ntiles=3, overlap=1500) {
   #Rasters loading
