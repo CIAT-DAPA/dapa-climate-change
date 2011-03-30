@@ -105,7 +105,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
       
       #Creating projection file
       cat("Projecting \n")
-      createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"tile-", tile, "/longitude.asc",sep=""),paste(rDir,"tile-", tile,"/latitude.asc",sep=""),paste(rDir,"tile-", tile,"/altitude.asc",sep="")))
+      createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"/tile-", tile, "/longitude.asc",sep=""),paste(rDir,"/tile-", tile,"/latitude.asc",sep=""),paste(rDir,"/tile-", tile,"/altitude.asc",sep="")))
       #Running
       if (unix) {
         fw <- file(paste(vn, "_prj.sh", sep=""), open="w")
