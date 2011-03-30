@@ -59,7 +59,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
     
     #Creating projection file
     cat("Projecting surfaces \n")
-    createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"/longitude.asc",sep=""),paste(rDir,"/latitude.asc",sep=""),paste(rDir,"/altitude.asc",sep="")))
+    createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"/tile-", tile, "/longitude.asc",sep=""),paste(rDir,"/tile-", tile,"/latitude.asc",sep=""),paste(rDir,"/tile-", tile,"/altitude.asc",sep="")))
     #Running
     if (unix) {
       fw <- file(paste(vn, "_prj.sh", sep=""), open="w")
