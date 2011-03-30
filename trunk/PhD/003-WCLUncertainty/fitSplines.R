@@ -11,7 +11,7 @@ source("writeDatFile.R"); source("createFitFile.R"); source("createValFile.R"); 
 #Cross-validation information and general set up
 #Do it by tiles and in thirds
 
-splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfolds=100, train.per=0.85, vn="rain", unix=F) {
+splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfolds=100, train.per=0.85, vn="rain", ntiles=3, unix=F) {
   #Defining units
   if (vn == "rain") {u <- "millimetres"} else {u <- "degrees"}
   
@@ -49,7 +49,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
     fDir <- paste(oDir, "/fold-", fold, sep=""); if (!file.exists(fDir)) {dir.create(fDir)}
     
     #Fold specific file creation
-    for (tile in 1:3) {
+    for (tile in 1:ntiles) {
       
       cat("Analysing tile", tile, "\n")
       
