@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_MaskGCM.py O:\climate_change\IPCC_CMIP3 A1B F:\climate_change\_Masks\SouthAmerica.shp F:\climate_change\IPCC_CMIP3\SouthAmerica_Extract 2_5min downscaled"
+	print "   - ie: python Extract_MaskGCM.py M:\climate_change\IPCC_CMIP3 A2 F:\climate_change\_Masks\SouthAmerica.shp F:\climate_change\IPCC_CMIP3\SouthAmerica_Extract 30s downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
