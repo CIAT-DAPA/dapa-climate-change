@@ -8,7 +8,7 @@ require(foreign)
 rm(list=ls());gc(T);gc()
 source("writeDatFile.R"); source("createFitFile.R"); source("createValFile.R"); source("createPrjFile.R"); source("accuracy.R")
 
-cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain", round=0, unix=F) {
+cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain", ntiles=3, round=0, unix=F) {
   #Defining units
   if (vn == "rain") {u <- "millimetres"} else {u <- "degrees"}
   cat("Reading stations \n")
@@ -17,7 +17,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
   #Round directory
   roDir <- paste(oDir, "/round-", round, sep=""); if (!file.exists(roDir)) {dir.create(roDir)}
   
-  for (tile in 1:3) {
+  for (tile in 1:ntiles) {
     #Reading mask
     cat("Reading mask file \n")
     msk <- raster(paste(rDir, "/tile-", tile, "/altitude.asc", sep=""))
