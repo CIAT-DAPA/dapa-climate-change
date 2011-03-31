@@ -7,10 +7,10 @@ require(raster)
 require(foreign)
 rm(list=ls());gc(T);gc()
 
-sd <- "F:/PhD-work/climate-data-assessment/wcl-uncertainties/input-data"
-rd <- "F:/PhD-work/climate-data-assessment/wcl-uncertainties/mask-srtm/ETH"
-od <- "F:/PhD-work/climate-data-assessment/wcl-uncertainties/outputs/density-map"
-varname <- "rain"
+#sd <- "F:/PhD-work/climate-data-assessment/wcl-uncertainties/input-data"
+#rd <- "F:/PhD-work/climate-data-assessment/wcl-uncertainties/mask-srtm/ETH"
+#od <- "F:/PhD-work/climate-data-assessment/wcl-uncertainties/outputs/density-map"
+#varname <- "rain"
 
 densityMap <- function(stDir, rDir, oDir, vn="rain", nclosest=10) {
   
