@@ -12,7 +12,7 @@ accuracy <- function(trainMx=NULL, testMx=NULL, variable="rain") {
     "NOV","DEC","PRED.JAN","PRED.FEB","PRED.MAR","PRED.APR","PRED.MAY","PRED.JUN","PRED.JUL","PRED.AUG",
     "PRED.SEP","PRED.OCT","PRED.NOV","PRED.DEC","ERR.JAN","ERR.FEB","ERR.MAR","ERR.APR","ERR.MAY","ERR.JUN",
     "ERR.JUL","ERR.AUG","ERR.SEP","ERR.OCT","ERR.NOV","ERR.DEC")
-    ipts <- read.fortran(fname, format=list(c("I6","A7","F14","2F10"),c("12F8"),c("12F8"),c("12F8"),c("I1")))
+    ipts <- read.fortran(fname, format=list(c("I6","A8","F14","2F10"),c("12F8"),c("12F8"),c("12F8"),c("I1")))
     ipts <- ipts[,2:41]; names(ipts) <- iNames
     
     fit.vals <- data.frame(ID=trainMx$ID, LONG=trainMx$LONG, LAT=trainMx$LAT,
