@@ -50,7 +50,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
         OKrow <- which(st.sel.10y[,i] != -9999.9)
         NArow <- which(st.sel.10y[,i] == -9999.9)
         if (length(NArow) >= 1) {
-          st.sel.10y <- st.sel.10y[OKrow]
+          st.sel.10y <- st.sel.10y[OKrow,]
         }
       }
       
