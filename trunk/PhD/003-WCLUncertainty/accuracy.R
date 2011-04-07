@@ -15,19 +15,19 @@ accuracy <- function(trainMx=NULL, testMx=NULL, variable="rain") {
     ipts <- read.fortran(fname, format=list(c("I6","A8","F14","2F10"),c("12F8"),c("12F8"),c("12F8"),c("I1")))
     ipts <- ipts[,2:41]; names(ipts) <- iNames
     
-    fit.vals <- data.frame(ID=trainMx$ID, LONG=trainMx$LONG, LAT=trainMx$LAT,
-    JAN=trainMx$JAN, PRED.JAN=ipts$PRED.JAN,
-    FEB=trainMx$FEB, PRED.FEB=ipts$PRED.FEB,
-    MAR=trainMx$MAR, PRED.MAR=ipts$PRED.MAR,
-    APR=trainMx$APR, PRED.APR=ipts$PRED.APR,
-    MAY=trainMx$MAY, PRED.MAY=ipts$PRED.MAY,
-    JUN=trainMx$JUN, PRED.JUN=ipts$PRED.JUN,
-    JUL=trainMx$JUL, PRED.JUL=ipts$PRED.JUL,
-    AUG=trainMx$AUG, PRED.AUG=ipts$PRED.AUG,
-    SEP=trainMx$SEP, PRED.SEP=ipts$PRED.SEP,
-    OCT=trainMx$OCT, PRED.OCT=ipts$PRED.OCT,
-    NOV=trainMx$NOV, PRED.NOV=ipts$PRED.NOV,
-    DEC=trainMx$DEC, PRED.DEC=ipts$PRED.DEC)
+    fit.vals <- data.frame(ID=ipts$ID, LONG=ipts$LONG, LAT=ipts$LAT,
+    JAN=ipts$JAN, PRED.JAN=ipts$PRED.JAN,
+    FEB=ipts$FEB, PRED.FEB=ipts$PRED.FEB,
+    MAR=ipts$MAR, PRED.MAR=ipts$PRED.MAR,
+    APR=ipts$APR, PRED.APR=ipts$PRED.APR,
+    MAY=ipts$MAY, PRED.MAY=ipts$PRED.MAY,
+    JUN=ipts$JUN, PRED.JUN=ipts$PRED.JUN,
+    JUL=ipts$JUL, PRED.JUL=ipts$PRED.JUL,
+    AUG=ipts$AUG, PRED.AUG=ipts$PRED.AUG,
+    SEP=ipts$SEP, PRED.SEP=ipts$PRED.SEP,
+    OCT=ipts$OCT, PRED.OCT=ipts$PRED.OCT,
+    NOV=ipts$NOV, PRED.NOV=ipts$PRED.NOV,
+    DEC=ipts$DEC, PRED.DEC=ipts$PRED.DEC)
     
     #Fit metrics per month
     for (mth in 1:12) {
