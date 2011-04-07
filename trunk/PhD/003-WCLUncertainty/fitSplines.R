@@ -55,9 +55,13 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
     st.reg.10y$TRAIN_TEST[train] <- "TRAIN"
     st.reg.10y$TRAIN_TEST[-train] <- "TEST"
     
-    #Creating output directory and writing regression file there
+    #Creating output directory and writing regression file there (if it does not exist)
     fDir <- paste(oDir, "/fold-", fold, sep=""); if (!file.exists(fDir)) {dir.create(fDir)}
-    write.dbf(st.reg.10y, paste(fDir, "/wc_", vn, "_stations.dbf", sep=""))
+    if (!file.exists(paste(fDir, "/wc_", vn, "_stations.dbf", sep=""))) {
+      write.dbf(st.reg.10y, paste(fDir, "/wc_", vn, "_stations.dbf", sep=""))
+    } else {
+      st.reg.10y <- read.dbf(paste(fDir, "/wc_", vn, "_stations.dbf", sep=""))
+    }
     
     #Fold specific file creation
     for (tile in 1:ntiles) {
@@ -68,7 +72,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
       tDir <- paste(fDir, "/tile-", tile, sep=""); if (!file.exists(tDir)) {dir.create(tDir)}
       setwd(tDir)
       
-      if (!file.exists("status.anu")) {
+      if (!file.exists(paste(vn, "-status.anu", sep=""))) {
         
         #Cleaning the folder if the status.anu file does not exist
         cat("Cleaning if necessary \n")
@@ -139,6 +143,24 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
           system(paste(vn, "_prj.bat", sep=""))
         }
         
+        #If run was successful then erase .cov file, and zip asciigrids
+        if (file.exists(paste(vn,".lis",sep="")) & file.exists(paste(vn, ".out", sep=""))) {
+          cat("Run was successful, collecting garbage \n")
+          file.remove(paste(vn, ".cov", sep=""))
+          
+          if (unix) {
+            for (aif in 1:12) {
+              system(paste("zip", paste(vn, "_", aif, ".zip", sep=""), paste(vn, "_", aif, ".asc", sep="")))
+              file.remove(paste(vn, "_", aif, ".asc", sep=""))
+            }
+          } else {
+            for (aif in 1:12) {
+              system(paste("7za", "a", paste(vn, "_", aif, ".zip", sep=""), paste(vn, "_", aif, ".asc", sep="")))
+              file.remove(paste(vn, "_", aif, ".asc", sep=""))
+            }
+          }
+        }
+        
         #Crossvalide data metrics
         cat("Accuracy metrics \n")
         train.data <- st.sel.10y[which(st.sel.10y$TRAIN_TEST == "TRAIN"),]
@@ -150,7 +172,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
         write.csv(acc$METRICS, paste(vn, "_metrics.csv", sep=""), quote=F, row.names=F)
         
         #Writing status file
-        zz <- file("status.anu", "w")
+        zz <- file(paste(vn, "-status.anu", sep=""), "w")
         cat("Process finished on", date(), "\n", file=zz)
         close(zz)
       } else {

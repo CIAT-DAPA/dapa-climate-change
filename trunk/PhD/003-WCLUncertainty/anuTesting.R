@@ -23,7 +23,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
     tDir <- paste(roDir, "/tile-", tile, sep=""); if (!file.exists(tDir)) {dir.create(tDir)}
     setwd(tDir)
     
-    if (!file.exists("status.anu")) {
+    if (!file.exists(paste(vn, "-status.anu", sep=""))) {
       
       cat("Cleaning if necessary \n")
       lfil <- list.files()
@@ -104,6 +104,24 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
       new.st <- st.sel.10y[-st.list,]
       write.dbf(new.st, paste("wc_", vn, "_stations.dbf",sep=""))
       
+      #If run was successful then erase .cov file, and zip asciigrids
+      if (file.exists(paste(vn,".lis",sep="")) & file.exists(paste(vn, ".out", sep=""))) {
+        cat("Run was successful, collecting garbage \n")
+        file.remove(paste(vn, ".cov", sep=""))
+        
+        if (unix) {
+          for (aif in 1:12) {
+            system(paste("zip", paste(vn, "_", aif, ".zip", sep=""), paste(vn, "_", aif, ".asc", sep="")))
+            file.remove(paste(vn, "_", aif, ".asc", sep=""))
+          }
+        } else {
+          for (aif in 1:12) {
+            system(paste("7za", "a", paste(vn, "_", aif, ".zip", sep=""), paste(vn, "_", aif, ".asc", sep="")))
+            file.remove(paste(vn, "_", aif, ".asc", sep=""))
+          }
+        }
+      }
+      
       #Accuracy metrics
       cat("Calculating accuracy metrics \n")
       acc <- accuracy(trainMx=st.sel.10y, testMx=NULL, variable=vn)
@@ -111,7 +129,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
       write.csv(acc$METRICS, paste(vn, "_metrics.csv", sep=""), quote=F, row.names=F)
       
       #Writing status file
-      zz <- file("status.anu", "w")
+      zz <- file(paste(vn, "-status.anu", sep=""), "w")
       cat("Process finished on", date(), "\n", file=zz)
       close(zz)
     } else {
