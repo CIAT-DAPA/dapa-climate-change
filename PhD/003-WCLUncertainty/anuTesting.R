@@ -105,7 +105,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
       write.dbf(new.st, paste("wc_", vn, "_stations.dbf",sep=""))
       
       #If run was successful then erase .cov file, and zip asciigrids
-      if (file.exists(paste(vn,".lis",sep="")) & file.exists(paste(vn, ".out", sep=""))) {
+      if (file.exists(paste(vn,".lis",sep=""))) {
         cat("Run was successful, collecting garbage \n")
         file.remove(paste(vn, ".cov", sep=""))
         
