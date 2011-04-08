@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 O:\climate_change\IPCC_CMIP3 A1B 30s downscaled"
+	print "   - ie: python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled"
 	print "   Syntax	: <Tiles_GCM.py>, <dirbase>, <dirtemp>, <scenario>, <dirout>, <scenario>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   dirtemp 	: Where is made calculations"
@@ -32,7 +32,7 @@ os.system('cls')
 gp.CheckOutExtension("Spatial")
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
-print " 	SPLIT IN TILES     "
+print "    SPLIT IN TILES     "
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 #periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
@@ -45,58 +45,79 @@ print "Available models: " + str(modellist)
 
 for model in sorted(modellist):
 
+    # diroutmodel = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model
+    # if not os.path.exists(diroutmodel):
+        # os.system('mkdir ' + diroutmodel)
+
     for period in sorted(periodDc):
-        
+
         gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
-        if not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_tiles\\" + period + "_TilesProcess_Done.txt"):
+        if not os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "_TilesProcess_Done.txt"):
             
             print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
             
             #Set dirtemp
             diroutraster = dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-
+            dirouttiles = diroutraster + "\\_tiles"
+            if not os.path.exists(dirouttiles):
+                os.system('mkdir ' + dirouttiles)
+                            
             if not os.path.exists(diroutraster):
                 os.system('mkdir ' + diroutraster)
                 
-			#Get a list of raster in workspace
-			rasters = sorted(gp.ListRasters("", "GRID"))
-			for raster in rasters:
-			
-				for lat in sorted(latDc):
-				
-					for lon in sorted(lonDc):
-					
-						print "/n    Processing " + raster 
-						print "    ----> Extracting "
-						OutRaster = diroutraster + "\\" + raster
-						xmin = str(lonDc [lon])
-						ymin = str(latDc [lat])
-						xmax = int(xmin) + 60
-						ymax = int(ymin) + 60
-						
-						gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
+            #Get a list of raster in workspace
+            rasters = sorted(gp.ListRasters("", "GRID"))
+            for raster in rasters:
 
-						dirouttiles = diroutraster + "\\_tiles"
-						if not os.path.exists(dirouttiles):
-							os.system('mkdir ' + dirouttiles)
-						
-						print "    ----> Converting " 
-						OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
-						gp.RasterToASCII_conversion(OutRaster, OutAscii)
-						gp.delete_management(OutRaster)
-						
-						print "    ----> Compressing "
-						InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
-						os.system('7za a ' + InZip + " " + OutAscii)
-						os.remove(OutAscii)
+                for lat in sorted(latDc):
+                
+                    for lon in sorted(lonDc):
+                    
+                        print "\n    Processing " + raster 
+                        print "    ----> Extracting "
+                        OutRaster = diroutraster + "\\" + raster
+                        xmin = str(lonDc [lon])
+                        ymin = str(latDc [lat])
+                        xmax = int(xmin) + 60
+                        ymax = int(ymin) + 60
+                        
+                        gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
 
-			print "Done!!"
-			
-			checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_tiles\\" + period + "_TilesProcess_Done.txt", "w")
-			checkTXT.close()
+                        print "    ----> Converting " 
+                        OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
+                        gp.RasterToASCII_conversion(OutRaster, OutAscii)
+                        gp.delete_management(OutRaster)
+                        
+                        print "    ----> Compressing "
+                        InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
+                        os.system('7za a ' + InZip + " " + OutAscii)
+                        os.remove(OutAscii)
+            
+
+                        
+            print "Done!!"
+            
+            checkTXT = open(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "_TilesProcess_Done.txt", "w")
+            checkTXT.close()
                 
         else:
-            print "The model " + model + " " + period + " is already processed"
+            print "\nThe model " + model + " " + period + " is already processed"
             print "Processing the next period \n"
-print "done!!!" 
+
+    # try:
+        # print "\n    ----> Copying out tiles by models... \n"
+        # # diroutcopy = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period 
+        # # if not os.path.exists(diroutcopy):
+            # # os.system('mkdir ' + diroutcopy)
+        # shutil.copytree(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model, dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model)
+        # print "\n    ----> Copy done... \n"
+
+    # except: 
+        # print "Error copying output ascii folder of " + str(model)
+        # sys.exit(4)
+
+    # print "\n    ----> Removing temporal folders ... \n"
+    # shutil.rmtree(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model)
+
+print "Process done!!!" 
