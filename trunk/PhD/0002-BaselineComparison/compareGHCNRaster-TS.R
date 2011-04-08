@@ -29,39 +29,73 @@ gcm.chars <- read.csv("gcm_chars.csv")
 #Initial setup (to be changed somehow)
 vn <- "rain"
 vo <- "prec"
-st.id <- "GHCN10160354001"
 gcmmd <- "bccr_bcm2_0"
-
-#Specify station data location
-wd <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/ghcn-weather-stations/"
-
-adminDir <- "F:/Administrative_boundaries/SHP_files"
 iso <- "ETH"
-shp <- paste(adminDir, "/", iso, "_adm/", iso, "0.shp", sep="")
+
+#Specify data location
+wd <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/ghcn-weather-stations/"
+modelDir <- "F:/climate_change/IPCC_CMIP3/20C3M/original-data"
+adminDir <- "F:/Administrative_boundaries/SHP_files"
+
+#Reading shapefile of the selected country
+shp <- readShapePoly(paste(adminDir, "/", iso, "_adm/", iso, "0.shp", sep=""))
 gcm.res <- getGCMRes(gcmmd, gcm.chars)
-msk <- createMask(shp, gcm.res)
+msk <- createMask(shp, gcm.res); msk[which(is.na(msk[]))] <- 0
 
 #Setting working directory
 setwd(wd)
 
-#Set up
+#Setting output directory
+od <- paste("./organized-data/", vn, "-extracted", sep=""); if (!file.exists(od)) {dir.create(od)}
+odCountry <- paste(od, "/", iso, sep=""); if (!file.exists(odCountry)) {dir.create(odCountry)}
+odm <- paste("./organized-data/", vn, "-metrics", sep=""); if (!file.exists(odm)) {dir.create(odm)}
+
+#Reading stations file and selecting stations within the study area
 wts.dir <- paste("./organized-data/", vn, "-per-station", sep="")
-st.list <- read.csv("./organized-data/" ****
+st.list <- read.csv(paste("./organized-data/ghcn_", vn, "_1961_1990_mean.csv", sep=""))
+st.sel <- st.list[which(st.list$LONG <= msk@extent@xmax & st.list$LONG >= msk@extent@xmin & st.list$LAT <= msk@extent@ymax & st.list$LAT >= msk@extent@ymin),]
+st.sel$INSIDE <- extract(msk, cbind(st.sel$LONG,st.sel$LAT))
+st.sel <- st.sel[,c(1,3:5,ncol(st.sel))]
+st.ids <- st.sel$ID
+rm(st.list); g=gc()
 
 #Loading station data and defining the site
-std <- read.csv(paste("./organized-data/", vn, "-per-station/", st.id, ".csv", sep=""))
-
-ghcn.comp <- GHCN.GCM.comp(gcmdir="F:/climate_change/IPCC_CMIP3/20C3M/original-data", mod="bccr_bcm2_0", std, c(1961:1990), vg=vo)
+for (st.id in st.ids) {
+  cat("Processing station", paste(st.id), "\n")
+  
+  #Reading the weather station data
+  std <- read.csv(paste("./organized-data/", vn, "-per-station/", st.id, ".csv", sep=""))
+  
+  #Checking whether the stuff was already done
+  outCompared <- paste(odCountry, "/", st.id, "-comparison.csv", sep="")
+  if (file.exists(outCompared)) {
+    ts.in <- read.csv(outCompared)
+    ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod="bccr_bcm2_0", std, c(1961:1990), vg=vo, extract=F, ts.out=ts.in, compare=T)
+  } else {
+    #Getting the comparison metrics and extracted values
+    ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod="bccr_bcm2_0", std, c(1961:1990), vg=vo, extract=T, ts.out=NULL, compare=T)
+    write.csv(ghcn.comp$VALUES, outCompared, row.names=F, quote=F)
+  }
+  
+  ghcn.comp$METRICS <- cbind(ID=rep(st.id, times=nrow(ghcn.comp$METRICS)),ghcn.comp$METRICS)
+  
+  if (st.id == st.ids[1]) {
+    out.metrics <- ghcn.comp$METRICS
+  } else {
+    out.metrics <- rbind(out.metrics, ghcn.comp$METRICS)
+  }
+}
+write.csv(out.metrics, paste(odm, "/metrics-", iso, ".csv", sep=""), row.names=F, quote=F)
 
 
 #Function to harvest data from a particular GCM and retrieve also the accuracy metrics
-GHCN.GCM.comp <- function(gcmdir="", mod="bccr_bcm2_0", station.data, yl, vg) {
+GHCN.GCM.comp <- function(gcmdir="", mod="bccr_bcm2_0", station.data, yl=c(1950:1960), vg="prec", extract=T, ts.out=NULL, compare=T) {
   #Define folder where yearly files are located
   yd <- paste(gcmdir, "/", mod, "/yearly_files", sep="")
   
   #Applying functions to the data
-  ts.out <- extractMonth(yl, yd, std, vg="prec", gcm=mod)
-  metrics <- compareTS(ts.out, plotit=F)
+  if (extract) {cat("Extracting \n"); ts.out <- extractMonth(yl, yd, std, vg="prec", gcm=mod)}
+  cat("Metrics calc \n"); metrics <- compareTS(ts.out, plotit=F)
   row.names(metrics) <- c(1:nrow(metrics))
   
   return(list(VALUES=ts.out, METRICS=metrics))
@@ -69,7 +103,7 @@ GHCN.GCM.comp <- function(gcmdir="", mod="bccr_bcm2_0", station.data, yl, vg) {
 
 
 #Routine to compare all months in the matrix and return a data frame in which each month and the total are a line
-compareTS <- function(x, plotit=F) {
+compareTS <- function(x, plotit=F, plotName="dummy") {
   
   mthList <- c("JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC", "TTL")
   
