@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled"
+	print "   - ie: python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 G:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 B1 30s downscaled"
 	print "   Syntax	: <Tiles_GCM.py>, <dirbase>, <dirtemp>, <scenario>, <dirout>, <scenario>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   dirtemp 	: Where is made calculations"
@@ -74,25 +74,27 @@ for model in sorted(modellist):
                 
                     for lon in sorted(lonDc):
                     
-                        print "\n    Processing " + raster 
-                        print "    ----> Extracting "
-                        OutRaster = diroutraster + "\\" + raster
-                        xmin = str(lonDc [lon])
-                        ymin = str(latDc [lat])
-                        xmax = int(xmin) + 60
-                        ymax = int(ymin) + 60
-                        
-                        gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
+						if not os.path.exists(dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(raster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"):
+							
+							print "\n    Processing " + raster 
+							print "    ----> Extracting "
+							OutRaster = diroutraster + "\\" + raster
+							xmin = str(lonDc [lon])
+							ymin = str(latDc [lat])
+							xmax = int(xmin) + 60
+							ymax = int(ymin) + 60
+							
+							gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
 
-                        print "    ----> Converting " 
-                        OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
-                        gp.RasterToASCII_conversion(OutRaster, OutAscii)
-                        gp.delete_management(OutRaster)
-                        
-                        print "    ----> Compressing "
-                        InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
-                        os.system('7za a ' + InZip + " " + OutAscii)
-                        os.remove(OutAscii)
+							print "    ----> Converting " 
+							OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
+							gp.RasterToASCII_conversion(OutRaster, OutAscii)
+							gp.delete_management(OutRaster)
+							
+							print "    ----> Compressing "
+							InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
+							os.system('7za a ' + InZip + " " + OutAscii)
+							os.remove(OutAscii)
             
 
                         
