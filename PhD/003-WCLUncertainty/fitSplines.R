@@ -40,7 +40,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
     OKrow <- which(st.reg.10y[,i] != -9999.9)
     NArow <- which(st.reg.10y[,i] == -9999.9)
     if (length(NArow) >= 1) {
-      st.reg.10y <- st.reg.10y[OKrow]
+      st.reg.10y <- st.reg.10y[OKrow,]
     }
   }
   
