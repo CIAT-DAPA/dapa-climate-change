@@ -22,3 +22,4 @@ pn <- processNCDF(gd, which=c(16:21)) #SoEE Core 2
 gd <- "/mnt/GIS-HD716B/climate_change/IPCC_CMIP3/20C3M/original-data"
 pn <- processNCDF(gd)
 
+
