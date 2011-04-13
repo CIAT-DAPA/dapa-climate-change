@@ -27,6 +27,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
   xt@xmax <- xt@xmax + 5
   xt@ymin <- xt@ymin - 5
   xt@ymax <- xt@ymax + 5
+  rm(msk); g=gc()
   
   #Reading station data and selecting stations
   cat("Reading stations data \n")
@@ -84,7 +85,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
         #Read tile altitude raster
         cat("Reading tile-specific altitude raster \n")
         alt <- raster(paste(rDir, "/tile-", tile, "/altitude.asc", sep=""))
-        xtt <- extent(msk)
+        xtt <- extent(alt)
         
         #Selecting stations
         st.sel.10y <- st[which(st.reg.10y$LONG >= xtt@xmin & st.reg.10y$LONG <= xtt@xmax & st.reg.10y$LAT >= xtt@ymin & st.reg.10y$LAT <= xtt@ymax),]
@@ -129,7 +130,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
         
         #Creating projection file
         cat("Projecting \n")
-        createPrjFile(msk, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"/tile-", tile, "/longitude.asc",sep=""),paste(rDir,"/tile-", tile,"/latitude.asc",sep=""),paste(rDir,"/tile-", tile,"/altitude.asc",sep="")))
+        createPrjFile(alt, variable=vn, nsurf=0, gridfiles=c(paste(rDir,"/tile-", tile, "/longitude.asc",sep=""),paste(rDir,"/tile-", tile,"/latitude.asc",sep=""),paste(rDir,"/tile-", tile,"/altitude.asc",sep="")))
         #Running
         if (unix) {
           fw <- file(paste(vn, "_prj.sh", sep=""), open="w")
