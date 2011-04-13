@@ -88,7 +88,7 @@ splineFitting <- function(anuDir="C:/anu/Anuspl43/bin", stDir, rDir, oDir, nfold
         xtt <- extent(alt)
         
         #Selecting stations
-        st.sel.10y <- st[which(st.reg.10y$LONG >= xtt@xmin & st.reg.10y$LONG <= xtt@xmax & st.reg.10y$LAT >= xtt@ymin & st.reg.10y$LAT <= xtt@ymax),]
+        st.sel.10y <- st.reg.10y[which(st.reg.10y$LONG >= xtt@xmin & st.reg.10y$LONG <= xtt@xmax & st.reg.10y$LAT >= xtt@ymin & st.reg.10y$LAT <= xtt@ymax),]
         
         #Input data file creation
         cat("Creating input files \n")
