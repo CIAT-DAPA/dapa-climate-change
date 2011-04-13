@@ -84,9 +84,6 @@ densityMap <- function(stDir, rDir, oDir, vn="rain", nclosest=10) {
   cat("Applying distance function \n")
   ot <- apply(xy, 1, pDist, xy.stat)
   
-  cat("Applying density function \n")
-  dens <- apply(xy, 1, chullDensity, xy.stat, nclosest=10, rs)
-  
   #Output raster writing
   min.d.rs <- rs; min.d.rs[desiredCells] <- ot[1,]
   min.d.rs <- writeRaster(min.d.rs, paste(roDir, "/min-distance.asc", sep=""), format='ascii', overwrite=T)
@@ -111,6 +108,9 @@ densityMap <- function(stDir, rDir, oDir, vn="rain", nclosest=10) {
   
   mode.20n.rs <- rs; mode.20n.rs[desiredCells] <- ot[8,]
   mode.20n.rs <- writeRaster(mode.20n.rs, paste(roDir, "/mode-distance-20p.asc", sep=""), format='ascii', overwrite=T)
+  
+  cat("Applying density function \n")
+  dens <- apply(xy, 1, chullDensity, xy.stat, nclosest=10, rs)
   
   ch.dens.rs <- rs; ch.dens.rs[desiredCells] <- dens
   ch.dens.rs <- writeRaster(ch.dens.rs, paste(roDir, "/chull-density-", nclosest, ".asc", sep=""), format='ascii', overwrite=T)
