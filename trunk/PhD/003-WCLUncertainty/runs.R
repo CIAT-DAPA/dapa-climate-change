@@ -58,18 +58,21 @@ The purpose is to achieve 100 folds, so you need 10 processors with 10 folds eac
 
 go to the dapa-climate-change/trunk/PhD/003-WCLUncertainty
 type "R" and enter
+
 source("fitSplines.R")
+drive <- "/data"
 
-set the folders
-sd: weather stations dbf dir
-rd: where the mask is located (mask-srtm dir)
-od: outputs/cross-validation dir
-ad: anu dir (as copied)
+#set the folders
+sd <- paste(drive, "/climate-data-assessment/input-data", sep="")
+rd <- paste(drive, "/climate-data-assessment/mask-srtm", sep="")
+od <- paste(drive, "/climate-data-assessment/outputs/cross-validation/part-", sep="")
+ad <- paste(drive, "/climate-data-assessment/anu/Anuspl43/bin", sep="")
 
-spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="rain", ntiles=5, unix=F)
-spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tean", ntiles=5, unix=F)
-spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmin", ntiles=5, unix=F)
-spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmax", ntiles=5, unix=F)
+
+spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="rain", ntiles=5, unix=T)
+spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tean", ntiles=5, unix=T)
+spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmin", ntiles=5, unix=T)
+spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmax", ntiles=5, unix=T)
 
 The purpose is to achieve 100 folds, so you need 10 processors with 10 folds each, for each variable
 
