@@ -73,8 +73,8 @@ for model in sorted(modellist):
                 for lat in sorted(latDc):
                 
                     for lon in sorted(lonDc):
-                    
-						if not os.path.exists(dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(raster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"):
+						
+						if not os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt"):
 							
 							print "\n    Processing " + raster 
 							print "    ----> Extracting "
@@ -95,8 +95,10 @@ for model in sorted(modellist):
 							InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
 							os.system('7za a ' + InZip + " " + OutAscii)
 							os.remove(OutAscii)
-            
-
+							
+							if str(lat) + str(lon) == "C6":
+								checkVAR = open(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt", "w")
+								checkVAR.close()
                         
             print "Done!!"
             
