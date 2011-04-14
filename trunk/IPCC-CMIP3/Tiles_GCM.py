@@ -96,7 +96,7 @@ for model in sorted(modellist):
 							os.system('7za a ' + InZip + " " + OutAscii)
 							os.remove(OutAscii)
 							
-							if str(lat) + str(lon) == "C6":
+							if raster == "bio_9" or raster == "cons_mths" or raster == "prec_9" or raster == "tmin_9" or raster == "tmax_9" or raster == "tmean_9" :
 								checkVAR = open(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt", "w")
 								checkVAR.close()
                         
