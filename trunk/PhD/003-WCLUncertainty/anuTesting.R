@@ -93,7 +93,7 @@ cleansing <- function(anuDir="C:/anu/Anuspl43/bin", rDir, stDir, oDir, vn="rain"
       
       #Here load and analyse the station deviations file
       cat("Analysing deviation results \n")
-      dev.data <- read.fortran(paste(vn, ".res",sep=""), c("I7","A9","F15"))
+      dev.data <- read.fortran(paste(vn, ".res",sep=""), c("I7","A11","F12"))
       dev.data <- dev.data[,2:3]; names(dev.data) <- c("ID","RESIDUAL")
       top.st <- dev.data[1:5,]
       
