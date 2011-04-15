@@ -1,10 +1,10 @@
 source("anuTesting.R")
 
-rd <- "E:/climate-data-assessment/mask-srtm"
-std <- "E:/climate-data-assessment/input-data"
-od <- "E:/climate-data-assessment/outputs/cleansing"
+rd <- "F:/climate-data-assessment/mask-srtm"
+std <- "F:/climate-data-assessment/input-data"
+od <- "F:/climate-data-assessment/outputs/cleansing"
 
-cs <- cleansing(anuDir="C:/anu/Anuspl43/bin", rDir=rd, stDir=std, oDir=od, vn="rain", ntiles=5, round=1, unix=F)
+cs <- cleansing(anuDir="F:/climate-data-assessment/anu/Anuspl43/bin", rDir=rd, stDir=std, oDir=od, vn="tean", ntiles=5, round=1, unix=F)
 
 ########Linux folders
 source("tileCreation.R")
