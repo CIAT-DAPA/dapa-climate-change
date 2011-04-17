@@ -1,18 +1,15 @@
 # apply thresholds
 ccafs.apply.threshold <- function(results,from=0,to=10){
- 
+  
   results.v <- getValues(results)
   results.v <- ifelse(results.v >= from & results.v <= to, results.v,NA)
   results <- setValues(results,results.v)
   
   return(results)
-
-
+  
   # different methods for threshold could be implemented e.g. quartiles,
   
 }
-
-
 
 # function to summarize results
 

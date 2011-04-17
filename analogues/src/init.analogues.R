@@ -1,6 +1,9 @@
 init.analogue <- function(x=10,                           # x location of point for which dissimilarity is calculated
   y=48,                           # y location
   method="ccafs",                 # method to calculate dissimilarity, currently only ccafs
+  hal.tmp=1,
+  hal.prec.annual=0.3,
+  hal.prec.month=0.15,
   scenario="a1b",                 # emission scenario(s)
   gcms=c("bccr_bcm2_0",           # gcms to be used
     "cccma_cgcm3_1_t47",
@@ -33,6 +36,12 @@ init.analogue <- function(x=10,                           # x location of point 
   direction="backwd",             # 2 possibilites: backwd -> take tmean,prec and dtr at location x,y in the futur for n gcms and look for similiarity in current conditions (i.e. project futur to current, projecting n possible futures to the present).
                                   #                 forwd -> take mean,prec and dtr at location x,y under current condition and look for similiarity in n gcms in future conditions (i.e. project current to futur, projecting 1 knwon truth into n possible futurs).
   growing.season=1:12, # specifiy a growing season for a crop (from, to) in months, currently it is not possible to specify growing seaon over e.g. nov - feb, must be within one year
+  across.year=T,
+  keep.lag=F,          # wether or not laged calculation for each month should be kept or not
+  sumarize.lag=T,      # wether or not lags should be sumarized, i.e. min searched
+  pdf="test.pdf",                 # name of a pdf continaing main results, if empty no pdf will be produced
+  cores=1,                        # number of cores to be used on a multiple core computer
+  sf.type="SOCK",                 # Type for parallelization
   grass.params=list(
     gisBase="/usr/local/grass-6.4.0",         # location of grass installation (needs a writeable .grassrc file)
     gisDbase="/home/johannes/GRASS/ciat_gdb", # location of the grass gisDbase
@@ -48,19 +57,32 @@ init.analogue <- function(x=10,                           # x location of point 
   require(maptools)
   require(maps)
   require(spgrass6)
+  require(akima)
   
   options(warn=-1)
   
   # check wether point is terrestrial or not
   
+  # either lags must be kept or sumarised
+  
+  if (!(keep.lag | sumarize.lag)) stop("no output options chosen")
+  
   # Make a list with all parameters
   params <- list(x=x,
                   y=y,
                   scenario=tolower(scenario), 
+                  method=method,
+                  hal.tmp=hal.tmp,
+                  hal.prec.annual=hal.prec.annual,
+                  hal.prec.month=hal.prec.month,
                   gcms=tolower(gcms), 
                   year=year,
                   direction=tolower(direction),
+                  across.year=across.year,
                   growing.season=growing.season,
+                  keep.lag=keep.lag,
+                  pdf=pdf,
+                  sumarize.lag=sumarize.lag,
                   use.grass=use.grass,
                   climate.data=climate.data,
                   grass.params=grass.params)
@@ -74,6 +96,15 @@ init.analogue <- function(x=10,                           # x location of point 
   source("src/ccafs.dissimilarity.R")
   source("src/ccafs.function.R")
   source("src/ccafs.summary.R")
+  source("src/ccafs.plot.R")
+  
+  if(cores > 1) {
+    require(snowfall)
+    sfInit(parallel=TRUE, cpus=cores, type=sf.type)
+    sfLibrary(raster)
+    sfLibrary(spgrass6)
+    sfLibrary(stringr)
+  }
   
   return(params)
   
