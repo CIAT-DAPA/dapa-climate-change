@@ -28,7 +28,7 @@ ccafs.load.data <- function(params) {
       for (gcm in params$gcms) {
         for (var in params$vars)
           cat(str_c("loading ",var," for ",gcm,"\n"))
-          with(params,cdata[[str_c(var,"_",scenario)]] <- do.call(stack,list(readRAST6(str_c(scenario,"_",year,"s_",gcm,"_",var,"_",growing.season,"_10min")))))
+          with(params,cdata[[str_c(var,"_",scenario)]] <- do.call(stack,list(readRAST6(str_c(scenario,"_",year,"s_",gcm,"_",var,"_",1:12,"_10min")))))
       }
     }
   }else {
@@ -37,14 +37,14 @@ ccafs.load.data <- function(params) {
       # load current climate
       for (var in params$vars) {
         cat(str_c("loading ",var," for current\n"))
-        cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", growing.season, ".asc")), raster))
+        cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", 1:12, ".asc")), raster))
       }
       
       # load future climate
       for (gcm in params$gcms) {
         for (var in params$vars) {
           cat(str_c("loading ",var," for ",gcm,"\n"))
-          cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", growing.season, ".asc")), raster))
+          cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", 1:12, ".asc")), raster))
         }
       }
     } else {
