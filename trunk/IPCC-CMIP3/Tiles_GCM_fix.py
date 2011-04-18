@@ -36,8 +36,8 @@ print "    SPLIT IN TILES     "
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 #periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
-modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
-periodDc = {"2010_2039": "2020s", "2020_2049": "2030s", "2030_2059": "2040s", "2040_2069": "2050s", "2050_2079": "2060s", "2060_2089": "2070s", "2070_2099": "2080s"}
+modellist = "cccma_cgcm3_1_t47", "cccma_cgcm3_1_t90" #sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
+periodDc = {"2050_2079": "2060s", "2060_2089": "2070s", "2070_2099": "2080s"}
 latDc = {"A": 30, "B": -30, "C": -90}
 lonDc = {"1": -180, "2": -120, "3": -60, "4": 0, "5": 60, "6": 120}
 
@@ -53,7 +53,7 @@ for model in sorted(modellist):
 
         gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
-        if not os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "_TilesProcess_Done.txt"):
+        if os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "_TilesProcess_Done.txt"):
             
             print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
             
@@ -74,37 +74,30 @@ for model in sorted(modellist):
                 
                     for lon in sorted(lonDc):
 						
-						if not os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt"):
-							
-							print "\n    Processing " + raster 
-							print "    ----> Extracting "
-							OutRaster = diroutraster + "\\" + raster
-							xmin = str(lonDc [lon])
-							ymin = str(latDc [lat])
-							xmax = int(xmin) + 60
-							ymax = int(ymin) + 60
-							
-							gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
+						if os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt") and not str(lat) + str(lon) == "A1":
+							if raster == "bio_9" or raster == "cons_mths" or raster == "prec_9" or raster == "tmin_9" or raster == "tmax_9" or raster == "tmean_9" :
+								print "\n    Processing " + raster 
+								print "    ----> Extracting "
+								OutRaster = diroutraster + "\\" + raster
+								xmin = str(lonDc [lon])
+								ymin = str(latDc [lat])
+								xmax = int(xmin) + 60
+								ymax = int(ymin) + 60
+								
+								gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
 
-							print "    ----> Converting " 
-							OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
-							gp.RasterToASCII_conversion(OutRaster, OutAscii)
-							gp.delete_management(OutRaster)
-							
-							print "    ----> Compressing "
-							InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
-							os.system('7za a ' + InZip + " " + OutAscii)
-							os.remove(OutAscii)
-							
-							if str(lat) + str(lon) == "C6": 
-								if raster == "bio_9" or raster == "cons_mths" or raster == "prec_9" or raster == "tmin_9" or raster == "tmax_9" or raster == "tmean_9" :
-									checkVAR = open(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt", "w")
-									checkVAR.close()
+								print "    ----> Converting " 
+								OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
+								gp.RasterToASCII_conversion(OutRaster, OutAscii)
+								gp.delete_management(OutRaster)
+								
+								print "    ----> Compressing "
+								InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
+								os.system('7za a ' + InZip + " " + OutAscii)
+								os.remove(OutAscii)
+								
                         
             print "Done!!"
-            
-            checkTXT = open(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "_TilesProcess_Done.txt", "w")
-            checkTXT.close()
                 
         else:
             print "\nThe model " + model + " " + period + " is already processed"
