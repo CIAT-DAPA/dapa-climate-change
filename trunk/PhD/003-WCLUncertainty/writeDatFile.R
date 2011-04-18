@@ -16,6 +16,8 @@ writeDat <- function(stData, filename="dummy.dat") {
   #Creating line jump row
   jumpRow <- rep("\n", nrow(stData))
   
+  stData$ID <- substr(stData$ID, 1, 10)
+  
   #Extracting data into a matrix
   tk <- matrix(c(format(stData$ID,width=10),
     formatC(stData$LONG,width=10,digits=3,format="f"),
