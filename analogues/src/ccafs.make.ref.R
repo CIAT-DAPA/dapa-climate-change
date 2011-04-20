@@ -17,18 +17,27 @@ ccafs.make.ref <- function(cdata=cdata, params=params, new.x=NA, new.y=NA, new.g
   # f_ref: list to store the futur reference 
   f_ref <- list()
   
-  # extract reference value for current
+#----------------------------------------------------------------------------------------------#
+# extract reference value for current
+#----------------------------------------------------------------------------------------------#
+
   for (var in params$vars) {
     cat(str_c("extracting reference of current conditions for: ",var,"\n"))
     f_ref[[str_c("current_",var)]] <- with(params,as.vector(extract(cdata[[str_c(var,"_b")]],cbind(x,y))))
   }
   
-  # extract reference for the futur, if model direction is backwrd
+#----------------------------------------------------------------------------------------------#
+# extract reference for the futur, if model direction is backwrd
+#----------------------------------------------------------------------------------------------#
+
   if (params$direction=="backwd"){
    
    # do it for all desired scenarios
    for (gcm in params$gcms) {
     
+#----------------------------------------------------------------------------------------------#
+# extract values from GRASS
+#----------------------------------------------------------------------------------------------#
     # assuming connection to grass remains open (needs double checking)
     if (params$use.grass==T) {
       for (var in params$vars)
@@ -39,6 +48,10 @@ ccafs.make.ref <- function(cdata=cdata, params=params, new.x=NA, new.y=NA, new.g
         f_ref[[str_c(gcm,"_",params$year,"_",var)]] <- str_split(q_res,",")[[1]][4:(length(params$growing.season)+3)]
       }
    } else {
+
+#----------------------------------------------------------------------------------------------#
+# extract values from rasters
+#----------------------------------------------------------------------------------------------#
       for (var in params$vars)
       {
         cat(str_c("extracting reference of future (",gcm,") conditions for: ",var,"\n"))

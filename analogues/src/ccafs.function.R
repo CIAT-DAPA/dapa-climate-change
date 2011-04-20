@@ -1,3 +1,7 @@
+#----------------------------------------------------------------------------------------------#
+# funcitons to calculate dissimilarity
+#----------------------------------------------------------------------------------------------#
+
 calc.dis <- function(roll, params,base.v,delta,cdata) {
   # create result 
   res_return <- list()
@@ -5,9 +9,11 @@ calc.dis <- function(roll, params,base.v,delta,cdata) {
   # for each combination (lag) loop calc dissimilartiy
   delta <- delta
   if (params$method=="ccafs") {
-     res_all <- apply(roll, 1, function(x) calc.ccafs(x,params,base.v,delta))
+      res_all <- apply(roll, 1, function(x) calc.ccafs(x,params,base.v,delta))
+  } else if (params$method=="ccafs.generic") {
+      res_all <- apply(roll, 1, function(x) calc.ccafs.generic(params.base.v,delta))
   } else if (params$method=="hallegate" | params$method=="hal") {
-    res_all <- apply(roll,1,function(x) calc.hal(lag=x, params=params,base.v, delta))
+      res_all <- apply(roll,1,function(x) calc.hal(lag=x, params=params,base.v, delta))
   }
     
   if (params$keep.lag) {
@@ -23,6 +29,12 @@ calc.dis <- function(roll, params,base.v,delta,cdata) {
   return(res_return)
 }
 
+#----------------------------------------------------------------------------------------------#
+# Functions to calculate dissimilarity
+#----------------------------------------------------------------------------------------------#
+
+# ccafs dissimilarity
+
 calc.ccafs <- function(lag, # lag is the arrangemnt of months
   params,                   # all parameters
   base.v,                   # base/reference value to find dissimilarity
@@ -31,22 +43,51 @@ calc.ccafs <- function(lag, # lag is the arrangemnt of months
   # calc dissimilartiy
   cat(str_c("calculating dissimilarity (ccafs) for: ",delta," starting with ",lag[1], ". \n"))
   # substract ref mean tmp
-  t1 <- t(base.v[['tmp_b.v']]) - params$ref_value[[str_c(delta,"_tmean")]][lag]
-  
+  t1 <- t(base.v[['tmean_b.v']]) - params$ref_value[[str_c(delta,"_tmean")]][lag]
+    
   # substract ref prec
   p1 <- t(base.v[['pre_b.v']]) - params$ref_value[[str_c(delta,"_prec")]][lag]
-  
+    
   # substract ref dtr
   d1 <- t(base.v[['dtr_b.v']]) - params$ref_value[[str_c(delta,"_dtr")]][lag]
-  
+    
   t2 <- d1*t1*t1
   p2 <- p1*p1
-  
+    
   v1 <- colSums(t2)
   v2 <- colSums(p2)
-  
+    
   res <- sqrt(v1+v2)
-  return(res)
+  return(res)    
+}
+
+# ccafs generic
+calc.ccafs.generic <- function(lag, # lag is the arrangemnt of months
+  params,                   # all parameters
+  base.v,                   # base/reference value to find dissimilarity
+  delta                     # second scenario against which dissimilarity should be looked for
+  ) {
+  # calc dissimilartiy
+  cat(str_c("calculating dissimilarity (ccafs) for: ",delta," starting with ",lag[1], ". \n"))
+  # substract ref mean tmp
+  
+  # substract reference value
+  ll <- lapply(str_c(params$var,"_b.v"), function(x) (t(base.v[[x]]) - params$ref_value[[str_c(delta,"_",x)]][lag])^2)
+  
+  # square
+  ll <- lapply(ll, function(x) x*x)
+    
+  # sum division ups
+  ll <- lapply(ll, colSums)
+
+  # take square rot
+  ll <- lapply(ll, sqrt)
+  
+  # sum over all lists
+  res <- c()
+  for (i in ll) res <- ress + i
+  
+  return(res)    
 }
 
 calc.hal <- function(lag,params,base.v,delta) {
@@ -56,7 +97,7 @@ calc.hal <- function(lag,params,base.v,delta) {
  
  # rasters for which dissimilarity should be found
  pre <- base.v[['pre_b.v']] # thats where i want to project to
- tmp <- base.v[['tmp_b.v']]
+ tmp <- base.v[['tmean_b.v']]
  
  # reference values for rain and tmp (vector of length 12)
  pre.ref <- params$ref_value[[str_c(delta,"_prec")]][lag]

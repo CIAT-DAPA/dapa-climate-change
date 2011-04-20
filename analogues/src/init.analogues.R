@@ -1,9 +1,14 @@
-init.analogue <- function(x=10,                           # x location of point for which dissimilarity is calculated
+#----------------------------------------------------------------------------------------------#
+# Function to initiate ccafs
+#----------------------------------------------------------------------------------------------#
+
+init.analogue <- function(x=10,   # x location of point for which dissimilarity is calculated
   y=48,                           # y location
-  method="ccafs",                 # method to calculate dissimilarity, currently only ccafs
-  hal.tmp=1,
-  hal.prec.annual=0.3,
-  hal.prec.month=0.15,
+  method="ccafs",                 # method to calculate dissimilarity, currently ccafs, ccafs.generic (i.e. bio variables and ele), hal
+  hal.tmp=1,                      # If hallagate method is chosen, what is the max tolerable difference in temp between sites [°C]
+  hal.prec.annual=0.3,            # If hallagate method is chosen, what is the max tolerable difference in annual precipitation [%]
+  hal.prec.month=0.15,            # If hallagate method is chosen, what is the max tolerable difference in monthly precipitation [%]
+  hal.ncond=3,                     # How many of the above specified conditions need to be fulfilled in order for a site to be suitable
   scenario="a1b",                 # emission scenario(s)
   gcms=c("bccr_bcm2_0",           # gcms to be used
     "cccma_cgcm3_1_t47",
@@ -30,16 +35,19 @@ init.analogue <- function(x=10,                           # x location of point 
     "ukmo_hadcm3",
     "ukmo_hadgem1"),
   year=2030,                      # year for the climate model
-  use.grass=T,                    # should a grass database with the climate data be used, grass.params need to be set
-  climate.data=".",                # directory where climate data is located. Labels in lower case should be as follows:
+  use.grass=F,                    # should a grass database with the climate data be used, grass.params need to be set
+  vars=c("tmean", "prec", "dtr"), # Variables to calculate dissimilarity. For hal tmean and prec are needed for ccafs any can be chosen.
+  ndivisions=12,                  # how are the measurements devided, this should be n equidistant time intervalls over a year. E.g. if there are monthly values the number would be 12. 
+  climate.data=".",               # directory where climate data is located. Labels in lower case should be as follows:
                                   # [sres]_[year]_[gcm]_[dtr|prec|tmean]_[1..12].asc
   direction="backwd",             # 2 possibilites: backwd -> take tmean,prec and dtr at location x,y in the futur for n gcms and look for similiarity in current conditions (i.e. project futur to current, projecting n possible futures to the present).
                                   #                 forwd -> take mean,prec and dtr at location x,y under current condition and look for similiarity in n gcms in future conditions (i.e. project current to futur, projecting 1 knwon truth into n possible futurs).
-  growing.season=1:12, # specifiy a growing season for a crop (from, to) in months, currently it is not possible to specify growing seaon over e.g. nov - feb, must be within one year
+  growing.season=1:12,            # specifiy a growing season for a crop (from, to) in months, currently it is not possible to specify growing seaon over e.g. nov - feb, must be within one year
   across.year=T,
-  keep.lag=F,          # wether or not laged calculation for each month should be kept or not
-  sumarize.lag=T,      # wether or not lags should be sumarized, i.e. min searched
+  keep.lag=F,                     # wether or not laged calculation for each month should be kept or not
+  sumarize.lag=T,                 # wether or not lags should be sumarized, i.e. min searched
   pdf="test.pdf",                 # name of a pdf continaing main results, if empty no pdf will be produced
+  paper="a4",                     # paper format: a4 or letter
   cores=1,                        # number of cores to be used on a multiple core computer
   sf.type="SOCK",                 # Type for parallelization
   grass.params=list(
@@ -48,8 +56,8 @@ init.analogue <- function(x=10,                           # x location of point 
     location="ccafs",             # location containing the data
     mapset="PERMANENT",           # mapset, in which rasters are located
     override=T,
-    res="1",                        # at which resolution should the model be calculated. in degree:min:seconds, e.g. 10 mins =00:10, 30 seconds=00:00:30
-    region="world")){                # specify the region, continent etc.. for which the analysis is performed
+    res="1",                      # at which resolution should the model be calculated. in degree:min:seconds, e.g. 10 mins =00:10, 30 seconds=00:00:30
+    region="world")){             # specify the region, continent etc.. for which the analysis is performed
 
   # required packages
   require(raster)
@@ -58,6 +66,8 @@ init.analogue <- function(x=10,                           # x location of point 
   require(maps)
   require(spgrass6)
   require(akima)
+  require(grid)
+  require(plotrix)
   
   options(warn=-1)
   
@@ -85,11 +95,16 @@ init.analogue <- function(x=10,                           # x location of point 
                   sumarize.lag=sumarize.lag,
                   use.grass=use.grass,
                   climate.data=climate.data,
-                  grass.params=grass.params)
+                  grass.params=grass.params,
+                  vars=vars,
+                  ndivisions=ndivisions,
+                  paper=paper,
+                  hal.tmp=hal.tmp,
+                  hal.prec.annual=hal.prec.annual,
+                  hal.prec.month=hal.prec.month,
+                  hal.ncond=hal.ncond)
                   
-  # add additonal parameters, not specified by user
-  params$vars <- c("tmean", "prec", "dtr")
-  
+                  
   # source other functions
   source("src/ccafs.load.data.R")
   source("src/ccafs.make.ref.R")
@@ -97,7 +112,8 @@ init.analogue <- function(x=10,                           # x location of point 
   source("src/ccafs.function.R")
   source("src/ccafs.summary.R")
   source("src/ccafs.plot.R")
-  
+  source("src/ccafs.plot.grid.R")
+   
   if(cores > 1) {
     require(snowfall)
     sfInit(parallel=TRUE, cpus=cores, type=sf.type)
