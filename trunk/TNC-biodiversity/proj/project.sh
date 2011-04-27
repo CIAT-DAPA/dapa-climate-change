@@ -54,7 +54,7 @@ function runmodel {
 	part=$(mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc;SELECT part FROM species WHERE species_id=$id")
 
 	# update statuts as startedo
-	mysql --skip-column-names -umodel1 -pmaxent -e"use tnc;UPDATE $model SET started=NOW() where species_id=$id;"
+	mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc;UPDATE $model SET started=NOW() where species_id=$id;"
 	
 	# make a directory for this species for this run
 	mkdir $results/$model/part.$part/$id
@@ -138,12 +138,12 @@ then
 	runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA_HOST $HOST
 	
 	# get second ID
-	ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $MODEL where started is null limit 1;")
+	ID=$(mysql --skip-column-names -umodel1 -pmaxent -h $HOST -e"use tnc; select species_id from $MODEL where started is null limit 1;")
 
 	while [ -n "$ID" ]
 	do
 		# run maxent $i &
-		runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA $HOST &
+		runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA_HOST $HOST &
 
 		PID=$!
 		queue $PID
