@@ -48,7 +48,7 @@ function runmodel {
 	maxent=$4	  # directory where maxent is located
 	max=$5		  # max ram available per maxent instance
 	envdata=$6	# directory were the environmental data is located
-	host=$6     # mysql server
+	host=$7     # mysql server
 	
 	# get part number from database
 	part=$(mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc;SELECT part FROM species WHERE species_id=$id")
@@ -66,7 +66,7 @@ function runmodel {
 		java -mx${max}m -cp $maxent/maxent.jar density.Project lambdas/part.$part/$id.lambdas $envdata/$model $results/$model/part.$part/$id/$model -a visible=false writeclampgrid=false warnings=false 
 	
 		# rescale the reuslts
-		gdal_translate -scale 0 1 1 255 -ot byte -a_nodata 0 -q -co "COMPRESSION=lzw" $results/$model/part.$part/$id/$model.asc $results/$model/part.$part/$model.tif
+		gdal_translate -scale 0 1 1 255 -ot byte -a_nodata 0 -q -co "COMPRESS=lzw" $results/$model/part.$part/$id/$model.asc $results/$model/part.$part/$id.tif
 
 		# clean up
 		rm -r $results/$model/part.$part/$id
@@ -98,22 +98,22 @@ then
 	if [ ! -d "$ENVDATA_HOST/$MODEL" ]
 	then
 	  cp $ENVDATA_SRV/$MODEL.zip $ENVDATA_HOST/$MODEL.zip
-		unzip $ENVDATA/$MODEL.zip -d $ENVDATA/$MODEL
+		unzip $ENVDATA_HOST/$MODEL.zip -d $ENVDATA_HOST/$MODEL
 		
 		# rename grids
-		for i in $(ls $ENVDATA/$MODEL)
+		for i in $(ls $ENVDATA_HOST/$MODEL)
 		do
-			mv $ENVDATA/$MODEL/$i $ENVDATA/$MODEL/$(echo $i | sed 's/_//')
+			mv $ENVDATA_HOST/$MODEL/$i $ENVDATA_HOST/$MODEL/$(echo $i | sed 's/_//')
 		done
 	fi
 	
 	# create the table this shoul only be done if the table doesnt not exists yet
 	echo "checking database .... "
-	test=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; show tables;" | grep $MODEL)
+	test=$(mysql --skip-column-names -umodel1 -pmaxent -h$HOST -e"use tnc; show tables;" | grep ^$MODEL)
 
 	if [ -z "$test" ]
 	then
-		mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; \
+		mysql --skip-column-names -umodel1 -pmaxent -h$HOST -e"use tnc; \
 		create table $MODEL \
 		(species_id int, started timestamp null default null, finished timestamp null default null, exit_status varchar(32));\
                 insert into $MODEL (species_id) select species_id from species;"
@@ -132,10 +132,10 @@ then
 	echo "starting with maxent"
 
 	# get first ID
-	ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $MODEL where started is null limit 1;")
+	ID=$(mysql --skip-column-names -umodel1 -pmaxent -h$HOST -e"use tnc; select species_id from $MODEL where started is null limit 1;")
 	
 	# run first species, so that java cached rasters are created 
-	runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA $HOST
+	runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA_HOST $HOST
 	
 	# get second ID
 	ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $MODEL where started is null limit 1;")
