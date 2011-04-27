@@ -6,14 +6,14 @@ Grid to Ascii Downscaled
 
 Grid to Ascii Disaggregation
 --------------------------------------------
--&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated E:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated N:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 30s
+198.93.225.72 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated F:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated N:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 30s
 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated C:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 30s
 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated F:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 30s
 
 Compress in Tiles Downscaled
 --------------------------------------------
 198.93.225.57 -python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A1B 30s downscaled
-python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled
+198.93.225.72 -python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled
 python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 B1 30s downscaled
 
 Compress in Tiles Disaggregated
