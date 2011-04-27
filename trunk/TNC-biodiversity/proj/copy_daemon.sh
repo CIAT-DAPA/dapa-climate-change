@@ -1,4 +1,4 @@
-for gcm in A1B_2020_2049_csiro_mk3_0; 
+for gcm in A1B_2020_2049_cccma_cgcm3_1_t47; 
 do
    RESULTS_HOST="/home/jsigner/TNC/results";   
    RESULTS_SRV="/mnt/GIS-HD716/TNC_global_plants/results";      
@@ -13,7 +13,7 @@ do
    do        
       part=$(mysql --skip-column-names  -umodel1 -pmaxent -e"use tnc;select part from species where species_id=$id;");          
       
-      mv $RESULTS_HOST/$gcm/part.$part/$id.zip $RESULTS_SRV/$gcm/part.$part/$id.zip;          
+      mv $RESULTS_HOST/$gcm/part.$part/$id.tif $RESULTS_SRV/$gcm/part.$part/$id.tif;          
       
       mysql -umodel1 -pmaxent -e"use tnc;UPDATE $gcm SET exit_status='mv $RESULTS_SRV' where species_id=$id;";          
 
