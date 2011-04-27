@@ -6,7 +6,7 @@ Grid to Ascii Downscaled
 
 Grid to Ascii Disaggregation
 --------------------------------------------
-198.93.225.72 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated F:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated N:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 30s
+198.93.225.72 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated F:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated O:\climate_change\IPCC_CMIP3\SRES_A1B\disaggregated 30s
 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated C:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated O:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated 30s
 -&r grid2ascii_process_modified.aml M:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated F:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated O:\climate_change\IPCC_CMIP3\SRES_B1\disaggregated 30s
 
