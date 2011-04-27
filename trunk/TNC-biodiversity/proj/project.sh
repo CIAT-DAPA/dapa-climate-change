@@ -91,12 +91,13 @@ else
   exit
 fi
 
-if [ -f "$ENVDATA/$MODEL.zip" ]
+if [ -f "$ENVDATA_SRV/$MODEL.zip" ]
 then
 	# only unzip env data if its not already done
 	echo "checking evn data .... "
-	if [ ! -d "$ENVDATA/$MODEL" ]
+	if [ ! -d "$ENVDATA_HOST/$MODEL" ]
 	then
+	  cp $ENVDATA_SRV/$MODEL.zip $ENVDATA_HOST/$MODEL.zip
 		unzip $ENVDATA/$MODEL.zip -d $ENVDATA/$MODEL
 		
 		# rename grids
@@ -119,12 +120,12 @@ then
 	fi
 	
 	# mkdir for the models
-	mkdir $RESULTS/$MODEL
+	mkdir $RESULTS_HOST/$MODEL
 	
 	# for each part make a folder
 	for i in $(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select distinct(part) from species;")
 	do
-		mkdir $RESULTS/$MODEL/part.$i
+		mkdir $RESULTS_HOST/$MODEL/part.$i
 	done
 
 	# run modells for all species
@@ -134,7 +135,7 @@ then
 	ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $MODEL where started is null limit 1;")
 	
 	# run first species, so that java cached rasters are created 
-	runmodel $ID $MODEL $RESULTS $MAXENT $MAXRAM $ENVDATA $HOST
+	runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA $HOST
 	
 	# get second ID
 	ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $MODEL where started is null limit 1;")
@@ -142,7 +143,7 @@ then
 	while [ -n "$ID" ]
 	do
 		# run maxent $i &
-		runmodel $ID $MODEL $RESULTS $MAXENT $MAXRAM $ENVDATA $HOST &
+		runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA $HOST &
 
 		PID=$!
 		queue $PID
