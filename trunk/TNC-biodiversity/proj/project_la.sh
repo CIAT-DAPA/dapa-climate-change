@@ -135,7 +135,7 @@ then
 	fi
 	
 	# mkdir for the models
-	mkdir -p $RESULTS_HOST/$RES/$TABLE
+	mkdir -p $RESULTS_HOST/$TABLE
 	
 	# for each part make a folder
 	for i in $(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select distinct(part) from species;")
@@ -153,7 +153,7 @@ then
 	runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA_HOST $HOST $RES $TABLE
 	
 	# get second ID
-	ID=$(mysql --skip-column-names -umodel1 -pmaxent -h $HOST -e"use tnc; select species_id from $TABLE where started is null and la=1 limit 1;")
+	ID=$(mysql --skip-column-names -umodel1 -pmaxent -h $HOST -e"use tnc; select species_id from $TABLE where started is null limit 1;")
 
 	while [ -n "$ID" ]
 	do
@@ -169,7 +169,7 @@ then
 		done
 		
 		sleep 0.1
-		ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $TABLE where started is null and la=1 limit 1;")
+		ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
 
 	done
 	
