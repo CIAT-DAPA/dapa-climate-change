@@ -5,7 +5,7 @@ work.dir <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/gsod-wea
 #stloc <- readWSLocation(wd=work.dir)
 
 #Individual year processing
-for (yr in 1973:1974) {
+for (yr in 1961:1990) {
   cat("\n")
   cat("Year", yr, "\n")
   rest <- readStations(wd=work.dir, yr, ow=T)
