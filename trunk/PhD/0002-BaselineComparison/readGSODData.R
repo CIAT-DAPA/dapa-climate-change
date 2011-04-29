@@ -52,14 +52,14 @@ readWSLocation <- function(wd="") {
 #     5. Join all stations at a daily step and monthly step into one single file into dir.in/formatted/summaries
 #     6. Generate daily and monthly files files into dir.in/formatted/monthly and dir.in/formatted/daily
 
-readStations <- function(wd="", year) {
+readStations <- function(wd="", year, ow=F) {
   setwd(wd)
   
   #Defining input folders
   dir.in <- paste("./", year, sep="")
   dir.out <- paste(dir.in, "/formatted", sep=""); if (!file.exists(dir.out)) {dir.create(dir.out)}
   dir.out.stations <- paste(dir.out, "/stations", sep=""); if (!file.exists(dir.out.stations)) {dir.create(dir.out.stations)}
-  st.list <- list.files(dir.in, pattern="op.gz")
+  st.list <- list.files(dir.in, pattern="op.gz")[1:51]
   
   #Loading stations locations station location
   st <- read.csv("gsod-stations.csv")
@@ -90,19 +90,18 @@ readStations <- function(wd="", year) {
   counter <- 0
   for (sts in st.list) {
     if (counter%%10 == 0) {cat("Processing", sts, "\n")}
-    
     #Defining input and output files
     st.file.in <- paste(dir.in,"/", sts, sep="")
     st.file.out <- paste(dir.out.stations, "/", sts, ".csv", sep="")
     
     #Reading in data if file does not exist
-    if (!file.exists(st.file.out)) {
+    if (!file.exists(st.file.out) | ow) {
       data <- read.fortran(gzfile(st.file.in),format=c("A6","A6","I6","2I2","F8","I3","F8","I3","F8","I3","F8","I3","F7","I3",
       "F7","I3","2F7","F8","A1","F7","A1","F6","A1","F6","I3","5I1"),skip=1,na.strings=c("9999.9","999.9","99.99"))
       
       #Defining column names
       cNames <- c("ID","WBAN","YEAR","MONTH","DAY","TMEAN","N.TMEAN","DEWP","N.DEWP","SLP","N.SLP","STP","N.STP","VISIB","N.VISIB","WDSP",
-      "N.WDSP","MXSPD","GUST","TMAX","TMAX.FLAG","TMIN","TMIN.FLAG","RAIN","RAIN.FLAG","SNDP","FOG","RAIN","SNOW","HAIL","THUNDER","TORNADO")
+      "N.WDSP","MXSPD","GUST","TMAX","TMAX.FLAG","TMIN","TMIN.FLAG","RAIN","RAIN.FLAG","SNDP","FOG","PRCP","SNOW","HAIL","THUNDER","TORNADO")
       names(data) <- cNames
       
       #Improving ID fields to avoid mismatches
@@ -149,11 +148,11 @@ readStations <- function(wd="", year) {
       data.mgd$LAT <- st$LAT[which(st$ID == id & st$WBAN == wban)]
       data.mgd$ALT <- st$ALT[which(st$ID == id & st$WBAN == wban)]
       
-      #Reorganizing fields
+      #Reorganising fields
       data.mgd <- data.mgd[,c(1:4,35,36,37,5:34)]
       
       #Writing formatted file
-      write.csv(data.mgd, st.file.out, row.names=F, quote=F)
+      write.csv(data.mgd, st.file.out, row.names=F, quote=T)
     } else {
       data.mgd <- read.csv(st.file.out)
     }
@@ -198,6 +197,7 @@ readStations <- function(wd="", year) {
       all.data <- data.mgd
       all.monthly <- monthly
     } else {
+      write.csv(all.data, "./all.data.csv", row.names=F, quote=F)
       all.data <- rbind(all.data,data.mgd)
       all.monthly <- rbind(all.monthly, monthly)
     }
