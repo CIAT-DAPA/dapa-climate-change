@@ -59,7 +59,7 @@ readStations <- function(wd="", year, ow=F) {
   dir.in <- paste("./", year, sep="")
   dir.out <- paste(dir.in, "/formatted", sep=""); if (!file.exists(dir.out)) {dir.create(dir.out)}
   dir.out.stations <- paste(dir.out, "/stations", sep=""); if (!file.exists(dir.out.stations)) {dir.create(dir.out.stations)}
-  st.list <- list.files(dir.in, pattern="op.gz")[1:51]
+  st.list <- list.files(dir.in, pattern="op.gz")
   
   #Loading stations locations station location
   st <- read.csv("gsod-stations.csv")
