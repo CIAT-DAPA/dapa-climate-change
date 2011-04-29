@@ -19,7 +19,7 @@ Compress in Tiles Downscaled
 Compress in Tiles Disaggregated
 --------------------------------------------
 198.93.225.79 -python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 F:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A1B 30s downscaled
-python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled
+198.93.225.57 -python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled
 python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 B1 30s downscaled
 
 Compress Grid 
