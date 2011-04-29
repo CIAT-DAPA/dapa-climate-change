@@ -2,13 +2,13 @@ source("readGSODData.R")
 work.dir <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/gsod-weather-stations"
 
 #Station locations
-stloc <- readWSLocation(wd=work.dir)
+#stloc <- readWSLocation(wd=work.dir)
 
 #Individual year processing
-for (yr in 1973:1990) {
+for (yr in 1973:1974) {
   cat("\n")
   cat("Year", yr, "\n")
-  rest <- readStations(wd=work.dir, yr)
+  rest <- readStations(wd=work.dir, yr, ow=T)
 }
 
 #Joining all years
