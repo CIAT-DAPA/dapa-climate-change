@@ -63,57 +63,61 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
   odmGCM <- paste(odm, "/", gcmmd, sep=""); if (!file.exists(odmGCM)) {dir.create(odmGCM)}
   
   #Reading stations file and selecting stations within the study area
-  wts.dir <- paste("./organized-data/", vn, "-per-station", sep="")
-  st.list <- read.csv(paste("./organized-data/ghcn_", vn, "_", min(timeseries), "_", max(timeseries), "_mean.csv", sep=""))
+  st.list <- read.csv(paste("./all-years/gsod-", vn, "-", min(timeseries), "_", max(timeseries), "-mean.csv", sep=""))
   st.sel <- st.list[which(st.list$LONG <= msk@extent@xmax & st.list$LONG >= msk@extent@xmin & st.list$LAT <= msk@extent@ymax & st.list$LAT >= msk@extent@ymin),]
   st.sel$INSIDE <- extract(msk, cbind(st.sel$LONG,st.sel$LAT))
   st.sel <- st.sel[which(st.sel$INSIDE == 1),]
-  st.sel <- st.sel[,c(1,3:5,ncol(st.sel))]
-  st.ids <- st.sel$ID
-  rm(st.list); g=gc()
+  st.sel <- st.sel[,c(1:5,ncol(st.sel))]
+  st.ids <- unique(paste(st.sel$ID, st.sel$WBAN, sep=""))
+  rm(st.list); g=gc(); rm(g)
   
+  #Checking if there is at least one station in there
   if (length(st.ids) > 0) {
     cat("Analysing", length(st.ids), "stations \n")
+    
+    #Reading in station data
+    st.data <- read.csv(paste("./all-years/gsod-", vn, "-data-all.csv", sep=""))
     
     st.counter <- 1
     #Loading station data and defining the site
     for (st.id in st.ids) {
       if (st.counter%%10 == 0 | st.counter == 1) {cat("Processing station", paste(st.id), "\n")}
       
-      #Reading the weather station data
-      std <- read.csv(paste("./organized-data/", vn, "-per-station/", st.id, ".csv", sep=""))
+      #Selecting the weather station data
+      gsod <- substr(st.id,1,10); wban <- substr(st.id,11,19)
+      std <- st.data[which(st.data$ID == gsod & st.data$WBAN == wban),]
       #print(str(std))
       
       #Checking whether the stuff was already done
       outCompared <- paste(odCountryGCM, "/", st.id, "-comparison.csv", sep="")
       if (file.exists(outCompared)) {
         ts.in <- read.csv(outCompared)
-        ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=F, ts.out=ts.in, compare=T)
+        gsod.comp <- GSOD.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=F, ts.out=ts.in, compare=T)
       } else {
         #Getting the comparison metrics and extracted values
-        ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=T, ts.out=NULL, compare=T)
-        write.csv(ghcn.comp$VALUES, outCompared, row.names=F, quote=F)
+        gsod.comp <- GSOD.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=T, ts.out=NULL, compare=T)
+        write.csv(gsod.comp$VALUES, outCompared, row.names=F, quote=F)
       }
       
-      ghcn.comp$METRICS <- cbind(ID=rep(st.id, times=nrow(ghcn.comp$METRICS)),ghcn.comp$METRICS)
+      gsod.comp$METRICS <- cbind(ID=rep(gsod, times=nrow(gsod.comp$METRICS)),WBAN=rep(gsod, times=nrow(gsod.comp$METRICS)),gsod.comp$METRICS)
       
       if (st.id == st.ids[1]) {
-        out.metrics <- ghcn.comp$METRICS
+        out.metrics <- gsod.comp$METRICS
       } else {
-        out.metrics <- rbind(out.metrics, ghcn.comp$METRICS)
+        out.metrics <- rbind(out.metrics, gsod.comp$METRICS)
       }
       st.counter <- st.counter+1
     }
     write.csv(out.metrics, paste(odmGCM, "/metrics-", iso, ".csv", sep=""), row.names=F, quote=F)
     return(out.metrics)
   } else {
-    cat(length(st.ids),"stations to analyse \n")
+    cat(length(st.ids), "stations to analyse \n")
   }
 }
 
 
 #Function to harvest data from a particular GCM and retrieve also the accuracy metrics
-GHCN.GCM.comp <- function(gcmdir="", mod="bccr_bcm2_0", station.data, yl=c(1950:1960), vg="prec", extract=T, ts.out=NULL, compare=T) {
+GSOD.GCM.comp <- function(gcmdir="", mod="bccr_bcm2_0", station.data, yl=c(1950:1960), vg="prec", extract=T, ts.out=NULL, compare=T) {
   #Define folder where yearly files are located
   yd <- paste(gcmdir, "/", mod, "/yearly_files", sep="")
   
@@ -207,7 +211,7 @@ compareTS <- function(x, plotit=F, plotName="dummy") {
 extractMonth <- function(year.list, year.dir, in.st.data, vg="prec", gcm="bccr_bcm2_0") {
   #Looping through months for data extraction
   for (m in 1:12) {
-#     cat("Processing month", m, "\n")
+#   cat("Processing month", m, "\n")
     
     #Correcting month
     if (m < 10) {month <- paste("0", m, sep="")} else {month <- paste(m)}
@@ -266,12 +270,11 @@ extractTS <- function(st.data, yrdir, yr.list, mth, vg="prec", gcm="bccr_bcm2_0"
   mth.name <- mthList[as.numeric(mth)]
   
   #Station location
-  xy <- t(as.matrix(c(as.numeric(st.data$LONG[1]), as.numeric(st.data$LAT[2]))))
+  xy <- t(as.matrix(c(as.numeric(st.data$LONG[1]), as.numeric(st.data$LAT[1]))))
   
   #Extracting the corresponding month from the station data file
   colm <- which(names(st.data) == mth.name)
-  sel.st.data <- st.data[,c(2,colm)]
-  sel.st.data[,2] <- sel.st.data[,2] * 0.1
+  sel.st.data <- st.data[,c(6,colm)] #6 is year
   
   #Listing the rasters and extract the values
   rs.list <- as.list(paste(yrdir, "/", yr.list, "/", vg, "_", mth, ".asc", sep=""))
