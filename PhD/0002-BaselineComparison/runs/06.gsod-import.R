@@ -11,7 +11,7 @@ for (yr in 1961:1990) {
   rest <- readStations(wd=work.dir, yr, ow=T)
 }
 
-#Joining all years
+#Joining all years ()
 jy <- joinYears(work.dir, 1961, 1990, variable="tmean")
 jy <- joinYears(work.dir, 1961, 1990, variable="tmax")
 jy <- joinYears(work.dir, 1961, 1990, variable="tmin")
