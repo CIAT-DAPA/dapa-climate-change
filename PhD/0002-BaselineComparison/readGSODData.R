@@ -197,7 +197,6 @@ readStations <- function(wd="", year, ow=F) {
       all.data <- data.mgd
       all.monthly <- monthly
     } else {
-      write.csv(all.data, "./all.data.csv", row.names=F, quote=F)
       all.data <- rbind(all.data,data.mgd)
       all.monthly <- rbind(all.monthly, monthly)
     }
