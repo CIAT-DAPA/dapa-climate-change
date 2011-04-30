@@ -82,9 +82,9 @@ function runmodel {
 
 		# update statuts as finished
 	
-		mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; UPDATE $table SET finished=NOW() where species_id=$id;"
+		mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc; UPDATE $table SET finished=NOW() where species_id=$id;"
 	else
-		mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; UPDATE $table SET exit_status='no lambda file' where species_id=$id;"
+		mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc; UPDATE $table SET exit_status='no lambda file' where species_id=$id;"
 	fi
 	
 }
