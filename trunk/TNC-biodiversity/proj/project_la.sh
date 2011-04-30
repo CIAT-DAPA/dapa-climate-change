@@ -169,7 +169,7 @@ then
 		done
 		
 		sleep 0.1
-		ID=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
+		ID=$(mysql --skip-column-names -umodel1 -h$HOST -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
 
 	done
 	
