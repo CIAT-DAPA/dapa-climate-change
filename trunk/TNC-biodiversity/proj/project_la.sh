@@ -138,7 +138,7 @@ then
 	mkdir -p $RESULTS_HOST/$TABLE
 	
 	# for each part make a folder
-	for i in $(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select distinct(part) from species;")
+	for i in $(mysql --skip-column-names -umodel1 -pmaxent -h $HOST -e"use tnc; select distinct(part) from species;")
 	do
 		mkdir $RESULTS_HOST/$TABLE/part.$i
 	done
