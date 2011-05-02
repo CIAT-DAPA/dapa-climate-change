@@ -17,7 +17,7 @@ densityMap <- function(stDir, rDir, oDir, vn="rain", nclosest=10) {
   #Defining pixel-based function to calculate distances of nearest stations
   pDist <- function(grxy,stxy) {
     #Point distance between each point and the set of stations
-    pd <- pointDistance(c(grxy[1],grxy[2]), stxy, type='Euclidean')
+    pd <- pointDistance(c(grxy[1],grxy[2]), stxy, longlat=T)
     
     #Metrics (minimum and mean distances)
     min.d <- min(pd)
@@ -44,7 +44,7 @@ densityMap <- function(stDir, rDir, oDir, vn="rain", nclosest=10) {
   #Function to calculate chull over area that the nearest n-stations do cover
   chullDensity <- function(grxy, stxy, nclosest=10, rs) {
     #Calculating distance from points and
-    pd <- pointDistance(c(grxy[1], grxy[2]), stxy, type='Euclidean')
+    pd <- pointDistance(c(grxy[1], grxy[2]), stxy, longlat=T)
     pd.order <- order(pd,decreasing=F)
     close.stat <- stxy[pd.order[1:10],]
     
