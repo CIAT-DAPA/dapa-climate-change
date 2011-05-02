@@ -48,7 +48,7 @@ gp = arcgisscripting.create(9.3)
 if type == "daily":
 
 	for year in range(inityear, finalyear + 1, 1):
-    
+		gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
 		# Set workspace
 		if os.path.exists(dirbase + "\\" + type + "_asciis\\" + str(year)) and not gp.Exists(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt"):
 			
@@ -139,71 +139,71 @@ if type == "daily":
 					os.system("7za a " + InZipCom + " " + asc)
 					os.system("del " + asc)
 			
-			else: 
-				# 2. Convert ASCII to Raster
-				print "\n         > Converting Daily asciis to grids \n"
-				
-				ascdayList = sorted(glob.glob(gp.workspace + "\\*.asc"))
-				for ascday in ascdayList:
-					if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(os.path.basename(ascday)[:-9]) + "_done.txt"):					
-						# Create outputfolder to Grid files
-						diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + os.path.basename(ascday)[:-9] 
-						if not os.path.exists(diroutGrid):
-							#shutil.rmtree(diroutGrid)
-							os.system('mkdir ' + diroutGrid)
-						#else:
-							#os.system('mkdir ' + diroutGrid)
-						
-						OutGrid = diroutGrid + "\\" + os.path.basename(ascday)[:-4]
-						if not gp.Exists(OutGrid):
-							gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
-							print "           " + os.path.basename(ascday)[:-4] + " converted"
-						else:
-							print "           " + os.path.basename(ascday)[:-4] + " converted"
 
-						if str(ascday)[-8:-4] == "1230":
-							#Create check file
-							checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascday)[:-8] + "done.txt", "w")
-							checkTXT.close()
-				
-				print "\n         > Compressing Daily asciis ... \n"		
-				for ascday in ascdayList:	
-				
-					InZip = gp.workspace + "\\" + os.path.basename(ascday)[:-8] + str(year) + ".zip"
-					os.system("7za a " + InZip + " " + ascday)
-					os.system("del " + ascday)
-
-				try:
-					print "\n         > Copying out grids ... \n"
-					if not os.path.exists(dirbase + "\\" + type + "_grids"):
-						os.system('mkdir ' + dirbase + "\\" + type + "_grids")
-					shutil.copytree(dirout + "\\" + type + "_grids\\" + str(year), dirbase + "\\" + type + "_grids\\" + str(year))
-				except: 
-					print "An error ocurrs while copied output grid folder of " + str(year)
-					sys.exit(3)
-
-				try:
-					print "         > Copying asciis compresed ... \n"
-					if not os.path.exists(dirbase + "\\" + type + "_asciis_compressed"):
-						os.system('mkdir ' + dirbase + "\\" + type + "_asciis_compressed")
-					shutil.copytree(dirout + "\\" + type + "_asciis\\" + str(year), dirbase + "\\" + type + "_asciis_compressed\\" + str(year))
-				except: 
-					print "Error copying output ascii folder of " + str(year)
-					sys.exit(4)
-				
-				print "         > Removing intermediate folders ... \n"
-				shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
-				shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
-				shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
-				os.rename(dirbase + "\\" + type + "_asciis_compressed\\" + str(year), dirbase + "\\" + type + "_asciis\\" + str(year))
-				
-				print "         > " + str(year) + " Done!\n"
-				#Create check file
-				checkTXT1 = open(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt", "w")
-				checkTXT1.close()
+		# 2. Convert ASCII to Raster
+		print "\n         > Converting Daily asciis to grids \n"
 		
-		else :
-			print "         > " + str(year) + " Done!\n"
+		ascdayList = sorted(glob.glob(gp.workspace + "\\*.asc"))
+		for ascday in ascdayList:
+			if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(os.path.basename(ascday)[:-9]) + "_done.txt"):					
+				# Create outputfolder to Grid files
+				diroutGrid = dirout + "\\" + type + "_grids\\" + str(year) + "\\" + os.path.basename(ascday)[:-9] 
+				if not os.path.exists(diroutGrid):
+					#shutil.rmtree(diroutGrid)
+					os.system('mkdir ' + diroutGrid)
+				#else:
+					#os.system('mkdir ' + diroutGrid)
+				
+				OutGrid = diroutGrid + "\\" + os.path.basename(ascday)[:-4]
+				if not gp.Exists(OutGrid):
+					gp.ASCIIToRaster_conversion(ascday, OutGrid, "FLOAT")
+					print "           " + os.path.basename(ascday)[:-4] + " converted"
+				else:
+					print "           " + os.path.basename(ascday)[:-4] + " converted"
+
+				if str(ascday)[-8:-4] == "1230":
+					#Create check file
+					checkTXT = open(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + os.path.basename(ascday)[:-8] + "done.txt", "w")
+					checkTXT.close()
+		
+		print "\n         > Compressing Daily asciis ... \n"		
+		for ascday in ascdayList:	
+		
+			InZip = gp.workspace + "\\" + os.path.basename(ascday)[:-8] + str(year) + ".zip"
+			os.system("7za a " + InZip + " " + ascday)
+			os.system("del " + ascday)
+
+		try:
+			print "\n         > Copying out grids ... \n"
+			if not os.path.exists(dirbase + "\\" + type + "_grids"):
+				os.system('mkdir ' + dirbase + "\\" + type + "_grids")
+			shutil.copytree(dirout + "\\" + type + "_grids\\" + str(year), dirbase + "\\" + type + "_grids\\" + str(year))
+		except: 
+			print "An error ocurrs while copied output grid folder of " + str(year)
+			sys.exit(3)
+
+		try:
+			print "         > Copying asciis compresed ... \n"
+			if not os.path.exists(dirbase + "\\" + type + "_asciis_compressed"):
+				os.system('mkdir ' + dirbase + "\\" + type + "_asciis_compressed")
+			shutil.copytree(dirout + "\\" + type + "_asciis\\" + str(year), dirbase + "\\" + type + "_asciis_compressed\\" + str(year))
+		except: 
+			print "Error copying output ascii folder of " + str(year)
+			sys.exit(4)
+		
+		print "         > Removing intermediate folders ... \n"
+		shutil.rmtree(dirout + "\\" + type + "_grids\\" + str(year))
+		shutil.rmtree(dirout + "\\" + type + "_asciis\\" + str(year))
+		shutil.rmtree(dirbase + "\\" + type + "_asciis\\" + str(year))
+		os.rename(dirbase + "\\" + type + "_asciis_compressed\\" + str(year), dirbase + "\\" + type + "_asciis\\" + str(year))
+		
+		print "         > " + str(year) + " Done!\n"
+		#Create check file
+		checkTXT1 = open(dirbase + "\\" + type + "_grids\\Ascii2Grid_" + str(year) + "_done.txt", "w")
+		checkTXT1.close()
+	
+		# else :
+			# print "         > " + str(year) + " Done!\n"
 	
 	print "Processed all years!!\n"
 
