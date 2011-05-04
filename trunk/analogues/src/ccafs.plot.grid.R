@@ -81,18 +81,32 @@ lp <- function(params, var){
 
 # plot grids
 
-nm <- function(r){
+nm <- function(params,r){
+  
   pushViewport(plotViewport(margins=c(2.5,2.5,0.9,0.5)))
-  pushViewport(dataViewport(c(-180,180), c(-90,90)))
+  pushViewport(dataViewport(c(xmin(r),xmax(r)), c(ymin(r),ymax(r))))
   
-  grid.xaxis(at=seq(-180,180,60), gp=gpar(cex=0.8))
-  grid.yaxis(at=seq(-90,90,30),gp=gpar(cex=0.8))
+  grid.xaxis(at=seq(xmin(r),xmax(r),length.out=7), gp=gpar(cex=0.8))
+  grid.yaxis(at=seq(ymin(r),ymax(r),length.out=7),gp=gpar(cex=0.8))
   
-  gGrad <- matrix(color.scale(getValues(r)),nrow=180,byrow=T)
+  # make color range
+  r.v   <- getValues(r)
+  r.vu  <- unique(r)
+  r.vu  <- r.vu[order(r.vu)]
+  cols  <- data.frame(or.values=r.vu,co=rainbow(length(r.vu)))
   
-  grid.raster(gGrad,interpolate=F,width=unit(355,"native"), height=unit(180,"native"))
+  cols <- with(cols, co[match(r.v, or.values)])
   
+  gGrad <- matrix(cols,nrow=r@nrows,byrow=T)
+  
+  grid.raster(gGrad,interpolate=F,width=unit(r@ncols,"native"), height=unit(r@nrows,"native"))
+  
+  m <- map("world", plot=F, xlim=c(xmin(r),xmax(r)), ylim=c(ymin(r),ymax(r)))
   grid.lines(x=m$x,y=m$y, default.units="native")
+  
+  # points
+  grid.points(x=params$x, y=params$y, gp=gpar(col="red"), pch=18)
+  grid.points(x=params$x, y=params$y, gp=gpar(cex=0.5), pch=20)
   
   upViewport(3)
 }
@@ -163,7 +177,7 @@ ccafs.report <- function(params=ccafs.params, r1=mean,r2=cv) {
     # plot raster1
     pushViewport(viewport(layout.pos.col=3, layout.pos.row=4))
     mdl()
-    nm(r)
+    nm(params,r)
     
     # plot temp_text
     pushViewport(viewport(layout.pos.col=2, layout.pos.row=5))
@@ -175,7 +189,7 @@ ccafs.report <- function(params=ccafs.params, r1=mean,r2=cv) {
     pushViewport(viewport(layout.pos.col=3, layout.pos.row=5))
     mdl()
   
-    nm(r)
+    nm(params,r)
     
     # small print
     pushViewport(viewport(layout.pos.col=3, layout.pos.row=6, width=0.9, height=0.9))

@@ -36,15 +36,25 @@ ccafs.load.data <- function(params) {
     if (file.exists(params$climate.data)){
       # load current climate
       for (var in params$vars) {
-        cat(str_c("loading ",var," for current\n"))
-        cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", 1:12, ".asc")), raster))
+        if(!params$normalise) {
+          cat(str_c("loading ",var," for current\n"))
+          cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", 1:12, ".asc")), raster))
+        } else {
+         cat(str_c("loading ",var," for current and normalising\n"))
+         cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", 1:12, ".asc")), raster.n))
+        }
       }
       
       # load future climate
       for (gcm in params$gcms) {
         for (var in params$vars) {
-          cat(str_c("loading ",var," for ",gcm,"\n"))
-          cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", 1:12, ".asc")), raster))
+          if(!params$normalise) {
+            cat(str_c("loading ",var," for ",gcm,"\n"))
+            cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", 1:12, ".asc")), raster))
+          } else {
+            cat(str_c("loading ",var," for ",gcm," and normalising \n"))
+            cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", 1:12, ".asc")), raster.n))
+          }
         }
       }
     } else {
