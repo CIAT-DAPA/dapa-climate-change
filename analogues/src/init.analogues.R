@@ -44,6 +44,7 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
                                   #                 forwd -> take mean,prec and dtr at location x,y under current condition and look for similiarity in n gcms in future conditions (i.e. project current to futur, projecting 1 knwon truth into n possible futurs).
   growing.season=1:12,            # specifiy a growing season for a crop (from, to) in months, currently it is not possible to specify growing seaon over e.g. nov - feb, must be within one year
   across.year=T,
+  normalise=F,                    # should varaibles be normalised (mean=0,sd=1), takes some time
   keep.lag=F,                     # wether or not laged calculation for each month should be kept or not
   sumarize.lag=T,                 # wether or not lags should be sumarized, i.e. min searched
   pdf="test.pdf",                 # name of a pdf continaing main results, if empty no pdf will be produced
@@ -97,6 +98,7 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
                   climate.data=climate.data,
                   grass.params=grass.params,
                   vars=vars,
+                  normalise=normalise,
                   ndivisions=ndivisions,
                   paper=paper,
                   hal.tmp=hal.tmp,
@@ -120,6 +122,14 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
     sfLibrary(raster)
     sfLibrary(spgrass6)
     sfLibrary(stringr)
+  }
+  
+  # Additional Functions
+  raster.n <- function(x) {
+    r <- raster(x)
+    r <- (r - cellStats(r,mean))/cellStats(r,sd)
+    r <- r+10
+    return(r)
   }
   
   return(params)

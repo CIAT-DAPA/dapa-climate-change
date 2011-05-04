@@ -7,25 +7,26 @@ calc.dis <- function(roll, params,base.v,delta,cdata) {
   res_return <- list()
   
   # for each combination (lag) loop calc dissimilartiy
-  delta <- delta
   if (params$method=="ccafs") {
       res_all <- apply(roll, 1, function(x) calc.ccafs(x,params,base.v,delta))
   } else if (params$method=="ccafs.generic") {
-      res_all <- apply(roll, 1, function(x) calc.ccafs.generic(params.base.v,delta))
+      res_all <- apply(roll, 1, function(x) calc.ccafs.generic(x,params,base.v,delta))
   } else if (params$method=="hallegate" | params$method=="hal") {
       res_all <- apply(roll,1,function(x) calc.hal(lag=x, params=params,base.v, delta))
   }
     
-  if (params$keep.lag) {
+  if (params$keep.lag & params$across.year) {
       # create stack with lagged 
       res_return$res_stacked <- do.call(stack, apply(res_all,2,function(x) setValues(cdata$tmean_b[[1]],x)))
   
-  } else if (params$sumarize.lag) {
+  } else if (params$sumarize.lag & params$across.year) {
       # take the minimum of each each month
       res_sum <- sumarize.lag(res_all)
       res_return$res_sum <- setValues(cdata$tmean_b[[1]],res_sum[2,])
+  } else if(!params$across.year) {
+      res_return <- setValues(cdata$tmean_b[[1]],res_all)
   }
-    
+  
   return(res_return)
 }
 
@@ -33,6 +34,7 @@ calc.dis <- function(roll, params,base.v,delta,cdata) {
 # Functions to calculate dissimilarity
 #----------------------------------------------------------------------------------------------#
 
+#----------------------------------------------------------------------------------------------#
 # ccafs dissimilarity
 
 calc.ccafs <- function(lag, # lag is the arrangemnt of months
@@ -46,12 +48,12 @@ calc.ccafs <- function(lag, # lag is the arrangemnt of months
   t1 <- t(base.v[['tmean_b.v']]) - params$ref_value[[str_c(delta,"_tmean")]][lag]
     
   # substract ref prec
-  p1 <- t(base.v[['pre_b.v']]) - params$ref_value[[str_c(delta,"_prec")]][lag]
+  p1 <- t(base.v[['prec_b.v']]) - params$ref_value[[str_c(delta,"_prec")]][lag]
     
   # substract ref dtr
   d1 <- t(base.v[['dtr_b.v']]) - params$ref_value[[str_c(delta,"_dtr")]][lag]
     
-  t2 <- d1*t1*t1
+  t2 <- (t1*t1)
   p2 <- p1*p1
     
   v1 <- colSums(t2)
@@ -61,6 +63,7 @@ calc.ccafs <- function(lag, # lag is the arrangemnt of months
   return(res)    
 }
 
+#----------------------------------------------------------------------------------------------#
 # ccafs generic
 calc.ccafs.generic <- function(lag, # lag is the arrangemnt of months
   params,                   # all parameters
@@ -72,7 +75,7 @@ calc.ccafs.generic <- function(lag, # lag is the arrangemnt of months
   # substract ref mean tmp
   
   # substract reference value
-  ll <- lapply(str_c(params$var,"_b.v"), function(x) (t(base.v[[x]]) - params$ref_value[[str_c(delta,"_",x)]][lag])^2)
+  ll <- lapply(params$var, function(x) (t(base.v[[str_c(x,"_b.v")]]) - params$ref_value[[str_c(delta,"_",x)]][lag])^2)
   
   # square
   ll <- lapply(ll, function(x) x*x)
@@ -80,15 +83,18 @@ calc.ccafs.generic <- function(lag, # lag is the arrangemnt of months
   # sum division ups
   ll <- lapply(ll, colSums)
 
-  # take square rot
-  ll <- lapply(ll, sqrt)
-  
   # sum over all lists
-  res <- c()
-  for (i in ll) res <- ress + i
-  
+  res <- 0
+  for (i in ll) res <- res + i
+
+  # take sqrt 
+  res <- sqrt(res)
+
   return(res)    
 }
+
+#----------------------------------------------------------------------------------------------#
+# hal method
 
 calc.hal <- function(lag,params,base.v,delta) {
  

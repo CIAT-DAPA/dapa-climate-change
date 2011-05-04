@@ -31,6 +31,7 @@ ccafs.dissimilarity <- function(cdata=cdata, params=params, new.direction=NA) {
       cat(str_c("calculating dissimilarity for: ",gcm,"\n"))
       # for each combination (lag) loop calc dissimilartiy
       results[[gcm]] <- calc.dis(roll=roll,params=params,base.v=base.v,delta=gcm,cdata=cdata) # problem with no default value for delta
+    
     }
   } else if (params$direction=="forwd" | params$direction=="forward"){
     
