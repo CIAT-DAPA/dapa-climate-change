@@ -18,9 +18,9 @@ createTiles(rd, std, od, vn="rain", ntiles=5, overlap=1000)
 ################################################
 source("densityMap.R")
 
-std <- "/home/jramirez/climate-data-assessment/input-data"
-rd <- "/home/jramirez/climate-data-assessment/mask-srtm"
-od <- "/home/jramirez/climate-data-assessment/outputs/density-map"
+std <- "/data/climate-data-assessment/input-data"
+rd <- "/data/climate-data-assessment/mask-srtm"
+od <- "/data/climate-data-assessment/outputs/density-map"
 
 dm <- densityMap(std, rd, od, vn="rain", nclosest=10)
 
@@ -29,13 +29,13 @@ dm <- densityMap(std, rd, od, vn="rain", nclosest=10)
 # TO FIT SPLINES ##########################################
 ###########################################################
 
-1. Copy files from 172.22.33.85\climate-data-assessment to a local folder
-2. Uncompress tiles.zip
-3. Update the repository if not already updated (dapa-climate-change)
-4a. In windows 
+#1. Copy files from 172.22.33.85\climate-data-assessment to a local folder
+#2. Uncompress tiles.zip
+#3. Update the repository if not already updated (dapa-climate-change)
+#4a. In windows 
 
-go to the dapa-climate-change/trunk/PhD/003-WCLUncertainty
-type "R" and enter
+#go to the dapa-climate-change/trunk/PhD/003-WCLUncertainty
+#type "R" and enter
 
 source("fitSplines.R")
 drive <- "E"
@@ -51,13 +51,13 @@ spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per
 spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmin", ntiles=5, unix=F)
 spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmax", ntiles=5, unix=F)
 
-The purpose is to achieve 100 folds, so you need 10 processors with 10 folds each, for each variable
+#The purpose is to achieve 100 folds, so you need 10 processors with 10 folds each, for each variable
 
 
-4b. In Linux it is 
+#4b. In Linux it is 
 
-go to the dapa-climate-change/trunk/PhD/003-WCLUncertainty
-type "R" and enter
+#go to the dapa-climate-change/trunk/PhD/003-WCLUncertainty
+#type "R" and enter
 
 source("fitSplines.R")
 drive <- "/data"
@@ -74,6 +74,26 @@ spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per
 spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmin", ntiles=5, unix=T)
 spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per=0.85, vn="tmax", ntiles=5, unix=T)
 
-The purpose is to achieve 100 folds, so you need 10 processors with 10 folds each, for each variable
+#The purpose is to achieve 100 folds, so you need 10 processors with 10 folds each, for each variable
+#Copy periodically processed folds
 
-Copy periodically processed folds
+###########################################################
+# TO MERGE FILES ##########################################
+###########################################################
+
+source("join-tiles.R")
+nDrive <- "/mnt/GIS-HD720"
+lDrive <- "/data"
+
+temp.dir <- paste(lDrive, "/jramirez/tmp", sep="")
+base.dir <- paste(nDrive, "/mnt/CCAFS/climate-data-assessment/wcl-uncertaities/outputs/cross-validation", sep="")
+
+batch.mergeTiles <- function(bd, td, vr="tean", folds=1:10, parts=1:5, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="tean", folds=1:10, parts=6:10, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="tmin", folds=1:10, parts=1:5, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="tmin", folds=1:10, parts=6:10, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="tmax", folds=1:10, parts=1:5, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="tmax", folds=1:10, parts=6:10, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="rain", folds=1:10, parts=1:5, months=1:12, nti=5)
+batch.mergeTiles <- function(bd, td, vr="rain", folds=1:10, parts=6:10, months=1:12, nti=5)
+
