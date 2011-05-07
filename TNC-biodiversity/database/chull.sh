@@ -44,9 +44,8 @@ id=$1
 
 ##################
 # load variabiles
-
 # get first ID
-ID=$(psql -U model1 -d gisdb -t -c "Select SpeciesID from ConvexHulls where HasChull IS NULL ORDER BY random() limit 1")
+ID=$(psql -U model1 -d gisdb -t -c "Select SpeciesID from ConvexHulls where HasChull IS NULL and NumberOfPoints > 9 ORDER BY random() limit 1")
 	
 while [ -n "$ID" ]
 do
@@ -62,7 +61,7 @@ do
 	done
 		
 	sleep 0.1
-	ID=$(psql -U model1 -d gisdb -t -c "Select SpeciesID from ConvexHulls where HasChull IS NULL ORDER BY random() limit 1")
+	ID=$(psql -U model1 -d gisdb -t -c "Select SpeciesID from ConvexHulls where HasChull IS NULL and NumberOfPoints > 9 ORDER BY random() limit 1")
 done
 
 
