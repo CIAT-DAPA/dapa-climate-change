@@ -60,10 +60,10 @@ function add_point {
 	NAME=$3
   psql -U model1 -d gisdb -c "ALTER TABLE Points ADD column $NAME boolean;"
 	
-while read line
+while read LINE
 do
 	# check points
-	add_point $ID $NAME &
+	add_point $LINE $NAME &
 
 	PID=$!
 	queue $PID
