@@ -2,7 +2,6 @@
 
 # $1: Number of processes to start
 # $2: Name of the file, the file needs to have the following structure: family,genus,species,lon,lat,database
-# $3: Name of column for this import, it is suggested to use: importYYYYMMDD
 
 
 MAX_NPROC=$1
@@ -23,7 +22,6 @@ fi
 function add_point {
 
   line="$1"
-  name=$2
   
   family=$(echo "$line" | cut -d, -f1)
   genus=$(echo "$line" | cut -d, -f2)
@@ -33,7 +31,14 @@ function add_point {
   db=$(echo "$line" | cut -d, -f6)
   
   # get the gbif id for the point
-  toAddID=$(psql -U model1 -d gisdb -t -c "SELECT ts.speciesid FROM taxspecies AS ts JOIN taxgenera AS tg ON ts.genusid = tg.genusid JOIN taxfamilies AS tf ON tg.familyid = tf.familyid WHERE tf.familyname='$family' AND ts.speciesname='$species';")
+  
+  # do family check only if family infofrmation is available
+  if [ "$family" == "" -o "$family" == "NA" ]
+  then
+    toAddID=$(psql -U model1 -d gisdb -t -c "SELECT speciesid FROM taxspecies WHERE speciesname='$species';")    
+  else
+    toAddID=$(psql -U model1 -d gisdb -t -c "SELECT ts.speciesid FROM taxspecies AS ts JOIN taxgenera AS tg ON ts.genusid = tg.genusid JOIN taxfamilies AS tf ON tg.familyid = tf.familyid WHERE tf.familyname='$family' AND ts.speciesname='$species';")
+  fi
   
   if [ "$toAddID" != "" ]
   then
@@ -42,7 +47,7 @@ function add_point {
     # add the point
     if [ $exists == "f" ]
     then
-      psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$name) VALUES ('$toAddID','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
+      psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,DateAdded) VALUES ('$toAddID','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f',current_date)"
     else
       echo "$line" >> point_already_in_db.csv
     fi
@@ -55,13 +60,10 @@ function add_point {
 # load variabiles
 # get first ID
 
-	NAME=$3
-  psql -U model1 -d gisdb -c "ALTER TABLE Points ADD column $NAME boolean;"
-	
 while read LINE
 do
 	# check points
-	add_point "$LINE" "$NAME" &
+	add_point "$LINE" &
 
 	PID=$!
 	queue $PID

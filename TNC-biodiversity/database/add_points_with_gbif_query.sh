@@ -41,19 +41,19 @@ function get_tax_and_add
   else
   
     # get famly name
-    familyId=$(psql -U model1 -d gisdb -t -c "select tf.familyid from taxgenera as tg join taxfamilies as tf on tg.familyid = tf.familyid where tg.genusname='$genus'")
+    familyId=$(psql -U model1 -d gisdb -t -c "select tf.familyid from taxgenera as tg join taxfamilies as tf on tg.familyid = tf.familyid where tg.genusname='$genus' limit 1")
     
     # check if family is already in database
     if [ $familyId != "" ]
     then  
-      genusId=$(psql -U model1 -d gisdb -t -c "select genusid from taxgenera where genusname='$genus'")
+      genusId=$(psql -U model1 -d gisdb -t -c "select genusid from taxgenera where genusname='$genus' limit 1")
     
       # add record to species table and then all the points
       psql -U model1 -d gisdb -t -c "insert into taxspecies (speciesid,speciesname,genusid) values ('$speciesId','$genus $species','$genusId');"
     else
       # for family and genus get name and id from GBIF
       # get family name 
-      family=$(curl "http://data.gbif.org/species/classificationSearch?query=$genus%20$species&retrieveChildren=false" | awk 'NR==5{print}')
+      family=$(curl "http://data.gbif.org/species/classificationSearch?query=${genus}%20${species}&retrieveChildren=false" | awk 'NR==5{print}')
     
       # get family id
       familyId=$(curl "http://data.gbif.org/species/nameSearch?rank=family&query=$family&returnType=nameId&maxResults=1" | cut -f1)
