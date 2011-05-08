@@ -16,7 +16,7 @@ then
   . bash_parallel.sh
 else
   echo "downloading parallel functions from svn"
-  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/utils/bash_parallel.sh
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/util/bash_parallel.sh
   . bash_parallel.sh
 fi
 
@@ -43,6 +43,7 @@ function add_point {
     
     # add the point
     if [ $exists = "f" ]
+    then
       psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$name) VALUES ('$toAddID','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
     else
       echo $line >> point_already_in_db.csv
