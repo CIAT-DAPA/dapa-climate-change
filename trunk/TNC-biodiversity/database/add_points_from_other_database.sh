@@ -22,15 +22,15 @@ fi
 
 function add_point {
 
-  line=$1
+  line="$1"
   name=$2
   
-  family=$(echo $line | cut -d, -f1)
-  genus=$(echo $line | cut -d, -f2)
-  species=$(echo $line | cut -d, -f3)
-  lon=$(echo $line | cut -d, -f4)
-  lat=$(echo $line | cut -d, -f5)
-  db=$(echo $line | cut -d, -f6)
+  family=$(echo "$line" | cut -d, -f1)
+  genus=$(echo "$line" | cut -d, -f2)
+  species=$(echo "$line" | cut -d, -f3)
+  lon=$(echo "$line" | cut -d, -f4)
+  lat=$(echo "$line" | cut -d, -f5)
+  db=$(echo "$line" | cut -d, -f6)
   
   # get the gbif id for the point
   toAddID=$(psql -U model1 -d gisdb -t -c "SELECT ts.speciesid FROM taxspecies AS ts 
@@ -46,10 +46,10 @@ function add_point {
     then
       psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$name) VALUES ('$toAddID','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
     else
-      echo $line >> point_already_in_db.csv
+      echo "$line" >> point_already_in_db.csv
     fi
   else
-    echo $line >> taxonomy_not_found.csv
+    echo "$line" >> taxonomy_not_found.csv
   fi
 }
 
