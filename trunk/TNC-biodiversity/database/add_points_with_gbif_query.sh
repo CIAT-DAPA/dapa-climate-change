@@ -48,7 +48,7 @@ function get_tax_and_add
       genusId=$(psql -U model1 -d gisdb -t -c "select genusid from taxgenera where genusname='$genus'")
     
       # add record to species table and then all the points
-      psql -U model1 -d gisdb -t -c "insert inot table taxspecies (speciesid,speciesname,genusid) values ('$speciesId','$genus $species','$genusId');"
+      psql -U model1 -d gisdb -t -c "insert into taxspecies (speciesid,speciesname,genusid) values ('$speciesId','$genus $species','$genusId');"
     else
       # for family and genus get name and id from GBIF
       # get family name 
@@ -58,17 +58,17 @@ function get_tax_and_add
       familyId=$(curl "http://data.gbif.org/species/nameSearch?rank=family&query=$family&returnType=nameId&maxResults=1" | cut -f1)
       
       # get genus id
-      familyId=$(curl "http://data.gbif.org/species/nameSearch?rank=genus&query=$genus&returnType=nameId&maxResults=1" | cut -f1)
+      genusId=$(curl "http://data.gbif.org/species/nameSearch?rank=genus&query=$genus&returnType=nameId&maxResults=1" | cut -f1)
       
       # insert into database
       # family
-      psql -U model1 -d gisdb -t -c "insert inot table taxfamilies (familyid,familyname) values ('$familyId','$family');"
+      psql -U model1 -d gisdb -t -c "insert into taxfamilies (familyid,familyname) values ('$familyId','$family');"
       
       # genus
-      psql -U model1 -d gisdb -t -c "insert inot table taxgenera (genusid,genusname,familyid) values ('$genusId','$genus', '$familyId');"
+      psql -U model1 -d gisdb -t -c "insert into taxgenera (genusid,genusname,familyid) values ('$genusId','$genus', '$familyId');"
       
       # species
-      psql -U model1 -d gisdb -t -c "insert inot table taxspecies (speciesid,speciesname,genusid) values ('$speciesId','$genus $species','$genusId');"
+      psql -U model1 -d gisdb -t -c "insert into taxspecies (speciesid,speciesname,genusid) values ('$speciesId','$genus $species','$genusId');"
     fi
   fi
   
@@ -80,7 +80,14 @@ function get_tax_and_add
     lat=$(echo "$line" | cut -d, -f5)
     db=$(echo "$line" | cut -d, -f6)
   
-    psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$col) VALUES ('$speciesId','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
+    exists=$(psql -U model1 -d gisdb -t -c "SELECT ST_GeomFromText('POINT($lon $lat)',4326) IN (SELECT geom FROM Points WHERE SpeciesId='$speciesId');")
+    
+    # add the point
+    if [ $exists == "f" ]
+    then
+      psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$col) VALUES ('$speciesId','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
+    fi
+    
      
   done
 }
