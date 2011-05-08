@@ -2,12 +2,12 @@
 
 # $1: Number of processes to start
 # $2: Name of the file, the file needs to have the following structure: family,genus,species,lon,lat,database
-# $3: Name of column for this import, it is suggested to use: importYYYYMMDD
+
 
 
 MAX_NPROC=$1
 FILE=$2
-TABLE=$3
+
 
 
 # check wether or not functions for running bash in parallel exists
@@ -28,6 +28,8 @@ function get_tax_and_add
   taxon=$1
   genus=$(echo $taxon | cut -d' ' -f1)
   species=$(echo $taxon | cut -d' ' -f2)
+  
+  file=$2
   
  
   # Get species ID
@@ -73,7 +75,7 @@ function get_tax_and_add
   
   # now add all points of this taxon to the database
   
-  awk -F',' '$3 ~ /'"$genus $species"'/{print $0}' codesan.csv | while read line
+  awk -F',' '$3 ~ /'"$genus $species"'/{print $0}' $file | while read line
   do 
     lon=$(echo "$line" | cut -d, -f4)
     lat=$(echo "$line" | cut -d, -f5)
@@ -96,7 +98,7 @@ function get_tax_and_add
 cat $FILE | cut -f3 -d, | sort -u -t','| while read LINE
 do
 	# check points
-	get_tax_and_add "$LINE" &
+	get_tax_and_add "$LINE" "$FILE" &
 
 	PID=$!
 	queue $PID
