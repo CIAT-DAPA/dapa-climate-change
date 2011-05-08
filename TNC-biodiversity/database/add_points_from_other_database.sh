@@ -42,7 +42,7 @@ function add_point {
     exists=$(psql -U model1 -d gisdb -t -c "SELECT ST_GeomFromText('POINT($lon $lat)',4326) IN (SELECT geom FROM Points WHERE SpeciesId='$toAddID');")
     
     # add the point
-    if [ $exists = "f" ]
+    if [ $exists == "f" ]
     then
       psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$name) VALUES ('$toAddID','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
     else
@@ -63,7 +63,7 @@ function add_point {
 while read LINE
 do
 	# check points
-	add_point $LINE $NAME &
+	add_point "$LINE" "$NAME" &
 
 	PID=$!
 	queue $PID
@@ -73,8 +73,7 @@ do
 		sleep 0.1
 	done
 	
-done < $2
-
+done < $FILE
 
 
 
