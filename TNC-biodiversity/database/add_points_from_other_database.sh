@@ -4,6 +4,7 @@
 # $2: Name of the file, the file needs to have the following structure: family,genus,species,lon,lat,database
 # $3: Name of column for this import, it is suggested to use: importYYYYMMDD
 
+
 MAX_NPROC=$1
 FILE=$2
 
@@ -18,9 +19,6 @@ else
   svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/utils/bash_parallel.sh
   . bash_parallel.sh
 fi
-
-# test line
-line="Orchidaceae,Trigonidium,Trigonidium riopalenquense,-84.04440308,10.4083004,SSTN"
 
 function add_point {
 
