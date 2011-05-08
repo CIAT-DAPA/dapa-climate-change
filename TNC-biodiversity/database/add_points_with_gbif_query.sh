@@ -90,7 +90,7 @@ function get_tax_and_add
 cat $FILE | cut -f3 -d, | sort -u -t','| while read LINE
 do
 	# check points
-	add_point "$LINE" "$NAME" &
+	get_tax_and_add "$LINE" "$NAME" &
 
 	PID=$!
 	queue $PID
