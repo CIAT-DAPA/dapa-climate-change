@@ -35,7 +35,7 @@ function add_point {
   # get the gbif id for the point
   toAddID=$(psql -U model1 -d gisdb -t -c "SELECT ts.speciesid FROM taxspecies AS ts JOIN taxgenera AS tg ON ts.genusid = tg.genusid JOIN taxfamilies AS tf ON tg.familyid = tf.familyid WHERE tf.familyname='$family' AND ts.speciesname='$species';")
   
-  if [ -n "toAddID" ]
+  if [ "$toAddID" != "" ]
   then
     exists=$(psql -U model1 -d gisdb -t -c "SELECT ST_GeomFromText('POINT($lon $lat)',4326) IN (SELECT geom FROM Points WHERE SpeciesId='$toAddID');")
     
