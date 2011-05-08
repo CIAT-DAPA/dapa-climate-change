@@ -29,8 +29,7 @@ function get_tax_and_add
   genus=$(echo $taxon | cut -d' ' -f1)
   species=$(echo $taxon | cut -d' ' -f2)
   
-  col=$2
-  
+ 
   # Get species ID
   speciesId=$(curl "http://data.gbif.org/species/nameSearch?rank=species&query=${genus}%20${species}&returnType=nameId&maxResults=1" | cut -f1)
 
@@ -85,7 +84,7 @@ function get_tax_and_add
     # add the point
     if [ $exists == "f" ]
     then
-      psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,$col) VALUES ('$speciesId','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f','t')"
+      psql -U model1 -d gisdb -c "INSERT INTO Points (SpeciesID,Lon,Lat,geom,Source,InModel,DateAdded) VALUES ('$speciesId','$lon','$lat',ST_GeomFromText('POINT($lon $lat)',4326),'$db','f',current_date)"
     fi
     
      
@@ -97,7 +96,7 @@ function get_tax_and_add
 cat $FILE | cut -f3 -d, | sort -u -t','| while read LINE
 do
 	# check points
-	get_tax_and_add "$LINE" "$NAME" &
+	get_tax_and_add "$LINE" &
 
 	PID=$!
 	queue $PID
