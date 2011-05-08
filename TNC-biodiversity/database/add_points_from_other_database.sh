@@ -33,9 +33,7 @@ function add_point {
   db=$(echo "$line" | cut -d, -f6)
   
   # get the gbif id for the point
-  toAddID=$(psql -U model1 -d gisdb -t -c "SELECT ts.speciesid FROM taxspecies AS ts 
-      JOIN taxgenera AS tg ON ts.genusid = tg.genusid 
-      JOIN taxfamilies AS tf ON tg.familyid = tf.familyid WHERE tf.familyname='$family' AND ts.speciesname='$species';")
+  toAddID=$(psql -U model1 -d gisdb -t -c "SELECT ts.speciesid FROM taxspecies AS ts JOIN taxgenera AS tg ON ts.genusid = tg.genusid JOIN taxfamilies AS tf ON tg.familyid = tf.familyid WHERE tf.familyname='$family' AND ts.speciesname='$species';")
   
   if [ -n "toAddID" ]
   then
