@@ -178,7 +178,7 @@ mergeTiles <- function(bDir, tmpDir, variable="rain", part=1, fold=1, month=1, n
   ml <- makeLog(oDir,month)
   } else {
     cat("Month, part and fold aready processed \n")
-    ml <- paste(oDir, "/status.",m,".merge", sep="")
+    ml <- paste(oDir, "/status.",month,".merge", sep="")
   }
   return(ml)
 }
