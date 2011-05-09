@@ -42,7 +42,7 @@ mergeTiles <- function(bDir, tmpDir, variable="rain", part=1, fold=1, month=1, n
   oDir <- paste(rDir, "/merged", sep="")
   if (!file.exists(oDir)) {dir.create(oDir)}
   
-  if (!file.exists(paste(oDir, "/status.merge", sep=""))) {
+  if (!file.exists(paste(oDir, "/status.m.",month,".merge", sep=""))) {
     #Cleaning working dir if necessary
     cat("Cleaning if necessary \n")
     fl <- list.files(procDir); for (f in fl) {file.remove(f)}
@@ -153,9 +153,6 @@ mergeTiles <- function(bDir, tmpDir, variable="rain", part=1, fold=1, month=1, n
       assign(paste("tile",i,sep=""),crop(rcTile, cExtent))
       #plot(get(paste("tile",i,sep=""))@extent,add=T)
     }
-  } else {
-    cat("Month, part and fold aready processed \n")
-  }
   
   cat("Merging \n")
   m <- merge(tile1,tile2,tile3,tile4,tile5)
@@ -178,14 +175,18 @@ mergeTiles <- function(bDir, tmpDir, variable="rain", part=1, fold=1, month=1, n
   fs <- file.remove(procDir)
   
   #Create log file
-  ml <- makeLog(oDir)
+  ml <- makeLog(oDir,month)
+  } else {
+    cat("Month, part and fold aready processed \n")
+    ml <- paste(oDir, "/status.",m,".merge", sep="")
+  }
   return(ml)
 }
 
 #Function to create a log file
-makeLog <- function(path) {
-  zz <- file(paste(path, "/status.merge", sep=""), "w")
+makeLog <- function(path, m) {
+  zz <- file(paste(path, "/status.m.",m,".merge", sep=""), "w")
   cat("Process finished on", date(), "\n", file=zz)
   close(zz)
-  return(paste(path, "/status.merge", sep=""))
+  return(paste(path, "/status.m.",m,".merge", sep=""))
 }

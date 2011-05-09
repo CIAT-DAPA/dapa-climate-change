@@ -86,14 +86,16 @@ nDrive <- "/mnt/GIS-HD720"
 lDrive <- "/data"
 
 temp.dir <- paste(lDrive, "/jramirez/tmp", sep="")
-base.dir <- paste(nDrive, "/mnt/CCAFS/climate-data-assessment/wcl-uncertaities/outputs/cross-validation", sep="")
+base.dir <- paste(nDrive, "/CCAFS/climate-data-assessment/wcl-uncertaities/outputs/cross-validation", sep="")
 
-batch.mergeTiles <- function(bd, td, vr="tean", folds=1:10, parts=1:5, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="tean", folds=1:10, parts=6:10, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="tmin", folds=1:10, parts=1:5, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="tmin", folds=1:10, parts=6:10, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="tmax", folds=1:10, parts=1:5, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="tmax", folds=1:10, parts=6:10, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="rain", folds=1:10, parts=1:5, months=1:12, nti=5)
-batch.mergeTiles <- function(bd, td, vr="rain", folds=1:10, parts=6:10, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:10, parts=1:5, months=1:12, nti=5) #23115.pts-6.fauna
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:10, parts=6:10, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:10, parts=1:5, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:10, parts=6:10, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmax", folds=1:10, parts=1:5, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmax", folds=1:10, parts=6:10, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmin", folds=1:10, parts=1:5, months=1:12, nti=5)
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmin", folds=1:10, parts=6:10, months=1:12, nti=5)
+
+
 
