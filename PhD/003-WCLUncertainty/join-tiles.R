@@ -46,7 +46,7 @@ mergeTiles <- function(bDir, tmpDir, variable="rain", part=1, fold=1, month=1, n
     #Cleaning working dir if necessary
     cat("Cleaning if necessary \n")
     fl <- list.files(procDir); for (f in fl) {file.remove(f)}
-    fl <- list.files(oDir); for (f in fl) {file.remove(paste(oDir, "/", f, sep=""))}
+    if (file.exists(paste(oDir, "/", variable, "_", month, ".zip", sep=""))) {file.remove(paste(oDir, "/", variable, "_", month, ".zip", sep=""))}
     
     #Copying required inputs to the processing dir
     for (i in 1:ntiles) {
