@@ -36,7 +36,8 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
     "ukmo_hadgem1"),
   year=2030,                      # year for the climate model
   use.grass=F,                    # should a grass database with the climate data be used, grass.params need to be set
-  vars=c("tmean", "prec", "dtr"), # Variables to calculate dissimilarity. For hal tmean and prec are needed for ccafs any can be chosen.
+  vars=c("tmean", "prec"),        # Variables to calculate dissimilarity. For hal tmean and prec are needed for ccafs any can be chosen.
+  weights=c("dtr",1),
   ndivisions=12,                  # how are the measurements devided, this should be n equidistant time intervalls over a year. E.g. if there are monthly values the number would be 12. 
   climate.data=".",               # directory where climate data is located. Labels in lower case should be as follows:
                                   # [sres]_[year]_[gcm]_[dtr|prec|tmean]_[1..12].asc
@@ -98,6 +99,7 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
                   climate.data=climate.data,
                   grass.params=grass.params,
                   vars=vars,
+                  weights=weights,
                   normalise=normalise,
                   ndivisions=ndivisions,
                   paper=paper,
@@ -106,6 +108,9 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
                   hal.prec.month=hal.prec.month,
                   hal.ncond=hal.ncond)
                   
+  # add idxs
+  params$idx.v <- rep(1:length(params$vars),length(params$gcms)+1)      # +1 for the current
+  params$idx.g <- rep(1:(length(params$gcms)+1),each=length(params$vars)) # +1 for the current
                   
   # source other functions
   source("src/ccafs.load.data.R")
@@ -115,6 +120,9 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
   source("src/ccafs.summary.R")
   source("src/ccafs.plot.R")
   source("src/ccafs.plot.grid.R")
+  
+  # create list where all data will be stored
+  ccafs.data <- list()
    
   if(cores > 1) {
     require(snowfall)
@@ -123,14 +131,7 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
     sfLibrary(spgrass6)
     sfLibrary(stringr)
   }
-  
-  # Additional Functions
-  raster.n <- function(x) {
-    r <- raster(x)
-    r <- (r - cellStats(r,mean))/cellStats(r,sd)
-    r <- r+10
-    return(r)
-  }
+
   
   return(params)
   

@@ -1,8 +1,20 @@
 # apply thresholds
-ccafs.apply.threshold <- function(results,from=0,to=10){
+ccafs.apply.threshold <- function(results,range=NA,best=NA){
   
-  results.v <- getValues(results)
-  results.v <- ifelse(results.v >= from & results.v <= to, results.v,NA)
+  if (!is.na(range) & !is.na(best))
+    exit("range and best are mutually exclusive, one needs to be NA")
+  
+  results.v <- getValues(results[[1]])
+  
+  if (!is.na(range))
+    results.v <- ifelse(results.v >= range[1] & results.v <= range[2], results.v,NA)
+    
+  if (!is.na(best)) {
+    probs <- quantile(results.v,probs=best,na.rm=T)
+    for (i in 1:length(probs)) 
+      results.v <- ifelse(results.v <= probs[i],best[i],results.v)
+    results.v <- ifelse(results.v > probs[length(probs)],NA,results.v)
+  }
   results <- setValues(results,results.v)
   
   return(results)

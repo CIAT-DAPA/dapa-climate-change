@@ -1,8 +1,9 @@
 ccafs.load.data <- function(params) {
     
   # load data
-  cdata <- list()             # list that holds all data, as raster stacks
+  training <- list()             # list that holds all data, as raster stacks
   
+  # --- use grass part is obsolete and needs updates
   if (params$use.grass==TRUE) {
     # get grass params
     grass.params <- params$grass.params
@@ -31,35 +32,69 @@ ccafs.load.data <- function(params) {
           with(params,cdata[[str_c(var,"_",scenario)]] <- do.call(stack,list(readRAST6(str_c(scenario,"_",year,"s_",gcm,"_",var,"_",1:12,"_10min")))))
       }
     }
+    
+  # --- from here code is up to date
   }else {
-    # if files need to be loaded from hd, significant improvment needed
-    if (file.exists(params$climate.data)){
-      # load current climate
-      for (var in params$vars) {
-        if(!params$normalise) {
-          cat(str_c("loading ",var," for current\n"))
-          cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", 1:12, ".asc")), raster))
-        } else {
-         cat(str_c("loading ",var," for current and normalising\n"))
-         cdata[[str_c(var,"_b")]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/current_",var,"_", 1:12, ".asc")), raster.n))
-        }
-      }
+ 
+    # get paths for rasters  
+    path1 <- with(params,str_c(climate.data,"/current_",vars,"_"))
       
-      # load future climate
-      for (gcm in params$gcms) {
-        for (var in params$vars) {
-          if(!params$normalise) {
-            cat(str_c("loading ",var," for ",gcm,"\n"))
-            cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", 1:12, ".asc")), raster))
-          } else {
-            cat(str_c("loading ",var," for ",gcm," and normalising \n"))
-            cdata[[str_c(var,"_",gcm)]] <- do.call(stack,lapply(with(params,str_c(climate.data,"/",scenario,"_",year,"_",gcm,"_",var,"_", 1:12, ".asc")), raster.n))
-          }
-        }
-      }
+    # get paths for rasters, if there are gcms as well
+    if (!is.na(params$gcms))
+        path1 <- with(params,c(str_c(climate.data,"/current_",vars,"_"), # load current
+          as.vector(t(outer(str_c(climate.data,"/",scenario,"_",year,"_",gcms,"_"),str_c(vars,"_"), FUN="str_c"))))) # load futur
+      
+    # load data
+    training <- lapply(path1, function(x) grid.from.file(x,params))
+        
+  }
+  return(training)
+}
+
+#------------------------------------------------------
+# function to load weights
+
+ccafs.load.weights <- function(params) {
+  
+  rweights <- list()
+  
+  # get paths for rasters  
+  path1 <- with(params,str_c(climate.data,"/current_",weights,"_"))
+      
+  # get paths for rasters, if there are gcms as well
+  if (length(params$gcms)>0)
+      path1 <- with(params,c(str_c(climate.data,"/current_",weights,"_"),outer(str_c(climate.data,"/",scenario,"_",year,"_",gcms,"_"),str_c(weights,"_"), FUN="str_c")))
+ 
+ 
+  for (i in 1:length(path1)) {
+    if (file.exists(str_c(path1[i],"1.asc"))) {
+      rweights[[i]] <- grid.from.file(path1[i],params)
     } else {
-      stop("Climate data not found")
+      rweights[[i]] <- 1
     }
   }
-  return(cdata)
+  
+  return(rweights)
 }
+
+#-------------------------------------------------------------------#
+
+grid.from.file <- function(path,params) {
+
+  
+  if(!params$normalise) {
+    cat(str_c("loading ",path," for current\n"))
+    grid <- do.call(stack,lapply(with(params,str_c(path, 1:12, ".asc")), raster))
+  } else {
+    cat(str_c("loading ",path," for current and normalising\n"))
+    grid <- do.call(stack,lapply(with(params,str_c(path, 1:12, ".asc")), raster.n))
+  }
+  
+  return(grid)
+}
+
+raster.n <- function(x) {
+    r <- raster(x)
+    r <- (r - cellStats(r,mean))/cellStats(r,sd)
+    return(r)
+  }

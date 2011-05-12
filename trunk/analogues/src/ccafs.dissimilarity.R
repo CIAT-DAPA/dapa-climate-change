@@ -1,7 +1,4 @@
-ccafs.dissimilarity <- function(cdata=cdata, params=params, new.direction=NA) {
-  
-  results <- list()
-  base.v <- list()
+ccafs.dissimilarity <- function(cdata=cdata, params=params, new.direction=NA,new.x=NA,new.y=NA, new.growing.season=NA) {
   
   # overwrite direction
   if (!is.na(new.direction)) {
@@ -18,49 +15,24 @@ ccafs.dissimilarity <- function(cdata=cdata, params=params, new.direction=NA) {
   roll <- roll[,params$growing.season]
   
   if (!params$across.year) roll <- roll[1,,drop=FALSE]
+  
+  ## extract reference values
+  # to save the reference values also into the parameters
+  params$ref_values <- ccafs.make.ref(type="training",cdata=ccafs.data, params=ccafs.params, new.x=NA,new.y=NA, new.growing.season=NA)
+  params$ref_weights <- ccafs.make.ref(type="weights",cdata=ccafs.data, params=ccafs.params, new.x=NA,new.y=NA, new.growing.season=NA)
+
 
   if (params$direction=="backwd" | params$direction=="backward") {
-  
-    # get values baseline
-    for (i in params$vars)
-      base.v[[str_c(i,"_b.v")]] <- getValues(cdata[[str_c(i,"_b")]])
-  
-    for (gcm in params$gcms)
-    {
-      # create result 
-      cat(str_c("calculating dissimilarity for: ",gcm,"\n"))
-      # for each combination (lag) loop calc dissimilartiy
-      results[[gcm]] <- calc.dis(roll=roll,params=params,base.v=base.v,delta=gcm,cdata=cdata) # problem with no default value for delta
+
+      results <- lapply(2:(length(params$gcms)+1),function(x) calc.dis(roll=roll,params=params,cdata,base=x,project=1)) # problem with no default value for delta
     
-    }
   } else if (params$direction=="forwd" | params$direction=="forward"){
     
-    for (gcm in params$gcms) {
-      
-      # get base value, but this time for every scenario in the futur  
-      cat(str_c("converting raster to matrix for ", gcm,"\n"))
-      
-      for (i in params$vars)
-        base.v[[str_c(i,"_b.v")]] <- getValues(cdata[[str_c(i,"_",gcm)]])
-      
-      #base.v[['tmp_b.v']] <- getValues(cdata[[str_c("tmean_",gcm)]])
-      #base.v[['pre_b.v']] <- getValues(cdata[[str_c("prec_",gcm)]])
-      #base.v[['dtr_b.v']] <- getValues(cdata[[str_c("dtr_",gcm)]])
-      
-      results[[gcm]] <- calc.dis(roll,params,base.v, delta=gcm,cdata)
-    }
+    results <- lapply(2:(length(params$gcms)+1),function(x) calc.dis(roll=roll,params=params,cdata,base=1,project=x)) # problem with no default value for delta
     
   } else if (params$direction=="current") {
     
-    # get base values
-    for (i in params$vars)
-      base.v[[str_c(i,"_b.v")]] <- getValues(cdata[[str_c(i,"_b")]])
-    
-    #base.v[['tmp_b.v']] <- getValues(cdata$tmean_b)
-    #base.v[['pre_b.v']] <- getValues(cdata$prec_b)
-    #base.v[['dtr_b.v']] <- getValues(cdata$dtr_b)
-   
-    results[["current_dissimilarity"]] <- calc.dis(roll,params,base.v, delta="current",cdata)
+    results <- calc.dis(roll=roll,params=params,cdata,base=1,project=1) # problem with no default value for delta
     
   } else { stop("no directions was chosen") }
   
