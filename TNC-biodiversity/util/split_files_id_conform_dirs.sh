@@ -23,10 +23,10 @@ h=$1
          nf=$(echo ${id:0:4});   
          if [ -e "$newdir/$nf" ];   
          then    
-            cp $j $newdir/$nf;   
+            mv -v $j $newdir/$nf;   
          else    
             mkdir $newdir/$nf;    
-            cp $j $newdir/$nf;   
+            mv -v $j $newdir/$nf;   
        fi;
       done; 
     done
