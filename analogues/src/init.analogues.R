@@ -109,9 +109,18 @@ init.analogue <- function(x=10,   # x location of point for which dissimilarity 
                   hal.ncond=hal.ncond)
                   
   # add idxs
-  params$idx.v <- rep(1:length(params$vars),length(params$gcms)+1)      # +1 for the current
-  params$idx.g <- rep(1:(length(params$gcms)+1),each=length(params$vars)) # +1 for the current
-                  
+  # indexing vars, ie saying to which gcm each variable belongs
+  if (!is.na(params$gcms)) {
+    params$idx.v <- rep(1:length(params$vars),length(params$gcms)+1)      # +1 for the current
+  } else {
+    params$idx.v <- rep(1:length(params$vars),length(params$gcms))}
+  
+  if(!is.na(params$gcms)) {
+    params$idx.g <- rep(1:(length(params$gcms)+1),each=length(params$vars)) # +1 for the current
+  } else {
+    params$idx.g <- rep(1,each=length(params$vars))} # only for current
+  
+    
   # source other functions
   source("src/ccafs.load.data.R")
   source("src/ccafs.make.ref.R")
