@@ -1,16 +1,5 @@
 ccafs.make.ref <- function(type,cdata=cdata, params=params, new.x=NA, new.y=NA, new.growing.season=NA) {
-  
-  # overwrite default x and y
-  if (!is.na(new.x) & !is.na(new.y)) {
-   params$x <- new.x
-   params$y <- new.y
-  }
- 
-  if (!is.na(new.growing.season)) {
-   params$growing.season <- new.growing.season
-  }
-  
-  
+    
 #----------------------------------------------------------------------------------------------#
 # extract reference value for current
 #----------------------------------------------------------------------------------------------#

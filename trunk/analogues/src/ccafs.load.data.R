@@ -37,11 +37,11 @@ ccafs.load.data <- function(params) {
   }else {
  
     # get paths for rasters  
-    path1 <- with(params,str_c(climate.data,"/current_",vars,"_"))
+    path1 <- with(params,str_c(climate.data,"/current_",vars))
       
     # get paths for rasters, if there are gcms as well
     if (!is.na(params$gcms))
-        path1 <- with(params,c(str_c(climate.data,"/current_",vars,"_"), # load current
+        path1 <- with(params,c(str_c(climate.data,"/current_",vars), # load current
           as.vector(t(outer(str_c(climate.data,"/",scenario,"_",year,"_",gcms,"_"),str_c(vars,"_"), FUN="str_c"))))) # load futur
       
     # load data
@@ -59,10 +59,10 @@ ccafs.load.weights <- function(params) {
   rweights <- list()
   
   # get paths for rasters  
-  path1 <- with(params,str_c(climate.data,"/current_",weights,"_"))
+  path1 <- with(params,str_c(climate.data,"/current_",weights))
       
   # get paths for rasters, if there are gcms as well
-  if (length(params$gcms)>0)
+  if (!is.na(params$gcms))
       path1 <- with(params,c(str_c(climate.data,"/current_",weights,"_"),outer(str_c(climate.data,"/",scenario,"_",year,"_",gcms,"_"),str_c(weights,"_"), FUN="str_c")))
  
  
