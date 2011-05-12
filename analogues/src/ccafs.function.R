@@ -30,6 +30,8 @@ calc.dis <- function(roll, params,cdata,base,project) {
   return(res_return)
 }
 
+
+
 #----------------------------------------------------------------------------------------------#
 # Functions to calculate dissimilarity
 #----------------------------------------------------------------------------------------------#
@@ -67,6 +69,50 @@ calc.ccafs <- function(lag, # lag is the arrangemnt of months
 #----------------------------------------------------------------------------------------------#
 # ccafs generic
 calc.ccafs.generic <- function(lag, # lag is the arrangemnt of months
+  params,                   # all parameters
+  cdata,                   # base/reference value to find dissimilarity
+  base,                     # second scenario against which dissimilarity should be looked for
+  project
+  ) {
+  # calc dissimilartiy
+  cat(str_c("calculating dissimilarity (ccafs.generic) projecting ",params$gcms[base]," to ",params$gcms[project]," starting with ",lag[1], ". \n"))
+  # substract ref mean tmp
+  
+  # substract reference value
+  ll <- lapply(1:length(params$vars), 
+      function(x) cdata$training[[which(params$idx.g==base & params$idx.v == x)]] - params$ref_value[[which(params$idx.g==base & params$idx.v == x)]][lag])
+  
+  # substrack reference values for weights
+  ww <- lapply(1:length(params$weights), function(x) { 
+    if (class(cdata$weights[[x]]) == "RasterLayer" | class(cdata$weights[[x]]) == "RasterStack") {
+      return(cdata$weights[[which(params$idx.g==base & params$idx.v == x)]] - params$ref_weights[[which(params$idx.g==base & params$idx.v == x)]][lag])
+      } else {return(params$ref_weights[[x]])}
+    })
+  
+  # multiply by weights
+  ll <- lapply(1:length(ll), function(x) ll[[x]] * ww[[x]])
+  
+  # square
+  ll <- lapply(ll, function(x) x*x)
+    
+  # sum division ups
+  ll <- lapply(ll, function(x) stackApply(x,rep(1,nlayers(x)),sum))
+
+  # sum over all lists
+  res <- 0
+  for (i in ll) res <- res + i
+
+  # take sqrt 
+  res <- sqrt(res)
+
+  return(res)    
+}
+
+# -------------------------------------------------------------------------------------
+# ARRAYs
+
+# ccafs generic
+e.calc.ccafs.generic <- function(lag, # lag is the arrangemnt of months
   params,                   # all parameters
   cdata,                   # base/reference value to find dissimilarity
   base,                     # second scenario against which dissimilarity should be looked for
