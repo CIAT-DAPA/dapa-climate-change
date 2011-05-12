@@ -33,7 +33,15 @@ system.time(first <- ccafs.dissimilarity(ccafs.data, ccafs.params))
 # the direction of the model can be overwritten
 results <- list()
 for (i in 1:nrow(ts))
-results[[i]] <- ccafs.dissimilarity(ccafs.data, ccafs.params, new.direction=NA, new.x=ts[i,5],new.y=ts[i,4])
+{
+  x.new <- ts[i,5]
+  y.new <- ts[i,4]
+  ccafs.params$x <- x.new
+  ccafs.params$y <- y.new
+   results[[i]] <- ccafs.dissimilarity(ccafs.data, ccafs.params)
+
+  print(c(x.new,y.new))
+}
 
 # apply a threshold
 ccafs.data$results_with_threshold <- ccafs.apply.threshold(ccafs.data$results,from=0,to=100)
