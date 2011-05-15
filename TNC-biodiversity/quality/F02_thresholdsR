@@ -1,0 +1,60 @@
+
+library(plyr)
+
+# ugly mysql hack to get all species ids
+sp <- system("mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e\"use tnc; select species_id,size from species where la=1;\" | sed 's/[\t]/,/g'",intern=T) 
+
+# create column with Threhold
+system("mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e\"use tnc; alter table species add column threshold float\"",intern=T)
+system("mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e\"use tnc; alter table species add column thresholdrs float\"",intern=T)
+
+
+sp <- ldply(strsplit(sp, ","))
+
+# base
+base <- "/mnt/GIS-HD716/TNC_global_plants/results/training/"
+
+for (i in 1:nrow(sp)) {
+  roc(id=sp[i,1], size=sp[i,2],base)
+  print(i)
+}
+
+roc <- function(id,size,base) {
+ 
+ # read the file
+ 
+ if (size < 10) {
+  omission.rate <- try(read.csv(paste(base,substr(id,1,4),"/",id,"/training/", id,"_omission.csv",sep="")))
+ } else if (size > 10) {
+  omission.rate <- try(read.csv(zip.file.extract(file=paste(base,substr(id,1,4),"/",id,"/", id,"_omission.csv",sep=""), zipname="results.zip")))
+ }
+ 
+ # if 
+ if (class(omission.rate) != "try-error"){
+   spec <- omission.rate$Fractional.area
+   sens <- 1-omission.rate$Training.omission
+   log.vals <- omission.rate$Corresponding.logistic.value
+            
+   abs.dif <- abs(1-(sens+spec))
+
+   if (length(log.vals[which(abs.dif== min(abs.dif))]) > 1) {
+    roc <- mean(log.vals[which(abs.dif==min(abs.dif))])
+   } else roc <- log.vals[which(abs.dif==min(abs.dif))] 
+  } else roc <- -9999
+  
+  if (roc > 0) {
+    roc.rs <- rescale(roc)
+  } else
+    roc.rs <- -9999
+ 
+ system(paste("mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e\"use tnc; update species set threshold=",roc," where species_id=",id,";\"", sep=""),intern=T)
+ 
+  system(paste("mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e\"use tnc; update species set thresholdrs=",roc.rs," where species_id=",id,";\"", sep=""),intern=T)
+}
+ 
+ 
+rescale <- function(x){
+  m <- (256 - 1)/(1-0)
+  return(1+(x-0)*m)
+}
+
