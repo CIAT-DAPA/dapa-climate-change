@@ -1,8 +1,8 @@
-function currentRichness {
+# Batch job, to be started in current directory
   # which folder should I work in
-  folder=$1
+  folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=')
   
-  # go to folder
+# go to folder
   cd $folder
 
   # make folder were vrts are stored
@@ -62,4 +62,3 @@ function currentRichness {
   done
 rm -r vrts vrts.chull rc.tables
 cd ..
-}
