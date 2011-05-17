@@ -3,7 +3,7 @@
   folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=')
   
 # go to folder
-  cd $folder
+  cd /data/TNC/results/la_5k_c_2000_current/$folder
 
   # make folder were vrts are stored
   mkdir vrts
