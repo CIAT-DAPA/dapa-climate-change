@@ -1,6 +1,6 @@
 # Batch job, to be started in current directory
   # which folder should I work in
-  folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=')
+  folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=' | sed 's/s//')
   
 # go to folder
   cd /data/TNC/results/la_5k_c_2000_current/$folder
