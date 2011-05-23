@@ -1,0 +1,15 @@
+Package: analogues
+Type: Package
+Title: What the package does (short line)
+Version: 1.0
+Date: 2011-05-17
+Author: Who wrote it
+Maintainer: Who to complain to <yourfault@somewhere.net>
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+LazyLoad: yes
+Collate: 'applyThreshold.R' 'calcCcafs.R' 'calcDis.R' 'calcHal.R'
+    'createParameters.R' 'cropInteractive.R' 'dissimilarity.R'
+    'loadAndNormaliseGrids.R' 'loadData.R' 'loadGridsFromFiles.R'
+    'loadWeights.R' 'makeRef.R' 'report.R' 'util.R'
+Packaged: 2011-05-23 01:33:01 UTC; johannes
