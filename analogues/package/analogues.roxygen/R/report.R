@@ -306,7 +306,7 @@ rast_plot.RasterLayer <- function(r,params, r_lab, rowpos){
       
         gGrad <- matrix(cols,nrow=r@nrows,byrow=T)
       
-        grid.raster(gGrad,interpolate=F,width=unit(r@ncols,"native"), height=unit(r@nrows,"native"))
+        grid.raster(gGrad,x=unit((xmin+(xmax-xmin)/2), "native"),y=unit((ymin+(ymax-ymin)/2),"native"),interpolate=F)
       
         # some work needed here
         m <- map("world", plot=F, xlim=c(xmin,xmax), ylim=c(ymin,ymax))
