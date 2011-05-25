@@ -76,19 +76,7 @@ do
   # create mapset for folder
   g.mapset -c mapset=s$folder --quiet
   g.region latinamerica@PERMANENT
-  
-  # run processes
-  for bufDis in 300000 305000 308000 325000 340000
-    do
 
-      # mapset for cut unclassified grids
-      g.mapset -c mapset=s$folder.$bufDis --quiet
-      g.region latinamerica@PERMANENT
-
-      # mapset for cut classified grids
-      g.mapset -c mapset=s$folder.th.$bufDis --quiet
-      g.region latinamerica@PERMANENT
-  done
 done
 exit
 
