@@ -50,8 +50,7 @@ exit
 #   b. cut convexhull (chull)
 #   c. get threshold value
 #   d. register them to grass
-#   e. reclassify to (1,0)
-#   f. reclassify to (2,0) for turnover calculations
+#   e. reclassify to (2,0) for turnover calculations
 #   f. sum in parts
 # 4. sum parts
 ##########################################################################
@@ -71,75 +70,85 @@ g.mapset -c mapset=summary
 g.region latinamerica@PERMANENT
 g.copy rast=template.summary@PERMANENT,richness
 
-# do for each folder seperately
-ls | grep "^[0-9]*" | while read folder
+# Create mapsets
+ls | grep -e "^[0-9]" | while read folder
 do
-  # get fold
-  cd $folder
-
-  # folder for all the vrts
-  mkdir vrts
-
-  # folder for all the reclassification rule
-  mkdir rc.tables
-	
-  # mkdir for errors
-  mkdir errors
-	
-  # mkdri reclassed rasters
-  mkdir vrts.chull300k
-
-  # make new mapset
-  g.mapset -c mapset=$folder
+  # create mapset for folder
+  g.mapset -c mapset=s$folder --quiet
   g.region latinamerica@PERMANENT
-
-  g.mapset -c mapset=$folder.th
-  g.region latinamerica@PERMANENT
-  g.copy rast=template.summary@PERMANENT,richness
   
-  g.mapset -c mapset=$folder.th.turnover
-  g.region latinamerica@PERMANENT
+  # run processes
+  for bufDis in 300000 305000 308000 325000 340000
+    do
 
-  # cycle through folder
-  for tif in *.tif
-  do
-    base=$(echo $tif | sed 's/.tif//')
-    # build virtual
-    gdalbuildvrt vrts/$base.vrt $base.tif
+      # mapset for cut unclassified grids
+      g.mapset -c mapset=s$folder.$bufDis --quiet
+      g.region latinamerica@PERMANENT
 
-    # to to chull
-    gdalwarp -cutline "PG:dbname=gisdb user=model1" -csql "select ST_Transform(ST_Buffer(ST_Transform(geom,3395),300000),4326) from convexhulls where speciesid='$base'" -q vrts/$base.vrt vrts.chull300k/$base.vrt
-    
-    # get value for reclass
-    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
-
-    # register with r.external in grass
-    g.mapset mapset=$folder
-    r.external in=vrts.chull300k/$base.vrt out=$base -o
-
-    # write reclass table
-    # use the -e to make a new line
-    echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 1 " > rc.tables/$base.rc
-
-    # reclass
-    g.mapset mapset=$folder.th
-    r.reclass in=$base@$folder out=$base rules=rc.tables/$base.rc
-
-
-    # add reclassed together
-    r.mapcalc "tmp=richness+$base"
-    g.rename rast=tmp,richness --o
-    
-    # prep rasters for turnover
-    g.mapset mapset=$folder.th.turnover
-    echo -e "0 = 0 \n1 = 2 " > rc.tables/$base.to.rc
-    r.reclass in=$base@$folder.th out=$base rules=rc.tables/$base.to.rc
+      # mapset for cut classified grids
+      g.mapset -c mapset=s$folder.th.$bufDis --quiet
+      g.region latinamerica@PERMANENT
   done
-  # go back up
-  cd ..
-done		
+done
+exit
+
+# Check if function for parallelizing are here
+svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/util/bash_parallel.sh /data/TNC/src/bash_parallel.sh
+. /data/TNC/src/bash_parallel.sh
+
+
+# check if the batch bash script is available
+svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_current.sh  /data/TNC/src/batch_current.sh 
+
+
+# allow writing access
+chmod u+x /data/TNC/src/batch_current.sh 
+
+####
+# Batch wrapper
+
+function runbatch {
+  folder=$1  
+  export GRASS_BATCH_JOB=/data/TNC/src/batch_current.sh 
+  /usr/bin/grass64 /data/TNC/grass/current/s$folder  
+  unset GRASS_BATCH_JOB
+
+}
+
+
+
+# dir for console output
+mkdir err
+
+# parallel
+QUEUE=""
+MAX_NPROC=10
+
+# run in parallel
+ls | grep -e "^[0-9]" | while read folder
+do
+  # run processes
+  runbatch $folder &> err/$folder.txt &
+
+  PID=$!
+  queue $PID
+
+  while [ $NUM -ge $MAX_NPROC ] 
+  do
+    checkqueue
+    sleep 0.5
+  done
+done
+
+
 
 # export added raster
+
+################# batch
+
+export GRASS_BATCH_JOB=/data/TNC/src/batch_current.sh 
+/usr/bin/grass64 -text /data/TNC/results/grass/current/s$folder
+
 
 ##########################################################################
 # FUTUR SRES
