@@ -255,69 +255,114 @@ rast_plot <- function(object, ...) {
 }
 
 rast_plot.RasterLayer <- function(r,params, r_lab, rowpos){
+
+  # make sure the viewport has proportion of 2:1
+  xmin <- xmin(r)
+  xmax <- xmax(r)
+  ymin <- ymin(r)
+  ymax <- ymax(r)
   
+  xrange <- xmax - xmin
+  yrange <- ymax - ymin
+  
+  # get dimenson s for data viewport
+  if (yrange/xrange > 0.5) {
+    xrange <- yrange * 2
+  } else if (yrange/xrange < 0.5) {
+    yrange <- xrange * .5
+  }
+  
+  width=1
+  height <- (ymax - ymin)/(xmax - xmin) * 2
+
+  if (height > 1){
+    width <- 1/height
+    height <- 1
+  }
+    
+  # get online of the world for the plotting reagion      
+  m <- map("world", xlim=c(xmin, xmax), ylim=c(ymin,ymax),plot=FALSE, wrap=TRUE)
+  
+  # get oultine for the whole world, that is then used for the overview
+  m.w <- map("world",plot=FALSE)
+  
+  # get coordinates of pixels, gotta be a more direct way
+  rr <- as.data.frame(as(as(r, "SpatialPixelsDataFrame"), "SpatialPointsDataFrame"))
+
+  # make colors
+  r.vu  <- unique(rr$values)
+  r.vu  <- r.vu[order(r.vu)]
+  co  <- data.frame(or.values=r.vu)
+  co$colors <- terrain.colors(nrow(co))
+  
+  # match colors and values
+  cols <- co[match(rr$values, co$or.values),'colors']
+  
+  # get colors for the raster legend
+  lcols <- co[ceiling(seq(1,nrow(co),length.out=11)),'colors']
+  
+  # plot legend
   pushViewport(viewport(layout.pos.col=2, layout.pos.row=rowpos))
+    
+    # make the box
     mtbg()
-    textbox(r_lab, str_c("xmin: ", xmin(r), 
-      "\nxmax: ", xmax(r),
-      "\nymin: ", ymin(r),
-      "\nymax: ", ymax(r),
-      "\nresolution: ", res(r)))
-  upViewport()
-        
-  # plot raster1
+    
+    # plot title
+    textbox(r_lab,"")
+  
+    # plot overview map
+    pushViewport(viewport(width=0.7,height=0.35,y=0.5))
+      pushViewport(dataViewport(xscale=c(-180,180),yscale=c(-90,90)))
+      
+        # plot the world
+        grid.lines(m.w$x,m.w$y,default.units="native")
+      
+        # plot bbox of region in the big plot
+        grid.lines(c(xmin,xmin,xmax,xmax,xmin),
+          c(ymin,ymax,ymax,ymin,ymin), 
+          gp=gpar(col="red"),default.units="native")
+      
+        # plot the point of interest
+        grid.points(x=params$x, y=params$y, gp=gpar(col="red"), pch=1)
+    upViewport(2)
+    
+    # plot rast legend
+    pushViewport(viewport(width=0.7,height=0.1,y=0.13, x=0.5))
+      grid.rect(x=seq(0,1,length.out=11),y=0.5,width=1/11, height=0.4,just=c("center","top"),
+      gp=gpar(col=NA,fill=lcols),name="image")
+      
+      # labels
+      grid.text(ceiling(seq(min(r.vu),max(r.vu),length.out=6)), 
+        x=seq(0,1,length.out=6),
+        y=0.6,just=c("center","bottom"),
+        gp=gpar(cex=0.7))
+  upViewport(2)
+      
+  # plot the actual raster map     
   pushViewport(viewport(layout.pos.col=3, layout.pos.row=rowpos))
-    mdl()
-  
+    
+    # set the plotting region
     pushViewport(plotViewport(margins=c(2.5,2.5,0.9,0.5)))
-  
-      # make sure the viewport has proportion of 2:1
-      xmin <- xmin(r)
-      xmax <- xmax(r)
-      ymin <- ymin(r)
-      ymax <- ymax(r)
-    
-      xrange <- xmax - xmin
-      mxrange <- xrange / 2 # middle of old range
-      yrange <- ymax - ymin
-    
-      #if (xrange / yrange != 2) {
       
-      #xrange <- yrange * 2
+      # plot the data region 
+      pushViewport(dataViewport(xscale=c(xmin,(xmin+xrange)),yscale=c(ymin,(ymin+yrange))))
       
-        # make new xrange
-       # xmin <- mxrange - (xrange / 2)
-        #xmax <- mxrange + (xrange / 2)
-      #}
-  
-      pushViewport(dataViewport(c(xmin,xmax), c(ymin,ymax)))
-  
         # axis
         grid.xaxis(at=round(seq(xmin,xmax,length.out=7),0), gp=gpar(cex=0.8))
         grid.yaxis(at=round(seq(ymin,ymax,length.out=5),0),gp=gpar(cex=0.8))
-        
-        # make color range
-        r.v   <- getValues(r)
-        r.vu  <- unique(r.v)
-        r.vu  <- r.vu[order(r.vu)]
-        cols  <- data.frame(or.values=r.vu,co=rainbow(length(r.vu)))
-        cols[(ncol(cols)+1),] <- c(NA,NA)
+ 
+        # definde the region were the outline is plotted
+        pushViewport(plotViewport(margins=c(0.5,0.5,0.5,0.5)))
+        pushViewport(viewport(clip="on"))
+          pushViewport(dataViewport(xscale=c(xmin,(xmin+xrange)),yscale=c(ymin,(ymin+yrange))))
       
-        cols <- with(cols, co[match(r.v, or.values)])
-      
-        gGrad <- matrix(cols,nrow=r@nrows,byrow=T)
-      
-        grid.raster(gGrad,interpolate=F,width=unit(r@ncols,"native"), height=unit(r@nrows,"native"))
-      
-        # some work needed here
-        m <- map("world", plot=F, xlim=c(xmin,xmax), ylim=c(ymin,ymax))
-        grid.lines(x=m$x,y=m$y, default.units="native")
-        
-        # points
-        grid.points(x=params$x, y=params$y, gp=gpar(col="red"), pch=18)
-        grid.points(x=params$x, y=params$y, gp=gpar(cex=0.5), pch=20)
-      
-    upViewport(3)
+          # plot grid
+          grid.rect(x=rr$x,y=rr$y,width=1, height=1,default.units="native", 
+            gp=gpar(col=NA,fill=cols),name="image")
+           
+            # outline
+            grid.lines(x=m$x,y=m$y, default.units="native")
+  upViewport(6)
 }
 
 ## create a textbox
@@ -332,3 +377,45 @@ textbox <- function(title, text){
   
   upViewport()
 }
+
+
+# to plot a raster (see also murell 2006)
+grid.image <- function(nrow, ncol, cols, byrow=T) {
+  
+  x <- (1:ncol)/ncol
+  y <- (1:nrow)/nrow
+  
+  if (byrow) {
+    right <- rep(x,nrow)
+    top <- rep(y,each=ncol)
+  } else {
+    right <- rep(x,each=nrow)
+    top <- rep(y,ncol)
+  }
+  
+  grid.rect(x=right,y=top,
+    width=1/ncol, height=1/nrow,
+    just=c("right","top"),
+    gp=gpar(col=NA,fill=cols),
+    name="image")
+}
+
+grid.world <- function(m) {
+  pushViewport(
+    viewport(name="worldlay",
+      layout=grid.layout(1,1,
+        width=diff(c(m$range[1],m$range[2])),
+        height=diff(c(m$range[3],m$range[4])),
+        respect=TRUE)))
+  pushViewport(viewport(name="ozvp",
+        layout.pos.row=1,
+        layout.pos.col=1,
+        xscale=c(m$range[1],m$range[2]),
+        yscale=c(m$range[3],m$range[4]),
+        clip="on"))
+        
+  grid.lines(m$x,m$y, default.units="native")
+  
+  upViewport(2)
+}
+  
