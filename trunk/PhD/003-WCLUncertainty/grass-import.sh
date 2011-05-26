@@ -1,6 +1,12 @@
 #!/bin/bash
 
 #$1 is the part (there's a mapset for each part, each mapset would contain 10-folds of each of the 12 monthly rasters
+
+if [ ! $1 | ! $2 ]
+then
+	exit
+fi
+
 part=$1
 TMP_PATH=$2
 
@@ -38,7 +44,7 @@ g.mapset -c mapset=wcl_uncertainties_$part
 				#Checking the database
 				STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT merge_fin FROM wclun WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';")
 				
-				if [ $STATUS != NULL ]
+				if [ ${#STATUS} != 4 ]
 				then
 					echo "The merged file exists!"
 					
