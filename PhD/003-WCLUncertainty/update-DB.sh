@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 #Input paths
 DRIVE=/mnt/GIS-HD717
 IN_PATH=$DRIVE/CCAFS/climate-data-assessment/wcl-uncertainties/outputs/cross-validation
@@ -20,9 +19,8 @@ do
 				if [ -f $ST_FILE ]
 				then
 					echo "The status file exists, updating the database!"
-					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_start=NOW() WHERE part=$part AND 	fold=$fold AND month=$month AND variable='$var';"
-					
-					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_fin=NOW() WHERE part=$part AND 	fold=$fold AND month=$month AND variable='$var';"
+					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_start=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
+					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_fin=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
 				fi
 			done
 		done
