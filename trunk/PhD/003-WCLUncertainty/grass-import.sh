@@ -1,10 +1,13 @@
 #!/bin/bash
 
 #$1 is the part (there's a mapset for each part, each mapset would contain 10-folds of each of the 12 monthly rasters
-
 part=$1
+
+#Drive and input paths
 DRIVE=/mnt/GIS-HD717
 IN_PATH=$DRIVE/CCAFS/climate-data-assessment/wcl-uncertainties/outputs/cross-validation
+
+#Temporary path where data is copied before import
 TMP_PATH=/data1/jramirez/tmp
 
 g.mapset -c mapset=wcl_uncertainties_$part
