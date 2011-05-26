@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #Input paths
 DRIVE=/mnt/GIS-HD717
 IN_PATH=$DRIVE/CCAFS/climate-data-assessment/wcl-uncertainties/outputs/cross-validation
