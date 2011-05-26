@@ -21,7 +21,7 @@ do
 				then
 					STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT merge_fin FROM wclun WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';")
 					
-					if [ $STATUS == NULL ]
+					if [ ${#$STATUS} == 4 ]
 					then
 						echo "The status file exists, updating the database!"
 						mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_start=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
