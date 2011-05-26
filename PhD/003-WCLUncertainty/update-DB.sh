@@ -19,9 +19,14 @@ do
 				#Check if the status file exists then update the DB
 				if [ -f $ST_FILE ]
 				then
-					echo "The status file exists, updating the database!"
-					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_start=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
-					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_fin=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
+					STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT merge_fin FROM wclun WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';")
+					
+					if [ $STATUS == NULL ]
+					then
+						echo "The status file exists, updating the database!"
+						mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_start=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
+						mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_fin=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
+					fi
 				fi
 				
 			done
