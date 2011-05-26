@@ -16,12 +16,14 @@ do
 				
 				ST_FILE=$IN_PATH/$var/part-$part/fold-$fold/merged/status.m.$month.merge
 				
+				#Check if the status file exists then update the DB
 				if [ -f $ST_FILE ]
 				then
 					echo "The status file exists, updating the database!"
 					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_start=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
 					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun SET merge_fin=NOW() WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';"
 				fi
+				
 			done
 		done
 	done
