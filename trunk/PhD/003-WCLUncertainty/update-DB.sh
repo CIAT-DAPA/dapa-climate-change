@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 #Input paths
 DRIVE=/mnt/GIS-HD717
