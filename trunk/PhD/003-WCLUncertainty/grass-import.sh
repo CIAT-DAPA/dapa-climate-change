@@ -2,7 +2,7 @@
 
 #$1 is the part (there's a mapset for each part, each mapset would contain 10-folds of each of the 12 monthly rasters
 
-if [ ! $1 OR ! $2 ]
+if [ ! $1 ] || [ ! $2 ]
 then
 	exit
 fi
