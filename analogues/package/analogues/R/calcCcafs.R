@@ -28,7 +28,7 @@ calcCcafs.logical <- function(lag, params, training, weights, base, project) {
   # substract reference value
   # for each variable (idx_vars) select the training grid (with idx_gcms) and ref values
   ll <- lapply(1:length(params$vars), 
-      function(x) training[[which(params$idx_gcms==base & params$idx_vars == x)]][[lag]] - params$ref_train[[which(params$idx_gcms==base & params$idx_vars == x)]][lag])
+      function(x) training[[which(params$idx_gcms==base & params$idx_vars == x)]][[params$growing_season]] - params$ref_train[[which(params$idx_gcms==base & params$idx_vars == x)]][lag])
   
   # substrack reference values for weights
   ww <- lapply(1:length(params$weights), function(x) { 
@@ -37,7 +37,7 @@ calcCcafs.logical <- function(lag, params, training, weights, base, project) {
       this_w_training <- which(params$idx_gcms==base & params$idx_vars == x)
       this_w_ref <- which(params$idx_gcms==base & params$idx_vars == x)
       
-      return(weights[[this_w_training]][[lag]] - params$ref_weight[[this_w_ref]][lag])
+      return(weights[[this_w_training]][[params$growing_season]] - params$ref_weight[[this_w_ref]][lag])
       } else {return(params$ref_weight[[x]][lag])}
     })
   
@@ -95,12 +95,12 @@ calcCcafs.matrix <- function(lag, params, training, weights, base, project) {
   
   # substract reference value
   ll <- lapply(1:length(params$vars), 
-      function(x) training_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][lag] - params$ref_train[[which(params$idx_gcms==base & params$idx_vars == x)]][lag])
+      function(x) training_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][params$growing_season] - params$ref_train[[which(params$idx_gcms==base & params$idx_vars == x)]][lag])
   
   # substrack reference values for weights
   ww <- lapply(1:length(params$weights), function(x) {
     if (class(weights[[x]]) == "RasterLayer" | class(weights[[x]]) == "RasterStack") {
-       weights_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][lag] - params$ref_weight[[which(params$idx_gcms==base & params$idx_vars == x)]][lag]
+       weights_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][params$growing_season] - params$ref_weight[[which(params$idx_gcms==base & params$idx_vars == x)]][lag]
     } else { 
       rep(weights_ext[[which(params$idx_gcms==base & params$idx_vars == x)]], params$ndivisions)[lag] 
     }
