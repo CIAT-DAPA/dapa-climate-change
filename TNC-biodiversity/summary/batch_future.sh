@@ -5,7 +5,7 @@
   gisdb=$(g.gisenv -n | grep 'GISDBASE' | cut -f2 -d'=')
 
 # go to folder
-  cd /data/TNC/results/la_5k_c_2000_current/$folder
+  cd /data/TNC/results/la_5k_$location/$folder
 
   # make folder for reclassification tables  
   mkdir rc.tables  
