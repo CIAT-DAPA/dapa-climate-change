@@ -18,12 +18,13 @@ createTiles(rd, std, od, vn="rain", ntiles=5, overlap=1000)
 ################################################
 source("densityMap.R")
 
-std <- "/data/climate-data-assessment/input-data"
-rd <- "/data/climate-data-assessment/mask-srtm"
-od <- "/data/climate-data-assessment/outputs/density-map"
+std <- "/data/jramirez/climate-data-assessment/wcl-uncertainties/input-data"
+rd <- "/data/jramirez/climate-data-assessment/wcl-uncertainties/mask-srtm"
+od <- "/data/jramirez/climate-data-assessment/wcl-uncertainties/outputs/density-map"
 
-dm <- densityMap(std, rd, od, vn="rain", nclosest=10)
-
+dm <- densityMap(std, rd, od, vn="rain", nclosest=10) #FAUNA
+dm <- densityMap(std, rd, od, vn="tean", nclosest=10) #ANDROMEDA
+dm <- densityMap(std, rd, od, vn="tmax", nclosest=10)
 
 ###########################################################
 # TO FIT SPLINES ##########################################
@@ -81,21 +82,38 @@ spf <- splineFitting(anuDir=ad, stDir=sd, rDir=rd, oDir=od, nfolds=10, train.per
 # TO MERGE FILES ##########################################
 ###########################################################
 
+###UNIX
 source("join-tiles.R")
-nDrive <- "/mnt/GIS-HD720"
+nDrive <- "/mnt/GIS-HD717"
 lDrive <- "/data"
 
-temp.dir <- paste(lDrive, "/jramirez/tmp", sep="")
-base.dir <- paste(nDrive, "/CCAFS/climate-data-assessment/wcl-uncertaities/outputs/cross-validation", sep="")
+#WINDOWS
+source("join-tiles.R")
+nDrive <- "S:"
+lDrive <- "G:"
 
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:10, parts=1:5, months=1:12, nti=5) #23115.pts-6.fauna
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:10, parts=6:10, months=1:12, nti=5)
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:10, parts=1:5, months=1:12, nti=5)
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:10, parts=6:10, months=1:12, nti=5)
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmax", folds=1:10, parts=1:5, months=1:12, nti=5)
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmax", folds=1:10, parts=6:10, months=1:12, nti=5)
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmin", folds=1:10, parts=1:5, months=1:12, nti=5)
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmin", folds=1:10, parts=6:10, months=1:12, nti=5)
+temp.dir <- paste(lDrive, "/jramirez/tmp", sep="")
+base.dir <- paste(nDrive, "/CCAFS/climate-data-assessment/wcl-uncertainties/outputs/cross-validation", sep="")
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:5, parts=1:5, months=1:12, nti=5) #STMARIA01 -OK!
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=6:10, parts=1:5, months=1:12, nti=5) #STMARIA02 -OK!
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:5, parts=6:10, months=1:12, nti=5) #PINTA01 -OK!
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=6:10, parts=6:10, months=1:12, nti=5) #PINTA02
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:5, parts=1:5, months=1:12, nti=5) #NINA01 -OK!
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=6:10, parts=1:5, months=1:12, nti=5) #NINA02 -OK!
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:5, parts=6:10, months=1:12, nti=5) #NINA01
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=6:10, parts=6:10, months=1:12, nti=5) #NINA02
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmax", folds=1:10, parts=1:5, months=1:12, nti=5) #ANDROMEDA -OK!
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmax", folds=1:10, parts=6:10, months=1:12, nti=5) #FAUNA -OK!
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmin", folds=1:10, parts=1:5, months=1:12, nti=5) #STMARIA01
+
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tmin", folds=1:10, parts=6:10, months=1:12, nti=5) #PINTA01
 
 
 

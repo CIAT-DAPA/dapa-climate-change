@@ -1,11 +1,11 @@
 source("readGSODData.R")
-work.dir <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/gsod-weather-stations"
+work.dir <- "S:/CCAFS/climate-data-assessment/comparisons/input-data/gsod-weather-stations"
 
 #Station locations
 #stloc <- readWSLocation(wd=work.dir)
 
 #Individual year processing
-for (yr in 1984:1990) {
+for (yr in 1985:1990) {
   cat("\n")
   cat("Year", yr, "\n")
   rest <- readStations(wd=work.dir, yr, ow=T)
@@ -19,3 +19,6 @@ jy <- joinYears(work.dir, 1961, 1990, variable="rain")
 
 #Calculate baseline (1961-1990) average
 bm <- baselineMean(outvn="tmean", wd=work.dir)
+bm <- baselineMean(outvn="rain", wd=work.dir)
+bm <- baselineMean(outvn="tmin", wd=work.dir)
+bm <- baselineMean(outvn="tmax", wd=work.dir)
