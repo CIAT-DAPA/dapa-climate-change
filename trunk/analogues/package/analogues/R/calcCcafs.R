@@ -75,22 +75,22 @@ calcCcafs.matrix <- function(lag, params, training, weights, base, project) {
 
   # check if reference data has already been extracted for this coordinates
 
-  if (exists(string_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), env=globalenv())) {
-    training_ext <- get(string_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), env=globalenv())
+  if (exists(str_c(".ccafstraining_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
+    training_ext <- get(str_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), env=globalenv())
   } else {
-    training_ext <- lapply(training, function(x) extract(x,params$to))
-    assign(string_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), training_ext, env=globalenv())
+    training_ext <- lapply(training, function(x) extract(x,params$to[1:3,]))
+    assign(str_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), training_ext, env=globalenv())
   }
 
-  if (exists(string_r(".ccafsweights_ext",paste(as.vector(params$to), collapse="")), env=globalenv())) {
-    weights_ext <- get(string_r(".ccafsweights_ext",paste(as.vector(params$to), collapse="")), env=globalenv())
+  if (exists(str_r(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
+    weights_ext <- get(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())
   } else {
     weights_ext <- lapply(weights, function(x) { 
       if (class(x) == "RasterLayer" | class(x) == "RasterStack") {
-        return(extract(x,params$to))
+        return(extract(x,params$to[1:3,]))
         } else {return(x)}
       })
-    assign(string_r(".ccafsweights_ext",paste(as.vector(params$to), collapse="")), weights_ext, env=globalenv())
+    assign(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), weights_ext, env=globalenv())
   }
   
   # substract reference value

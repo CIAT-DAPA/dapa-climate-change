@@ -1,6 +1,6 @@
 #' Create a report
 #'
-#' @param results a list with rasters
+#' @param results a list with rasters, they all need to have the same extent
 #' @param do_mean calculate the mean over all rasters in the list
 #' @param do_std calcualte the sd over all rasters in the list
 #' @param do_cv calculate the coefficient of variance over all rasters in the list
@@ -11,7 +11,7 @@
 #' summary(list(restuls[[1]], results[[3]], results[[2]]), TRUE,TRUE,TRUE)
 
 
-summary <- function(results, do_mean=TRUE,do_std=TRUE,do_cv=TRUE) {
+summariseRuns <- function(results, do_mean=TRUE,do_std=TRUE,do_cv=TRUE) {
   
   # get predicted dissimilarities
   results_sum <- list()
@@ -28,7 +28,7 @@ summary <- function(results, do_mean=TRUE,do_std=TRUE,do_cv=TRUE) {
     results_sum$std <- stackApply(results,indices=rep(1,nlayers(results)),fun=sd)
   }
   
-  if (do.cv) {
+  if (do_cv) {
     cat("calculating coefficient of variance \n")
     results_sum$cv <- results_sum$std / results_sum$mean * 100
   }
