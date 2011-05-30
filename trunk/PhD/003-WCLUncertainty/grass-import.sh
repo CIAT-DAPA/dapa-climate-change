@@ -2,13 +2,14 @@
 
 #$1 is the part (there's a mapset for each part, each mapset would contain 10-folds of each of the 12 monthly rasters
 
-if [ ! $1 ] || [ ! $2 ]
+if [ ! $1 ] || [ ! $2 ] || [ ! $3 ]
 then
 	exit
 fi
 
 part=$1
 TMP_PATH=$2
+var=$3
 
 #Drive and input paths
 DRIVE=/mnt/GIS-HD717
@@ -26,8 +27,8 @@ g.mapset -c mapset=wcl_uncertainties_$part
 #do
 	for fold in {1..10}
 	do
-		for var in rain tmin tmax tean
-		do
+		#for var in rain tmin tmax tean
+		#do
 			for month in {1..12}
 			do
 				#Variable definitions
@@ -120,6 +121,6 @@ g.mapset -c mapset=wcl_uncertainties_$part
 					echo "Number of months is not 12, so cannot calculate annual mean"
 				fi
 			fi
-		done
+		#done
 	done
 #done
