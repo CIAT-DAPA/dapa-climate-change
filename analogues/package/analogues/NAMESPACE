@@ -18,4 +18,8 @@ export(loadWeights)
 export(makeRef)
 export(makeRef.AnalogueWeights)
 export(report)
+<<<<<<< .mine
+export(summariseRuns)
+=======
 export(summary)
+>>>>>>> .r1039
