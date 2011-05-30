@@ -14,8 +14,8 @@
   # Cycle through all adapttation scenarios, buffer width in [m]
   # 300000 - null
   # 306000 - 2030 realistic   60 years a 100m (1975 - 2035)
-  # 308000 - 2030 optimistic  60 years a 500m
-  # 330000 - 2050 realistic   80 years a 100m
+  # 330000 - 2030 optimistic  60 years a 500m
+  # 308000 - 2050 realistic   80 years a 100m
   # 340000 - 2050 optimistic  80 years a 500m
 
 
@@ -46,22 +46,25 @@
       # register raste rin GRASS
       r.in.gdal in=vrts.chull.$bufDis/$base.vrt out=s$base.$bufDis -o --o
 
-      # create reclassification table (0 absence, 2 presence, 2 is used so it can be used in the turn over calculation 
-      echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 2 " > rc.tables/$base.p.rc 
-
-      # create reclassification table (0 absence, 2 presence, 2 is used so it can be used in the turn over calculation 
-      echo -e "0 = 0 \n1 thru 300 = 10 " > rc.tables/$base.b.rc 
-
-      # reclass
-      r.reclass in=s$base.$bufDis out=s$base.$bufDis.p rules=rc.tables/$base.p.rc --o
-
+      # create reclassification table (0 absence, 20 presence, for the buffer
+      echo -e "0 = 0 \n1 thru 300 = 20 " > rc.tables/$base.b.rc 
+      
       # reclass
       r.reclass in=s$base.$bufDis out=s$base.$bufDis.b rules=rc.tables/$base.b.rc --o
 
+      if [ $bufDis -eq 340000 ]
+      then
+        # create reclassification table (0 absence, 2 presence, 2 is used so it can be used in the turn over calculation 
+        echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 2 " > rc.tables/$base.p.rc 
+
+        # reclass
+        r.reclass in=s$base.$bufDis out=s$base.$bufDis.p rules=rc.tables/$base.p.rc --o
+      fi
+
+
     done
 
-    r.mapcalc "s$base.stencil.p=s$base.300000.p + s$base.306000.p + s$base.308000.p + s$base.330000.p + s$base.340000.p"
-    r.mapcalc "s$base.stencil.b=s$base.300000.b + s$base.306000.b + s$base.308000.b + s$base.330000.b + s$base.340000.b"
+    r.mapcalc "s$base.stencil.p=s$base.300000.p + s$base.306000.p + s$base.308000.p + s$base.330000.p + s$base.340000.p + s$base.340000.b"
     
     # remove original maps
     g.mremove rast="s$base.3*" -f
