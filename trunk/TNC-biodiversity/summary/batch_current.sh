@@ -64,7 +64,7 @@
 
     done
 
-    r.mapcalc "s$base.stencil.p=s$base.300000.p + s$base.306000.p + s$base.308000.p + s$base.330000.p + s$base.340000.p + s$base.340000.b"
+    r.mapcalc "s$base.stencil=s$base.300000.b + s$base.306000.b + s$base.308000.b + s$base.330000.b + s$base.340000.b + s$base.340000.p"
     
     # remove original maps
     g.mremove rast="s$base.3*" -f
