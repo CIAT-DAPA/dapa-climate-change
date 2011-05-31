@@ -103,7 +103,7 @@ g.mapset -c mapset=wcl_uncertainties_$part
 			if [ ! $file ]
 			then
 				#Checking if all the monthly GRASS files do exist
-				if [ ${#monthList} == 170 ]
+				if [ ${#monthList} -ge 170 ]
 				then
 					#Update database on total (calc_start) to started
 					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun_ttl SET calc_start=NOW() WHERE part=$part AND fold=$fold AND variable='$var';"
