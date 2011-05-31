@@ -74,33 +74,39 @@ calcCcafs.matrix <- function(lag, params, training, weights, base, project) {
   cat(str_c("calculating dissimilarity (ccafs.generic) projecting ",params$gcms[base]," to ",params$gcms[project]," starting with ",lag[1], ". \n"))
 
   # check if reference data has already been extracted for this coordinates
-
-  if (exists(str_c(".ccafstraining_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
-    training_ext <- get(str_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), env=globalenv())
-  } else {
-    training_ext <- lapply(training, function(x) extract(x,params$to[1:3,]))
-    assign(str_c(".ccafstraining_ext",paste(as.vector(params$to), collapse="")), training_ext, env=globalenv())
-  }
-
-  if (exists(str_r(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
-    weights_ext <- get(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())
-  } else {
-    weights_ext <- lapply(weights, function(x) { 
-      if (class(x) == "RasterLayer" | class(x) == "RasterStack") {
-        return(extract(x,params$to[1:3,]))
-        } else {return(x)}
-      })
-    assign(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), weights_ext, env=globalenv())
+  # only do itdata is no  
+  if (class(training[[1]]) == "RasterStack" | class(training[[1]]) == "RasterLayer") {
+    if (exists(str_c(".ccafstraining_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
+      training_ext <- get(str_c(".ccafstraining_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())
+    } else {
+      training_ext <- lapply(training, function(x) extract(x,params$to))
+      assign(str_c(".ccafstraining_ext",paste(as.vector(params$to[1:3,]), collapse="")), training_ext, env=globalenv())
+    }
+  
+    if (exists(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
+      weights_ext <- get(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())
+    } else {
+      weights_ext <- lapply(weights, function(x) { 
+        if (class(x) == "RasterLayer" | class(x) == "RasterStack") {
+          return(extract(x,params$to))
+          } else {return(x)}
+        })
+      assign(str_c(".ccafsweights_ext",paste(as.vector(params$to[1:3,]), collapse="")), weights_ext, env=globalenv())
+    }
   }
   
   # substract reference value
   ll <- lapply(1:length(params$vars), 
-      function(x) training_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][params$growing_season] - params$ref_train[[which(params$idx_gcms==base & params$idx_vars == x)]][lag])
+      function(x) {
+          apply(training_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][params$growing_season],2,'-',
+            params$ref_train[[which(params$idx_gcms==base & params$idx_vars == x)]][lag])
+      })      
   
   # substrack reference values for weights
   ww <- lapply(1:length(params$weights), function(x) {
     if (class(weights[[x]]) == "RasterLayer" | class(weights[[x]]) == "RasterStack") {
-       weights_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][params$growing_season] - params$ref_weight[[which(params$idx_gcms==base & params$idx_vars == x)]][lag]
+       weights_ext[[which(params$idx_gcms==base & params$idx_vars == x)]][params$growing_season] 
+        - params$ref_weight[[which(params$idx_gcms==base & params$idx_vars == x)]][lag]
     } else { 
       rep(weights_ext[[which(params$idx_gcms==base & params$idx_vars == x)]], params$ndivisions)[lag] 
     }

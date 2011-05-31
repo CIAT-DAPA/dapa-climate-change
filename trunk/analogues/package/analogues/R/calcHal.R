@@ -126,13 +126,15 @@ calcHal.matrix <- function (lag, params, training, weights, base, project)
  cat(str_c("calculating dissimilarity for (hal): starting with ",lag[1], ". \n"))
  
  # extract values at points
- if (exists(str_c(".ccafshal_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
-    ll <- get(str_c(".ccafshal_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())
-  } else {
-      ll <- lapply(training, 
-        function(x) extract(x,params$to))
-    assign(str_c(".ccafshal_ext",paste(as.vector(params$to[1:3,]), collapse="")), ll, env=globalenv())
-  }
+ if (class(training[[1]]) == "RasterStack" | class(training[[1]]) == "RasterLayer") {
+   if (exists(str_c(".ccafshal_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())) {
+      ll <- get(str_c(".ccafshal_ext",paste(as.vector(params$to[1:3,]), collapse="")), env=globalenv())
+    } else {
+        ll <- lapply(training, 
+          function(x) extract(x,params$to))
+      assign(str_c(".ccafshal_ext",paste(as.vector(params$to[1:3,]), collapse="")), ll, env=globalenv())
+    }
+ }
  
  # to be as generic as possible we need for each variables
  
