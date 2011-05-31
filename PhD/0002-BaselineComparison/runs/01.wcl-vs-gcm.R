@@ -1,5 +1,9 @@
 library(rgdal)
-setwd("D:/_tools/dapa-climate-change/trunk/PhD/0002-BaselineComparison")
+
+repoDir <- "D:/_tools"
+srcDir <- paste(repoDir, "/dapa-climate-change/trunk/PhD/0002-BaselineComparison", sep="")
+
+setwd(srcDir)
 source("compareRasterRaster.R")
 
 #################################################################################
@@ -7,15 +11,16 @@ source("compareRasterRaster.R")
 #GCM vs. WCL grids
 #################################################################################
 #################################################################################
-md <- "F:/PhD-work/cru-wcl-gcm-comparison/gcm-data/20C3M/1961_1990"
+mDataDir <- "F:/PhD-work"
+md <- paste(mDataDir, "/climate-data-assessment/comparisons/input-data/gcm-data/20C3M/1961_1990", sep="")
 gcmList <- list.files(md)
-cd <- "F:/PhD-work/cru-wcl-gcm-comparison/input-data/wcl-data"
+cd <- paste(mDataDir, "/climate-data-assessment/comparisons/input-data/wcl-data", sep="")
 shd <- "F:/Administrative_boundaries/SHP_files"
 
 cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL")
-jja <- "F:/PhD-work/comparisons/results/wcl-vs-gcm/JJA"
-djf <- "F:/PhD-work/comparisons/results/wcl-vs-gcm/DJF"
-ann <- "F:/PhD-work/comparisons/results/wcl-vs-gcm/ANNUAL"
+jja <- paste(mDataDir, "/climate-data-assessment/comparisons/results/wcl-vs-gcm/JJA", sep="")
+djf <- paste(mDataDir, "/climate-data-assessment/comparisons/results/wcl-vs-gcm/DJF", sep="")
+ann <- paste(mDataDir, "/climate-data-assessment/comparisons/results/wcl-vs-gcm/ANNUAL",sep="")
 for (ctry in cList) {
 	for (mod in gcmList) {
 		for (vr in c("tmean", "prec")) {

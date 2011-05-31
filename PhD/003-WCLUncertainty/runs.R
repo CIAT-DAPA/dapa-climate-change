@@ -99,7 +99,7 @@ bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:5, parts=1:
 bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=6:10, parts=1:5, months=1:12, nti=5) #STMARIA02 -OK!
 
 bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=1:5, parts=6:10, months=1:12, nti=5) #PINTA01 -OK!
-bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=6:10, parts=6:10, months=1:12, nti=5) #PINTA02
+bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="rain", folds=6:10, parts=6:10, months=1:12, nti=5) #PINTA02 -OK!
 
 bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=1:5, parts=1:5, months=1:12, nti=5) #NINA01 -OK!
 bmt <- batch.mergeTiles(bd=base.dir, td=temp.dir, vr="tean", folds=6:10, parts=1:5, months=1:12, nti=5) #NINA02 -OK!
