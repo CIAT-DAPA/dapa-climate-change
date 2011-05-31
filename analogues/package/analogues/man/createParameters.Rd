@@ -72,11 +72,77 @@ createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad
     weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
     direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
     normalise=F)
+createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad=c(NA,
+    0.3), hal_mrd=c(1, NA), hal_ncond=2, scenario="a1b",
+    gcms=c("current"), year=2030, vars=c("tmean", "prec"),
+    weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
+    direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
+    normalise=F)
+createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad=c(NA,
+    0.3), hal_mrd=c(1, NA), hal_ncond=2, scenario="a1b",
+    gcms=c("current"), year=2030, vars=c("tmean", "prec"),
+    weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
+    direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
+    normalise=F)
+createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad=c(NA,
+    0.3), hal_mrd=c(1, NA), hal_ncond=2, scenario="a1b",
+    gcms=c("current"), year=2030, vars=c("tmean", "prec"),
+    weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
+    direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
+    normalise=F)
+createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad=c(NA,
+    0.3), hal_mrd=c(1, NA), hal_ncond=2, scenario="a1b",
+    gcms=c("current"), year=2030, vars=c("tmean", "prec"),
+    weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
+    direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
+    normalise=F)
+createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad=c(NA,
+    0.3), hal_mrd=c(1, NA), hal_ncond=2, scenario="a1b",
+    gcms=c("current"), year=2030, vars=c("tmean", "prec"),
+    weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
+    direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
+    normalise=F)
+createParameters(x=10, y=48, to=NA, method="ccafs", hal_rad=c(NA, 0.15), hal_mad=c(NA,
+    0.3), hal_mrd=c(1, NA), hal_ncond=2, scenario="a1b",
+    gcms=c("current"), year=2030, vars=c("tmean", "prec"),
+    weights=c("dtr", 1), ndivisions=12, climate_data=".", ext="asc",
+    direction="backwd", growing_season=1:12, across_year=T, keep_lag=F,
+    normalise=F)
 }
 \description{Initiate parameters for analogue dissimilarity analysis.}
 \details{This function is the first step too find analogue climate sites.
 Here all parameters for the later analysis are set. The initial 
 parameters can be changed later. Make sure clmate data are name properly.\code{createParameters}: This function is the first step too find analogue climate sites.
+Here all parameters for the later analysis are set. The initial 
+parameters can be changed later. Make sure clmate data are name properly.
+
+
+\code{createParameters}: This function is the first step too find analogue climate sites.
+Here all parameters for the later analysis are set. The initial 
+parameters can be changed later. Make sure clmate data are name properly.
+
+
+\code{createParameters}: This function is the first step too find analogue climate sites.
+Here all parameters for the later analysis are set. The initial 
+parameters can be changed later. Make sure clmate data are name properly.
+
+
+\code{createParameters}: This function is the first step too find analogue climate sites.
+Here all parameters for the later analysis are set. The initial 
+parameters can be changed later. Make sure clmate data are name properly.
+
+
+\code{createParameters}: This function is the first step too find analogue climate sites.
+Here all parameters for the later analysis are set. The initial 
+parameters can be changed later. Make sure clmate data are name properly.
+
+
+\code{createParameters}: This function is the first step too find analogue climate sites.
+Here all parameters for the later analysis are set. The initial 
+parameters can be changed later. Make sure clmate data are name properly.
+
+
+\code{createParameters}: This function is the first step too find analogue climate sites.
 Here all parameters for the later analysis are set. The initial 
 parameters can be changed later. Make sure clmate data are name properly.
 
@@ -166,6 +232,24 @@ parameters can be changed later. Make sure clmate data are name properly.
 \code{createParameters}: an object of AnalogueParameters
 
 
+\code{createParameters}: an object of AnalogueParameters
+
+
+\code{createParameters}: an object of AnalogueParameters
+
+
+\code{createParameters}: an object of AnalogueParameters
+
+
+\code{createParameters}: an object of AnalogueParameters
+
+
+\code{createParameters}: an object of AnalogueParameters
+
+
+\code{createParameters}: an object of AnalogueParameters
+
+
 }
 \arguments{\item{x}{coordinate of site under analysis}
 \item{y}{coodrinate of site under analysis}
@@ -197,7 +281,25 @@ used to account for differences in seasons}
 \item{keep_lag}{specify whether or not grids for each lag should be kept}
 \item{...}{expressions evaluated in the context of \code{df} and 
 then fed to \code{\link{order}}}}
-\examples{ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )}
+\examples{ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )ccafs_params <- createParams(x, z, )}
+\alias{createParameters}
+\keyword{manip}
+
+\alias{createParameters}
+\keyword{manip}
+
+\alias{createParameters}
+\keyword{manip}
+
+\alias{createParameters}
+\keyword{manip}
+
+\alias{createParameters}
+\keyword{manip}
+
+\alias{createParameters}
+\keyword{manip}
+
 \alias{createParameters}
 \keyword{manip}
 

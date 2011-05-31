@@ -11,17 +11,31 @@ function(roll, params,training,weights,base,project) {
 
   # for each combination (lag) loop calc dissimilartiy
   if (params$method=="ccafs") {
-    res_all <- apply(roll, 1, function(x) calcCcafs(x,params,training, weights,base,project))
+    
+    if (length(roll) > 1)
+      res_all <- apply(roll, 1, function(x) calcCcafs(x,params,training, weights,base,project))
+    
+    if (length(roll) <= 1)
+       res_all <- calcCcafs(roll,params,training, weights,base,project)
+    
     class(res_all) <- "CcafsResults"
+  
   } else if (params$method=="hallegate" | params$method=="hal") {
-    res_all <- apply(roll,1,function(x) calcHal(x,params,training,weights, base,project))
+    
+    if (length(roll) > 1)
+      res_all <- apply(roll,1,function(x) calcHal(x,params,training,weights, base,project))
+    
+    if (length(roll) <= 1)
+      res_all <- calcHal(x,params,training,weights, base,project)
+    
     class(res_all) <- "HalResults"
-  } else {
+ 
+ } else {
      stop("sorry, i dont know the method you chose")
   }
-    
-  res_return <- summarizeResults(res_all,params)
+ 
+  res_all <- summarizeResults(res_all,params)
   
-  return(res_return)
+  return(res_all)
 }
 

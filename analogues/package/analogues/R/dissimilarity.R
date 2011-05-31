@@ -27,7 +27,9 @@ function(params, training, weights) {
   roll <- roll[ , params$growing_season]
   
   # only keep first row, if accross the years is false
-  if (!params$across_year) roll <- roll[1, , drop=FALSE]
+  
+  if (!params$across_year & length(roll)>1) roll <- roll[1, , drop=FALSE]
+  if (!params$across_year & length(roll)==1) roll <- 1
   
   
   if (params$direction=="backwd" | params$direction=="backward") {
@@ -46,6 +48,6 @@ function(params, training, weights) {
   }
   
   # if there is only gcm and a current, unlis the the list
-  if (length(params$gcms==2)) results <- unlist(results)
+  #if (length(params$gcms==2)) results <- unlist(results)
 }
 
