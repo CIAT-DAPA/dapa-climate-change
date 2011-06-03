@@ -142,14 +142,14 @@
     g.copy rast=nrichness,nrichness.tmp --o
 
     # clean
-   # g.remove rast=s$base.p
-   # g.remove rast=s$base
-   # g.mremove rast="s$base.to*" -f
-   # g.mremove rast="s$base.to*" -f
+    g.remove rast=s$base.p
+    g.remove rast=s$base
+    g.mremove rast="s$base.to*" -f
+    g.mremove rast="s$base.to*" -f
   done
 
   # remove temp rasters
-  #g.mremove rast="*.tmp" -f
+  g.mremove rast="*.tmp" -f
  
   rm -r rc.tables
 
