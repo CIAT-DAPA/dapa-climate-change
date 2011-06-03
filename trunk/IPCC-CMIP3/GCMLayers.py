@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python GCMLayers.py \\172.22.33.33\Geodata\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3\_layers A1B 10min downscaled"
+	print "   - ie: python GCMLayers.py O:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3\_layersCorrected A1B 10min downscaled"
 	sys.exit(1)
 
 #Set variables 
