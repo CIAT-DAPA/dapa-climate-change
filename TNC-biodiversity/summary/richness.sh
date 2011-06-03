@@ -55,13 +55,16 @@ exit
 # 4. sum parts
 ##########################################################################
 
+# new location
+NLOCATION="A2_2040_2069_bccr_bcm2_0"
+
 # Copy the location
-cp -r /data/TNC/grass/template /data/TNC/grass/current
+cp -r /data/TNC/grass/template /data/TNC/grass/$NLOCATION
 
 # Start GRASS shell up at location and mapset
 
 # specify proper variables here
-/usr/bin/grass64 -text /data/TNC/grass/current/PERMANENT
+/usr/bin/grass64 -text /data/TNC/grass/$NLOCATION/PERMANENT
 
 g.region latinamerica@PERMANENT
 
@@ -71,6 +74,8 @@ g.region latinamerica@PERMANENT
 g.copy rast=template.summary@PERMANENT,richness
 
 # Create mapsets
+# prefix mapsets with s -> subfolder
+
 ls | grep -e "^[0-9]" | while read folder
 do
   # create mapset for folder
@@ -85,20 +90,33 @@ svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity
 . /data/TNC/src/bash_parallel.sh
 
 
-# check if the batch bash script is available
+# check if the batch bash script is available (present
 svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_current.sh  /data/TNC/src/batch_current.sh 
+
+# check if the batch bash script is available (futur)
+svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_future.sh  /data/TNC/src/batch_future.sh 
 
 
 # allow writing access
 chmod u+x /data/TNC/src/batch_current.sh 
+chmod u+x /data/TNC/src/batch_future.sh 
 
 ####
 # Batch wrapper
 
-function runbatch {
+function runbatch_current {
   folder=$1  
   export GRASS_BATCH_JOB=/data/TNC/src/batch_current.sh 
   /usr/bin/grass64 /data/TNC/grass/current/s$folder  
+  unset GRASS_BATCH_JOB
+
+}
+
+function runbatch_future {
+  folder=$1  
+  NLOCATION=$2
+  export GRASS_BATCH_JOB=/data/TNC/src/batch_future.sh 
+  /usr/bin/grass64 /data/TNC/grass/$NLOCATION/s$folder  
   unset GRASS_BATCH_JOB
 
 }
@@ -110,13 +128,16 @@ mkdir err
 
 # parallel
 QUEUE=""
-MAX_NPROC=10
+MAX_NPROC=16
 
 # run in parallel
 ls | grep -e "^[0-9]" | while read folder
 do
-  # run processes
-  runbatch $folder &> err/$folder.txt &
+  # run processes current
+  # runbatch_current $folder &> err/$folder.txt &
+
+  # run process future
+  runbatch_future $folder $NLOCATION &> err/$folder.txt &
 
   PID=$!
   queue $PID
@@ -130,87 +151,3 @@ done
 
 
 
-# export added raster
-
-################# batch
-
-export GRASS_BATCH_JOB=/data/TNC/src/batch_current.sh 
-/usr/bin/grass64 -text /data/TNC/results/grass/current/s$folder
-
-
-##########################################################################
-# FUTUR SRES
-###########################################################################
-
-# Copy the location
-cp /GRASS/locations/template /GRASS/locations/$run
-
-# Start GRASS shell up at location and mapset
-
-# specify proper variables here
-/usr/bin/grass64 -text /data/TNC/grass/test1/PERMANENT
-
-g.region latinamerica@PERMANENT
-
-# Create a mapset that will contain the summaries of each sub folder and a total summary of this run
-g.mpaset -c mapset=summary
-g.region latinamerica@PERMANENT
-
-# do for each folder seperately
-ls | grep "^[0-9]*" | while read folder
-do
-	# get fold
-	cd $folder
-	
-	# folder for all the vrts
-	mkdir vrts
-	
-	# folder for all the reclassification rule
-	mkdir rc.tables
-	
-	# mkdir for errors
-	mkdir errors
-	
-	# mkdri reclassed rasters
-	mkdir cut.vrts
-	
-	# make new mapset
-	g.mapset -c mapset=$folder
-	g.region latinamerica@PERMANENT
-	
-	g.mapset -c mapset=$folder.th
-	g.region latinamerica@PERMANENT
-
-	# cycle through folder
-	for tif in *.tif
-	do
-    base=$(echo $tif | sed 's/.tif//')
-    # build virtual
-    gdalbuildvrt vrts/$base.vrt $base.tif
-    
-    
-    # cut virtual with chull
-    # ogr2ogr -f "ESRI Shapefile" $base.shp PG:"user=model1 dbname=gisdb" -sql "select * from convexhulls where speciesid='$base'"
-    # gdalwarp -q -cutline vrts/$base.shp vrts/$base.vrt c$base.vrt
-    gdalwarp -cutline "PG:dbname=gisdb user=model1" -csql "select ST_Transform(ST_Buffer(ST_Transform(geom,3395),$bufdis),4326) from convexhulls where speciesid='$base'" -q vrts/$base.vrt cut.vrts/$base.vrt
-    
-    # get value for reclass
-    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
-		
-    # register with r.external in grass
-    g.mapset mapset=$folder
-    r.external in=cut.vrts/$base.vrt out=$base -o
-
-    # write reclass table
-    # use the -e to make a new line
-    echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 1 " > rc.tables/$base.rc
-
-    # reclass
-    g.mapset mapset=$folder.th
-    r.reclass in=$base@$folder out=$base rules=rc.tables/$base.rc
-
-		# add reclassed together
-		g.mapset mapset=summary
-		
-
-# export added raster
