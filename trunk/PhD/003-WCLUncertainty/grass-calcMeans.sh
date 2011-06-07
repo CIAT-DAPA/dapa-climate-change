@@ -47,7 +47,7 @@ do
 			then
 				#Create a list for mean and std of the 10 rasters of a certain fold
 				
-				if [ $month == 1 ] & [ $fold == 1 ] & [ $part == 1]
+				if [ $fold == 1 ] & [ $part == 1]
 				then
 					rList=$RAST
 				else
