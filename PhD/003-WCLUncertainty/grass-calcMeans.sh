@@ -74,8 +74,8 @@ then
 	if [ ${#rList} -ge 1300 ]
 	then
 		echo "Average and STD"
-		#r.series in=$rList out=$OUT_MEAN method=average
-		#r.series in=$rList out=$OUT_STD method=stddev
+		r.series in=$rList out=$OUT_MEAN method=average
+		r.series in=$rList out=$OUT_STD method=stddev
 	else
 		echo "Number of folds is not 10, so cannot calculate avg and std"
 	fi
