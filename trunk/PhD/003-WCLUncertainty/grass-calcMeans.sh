@@ -30,7 +30,7 @@ do
 		RAST=$var\_p$part\_f$fold\_$month@wcl_uncertainties_$part
 		monthDB=$(echo $month | sed 's\m\\g')
 		
-		if [ $month == ann ]
+		if [ $month != ann ]
 		then
 			STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT merge_fin FROM wclun WHERE part=$part AND fold=$fold AND month=$monthDB AND variable='$var';")
 		else
