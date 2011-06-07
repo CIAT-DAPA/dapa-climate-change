@@ -2,7 +2,7 @@
 
 #$1 = part
 #$2 = variable
-#$3 = month (or can be ann for annual mean/total)
+#$3 = month (or can be ann for annual mean/total), must be m1..12, or ann
 
 if [ ! $1 ] || [ ! $2 ]
 then
@@ -27,12 +27,13 @@ do
 		echo "Processing month $month fold $fold of part $part of variable $var"
 		
 		#Variable definitions, and database check
-		if [ month == ann ]
+		RAST=$var\_p$part\_f$fold\_$month@wcl_uncertainties_$part
+		monthDB=$(echo $month | sed 's\m\\g')
+		
+		if [ $month == ann ]
 		then
-			RAST=$var\_p$part\_f$fold\_ann@wcl_uncertainties_$part
-			STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT merge_fin FROM wclun WHERE part=$part AND fold=$fold AND month=$month AND variable='$var';")
+			STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT merge_fin FROM wclun WHERE part=$part AND fold=$fold AND month=$monthDB AND variable='$var';")
 		else
-			RAST=$var\_p$part\_f$fold\_m$month@wcl_uncertainties_$part
 			STATUS=$(mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; SELECT calc_fin FROM wclun_ttl WHERE part=$part AND fold=$fold AND variable='$var';")
 		fi
 		
@@ -40,7 +41,7 @@ do
 		then
 			echo "The file exists!"
 			
-			#Do if the dataset does not exist
+			#Do if the dataset exists
 			eval `g.findfile element=cell file=$RAST`
 			if [ $file ]
 			then
@@ -70,7 +71,7 @@ eval `g.findfile element=cell file=$OUT_STD`
 if [ ! $file ]
 then
 	#Checking if all the monthly GRASS files do exist
-	if [ ${#rList} -ge 130 ]
+	if [ ${#rList} -ge 1300 ]
 	then
 		echo "Average and STD"
 		r.series in=$rList out=$OUT_MEAN method=average
