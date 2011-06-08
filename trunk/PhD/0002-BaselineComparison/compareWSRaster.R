@@ -184,7 +184,7 @@ compareWSR <- function(gcmDir=NULL, gcm=NULL, shpDir=NULL, stationDir=NULL, coun
   lgname <- paste("log-", variable, sep="")
   if (!file.exists(paste(outDir, "/", lgname, sep=""))) {
     #Directories and basic data loading
-    gcmrsDir <- paste(gcmDir, "/", gcm, "/1961_1990", sep="")
+    gcmrsDir <- paste(gcmDir, "/", gcm, sep="")
     sh <- readShapePoly(paste(shpDir, "/", country, "_adm/", country, "0.shp", sep=""))
     mk <- raster(paste(gcmrsDir, "/prec_01.asc", sep="")) #mask (dummy grid, prec_01.asc by default)
     
