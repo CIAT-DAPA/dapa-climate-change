@@ -60,42 +60,42 @@ st.compareAndPlot <- function(msk, gcmrs, sel.st, mName, plotit=F, plotDir=NULL,
   nz.CL.N <- length(which(compMatrix$CL.N == 0))
   
   #Fit mean
-  if (nz.GCM == nrow(compMatrix) | nz.CL.M == nrow(compMatrix)) {
-  fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
+  if (nz.GCM == nrow(compMatrix) | nz.CL.M == nrow(compMatrix) | nrow(compMatrix) == 1) {
+    fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
     pval.mf <- NA
     fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
     pval.m <- NA
     plot.M <- F
   } else {
 	#Fit mean
-	fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
-	pd.mf <- lims*fit.mf$coefficients; pd.mf <- cbind(lims, pd.mf)
-	pval.mf <- pf(summary(fit.mf)$fstatistic[1],summary(fit.mf)$fstatistic[2],summary(fit.mf)$fstatistic[3],lower.tail=F)
-	fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
-	pd.m <- lims*fit.m$coefficients[2] + fit.m$coefficients[1]; pd.m <- cbind(lims, pd.m)
-	pval.m <- pf(summary(fit.m)$fstatistic[1],summary(fit.m)$fstatistic[2],summary(fit.m)$fstatistic[3],lower.tail=F)
-	plot.M <- T
+    fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
+    pd.mf <- lims*fit.mf$coefficients; pd.mf <- cbind(lims, pd.mf)
+    pval.mf <- pf(summary(fit.mf)$fstatistic[1],summary(fit.mf)$fstatistic[2],summary(fit.mf)$fstatistic[3],lower.tail=F)
+    fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
+    pd.m <- lims*fit.m$coefficients[2] + fit.m$coefficients[1]; pd.m <- cbind(lims, pd.m)
+    pval.m <- pf(summary(fit.m)$fstatistic[1],summary(fit.m)$fstatistic[2],summary(fit.m)$fstatistic[3],lower.tail=F)
+    plot.M <- T
   }
  
   #Fit max
-  if (nz.GCM == nrow(compMatrix) | nz.CL.X == nrow(compMatrix)) {
-  fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
+  if (nz.GCM == nrow(compMatrix) | nz.CL.X == nrow(compMatrix) | nrow(compMatrix) == 1) {
+    fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
     pval.xf <- NA
     fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
     pval.x <- NA
     plot.X <- F
   } else {
-	fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
-	pd.xf <- lims*fit.xf$coefficients; pd.xf <- cbind(lims, pd.xf) #plot(compMatrix$GCM, compMatrix$CL.X,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
-	pval.xf <- pf(summary(fit.xf)$fstatistic[1],summary(fit.xf)$fstatistic[2],summary(fit.xf)$fstatistic[3],lower.tail=F)
-	fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
-	pd.x <- lims*fit.x$coefficients[2] + fit.x$coefficients[1]; pd.x <- cbind(lims, pd.x)
-	pval.x <- pf(summary(fit.x)$fstatistic[1],summary(fit.x)$fstatistic[2],summary(fit.x)$fstatistic[3],lower.tail=F)
-	plot.X <- T
+  	fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
+  	pd.xf <- lims*fit.xf$coefficients; pd.xf <- cbind(lims, pd.xf) #plot(compMatrix$GCM, compMatrix$CL.X,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
+  	pval.xf <- pf(summary(fit.xf)$fstatistic[1],summary(fit.xf)$fstatistic[2],summary(fit.xf)$fstatistic[3],lower.tail=F)
+  	fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
+  	pd.x <- lims*fit.x$coefficients[2] + fit.x$coefficients[1]; pd.x <- cbind(lims, pd.x)
+  	pval.x <- pf(summary(fit.x)$fstatistic[1],summary(fit.x)$fstatistic[2],summary(fit.x)$fstatistic[3],lower.tail=F)
+  	plot.X <- T
   }
  
   #Fit min
-  if (nz.GCM == nrow(compMatrix) | nz.CL.N == nrow(compMatrix)) {
+  if (nz.GCM == nrow(compMatrix) | nz.CL.N == nrow(compMatrix) | nrow(compMatrix) == 1) {
   fit.nf <- lm(compMatrix$CL.N ~ compMatrix$GCM - 1) #Fit forced to origin
     pval.nf <- NA
     fit.n <- lm(compMatrix$CL.N ~ compMatrix$GCM) #Fit normal (unforced)
