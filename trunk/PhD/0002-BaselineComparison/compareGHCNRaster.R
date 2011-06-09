@@ -53,45 +53,82 @@ st.compareAndPlot <- function(msk, gcmrs, sel.st, mName, plotit=F, plotDir=NULL,
   compMatrix <- as.data.frame(compMatrix); names(compMatrix) <- c("GCM", "CL.M", "CL.X", "CL.N")
   lims <- c(min(compMatrix), max(compMatrix))
   
+  #Check if compMatrix has any of its columns with full zeros
+  nz.GCM <- length(which(compMatrix$GCM == 0))
+  nz.CL.M <- length(which(compMatrix$CL.M == 0))
+  nz.CL.X <- length(which(compMatrix$CL.X == 0))
+  nz.CL.N <- length(which(compMatrix$CL.N == 0))
+  
   #Fit mean
+  if (nz.GCM == nrow(compMatrix) | nz.CL.M == nrow(compMatrix)) {
   fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
-  pd.mf <- lims*fit.mf$coefficients; pd.mf <- cbind(lims, pd.mf)
-  pval.mf <- pf(summary(fit.mf)$fstatistic[1],summary(fit.mf)$fstatistic[2],summary(fit.mf)$fstatistic[3],lower.tail=F)
-  fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
-  pd.m <- lims*fit.m$coefficients[2] + fit.m$coefficients[1]; pd.m <- cbind(lims, pd.m)
-  pval.m <- pf(summary(fit.m)$fstatistic[1],summary(fit.m)$fstatistic[2],summary(fit.m)$fstatistic[3],lower.tail=F)
+    pval.mf <- NA
+    fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
+    pval.m <- NA
+    plot.M <- F
+  } else {
+	#Fit mean
+	fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
+	pd.mf <- lims*fit.mf$coefficients; pd.mf <- cbind(lims, pd.mf)
+	pval.mf <- pf(summary(fit.mf)$fstatistic[1],summary(fit.mf)$fstatistic[2],summary(fit.mf)$fstatistic[3],lower.tail=F)
+	fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
+	pd.m <- lims*fit.m$coefficients[2] + fit.m$coefficients[1]; pd.m <- cbind(lims, pd.m)
+	pval.m <- pf(summary(fit.m)$fstatistic[1],summary(fit.m)$fstatistic[2],summary(fit.m)$fstatistic[3],lower.tail=F)
+	plot.M <- T
+  }
+ 
   #Fit max
+  if (nz.GCM == nrow(compMatrix) | nz.CL.X == nrow(compMatrix)) {
   fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
-  pd.xf <- lims*fit.xf$coefficients; pd.xf <- cbind(lims, pd.xf) #plot(compMatrix$GCM, compMatrix$CL.X,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
-  pval.xf <- pf(summary(fit.xf)$fstatistic[1],summary(fit.xf)$fstatistic[2],summary(fit.xf)$fstatistic[3],lower.tail=F)
-  fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
-  pd.x <- lims*fit.x$coefficients[2] + fit.x$coefficients[1]; pd.x <- cbind(lims, pd.x)
-  pval.x <- pf(summary(fit.x)$fstatistic[1],summary(fit.x)$fstatistic[2],summary(fit.x)$fstatistic[3],lower.tail=F)
+    pval.xf <- NA
+    fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
+    pval.x <- NA
+    plot.X <- F
+  } else {
+	fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
+	pd.xf <- lims*fit.xf$coefficients; pd.xf <- cbind(lims, pd.xf) #plot(compMatrix$GCM, compMatrix$CL.X,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
+	pval.xf <- pf(summary(fit.xf)$fstatistic[1],summary(fit.xf)$fstatistic[2],summary(fit.xf)$fstatistic[3],lower.tail=F)
+	fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
+	pd.x <- lims*fit.x$coefficients[2] + fit.x$coefficients[1]; pd.x <- cbind(lims, pd.x)
+	pval.x <- pf(summary(fit.x)$fstatistic[1],summary(fit.x)$fstatistic[2],summary(fit.x)$fstatistic[3],lower.tail=F)
+	plot.X <- T
+  }
+ 
   #Fit min
+  if (nz.GCM == nrow(compMatrix) | nz.CL.N == nrow(compMatrix)) {
   fit.nf <- lm(compMatrix$CL.N ~ compMatrix$GCM - 1) #Fit forced to origin
-  pd.nf <- lims*fit.nf$coefficients; pd.nf <- cbind(lims, pd.nf) #plot(compMatrix$GCM, compMatrix$CL.N,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
-  pval.nf <- pf(summary(fit.nf)$fstatistic[1],summary(fit.nf)$fstatistic[2],summary(fit.nf)$fstatistic[3],lower.tail=F)
-  fit.n <- lm(compMatrix$CL.N ~ compMatrix$GCM) #Fit normal (unforced)
-  pd.n <- lims*fit.n$coefficients[2] + fit.n$coefficients[1]; pd.n <- cbind(lims, pd.n)
-  pval.n <- pf(summary(fit.n)$fstatistic[1],summary(fit.n)$fstatistic[2],summary(fit.n)$fstatistic[3],lower.tail=F)
+    pval.nf <- NA
+    fit.n <- lm(compMatrix$CL.N ~ compMatrix$GCM) #Fit normal (unforced)
+    pval.n <- NA
+    plot.N <- F
+  } else {
+	fit.nf <- lm(compMatrix$CL.N ~ compMatrix$GCM - 1) #Fit forced to origin
+	pd.nf <- lims*fit.nf$coefficients; pd.nf <- cbind(lims, pd.nf) #plot(compMatrix$GCM, compMatrix$CL.N,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="WorldClim values")
+	pval.nf <- pf(summary(fit.nf)$fstatistic[1],summary(fit.nf)$fstatistic[2],summary(fit.nf)$fstatistic[3],lower.tail=F)
+	fit.n <- lm(compMatrix$CL.N ~ compMatrix$GCM) #Fit normal (unforced)
+	pd.n <- lims*fit.n$coefficients[2] + fit.n$coefficients[1]; pd.n <- cbind(lims, pd.n)
+	pval.n <- pf(summary(fit.n)$fstatistic[1],summary(fit.n)$fstatistic[2],summary(fit.n)$fstatistic[3],lower.tail=F)
+	plot.N <- T
+  }
+ 
   cat("Linear regressions fitted \n")
   
   if (plotit) {
     #Forced to origin
     jpeg(paste(plotDir, "/", plotName, "-forced.jpg", sep=""), quality=100, width=780, height=780, pointsize=18)
   	plot(compMatrix$GCM, compMatrix$CL.M,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="Observed values")
-  	lines(pd.mf); #lines(pd, lty=2)
-  	lines(pd.xf, col="red", lty=3); #lines(pd.m, lty=2); #abline(0,1,lty=2)
-  	lines(pd.nf, col="red", lty=3); #lines(pd.n, lty=2); #abline(0,1,lty=2)
-  	for (i in 1:nrow(compMatrix)) {lines(c(compMatrix$GCM[i], compMatrix$GCM[i]), c(compMatrix$CL.N[i], compMatrix$CL.X[i]))}
+  	if (plot.M) {lines(pd.mf)}; #lines(pd, lty=2)
+    if (plot.X) {lines(pd.xf, col="red", lty=3)}; #lines(pd.m, lty=2); #abline(0,1,lty=2)
+  	if (plot.N) {lines(pd.nf, col="red", lty=3)}; #lines(pd.n, lty=2); #abline(0,1,lty=2)
+    for (i in 1:nrow(compMatrix)) {lines(c(compMatrix$GCM[i], compMatrix$GCM[i]), c(compMatrix$CL.N[i], compMatrix$CL.X[i]))}
   	abline(0,1,lty=2)
   	dev.off()
     #Not forced to origin
     jpeg(paste(plotDir, "/", plotName, "-unforced.jpg", sep=""), quality=100, width=780, height=780, pointsize=18)
     plot(compMatrix$GCM, compMatrix$CL.M,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="Observed values")
-    lines(pd.m); #lines(pd, lty=2)
-    lines(pd.x, col="red", lty=3) #lines(pd.m, lty=2); #abline(0,1,lty=2)
-    lines(pd.n, col="red", lty=3) #lines(pd.n, lty=2); #abline(0,1,lty=2)
+    if (plot.M) {lines(pd.m)}; #lines(pd, lty=2)
+    if (plot.X) {lines(pd.x, col="red", lty=3)} #lines(pd.m, lty=2); #abline(0,1,lty=2)
+    if (plot.N) {lines(pd.n, col="red", lty=3)} #lines(pd.n, lty=2); #abline(0,1,lty=2)
     for (i in 1:nrow(compMatrix)) {lines(c(compMatrix$GCM[i], compMatrix$GCM[i]), c(compMatrix$CL.N[i], compMatrix$CL.X[i]))}
     abline(0,1,lty=2)
     dev.off()
@@ -147,7 +184,7 @@ compareGHCNR <- function(gcmDir=NULL, gcm=NULL, shpDir=NULL, stationDir=NULL, co
   lgname <- paste("log-", variable, sep="")
   if (!file.exists(paste(outDir, "/", lgname, sep=""))) {
     #Directories and basic data loading
-    gcmrsDir <- paste(gcmDir, "/", gcm, "/1961_1990", sep="")
+    gcmrsDir <- paste(gcmDir, "/", gcm, sep="")
     sh <- readShapePoly(paste(shpDir, "/", country, "_adm/", country, "0.shp", sep=""))
     mk <- raster(paste(gcmrsDir, "/prec_01.asc", sep="")) #mask (dummy grid, prec_01.asc by default)
     
