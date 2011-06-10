@@ -107,8 +107,8 @@ g.mapset -c mapset=wcl_uncertainties_$part
 					#Update database on total (calc_start) to started
 					mysql --skip-column-names -ujramirez -pramirez2009 -e"USE dapaproc; UPDATE wclun_ttl SET calc_start=NOW() WHERE part=$part AND fold=$fold AND variable='$var';"
 					
-					if [ $var == rain ]
 					echo "Annual means or totals..."
+					if [ $var == rain ]
 					then
 						r.series in=$monthList out=$OUT_ANN method=sum
 					else

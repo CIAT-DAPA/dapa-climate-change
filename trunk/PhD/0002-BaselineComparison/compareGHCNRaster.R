@@ -61,8 +61,14 @@ st.compareAndPlot <- function(msk, gcmrs, sel.st, mName, plotit=F, plotDir=NULL,
   nz.CL.X <- length(which(compMatrix$CL.X == 0))
   nz.CL.N <- length(which(compMatrix$CL.N == 0))
   
+  #Check unique values in compMatrix columns
+  uv.GCM <- length(unique(compMatrix$GCM))
+  uv.CL.M <- length(unique(compMatrix$CL.M))
+  uv.CL.X <- length(unique(compMatrix$CL.X))
+  uv.CL.N <- length(unique(compMatrix$CL.N))
+  
   #Fit mean
-  if (nz.GCM == nrow(compMatrix) | nz.CL.M == nrow(compMatrix) | nrow(compMatrix) == 1) {
+  if (nz.GCM == nrow(compMatrix) | nz.CL.M == nrow(compMatrix) | nrow(compMatrix) == 1 | uv.GCM == 1 | uv.CL.M == 1) {
     fit.mf <- lm(compMatrix$CL.M ~ compMatrix$GCM - 1) #Fit forced to origin
     pval.mf <- NA
     fit.m <- lm(compMatrix$CL.M ~ compMatrix$GCM) #Fit normal (unforced)
@@ -80,7 +86,7 @@ st.compareAndPlot <- function(msk, gcmrs, sel.st, mName, plotit=F, plotDir=NULL,
   }
  
   #Fit max
-  if (nz.GCM == nrow(compMatrix) | nz.CL.X == nrow(compMatrix) | nrow(compMatrix) == 1) {
+  if (nz.GCM == nrow(compMatrix) | nz.CL.X == nrow(compMatrix) | nrow(compMatrix) == 1 | uv.GCM == 1 | uv.CL.X == 1) {
     fit.xf <- lm(compMatrix$CL.X ~ compMatrix$GCM - 1) #Fit forced to origin
     pval.xf <- NA
     fit.x <- lm(compMatrix$CL.X ~ compMatrix$GCM) #Fit normal (unforced)
@@ -97,7 +103,7 @@ st.compareAndPlot <- function(msk, gcmrs, sel.st, mName, plotit=F, plotDir=NULL,
   }
  
   #Fit min
-  if (nz.GCM == nrow(compMatrix) | nz.CL.N == nrow(compMatrix) | nrow(compMatrix) == 1) {
+  if (nz.GCM == nrow(compMatrix) | nz.CL.N == nrow(compMatrix) | nrow(compMatrix) == 1 | uv.GCM == 1 | uv.CL.N == 1) {
   fit.nf <- lm(compMatrix$CL.N ~ compMatrix$GCM - 1) #Fit forced to origin
     pval.nf <- NA
     fit.n <- lm(compMatrix$CL.N ~ compMatrix$GCM) #Fit normal (unforced)

@@ -13,11 +13,11 @@
 #1. read all tiles file and add them into a whole thing matrix
 #2. calculate required metrics and store them into a matrix
 
-source("accuracy.R")
+source("accuracyFinal.R")
 
 finalMetrics <- function(bDir="", variable="rain", ntiles=5) {
 	#Input data details
-	dataDir <- paste(bDir, "/climate-data-assessment/wcl-uncertainties/outputs/cross-validation", sep="")
+	dataDir <- paste(bDir, "/climate-data-assessment/wcl-uncertainties/outputs/cross-validation/", variable, sep="")
 	
 	#Output directory
 	outDir <- paste(bDir, "/climate-data-assessment/wcl-uncertainties/outputs", sep="")
@@ -36,8 +36,8 @@ finalMetrics <- function(bDir="", variable="rain", ntiles=5) {
 			cat("Loading tile data \n")
 			for (tile in 1:ntiles) {
 				tileDir <- paste(foldDir, "/tile-", tile, sep="")
-				fitFile <- paste(tileDir, "/rain_fitted-values.csv", sep="")
-				tstFile <- paste(tileDir, "/rain_test-values.csv", sep="")
+				fitFile <- paste(tileDir, "/", variable, "_fitted-values.csv", sep="")
+				tstFile <- paste(tileDir, "/", variable, "_test-values.csv", sep="")
 				
 				fitData <- read.csv(fitFile)
 				tstData <- read.csv(tstFile)
