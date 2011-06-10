@@ -10,7 +10,7 @@ for part in {1..10}
 do
 	for fold in {1..10}
 	do
-		for var in rain tmin tmax tean
+		for var in tmin tmax tean
 		do
 			
 			#Calculating annual mean and total
