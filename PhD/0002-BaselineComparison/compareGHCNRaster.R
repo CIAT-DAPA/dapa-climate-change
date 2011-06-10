@@ -24,8 +24,8 @@ st.extractGCMCell <- function(x, stations, mnth="JAN", gcmRes) {
   comp.st <- stations[which(stations$LONG >= xn & stations$LONG <= xx & stations$LAT >= yn & stations$LAT <= yx),]
   m.pos <- which(names(comp.st) == mnth)
   comp.data <- comp.st[,m.pos] * 0.1
-  if (length(comp.data) == 0) {res <- c(NA,NA,NA)} else {res <- c(mean(comp.data),max(comp.data),min(comp.data))}
-  return(res)
+  if (length(comp.data) == 0) {resp <- c(NA,NA,NA)} else {resp <- c(mean(comp.data,na.rm=T),max(comp.data,na.rm=T),min(comp.data,na.rm=T))}
+  return(resp)
 }
 
 #Second order function to compare a raster and the set of stations
@@ -51,6 +51,8 @@ st.compareAndPlot <- function(msk, gcmrs, sel.st, mName, plotit=F, plotDir=NULL,
   #Matrix for assessment and limits for plotting
   compMatrix <- extract(stk, which(!is.na(strs.m[])))
   compMatrix <- as.data.frame(compMatrix); names(compMatrix) <- c("GCM", "CL.M", "CL.X", "CL.N")
+  #print(compMatrix)
+  #plot(msk); plot(gcmrs,add=T); points(coords,pch=20)
   lims <- c(min(compMatrix), max(compMatrix))
   
   #Check if compMatrix has any of its columns with full zeros
