@@ -3,11 +3,9 @@
 DRIVE=/mnt/GIS-HD717
 IN_PATH=$DRIVE/CCAFS/climate-data-assessment/wcl-uncertainties/outputs/cross-validation
 
-
-g.mapset -c mapset=wcl_uncertainties_$part
-
 for part in {1..10}
 do
+	g.mapset -c mapset=wcl_uncertainties_$part
 	for fold in {1..10}
 	do
 		for var in tmin tmax tean
