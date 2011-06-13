@@ -142,9 +142,11 @@ g.mremove rast="*_tmax*" -f
 #######################################################
 # Values at XY POI
 
+r.mapcalc "MASK=mask_bin"
+
 for i in $(g.mlist type=rast pattern="*")
-do
-  cat poi_xy.txt | r.what input=$i fs=, | cut -f4 -d, > poi/${i}_poi.txt
+do  
+	cat poi_xy.txt | r.what input=$i fs=, | cut -f4 -d, > poi/${i}_poi.txt
   echo $i
 done
 
@@ -153,7 +155,7 @@ done
 
 for i in $(g.mlist type=rast pattern="*")
 do
-  cat sites/trials_june.csv | awk -F, 'NR>1{print $2,$3}' | r.what input=$i fs=, | cut -f4 -d, > ref/${i}_ref.txt
+  cat sites/20110613_all_trials.csv | awk -F, 'NR>1{print $6,$5}' | r.what input=$i fs=, | cut -f4 -d, > data_run/${i}_ref.txt
   echo $i
 done
 
@@ -273,7 +275,7 @@ done
 
 for i in $(g.mlist type=rast pattern="*")
 do
-  cat poi_xy.txt | r.what input=$i fs=, | cut -f4 -d, > ${i}_poi.txt
+  cat sites/poi_xy.txt | r.what input=$i fs=, | cut -f4 -d, > data_run/${i}_poi.txt
   echo $i
 done
 
@@ -282,7 +284,7 @@ done
 
 for i in $(g.mlist type=rast pattern="c*")
 do
-  cat sites/trials_june.csv | awk -F, 'NR>1{print $2,$3}' | r.what input=$i fs=, | cut -f4 -d, > ref/${i}_ref.txt
+  cat sites/20110613_all_trials.csv | awk -F, 'NR>1{print $6,$5}' | r.what input=$i fs=, | cut -f4 -d, > data_run/${i}_ref.txt
   echo $i
 done
 
@@ -310,7 +312,7 @@ tmean <- str_sub(tmean, 1,-16)
 
 
 
-sfInit(parallel=TRUE, cpus=20, type="SOCK")
+sfInit(parallel=TRUE, cpus=22, type="SOCK")
 sfExport("disPts")
 sfExport("ccafsMPoints")
 sfLibrary(stringr)
@@ -437,5 +439,66 @@ ccafsMPoints <- function(ref.t, poi.t, ref.w, poi.w, z=2) {
   
   return(tmp)
 }
+
+
+# ------------------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------ #
+# Get rownumber of ref points                                                    #
+# ------------------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------ #
+
+# in grass
+
+cat sites/20110613_all_trials.csv | awk -F, 'NR>1{print $6,$5}' | r.what input=$i fs=, | cut -f1,2 -d, > sites/ref_sites_row_numbers.txt
+
+# in R
+poi <- read.table("poi_xy.txt")
+ref <- read.table("ref_sites_row_numbers.txt", sep=",")
+
+rows <- c()
+
+for (i in 1:nrow(ref)) {
+	rows <- c(rows, which(poi[,1] == ref[i,1] & poi[,2] == ref[i,2])[1])
+}
+
+write.table(rows, "which_rows_ref.txt", col.names=F, row.names=F, quote=F)
+
+# ------------------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------ #
+# For each point provinence and trial                                            #
+# ------------------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------ #
+
+
+#@ ff <- list.files(path="../fwd", pattern="A2_2040_2069_mpi_echam5_s*", full=T)
+
+ff <- list.files(path="../fwd", pattern="*s-41.txt", full=T)
+
+ff <- str_sub(ff, 1, -7)
+
+
+findPT <- function(path, disToRef, ref) {
+
+	ffull <- do.call(cbind, lapply(str_c(path, "1:67", read.table))
+
+#@	rows <- read.table("./sites/which_rows_ref.txt")
+#@	rows <- 1000:1066
+
+	ref <- read.csv("./sites/20110613_all_trials.csv")
+
+	res <- matrix(rep(NA, (nrow(ffull) * length(unique(ref[,1]))))
+
+	for (i in unique(ref[,1])) {
+
+		where <- which(ref[,1]==i)
+
+		meanNotTop <- rowMeans(ffull[,where[-1]])
+		minNotTop <-  apply(ffull[,where[-1]], 1, which.min)
+		res[,i] <- ifelse(meanNotTop < ffull[,where[1]], minNotTop, where[1])	
+
+	}
+	# write matrix
+}
+
 
 
