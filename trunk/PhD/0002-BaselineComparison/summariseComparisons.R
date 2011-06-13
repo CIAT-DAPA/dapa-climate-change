@@ -85,7 +85,7 @@ metricsSummary <- function(bDir, dataset, variable) {
 		}
 	}
 
-	outFile <- paste(variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
+	outFile <- paste(outDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
 	write.csv(summaryData,outFile,row.names=F,quote=F)
 }
 
@@ -137,7 +137,7 @@ dataSummary <- function(bDir, dataset, variable) {
 		}
 	}
 
-	outFile <- paste(variable, "-", dataset, "-vs-gcm-allPlotData.csv", sep="")
+	outFile <- paste(outDir, "/", variable, "-", dataset, "-vs-gcm-allPlotData.csv", sep="")
 	write.csv(summaryData,outFile,row.names=F,quote=F)
 	return(summaryData)
 }
