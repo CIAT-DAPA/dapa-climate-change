@@ -118,7 +118,7 @@ dataSummary <- function(bDir, dataset, variable) {
 				plotData <- read.csv(paste(mDir, "/plotData-", variable, ".csv", sep=""))
 				
 				if (period != "ANNUAL") {
-					plotData <- plotData[which(plotData$MONTH == "TOTAL"),]
+					plotData <- plotData[which(plotData$MONTH == "total"),]
 				}
 				
 				#Adding identification fields
