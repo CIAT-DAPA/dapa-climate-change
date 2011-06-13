@@ -82,3 +82,63 @@ finalMetrics <- function(bDir="", variable="rain", ntiles=5) {
 
 
 #Here implement the density plot figures on a monthly and variable basis
+plotFigure.RSQ <- function(variable) {
+	tiff(paste("./../figures/fig6-",variable, ".tif",sep=""), pointsize=6, width=1000, height=1000, units="px", compression="lzw",bg="white",res=300)
+	values <- read.csv(paste(variable, "_overall-metrics.csv", sep=""))
+	cols <- colorRampPalette(c("red","black"))(12)
+
+	#Plot big histogram
+	hs <- hist(values$R2.TEST,breaks=25, xlim=c(min(values$R2.TEST)-0.01,max(values$R2.TEST)+0.01), xlab="R-square value", main=NA)
+
+	#Plot density lines per months
+	for (m in 1:12) {
+		values.subsel <- values[which(values$MONTH == m),]
+		dp <- density(values.subsel$R2.TEST)
+		dp$y <- dp$y / max(dp$y)
+		lines(dp$x, dp$y*max(hs$counts), col="grey70",lw=0.8)
+	}
+
+	dp <- density(values$R2.TEST)
+	dp$y <- dp$y / max(dp$y)
+	lines(dp$x, dp$y*max(hs$counts), col="black",lw=1.5)
+	dev.off()
+}
+
+
+plotFigure.RMSE <- function(variable) {
+	tiff(paste("./../figures/fig7-",variable, ".tif",sep=""), pointsize=6, width=1000, height=1000, units="px", compression="lzw",bg="white",res=300)
+	values <- read.csv(paste(variable, "_overall-metrics.csv", sep=""))
+	cols <- colorRampPalette(c("red","black"))(12)
+
+	#Plot big histogram
+	hs <- hist(values$RMSE.TEST,breaks=25, xlim=c(min(values$RMSE.TEST)-0.01,max(values$RMSE.TEST)+0.01), xlab="Root mean square error", main=NA)
+
+	#Plot density lines per months
+	for (m in 1:12) {
+		values.subsel <- values[which(values$MONTH == m),]
+		dp <- density(values.subsel$RMSE.TEST)
+		dp$y <- dp$y / max(dp$y)
+		lines(dp$x, dp$y*max(hs$counts), col="grey70",lw=0.8)
+	}
+
+	dp <- density(values$RMSE.TEST)
+	dp$y <- dp$y / max(dp$y)
+	lines(dp$x, dp$y*max(hs$counts), col="black",lw=1.5)
+	dev.off()
+}
+
+boxplots.RSQ <- function(variable) {
+	tiff(paste("./../figures/fig8-",variable, ".tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	values <- read.csv(paste(variable, "_overall-metrics.csv", sep=""))
+	
+	boxplot(values$R2.TEST~rain$MONTH, ylab="R-square", xlab="Month", pch=20, col='white')
+	dev.off()
+}
+
+boxplots.RMSE <- function(variable) {
+	tiff(paste("./../figures/fig9-",variable, ".tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	values <- read.csv(paste(variable, "_overall-metrics.csv", sep=""))
+	
+	boxplot(values$RMSE.TEST~rain$MONTH, ylab="Root mean square error", xlab="Month", pch=20, col='white')
+	dev.off()
+}
