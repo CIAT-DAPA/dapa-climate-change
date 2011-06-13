@@ -66,7 +66,7 @@ metricsSummary <- function(bDir, dataset, variable) {
 				metData <- read.csv(paste(mDir, "/metrics-", variable, ".csv", sep=""))
 				
 				if (period != "ANNUAL") {
-					metData <- metData[which(metData$MONTH == "TOTAL"),]
+					metData <- metData[which(metData$MONTH == "total"),]
 				}
 				
 				#Adding identification fields
@@ -118,7 +118,7 @@ dataSummary <- function(bDir, dataset, variable) {
 				plotData <- read.csv(paste(mDir, "/plotData-", variable, ".csv", sep=""))
 				
 				if (period != "ANNUAL") {
-					metData <- plotData[which(plotData$MONTH == "TOTAL"),]
+					plotData <- plotData[which(plotData$MONTH == "TOTAL"),]
 				}
 				
 				#Adding identification fields
