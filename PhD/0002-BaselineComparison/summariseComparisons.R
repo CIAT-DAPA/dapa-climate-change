@@ -146,7 +146,7 @@ dataSummary <- function(bDir, dataset, variable) {
 
 source("accuracy.R")
 
-regionalMetrics <- function(bDir="", region="WAF", dataset"wcl", variable="prec", period="ANNUAL", month="TOTAL") {
+regionalMetrics <- function(bDir="", region="WAF", dataset="wcl", variable="prec", period="ANNUAL", month="TOTAL") {
 	summaryDir <- paste(bDir, "/summary", sep="")
 	inFile <- paste(summaryDir, "/", variable, "-", dataset, "-vs-gcm-allPlotData.csv", sep="")
 	
