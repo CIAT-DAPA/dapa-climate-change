@@ -1,33 +1,29 @@
 import os, sys, glob, string, shutil
-#python copy.py L:\PrecisData\archive N:\PrecisData\archive
+#python copy.py O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_10min G:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_10min
 
 dirbase = sys.argv[1]
 dirout = sys.argv[2]
 
-folderlist = sorted(os.listdir(dirbase))
+modellist = sorted(os.listdir(dirbase))
 
-for folder in folderlist:
-	print dirbase + "\\" + str(folder) + "\n"
-	# tmplist = sorted(glob.glob(dirbase + "\\" + str(folder) + "\\*"))
-	if not os.path.exists(dirout + "\\" + str(folder)):
-		os.system('mkdir ' + dirout + "\\" + str(folder))
-		
-	# for tmp in tmplist:
-
-		# if not os.path.exists(dirout + "\\" + str(folder) + "\\" + os.path.basename(tmp)):
-			# print file + " ---> " + dirout + "\\" + str(folder) + "\\" + os.path.basename(tmp)
-			# shutil.copyfile(file, dirout + "\\" + str(folder) + "\\" + os.path.basename(tmp))	
-		
-		
-	runidlist = sorted(os.listdir(dirbase + "\\" + str(folder)))
-	for runid in runidlist:
-		print dirbase + "\\" + str(folder) + "\\" + str(runid) + "\n"
-		filelist = sorted(glob.glob(dirbase + "\\" + str(folder) + "\\" + str(runid) + "\\*"))
-		if not os.path.exists(dirout + "\\" + str(folder) + "\\" + str(runid)):
-			os.system('mkdir ' + dirout + "\\" + str(folder) + "\\" + str(runid))
-		
-		for file in filelist:
-
-			if not os.path.exists(dirout + "\\" + str(folder) + "\\" + str(runid) + "\\" + os.path.basename(file)):
-				print file + " ---> " + dirout + "\\" + str(folder) + "\\" + str(runid) + "\\" + os.path.basename(file)
-				shutil.copyfile(file, dirout + "\\" + str(folder) + "\\" + str(runid) + "\\" + os.path.basename(file))
+for model in modellist:
+	print dirbase + "\\" + str(model) + "\n"
+	if not os.path.exists(dirout + "\\" + str(model)):
+		os.system('mkdir ' + dirout + "\\" + str(model))
+		os.system("xcopy /fe " +  dirbase + "\\" + str(model) + " " + dirout + "\\" + str(model))
+	# periodlist = sorted(os.listdir(dirbase + "\\" + str(model)))
+	# for period in periodlist:
+		# print dirbase + "\\" + str(model) + "\\" + str(period) + "\n"
+		# shutil.copytree(dirbase + "\\" + str(model) + "\\" + str(period), dirout + "\\" + str(model) + "\\" + str(period))
+		# # variablelist = sorted(os.listdir(dirbase + "\\" + str(model) + "\\" + str(period)))
+		# for variable in variablelist:
+			# if not variable == "_asciis" and not str(variable) == "*.aux":
+				# shutil.copytree(dirbase + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable), dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable))
+				
+				# # filelist = sorted(glob.glob(dirbase + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\*"))
+				# # if not os.path.exists(dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable)):
+					# # os.system('mkdir ' + dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable))
+					# # for file in filelist:
+						# # if not os.path.exists(dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\" + os.path.basename(file)):
+							# # print file + " ---> " + dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\" + os.path.basename(file)
+							# # shutil.copyfile(file, dirout + "\\" + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\" + os.path.basename(file))
