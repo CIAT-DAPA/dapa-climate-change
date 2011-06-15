@@ -55,51 +55,82 @@ exit
 # 4. sum parts
 ##########################################################################
 
-# new location
-NLOCATION="A2_2040_2069_bccr_bcm2_0"
+function prepare_batch {
 
-# Copy the location
-cp -r /data/TNC/grass/template /data/TNC/grass/$NLOCATION
+  # new location
 
-# Start GRASS shell up at location and mapset
+  NLOCATION=$1
 
-# specify proper variables here
-/usr/bin/grass64 -text /data/TNC/grass/$NLOCATION/PERMANENT
+  # go to the new location and split folders
+  cd /data/TNC/results/$NLOCATION
 
-g.region latinamerica@PERMANENT
+  if [ -d "part.1" ]
+  then
+  
+    # split each part
+    for i in 1 2 3 4 5 6 7 8; 
+    do  
+      for j in part.$i/*;  
+      do
+        id=$(echo $j | cut -f2 -d/);   
+        nf=$(echo ${id:0:4});   
+        if [ -e "$nf" ];   
+        then    
+          mv -v $j $nf;   
+        else    
+          mkdir $nf;    
+          mv -v $j $nf;   
+        fi;
+      done; 
+    done
 
-# Create a mapset that will contain the summaries of each sub folder and a total summary of this run
-g.mapset -c mapset=summary
-g.region latinamerica@PERMANENT
-g.copy rast=template.summary@PERMANENT,richness
+    rm -r part*
+  fi
 
-# Create mapsets
-# prefix mapsets with s -> subfolder
 
-ls | grep -e "^[0-9]" | while read folder
-do
-  # create mapset for folder
-  g.mapset -c mapset=s$folder --quiet
+
+  # Copy the location
+  cp -r /mnt/GIS-HD716/TNC_global_plants/grass/template /data/TNC/grass/$NLOCATION
+
+  # Start GRASS shell up at location and mapset
+  # specify proper variables here
+  /usr/bin/grass64 -text /data/TNC/grass/$NLOCATION/PERMANENT
+
   g.region latinamerica@PERMANENT
 
-done
-exit
+  # Create a mapset that will contain the summaries of each sub folder and a total summary of this run
+  g.mapset -c mapset=summary
+  g.region latinamerica@PERMANENT
+  g.copy rast=template.summary@PERMANENT,richness
 
-# Check if function for parallelizing are here
-svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/util/bash_parallel.sh /data/TNC/src/bash_parallel.sh
-. /data/TNC/src/bash_parallel.sh
+  # Create mapsets
+  # prefix mapsets with s -> subfolder
+
+  ls | grep -e "^[0-9]" | while read folder
+  do
+    # create mapset for folder
+    g.mapset -c mapset=s$folder --quiet
+    g.region latinamerica@PERMANENT
+
+  done
+  exit
+
+  # Check if function for parallelizing are here
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/util/bash_parallel.sh /data/TNC/src/bash_parallel.sh
+  . /data/TNC/src/bash_parallel.sh
 
 
-# check if the batch bash script is available (present
-svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_current.sh  /data/TNC/src/batch_current.sh 
+  # check if the batch bash script is available (present
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_current.sh  /data/TNC/src/batch_current.sh 
 
-# check if the batch bash script is available (futur)
-svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_future.sh  /data/TNC/src/batch_future.sh 
+  # check if the batch bash script is available (futur)
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_future.sh  /data/TNC/src/batch_future.sh 
 
 
-# allow writing access
-chmod u+x /data/TNC/src/batch_current.sh 
-chmod u+x /data/TNC/src/batch_future.sh 
+  # allow writing access
+  chmod u+x /data/TNC/src/batch_current.sh 
+  chmod u+x /data/TNC/src/batch_future.sh 
+}
 
 ####
 # Batch wrapper
@@ -121,33 +152,50 @@ function runbatch_future {
 
 }
 
+function calculateRichness {
 
+  NLOCATION=$1
 
-# dir for console output
-mkdir err
+  # go to the new location
+  cd /data/TNC/results/$NLOCATION
 
-# parallel
-QUEUE=""
-MAX_NPROC=16
+  prepare_batch $NLOCATION
 
-# run in parallel
-ls | grep -e "^[0-9]" | while read folder
-do
-  # run processes current
-  # runbatch_current $folder &> err/$folder.txt &
+  # dir for console output
+  mkdir err
 
-  # run process future
-  runbatch_future $folder $NLOCATION &> err/$folder.txt &
+  # parallel
+  QUEUE=""
+  MAX_NPROC=16
 
-  PID=$!
-  queue $PID
+  # run in parallel
+  ls | grep -e "^[0-9]" | while read folder
+  do
+    # run processes current
+    # runbatch_current $folder &> err/$folder.txt &
 
-  while [ $NUM -ge $MAX_NPROC ] 
+    # run process future
+    runbatch_future $folder $NLOCATION &> err/$folder.txt &
+
+    PID=$!
+    queue $PID
+
+    while [ $NUM -ge $MAX_NPROC ] 
+    do
+      checkqueue
+      sleep 0.5
+    done
+  done
+
+  # wait untill all processes finished 
+  while [ $NUM -ge 1 ]
   do
     checkqueue
-    sleep 0.5
+    sleep 10
   done
-done
+}
+
+
 
 
 
