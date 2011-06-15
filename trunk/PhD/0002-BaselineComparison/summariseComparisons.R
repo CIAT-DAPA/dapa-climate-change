@@ -190,3 +190,176 @@ regionalMetrics <- function(bDir="", region="WAF", dataset="wcl", variable="prec
 	outFile <- paste(summaryDir, "/", variable, "-", region, "-", dataset, "-vs-gcm-metrics.csv", sep="")
 	write.csv(metData, outFile, quote=F, row.names=F)
 }
+
+
+#Boxplots
+boxplots.cru_wcl.ISO <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/metrics", variable="prec") {
+	inFile.cru <- paste(fDir, "/", variable, "-cru-vs-gcm-summaryMetrics.csv", sep="")
+	inFile.wcl <- paste(fDir, "/", variable, "-wcl-vs-gcm-summaryMetrics.csv", sep="")
+
+	cruValues <- read.csv(inFile.cru)
+	wclValues <- read.csv(inFile.wcl)
+	allValues <- rbind(cruValues, wclValues)
+
+	values.ann <- allValues[which(allValues$PERIOD == "ANNUAL" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+	values.djf <- allValues[which(allValues$PERIOD == "DJF" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+	values.jja <- allValues[which(allValues$PERIOD == "JJA" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+
+	for (period in c("ann","djf","jja")) {
+		values <- get(paste("values.", period, sep=""))
+		
+		tiff(paste(fDir, "/figures/merged/fig-ISO-",variable, "-", period, "-cru_wcl-vs-gcm_N.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2)
+		boxplot(values$N~values$ISO, ylab="Number of observations", pch=20, col='white')
+		dev.off()
+
+		tiff(paste(fDir, "/figures/merged/fig-ISO-",variable, "-", period, "-cru_wcl-vs-gcm_R2.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2)
+		boxplot(values$R2.FORCED~values$ISO, ylab="R-square", pch=20, col='white')
+		dev.off()
+
+		tiff(paste(fDir, "/figures/merged/fig-ISO-",variable, "-", period, "-cru_wcl-vs-gcm_SLOPE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2)
+		boxplot(values$SLOPE.FORCED~values$ISO, ylab="Slope", pch=20, col='white')
+		dev.off()
+
+		tiff(paste(fDir, "/figures/merged/fig-ISO-",variable, "-", period, "-cru_wcl-vs-gcm_RMSE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2)
+		boxplot(values$ERROR~values$ISO, ylab="RMSE", pch=20, col='white')
+		dev.off()
+	}
+}
+
+#Boxplots for CRU and WCL comparisons merged
+boxplots.cru_wcl.GCM <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/metrics", variable="prec") {
+	inFile.cru <- paste(fDir, "/", variable, "-cru-vs-gcm-summaryMetrics.csv", sep="")
+	inFile.wcl <- paste(fDir, "/", variable, "-wcl-vs-gcm-summaryMetrics.csv", sep="")
+
+	cruValues <- read.csv(inFile.cru)
+	wclValues <- read.csv(inFile.wcl)
+	allValues <- rbind(cruValues, wclValues)
+
+	values.ann <- allValues[which(allValues$PERIOD == "ANNUAL" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+	values.djf <- allValues[which(allValues$PERIOD == "DJF" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+	values.jja <- allValues[which(allValues$PERIOD == "JJA" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+
+	for (period in c("ann","djf","jja")) {
+		values <- get(paste("values.", period, sep=""))
+		
+		tiff(paste(fDir, "/figures/merged/fig-GCM-",variable, "-", period, "-cru_wcl-vs-gcm_N.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2, mar=c(11, 5, 1, 1))
+		boxplot(values$N~values$MODEL, ylab="Number of observations", pch=20, col='white')
+		dev.off()
+
+		tiff(paste(fDir, "/figures/merged/fig-GCM-",variable, "-", period, "-cru_wcl-vs-gcm_R2.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2, mar=c(11, 5, 1, 1))
+		boxplot(values$R2.FORCED~values$MODEL, ylab="R-square", pch=20, col='white')
+		dev.off()
+
+		tiff(paste(fDir, "/figures/merged/fig-GCM-",variable, "-", period, "-cru_wcl-vs-gcm_SLOPE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2, mar=c(11, 5, 1, 1))
+		boxplot(values$SLOPE.FORCED~values$MODEL, ylab="Slope", pch=20, col='white')
+		dev.off()
+
+		tiff(paste(fDir, "/figures/merged/fig-GCM-",variable, "-", period, "-cru_wcl-vs-gcm_RMSE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+		par(las=2, mar=c(11, 5, 1, 1))
+		boxplot(values$ERROR~values$MODEL, ylab="RMSE", pch=20, col='white')
+		dev.off()
+	}
+}
+
+
+#Boxplot where countries are x-axis
+boxplots.ISO <- function(fDir="", variable="prec", dataset="wcl", period="ANNUAL") {
+	#Reading in data
+	inFile <- paste(fDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
+	allValues <- read.csv(inFile)
+
+	#Sub-selecting desired data
+	values <- allValues[which(allValues$PERIOD == period & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+	
+	#Plotting
+	tiff(paste(fDir, "/figures/fig-ISO-",variable, "-", period, "-", dataset, "-vs-gcm_N.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2)
+	boxplot(values$N~values$ISO, ylab="Number of observations", pch=20, col='white')
+	dev.off()
+	
+	tiff(paste(fDir, "/figures/fig-ISO-",variable, "-", period, "-", dataset, "-vs-gcm_R2.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2)
+	boxplot(values$R2.FORCED~values$ISO, ylab="R-square", pch=20, col='white')
+	dev.off()
+	
+	tiff(paste(fDir, "/figures/fig-ISO-",variable, "-", period, "-", dataset, "-vs-gcm_SLOPE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2)
+	boxplot(values$SLOPE.FORCED~values$ISO, ylab="Slope", pch=20, col='white')
+	dev.off()
+	
+	tiff(paste(fDir, "/figures/fig-ISO-",variable, "-", period, "-", dataset, "-vs-gcm_RMSE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2)
+	boxplot(values$ERROR~values$ISO, ylab="RMSE", pch=20, col='white')
+	dev.off()
+}
+
+#Boxplot where GCMs are x-axis
+boxplots.GCM <- function(fDir="", variable="prec", dataset="wcl", period="ANNUAL") {
+	#Reading in data
+	inFile <- paste(fDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
+	allValues <- read.csv(inFile)
+
+	#Sub-selecting desired data
+	values <- allValues[which(allValues$PERIOD == period & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
+	
+	#Plotting
+	tiff(paste(fDir, "/figures/fig-GCM-",variable, "-", period, "-", dataset, "-vs-gcm_N.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2, mar=c(11, 5, 1, 1))
+	boxplot(values$N~values$MODEL, ylab="Number of observations", pch=20, col='white')
+	dev.off()
+	
+	tiff(paste(fDir, "/figures/fig-GCM-",variable, "-", period, "-", dataset, "-vs-gcm_R2.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2, mar=c(11, 5, 1, 1))
+	boxplot(values$R2.FORCED~values$MODEL, ylab="R-square", pch=20, col='white')
+	dev.off()
+	
+	tiff(paste(fDir, "/figures/fig-GCM-",variable, "-", period, "-", dataset, "-vs-gcm_SLOPE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2, mar=c(11, 5, 1, 1))
+	boxplot(values$SLOPE.FORCED~values$MODEL, ylab="Slope", pch=20, col='white')
+	dev.off()
+	
+	tiff(paste(fDir, "/figures/fig-GCM-",variable, "-", period, "-", dataset, "-vs-gcm_RMSE.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
+	par(las=2, mar=c(11, 5, 1, 1))
+	boxplot(values$ERROR~values$MODEL, ylab="RMSE", pch=20, col='white')
+	dev.off()
+}
+
+generateBoxplots <- function(fd="C:/CIAT_work/CCAFS/baselineComparison/metrics") {
+	for (vr in c("prec","tmean") {
+		for (dset in c("wcl","cru","wclst","ghcn","gsod")) {
+			for (prd in c("ANNUAL","JJA","DJF")) {
+				boxplots.ISO(fDir=fd, variable=vr, dataset=dset, period=prd)
+				boxplots.GCM(fDir=fd, variable=vr, dataset=dset, period=prd)
+			}
+		}
+	}
+}
+
+createColoured <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/metrics", variable="prec", dataset="wclst", month="total", period="ANNUAL", metric="R2.FORCED") {
+	inFile <- paste(fDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
+	allValues <- read.csv(inFile)
+	col.metric <- which(names(allValues) == metric)
+	
+	#Sub-selecting desired data
+	values <- allValues[which(allValues$PERIOD == period & allValues$MONTH == month & allValues$VALUE == "MEAN"),]
+	for (iso in unique(values$ISO)) {
+		values.iso <- values[which(values$ISO == iso),]
+		values.iso <- data.frame(X=values.iso$MODEL, Y=values.iso[,col.metric])
+		names(values.iso) <- c("GCM",paste(iso))
+		
+		if (iso == unique(values$ISO)[1]) {
+			output <- values.iso
+		} else {
+			output <- merge(output,values.iso)
+		}
+	}
+
+	write.csv(output, "coloured.csv", row.names=F, quote=F)
+}
