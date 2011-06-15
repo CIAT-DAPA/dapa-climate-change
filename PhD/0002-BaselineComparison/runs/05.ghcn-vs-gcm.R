@@ -4,19 +4,24 @@
 #################################################################################
 #################################################################################
 
-setwd("D:/_tools/dapa-climate-change/trunk/PhD/0002-BaselineComparison/")
+library(rgdal)
+
+repoDir <- "D:/_tools"
+srcDir <- paste(repoDir, "/dapa-climate-change/trunk/PhD/0002-BaselineComparison", sep="")
+setwd(srcDir)
 source("compareGHCNRaster-TS.R")
 
 #Specify data location
-wd <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/ghcn-weather-stations/"
+mDataDir <- "F:/PhD-work"
+wd <- paste(mDataDir, "/climate-data-assessment/comparisons/input-data/ghcn-weather-stations/", sep="")
 ad <- "F:/Administrative_boundaries/SHP_files"
 gd <- "F:/climate_change/IPCC_CMIP3/20C3M/original-data"
-od <- "F:/PhD-work/climate-data-assessment/comparisons/results/ghcn-vs-gcm-ts"
+od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/ghcn-vs-gcm-ts", sep="")
 
 cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL")
 for (ctry in cList) {
-  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which=ALL, aDir=ad, var.in="rain", var.out="prec", iso.ctry=ctry, time.series=c(1961:1990))
-  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which=ALL, aDir=ad, var.in="tmean", var.out="tmean", iso.ctry=ctry, time.series=c(1961:1990))
+  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in="rain", var.out="prec", iso.ctry=ctry, time.series=c(1961:1990))
+  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in="tmean", var.out="tmean", iso.ctry=ctry, time.series=c(1961:1990))
 }
 
 
