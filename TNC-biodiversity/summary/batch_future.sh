@@ -78,7 +78,8 @@
 
 
     # getting threshold value (already rescaled to 1 - 256)
-    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
+    # threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
+    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select thresholdrs from species where species_id=$base;")
 
     # register raste rin GRASS
     r.in.gdal in=$base.tif out=s$base -o 
@@ -115,31 +116,31 @@
 
     # add to total
     r.mapcalc "rgain=rgain.tmp + s$base.to.rgain"
-    g.copy rast=rgain,rgain.tmp --o
+    g.rename rast=rgain,rgain.tmp --o
 
     r.mapcalc "rloss=rloss.tmp + s$base.to.rloss"
-    g.copy rast=rloss,rloss.tmp --o
+    g.rename rast=rloss,rloss.tmp --o
 
     r.mapcalc "rrichness=rrichness.tmp + s$base.to.rrichness"
-    g.copy rast=rrichness,rrichness.tmp --o
+    g.rename rast=rrichness,rrichness.tmp --o
 
     r.mapcalc "ogain=ogain.tmp + s$base.to.ogain"
-    g.copy rast=ogain,ogain.tmp --o
+    g.rename rast=ogain,ogain.tmp --o
 
     r.mapcalc "oloss=oloss.tmp + s$base.to.oloss"
-    g.copy rast=oloss,oloss.tmp --o
+    g.rename rast=oloss,oloss.tmp --o
 
     r.mapcalc "orichness=orichness.tmp + s$base.to.orichness"
-    g.copy rast=orichness,orichness.tmp --o
+    g.rename rast=orichness,orichness.tmp --o
 
     r.mapcalc "ngain=ngain.tmp + s$base.to.ngain"
-    g.copy rast=ngain,ngain.tmp --o
+    g.rename rast=ngain,ngain.tmp --o
 
     r.mapcalc "nloss=nloss.tmp + s$base.to.nloss"
-    g.copy rast=nloss,nloss.tmp --o
+    g.rename rast=nloss,nloss.tmp --o
 
     r.mapcalc "nrichness=nrichness.tmp + s$base.to.nrichness"
-    g.copy rast=nrichness,nrichness.tmp --o
+    g.rename rast=nrichness,nrichness.tmp --o
 
     # clean
     g.remove rast=s$base.p
