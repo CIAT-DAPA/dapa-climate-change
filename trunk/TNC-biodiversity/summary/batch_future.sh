@@ -26,48 +26,40 @@
   # 4 = current + chull (300km) + 30 km = 2030 optimistic
   # 2 = current + chull (300km) + 40 km = 2050 optimistic
 
-  null_gain="101"
-  null_loss="102"
-  null_richness="101 103"
-
   if [ $year = "2020_2049" ] 
   then
-    realistic_gain="81 101"
-    realistic_loss="82 102"
-    realistic_richness="81 83 101 103"
-    optimistic_gain="41 61 81 101"
-    optimistic_loss="42 62 82 102"
-    optimistic_richness="41 43 61 63 81 83 101 103"
+    realistic_richness="11 12"
+    realistic_gain="12"
+    optimistic_richness="11 12 13 14"
+    optimistic_gain="12 13 14"
   elif [ $year = "2040_2069" ]
   then
-    realistic_gain="61 81 101"
-    realistic_loss="62 82 102"
-    realistic_richness="61 63 81 83 101 103"
-    optimistic_gain="21 41 61 81 101"
-    optimistic_loss="22 42 62 82 102"
-    optimistic_richness="21 23 41 43 61 63 81 83 101 103"
+    realistic_richness="11 12 13"
+    realistic_gain="12 13"
+    optimistic_richness="11 12 13 14 15"
+    optimistic_gain="12 13 14 15"
   fi
 
   # Create reclass tables for gain, loss and richness
   echo -e "$realistic_gain = 1 \n * = 0 " > rc.tables/realistic_gain.rc 
-  echo -e "$realistic_loss = 1 \n * = 0 " > rc.tables/realistic_loss.rc 
   echo -e "$realistic_richness = 1 \n * = 0 " > rc.tables/realistic_richness.rc 
   echo -e "$optimistic_gain = 1 \n * = 0 " > rc.tables/optimistic_gain.rc 
-  echo -e "$optimistic_loss = 1 \n * = 0 " > rc.tables/optimistic_loss.rc 
   echo -e "$optimistic_richness = 1 \n * = 0 " > rc.tables/optimistic_richness.rc 
-  echo -e "$null_gain = 1 \n * = 0 " > rc.tables/null_gain.rc 
-  echo -e "$null_loss = 1 \n * = 0 " > rc.tables/null_loss.rc 
-  echo -e "$null_richness = 1 \n * = 0 " > rc.tables/null_richness.rc 
+
+  # null, full and loss dont change
+  echo -e "11 = 1 \n * = 0 " > rc.tables/null_richness.rc  # null has no gain
+  echo -e "10 11 12 13 14 15 = 1 \n * = 0 " > rc.tables/full_richness.rc 
+  echo -e "10 12 13 14 15 = 1 \n * = 0 " > rc.tables/full_gain.rc 
+  echo -e "1 = 1 \n * = 0 " > rc.tables/loss.rc 
 
   r.mapcalc "rrichness.tmp=0"
   r.mapcalc "rgain.tmp=0"
-  r.mapcalc "rloss.tmp=0"
   r.mapcalc "orichness.tmp=0"
   r.mapcalc "ogain.tmp=0"
-  r.mapcalc "oloss.tmp=0"
   r.mapcalc "nrichness.tmp=0"
-  r.mapcalc "ngain.tmp=0"
-  r.mapcalc "nloss.tmp=0"
+  r.mapcalc "fgain.tmp=0"
+  r.mapcalc "frichness.tmp=0"
+  r.mapcalc "loss.tmp=0"
 
 
   # cycle through each tif
@@ -78,75 +70,71 @@
 
 
     # getting threshold value (already rescaled to 1 - 256)
-    # threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
-    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select thresholdrs from species where species_id=$base;")
+    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
+    #threshold=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select thresholdrs from species where species_id=$base;")
 
-    # register raste rin GRASS
+    # register raster in GRASS
     r.in.gdal in=$base.tif out=s$base -o 
 
-    # create reclassification table (0 absence, 2 presence, 2 is used so it can be used in the turn over calculation 
-    echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 1 " > rc.tables/$base.rc 
+    # create reclassification table (0 absence, 10 presence 
+    echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 10 " > rc.tables/$base.rc 
 
     # reclass
     r.reclass in=s$base out=s$base.p rules=rc.tables/$base.rc --o
-  
-    # Add presence of the model to the stencil
-    r.mapcalc "s$base.to=s$base.p + s$base.stencil@c$folder"
+
+    # Add current buffered distribution and futur distribution together
+    r.mapcalc "s$base.start=s$base.p + s$base.buf@c$folder"  
 
     # Reclass for gain, loss and richness
     echo -e "$realistic_gain = 1 \n * = 0 " > rc.tables/realistic_gain.rc 
-    echo -e "$realistic_loss = 1 \n * = 0 " > rc.tables/realistic_loss.rc 
-    echo -e "$realistic_richness = 1 \n * = 0 " > rc.tables/realistic_richness.rc 
-    echo -e "$optimistic_gain = 1 \n * = 0 " > rc.tables/optimistic_gain.rc 
-    echo -e "$optimistic_loss = 1 \n * = 0 " > rc.tables/optimistic_loss.rc 
-    echo -e "$optimistic_richness = 1 \n * = 0 " > rc.tables/optimistic_richness.rc 
-    echo -e "$null_gain = 1 \n * = 0 " > rc.tables/null_gain.rc 
-    echo -e "$null_loss = 1 \n * = 0 " > rc.tables/null_loss.rc 
-    echo -e "$null_richness = 1 \n * = 0 " > rc.tables/null_richness.rc 
 
-    r.reclass in=s$base.to out=s$base.to.rgain rules=rc.tables/realistic_gain.rc 
-    r.reclass in=s$base.to out=s$base.to.rloss rules=rc.tables/realistic_loss.rc 
-    r.reclass in=s$base.to out=s$base.to.rrichness rules=rc.tables/realistic_richness.rc 
-    r.reclass in=s$base.to out=s$base.to.ogain rules=rc.tables/optimistic_gain.rc 
-    r.reclass in=s$base.to out=s$base.to.oloss rules=rc.tables/optimistic_loss.rc 
-    r.reclass in=s$base.to out=s$base.to.orichness rules=rc.tables/optimistic_richness.rc 
-    r.reclass in=s$base.to out=s$base.to.ngain rules=rc.tables/null_gain.rc 
-    r.reclass in=s$base.to out=s$base.to.nloss rules=rc.tables/null_loss.rc 
-    r.reclass in=s$base.to out=s$base.to.nrichness rules=rc.tables/null_richness.rc 
 
-    # add to total
-    r.mapcalc "rgain=rgain.tmp + s$base.to.rgain"
-    g.rename rast=rgain,rgain.tmp --o
+    # realistic gain and richness
+    r.reclass in=s$base.start out=s$base.rgain rules=rc.tables/realistic_gain.rc 
+    r.reclass in=s$base.start out=s$base.rrichness rules=rc.tables/realistic_richness.rc 
 
-    r.mapcalc "rloss=rloss.tmp + s$base.to.rloss"
-    g.rename rast=rloss,rloss.tmp --o
-
-    r.mapcalc "rrichness=rrichness.tmp + s$base.to.rrichness"
+    r.mapcalc "rrichness=rrichness.tmp + s$base.richness"
     g.rename rast=rrichness,rrichness.tmp --o
 
-    r.mapcalc "ogain=ogain.tmp + s$base.to.ogain"
-    g.rename rast=ogain,ogain.tmp --o
+    r.mapcalc "rgain=rgain.tmp + s$base.rgain"
+    g.rename rast=rgain,rgain.tmp --o
+    
+    # optimistic gain and richness
+    r.reclass in=s$base.start out=s$base.ogain rules=rc.tables/optimistic_gain.rc 
+    r.reclass in=s$base.start out=s$base.to.rgain rules=rc.tables/realistic_gain.rc 
 
-    r.mapcalc "oloss=oloss.tmp + s$base.to.oloss"
-    g.rename rast=oloss,oloss.tmp --o
-
-    r.mapcalc "orichness=orichness.tmp + s$base.to.orichness"
+    r.mapcalc "orichness=orichness.tmp + s$base.orichness"
     g.rename rast=orichness,orichness.tmp --o
 
-    r.mapcalc "ngain=ngain.tmp + s$base.to.ngain"
-    g.rename rast=ngain,ngain.tmp --o
+    r.mapcalc "ogain=ogain.tmp + s$base.ogain"
+    g.rename rast=ogain,ogain.tmp --o
+    
+    # null richness
+    r.reclass in=s$base.start out=s$base.nrichness rules=rc.tables/null_richness.rc
 
-    r.mapcalc "nloss=nloss.tmp + s$base.to.nloss"
-    g.rename rast=nloss,nloss.tmp --o
-
-    r.mapcalc "nrichness=nrichness.tmp + s$base.to.nrichness"
+    r.mapcalc "nrichness=nrichness.tmp + s$base.nrichness"
     g.rename rast=nrichness,nrichness.tmp --o
 
+    # full richness and gain
+    r.reclass in=s$base.start out=s$base.frichness rules=rc.tables/full_richness.rc 
+    r.reclass in=s$base.start out=s$base.fgain rules=rc.tables/full_gain.rc 
+
+    r.mapcalc "frichness=frichness.tmp + s$base.frichness"
+    g.rename rast=frichness,frichness.tmp --o
+
+    r.mapcalc "fgain=fgain.tmp + s$base.fgain"
+    g.rename rast=fgain,fgain.tmp --o    
+
+    # loss for all
+    r.reclass in=s$base.start out=s$base.loss rules=rc.tables/loss.rc 
+
+    r.mapcalc "loss=loss.tmp + s$base.loss"
+    g.rename rast=loss,loss.tmp --o
+
     # clean
-    g.remove rast=s$base.p
     g.remove rast=s$base
-    g.mremove rast="s$base.to*" -f
-    g.mremove rast="s$base.to*" -f
+    g.mremove rast="s$base.*" -f
+    g.mremove rast="s$base.*" -f
   done
 
   # remove temp rasters
