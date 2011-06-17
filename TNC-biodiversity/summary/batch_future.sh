@@ -1,11 +1,11 @@
 # Batch job, to be started in current directory
   # which folder should I work in
-  folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=' | sed 's/s//')
-  location=$(g.gisenv -n | grep 'LOCATION_NAME' | cut -f2 -d'=' | sed 's/s//')
+  folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=' | cut -c2-)
+  location=$(g.gisenv -n | grep 'LOCATION_NAME' | cut -f2 -d'=')
   gisdb=$(g.gisenv -n | grep 'GISDBASE' | cut -f2 -d'=')
 
 # go to folder
-  cd /data/TNC/results/la_5k_$location/$folder
+  cd /data/TNC/results/$location/$folder
 
   # make folder for reclassification tables  
   mkdir rc.tables  
@@ -16,7 +16,7 @@
 
   # figure out which year we are treating
 
-  year=$(echo $location | awk 'BEGIN{FS=OFS="_"}{print $2,$3}')
+  year=$(echo $location | awk 'BEGIN{FS=OFS="_"}{print $4,$5}')
 
   # setting thresholds according to the year of the SRES
   # each sres correspongs to a value in the [spid].stencil.b 
@@ -70,13 +70,13 @@
 
 
     # getting threshold value (already rescaled to 1 - 256)
-    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
-    #threshold=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select thresholdrs from species where species_id=$base;")
+    # threshold=$(mysql --skip-column-names -umodel1 -pmaxent -hflora.ciat.cgiar.org -e"use tnc; select thresholdrs from species where species_id=$base;")
+    threshold=$(mysql --skip-column-names -umodel1 -pmaxent -e"use tnc; select thresholdrs from species where species_id=$base;")
 
     # register raster in GRASS
     r.in.gdal in=$base.tif out=s$base -o 
 
-    # create reclassification table (0 absence, 10 presence 
+    # create reclassification table (0 absence, 10 presence) 
     echo -e "0 thru $threshold = 0 \n$threshold thru 300 = 10 " > rc.tables/$base.rc 
 
     # reclass
@@ -84,24 +84,23 @@
 
     # Add current buffered distribution and futur distribution together
     r.mapcalc "s$base.start=s$base.p + s$base.buf@c$folder"  
-
-    # Reclass for gain, loss and richness
-    echo -e "$realistic_gain = 1 \n * = 0 " > rc.tables/realistic_gain.rc 
-
+    
+    # set s$base.start null to 0, in order to avoid problems
+    r.null map=s$base.start null=0
 
     # realistic gain and richness
-    r.reclass in=s$base.start out=s$base.rgain rules=rc.tables/realistic_gain.rc 
     r.reclass in=s$base.start out=s$base.rrichness rules=rc.tables/realistic_richness.rc 
+    r.reclass in=s$base.start out=s$base.rgain rules=rc.tables/realistic_gain.rc 
 
-    r.mapcalc "rrichness=rrichness.tmp + s$base.richness"
+    r.mapcalc "rrichness=rrichness.tmp + s$base.rrichness"
     g.rename rast=rrichness,rrichness.tmp --o
 
     r.mapcalc "rgain=rgain.tmp + s$base.rgain"
     g.rename rast=rgain,rgain.tmp --o
     
     # optimistic gain and richness
+    r.reclass in=s$base.start out=s$base.orichness rules=rc.tables/optimistic_richness.rc 
     r.reclass in=s$base.start out=s$base.ogain rules=rc.tables/optimistic_gain.rc 
-    r.reclass in=s$base.start out=s$base.to.rgain rules=rc.tables/realistic_gain.rc 
 
     r.mapcalc "orichness=orichness.tmp + s$base.orichness"
     g.rename rast=orichness,orichness.tmp --o
@@ -132,14 +131,11 @@
     g.rename rast=loss,loss.tmp --o
 
     # clean
-    g.remove rast=s$base
     g.mremove rast="s$base.*" -f
     g.mremove rast="s$base.*" -f
+    g.remove rast=s$base  
   done
 
-  # remove temp rasters
-  g.mremove rast="*.tmp" -f
- 
   rm -r rc.tables
 
 cd ..
