@@ -63,39 +63,7 @@ done
     d.mon stop=PNG
 
 # Future richness
-
-g.region latinamerica
-
-r.mapcalc "ngain=0"
-r.mapcalc "nloss=0"
-r.mapcalc "nrichness=0"
-
-r.mapcalc "ogain=0"
-r.mapcalc "oloss=0"
-r.mapcalc "orichness=0"
-
-r.mapcalc "rgain=0"
-r.mapcalc "rloss=0"
-r.mapcalc "rrichness=0"
-
-
-for i in $(g.mapset -l)
-do
-  mapset=$(echo $i | grep "^s[0-9]")
   
-  if [ $mapset ]
-  then
-    for adapt in n o r
-    do
-      for measure in gain loss richness
-      do
-        r.mapcalc "tmp=${adapt}${measure}@PERMANENT+${adapt}${measure}@${mapset}"       
-        g.rename rast=tmp,${adapt}${measure}@PERMANENT --o
-      done
-    done    
-  fi  
-done  
-
 
 # Create maps
 for adapt in n o r
