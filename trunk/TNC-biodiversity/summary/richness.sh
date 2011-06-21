@@ -55,7 +55,7 @@ exit
 # 4. sum parts
 ##########################################################################
 
-function prepare_batch {
+function renameRuns {
 
   # new location
 
@@ -92,9 +92,14 @@ function prepare_batch {
   # Copy the location
   cp -r /mnt/GIS-HD716/TNC_global_plants/grass/template /data/TNC/grass/$NLOCATION
 
+}
+
   # Start GRASS shell up at location and mapset
   # specify proper variables here
-  /usr/bin/grass64 -text /data/TNC/grass/$NLOCATION/PERMANENT
+
+while read line
+do
+  g.mapset location=$line mapset=PERMANENT
 
   g.region latinamerica@PERMANENT
 
@@ -105,6 +110,8 @@ function prepare_batch {
 
   # Create mapsets
   # prefix mapsets with s -> subfolder
+  
+  cd /data/TNC/results/$line
 
   ls | grep -e "^[0-9]" | while read folder
   do
@@ -113,24 +120,8 @@ function prepare_batch {
     g.region latinamerica@PERMANENT
 
   done
-  exit
+done < list.todo
 
-  # Check if function for parallelizing are here
-  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/util/bash_parallel.sh /data/TNC/src/bash_parallel.sh
-  . /data/TNC/src/bash_parallel.sh
-
-
-  # check if the batch bash script is available (present
-  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_current.sh  /data/TNC/src/batch_current.sh 
-
-  # check if the batch bash script is available (futur)
-  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_future.sh  /data/TNC/src/batch_future.sh 
-
-
-  # allow writing access
-  chmod u+x /data/TNC/src/batch_current.sh 
-  chmod u+x /data/TNC/src/batch_future.sh 
-}
 
 ####
 # Batch wrapper
@@ -156,17 +147,36 @@ function calculateRichness {
 
   NLOCATION=$1
 
+   # Check if function for parallelizing are here
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/util/bash_parallel.sh /data/TNC/src/bash_parallel.sh
+
+  . /data/TNC/src/bash_parallel.sh
+
+
+  # check if the batch bash script is available (present
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_current.sh  /data/TNC/src/batch_current.sh 
+
+  # check if the batch bash script is available (futur)
+  svn export https://dapa-climate-change.googlecode.com/svn/trunk/TNC-biodiversity/summary/batch_future.sh  /data/TNC/src/batch_future.sh 
+
+
+  # allow writing access
+  chmod u+x /data/TNC/src/batch_current.sh 
+  chmod u+x /data/TNC/src/batch_future.sh 
+
+  
   # go to the new location
   cd /data/TNC/results/$NLOCATION
 
-  prepare_batch $NLOCATION
-
   # dir for console output
-  mkdir err
-
+  if [ ! -d "err" ]
+  then
+    mkdir err
+  fi
+  
   # parallel
   QUEUE=""
-  MAX_NPROC=16
+  MAX_NPROC=22
 
   # run in parallel
   ls | grep -e "^[0-9]" | while read folder
@@ -175,6 +185,7 @@ function calculateRichness {
     # runbatch_current $folder &> err/$folder.txt &
 
     # run process future
+    echo "..... starting with $NLOCATION $folder ........."
     runbatch_future $folder $NLOCATION &> err/$folder.txt &
 
     PID=$!
@@ -186,15 +197,13 @@ function calculateRichness {
       sleep 0.5
     done
   done
-
-  # wait untill all processes finished 
-  while [ $NUM -ge 1 ]
-  do
-    checkqueue
-    sleep 10
-  done
 }
 
+while read line 
+do
+  calculateRichness $line
+  wait ${!}
+done < list.todo
 
 
 
