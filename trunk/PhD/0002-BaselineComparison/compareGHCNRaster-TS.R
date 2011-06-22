@@ -62,52 +62,56 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
   odm <- paste(outDir, "/", vn, "-metrics", sep=""); if (!file.exists(odm)) {dir.create(odm)}
   odmGCM <- paste(odm, "/", gcmmd, sep=""); if (!file.exists(odmGCM)) {dir.create(odmGCM)}
   
-  #Reading stations file and selecting stations within the study area
-  wts.dir <- paste("./organized-data/", vn, "-per-station", sep="")
-  st.list <- read.csv(paste("./organized-data/ghcn_", vn, "_", min(timeseries), "_", max(timeseries), "_mean.csv", sep=""))
-  st.sel <- st.list[which(st.list$LONG <= msk@extent@xmax & st.list$LONG >= msk@extent@xmin & st.list$LAT <= msk@extent@ymax & st.list$LAT >= msk@extent@ymin),]
-  st.sel$INSIDE <- extract(msk, cbind(st.sel$LONG,st.sel$LAT))
-  st.sel <- st.sel[which(st.sel$INSIDE == 1),]
-  st.sel <- st.sel[,c(1,3:5,ncol(st.sel))]
-  st.ids <- st.sel$ID
-  rm(st.list); g=gc()
+  #Check if metrics file exists
+  if (!file.exists(paste(odmGCM, "/metrics-", iso, ".csv", sep=""))) {
   
-  if (length(st.ids) > 0) {
-    cat("Analysing", length(st.ids), "stations \n")
+    #Reading stations file and selecting stations within the study area
+    wts.dir <- paste("./organized-data/", vn, "-per-station", sep="")
+    st.list <- read.csv(paste("./organized-data/ghcn_", vn, "_", min(timeseries), "_", max(timeseries), "_mean.csv", sep=""))
+    st.sel <- st.list[which(st.list$LONG <= msk@extent@xmax & st.list$LONG >= msk@extent@xmin & st.list$LAT <= msk@extent@ymax & st.list$LAT >= msk@extent@ymin),]
+    st.sel$INSIDE <- extract(msk, cbind(st.sel$LONG,st.sel$LAT))
+    st.sel <- st.sel[which(st.sel$INSIDE == 1),]
+    st.sel <- st.sel[,c(1,3:5,ncol(st.sel))]
+    st.ids <- st.sel$ID
+    rm(st.list); g=gc()
     
-    st.counter <- 1
-    #Loading station data and defining the site
-    for (st.id in st.ids) {
-      if (st.counter%%10 == 0 | st.counter == 1) {cat("Processing station", paste(st.id), "\n")}
+    if (length(st.ids) > 0) {
+      cat("Analysing", length(st.ids), "stations \n")
       
-      #Reading the weather station data
-      std <- read.csv(paste("./organized-data/", vn, "-per-station/", st.id, ".csv", sep=""))
-      #print(str(std))
-      
-      #Checking whether the stuff was already done
-      outCompared <- paste(odCountryGCM, "/", st.id, "-comparison.csv", sep="")
-      if (file.exists(outCompared)) {
-        ts.in <- read.csv(outCompared)
-        ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=F, ts.out=ts.in, compare=T)
-      } else {
-        #Getting the comparison metrics and extracted values
-        ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=T, ts.out=NULL, compare=T)
-        write.csv(ghcn.comp$VALUES, outCompared, row.names=F, quote=F)
+      st.counter <- 1
+      #Loading station data and defining the site
+      for (st.id in st.ids) {
+        if (st.counter%%10 == 0 | st.counter == 1) {cat("Processing station", paste(st.id), "\n")}
+        
+        #Reading the weather station data
+        std <- read.csv(paste("./organized-data/", vn, "-per-station/", st.id, ".csv", sep=""))
+        #print(str(std))
+        
+        #Checking whether the stuff was already done
+        outCompared <- paste(odCountryGCM, "/", st.id, "-comparison.csv", sep="")
+        if (file.exists(outCompared)) {
+          ts.in <- read.csv(outCompared)
+          ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=F, ts.out=ts.in, compare=T)
+        } else {
+          #Getting the comparison metrics and extracted values
+          ghcn.comp <- GHCN.GCM.comp(gcmdir=modelDir, mod=gcmmd, std, timeseries, vg=vo, extract=T, ts.out=NULL, compare=T)
+          write.csv(ghcn.comp$VALUES, outCompared, row.names=F, quote=F)
+        }
+        
+        ghcn.comp$METRICS <- cbind(ID=rep(st.id, times=nrow(ghcn.comp$METRICS)),ghcn.comp$METRICS)
+        
+        if (st.id == st.ids[1]) {
+          out.metrics <- ghcn.comp$METRICS
+        } else {
+          out.metrics <- rbind(out.metrics, ghcn.comp$METRICS)
+        }
+        st.counter <- st.counter+1
       }
-      
-      ghcn.comp$METRICS <- cbind(ID=rep(st.id, times=nrow(ghcn.comp$METRICS)),ghcn.comp$METRICS)
-      
-      if (st.id == st.ids[1]) {
-        out.metrics <- ghcn.comp$METRICS
-      } else {
-        out.metrics <- rbind(out.metrics, ghcn.comp$METRICS)
-      }
-      st.counter <- st.counter+1
+      write.csv(out.metrics, paste(odmGCM, "/metrics-", iso, ".csv", sep=""), row.names=F, quote=F)
+      return(out.metrics)
+    } else {
+      cat(length(st.ids),"stations to analyse \n")
     }
-    write.csv(out.metrics, paste(odmGCM, "/metrics-", iso, ".csv", sep=""), row.names=F, quote=F)
-    return(out.metrics)
-  } else {
-    cat(length(st.ids),"stations to analyse \n")
   }
 }
 
@@ -140,26 +144,44 @@ compareTS <- function(x, plotit=F, plotName="dummy") {
     compMatrix <- compMatrix[which(!is.na(compMatrix[,1])),]; compMatrix <- compMatrix[which(!is.na(compMatrix[,2])),]
     if (nrow(compMatrix) > 2) {
       lims <- c(min(compMatrix), max(compMatrix))
+      #cat("month",m, "\n")
       
-      #Fit mean
-      fit.mf <- lm(compMatrix$WST ~ compMatrix$GCM - 1) #Fit forced to origin
-      pd.mf <- lims*fit.mf$coefficients; pd.mf <- cbind(lims, pd.mf)
-      pval.mf <- pf(summary(fit.mf)$fstatistic[1],summary(fit.mf)$fstatistic[2],summary(fit.mf)$fstatistic[3],lower.tail=F)
-      fit.m <- lm(compMatrix$WST ~ compMatrix$GCM) #Fit normal (unforced)
-      pd.m <- lims*fit.m$coefficients[2] + fit.m$coefficients[1]; pd.m <- cbind(lims, pd.m)
-      pval.m <- pf(summary(fit.m)$fstatistic[1],summary(fit.m)$fstatistic[2],summary(fit.m)$fstatistic[3],lower.tail=F)
+      #Check if compMatrix has any of its columns with full zeros
+      nz.GCM <- length(which(compMatrix$GCM == 0))
+      nz.WST <- length(which(compMatrix$WST == 0))
+      
+      #Check unique values in compMatrix columns
+      uv.GCM <- length(unique(compMatrix$GCM))
+      uv.WST <- length(unique(compMatrix$WST))
+      
+      if (nz.GCM == nrow(compMatrix) | nz.WST == nrow(compMatrix) | uv.GCM == 1 | uv.WST == 1) {
+        fit.mf <- lm(compMatrix$WST ~ compMatrix$GCM - 1) #Fit forced to origin
+        pval.mf <- NA
+        fit.m <- lm(compMatrix$WST ~ compMatrix$GCM) #Fit normal (unforced)
+        pval.m <- NA
+        plot.M <- F
+      } else {
+        #Fit mean
+        fit.mf <- lm(compMatrix$WST ~ compMatrix$GCM - 1) #Fit forced to origin
+        pd.mf <- lims*fit.mf$coefficients; pd.mf <- cbind(lims, pd.mf)
+        pval.mf <- pf(summary(fit.mf)$fstatistic[1],summary(fit.mf)$fstatistic[2],summary(fit.mf)$fstatistic[3],lower.tail=F)
+        fit.m <- lm(compMatrix$WST ~ compMatrix$GCM) #Fit normal (unforced)
+        pd.m <- lims*fit.m$coefficients[2] + fit.m$coefficients[1]; pd.m <- cbind(lims, pd.m)
+        pval.m <- pf(summary(fit.m)$fstatistic[1],summary(fit.m)$fstatistic[2],summary(fit.m)$fstatistic[3],lower.tail=F)
+        plot.M <- T
+      }
       
       if (plotit) {
         #Forced to origin
         jpeg(paste(plotDir, "/", plotName, "-forced.jpg", sep=""), quality=100, width=780, height=780, pointsize=18)
         plot(compMatrix$GCM, compMatrix$WST,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="Observed values")
-      	lines(pd.mf); #lines(pd, lty=2)
+      	if (plot.M) {lines(pd.mf)}; #lines(pd, lty=2)
       	abline(0,1,lty=2)
       	dev.off()
         #Not forced to origin
         jpeg(paste(plotDir, "/", plotName, "-unforced.jpg", sep=""), quality=100, width=780, height=780, pointsize=18)
         plot(compMatrix$GCM, compMatrix$WST,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="Observed values")
-        lines(pd.m); #lines(pd, lty=2
+        if (plot.M) {lines(pd.m)}; #lines(pd, lty=2
         abline(0,1,lty=2)
         dev.off()
         cat("Plots done \n")
