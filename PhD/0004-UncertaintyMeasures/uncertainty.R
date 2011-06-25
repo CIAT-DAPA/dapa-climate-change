@@ -5,14 +5,6 @@ rm(list=ls()); g<-gc(T)
 
 extractGCMData <- function(bDir="F:/climate_change/IPCC_CMIP3", variable="prec", period="2020_2049", month=6:9, sres="A1B", x=76.981201, y=29.668963) {
 	
-#   bDir <- "F:/climate_change/IPCC_CMIP3"
-#   variable <- "prec"
-#   period <- "2020_2049"
-#   month <- 6:9
-#   sres <- "A1B"
-#   x <- 76.981201
-#   y <- 29.668963
-  
 	#Defining input directory
 	sres <- paste("SRES_", sres, sep="")
 	sresDir <- paste(bDir, "/", sres, "/anomalies", sep="")
@@ -77,7 +69,6 @@ extractGCMData <- function(bDir="F:/climate_change/IPCC_CMIP3", variable="prec",
 shannon.e <- function(pix.data, ndiv=8) {
   #Calculate range and interval
   pix.range <- max(pix.data) - min(pix.data)
-  ndiv <- 8
   int.lg <- pix.range / ndiv
   
   #generate breaks (equally distant) and calculate probabilities for each break
@@ -116,15 +107,57 @@ shannon.e <- function(pix.data, ndiv=8) {
   return(list(CLASSES=classes, Hvect=H, H=H.total))
 }
 
-kar.data <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="prec", period="2020_2049", month=6:9, sres="A1B", x=76.981201, y=29.668963)
-kar.h <- shannon.e(kar.data,ndiv=8)
+wd <- "F:/PhD-work/climate-data-assessment/gcm-uncertainties"
+setwd(wd)
 
-kar.data.t <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="tmean", period="2020_2049", month=6:9, sres="A1B", x=76.981201, y=29.668963)
-kar.h.t <- shannon.e(kar.data.t,ndiv=8)
+sites <- read.csv("sites.csv")
 
-tim.data <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="prec", period="2020_2049", month=6:9, sres="A1B", x=-77.250, y=2.917)
-tim.h <- shannon.e(tim.data,ndiv=8)
-
-tim.data.t <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="tmean", period="2020_2049", month=6:9, sres="A1B", x=-77.250, y=2.917)
-tim.h.t <- shannon.e(tim.data.t,ndiv=8)
+for (site in sites$Site) {
+  cat("\n")
+  cat("Processing", paste(site), "\n")
+  
+  ctry <- sites$Country[which(sites$Site == site)]
+  loc.x <- sites$x[which(sites$Site == site)]
+  loc.y <- sites$y[which(sites$Site == site)]
+  
+  prec.data <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="prec", period="2020_2049", month=6:8, sres="A1B", x=loc.x, y=loc.y)
+  prec.h <- shannon.e(prec.data, ndiv=8)$H
+  
+  temp.data <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="tmean", period="2020_2049", month=6:8, sres="A1B", x=loc.x, y=loc.y)
+  temp.h <- shannon.e(temp.data, ndiv=8)$H
+  
+  nposit <- length(which(prec.data > 0))
+  nnegat <- length(which(prec.data < 0))
+  
+  if (mean(prec.data) < 0) {ag.prec <- nnegat/length(prec.data)} else {ag.prec <- nposit/length(prec.data)}
+  
+  out.data <- data.frame(
+    Country=ctry, 
+    Site=site, 
+    x=loc.x, 
+    y=loc.y, 
+    Mean.prec=mean(prec.data), 
+    Max.prec=max(prec.data),
+    Min.prec=min(prec.data),
+    Range.prec=max(prec.data)-min(prec.data)
+    StD.prec=sd(prec.data), 
+    CV.prec=sd(prec.data)/mean(prec.data)*100, 
+    AG.prec=ag.prec,
+    H.prec=prec.h,
+    Mean.temp=mean(temp.data), 
+    Max.temp=max(temp.data),
+    Min.temp=min(temp.data),
+    Range.temp=max(temp.data)-min(temp.data)
+    StD.temp=sd(temp.data), 
+    CV.temp=sd(temp.data)/mean(temp.data)*100, 
+    H.temp=temp.h
+  )
+  
+  if (site == sites$Site[1]) {
+    out.all <- out.data
+  } else {
+    out.all <- rbind(out.all, out.data)
+  }
+  
+}
 
