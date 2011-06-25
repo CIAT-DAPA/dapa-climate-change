@@ -25,6 +25,34 @@ for (ctry in cList) {
 }
 
 
+########### LINUX RUN
+
+#"ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL"
+
+library(rgdal)
+
+repoDir <- "/home/jramirez"
+srcDir <- paste(repoDir, "/dapa-climate-change/trunk/PhD/0002-BaselineComparison", sep="")
+setwd(srcDir)
+source("compareGHCNRaster-TS.R")
+
+#Specify data location
+mDataDir <- "/mnt/GIS-HD717/CCAFS"
+wd <- paste(mDataDir, "/climate-data-assessment/comparisons/input-data/ghcn-weather-stations/", sep="")
+ad <- "/mnt/GIS-HD716/Administrative_boundaries/SHP_files"
+gd <- "/mnt/GIS-HD716/climate_change/IPCC_CMIP3/20C3M/original-data"
+od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/ghcn-vs-gcm-ts", sep="")
+
+ctry <- "KEN"
+
+vList <- c("rain","tmean")
+for (vrin in vList) {
+  if (vrin == "rain") {vrout <- "prec"} else {vrout <- vrin}
+  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in=vrin, var.out=vrout, iso.ctry=ctry, time.series=c(1961:1990))
+  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in=vrin, var.out=vrout, iso.ctry=ctry, time.series=c(1961:1990))
+}
+
+
 #################################################################################
 #################################################################################
 
