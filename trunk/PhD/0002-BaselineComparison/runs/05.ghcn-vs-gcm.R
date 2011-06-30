@@ -32,7 +32,7 @@ for (ctry in cList) {
 library(rgdal)
 
 repoDir <- "/home/jramirez"
-srcDir <- paste(repoDir, "/dapa-climate-change/trunk/PhD/0002-BaselineComparison", sep="")
+srcDir <- paste(repoDir, "/dapa-climate-change/PhD/0002-BaselineComparison", sep="")
 setwd(srcDir)
 source("compareGHCNRaster-TS.R")
 
@@ -43,7 +43,13 @@ ad <- "/mnt/GIS-HD716/Administrative_boundaries/SHP_files"
 gd <- "/mnt/GIS-HD716/climate_change/IPCC_CMIP3/20C3M/original-data"
 od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/ghcn-vs-gcm-ts", sep="")
 
-ctry <- "KEN"
+#KEN: 1648
+#TZA: 21070
+#UGA: 21251
+#GHA: 21318
+#SEN: 21495
+#MLI: 21678
+ctry <- "MLI"
 
 vList <- c("rain","tmean")
 for (vrin in vList) {
