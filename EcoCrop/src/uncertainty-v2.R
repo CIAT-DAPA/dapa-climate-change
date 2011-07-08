@@ -30,9 +30,10 @@ require(raster)
 #Basic function to calculate eveything per pixel
 uncertain <- function(x) {
 	if (is.na(x[1])) {
-		return(c(NA,NA,NA,NA,NA,NA,NA,NA))
+		return(c(NA,NA,NA,NA,NA,NA))
 	} else {
 		#stippling
+		x <- x[which(!is.na(x))]
 		if (mean(x) < 0) {
 			st <- length(which(x < 0))
 		} else if (mean(x) > 0) {
@@ -50,7 +51,8 @@ uncertain <- function(x) {
 		q75 <- quantile(x,probs=0.75)
 		#Average above that value
 		top25 <- mean(x[which(x>=q75)])
-		return(c(mean(x),sd(x),st))
+		
+		#Return values
 		return(c(mean(x),sd(x),bot25,top25,st,st/length(x)))
 	}
 }
@@ -102,8 +104,8 @@ uncertainties <- function(instack, outFolder="F:/EcoCrop-development/testing") {
 	#Writing data
 	avgName <- paste(outFolder, "/mean.asc", sep=""); rsmean <- writeRaster(rsmean, avgName, format='ascii', overwrite=TRUE)
 	sdName <- paste(outFolder, "/sd.asc", sep=""); rssd <- writeRaster(rssd, sdName, format='ascii', overwrite=TRUE)
-	b25Name <- paste(outFolder, "/mean-bottom25p.asc", sep=""); rsb25 <- writeRaster(rsb25, sdName, format='ascii', overwrite=TRUE)
-	t25Name <- paste(outFolder, "/mean-top25p.asc", sep=""); rst25 <- writeRaster(rst25, sdName, format='ascii', overwrite=TRUE)
+	b25Name <- paste(outFolder, "/mean-bottom25p.asc", sep=""); rsb25 <- writeRaster(rsb25, b25Name, format='ascii', overwrite=TRUE)
+	t25Name <- paste(outFolder, "/mean-top25p.asc", sep=""); rst25 <- writeRaster(rst25, t25Name, format='ascii', overwrite=TRUE)
 	stName <- paste(outFolder, "/agreement.asc", sep=""); rsst <- writeRaster(rsst, stName, format='ascii', overwrite=TRUE)
 	stpName <- paste(outFolder, "/agreement-percent.asc", sep=""); rsstp <- writeRaster(rsstp, stpName, format='ascii', overwrite=TRUE)
 }
