@@ -107,30 +107,41 @@ shannon.e <- function(pix.data, ndiv=8) {
   return(list(CLASSES=classes, Hvect=H, H=H.total))
 }
 
-wd <- "F:/PhD-work/climate-data-assessment/gcm-uncertainties"
+wd <- "C:/CIAT_work/CCAFS/gcm-uncertainties" #"F:/PhD-work/climate-data-assessment/gcm-uncertainties"
 setwd(wd)
 
+#Loading site list
 sites <- read.csv("sites.csv")
 
+#Extracting data for each site
+i <- 1
 for (site in sites$Site) {
   cat("\n")
   cat("Processing", paste(site), "\n")
   
+  #Extracting site details
   ctry <- sites$Country[which(sites$Site == site)]
   loc.x <- sites$x[which(sites$Site == site)]
   loc.y <- sites$y[which(sites$Site == site)]
   
-  prec.data <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="prec", period="2020_2049", month=6:8, sres="A1B", x=loc.x, y=loc.y)
-  prec.h <- shannon.e(prec.data, ndiv=8)$H
+  #Extracting site precipitation anomalies
+  assign(paste("prec.data.",i,sep=""),extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="prec", period="2020_2049", month=1:12, sres="A1B", x=loc.x, y=loc.y))
+  assign(paste("prec.h.",i,sep=""),shannon.e(get(paste("prec.data.",i,sep="")), ndiv=8)$H)
+  prec.data <- get(paste("prec.data.",i,sep=""))
+  prec.h <- get(paste("prec.h.",i,sep=""))
   
-  temp.data <- extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="tmean", period="2020_2049", month=6:8, sres="A1B", x=loc.x, y=loc.y)
-  temp.h <- shannon.e(temp.data, ndiv=8)$H
+  #Extracting site temperature anomalies
+  assign(paste("temp.data.",i,sep=""),extractGCMData(bDir="F:/climate_change/IPCC_CMIP3", variable="tmean", period="2020_2049", month=1:12, sres="A1B", x=loc.x, y=loc.y))
+  assign(paste("temp.h.",i,sep=""),shannon.e(get(paste("temp.data.",i,sep="")), ndiv=8)$H)
+  temp.data <- get(paste("temp.data.",i,sep=""))
+  temp.h <- get(paste("temp.h.",i,sep=""))
   
+  #Calculating model agreement
   nposit <- length(which(prec.data > 0))
   nnegat <- length(which(prec.data < 0))
-  
   if (mean(prec.data) < 0) {ag.prec <- nnegat/length(prec.data)} else {ag.prec <- nposit/length(prec.data)}
   
+  #Putting metrics together into a data frame
   out.data <- data.frame(
     Country=ctry, 
     Site=site, 
@@ -139,7 +150,7 @@ for (site in sites$Site) {
     Mean.prec=mean(prec.data), 
     Max.prec=max(prec.data),
     Min.prec=min(prec.data),
-    Range.prec=max(prec.data)-min(prec.data)
+    Range.prec=max(prec.data)-min(prec.data),
     StD.prec=sd(prec.data), 
     CV.prec=sd(prec.data)/mean(prec.data)*100, 
     AG.prec=ag.prec,
@@ -147,17 +158,116 @@ for (site in sites$Site) {
     Mean.temp=mean(temp.data), 
     Max.temp=max(temp.data),
     Min.temp=min(temp.data),
-    Range.temp=max(temp.data)-min(temp.data)
+    Range.temp=max(temp.data)-min(temp.data),
     StD.temp=sd(temp.data), 
     CV.temp=sd(temp.data)/mean(temp.data)*100, 
-    H.temp=temp.h
-  )
+    H.temp=temp.h)
   
   if (site == sites$Site[1]) {
     out.all <- out.data
+    prec.out.extracted <- prec.data
+    temp.out.extracted <- temp.data
   } else {
     out.all <- rbind(out.all, out.data)
+    prec.out.extracted <- rbind(prec.out.extracted,prec.data)
+    temp.out.extracted <- rbind(temp.out.extracted,temp.data)
+  }
+  
+  i <- i+1
+}
+
+write.csv(out.all,"sites-data.csv",quote=F,row.names=F)
+write.csv(prec.out.extracted,"prec.data.csv",quote=F,row.names=F)
+write.csv(temp.out.extracted,"temp.data.csv",quote=F,row.names=F)
+
+################################################
+############Plotting precipitation
+################################################
+#Determining limits for precipitation
+#Now plotting
+for (j in 1:nrow(sites)) {
+  plot.data <- as.numeric(prec.out.extracted[j,])
+  pd <- density(plot.data)
+  
+  x.norm <- (pd$x - mean(pd$x))/(sd(pd$x))
+  y.norm <- (pd$y - mean(pd$y))/(sd(pd$y)) #pd$y / max(pd$y)
+  
+  if (j == 1) {
+    x.norm.all <- x.norm
+    y.norm.all <- y.norm
+  } else {
+    x.norm.all <- c(x.norm.all,x.norm)
+    y.norm.all <- c(y.norm.all,y.norm)
+  }
+  
+}
+xlims <- c(min(x.norm.all),max(x.norm.all))
+ylims <- c(min(y.norm.all),max(y.norm.all))
+
+cols <- c("black","red","blue","dark green","gray","purple","orange")
+#Now plotting precipitation
+tiff("prec-uncertainties.tif", pointsize=6, width=1000, height=1000, units="px", compression="lzw",bg="white",res=300)
+for (j in 1:nrow(sites)) {
+  plot.data <- as.numeric(prec.out.extracted[j,])
+  pd <- density(plot.data)
+  
+  x.norm <- (pd$x - mean(pd$x))/(sd(pd$x))
+  y.norm <- (pd$y - mean(pd$y))/(sd(pd$y)) #pd$y / max(pd$y)
+  
+  if (j == 1) {
+    plot(x.norm,y.norm,type="l",col=cols[j],xlab="Normalised delta",ylab="Normalised probability",xlim=xlims,ylim=ylims)
+    lines(x.norm,y.norm,col=cols[j],lw=2)
+  } else {
+    lines(x.norm,y.norm,col=cols[j],lw=2)
   }
   
 }
 
+legend(0.8,1,sites$Site,cex=0.8,col=cols,pch=NA,lty=1)
+dev.off()
+
+#############################################
+###########Now for temperature
+#############################################
+#Determining limits for temperature
+#Now plotting
+for (j in 1:nrow(sites)) {
+  plot.data <- as.numeric(temp.out.extracted[j,])
+  pd <- density(plot.data)
+  
+  x.norm <- (pd$x - mean(pd$x))/(sd(pd$x))
+  y.norm <- (pd$y - mean(pd$y))/(sd(pd$y)) #pd$y / max(pd$y)
+  
+  if (j == 1) {
+    x.norm.all <- x.norm
+    y.norm.all <- y.norm
+  } else {
+    x.norm.all <- c(x.norm.all,x.norm)
+    y.norm.all <- c(y.norm.all,y.norm)
+  }
+  
+}
+xlims <- c(min(x.norm.all),max(x.norm.all))
+ylims <- c(min(y.norm.all),max(y.norm.all))
+
+cols <- c("black","red","blue","dark green","gray","purple","orange")
+#Now plotting temperature
+tiff("temp-uncertainties.tif", pointsize=6, width=1000, height=1000, units="px", compression="lzw",bg="white",res=300)
+for (j in 1:nrow(sites)) {
+  plot.data <- as.numeric(temp.out.extracted[j,])
+  pd <- density(plot.data)
+  
+  x.norm <- (pd$x - mean(pd$x))/(sd(pd$x))
+  y.norm <- (pd$y - mean(pd$y))/(sd(pd$y)) #pd$y / max(pd$y)
+  
+  if (j == 1) {
+    plot(x.norm,y.norm,type="l",col=cols[j],xlab="Normalised delta",ylab="Normalised probability",xlim=xlims,ylim=ylims)
+    lines(x.norm,y.norm,col=cols[j],lw=2)
+  } else {
+    lines(x.norm,y.norm,col=cols[j],lw=2)
+  }
+  
+}
+
+legend(0.8,1,sites$Site,cex=0.8,col=cols,pch=NA,lty=1)
+dev.off()
