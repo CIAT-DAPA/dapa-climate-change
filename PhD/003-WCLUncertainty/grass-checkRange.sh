@@ -26,7 +26,7 @@ do
 				echo "Processing month $month fold $fold of part $part of variable $var"
 				
 				eval `g.findfile element=cell file=$RAST`
-				if [ ! $file ]
+				if [ $file ]
 				then
 					VALUES=$(r.describe -rn map=$RAST)
 					VALUES=$( echo $VALUES | awk '{gsub("thru","",$0);print}')
@@ -41,7 +41,7 @@ do
 			ANN_RAST=$var\_p$part\_f$fold\_ann
 			#Do it if the GRASS raster file does not exist
 			eval `g.findfile element=cell file=$ANN_RAST`
-			if [ ! $file ]
+			if [ $file ]
 			then
 				VALUES=$(r.describe -rn map=$ANN_RAST)
 				VALUES=$( echo $VALUES | awk '{gsub("thru","",$0);print}')
