@@ -4,14 +4,19 @@
 #################################################################################
 #################################################################################
 
-setwd("D:/_tools/dapa-climate-change/trunk/PhD/0002-BaselineComparison/")
-source("compareGSODRaster-TS.R")
+library(rgdal)
+
+repoDir <- "D:/_tools"
+srcDir <- paste(repoDir, "/dapa-climate-change/trunk/PhD/0002-BaselineComparison", sep="")
+setwd(srcDir)
+source("compareGSODRaster-TS.v2.R")
 
 #Specify data location
-wd <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/gsod-weather-stations/"
+mDataDir <- "F:/PhD-work"
+wd <- paste(mDataDir, "/climate-data-assessment/comparisons/input-data/gsod-weather-stations/", sep="")
 ad <- "F:/Administrative_boundaries/SHP_files"
 gd <- "F:/climate_change/IPCC_CMIP3/20C3M/original-data"
-od <- "F:/PhD-work/climate-data-assessment/comparisons/results/gsod-vs-gcm-ts"
+od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm-ts", sep="")
 
 cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL")
 for (ctry in cList) {

@@ -18,6 +18,7 @@
 #2. Measure Similarity (take into account NAs), this should input a xy (measured,modelled) matrix and output the three measures
 #   (R2, slope and RMSQE)
 #3. Main function to apply over all stations within an area
+#4. Function to run over a set or ALL GCMs
 
 #Purge objects in memory
 rm(list=ls()); g=gc()
@@ -29,6 +30,7 @@ require(raster); require(maptools)
 source("createMask.R")
 gcm.chars <- read.csv("gcm_chars.csv")
 ####################################################################################
+
 
 ####################################################################################
 ########FUNCTION: processCompareWS
@@ -108,14 +110,14 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
     ###READING STATIONS FILE, SETTING UNIQUE LOCATIONS
     #############################################################################
     #Reading stations file and selecting stations within the study area
-    wts.dir <- paste("./organized-data/", vn, "-per-station", sep="")
-    st.list <- read.csv(paste("./organized-data/ghcn_", vn, "_", min(timeseries), "_", max(timeseries), "_mean.csv", sep=""))
+    #wts.dir <- paste("./organized-data/", vn, "-per-station", sep="")
+    st.list <- read.csv(paste("./all-years/gsod-", vn, "-", min(timeseries), "_", max(timeseries), "-mean.csv", sep=""))
     st.sel <- st.list[which(st.list$LONG <= msk@extent@xmax & st.list$LONG >= msk@extent@xmin & st.list$LAT <= msk@extent@ymax & st.list$LAT >= msk@extent@ymin),]
     st.sel$INSIDE <- extract(msk, cbind(st.sel$LONG,st.sel$LAT))
     st.sel <- st.sel[which(st.sel$INSIDE == 1),]
-    st.sel <- st.sel[,c(1,3:5,ncol(st.sel))]
-    st.ids <- st.sel$ID
-    rm(st.list); g=gc()
+    st.sel <- st.sel[,c(1:5,ncol(st.sel))]
+    st.ids <- unique(paste(st.sel$ID, st.sel$WBAN, sep=""))
+    rm(st.list); g=gc(); rm(g)
     
     ###Here create a numbered mask and extract, make NAs those outside range
     msk.cellNumbers <- msk
@@ -190,14 +192,18 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
     #############################################################################
       cat("Analysing", length(st.ids), "stations \n")
       
+      #Reading in station data
+      st.data <- read.csv(paste("./all-years/gsod-", vn, "-data-all.csv", sep=""))
+      
       #Loop throught stations and match these and extract metrics
       st.counter <- 1
       #Loading station data and defining the site
       for (st.id in st.ids) {
         if (st.counter%%10 == 0 | st.counter == 1) {cat("Processing station", paste(st.id), "\n")}
         
-        #Reading the weather station data
-        std <- read.csv(paste("./organized-data/", vn, "-per-station/", st.id, ".csv", sep=""))
+        #Selecting the weather station data
+        gsod <- substr(st.id,1,10); wban <- substr(st.id,11,19)
+        std <- st.data[which(st.data$ID == gsod & st.data$WBAN == wban),]
         #print(str(std))
         
         #Find out where the point is located
@@ -209,19 +215,19 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
         outCompared <- paste(odCountryGCM, "/", st.id, "-comparison.csv", sep="")
         if (file.exists(outCompared)) {
           ts.in <- read.csv(outCompared)
-          ghcn.comp <- GHCN.GCM.comp(std, gcm.in.data, vg=vo, match=F, ts.out=ts.in, compare=T)
+          gsod.comp <- GSOD.GCM.comp(std, gcm.in.data, vg=vo, match=F, ts.out=ts.in, compare=T)
         } else {
           #Getting the comparison metrics and extracted values
-          ghcn.comp <- GHCN.GCM.comp(std, gcm.in.data, vg=vo, match=T, ts.out=NULL, compare=T)
-          write.csv(ghcn.comp$VALUES, outCompared, row.names=F, quote=F)
+          gsod.comp <- GSOD.GCM.comp(std, gcm.in.data, vg=vo, match=T, ts.out=NULL, compare=T)
+          write.csv(gsod.comp$VALUES, outCompared, row.names=F, quote=F)
         }
         
-        ghcn.comp$METRICS <- cbind(ID=rep(st.id, times=nrow(ghcn.comp$METRICS)),ghcn.comp$METRICS)
+        gsod.comp$METRICS <- cbind(ID=rep(gsod, times=nrow(gsod.comp$METRICS)),WBAN=rep(wban, times=nrow(gsod.comp$METRICS)),gsod.comp$METRICS)
         
         if (st.id == st.ids[1]) {
-          out.metrics <- ghcn.comp$METRICS
+          out.metrics <- gsod.comp$METRICS
         } else {
-          out.metrics <- rbind(out.metrics, ghcn.comp$METRICS)
+          out.metrics <- rbind(out.metrics, gsod.comp$METRICS)
         }
         st.counter <- st.counter+1
       }
@@ -235,7 +241,7 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
 
 
 ####################################################################################
-########FUNCTION: GHCN.GCM.comp
+########FUNCTION: GSOD.GCM.comp
 ########ARGUMENTS: station.data, model.data, vg, match, ts.out, compare
 ####################################################################################
 ########station.data: Input weather station data of the structure (ID,LAT,LONG,YEAR,JAN,FEB,...)
@@ -249,7 +255,7 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
 ########compare: logical. TRUE if the comparison is to be done, otherwise FALSE
 ####################################################################################
 #Function to harvest data from a particular GCM and also retrieve the accuracy metrics
-GHCN.GCM.comp <- function(station.data, model.data, vg="prec", match=T, ts.out=NULL, compare=T) {
+GSOD.GCM.comp <- function(station.data, model.data, vg="prec", match=T, ts.out=NULL, compare=T) {
   
   #Applying functions to the data
   if (match) {ts.out <- matchMonth(station.data, model.data, vg=vg)}
@@ -315,7 +321,7 @@ compareTS <- function(x, plotit=F, plotName="dummy") {
         jpeg(paste(plotDir, "/", plotName, "-forced.jpg", sep=""), quality=100, width=780, height=780, pointsize=18)
         plot(compMatrix$GCM, compMatrix$WST,xlim=lims, ylim=lims, col="black", pch=20, xlab="GCM values", ylab="Observed values")
         if (plot.M) {lines(pd.mf)}; #lines(pd, lty=2)
-      	abline(0,1,lty=2)
+        abline(0,1,lty=2)
       	dev.off()
         #Not forced to origin
         jpeg(paste(plotDir, "/", plotName, "-unforced.jpg", sep=""), quality=100, width=780, height=780, pointsize=18)
@@ -450,13 +456,13 @@ matchTS <- function(st.data, gcm.data, mth) {
   
   #Extracting the corresponding month from the station data file
   colm <- which(names(st.data) == mth.name)
-  sel.st.data <- st.data[,c(2,colm)]
+  sel.st.data <- st.data[,c(6,colm)] #6 is the column where the YEAR is
   
   colm.gcm <- which(names(gcm.data) == paste(mth.name,".GCM",sep=""))
   sel.gcm.data <- gcm.data[,c(1,colm.gcm)]
   
-  #Multiply by 0.1 to rescale (data are originally multiplied by 10)
-  sel.st.data[,2] <- sel.st.data[,2] * 0.1
+  #Multiply by 0.1 to rescale (data are originally multiplied by 10), not necessary for GSOD
+  #sel.st.data[,2] <- sel.st.data[,2] * 0.1
   
   names(sel.gcm.data) <- c("YEAR", "VALUE")
   

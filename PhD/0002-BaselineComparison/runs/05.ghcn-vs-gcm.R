@@ -9,7 +9,7 @@ library(rgdal)
 repoDir <- "D:/_tools"
 srcDir <- paste(repoDir, "/dapa-climate-change/trunk/PhD/0002-BaselineComparison", sep="")
 setwd(srcDir)
-source("compareGHCNRaster-TS.R")
+source("compareGHCNRaster-TS.v2.R")
 
 #Specify data location
 mDataDir <- "F:/PhD-work"
