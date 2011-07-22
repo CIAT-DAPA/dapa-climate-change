@@ -34,7 +34,7 @@ library(rgdal)
 repoDir <- "/home/jramirez"
 srcDir <- paste(repoDir, "/dapa-climate-change/PhD/0002-BaselineComparison", sep="")
 setwd(srcDir)
-source("compareGHCNRaster-TS.R")
+source("compareGHCNRaster-TS.v2.R")
 
 #Specify data location
 mDataDir <- "/mnt/GIS-HD717/CCAFS"
@@ -43,18 +43,11 @@ ad <- "/mnt/GIS-HD716/Administrative_boundaries/SHP_files"
 gd <- "/mnt/GIS-HD716/climate_change/IPCC_CMIP3/20C3M/original-data"
 od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/ghcn-vs-gcm-ts", sep="")
 
-#KEN: 1648
-#TZA: 21070
-#UGA: 21251
-#GHA: 21318
-#SEN: 21495
-#MLI: 21678
 ctry <- "MLI"
 
 vList <- c("rain","tmean")
 for (vrin in vList) {
   if (vrin == "rain") {vrout <- "prec"} else {vrout <- vrin}
-  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in=vrin, var.out=vrout, iso.ctry=ctry, time.series=c(1961:1990))
   pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in=vrin, var.out=vrout, iso.ctry=ctry, time.series=c(1961:1990))
 }
 
