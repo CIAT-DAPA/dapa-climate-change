@@ -20,7 +20,7 @@ do
 				else
 					monthList=$monthList,$RAST
 				fi
-			fi
+			done
 				#Calculating annual mean and total
 				echo "Calculating annual average of part $part fold $fold variable $var and month $month"
 				OUT_ANN=$var\_p$part\_f$fold\_ann
