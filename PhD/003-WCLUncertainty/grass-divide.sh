@@ -5,7 +5,7 @@ IN_PATH=$DRIVE/CCAFS/climate-data-assessment/wcl-uncertainties/outputs/cross-val
 
 for part in {1..10}
 do
-	g.mapset -c mapset=wcl_uncertainties_$part
+	g.mapset mapset=wcl_uncertainties_$part
 	for fold in {1..10}
 	do
 		for var in tmin tmax tean
