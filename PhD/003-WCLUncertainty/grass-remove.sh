@@ -21,17 +21,19 @@ do
 					monthList=$monthList,$RAST
 				fi
 			done
-				#Calculating annual mean and total
-				echo "Calculating annual average of part $part fold $fold variable $var and month $month"
-				OUT_ANN=$var\_p$part\_f$fold\_ann
-				#Erase original file
-				eval `g.findfile element=cell file=$OUT_ANN`
-				if [ $file ]
-				then
-					g.remove rast=$OUT_ANN
-				fi
-				
-				r.series in=$monthList out=$OUT_ANN method=average
+			
+			#Calculating annual mean and total
+			echo "Calculating annual average of part $part fold $fold variable $var and month $month"
+			OUT_ANN=$var\_p$part\_f$fold\_ann\
+			
+			#Erase original file
+			eval `g.findfile element=cell file=$OUT_ANN`
+			if [ $file ]
+			then
+				g.remove rast=$OUT_ANN
+			fi
+			
+			r.series in=$monthList out=$OUT_ANN method=average
 			
 		done
 	done
