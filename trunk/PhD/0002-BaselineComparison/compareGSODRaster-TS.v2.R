@@ -361,7 +361,7 @@ compareTS <- function(x, plotit=F, plotName="dummy") {
       res.m <- data.frame(MONTH=m, N=npts, R2.FORCED=NA, ADJ.R2.FORCED=NA, P.VALUE.FORCED=NA, SLOPE.FORCED=NA, INTERCEPT.FORCED=NA, F.STAT.FORCED=NA, R2=NA, ADJ.R2=NA, P.VALUE=NA, SLOPE=NA, INTERCEPT=NA, F.STAT=NA, ERROR=NA)
     }
     
-    if (m == mthList) {
+    if (m == mthList[1]) {
       monthly.mx <- res.m
     } else {
       monthly.mx <- rbind(monthly.mx, res.m)
