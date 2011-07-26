@@ -33,9 +33,12 @@ yValues = []
 f.readline()
 
 for val in f:
-   (x,y) = val.split(',')
-   xValues.append(float(x))
-   yValues.append(float(y))
+   try:
+      (x,y) = val.split(',')
+      xValues.append(float(x))
+      yValues.append(float(y))
+   except:
+      continue
 
 # register all of the drivers
 gdal.AllRegister()
