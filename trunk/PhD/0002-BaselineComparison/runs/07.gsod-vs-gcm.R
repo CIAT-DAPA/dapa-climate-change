@@ -65,7 +65,32 @@ source("compareGSODRaster.R")
 
 #################################################################################
 #################################################################################
-#GCM vs. GHCN weather stations
+#GCM vs. GHCN weather stations (DTR)
+#################################################################################
+#################################################################################
+mDataDir <- "F:/PhD-work"
+md <- paste(mDataDir, "/climate-data-assessment/comparisons/input-data/gcm-data/20C3M/1961_1990", sep="")
+gcmList <- list.files(md)[-c(10,23)]
+
+cd <- "F:/PhD-work/climate-data-assessment/comparisons/input-data/gsod-weather-stations/all-years"
+shd <- "F:/Administrative_boundaries/SHP_files"
+
+cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL")
+jja <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm/JJA", sep="")
+djf <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm/DJF", sep="")
+ann <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm/ANNUAL", sep="")
+for (ctry in cList) {
+  for (mod in gcmList) {3
+    cat("Processing", ctry, mod, "dtr \n")
+		outp <- compareGSODR(gcmDir=md, gcm=mod, shpDir=shd, stationDir=cd, country=ctry, variable="dtr", divide=T, months=c(6,7,8), outDir=jja, verbose=T)
+		outp <- compareGSODR(gcmDir=md, gcm=mod, shpDir=shd, stationDir=cd, country=ctry, variable="dtr", divide=T, months=c(12,1,2), outDir=djf, verbose=T)
+		outp <- compareGSODR(gcmDir=md, gcm=mod, shpDir=shd, stationDir=cd, country=ctry, variable="dtr", divide=T, months=c(1:12), outDir=ann, verbose=T)
+	}
+}
+
+#################################################################################
+#################################################################################
+#GCM vs. GHCN weather stations (RAIN, TMEAN)
 #################################################################################
 #################################################################################
 mDataDir <- "F:/PhD-work"

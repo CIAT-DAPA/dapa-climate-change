@@ -493,7 +493,7 @@ extractTS <- function(xy, gcmdir, yr.list, mth, vg="prec", gcm="bccr_bcm2_0") {
   #Listing the rasters and extract the values
   rs.list <- as.list(paste(yrdir, "/", yr.list, "/", vg, "_", mth, ".asc", sep=""))
   rstack <- stack(rs.list)
-  ex.vals <- extract(rstack, xy)
+  ex.vals <- extract(rstack, xy); rm(rstack); rm(rs.list); g=gc()
   
   gcm.values <- data.frame(yr.list, t(ex.vals))
   row.names(gcm.values) <- c(1:nrow(gcm.values))
