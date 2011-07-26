@@ -51,7 +51,7 @@ then
 fi
 
 # Do dir exists?
-if [ ! -f $SAVE_TO]
+if [ ! -f $SAVE_TO ]
 then
    echo "Creating dir ($OUT_FILE)"
    mkdir -p $SAVE_TO
