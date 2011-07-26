@@ -221,6 +221,7 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
           gsod.comp <- GSOD.GCM.comp(std, gcm.in.data, vg=vo, match=T, ts.out=NULL, compare=T)
           write.csv(gsod.comp$VALUES, outCompared, row.names=F, quote=F)
         }
+        rm(gcm.in.data); rm(std); g=gc()
         
         gsod.comp$METRICS <- cbind(ID=rep(gsod, times=nrow(gsod.comp$METRICS)),WBAN=rep(wban, times=nrow(gsod.comp$METRICS)),gsod.comp$METRICS)
         

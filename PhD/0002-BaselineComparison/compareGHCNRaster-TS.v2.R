@@ -215,6 +215,7 @@ gcmmd="bccr_bcm2_0", iso="ETH", timeseries=c(1961:1990)) {
           ghcn.comp <- GHCN.GCM.comp(std, gcm.in.data, vg=vo, match=T, ts.out=NULL, compare=T)
           write.csv(ghcn.comp$VALUES, outCompared, row.names=F, quote=F)
         }
+        rm(gcm.in.data); rm(std); g=gc()
         
         ghcn.comp$METRICS <- cbind(ID=rep(st.id, times=nrow(ghcn.comp$METRICS)),ghcn.comp$METRICS)
         
@@ -451,6 +452,18 @@ matchTS <- function(st.data, gcm.data, mth) {
   #Extracting the corresponding month from the station data file
   colm <- which(names(st.data) == mth.name)
   sel.st.data <- st.data[,c(2,colm)]
+  
+  #Verifying duplicates and removing them
+  st.yrs <- unique(sel.st.data$YEAR)
+  if (length(st.yrs) != nrow(sel.st.data)) {
+    st.ydup <- sel.st.data$YEAR[duplicated(sel.st.data$YEAR)]
+    temp.data <- sel.st.data[!duplicated(sel.st.data$YEAR),]
+    for (yk in st.ydup) {
+      temp.data[which(temp.data$YEAR == yk),2] <- mean(sel.st.data[which(sel.st.data$YEAR==yk),2],na.rm=T)
+    }
+    sel.st.data <- temp.data
+    rm(temp.data); g=gc()
+  }
   
   colm.gcm <- which(names(gcm.data) == paste(mth.name,".GCM",sep=""))
   sel.gcm.data <- gcm.data[,c(1,colm.gcm)]
