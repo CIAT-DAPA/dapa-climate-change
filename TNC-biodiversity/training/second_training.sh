@@ -46,7 +46,7 @@ function runmodel {
  # Arguments that were passed to the function
  id=$1		    # id of the species that is being processed
  results=$(echo ${id:0:4}) 
- maxent="lib/maxent/"
+ maxent="lib/maxent"
  max=2048
  host=$2     # mysql server
  table=$3
@@ -59,7 +59,6 @@ function runmodel {
 	
  # make a directory for this species for this run
  mkdir $base/training
- # only run maxent if a lambda file exists
 
  # run maxent
  
@@ -77,7 +76,7 @@ echo "creating table ...."
 mysql --skip-column-names -umodel1 -pmaxent -h$HOST -e"use tnc; \
 create table $TABLE \
 (species_id int, started timestamp null default null, finished timestamp null default null, exit_status varchar(32));\
- nsert into $TABLE (species_id) select species_id from species where la=1 and where size < 10;"
+ insert into $TABLE (species_id) select species_id from species where la=1 and size < 10;"
 
 
 

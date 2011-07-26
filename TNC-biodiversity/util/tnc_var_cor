@@ -1,0 +1,44 @@
+
+# imports bio variables
+for j in $(seq 1 19)
+do
+ r.in.bin -s input=bio_${j}.bil output=bio$j bytes=2 north=90 south=-60 east=180 west=-180 rows=18000 cols=43200 --o
+done
+
+
+for i in $(seq 1 14)
+do
+  r.mapcalc "MASK=if(eco==$i,1,null())"
+  r.random in=eco raster_output=sample.biome.${i} n=1000 --o
+  g.remove rast=MASK 
+done
+
+for i in $(seq 1 14)
+do
+	r.mapcalc "MASK=sample.biome.${i}"
+  #r.out.xyz input=bio1,bio2,bio3,bio4,bio5,bio6,bio7,bio8,bio9,bio10,bio11,bio12,bio13,bio14,bio15,bio16,bio17,bio18,bio19 fs=,  > biome${i}.txt
+
+  for j in $(seq 1 19)
+  do
+    r.out.xyz input=bio$j fs=, > biome${i}_${j}.txt    		
+  done 
+  
+  g.remove rast=MASK
+done
+
+# do the correlation in R
+library(stringr)
+
+for (i in 1:14) {
+  m <- matrix(NA, nrow=19, ncol=19)  
+  for (j in 1:19) {
+    for (k in 1:19)
+      if (j < k) m[j,k] <- cor(read.csv(str_c("biome",i,"_",j,".txt"))[,3], read.csv(str_c("biome",i,"_",k,".txt"))[,3])
+   }
+  write.csv(m, str_c("cor_biome",i,".csv"))
+}
+
+
+  
+
+

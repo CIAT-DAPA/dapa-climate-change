@@ -8,7 +8,7 @@
 #--------------------------------------------------------------------#
                                                 
 
-extract.bg <- function (path, no.bg.files,dir.bg, log) {
+extract.bg <- function (path, no.bg.files, dir.bg, log) {
 
    tryCatch({
    # read the info.txt file for species that is being processed

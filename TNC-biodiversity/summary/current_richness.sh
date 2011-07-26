@@ -66,16 +66,20 @@ done
   
 
 # Create maps
-for adapt in n o r
+  r.in.gdal in=current_richness.asc out=current_richness -o
+  r.mapcalc MASK=current_richness
+
+for adapt in f o r
 do
 
+
   r.mapcalc "${adapt}change=${adapt}richness - current_richness"
-  r.mapcalc "${adapt}turnover=100 * (${adapt}gain * 1.00 + ${adapt}loss) / (current_richness * 1.00 + ${adapt}gain)"
+  r.mapcalc "${adapt}turnover=100 * (${adapt}gain * 1.00 + loss) / (current_richness * 1.00 + ${adapt}gain)"
 
   for measure in richness turnover change
   do
     # set colors
-    r.colors -e map=${adapt}${measure} rules=$measure.rules
+    r.colors -e map=${adapt}${measure} color=rainbow
     # create background 
     v.in.region output=bckgrnd cat=1 --o
 
@@ -132,12 +136,112 @@ do
   done
 done    
 
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+# Export Rasters in GRASS and make maps in R
+
+# Calculate
+r.in.gdal in=current_richness.asc out=current_richness -o
+r.mapcalc MASK=current_richness
+
+location=$(g.gisenv -n | grep "LOCATION_NAME" | cut -d= -f2)
+
+for adapt in f o r
+do
+
+
+  r.mapcalc "${adapt}change=${adapt}richness - current_richness"
+  r.mapcalc "${adapt}turnover=100 * (${adapt}gain * 1.00 + loss) / (current_richness * 1.00 + ${adapt}gain)"
+
+  for measure in richness turnover change
+  do
+    r.out.arc in=$adapt$measure out=${location}_${adapt}_${measure}.asc
+  done
+done
+
+# null adaption
+r.out.arc in=nrichness out=${location}_nrichness.asc
+
+r.mapcalc "nturnover=100 * (loss) / (current_richness * 1.00)"
+r.mapcalc "nchange=nrichness - current_richness"
+
+r.out.arc in=nturnover out=${location}_nturnover.asc
+r.out.arc in=nchange out=${location}_nchange.asc
+
+r.out.arc in=current_richness out=current_richness.asc
 
 
 
-# reclass all currents
+# ---------------------------------------------------------------------------- #
+# In R
 
-# and buffer
+library(raster)
+library(stringr)
+library(maps)
+library(fields)
+
+# turnover
+
+printMap <- function(path) {
+
+  r <- raster(path)
+
+  if (grepl("turnover", path)) {
+    ra <- c(0,100)
+  } 
+  if (grepl("change", path)) {
+    ra <- c(-3000, 3000)
+  } 
+  if (grepl("richness", path)) {
+    ra <- c(0,7000)
+  }
+
+  colors <- rev(terrain.colors(7000))
+
+  v <- getValues(r)
+  from <- min(v, na.rm=T)
+  to <- max(v, na.rm=T)
+
+  from <- floor(rscale(from, ra))
+  to <- floor(rscale(to, ra))
+
+  png(height=680, width=480, str_c(str_sub(path,1,-4), "png"))
+  par(mar=c(7,3,2,1))
+  plot(0, xlim=c(-120,-33), ylim=c(-60,35), xaxt="n", yaxt="n", xlab="", ylab="", asp=95/87)
+  rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col="cornflowerblue")
+  map("world", add=T, fill=T, col="grey", lwd=0.5)
+  image(r, col=colors[from:to], add=T)
+  map("world", add=T, lwd=0.5)
+  abline(h=0, lty=2, lwd=0.5)
+  box()
+
+  axis(2, at=seq(-60,60,10),label=F, tck=-0.02) 
+  axis(2, at=seq(-60,60,20), las=T)
+
+  axis(1, at=seq(-120,0,10),label=F, tck=-0.02) 
+  axis(1, at=seq(-120,60,20), las=T)
+
+  image.plot(zlim=ra, nlevel=100,legend.only=TRUE, horizontal=T,col=colors)
+  
+  dev.off()
+  
+}
+
+rscale <- function(x, ra) {
+  return(0 + (x - ra[1]) * (7000 - 0)/(ra[2] - ra[1]))
+}
+
+
+for (i in list.files(pattern="*.asc")) {
+  printMap(i)
+  print(i)
+}
+
+
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+# reclass all and buffer
 
 g.region latinamerica
 
