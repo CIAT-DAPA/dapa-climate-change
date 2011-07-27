@@ -112,13 +112,18 @@ function create_swd
    do
       for biome in $T_BIOMES
       do
-         tmp="$BACKGROUND_FILES $BACKGROUND/continent${continent}_biome${biome}sample$(rand10)_swd.txt "
+	 newf=""
+	 while [ ! -f $newfile ]
+         do
+	    newf=$BACKGROUND/continent${continent}_biome${biome}sample$(rand10)_swd.txt
+	 done
+         tmp="$BACKGROUND_FILES $newf "
          BACKGROUND_FILES=$tmp
       done
    done
 
    echo $ENV_VAR_HEADER > $SAVE_TO_COMPLETE/background.swd
-   cat $BACKGROUND_FILES | rl -c 10000  >> $SAVE_TO_COMPLETE/background.swd
+   cat $BACKGROUND_FILES | rl -r -c 10000  >> $SAVE_TO_COMPLETE/background.swd
 
    # in case there are less than 10k lines, do it with resampleing
    if [ $? != 0 ]
