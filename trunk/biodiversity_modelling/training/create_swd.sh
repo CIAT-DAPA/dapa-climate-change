@@ -112,11 +112,11 @@ function create_swd
    do
       for biome in $T_BIOMES
       do
-	 newf=""
-	 while [ ! -f $newfile ]
+	       newf="none"
+         while [ ! -f $newf ]
          do
-	    newf=$BACKGROUND/continent${continent}_biome${biome}sample$(rand10)_swd.txt
-	 done
+            newf=$BACKGROUND/continent${continent}_biome${biome}sample$(rand10)_swd.txt
+         done
          tmp="$BACKGROUND_FILES $newf "
          BACKGROUND_FILES=$tmp
       done
