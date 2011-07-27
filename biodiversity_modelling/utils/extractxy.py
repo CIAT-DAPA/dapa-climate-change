@@ -11,10 +11,10 @@
 # Usage:
 # python extractxy.py -f raster1.asc raster2.asc -xy my_coords.csv
 
-
-import os, sys, time, gdal
+from osgeo import gdal
+from osgeo.gdalconst import *
+import os, sys, time
 import argparse
-from gdalconst import *
 
 # Get files to be read
 parser = argparse.ArgumentParser()
