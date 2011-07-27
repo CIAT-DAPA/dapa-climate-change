@@ -102,8 +102,9 @@ function create_swd
    
    # remove all tmp files
    rm $SAVE_TO_COMPLETE/*.tmp
-   zip -r -r -r -r -r -r -r -r -r $SAVE_TO_COMPLETE/$spid.zip $SAVE_TO_COMPLETE/*
+   zip -q -j $SAVE_TO_COMPLETE/$spid.zip $SAVE_TO_COMPLETE/*
    rm $SAVE_TO_COMPLETE/*.swd
+   echo $spid
 }
 
 
