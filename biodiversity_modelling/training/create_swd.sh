@@ -22,9 +22,6 @@ ENV_VAR_LOCATION='data/env'
 ENV_VAR="$ENV_VAR_LOCATION/bio/bio_1/hdr.adf $ENV_VAR_LOCATION/bio/bio_2/hdr.adf $ENV_VAR_LOCATION/bio/bio_3/hdr.adf $ENV_VAR_LOCATION/bio/bio_4/hdr.adf $ENV_VAR_LOCATION/bio/bio_5/hdr.adf $ENV_VAR_LOCATION/bio/bio_6/hdr.adf $ENV_VAR_LOCATION/bio/bio_8/hdr.adf $ENV_VAR_LOCATION/bio/bio_9/hdr.adf $ENV_VAR_LOCATION/bio/bio_12/hdr.adf $ENV_VAR_LOCATION/bio/bio_13/hdr.adf $ENV_VAR_LOCATION/bio/bio_14/hdr.adf $ENV_VAR_LOCATION/bio/bio_15/hdr.adf $ENV_VAR_LOCATION/bio/bio_18/hdr.adf $ENV_VAR_LOCATION/bio/bio_19/hdr.adf"
 ENV_VAR_HEADER='species,lon,lat,bio1,bio2,bio3,bio4,bio5,bio6,bio8,bio9,bio12,bio13,bio14,bio15,bio18,bio19'
 
-# Dir for backgrounds files
-BACKGROUND="data/species/background_swd"
-
 # path to raster of biomes and continents
 BIOMES="$ENV_VAR_LOCATION/biomes/biomes.tif"
 CONTINENTS="$ENV_VAR_LOCATION/continents/continents.tif"
@@ -66,15 +63,6 @@ fi
 
 # Now cycle through all species and create files
 
-# Generate pseudo random number between 1 and 10
-function rand10
-{
-   local n=$RANDOM
-   local m=$((n %= 10))
-   local mm=$((m + 1))
-   echo $mm
-}
-
 function create_swd
 {
    # species id
@@ -106,30 +94,11 @@ function create_swd
    T_CONTINENTS=$(python $EXTRACTXY -f $CONTINENTS -xy $SAVE_TO_COMPLETE/xy.tmp | cut -f3 -d, | grep -v 255 | sort -u)
 
    # select background points from database
-   BACKGROUND_FILES=""
-
-   for continent in $T_CONTINENTS
-   do
-      for biome in $T_BIOMES
-      do
-	       newf="none"
-         while [ ! -f $newf ]
-         do
-            newf=$BACKGROUND/continent${continent}_biome${biome}sample$(rand10)_swd.txt
-         done
-         tmp="$BACKGROUND_FILES $newf "
-         BACKGROUND_FILES=$tmp
-      done
-   done
+   qstring="SELECT lon,lat,bio1,bio2,bio3,bio4,bio5,bio6,bio8,bio9,bio12,bio13,bio14,bio15,bio18,bio19 FROM background where biome="$(echo \'$T_BIOMES\' | sed "s/ /\' OR biome=\' /g")" AND continent="$(echo \'$T_CONTINENTS\' | sed "s/ /\' OR continent=\' /g")" ORDER BY random() LIMIT 10000"
 
    echo $ENV_VAR_HEADER > $SAVE_TO_COMPLETE/background.swd
-   cat $BACKGROUND_FILES | rl -r -c 10000  >> $SAVE_TO_COMPLETE/background.swd
-
-   # in case there are less than 10k lines, do it with resampleing
-   if [ $? != 0 ]
-   then
-      cat $BACKGROUND_FILES | rl -c 10000 -r >> $SAVE_TO_COMPLETE/background.swd
-   fi
+   psql -U $USER -h $HOST -d $DB -t -c "$qstring" | sed 's/|/,/g' | sed 's/ //g' | grep -v 9999  > $SAVE_TO_COMPLETE/bg_swd.tmp
+   awk 'BEGIN{OFS=","}{print '"background"',$0}' $SAVE_TO_COMPLETE/bg_swd.tmp >> $SAVE_TO_COMPLETE/background.swd
 
    # remove all tmp files
    rm $SAVE_TO_COMPLETE/*.tmp
