@@ -43,7 +43,7 @@ ad <- "/mnt/GIS-HD716/Administrative_boundaries/SHP_files"
 gd <- "/mnt/GIS-HD716/climate_change/IPCC_CMIP3/20C3M/original-data"
 od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm-ts", sep="")
 
-ctry <- "NPL"
+ctry <- "ETH"
 
 vList <- c("rain","tmean")
 for (vrin in vList) {
