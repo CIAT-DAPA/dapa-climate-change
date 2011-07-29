@@ -138,7 +138,7 @@ while [ -n "$ID" ]
 do
    # check queue if file exists, if exists 
    GET_NEW_ID=""
-   while [ -n $GET_NEW_ID ]
+   while [ "$GET_NEW_ID" != "TRUE" ]
    do
       for i in $RUN_QUEUE
       do
