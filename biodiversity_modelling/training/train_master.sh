@@ -87,7 +87,7 @@ do
    then
       qs="INSERT INTO models (speciesid, modelstarted, modelfinished, mostrecent, issuccessfull, exitstatus, runtrainingid) VALUES ('$spid', now(), now(), 't', 'f', 'err swd', '$RUNID')"
    else
-      qs="INSERT INTO models (speciesid, modelstarted, mostrecent, runtrainingid) VALUES ('$spid', now(), 't',  '$RUNID')"
+      qs="INSERT INTO models (speciesid, mostrecent, runtrainingid) VALUES ('$spid', 't',  '$RUNID')"
    fi
 
    psql -U $USER -d $DB -h $HOST -c "UPDATE models SET mostrecent='f' where speciesid '$spid' AND runtrainingid <> '$RUNID'"
@@ -101,8 +101,8 @@ done < $ID_FILE
 for server in $SERVERS
 do
    t_server=$(echo $server | cut -f1 -d:)
-   scp $SEVER_INIT_SCRIPT $t_server
-   ssh $t_server slave_init.sh
+   scp $SERVER_INIT_SCRIPT $t_server:
+   ssh $t_server sh slave_init.sh
 done
 
 # 3. Run models on slaves and copy back results
@@ -122,7 +122,7 @@ done
 # initiate runs
 for slave in $INIT_QUEUE
 do
-   ID=$(mysql --skip-column-names -umodel1 -h$HOST -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
+   ID=$(psql -U $USER -d $DB -h $HOST -t -c "SELECT speciesid FROM models where runtrainingid=$RUNID AND modelstarted=NULL limit 1")
    run_training $ID $slave &
    RUN_QUEUE="$RUN_QUEUE $slave:$ID"
 done
