@@ -72,25 +72,28 @@ function clear_finished
 psql -U $USER -d $DB -h $HOST -c "INSERT INTO runstraining (runtid,notes,location) VALUES ('$RUNID', '$NOTES', '$LOCATION')"
 
 # for each species that is in the ID_FILE add it to the database for this model
-while read spid
-do
-   COMPLETE_PATH=`echo $SAVE_TO/${spid:0:4}/$spid`
-   
-   # check if files are complete 
-   size=$(du $COMPLETE_PATH | cut -f1)
+if [ $1 = "import" ]
+then
+	while read spid
+	do
+	   COMPLETE_PATH=`echo $SAVE_TO/${spid:0:4}/$spid`
+	   
+	   # check if files are complete 
+	   size=$(du $COMPLETE_PATH | cut -f1)
 
-   # update database
-   if [ $size  < $TRAINING_FILE_TH ]
-   then
-      qs="INSERT INTO models (speciesid, modelstarted, modelfinished, mostrecent, issuccessfull, exitstatus, runtrainingid) VALUES ('$spid', now(), now(), 't', 'f', 'err swd', '$RUNID')"
-   else
-      qs="INSERT INTO models (speciesid, mostrecent, runtrainingid) VALUES ('$spid', 't',  '$RUNID')"
-   fi
+	   # update database
+	   if (($size  < $TRAINING_FILE_TH))
+	   then
+	      qs="INSERT INTO models (speciesid, modelstarted, modelfinished, mostrecent, issuccessfull, exitstatus, runtrainingid) VALUES ('$spid', now(), now(), 't', 'f', 'err swd', '$RUNID')"
+	   else
+	      qs="INSERT INTO models (speciesid, mostrecent, runtrainingid) VALUES ('$spid', 't',  '$RUNID')"
+	   fi
 
-   psql -U $USER -d $DB -h $HOST -c "UPDATE models SET mostrecent='f' where speciesid '$spid' AND runtrainingid <> '$RUNID'"
-   psql -U $USER -d $DB -h $HOST -c "$qs"
+	   psql -U $USER -d $DB -h $HOST -c "UPDATE models SET mostrecent='f' where speciesid = '$spid' AND runtrainingid <> '$RUNID'"
+	   psql -U $USER -d $DB -h $HOST -c "$qs"
 
-done < $ID_FILE
+	done < $ID_FILE
+fi
    
 # 2. Copy scripts to the slaves
 
@@ -152,9 +155,10 @@ do
 
             # rund next species
             run_training $slave $ID &
+	    echo Starting new run!
             # updated here to prevent that the same species is modelled twice
             psql -U $USER -d $DB -h $HOST  -c "UPDATE models SET modelstarted=now() where runtrainingid=$RUNID AND speciesid ='$ID'"
-            RUN_QUEUE="$RUN_QUEUE $slave:$ID"
+            RUN_QUEUE="$RUN_QUEUE $(echo $slave:$ID | sed 's/ //')"
 
             # clear finished
             # at the moment everything is saved locally 

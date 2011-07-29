@@ -27,7 +27,7 @@ BIOMES="$ENV_VAR_LOCATION/biomes/biomes.tif"
 CONTINENTS="$ENV_VAR_LOCATION/continents/continents.tif"
 
 # number of cores:
-MAX_NPROC=20
+MAX_NPROC=10
 QUEUE=""
 
 # No further changes chould be make below
