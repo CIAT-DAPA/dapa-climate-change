@@ -37,7 +37,7 @@ LOCATION="/mnt/GIS-HD716/TNC_global_plants/results/training_1"
 
 # Information on available server (ssh keys need to be enabled inorder for this to work)
 # format: server:number_cores
-SERVERS="flora:20 fauna:20 andromeda:20 gisbif.ciat.cgiar.org:10"
+SERVERS="flora:15 fauna:24 andromeda:10 gisbif.ciat.cgiar.org:10"
 SERVER_INIT_SCRIPT="src/scripts/training/slave_init.sh"
 
 
@@ -121,14 +121,15 @@ done
 for slave in $INIT_QUEUE
 do
    ID=$(psql -U $USER -d $DB -h $HOST -t -c "SELECT speciesid FROM models where runtrainingid=$RUNID AND modelstarted IS NULL limit 1")
+   run_training $slave $ID &
+   # updated here to prevent that the same species is modelled twice
    psql -U $USER -d $DB -h $HOST  -c "UPDATE models SET modelstarted=now() where runtrainingid=$RUNID AND speciesid ='$ID'"
 
-   run_training $slave $ID &
    RUN_QUEUE="$RUN_QUEUE $(echo $slave:$ID | sed 's/ //')"
 done
 
 # read an other id
-ID=$(mysql --skip-column-names -umodel1 -h$HOST -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
+ID=$(psql -U $USER -d $DB -h $HOST -t -c "SELECT speciesid FROM models where runtrainingid=$RUNID AND modelstarted IS NULL limit 1")
 
 while [ -n "$ID" ]
 do
@@ -150,11 +151,13 @@ do
             RUN_QUEUE=$(echo $OLD_RUN_QUEUE | sed 's/'"$slave:$finished_id"'//')
 
             # rund next species
-            run_training $ID $slave &
+            run_training $slave $ID &
+            # updated here to prevent that the same species is modelled twice
+            psql -U $USER -d $DB -h $HOST  -c "UPDATE models SET modelstarted=now() where runtrainingid=$RUNID AND speciesid ='$ID'"
             RUN_QUEUE="$RUN_QUEUE $slave:$ID"
 
             # clear finished
-            clear_finished $finished_id &
+            # at the moment everything is saved locally 
 
             # get new id and break loop
             GET_NEW_ID="TRUE"
@@ -163,7 +166,7 @@ do
       done
    done
         
-   ID=$(mysql --skip-column-names -umodel1 -h$HOST -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
+   ID=$(psql -U $USER -d $DB -h $HOST -t -c "SELECT speciesid FROM models where runtrainingid=$RUNID AND modelstarted IS NULL limit 1")
 
 done
 
