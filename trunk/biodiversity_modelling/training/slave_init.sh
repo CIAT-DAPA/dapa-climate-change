@@ -11,6 +11,6 @@ mkdir -p tnc_tmp/logs
 
 # get src files
 scp flora:tnc/src/lib/maxent/maxent.zip tnc_tmp/src/lib/maxent
-unzip -d tnc_tmp/src/lib/maxent tnc/src/lib/maxent/maxent.zip
+unzip -d tnc_tmp/src/lib/maxent tnc_tmp/src/lib/maxent/maxent.zip
 
 scp flora:tnc/src/scripts/training/train_slave.sh tnc_tmp/src/scripts/training
