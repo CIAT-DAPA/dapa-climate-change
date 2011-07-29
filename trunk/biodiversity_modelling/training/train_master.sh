@@ -30,7 +30,7 @@ SAVE_TO='data/species/species_swd'  # this is the directory where all the result
 TRAINING_FILE_TH=200
 
 # Information on the model
-RUNDID=2
+RUNID=2
 NUMBER_SPECIES=`wc -l $ID_FILE`
 NOTES="Training run for latin america"
 LOCATION="/mnt/GIS-HD716/TNC_global_plants/results/training_1"
@@ -40,7 +40,6 @@ LOCATION="/mnt/GIS-HD716/TNC_global_plants/results/training_1"
 SERVERS="flora:20 fauna:20 andromeda:20 gisbif.ciat.cgiar.org:10"
 SERVER_INIT_SCRIPT="src/scripts/training/slave_init.sh"
 
-TMP_DIR_FROM_SLAVE="results/$RUNDID/tmp_from_slave"
 
 # ---------------------- NO CHANGES BELOW ---------------------------------- #
 
@@ -54,7 +53,7 @@ function run_training
    mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc;UPDATE $table SET started=NOW() where species_id=$id;"
 
    # call script at slve
-   shh $slave sh tnc/src/scripts/training_slave.sh $id $TMP_DIR_FROM_SLAVE
+   ssh $slave sh tnc/src/scripts/training/train_slave.sh $id 
 
    # tell db that trianing is done
    mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc; UPDATE $table SET finished=NOW() where species_id=$id;"
@@ -69,13 +68,11 @@ function clear_finished
    
    # rm swd files
 
-   # cp everything to network drive
-
 }
 
 # 1. Inform database
 # add model
-psql -U $USER -d $DB -h $HOST -c "INSERT INTO runstraining (runtid,numberspecies,notes,location) VALUES (\'$RUNID\', \'$NUMBER_SPECIES\', \'$NOTES\', \'$LOCATION\')"
+psql -U $USER -d $DB -h $HOST -c "INSERT INTO runstraining (runtid,notes,location) VALUES ('$RUNID', '$NOTES', '$LOCATION')"
 
 # for each species that is in the ID_FILE add it to the database for this model
 while read spid
@@ -88,12 +85,12 @@ do
    # update database
    if [ $size  < $TRAINING_FILE_TH ]
    then
-      qs="INSERT INTO models (speciesid, modelstarted, modelfinished, mostrecent, issuccessfull, exitstatus, runtrainingid) VALUES (\'$spid\', now(), now(), \'t\', \'f\', \'err swd\', \'$RUNID\')"
+      qs="INSERT INTO models (speciesid, modelstarted, modelfinished, mostrecent, issuccessfull, exitstatus, runtrainingid) VALUES ('$spid', now(), now(), 't', 'f', 'err swd', '$RUNID')"
    else
-      qs="INSERT INTO models (speciesid, modelstarted, mostrecent, runtrainingid) VALUES (\'$spid\', now(), \'t\',  \'$RUNID\')"
+      qs="INSERT INTO models (speciesid, modelstarted, mostrecent, runtrainingid) VALUES ('$spid', now(), 't',  '$RUNID')"
    fi
 
-   psql -U $USER -d $DB -h $HOST -c "UPDATE models SET mostrecent='f' where speciesid \'$spid\' AND runtrainingid <> \'$RUNID\'"
+   psql -U $USER -d $DB -h $HOST -c "UPDATE models SET mostrecent='f' where speciesid '$spid' AND runtrainingid <> '$RUNID'"
    psql -U $USER -d $DB -h $HOST -c "$qs"
 
 done < $ID_FILE
