@@ -7,19 +7,19 @@ id=$1
 TMP_FROM_SLAVE=$2
 
 # 2. mkdir and get files needed
-mkdir -p tnc/results/$id
-scp flora:tnc/data/species/species_swd/${id:0:4}/$id/$id.zip tnc/results/$id
+mkdir -p tnc_tmp/results/$id
+scp flora:tnc/data/species/species_swd/${id:0:4}/$id/$id.zip tnc_tmp/results/$id
 
-unzip -d tnc/results/$id tnc/results/$id/$id.zip
+unzip -d tnc_tmp/results/$id tnc_tmp/results/$id/$id.zip
 
-rm tnc/results/$id/$id.zip
+rm tnc_tmp/results/$id/$id.zip
 
-java -mx1024m -jar tnc/src/lib/maxent/maxent.jar nowarnings outputdirectory=tnc/results/$id samplesfile=tnc/results/$id/$id.swd environmentallayers=tnc/results/$id/background.swd -a -z nopictures plots=false replicates=10
+java -mx1024m -jar tnc_tmp/src/lib/maxent/maxent.jar nowarnings outputdirectory=tnc_tmp/results/$id samplesfile=tnc_tmp/results/$id/$id.swd environmentallayers=tnc_tmp/results/$id/background.swd -a -z nopictures plots=false replicates=10
 
-zip -j tnc/results/$id/$id.zip tnc/results/$id/*.lambdas tnc/results/$id/maxentResults.csv
+zip -j tnc_tmp/results/$id/$id.zip tnc_tmp/results/$id/*.lambdas tnc_tmp/results/$id/maxentResults.csv
 
 ssh flora mkdir -p tnc/$RUNID/${id:0:4}/
-scp tnc/results/$id/$id.zip flora:tnc/$RUNID/${id:0:4}/
+scp tnc_tmp/results/$id/$id.zip flora:tnc/$RUNID/${id:0:4}/
 
-rm -r tnc/results/$id
+rm -r tnc_tmp/results/$id
 
