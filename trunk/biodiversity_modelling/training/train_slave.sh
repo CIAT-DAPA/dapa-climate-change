@@ -4,7 +4,7 @@
 
 # 1. Species id
 id=$1
-TMP_FROM_SLAVE=$2
+RUNID=$2
 
 # 2. mkdir and get files needed
 mkdir -p tnc_tmp/results/$id
@@ -18,8 +18,8 @@ java -mx1024m -jar tnc_tmp/src/lib/maxent/maxent.jar nowarnings outputdirectory=
 
 zip -j tnc_tmp/results/$id/$id.zip tnc_tmp/results/$id/*.lambdas tnc_tmp/results/$id/maxentResults.csv
 
-ssh flora mkdir -p tnc/$RUNID/${id:0:4}/
-scp tnc_tmp/results/$id/$id.zip flora:tnc/$RUNID/${id:0:4}/
+ssh flora mkdir -p tnc/results/$RUNID/${id:0:4}/
+scp tnc_tmp/results/$id/$id.zip flora:tnc/results/$RUNID/${id:0:4}/
 
 rm -r tnc_tmp/results/$id
 

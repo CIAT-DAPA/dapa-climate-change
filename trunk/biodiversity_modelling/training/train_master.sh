@@ -49,14 +49,11 @@ function run_training
    slave=$1
    id=$2
    
-   # tell db that model is starting
-   mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc;UPDATE $table SET started=NOW() where species_id=$id;"
-
    # call script at slve
-   ssh $slave sh tnc/src/scripts/training/train_slave.sh $id 
+   ssh $slave sh tnc_tmp/src/scripts/training/train_slave.sh $id $RUNID
 
    # tell db that trianing is done
-   mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc; UPDATE $table SET finished=NOW() where species_id=$id;"
+   psql -U $USER -d $DB -h $HOST  -c "UPDATE models SET modelfinished=now() where runtrainingid=$RUNID AND speciesid ='$ID'"
 }
 
 # Copy finished models to final destination and extract statistics
@@ -79,7 +76,7 @@ while read spid
 do
    COMPLETE_PATH=`echo $SAVE_TO/${spid:0:4}/$spid`
    
-   # check if files are complete ()
+   # check if files are complete 
    size=$(du $COMPLETE_PATH | cut -f1)
 
    # update database
@@ -101,6 +98,7 @@ done < $ID_FILE
 for server in $SERVERS
 do
    t_server=$(echo $server | cut -f1 -d:)
+   ssh $t_server rm -r tnc_tmp
    scp $SERVER_INIT_SCRIPT $t_server:
    ssh $t_server sh slave_init.sh
 done
@@ -122,9 +120,11 @@ done
 # initiate runs
 for slave in $INIT_QUEUE
 do
-   ID=$(psql -U $USER -d $DB -h $HOST -t -c "SELECT speciesid FROM models where runtrainingid=$RUNID AND modelstarted=NULL limit 1")
-   run_training $ID $slave &
-   RUN_QUEUE="$RUN_QUEUE $slave:$ID"
+   ID=$(psql -U $USER -d $DB -h $HOST -t -c "SELECT speciesid FROM models where runtrainingid=$RUNID AND modelstarted IS NULL limit 1")
+   psql -U $USER -d $DB -h $HOST  -c "UPDATE models SET modelstarted=now() where runtrainingid=$RUNID AND speciesid ='$ID'"
+
+   run_training $slave $ID &
+   RUN_QUEUE="$RUN_QUEUE $(echo $slave:$ID | sed 's/ //')"
 done
 
 # read an other id
@@ -141,7 +141,7 @@ do
          slave=$(echo $i | cut -f1 -d:)
          finished_id=$(echo $i | cut -f2 -d:)
 
-         finished_file="$TMP_DIR_FROM_SLAVE/$finished_id.zip"
+         finished_file="results/$RUNID/${finished_id:0:4}/$finished_id.zip"
 
          if [ -f $finished_file ]
          then
