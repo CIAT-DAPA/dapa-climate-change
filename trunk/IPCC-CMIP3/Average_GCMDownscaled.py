@@ -8,10 +8,10 @@ import arcgisscripting, os, sys, string
 gp = arcgisscripting.create(9.3)
 
 #Syntax 
-if len(sys.argv) < 6:
+if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Average_GCMDownscaled.py M:\climate_change\IPCC_CMIP3 B1 D:\climate_change\IPCC_CMIP3\ 30s downscaled"
+	print "   - ie: python Average_GCMDownscaled.py M:\climate_change\IPCC_CMIP3 B1 D:\climate_change\IPCC_CMIP3\ 30s downscaled D:\Masks\COL_adm\COL_adm0.dbf"
 	print "   Syntax	: <code.py>, <dirbase>, <scenario>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   dirout	: Out folder of txt describe archive"
@@ -25,6 +25,7 @@ scenario = sys.argv[2]
 dirout = sys.argv[3]
 resolution = sys.argv[4]
 type = sys.argv[5]
+mask = sys.argv[6]
 
 #Clear screen
 os.system('cls')
@@ -68,11 +69,25 @@ for period in periodlist:
 			LISTA = "\"" + lista[1:] + "\""		
 			
 			OutRasterMean =  diroutMean + "\\" + variable
-			if not gp.Exists(OutRasterMean):
+			diroutcut = diroutMean + "\\_cut" 
+			if not os.path.exists(diroutcut):
+				os.system('mkdir ' + diroutcut)				
+			OutRasterMeanCut = diroutcut + "\\" + os.path.basename(OutRasterMean)
+			
+			if not gp.Exists(OutRasterMean) and not gp.Exists(OutRasterMeanCut):
 				print "\n\t   ..averaging " + variable + ""
 				gp.CellStatistics_sa(LISTA, OutRasterMean, "MEAN")
+				print "\n\t   ..average " + variable + " done"
 			else:
-				print "\n\t   ..averaging " + variable + " done"
+				print "\n\t   ..average " + variable + " done"
+			
+			if gp.Exists(OutRasterMean) and not gp.Exists(OutRasterMeanCut):
+				print "\n\t   ..cutting " + variable + ""
+				gp.ExtractByMask_sa(OutRasterMean, mask, OutRasterMeanCut)
+				print "\n\t   ..cut " + variable + " done"
+			else:
+				print "\n\t   ..cut " + variable + " done"
+			gp.delete_management(OutRasterMean)
 			
 			# OutRasterSTD =  diroutSTD + "\\" + variable
 			# if not gp.Exists(OutRasterSTD):
