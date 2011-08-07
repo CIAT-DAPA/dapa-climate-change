@@ -21,15 +21,12 @@ USER='model1'
 HOST='192.168.20.228'
 DB='gisdb'
 
-# Information on the projection
-PROJ_INFO="P1:current.zip P2:A1B_2020_mean_bio.zip P3:A1B_2040_mean_bio.zip P4:A2_2020_mean_bio.zip P5:A2_2040_mean_bio.zip"
-
 # Model id, models that should be used as base of projection
 RUN_MODEL_ID=2
 
 # Information on available server (ssh keys need to be enabled inorder for this to work)
 # format: server:number_cores
-SERVERS="flora:20 fauna:24 andromeda:15 gisbif.ciat.cgiar.org:10"
+SERVERS="flora:10 fauna:14 andromeda:12 gisbif.ciat.cgiar.org:15"
 SERVER_INIT_SCRIPT="src/scripts/proj/slave_init.sh"
 
 # Where all the data will be stored after projection (/data/tnc/results/proj/)
@@ -81,7 +78,7 @@ done
 for slave in $INIT_QUEUE
 do
    # read an other proj_id, sres, year, spid and modelid from database
-   read runprojectid sres year spid modelprojectionid <<< $(psql -U $USER -d $DB -h $HOST -t -c "select runprojectid,sres,year,speciesid,modelprojectionid from modelprojections as mp join runsprojecting as rp on mp.runprojectid = rp.runpid join models as m on mp.modelprojectionid = m.modelid where projectionstarted is null limit 1;" | sed 's/ //g;s/|/ /g')
+   read runprojectid sres year spid modelprojectionid <<< $(psql -U $USER -d $DB -h $HOST -t -c "select runprojectid,sres,year,speciesid,modelprojectionid from modelprojections as mp join runsprojecting as rp on mp.runprojectid = rp.runpid join models as m on mp.modelid = m.modelid where projectionstarted is null limit 1;" | sed 's/ //g;s/|/ /g')
    
    run_proj $slave $sres $year $spid $modelprojectionid $RUN_MODEL_ID &
 
@@ -92,7 +89,7 @@ do
 done
 
 # read an other proj_id, sres, year, spid and modelid from database
-read runprojectid sres year spid modelprojectionid <<< $(psql -U $USER -d $DB -h $HOST -t -c "select runprojectid,sres,year,speciesid,modelprojectionid from modelprojections as mp join runsprojecting as rp on mp.runprojectid = rp.runpid join models as m on mp.modelprojectionid = m.modelid where projectionstarted is null limit 1;" | sed 's/ //g;s/|/ /g')
+read runprojectid sres year spid modelprojectionid <<< $(psql -U $USER -d $DB -h $HOST -t -c "select runprojectid,sres,year,speciesid,modelprojectionid from modelprojections as mp join runsprojecting as rp on mp.runprojectid = rp.runpid join models as m on mp.modelid = m.modelid where projectionstarted is null limit 1;" | sed 's/ //g;s/|/ /g')
 
 
 while [ -n "$spid" ]
@@ -125,6 +122,8 @@ do
               mkdir -p $DATA/${dir:0:4}
               mv results/proj/$finished_modelprojectionid.tif.gz $DATA/${dir:0:4} &
             fi
+	    
+            rm $finished_file &
 
             # delete file from queue
             OLD_RUN_QUEUE=$RUN_QUEUE
@@ -148,7 +147,7 @@ do
    done
         
    # read an other proj_id, sres, year, spid and modelid from database
-   read runprojectid sres year spid modelprojectionid <<< $(psql -U $USER -d $DB -h $HOST -t -c "select runprojectid,sres,year,speciesid,modelprojectionid from modelprojections as mp join runsprojecting as rp on mp.runprojectid = rp.runpid join models as m on mp.modelprojectionid = m.modelid where projectionstarted is null limit 1;" | sed 's/ //g;s/|/ /g')
+   read runprojectid sres year spid modelprojectionid <<< $(psql -U $USER -d $DB -h $HOST -t -c "select runprojectid,sres,year,speciesid,modelprojectionid from modelprojections as mp join runsprojecting as rp on mp.runprojectid = rp.runpid join models as m on mp.modelid = m.modelid where projectionstarted is null limit 1;" | sed 's/ //g;s/|/ /g')
 
 done
 
