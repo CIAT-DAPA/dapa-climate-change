@@ -13,6 +13,8 @@ dataSummary(bDir=bd, dataset=ds, variable=vb)
 
 in.file <- paste(bd,"/",ds,"-gcm/summary/",vb,"-",ds,"-vs-gcm-allPlotData.csv",sep="")
 ot.file <- paste(bd,"/_summaries/",vb,"-",ds,"-vs-gcm-allPlotData.csv",sep="")
+file.copy(in.file,ot.file)
 
 in.file <- paste(bd,"/",ds,"-gcm/summary/",vb,"-",ds,"-vs-summaryMetrics.csv",sep="")
-
+ot.file <- paste(bd,"/_summaries/",vb,"-",ds,"-vs-gcm-allPlotData.csv",sep="")
+file.copy(in.file,ot.file)
