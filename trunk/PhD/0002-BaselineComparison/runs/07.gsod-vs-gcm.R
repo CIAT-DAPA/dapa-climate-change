@@ -18,11 +18,14 @@ ad <- "F:/Administrative_boundaries/SHP_files"
 gd <- "F:/climate_change/IPCC_CMIP3/20C3M/original-data"
 od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm-ts", sep="")
 
-cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL")
-for (ctry in cList) {
-  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which=ALL, aDir=ad, var.in="rain", var.out="prec", iso.ctry=ctry, time.series=c(1961:1990))
-  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which=ALL, aDir=ad, var.in="tmean", var.out="tmean", iso.ctry=ctry, time.series=c(1961:1990))
+ctry <- "GHA"
+
+vList <- c("rain","tmean")
+for (vrin in vList) {
+  if (vrin == "rain") {vrout <- "prec"} else {vrout <- vrin}
+  pcws <- processCompareWS(work.dir=wd, out.dir=od, gcmdir=gd, which="ALL", aDir=ad, var.in=vrin, var.out=vrout, iso.ctry=ctry, time.series=c(1961:1990))
 }
+
 
 
 ########### LINUX RUN
@@ -43,7 +46,7 @@ ad <- "/mnt/GIS-HD716/Administrative_boundaries/SHP_files"
 gd <- "/mnt/GIS-HD716/climate_change/IPCC_CMIP3/20C3M/original-data"
 od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/gsod-vs-gcm-ts", sep="")
 
-ctry <- "ETH"
+ctry <- "BGD" #SEN MLI NER BFA IND BGD
 
 vList <- c("rain","tmean")
 for (vrin in vList) {

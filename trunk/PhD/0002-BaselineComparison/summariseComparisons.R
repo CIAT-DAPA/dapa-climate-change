@@ -332,7 +332,7 @@ boxplots.GCM <- function(fDir="", variable="prec", dataset="wcl", period="ANNUAL
 }
 
 generateBoxplots <- function(fd="C:/CIAT_work/CCAFS/baselineComparison/metrics") {
-	for (vr in c("prec","tmean") {
+	for (vr in c("prec","tmean")) {
 		for (dset in c("wcl","cru","wclst","ghcn","gsod")) {
 			for (prd in c("ANNUAL","JJA","DJF")) {
 				boxplots.ISO(fDir=fd, variable=vr, dataset=dset, period=prd)
