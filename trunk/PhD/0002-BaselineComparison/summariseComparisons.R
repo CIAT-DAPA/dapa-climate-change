@@ -63,30 +63,33 @@ metricsSummary <- function(bDir, dataset, variable) {
 				
 				#Open file, conditinally select all rows, or only totals (JJA/DJF cases)
 				cat("Reading in data \n")
-				metData <- read.csv(paste(mDir, "/metrics-", variable, ".csv", sep=""))
-				
-				if (period != "ANNUAL") {
-					metData <- metData[which(metData$MONTH == "total"),]
-				}
-				
-				#Adding identification fields
-				cat("Adding identification fields \n")
-				metData <- cbind(PERIOD=rep(period,nrow(metData)), ISO=rep(iso,nrow(metData)), MODEL=rep(model,nrow(metData)),metData)
-				
-				cat("Rbinding \n")
-				if (counter == 1) {
-					summaryData <- metData
-				} else {
-					summaryData <- rbind(summaryData, metData)
-				}
-				
-				counter <- counter+1
+        if (file.exists(paste(mDir,"/metrics-",variable,".csv",sep=""))) {
+  				metData <- read.csv(paste(mDir, "/metrics-", variable, ".csv", sep=""))
+  				
+  				if (period != "ANNUAL") {
+  					metData <- metData[which(metData$MONTH == "total"),]
+  				}
+  				
+  				#Adding identification fields
+  				cat("Adding identification fields \n")
+  				metData <- cbind(PERIOD=rep(period,nrow(metData)), ISO=rep(iso,nrow(metData)), MODEL=rep(model,nrow(metData)),metData)
+  				
+  				cat("Rbinding \n")
+  				if (counter == 1) {
+  					summaryData <- metData
+  				} else {
+  					summaryData <- rbind(summaryData, metData)
+  				}
+  				
+  				counter <- counter+1
+			  }
 			}
 		}
 	}
 
 	outFile <- paste(outDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
 	write.csv(summaryData,outFile,row.names=F,quote=F)
+  return(summaryData)
 }
 
 #This function gathers all the data that was used for getting the metrics in a single file 
@@ -115,24 +118,26 @@ dataSummary <- function(bDir, dataset, variable) {
 				
 				#Open file, conditinally select all rows, or only totals (JJA/DJF cases)
 				cat("Reading in data \n")
-				plotData <- read.csv(paste(mDir, "/plotData-", variable, ".csv", sep=""))
-				
-				if (period != "ANNUAL") {
-					plotData <- plotData[which(plotData$MONTH == "total"),]
-				}
-				
-				#Adding identification fields
-				cat("Adding identification fields \n")
-				plotData <- cbind(PERIOD=rep(period,nrow(plotData)), ISO=rep(iso,nrow(plotData)), MODEL=rep(model,nrow(plotData)),plotData)
-				
-				cat("Rbinding \n")
-				if (counter == 1) {
-					summaryData <- plotData
-				} else {
-					summaryData <- rbind(summaryData, plotData)
-				}
-				
-				counter <- counter+1
+        if (file.exists(paste(mDir, "/plotData-", variable, ".csv", sep=""))) {
+  				plotData <- read.csv(paste(mDir, "/plotData-", variable, ".csv", sep=""))
+  				
+  				if (period != "ANNUAL") {
+  					plotData <- plotData[which(plotData$MONTH == "total"),]
+  				}
+  				
+  				#Adding identification fields
+  				cat("Adding identification fields \n")
+  				plotData <- cbind(PERIOD=rep(period,nrow(plotData)), ISO=rep(iso,nrow(plotData)), MODEL=rep(model,nrow(plotData)),plotData)
+  				
+  				cat("Rbinding \n")
+  				if (counter == 1) {
+  					summaryData <- plotData
+  				} else {
+  					summaryData <- rbind(summaryData, plotData)
+  				}
+  				
+  				counter <- counter+1
+			  }
 			}
 		}
 	}
