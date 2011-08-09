@@ -205,7 +205,10 @@ boxplots.cru_wcl.ISO <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/met
 	cruValues <- read.csv(inFile.cru)
 	wclValues <- read.csv(inFile.wcl)
 	allValues <- rbind(cruValues, wclValues)
-
+  
+  if (!file.exists(paste(fDir,"/figures",sep=""))) {dir.create(paste(fDir,"/figures",sep=""))}
+  if (!file.exists(paste(fDir,"/figures/merged",sep=""))) {dir.create(paste(fDir,"/figures/merged",sep=""))}
+  
 	values.ann <- allValues[which(allValues$PERIOD == "ANNUAL" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
 	values.djf <- allValues[which(allValues$PERIOD == "DJF" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
 	values.jja <- allValues[which(allValues$PERIOD == "JJA" & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
@@ -239,7 +242,10 @@ boxplots.cru_wcl.ISO <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/met
 boxplots.cru_wcl.GCM <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/metrics", variable="prec") {
 	inFile.cru <- paste(fDir, "/", variable, "-cru-vs-gcm-summaryMetrics.csv", sep="")
 	inFile.wcl <- paste(fDir, "/", variable, "-wcl-vs-gcm-summaryMetrics.csv", sep="")
-
+  
+  if (!file.exists(paste(fDir,"/figures",sep=""))) {dir.create(paste(fDir,"/figures",sep=""))}
+  if (!file.exists(paste(fDir,"/figures/merged",sep=""))) {dir.create(paste(fDir,"/figures/merged",sep=""))}
+  
 	cruValues <- read.csv(inFile.cru)
 	wclValues <- read.csv(inFile.wcl)
 	allValues <- rbind(cruValues, wclValues)
@@ -279,7 +285,9 @@ boxplots.ISO <- function(fDir="", variable="prec", dataset="wcl", period="ANNUAL
 	#Reading in data
 	inFile <- paste(fDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
 	allValues <- read.csv(inFile)
-
+  
+  if (!file.exists(paste(fDir,"/figures",sep=""))) {dir.create(paste(fDir,"/figures",sep=""))}
+  
 	#Sub-selecting desired data
 	values <- allValues[which(allValues$PERIOD == period & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
 	
@@ -310,10 +318,12 @@ boxplots.GCM <- function(fDir="", variable="prec", dataset="wcl", period="ANNUAL
 	#Reading in data
 	inFile <- paste(fDir, "/", variable, "-", dataset, "-vs-gcm-summaryMetrics.csv", sep="")
 	allValues <- read.csv(inFile)
-
+  
+  if (!file.exists(paste(fDir,"/figures",sep=""))) {dir.create(paste(fDir,"/figures",sep=""))}
+  
 	#Sub-selecting desired data
 	values <- allValues[which(allValues$PERIOD == period & allValues$MONTH == "total" & allValues$VALUE == "MEAN"),]
-	
+  
 	#Plotting
 	tiff(paste(fDir, "/figures/fig-GCM-",variable, "-", period, "-", dataset, "-vs-gcm_N.tif",sep=""), pointsize=6, width=900, height=1000, units="px", compression="lzw",bg="white",res=300)
 	par(las=2, mar=c(11, 5, 1, 1))
@@ -337,12 +347,14 @@ boxplots.GCM <- function(fDir="", variable="prec", dataset="wcl", period="ANNUAL
 }
 
 generateBoxplots <- function(fd="C:/CIAT_work/CCAFS/baselineComparison/metrics") {
-	for (vr in c("prec","tmean")) {
+	for (vr in c("prec","tmean","dtr")) {
 		for (dset in c("wcl","cru","wclst","ghcn","gsod")) {
-			for (prd in c("ANNUAL","JJA","DJF")) {
-				boxplots.ISO(fDir=fd, variable=vr, dataset=dset, period=prd)
-				boxplots.GCM(fDir=fd, variable=vr, dataset=dset, period=prd)
-			}
+      if (file.exists(paste(fd,"/",vr,"-",dset,"-vs-gcm-summaryMetrics.csv",sep=""))) {
+  			for (prd in c("ANNUAL","JJA","DJF")) {
+  				boxplots.ISO(fDir=fd, variable=vr, dataset=dset, period=prd)
+  				boxplots.GCM(fDir=fd, variable=vr, dataset=dset, period=prd)
+  			}
+      }
 		}
 	}
 }
@@ -366,5 +378,5 @@ createColoured <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/metrics",
 		}
 	}
 
-	write.csv(output, "coloured.csv", row.names=F, quote=F)
+	write.csv(output, paste(fDir,"/",variable,"-",dataset,"-vs-gcm-coloured.csv",sep=""), row.names=F, quote=F)
 }
