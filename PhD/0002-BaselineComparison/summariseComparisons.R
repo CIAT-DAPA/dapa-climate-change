@@ -378,5 +378,5 @@ createColoured <- function(fDir="C:/CIAT_work/CCAFS/baselineComparison/metrics",
 		}
 	}
 
-	write.csv(output, paste(fDir,"/",variable,"-",dataset,"-vs-gcm-coloured.csv",sep=""), row.names=F, quote=F)
+	write.csv(output, paste(fDir,"/",variable,"-",period,"-",dataset,"-vs-gcm-coloured.csv",sep=""), row.names=F, quote=F)
 }

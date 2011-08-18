@@ -1,6 +1,39 @@
 #################################################################################
 #################################################################################
-#Compare stations timeseries
+#Compare stations timeseries (average of stations within each cell)
+#################################################################################
+#################################################################################
+
+repoDir <- "D:/_tools"
+src.dir <- paste(repoDir,"/dapa-climate-change/trunk/PhD/0002-BaselineComparison",sep=""); setwd(src.dir)
+source("compareGHCNRaster-TS.mc.R")
+
+mDataDir <- "F:/PhD-work"
+work.dir <- paste(mDataDir,"/climate-data-assessment/comparisons", sep="")
+iso.dir <- "F:/Administrative_boundaries/SHP_files"
+
+modDir <- paste(work.dir, "/input-data/gcm-data/20C3M/1961_1990", sep="")
+gcmList <- list.files(modDir)
+
+vList <- c("rain","tmean")
+cList <- c("ETH", "KEN", "TZA", "UGA", "GHA", "SEN", "MLI", "NER", "BFA", "IND", "BGD", "NPL")
+
+for (gcm in gcmList) {
+  for (ctry in cList) {
+    for (vr in vList) {
+      cat("Processing",gcm,ctry,vr,"\n")
+      if (vr == "rain") {dv <- F} else {dv <- T}
+      compareMeanCellGHCN(wd=work.dir,gcm=gcm,variable=vr,divide=dv,iso=ctry,isoDir=iso.dir)
+    }
+  }
+}
+
+
+
+
+#################################################################################
+#################################################################################
+#Compare stations timeseries (Individual stations)
 #################################################################################
 #################################################################################
 
@@ -18,7 +51,7 @@ ad <- "F:/Administrative_boundaries/SHP_files"
 gd <- "F:/climate_change/IPCC_CMIP3/20C3M/original-data"
 od <- paste(mDataDir, "/climate-data-assessment/comparisons/results/ghcn-vs-gcm-ts", sep="")
 
-ctry <- "NPL"
+ctry <- "ETH"
 vList <- c("rain","tmean")
 for (vrin in vList) {
   if (vrin == "rain") {vrout <- "prec"} else {vrout <- vrin}
