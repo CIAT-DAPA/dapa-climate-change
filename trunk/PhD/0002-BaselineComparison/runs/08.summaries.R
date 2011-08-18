@@ -1,16 +1,18 @@
 #Summaries
 
+#Summarise all the comparisons for the 'climate normals' comparisons
 source("summariseComparisons.R")
 
 #WorldClim
 bd <- "F:/PhD-work/climate-data-assessment/comparisons/results"
 ds <- "wcl"
 vb <- "dtr"
-sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
-sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
 #Copy the output file sumaryMetrics to the _summary folder
 in.file <- paste(bd,"/",ds,"-vs-gcm/summary/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
 ot.file <- paste(bd,"/_summaries/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
+if (file.exists(ot.file)) {file.remove(ot.file)}
 file.copy(in.file,ot.file)
 
 
@@ -18,22 +20,24 @@ file.copy(in.file,ot.file)
 bd <- "F:/PhD-work/climate-data-assessment/comparisons/results"
 ds <- "cru"
 vb <- "dtr"
-sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
-sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
 #Copy the output file sumaryMetrics to the _summary folder
 in.file <- paste(bd,"/",ds,"-vs-gcm/summary/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
 ot.file <- paste(bd,"/_summaries/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
+if (file.exists(ot.file)) {file.remove(ot.file)}
 file.copy(in.file,ot.file)
 
 #WCL-WS
 bd <- "F:/PhD-work/climate-data-assessment/comparisons/results"
 ds <- "wclst"
 vb <- "dtr"
-sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
-sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
 #Copy the output file sumaryMetrics to the _summary folder
 in.file <- paste(bd,"/",ds,"-vs-gcm/summary/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
 ot.file <- paste(bd,"/_summaries/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
+if (file.exists(ot.file)) {file.remove(ot.file)}
 file.copy(in.file,ot.file)
 
 #GHCN was not done because DTR data was unavailable for the regions.
@@ -42,11 +46,12 @@ file.copy(in.file,ot.file)
 bd <- "F:/PhD-work/climate-data-assessment/comparisons/results"
 ds <- "gsod"
 vb <- "dtr"
-sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
-sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- metricsSummary(bDir=bd, dataset=ds, variable=vb)
+#sdt <- dataSummary(bDir=bd, dataset=ds, variable=vb)
 #Copy the output file sumaryMetrics to the _summary folder
 in.file <- paste(bd,"/",ds,"-vs-gcm/summary/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
 ot.file <- paste(bd,"/_summaries/",vb,"-",ds,"-vs-gcm-summaryMetrics.csv",sep="")
+if (file.exists(ot.file)) {file.remove(ot.file)}
 file.copy(in.file,ot.file)
 
 ######################################################
