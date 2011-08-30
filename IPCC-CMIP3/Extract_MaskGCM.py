@@ -5,14 +5,14 @@
 # Note: If process is interrupted, you must be erase the last processed period
 # ----------------------------------------------------------------------------------
 
-import arcgisscripting, os, sys, string
+import arcgisscripting, os, sys, string,glob
 gp = arcgisscripting.create(9.3)
 
 #Syntax
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_MaskGCM.py D:\climate_change\IPCC_CMIP3 B1 D:\Masks\COL_adm\COL_adm0.dbf D:\climate_change\IPCC_CMIP3\Colombia_Extract 30s downscaled"
+	print "   - ie: python Extract_MaskGCM.py D:\climate_change\IPCC_CMIP3 B1 D:\Masks\COL_adm\COL_adm0.dbf D:\climate_change\IPCC_CMIP3\CA_Extract 30s downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -38,7 +38,7 @@ print " EXTRACT BY MASK GCM  "
 print "~~~~~~~~~~~~~~~~~~~~~~"
 
 #Get lists 
-periodlist = "2040_2069", "2070_2099" #, "1961_1990" #, "2050_2079", "2060_2089", "2010_2039", "2020_2049", "2030_2059",
+periodlist = "2010_2039", "2040_2069", "2070_2099" #, "1961_1990" #, "2050_2079", "2060_2089", , "2020_2049", "2030_2059",
 modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 print "Available models: " + str(modellist)
 
@@ -68,8 +68,8 @@ for model in modellist:
 					print "    Extracting " + raster
 					OutRaster = diroutraster + "\\" + raster
 					# X-Minimum, Y-Minimum, X-Maximum, Y-Maximum
-					gp.clip_management(raster,"-10 32 5 47 ",OutRaster)
-					gp.ExtractByMask_sa(gp.workspace + "\\" + raster, mask, OutRaster)
+					gp.clip_management(raster,"-97.75 7.05 -68.25 21.75 ",OutRaster)
+					# gp.ExtractByMask_sa(gp.workspace + "\\" + raster, mask, OutRaster)
 
 					if not os.path.exists(diroutascii):
 						os.system('mkdir ' + diroutascii)
@@ -82,6 +82,11 @@ for model in modellist:
 					os.remove(OutAscii)
 					gp.delete_management(OutRaster)
 
+				pjrList = sorted(glob.glob(diroutascii + "\\*.pjr"))
+				for pjr in pjrList:
+					os.remove(pjr)
+				
+				
 					# MIN = gp.GetRasterProperties_management(OutRaster, "MINIMUM")
 					# MAX = gp.GetRasterProperties_management(OutRaster, "MAXIMUM")
 					# MEA = gp.GetRasterProperties_management(OutRaster, "MEAN")
