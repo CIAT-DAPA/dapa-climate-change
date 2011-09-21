@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_MaskGCM.py D:\climate_change\IPCC_CMIP3 B1 D:\Masks\COL_adm\COL_adm0.dbf D:\climate_change\IPCC_CMIP3\CA_Extract 30s downscaled"
+	print "   - ie: python Extract_MaskGCM.py M:\climate_change\IPCC_CMIP3 A1B D:\Masks\COL_adm\COL_adm0.dbf D:\Workspace\IGP_extract 30s downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -38,19 +38,19 @@ print " EXTRACT BY MASK GCM  "
 print "~~~~~~~~~~~~~~~~~~~~~~"
 
 #Get lists 
-periodlist = "2010_2039", "2040_2069", "2070_2099" #, "1961_1990" #, "2050_2079", "2060_2089", , "2020_2049", "2030_2059",
+periodlist = "2010_2039", "2020_2049", "2040_2069" #"1961_1990", "2070_2099", "2050_2079", "2060_2089", "2030_2059",
 modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 print "Available models: " + str(modellist)
 
 for model in modellist:
     for period in periodlist:
-        
+    
 		gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
-		if os.path.exists(gp.workspace) and not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done.txt"):
+		if os.path.exists(gp.workspace) and not os.path.exists(dirout + "\\SRES_" + scenario + "\\" + model + "_extract_" + period + "_done.txt"):
 			print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
-			diroutraster = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-			diroutascii = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_asciis"
+			diroutraster = dirout + "\\SRES_" + scenario + "\\" + model + "\\" + period
+			diroutascii = dirout + "\\SRES_" + scenario + "\\" + model + "\\" + period
 
 			if not os.path.exists(diroutraster):
 				os.system('mkdir ' + diroutraster)
@@ -63,12 +63,13 @@ for model in modellist:
 				# outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 				
 				#Get a list of raster in workspace
-				rasters = sorted(gp.ListRasters("*", "GRID"))
-				for raster in rasters:
-					print "    Extracting " + raster
-					OutRaster = diroutraster + "\\" + raster
-					# X-Minimum, Y-Minimum, X-Maximum, Y-Maximum
-					gp.clip_management(raster,"-97.75 7.05 -68.25 21.75 ",OutRaster)
+			rasters = sorted(gp.ListRasters("*", "GRID"))
+			for raster in rasters:
+				print "    Extracting " + raster
+				OutRaster = diroutraster + "\\" + raster
+				# X-Minimum, Y-Minimum, X-Maximum, Y-Maximum
+				if not gp.Exists(OutRaster):
+					gp.clip_management(raster,"66 4 100 38 ",OutRaster)
 					# gp.ExtractByMask_sa(gp.workspace + "\\" + raster, mask, OutRaster)
 
 					if not os.path.exists(diroutascii):
@@ -95,10 +96,10 @@ for model in modellist:
 					# outFile = open(describefile, "a")
 					# outFile.write(scenario + "\t" + model + "\t" + period + "\t" + raster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
 
-				print "Done!!"
-				
-				checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + str(type) + "\\Global_" + str(resolution) + "\\" + model + "\\_extract_" + period + "_done.txt", "w")
-				checkTXT.close()
+			print "Done!!"
+			
+			checkTXT = open(dirout + "\\SRES_" + scenario + "\\" + model + "_extract_" + period + "_done.txt", "w")
+			checkTXT.close()
 		else:
 			print "The model " + model + " " + period + " is already processed"
 			print "Processing the next period \n"
