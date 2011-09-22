@@ -42,7 +42,8 @@ periodlist = "2010_2039", "2020_2049", "2040_2069" #"1961_1990", "2070_2099", "2
 modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 print "Available models: " + str(modellist)
 
-for model in modellist:
+# for model in modellist:
+for model in modellist[0:5]:
     for period in periodlist:
     
 		gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
@@ -75,17 +76,20 @@ for model in modellist:
 					if not os.path.exists(diroutascii):
 						os.system('mkdir ' + diroutascii)
 
-					OutAscii = diroutascii + "\\" + os.path.basename(OutRaster) + ".asc"
-					print "    Converting " + OutAscii
-					gp.RasterToASCII_conversion(OutRaster, OutAscii)
-					InZip = diroutascii + "\\" + os.path.basename(OutRaster).split("_")[0] + "_asc.zip"
-					os.system('7za a ' + InZip + " " + OutAscii)
-					os.remove(OutAscii)
-					gp.delete_management(OutRaster)
+			gp.workspace = diroutraster
+			rasters1 = sorted(gp.ListRasters("*", "GRID"))
+			for raster in rasters1:
+				OutAscii = diroutascii + "\\" + os.path.basename(raster) + ".asc"
+				print "    Converting " + OutAscii
+				gp.RasterToASCII_conversion(raster, OutAscii)
+				InZip = diroutascii + "\\" + os.path.basename(raster).split("_")[0] + "_asc.zip"
+				os.system('7za a ' + InZip + " " + OutAscii)
+				os.remove(OutAscii)
+				gp.delete_management(raster)
 
-				pjrList = sorted(glob.glob(diroutascii + "\\*.pjr"))
-				for pjr in pjrList:
-					os.remove(pjr)
+			pjrList = sorted(glob.glob(diroutascii + "\\*.pjr"))
+			for pjr in pjrList:
+				os.remove(pjr)
 				
 				
 					# MIN = gp.GetRasterProperties_management(OutRaster, "MINIMUM")
