@@ -74,6 +74,18 @@ for (model in gcmList) {
   }
 }
 
+#######################################################
+repoDir <- "D:/_tools"
+src.dir <- paste(repoDir,"/dapa-climate-change/trunk/PhD/0002-BaselineComparison",sep=""); setwd(src.dir)
+source("mapMeanMetrics-TS.R")
+
+mDataDir <- "F:/PhD-work"
+work.dir <- paste(mDataDir,"/climate-data-assessment/comparisons", sep="")
+
+gcmDir <- paste(work.dir, "/input-data/gcm-data/20C3M/1961_1990", sep="")
+gcmList <- list.files(gcmDir)
+
+
 #GSOD
 for (model in gcmList) {
   for (prd in c("TTL","JJA","DJF")) {

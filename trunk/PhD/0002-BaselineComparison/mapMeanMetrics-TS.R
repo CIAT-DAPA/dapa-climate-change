@@ -18,6 +18,7 @@
 
 require(raster)
 rm(list=ls());g=gc();rm(g)
+gcm.chars <- read.csv("gcm_chars.csv")
 
 mapMetricMean <- function(wd="",dataset="ghcn",gcm="",variable="rain",period="TTL",metric="R2.FORCED") {
   
@@ -54,9 +55,13 @@ mapMetricMean <- function(wd="",dataset="ghcn",gcm="",variable="rain",period="TT
   }
   
   #Load dummy global mask of GCM cells and assign cell IDs as cell numbers
-  GCMDir <- paste(wd, "/input-data/gcm-data/20C3M/1961_1990", sep="")
-  modDir <- paste(GCMDir,"/",gcm,sep="")
-  msk <- raster(paste(modDir,"/prec_01.asc",sep=""))
+  gcm.res <- getGCMRes(gcm, gcm.chars)
+  #GCMDir <- paste(wd, "/input-data/gcm-data/20C3M/1961_1990", sep="")
+  #modDir <- paste(GCMDir,"/",gcm,sep="")
+  xt <- extent(c(-180,180,-90,90))
+  nc <- 360/gcm.res
+  nr <- 180/gcm.res
+  msk <- raster(xt,ncol=nc,nrow=nr) #msk <- raster(paste(modDir,"/prec_01.asc",sep=""))
   msk[] <- 1:ncell(msk)
   
   #Extract stations locations from mask
@@ -88,3 +93,7 @@ mapMetricMean <- function(wd="",dataset="ghcn",gcm="",variable="rain",period="TT
   return(rs)
 }
 
+#GET GCM Resolution
+getGCMRes <- function(gcm, gcm.params) {
+  return(gcm.params$dxNW[which(gcm.params$model == gcm)])
+}
