@@ -16,6 +16,8 @@ zipList <- list.files(env.dir.in,pattern=paste(sres,"_",period,"_",sep=""))
 for (i in 1:19) {
 	gcount <- 1
 	for (zipFile in zipList) {
+		cat("Loading file", i, "inside", zipFile, "\n")
+		
 		zipFile.path <- paste(env.dir.in,"/",zipFile,sep="")
 		zz <- unz(zipFile.path, paste("bio_",i,".asc",sep=""), "r")
 		
@@ -49,8 +51,10 @@ for (i in 1:19) {
 		gcount <- gcount + 1
 		rm(rs); g=gc()
 	}
+	
+	cat("Calculating mean and writing \n")
 	rs.mean <- rpund(rs.mean/length(zipList),0)
 	writeRaster(rs.mean, paste(env.dir.out,"/f_2050_ensemble/bio_",i,".asc",sep=""),format='ascii',overwrite=T)
-	rm(rs.mean)
+	rm(rs.mean); g=gc()
 }
 
