@@ -1,4 +1,5 @@
 #Script to create a GCM ensemble
+require(rgdal); require(raster)
 
 env.dir.in <- "/mnt/GIS-HD716/TNC_global_plants/data/proj"
 env.dir.out <- "/data1/TNC/env"
