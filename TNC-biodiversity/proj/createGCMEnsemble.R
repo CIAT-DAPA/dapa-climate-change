@@ -53,7 +53,7 @@ for (i in 1:19) {
 	}
 	
 	cat("Calculating mean and writing \n")
-	rs.mean <- rpund(rs.mean/length(zipList),0)
+	rs.mean <- round(rs.mean/length(zipList),0)
 	writeRaster(rs.mean, paste(env.dir.out,"/f_2050_ensemble/bio_",i,".asc",sep=""),format='ascii',overwrite=T)
 	rm(rs.mean); g=gc()
 }
