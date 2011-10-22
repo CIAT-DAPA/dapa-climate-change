@@ -3,6 +3,7 @@
 # the bash script variables.sh needs to be modified
 # $1 containts the name of SRES,YEAR and GCM
 # $2 is the number of cores to start
+#models are: c_2000_current | f_2050_ensemble
 
 MODEL=$1
 MAX_NPROC=$2
@@ -167,7 +168,8 @@ then
 	
 	# get second ID
 	ID=$(mysql --skip-column-names -umodel1 -pmaxent -h $HOST -e"use tnc; select species_id from $TABLE where started is null limit 1;")
-
+	
+	COUNT=1
 	while [ -n "$ID" ]
 	do
 		echo "sending for species $ID"
@@ -184,6 +186,14 @@ then
 		
 		sleep 0.1
 		ID=$(mysql --skip-column-names -umodel1 -h$HOST -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
+		
+		# stopping for first test
+		COUNT=$(echo $COUNT+1 | bc)
+		if [ $COUNT -eq 10 ]
+		then
+			echo "first test done"
+			exit
+		fi
 		
 	done
 	
