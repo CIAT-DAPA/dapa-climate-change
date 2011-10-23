@@ -11,6 +11,19 @@ MAX_NPROC=$2
 #RES=$4
 QUEUE=""
 
+##################
+# load variabiles
+
+if [ -f variables.sh ]
+then
+  echo "loading variables ..."
+  . variables.sh
+else
+  echo "can not find variables"
+  exit
+fi
+
+
 # Table name
 TABLE=lam_$RES\_$MODEL
 
@@ -99,18 +112,8 @@ function runmodel {
 	
 }
 
-##################
-# load variabiles
 
-if [ -f variables.sh ]
-then
-  echo "loading variables ..."
-  . variables.sh
-else
-  echo "can not find variables"
-  exit
-fi
-
+#Multi process
 if [ -f "$ENVDATA_SRV/$MODEL.zip" ]
 then
 	# only unzip env data if its not already done
