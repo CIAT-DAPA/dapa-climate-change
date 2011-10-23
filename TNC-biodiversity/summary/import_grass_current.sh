@@ -44,6 +44,7 @@ do
 
   calculateRichness $MODEL $folder
   wait ${!}
+  rm /data1/TNC/src/summary/batch_current.v2.rw.sh
 done
 
 
