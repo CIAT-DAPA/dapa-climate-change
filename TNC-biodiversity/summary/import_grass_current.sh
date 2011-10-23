@@ -20,7 +20,7 @@
 function runbatch_current {
   folder=$1
   export GRASS_BATCH_JOB=/data1/TNC/src/summary/batch_current.v2.rw.sh
-  /usr/bin/grass64 /data1/TNC/results/lam_5k_c_2000_current/s$folder
+  /usr/bin/grass64 /data1/TNC/results/grass/lam_5k_c_2000_current/s$folder
   unset GRASS_BATCH_JOB
 }
 
