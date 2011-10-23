@@ -4,19 +4,21 @@ require(rgdal); require(raster)
 env.dir.in <- "/mnt/GIS-HD716/TNC_global_plants/data/proj"
 env.dir.out <- "/data1/TNC/env"
 
-sres <- "A2"
+sres <- "A1B"
 period <- "2040_2069"
+ensemble <- "a1b_2050_ensemble"
 
-if (!file.exists(paste(env.dir.out,"/f_2050_ensemble",sep=""))) {
-	dir.create(paste(env.dir.out,"/f_2050_ensemble",sep=""))
+if (!file.exists(paste(env.dir.out,"/",ensemble,sep=""))) {
+	dir.create(paste(env.dir.out,"/",ensemble,sep=""))
 }
 
 zipList <- list.files(env.dir.in,pattern=paste(sres,"_",period,"_",sep=""))
 
 for (i in 1:19) {
 	gcount <- 1
-	if (!file.exists(paste(env.dir.out,"/f_2050_ensemble/bio_",i,".asc",sep=""))) {
+	if (!file.exists(paste(env.dir.out,"/",ensemble,"/bio_",i,".asc",sep=""))) {
 		for (zipFile in zipList) {
+			cat("\n")
 			cat("Loading file", i, "inside", zipFile, "\n")
 			
 			zipFile.path <- paste(env.dir.in,"/",zipFile,sep="")
@@ -55,7 +57,7 @@ for (i in 1:19) {
 		
 		cat("Calculating mean and writing \n")
 		rs.mean <- round(rs.mean/length(zipList),0)
-		writeRaster(rs.mean, paste(env.dir.out,"/f_2050_ensemble/bio_",i,".asc",sep=""),format='ascii',overwrite=T)
+		writeRaster(rs.mean, paste(env.dir.out,"/",ensemble,"/bio_",i,".asc",sep=""),format='ascii',overwrite=T)
 		rm(rs.mean); g=gc()
 	}
 }
