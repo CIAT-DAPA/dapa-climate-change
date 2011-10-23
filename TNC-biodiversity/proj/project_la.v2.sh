@@ -68,6 +68,13 @@ function runmodel {
 	mysql --skip-column-names -umodel1 -pmaxent -h$host -e"use tnc;UPDATE $table SET started=NOW() where species_id=$id;"
 	nf=$(echo ${id:0:4})
 	
+	#make nf directory if it does not exist
+	if [ ! -d "$results/$table/$nf" ]
+	then
+	  echo "mk prefix dir..."
+	  mkdir -p $results/$table/$nf
+	fi
+	
 	# make a directory for this species for this run
 	mkdir $base/$nf/$id
 
@@ -155,13 +162,6 @@ then
 	# get first ID
 	ID=$(mysql --skip-column-names -umodel1 -pmaxent -h$HOST -e"use tnc; select species_id from $TABLE where started is null limit 1;")
 	NF=$(echo ${ID:0:4})
-	
-	#make nf directory if it does not exist
-	if [ ! -d "$RESULTS_HOST/$TABLE/$NF" ]
-	then
-	  echo "mk prefix dir..."
-	  mkdir -p $RESULTS_HOST/$TABLE/$NF
-	fi
 	
 	# run first species, so that java cached rasters are created 
 	runmodel $ID $MODEL $RESULTS_HOST $MAXENT $MAXRAM $ENVDATA_HOST $HOST $RES $TABLE
