@@ -16,9 +16,9 @@ zipList <- list.files(env.dir.in,pattern=paste(sres,"_",period,"_",sep=""))
 
 for (i in 1:19) {
 	gcount <- 1
+	cat("\n")
 	if (!file.exists(paste(env.dir.out,"/",ensemble,"/bio_",i,".asc",sep=""))) {
 		for (zipFile in zipList) {
-			cat("\n")
 			cat("Loading file", i, "inside", zipFile, "\n")
 			
 			zipFile.path <- paste(env.dir.in,"/",zipFile,sep="")
