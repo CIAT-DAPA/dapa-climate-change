@@ -195,7 +195,7 @@ then
 		if [ $COUNT -eq 10 ]
 		then
 			echo "first test done"
-			exit
+			return 0
 		fi
 		
 	done
