@@ -192,11 +192,11 @@ then
 		
 		# stopping for first test, uncomment for testing
 		COUNT=$(echo $COUNT+1 | bc)
-		if [ $COUNT -eq 10 ]
-		then
-			echo "first test done"
-			return 0
-		fi
+		#if [ $COUNT -eq 10 ]
+		#then
+		#	echo "first test done"
+		#	return 0
+		#fi
 		
 	done
 	
