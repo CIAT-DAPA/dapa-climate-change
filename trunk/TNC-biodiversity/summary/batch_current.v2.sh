@@ -62,10 +62,10 @@ do
 		cp /data1/TNC/env/dummy.tif chull.tifs/$base.tif
 		gdal_rasterize -a HASCHULL -l $base shps/$base.shp chull.tifs/$base.tif
 		gdalbuildvrt vrts/$base.chull.vrt chull.tifs/$base.tif
-		r.in.gdal in=vrts/$base.chull.vrt out=s$base.ch -o
-		r.buffer input=s$base.ch output=$base.tmp distances=$bufDis units=meters
-		r.mapcalc "$base.bf=if($base.tmp>=0,1,null())"
-		r.mapcalc "s$base.bf=if(isnull($base.bf),0,$base.bf)"
+		r.in.gdal in=vrts/$base.chull.vrt out=s$base.ch -o --o
+		r.buffer input=s$base.ch output=$base.tmp distances=$bufDis units=meters --overwrite
+		r.mapcalc "$base.bf=if($base.tmp>=0,1,null())" --overwrite
+		r.mapcalc "s$base.bf=if(isnull($base.bf),0,$base.bf)" --overwrite
 		g.mremove rast=$base.tmp,$base.bf -f
 		
 		# register rasters in GRASS
@@ -82,8 +82,8 @@ do
 		
 		#done
 
-		r.mapcalc "s$base.th=s$base.th.b"
-		r.mapcalc "s$base.pa=if(s$base.th==1 & s$base.bf==1,1,0)"
+		r.mapcalc "s$base.th=s$base.th.b" --overwrite
+		r.mapcalc "s$base.pa=if(s$base.th==1 & s$base.bf==1,1,0)" --overwrite
 
 		# remove original maps
 		g.remove rast="s$base.th.b" -f
