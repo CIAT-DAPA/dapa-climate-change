@@ -75,7 +75,7 @@ function renameRuns {
         id=$(echo $j | cut -f2 -d/);   
         nf=$(echo ${id:0:4});   
         if [ -e "$nf" ];   
-        then    
+        then
           mv -v $j $nf;   
         else    
           mkdir $nf;    
@@ -129,7 +129,7 @@ done < list.todo
 function runbatch_current {
   folder=$1  
   export GRASS_BATCH_JOB=/data/TNC/src/batch_current.sh 
-  /usr/bin/grass64 /data/TNC/grass/current/s$folder  
+  /usr/bin/grass64 /data/TNC/grass/current/s$folder
   unset GRASS_BATCH_JOB
 
 }
