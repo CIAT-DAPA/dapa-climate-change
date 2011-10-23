@@ -3,7 +3,7 @@
 # the bash script variables.sh needs to be modified
 # $1 containts the name of SRES,YEAR and GCM
 # $2 is the number of cores to start
-#models are: c_2000_current | f_2050_ensemble
+#models are: c_2000_current | a2_2050_ensemble | a1b_2050_ensemble
 
 MODEL=$1
 MAX_NPROC=$2
