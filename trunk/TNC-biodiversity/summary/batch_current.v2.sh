@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Batch job, to be started in current directory
 # which folder should I work in
 folder=$(g.gisenv -n | grep 'MAPSET' | cut -f2 -d'=' | sed 's/s//')
