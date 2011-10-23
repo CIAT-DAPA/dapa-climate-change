@@ -190,13 +190,13 @@ then
 		sleep 0.1
 		ID=$(mysql --skip-column-names -umodel1 -h$HOST -pmaxent -e"use tnc; select species_id from $TABLE where started is null limit 1;")
 		
-		# stopping for first test
+		# stopping for first test, uncomment for testing
 		COUNT=$(echo $COUNT+1 | bc)
-		if [ $COUNT -eq 10 ]
-		then
-			echo "first test done"
-			return 0
-		fi
+		#if [ $COUNT -eq 10 ]
+		#then
+		#	echo "first test done"
+		#	return 0
+		#fi
 		
 	done
 	
