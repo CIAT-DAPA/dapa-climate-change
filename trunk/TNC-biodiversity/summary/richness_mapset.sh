@@ -33,7 +33,7 @@
     base=$(echo $lyr | sed 's/.pr//' | sed 's/s//')
 
     # calculate cumulative richness (and others) grid
-	if [ loc -eq 0 ]
+	if [ $loc -eq 0 ]
 	then
 		r.mapcalc "richness.tmp=richness+s$base.pa"
 		g.remove rast=richness -f
