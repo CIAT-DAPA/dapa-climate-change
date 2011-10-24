@@ -19,12 +19,12 @@
 
 function runbatch_current {
   folder=$1
-  export GRASS_BATCH_JOB=/data1/TNC/src/summary/batch_current.v2.rw.sh
+  export GRASS_BATCH_JOB=/data1/TNC/results/lam_5k_c_2000_current/$folder/batch_current.v2.rw.sh
   /usr/bin/grass64 /data1/TNC/results/grass/lam_5k_c_2000_current/s$folder
   unset GRASS_BATCH_JOB
 }
 
-function calculateRichness {
+function controlBatch {
 
   NLOCATION=$1
   PROC_FOLDER=$2
@@ -40,12 +40,12 @@ while read folder
 do
   echo "doing folder $folder"
   MODEL=lam_5k_$1
-  cp /data1/TNC/src/summary/batch_current.v2.sh /data1/TNC/src/summary/batch_current.v2.rw.sh
-  chmod 777 /data1/TNC/src/summary/batch_current.v2.rw.sh
-
-  calculateRichness $MODEL $folder
+  cp /data1/TNC/src/summary/batch_current.v2.sh /data1/TNC/results/$MODEL/$folder/batch_current.v2.rw.sh
+  chmod 777 /data1/TNC/results/$MODEL/$folder/batch_current.v2.rw.sh
+  
+  controlBatch $MODEL $folder
   #wait ${!}
-  rm /data1/TNC/src/summary/batch_current.v2.rw.sh
+  rm /data1/TNC/results/$MODEL/$folder/batch_current.v2.rw.sh
 done
 
 
