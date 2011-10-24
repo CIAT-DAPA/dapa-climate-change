@@ -12,7 +12,7 @@ do
 	do
 		base=$(echo $tif | sed 's/.tif//')
 		
-		if [ $MODEL == lam_5k_c_2000_current ]
+		if [ $MODEL == "lam_5k_c_2000_current" ]
 		then
 			for FILE in s$base.bf s$base.pa s$base.th s$base.ch s$base.pr
 			do

@@ -1,0 +1,18 @@
+TNC runs
+c_2000_current			dirlist_1.lst			
+c_2000_current			dirlist_2.lst			
+c_2000_current			dirlist_3.lst			
+c_2000_current			dirlist_4.lst			ok
+c_2000_current			dirlist_5.lst			ok
+
+a2_2050_ensemble		dirlist_1.lst			
+a2_2050_ensemble		dirlist_2.lst			
+a2_2050_ensemble		dirlist_3.lst			
+a2_2050_ensemble		dirlist_4.lst			
+a2_2050_ensemble		dirlist_5.lst			
+
+a1b_2050_ensemble 		dirlist_1.lst			
+a1b_2050_ensemble 		dirlist_2.lst			
+a1b_2050_ensemble 		dirlist_3.lst			
+a1b_2050_ensemble 		dirlist_4.lst			
+a1b_2050_ensemble 		dirlist_5.lst			
