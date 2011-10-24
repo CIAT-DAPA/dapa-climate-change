@@ -113,6 +113,4 @@
 	COUNT=$(echo $COUNT+1 | bc)
   done
 
-  rm -r rc.tables
-
 cd ..
