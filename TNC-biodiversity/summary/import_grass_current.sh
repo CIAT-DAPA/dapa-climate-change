@@ -38,12 +38,13 @@ function calculateRichness {
 
 while read folder 
 do
+  echo "doing folder $folder"
   MODEL=lam_5k_$1
   cp /data1/TNC/src/summary/batch_current.v2.sh /data1/TNC/src/summary/batch_current.v2.rw.sh
   chmod 777 /data1/TNC/src/summary/batch_current.v2.rw.sh
 
   calculateRichness $MODEL $folder
-  wait ${!}
+  #wait ${!}
   rm /data1/TNC/src/summary/batch_current.v2.rw.sh
 done
 
