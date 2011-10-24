@@ -20,9 +20,9 @@ do
 				if [ ! -f /data1/TNC/resutls/grass/$MODEL/$folder/cell/$file ]
 				then
 					COUNT=$(echo $COUNT+1 | bc)
-					echo "$MODEL/$folder/$FILE...ok" >> /data1/TNC/lib/checkImport.lst
+					echo "$MODEL/$folder/$FILE...ok" >> /data1/TNC/lib/success.lst
 				else
-					echo "$MODEL/$folder/$FILE...missing" >> /data1/TNC/lib/checkImport.lst
+					echo "$MODEL/$folder/$FILE...missing" >> /data1/TNC/lib/errors.lst
 				fi
 			done
 		else
