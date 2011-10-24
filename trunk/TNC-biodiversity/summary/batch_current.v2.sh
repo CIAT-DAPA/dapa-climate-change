@@ -64,8 +64,8 @@ do
 		gdalbuildvrt vrts/$base.chull.vrt chull.tifs/$base.tif
 		r.in.gdal in=vrts/$base.chull.vrt out=s$base.ch -o --o
 		r.buffer input=s$base.ch output=$base.tmp distances=$bufDis units=meters --overwrite
-		r.mapcalc "$base.bf=if($base.tmp>=0,1,null())" --overwrite
-		r.mapcalc "s$base.bf=if(isnull($base.bf),0,$base.bf)" --overwrite
+		r.mapcalc "$base.bf=if($base.tmp>=0,1,null())"
+		r.mapcalc "s$base.bf=if(isnull($base.bf),0,$base.bf)"
 		g.mremove rast=$base.tmp,$base.bf -f
 		
 		# register rasters in GRASS
@@ -77,13 +77,12 @@ do
 		echo -e "0 thru $threshold = 0 \n$threshold thru 255 = 1" > rc.tables/$base.rc
 
 		# reclass
-		#r.reclass in=s$base.$bufDis out=s$base.$bufDis.b rules=rc.tables/$base.b.rc --o
 		r.reclass in=s$base.pr out=s$base.th.b rules=rc.tables/$base.rc --o
 		
 		#done
 
-		r.mapcalc "s$base.th=s$base.th.b" --overwrite
-		r.mapcalc "s$base.pa=if(s$base.th==1 & s$base.bf==1,1,0)" --overwrite
+		r.mapcalc "s$base.th=s$base.th.b"
+		r.mapcalc "s$base.pa=if(s$base.th==1 & s$base.bf==1,1,0)"
 
 		# remove original maps
 		g.remove rast="s$base.th.b" -f
