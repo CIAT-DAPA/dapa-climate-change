@@ -33,21 +33,13 @@
     base=$(echo $lyr | sed 's/.pr//' | sed 's/s//')
 
     # calculate cumulative richness (and others) grid
-	if [ loc -eq 1 ]
+	if [ loc -eq 0 ]
 	then
 		r.mapcalc "richness.tmp=richness+s$base.pa"
 		g.remove rast=richness -f
 		r.mapcalc "richness=richness.tmp"
 		g.remove rast=richness.tmp
 	else
-		# s$base.gn.um = gain (1) else not gained (0), only for unlimited migration
-		# s$base.gn.re = gain (1) else not gained (0), only for realistic migration
-		# s$base.gn.op = gain (1) else not gained (0), only for optimistic migration
-		# s$base.ls.um = loss (1) else not lost (0), unlimited migration
-		# s$base.ls.re = loss (1) else not lost (0), realistic migration
-		# s$base.ls.op = loss (1) else not lost (0), optimistic migration
-		# s$base.ls.nm = loss (1) else not lost (0), null migration
-		
 		#richness
 		#unlimited
 		r.mapcalc "richness.um.tmp=richness.um+s$base.pa.um"
