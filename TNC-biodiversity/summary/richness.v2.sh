@@ -45,7 +45,7 @@ do
   cp /data1/TNC/src/summary/richness_mapset.sh /data1/TNC/results/grass/$MODEL/s$folder/richness_mapset.rw.sh
   chmod 777 /data1/TNC/results/grass/$MODEL/s$folder/richness_mapset.rw.sh
   
-  calculateRichness $MODEL $folder
+  calculateRichness $folder $MODEL
   rm /data1/TNC/results/grass/$MODEL/s$folder/richness_mapset.rw.sh
 done
 
