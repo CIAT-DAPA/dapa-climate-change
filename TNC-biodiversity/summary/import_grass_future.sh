@@ -34,7 +34,7 @@ function controlBatch {
   cd /data1/TNC/results/$NLOCATION
 
   # run processes current
-  runbatch_current $PROC_FOLDER $NLOCATION
+  runbatch_future $PROC_FOLDER $NLOCATION
 }
 
 while read folder 
