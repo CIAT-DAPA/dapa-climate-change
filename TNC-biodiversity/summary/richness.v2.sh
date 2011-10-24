@@ -30,11 +30,11 @@
 # Batch wrapper
 
 function calculateRichness {
-  folder=$1
+  sfolder=$1
   location=$2
   
-  export GRASS_BATCH_JOB=/data1/TNC/results/$location/s$folder/richness_mapset.rw.sh
-  /usr/bin/grass64 /data1/TNC/results/grass/$location/s$folder
+  export GRASS_BATCH_JOB=/data1/TNC/results/grass/$location/s$sfolder/richness_mapset.rw.sh
+  /usr/bin/grass64 /data1/TNC/results/grass/$location/s$sfolder
   unset GRASS_BATCH_JOB
 }
 
