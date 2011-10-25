@@ -26,7 +26,7 @@ fi
 #loop through folders and create them (copy from the base mapset)
 for i in $(ls $DATA_PATH)
 do
-	if [ ! -d "$GISDB_PATH/s$i" ]
+	if [ ! -d "$GISDB_PATH/$MODEL/s$i" ]
 	then
 		echo "Creating mapset s$i"
 		cp -r $GISDB_PATH/$MODEL/tmp $GISDB_PATH/$MODEL/s$i
