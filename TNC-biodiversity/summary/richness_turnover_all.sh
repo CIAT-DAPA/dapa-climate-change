@@ -11,3 +11,8 @@
 # percent change in richness and absolute
 
 # easy!
+
+for location in c_2000_current a2_2050_future a1b_2050_future
+do
+	
+done
