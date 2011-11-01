@@ -5,17 +5,17 @@
 import arcgisscripting, os, sys, glob
 gp = arcgisscripting.create(9.3)
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python Grid2Ascii.py <dirbase> <outdir> <variable>"
-	print "   - ie: python Ascii2Gridi.py D:\climate_change\Tyndall_Data\Global_30s\ukmo_hadgem1\2050s\_asciis D:\Tyndall_data\A1Bp50\30yrAverages"
+	print "   - ie: python Ascii2Gridi.py D:\EcoCrop-development\climate\afasia_2_5min_future"
 	sys.exit(1)
 
 dirbase =sys.argv[1]
-dirout = sys.argv[2]
-if not os.path.exists(dirout):
-	os.system('mkdir ' + dirout)
+# dirout = sys.argv[2]
+# if not os.path.exists(dirout):
+	# os.system('mkdir ' + dirout)
 # variable = sys.argv[3]
 
 gp.CheckOutExtension("Spatial")
@@ -25,33 +25,20 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "     ASCII TO GRID       "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-#varlist = "bio", "cons", "prec", "tmax", "tmean", "tmin"
-gp.workspace = dirbase 
 print "\n---> Processing: " + dirbase
 
-var = "prec"
+modellist = sorted(os.listdir(dirbase))
+for model in modellist:
+	print model
+	gp.workspace = dirbase + "\\" + model + "\\2020_2049\\_asciis"
+	asclist = sorted(glob.glob(gp.workspace + "\\*.asc"))
 
-asclist = sorted(glob.glob(dirbase + "\\" + str(var) + "*.asc"))
-
-for asc in asclist:
-	print asc
-	OutRaster = dirbase + "\\" + os.path.basename(asc)[:-4]
-	if not gp.Exists(OutRaster):
-		gp.ASCIIToRaster_conversion(asc, OutRaster, "FLOAT")
-		
-	OutRaster10 = dirout + "\\Global_10min\\ukmo_hadgem1\\2060s\\" + os.path.basename(asc)[:-4] 
-	if not gp.Exists(OutRaster10):
-		print OutRaster10
-		gp.Resample_management(OutRaster, OutRaster10, "0.166667", "NEAREST")	
-		
-	OutRaster5 = dirout + "\\Global_5min\\ukmo_hadgem1\\2060s\\" + os.path.basename(asc)[:-4] 
-	if not gp.Exists(OutRaster5):
-		gp.Resample_management(OutRaster, OutRaster5, "0.08333333", "NEAREST")	
-
-	OutRaster2_5 = dirout + "\\Global_2_5min\\ukmo_hadgem1\\2060s\\" + os.path.basename(asc)[:-4] 
-	if not gp.Exists(OutRaster2_5):
-		gp.Resample_management(OutRaster, OutRaster2_5, "0.04166667", "NEAREST")		
-
+	for asc in asclist:
+		print "converting", os.path.basename(asc)
+		OutRaster = dirbase + "\\" + model + "\\2020_2049\\" + os.path.basename(asc)[:-4]
+		print OutRaster
+		if not gp.Exists(OutRaster):
+			gp.ASCIIToRaster_conversion(asc, OutRaster, "FLOAT")
 
 
 print "Done!!!!"
