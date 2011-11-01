@@ -111,23 +111,23 @@ impact <- function(x, y, threshold=0) { #suitability and suitable-area change
 		th.csum <- NA
 		th.arum <- NA
 	} else {
-		th.csum <- mean(chg[ab]) #change in suitability
-		th.arum <- sum(as[ab]) #total area in >threshold mask
+		th.csum <- mean(chg[ab],na.rm=T) #change in suitability
+		th.arum <- sum(as[ab],na.rm=T) #total area in >threshold mask
 	}
 	if (length(abe) == 0) {
 		th.inc.csum <- NA
 		th.inc.arum <- NA
 	} else {
-		th.inc.csum <- mean(chg[abe]) #change in suitability, areas increasing
-		th.inc.arum <- sum(as[abe]) #total area in mask with increases in suitability
+		th.inc.csum <- mean(chg[abe],na.rm=T) #change in suitability, areas increasing
+		th.inc.arum <- sum(as[abe],na.rm=T) #total area in mask with increases in suitability
 	}
 	
 	if (length(abf) == 0) {
 		th.dec.csum <- NA
 		th.dec.arum <- NA
 	} else {
-		th.dec.csum <- mean(chg[abf]) #change in suitability, areas decreasing
-		th.dec.arum <- sum(as[abf]) #total area in mask with decreases in suitability
+		th.dec.csum <- mean(chg[abf],na.rm=T) #change in suitability, areas decreasing
+		th.dec.arum <- sum(as[abf],na.rm=T) #total area in mask with decreases in suitability
 	}
 	r1 <- c("un.mig",threshold,th.csum,th.arum,th.inc.csum,th.inc.arum,th.dec.csum,th.dec.arum)
 	#suitability metrix, mask >Threshold, no mig
@@ -135,24 +135,24 @@ impact <- function(x, y, threshold=0) { #suitability and suitable-area change
 		th.csnm <- NA
 		th.arnm <- NA
 	} else {
-		th.csnm <- mean(chg[ad]) #change in suitability
-		th.arnm <- sum(as[ad]) #total area in >threshold mask
+		th.csnm <- mean(chg[ad],na.rm=T) #change in suitability
+		th.arnm <- sum(as[ad],na.rm=T) #total area in >threshold mask
 	}
 	
 	if (length(ade) == 0) {
 		th.inc.csnm <- NA
 		th.inc.arnm <- NA
 	} else {
-		th.inc.csnm <- mean(chg[ade]) #change in suitability, areas increasing
-		th.inc.arnm <- sum(as[ade]) #total area in mask with increases in suitability
+		th.inc.csnm <- mean(chg[ade],na.rm=T) #change in suitability, areas increasing
+		th.inc.arnm <- sum(as[ade],na.rm=T) #total area in mask with increases in suitability
 	}
 	
 	if (length(adf) == 0) {
 		th.dec.csnm <- NA
 		th.dec.arnm <- NA
 	} else {
-		th.dec.csnm <- mean(chg[adf]) #change in suitability, areas decreasing
-		th.dec.arnm <- sum(as[adf]) #total area in mask with decreases in suitability
+		th.dec.csnm <- mean(chg[adf],na.rm=T) #change in suitability, areas decreasing
+		th.dec.arnm <- sum(as[adf],na.rm=T) #total area in mask with decreases in suitability
 	}
 	r2 <- c("no.mig",threshold,th.csnm,th.arnm,th.inc.csnm,th.inc.arnm,th.dec.csnm,th.dec.arnm)
 	#return object
