@@ -52,6 +52,11 @@ do
 		if [ $location == "c_2000_current" ]
 		then
 			# calculate richness
+			eval `g.findfile element=cell file=richness@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "richness.tmp=richness+richness@s$folder"
 			g.remove rast=richness -f
 			r.mapcalc "richness=richness.tmp"
