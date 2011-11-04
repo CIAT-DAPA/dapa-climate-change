@@ -22,7 +22,7 @@ do
 	if [ ! -d "$GISDB_PATH/$MODEL/summary" ]
 	then
 		echo "Creating mapset for summary"
-		cp -r $GISDB_PATH/$MODEL/tmp $GISDB_PATH/$MODEL/summary
+		cp -r $GISDB_PATH/lam_5k_c_2000_current/tmp $GISDB_PATH/$MODEL/summary
 	fi
 	
 	# change to summary mapset
