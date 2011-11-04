@@ -63,58 +63,113 @@ do
 			g.remove rast=richness.tmp
 		else
 			# calculate richness, migration scenarios
+			eval `g.findfile element=cell file=richness.um@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "richness.um.tmp=richness.um+richness.um@s$folder"
 			g.remove rast=richness.um -f
 			r.mapcalc "richness.um=richness.um.tmp"
 			g.remove rast=richness.um.tmp
 			
+			eval `g.findfile element=cell file=richness.nm@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "richness.nm.tmp=richness.nm+richness.nm@s$folder"
 			g.remove rast=richness.nm -f
 			r.mapcalc "richness.nm=richness.nm.tmp"
 			g.remove rast=richness.nm.tmp
 			
+			eval `g.findfile element=cell file=richness.re@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "richness.re.tmp=richness.re+richness.re@s$folder"
 			g.remove rast=richness.re -f
 			r.mapcalc "richness.re=richness.re.tmp"
 			g.remove rast=richness.re.tmp
 			
+			eval `g.findfile element=cell file=richness.op@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "richness.op.tmp=richness.op+richness.op@s$folder"
 			g.remove rast=richness.op -f
 			r.mapcalc "richness.op=richness.op.tmp"
 			g.remove rast=richness.op.tmp
 			
 			# calculate gain
+			eval `g.findfile element=cell file=gain.um@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "gain.um.tmp=gain.um+gain.um@s$folder"
 			g.remove rast=gain.um -f
 			r.mapcalc "gain.um=gain.um.tmp"
 			g.remove rast=gain.um.tmp
-						
+			
+			eval `g.findfile element=cell file=gain.re@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "gain.re.tmp=gain.re+gain.re@s$folder"
 			g.remove rast=gain.re -f
 			r.mapcalc "gain.re=gain.re.tmp"
 			g.remove rast=gain.re.tmp
 			
+			eval `g.findfile element=cell file=gain.op@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "gain.op.tmp=gain.op+gain.op@s$folder"
 			g.remove rast=gain.op -f
 			r.mapcalc "gain.op=gain.op.tmp"
 			g.remove rast=gain.op.tmp
 			
 			# calculate loss
+			eval `g.findfile element=cell file=loss.um@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "loss.um.tmp=loss.um+loss.um@s$folder"
 			g.remove rast=loss.um -f
 			r.mapcalc "loss.um=loss.um.tmp"
 			g.remove rast=loss.um.tmp
 			
+			eval `g.findfile element=cell file=loss.nm@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "loss.nm.tmp=loss.nm+loss.nm@s$folder"
 			g.remove rast=loss.nm -f
 			r.mapcalc "loss.nm=loss.nm.tmp"
 			g.remove rast=loss.nm.tmp
 			
+			eval `g.findfile element=cell file=loss.re@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "loss.re.tmp=loss.re+loss.re@s$folder"
 			g.remove rast=loss.re -f
 			r.mapcalc "loss.re=loss.re.tmp"
 			g.remove rast=loss.re.tmp
 			
+			eval `g.findfile element=cell file=loss.op@s$folder`
+			if [ ! $file ]
+			then
+				return 0
+			fi
 			r.mapcalc "loss.op.tmp=loss.op+loss.op@s$folder"
 			g.remove rast=loss.op -f
 			r.mapcalc "loss.op=loss.op.tmp"
@@ -128,6 +183,7 @@ do
 		r.out.gdal input=richness format=AAIGrid output=/data1/TNC/results/summaries/richness.$location.asc nodata=-9999 type=Int32
 		r.out.gdal input=richness format=GTiff output=/data1/TNC/results/summaries/richness.$location.tif nodata=-9999 type=Int32
 	else
+		echo "future $location richness done successfully, exporting"
 		# link current folder for easy usage of these data
 		ln -s $GISDB_PATH/lam_5k_c_2000_current/summary $GISDB_PATH/$MODEL/c_summary
 		
