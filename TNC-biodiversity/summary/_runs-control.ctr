@@ -6,17 +6,17 @@ c_2000_current			dirlist_3.lst			ok,ok					ok
 c_2000_current			dirlist_4.lst			ok,ok					ok
 c_2000_current			dirlist_5.lst			ok,ok					ok
 
-a2_2050_ensemble		dirlist_1a.lst			ok,ok					r
+a2_2050_ensemble		dirlist_1a.lst			ok,ok					ok
 a2_2050_ensemble		dirlist_1b.lst			ok,ok					ok
 a2_2050_ensemble		dirlist_2.lst			ok,ok					ok
-a2_2050_ensemble		dirlist_3.lst			ok,ok					r
+a2_2050_ensemble		dirlist_3.lst			ok,ok					ok
 a2_2050_ensemble		dirlist_4.lst			ok,ok					ok
 a2_2050_ensemble		dirlist_5.lst			ok,ok					ok
 
-a1b_2050_ensemble 		dirlist_1a.lst			ok,ok					r
+a1b_2050_ensemble 		dirlist_1a.lst			ok,ok					ok
 a1b_2050_ensemble 		dirlist_1b.lst			ok,ok					ok
 a1b_2050_ensemble 		dirlist_2.lst			ok,ok					ok
-a1b_2050_ensemble 		dirlist_3.lst			ok,ok					r
+a1b_2050_ensemble 		dirlist_3.lst			ok,ok					ok
 a1b_2050_ensemble 		dirlist_4.lst			ok,ok					ok
 a1b_2050_ensemble 		dirlist_5.lst			ok,ok					ok
 
