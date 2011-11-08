@@ -98,7 +98,7 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	
 	#This is the function that evaluates the suitability in a pixel basis
 	suitFun <- function(dataPixel) {
-		if(is.na(dataPixel[1])) {
+		if(length(which(is.na(dataPixel)))!=0) {
 			return(c(NA,NA,NA,NA,NA))
 		} else {
 			TavDataPixel <- dataPixel[1:12]
@@ -130,17 +130,20 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 				end.mth.p <- end.month
 				if (end.mth.p > 12) {
 					end.mth.p <- end.mth.p - 12
+					cumPpt[i] <- sum(PptDataPixel[c(start.month:12,1:end.mth.p)])
+				} else {
+					cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
 				}
-				cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
+				
 				
 				#Precipitation iteration
 				if (cumPpt[i] < Rmin) {
 					pSuit[i] <- 0
-				} else if (cumPpt[i] >= Rmin && cumPpt[i] <= Ropmin) {
+				} else if (cumPpt[i] >= Rmin & cumPpt[i] <= Ropmin) {
 					pSuit[i] <- (rainLeftM) * cumPpt[i] + (rainLeftB)
-				} else if (cumPpt[i] > Ropmin && cumPpt[i] < Ropmax) {
+				} else if (cumPpt[i] > Ropmin & cumPpt[i] < Ropmax) {
 					pSuit[i] <- 1
-				} else if (cumPpt[i] >= Ropmax &&  cumPpt[i] <= Rmax) {
+				} else if (cumPpt[i] >= Ropmax &  cumPpt[i] <= Rmax) {
 					pSuit[i] <- (rainRightM) * cumPpt[i] + (rainRightB)
 				} else if (cumPpt[i] > Rmax) {
 					pSuit[i] <- 0
