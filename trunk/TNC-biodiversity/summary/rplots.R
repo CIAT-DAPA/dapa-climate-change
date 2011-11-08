@@ -12,7 +12,7 @@ fixRaster <- function(rs.src) {
   rs.tgt <- raster(xt,ncol=2040,nrow=2280)
   
   #fix the raster
-  rs.fxd <- resample(rs,rs2)
+  rs.fxd <- resample(rs.src,rs.tgt,method="ngb")
   
   return(rs.fxd)
 }
@@ -44,4 +44,4 @@ fixData <- function(fileDir) {
   return("done!")
 }
 
-fixData("/data1/TNC/results/summaries")
+fixData("D:/CIAT_work/TNC_global_biodiversity/summaries")
