@@ -17,18 +17,35 @@ Para Red Hat con el instaldor en la ruta /mnt/GIS-HD711/Precis_versions/Precis18
 
 1. Abrir una terminal
 2. Eliminar versiones anteriores del precis, incluyendo archivos del home/user Gi
-3. cp -v /mnt/GIS-HD711/Precis_versions/Precis182/install* $HOME (de ser necesario hacerlo con superusuario comando sudo)
+3.no
 3. ir al home
 4. ejecutar con el path ...    ./install_precis /mnt/GIS-HD711/Precis_versions/Precis182   (de ser necesario hacerlo con superusuario sudo)
 5. Configurar folders del setvars segun donde vaya a quedar (pe: /data3)
 6. ir al folder de salida (/data3)
 7. cambiar los permisos...   sudo chmod -R 777 precis 	password: precis
 	Nota: Los permisos se cambian termporalmente por lo que es necesario acceder como superusuario
+7. Dar "no" a append servars
 7. ejecutar el setvars... source setvars
 8. correr el install_data....    $HOME/install_data /mnt/GIS-HD711/Precis_versions/Precis182  (de ser necesario con superusuario)
 9. Copiar dumps, pp4lbc, experiments_save y demas (ver copying an experiment to another machine)
-10. hacer un.. source setvars en un terminal
-11. Correr precis!!!
+10. IVerificar el siguiente software en yast:
+	Tcl
+	Tk
+	Python
+	Perl
+	ImageMagick
+	Ghostscript
+	Rsh
+	Rsh-server
+	Xanim
+	Gawk
+	Fortran compiler
+11. Desinstalar del yast ksh93 u similares. 
+12. Instalar pdksh y xanim incluidos en /mnt/GIS-HD711/Precis_versions/Precis182/utils (sintaxis:  rpm -ivh [file]
+13. Activar atd
+	/etc/init.d/atd start
+14. hacer un.. source setvars en un terminal
+15. Correr precis!!!
 
 
 Notas:

@@ -27,7 +27,7 @@ os.system('cls')
 
 print "\n"
 print "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-print "                    	   AVERAGE GRIDS PRECIS                       "
+print "                    	  AVERAGE GRIDS PRECIS                       "
 print "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
