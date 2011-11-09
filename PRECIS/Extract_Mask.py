@@ -37,36 +37,42 @@ variablelist = "prec", "tmean1_5", "tmmax1_5", "tmmin1_5"
 print "Available models: " + str(modellist)
 
 for model in modellist:
+
 	for period in periodlist:
+	
 		gp.workspace = dirbase + "\\" + model + "\\30yrAverages\\" + period
+		
 		if os.path.exists(gp.workspace):
-			print "\n---> Processing: " + model + " " + period + "\n"
-			for variable in variablelist:
+			diroutraster = dirout + "\\" + model + "\\30yrAverages\\" + period
 			
-				diroutdescribe = dirout + "\\_describes"  
-				if not os.path.exists(diroutdescribe):
-					os.system('mkdir ' + diroutdescribe)
-				if os.path.isfile(diroutdescribe + "\\" + variable + "_" + model + ".txt"):
-					outFile = open(diroutdescribe + "\\" + variable + "_" + model + ".txt", "a")
-				else:
-					outFile = open(diroutdescribe + "\\" + variable + "_" + model + ".txt", "w")
-				outFile.write("PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
+			if not os.path.exists(diroutraster):
+				os.system('mkdir ' + diroutraster)
+				print "\n---> Processing: " + model + " " + period + "\n"
+				
+				for variable in variablelist:
+					diroutdescribe = dirout + "\\_describes"  
+					if not os.path.exists(diroutdescribe):
+						os.system('mkdir ' + diroutdescribe)
+					if os.path.isfile(diroutdescribe + "\\" + variable + "_" + model + ".txt"):
+						outFile = open(diroutdescribe + "\\" + variable + "_" + model + ".txt", "a")
+					else:
+						outFile = open(diroutdescribe + "\\" + variable + "_" + model + ".txt", "w")
+					outFile.write("PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
-				rasters = gp.ListRasters(str(variable) + "*", "GRID")
-				for raster in rasters:
-					print raster
-					diroutraster = dirout + "\\" + model + "\\30yrAverages\\" + period
-					if not os.path.exists(diroutraster):
-						os.system('mkdir ' + diroutraster)
-					OutRaster = diroutraster + "\\" + raster
-					gp.ExtractByMask_sa(raster, mask, OutRaster)
-					
-					MIN = gp.GetRasterProperties_management(OutRaster, "MINIMUM")
-					MAX = gp.GetRasterProperties_management(OutRaster, "MAXIMUM")
-					MEA = gp.GetRasterProperties_management(OutRaster, "MEAN")
-					STD = gp.GetRasterProperties_management(OutRaster, "STD")
-					CEX = gp.GetRasterProperties_management(OutRaster, "CELLSIZEX")
-					outFile = open(diroutdescribe + "\\" + variable + "_" + model + ".txt", "a")
-					outFile.write(str(period) + "\t" + OutRaster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
+					rasters = gp.ListRasters(str(variable) + "*", "GRID")
+					for raster in rasters:
+						print raster
 
+						OutRaster = diroutraster + "\\" + raster
+						gp.ExtractByMask_sa(raster, mask, OutRaster)
+						
+						MIN = gp.GetRasterProperties_management(OutRaster, "MINIMUM")
+						MAX = gp.GetRasterProperties_management(OutRaster, "MAXIMUM")
+						MEA = gp.GetRasterProperties_management(OutRaster, "MEAN")
+						STD = gp.GetRasterProperties_management(OutRaster, "STD")
+						CEX = gp.GetRasterProperties_management(OutRaster, "CELLSIZEX")
+						outFile = open(diroutdescribe + "\\" + variable + "_" + model + ".txt", "a")
+						outFile.write(str(period) + "\t" + OutRaster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
+
+						
 print "done!!!" 
