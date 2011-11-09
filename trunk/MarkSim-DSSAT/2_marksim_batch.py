@@ -1,26 +1,27 @@
-#!/bin/env python
+# -----------------------------------------------------------------
+# Author: Johannes Signer 
+# Modified by: Carlos Navarro
+# Date: September 21th, 2011
+# Purpose: Produces output files from MarkSim orgnized by folders 
+# -----------------------------------------------------------------
 
-import os
-import sys
+import os, sys
 
 # set Pathes
 # script to run marksim
-script = "L:\\MarkSimGCM\\datamanagement\\src\\scripts\\1_runing_interpolations.py"
+script = "D:\\_scripts\\dapa-climate-change\\MarkSim-DSSAT\\1_runing_interpolations.py"
 # where marksim located
-marksim = "L:\\MarkSimGCM\\datamanagement\\src\\lib\\marksim.zip"
+marksim = "D:\_scripts\dapa-climate-change\MarkSim-DSSAT\lib\marksim.zip"
 # where the results will be copied to
-out_file = "L:\\MarkSimGCM\\results"
+out_file = "D:\Workspace\MS_llanos\MS\OUTPUT\results"
+dirout = "D:\\Workspace\\"
+dirbase = "D:\Workspace\MS_llanos\_wc30s"
+basename = "MS2_5min"
 
-# read params
-try:
-  f = open(sys.argv[1], "r")
-except:
-  print "count not open list of files"
-  sys.exit(1)
+year = "2000"
+# gcmlist = "worldclim", "bccr_bcm2_0"
+gcm = "worldclim"
 
 # run marskim
-for file in f:
-  (year, gcm) = file.split(",")
-  year = year.rstrip()
-  gcm = gcm.rstrip()
-  os.system("python L:\\MarkSimGCM\datamanagement\\src\\scripts\\1_runing_interpolations.py L:\\MarkSimGCM\\MarkSim_data\\" + year + "\\" + gcm + ".zip " + out_file + " L:\\MarkSimGCM\\datamanagement\\src\\lib\\marksim.zip ")
+# for gcm in gcmlist:
+os.system("python " + script + " " + dirbase + "\\" + year + "\\" + gcm + ".zip " + out_file + " " + marksim + " " + dirout + " " + basename )
