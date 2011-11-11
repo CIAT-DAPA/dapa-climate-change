@@ -1,12 +1,22 @@
 #!/usr/bin/env python
+
 # Author: Johannes Signer
 # Contact: jmsigner@gmail.com
 # Date: 8.8.2011
 # License: GPLv2
 
 # import models
-import hashlib, os, shutil, sys, time, zipfile
+import hashlib
+import os
+import shutil
+import sys
+import time
+import zipfile
 
+# set variables
+
+
+# functions
 
 # zip recursevily
 def zipper(dir, zip_file):
@@ -38,6 +48,7 @@ def ccp(org, dest):
       continue
   return success
 
+
 # Calac md5Checksum from file (www.joelverhagen.com/blog/2011/02/md5-hash-of-file-in-python/)
 def md5Checksum(filePath):
   fh = open(filePath, 'rb')
@@ -51,103 +62,103 @@ def md5Checksum(filePath):
 
 def main():
   # check arguments
-  if (len(sys.argv) >= 6 ):
+  if (len(sys.argv) >= 4 ):
 	in_file = sys.argv[1]
-	out_file = sys.argv[2]
+	dirout = sys.argv[2]
 	where_marksim = sys.argv[3]
-	dirout = sys.argv[4]
-	base = sys.argv[5]
-  
+	tmp_dir = sys.argv[4]
   else:
     sys.exit("not three arguments provided")
   
-  # # outidr
-  # base = '_'.join(in_file.split('\\')[-2:]).split(".")[0]
+  # outidr
+  base = '_'.join(in_file.split('\\')[-2:]).split(".")[0]
   
   # 1. check if file exists
   if not os.path.exists(in_file):
     sys.exit("in_file does not exists")
+  
+  #if not os.path.exists(out_file):
+    #sys.exit("out_file not exists")
+  
   if not os.path.exists(where_marksim):
     sys.exit("marksim does not exists")
   
   # make temp structure on C:\
-  if not os.path.exists(dirout + base ):
-    os.mkdir(dirout + base + "")
-  if not os.path.exists(dirout + base + "/data"):
-    os.mkdir(dirout + base + "/data")
-  if not os.path.exists(dirout + base + "/lib"):
-    os.mkdir(dirout + base + "/lib")
+  if not os.path.exists(tmp_dir + "/" + base ):
+    os.mkdir(tmp_dir + "/" + base + "")
+  if not os.path.exists(tmp_dir + "/" + base + "/data"):
+    os.mkdir(tmp_dir + "/" + base + "/data")
+  if not os.path.exists(tmp_dir + "/lib"):
+    os.mkdir(tmp_dir + "/lib")
   
   
   # cp gcm to local drive
-  shutil.copy2(in_file, dirout + base + "/data")
-  this_gcm = os.listdir(dirout + base + "/data")
+  shutil.copy2(in_file, tmp_dir + "/" + base + "/data")
+  
+  this_gcm = os.listdir(tmp_dir + "/" + base + "/data")
   
   # cp marksim 
-  shutil.copy2(where_marksim, dirout + base + "/lib")
+  shutil.copy2(where_marksim, tmp_dir + "/lib")
   
   # unzip marksim
-  zip = zipfile.ZipFile(dirout + base + "/lib/marksim.zip")
+  zip = zipfile.ZipFile(tmp_dir + "/lib/marksim.zip")
   
   for f in zip.namelist():
-	open(dirout + base + "\\lib\\" + f, 'wb').write(zip.read(f))
+    open(tmp_dir + "\\lib\\" + f, 'wb').write(zip.read(f))
   zip.close()
   
   # write MASTER_PATH
-  f = open(dirout + base + "/lib/MASTER_PATH.CTR","w")
-  f.write(dirout + base + "\\run.LST")
+  f = open(tmp_dir + "/lib/MASTER_PATH.CTR","w")
+  f.write(tmp_dir + "\\" + base + "\\run.LST")
   f.close()
   
   
   print "copied everyting", "-----------------"
   
   # Run Marksim for each point
-  zip = zipfile.ZipFile(dirout + base + "/data/" + this_gcm[0])
-  for p in zip.namelist():
-	print p
+  zip = zipfile.ZipFile(tmp_dir + "/" + base + "/data/" + this_gcm[0])
+  
   count = 1
   for p in zip.namelist():
     if p[-4:] == '.dat':
-		print p
-		contents = zip.read(p)
-		f_name = p[:-4] 
-		f_parent = str(int(f_name) + 100000)[0:3]
-		if not os.path.exists(dirout + base + "/data/" + f_parent): 
-			os.mkdir(dirout + base + "/data/" + f_parent)
-			f_path = dirout + base + "/data/" + f_parent + "/" + f_name
-		if not os.path.exists(f_path): 
-			os.mkdir(f_path)
-		# write the *.dat file
-		f = open(f_path + '/' + f_name + '.dat','w')
-		f.write(contents)
-		f.close()
-		# write *.LST
-
-		f = open(dirout + base + "/run.LST","w")
-		f.write(dirout + base + "\\data\\" + f_parent + "\\" + f_name + "\\\n" +  dirout + base + "\\data\\" + f_parent + "\\" + f_name + "\\\n" + "tmp")
-		f.close()
-		# write *.CBF
-		f = open(f_path + '/' + 'tmp.CBF','w')
-		f.write(dirout + base + "\\data\\" + f_parent + "\\" + f_name + "\\" + f_name + ".dat")
-		f.close()
-		# write *.XBF
-		f = open(f_path + '/' + 'tmp.XBF','w')
-		f.write(dirout + base + "\\data\\" + f_parent + "\\" + f_name + "\\" + f_name + ".CLX," + f_name + ",1234,99,d")
-		f.close()
-		os.system(dirout + base + "/lib/MarkSim_v1.2.exe")
-		count += 1
-		# UNcomment the following line once testing is done!
-		# if count == 3: break
+      contents = zip.read(p)
+      f_name = p.split('/')[1][:-4] 
+      f_parent = str(int(f_name) + 100000)[0:3]
+      if not os.path.exists(tmp_dir + "/" + base + "/data/" + f_parent): 
+        os.mkdir(tmp_dir + "/" + base + "/data/" + f_parent)
+      f_path = tmp_dir + "/" + base + "/data/" + f_parent + "/" + f_name
+      if not os.path.exists(f_path): 
+        os.mkdir(f_path)
+      # write the *.dat file
+      f = open(f_path + '/' + f_name + '.dat','w')
+      f.write(contents)
+      f.close()
+      # write *.LST
+      f = open(tmp_dir + "/" + base + "/run.LST","w")
+      f.write(tmp_dir + "\\" + base + "\\data\\" + f_parent + "\\" + f_name + "\\\n" +  tmp_dir + "\\" + base + "\\data\\" + f_parent + "\\" + f_name + "\\\n" + "tmp")
+      f.close()
+      # write *.CBF
+      f = open(f_path + '/' + 'tmp.CBF','w')
+      f.write(tmp_dir + "\\" + base + "\\data\\" + f_parent + "\\" + f_name + "\\" + f_name + ".dat")
+      f.close()
+      # write *.XBF
+      f = open(f_path + '/' + 'tmp.XBF','w')
+      f.write(tmp_dir + "\\" + base + "\\data\\" + f_parent + "\\" + f_name + "\\" + f_name + ".CLX," + f_name + ",1234,99,d")
+      f.close()
+      os.system(tmp_dir + "/lib/MarkSim_v1.2.exe")
+      count += 1
+      # UNcomment the following line once testing is done!
+      # if count == 3: break
   zip.close()
   
-  # # Zip results
-  # target_dir = dirout + base + "/data"
-  # target_zip = dirout + base + ".zip "
-  # print "zipping results"
-  # os.system(dirout + base + "\\lib\\7za.exe a -tzip " + target_zip +  target_dir)
-  # print dirout + base + "\\lib\\7za.exe a -tzip"  + target_dir
-  # print "now cleaning"
-  # os.system("rd /s /q C:\\tmp_marksim_" + base + "\\data")
+  # Zip results
+  target_dir = tmp_dir + "/" + base + "/data"
+  target_zip = dirout + "\\" + base + ".zip "
+  print "zipping results"
+  os.system(tmp_dir + "\\lib\\7za.exe a -tzip " + target_zip +  target_dir)
+  print "Removing temporal files"
+  if os.path.exists(target_zip):
+	os.system("rd /s /q " + target_dir)
   
   # while True:
     # print "trying to copy"

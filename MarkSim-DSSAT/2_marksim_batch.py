@@ -1,27 +1,34 @@
-# -----------------------------------------------------------------
-# Author: Johannes Signer 
-# Modified by: Carlos Navarro
-# Date: September 21th, 2011
-# Purpose: Produces output files from MarkSim orgnized by folders 
-# -----------------------------------------------------------------
+#!/bin/env python
 
 import os, sys
 
+if len(sys.argv) < 4:
+	os.system('cls')
+	print "\n Too few args"
+	print "   - Sintaxis: "
+	print "   - python 2_marksim_batch.py D:\Workspace\MS_llanos\MS2_5min D:\Workspace\MS_llanos\MS2_5min D:\Workspace\tmp"
+	sys.exit(1)
+
+dirbase = sys.argv[1]
+dirout = sys.argv[2]
+tmp_dir = sys.argv[3]
+if not os.path.exists(tmp_dir):
+	os.system('mkdir ' + tmp_dir)
+if not os.path.exists(dirout):
+	os.system('mkdir ' + dirout)
+	
+
 # set Pathes
+
 # script to run marksim
-script = "D:\\_scripts\\dapa-climate-change\\MarkSim-DSSAT\\1_runing_interpolations.py"
+script = os.getcwd() + "\\1_runing_interpolations.py"
+
 # where marksim located
-marksim = "D:\_scripts\dapa-climate-change\MarkSim-DSSAT\lib\marksim.zip"
+marksim = os.getcwd() + "\\lib\\marksim.zip"
+
 # where the results will be copied to
-out_file = "D:\Workspace\MS_llanos\MS\OUTPUT\results"
-dirout = "D:\\Workspace\\"
-dirbase = "D:\Workspace\MS_llanos\_wc30s"
-basename = "MS2_5min"
-
-year = "2000"
-# gcmlist = "worldclim", "bccr_bcm2_0"
-gcm = "worldclim"
-
-# run marskim
-# for gcm in gcmlist:
-os.system("python " + script + " " + dirbase + "\\" + year + "\\" + gcm + ".zip " + out_file + " " + marksim + " " + dirout + " " + basename )
+yearlist = sorted(os.listdir(dirbase))
+for year in yearlist:
+	gcmlist = sorted(os.listdir(dirbase + "\\" + year))
+	for gcm in gcmlist:
+		os.system("python " + script + " " + dirbase + "\\" + str(year) + "\\" + gcm[:-4] + ".zip " + dirout + " " + marksim + " " + tmp_dir)
