@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_PointsGCM_v1.py O:\climate_change\IPCC_CMIP3 A2 D:\Workspace\Osana\points.shp.shp D:\Workspace\Osana 10min downscaled"
+	print "   - ie: python Extract_PointsGCM_v1.py M:\climate_change\IPCC_CMIP3 A2 D:\Workspace\Osana\Sites_new.shp D:\Workspace\Osana 30s downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -38,52 +38,52 @@ print " EXTRACT BY MASK GCM  "
 print "~~~~~~~~~~~~~~~~~~~~~~"
 
 #Get lists 
-periodlist =   "2020_2049", "2040_2069"#"2010_2039"#,#, "2030_2059", , "2050_2079", "2060_2089", "2070_2099"
+periodlist =  "2020_2049", "2040_2069" #"2010_2039"#,#, "2030_2059", , "2050_2079", "2060_2089", "2070_2099"
 modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 # variablelist = "prec", "tmax", "tmean", "tmin"
 # variable = "bio"
 print "Available models: " + str(modellist)
 
-for model in modellist[10:]:
-	# for period in periodlist:
-	period = "2020_2049"
-	print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
-	diroutpoints = dirout + "\\_extract_SRES_" + scenario 
-	if not os.path.exists(diroutpoints):
-		os.system('mkdir ' + diroutpoints)	
-	
-	if not os.path.exists(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_done.txt"):		
-		gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-		rasters = sorted(gp.ListRasters("*", "GRID"))
+for model in modellist[:]:
+	for period in periodlist:
+	# period = "2020_2049"
+		print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
+		diroutpoints = dirout + "\\_extract_SRES_" + scenario 
+		if not os.path.exists(diroutpoints):
+			os.system('mkdir ' + diroutpoints)	
 		
-		InPointsFC = mask 
-		for raster in rasters:
-			OutPointsFC = diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_" + os.path.basename(raster) + ".dbf"
-			gp.CheckOutExtension("Spatial")
+		if not os.path.exists(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_done.txt"):		
+			gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+			rasters = sorted(gp.ListRasters("*", "GRID"))
+			
+			InPointsFC = mask 
+			for raster in rasters:
+				OutPointsFC = diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_" + os.path.basename(raster) + ".dbf"
+				gp.CheckOutExtension("Spatial")
 
-			#Process: Sample...
-			if not gp.Exists(OutPointsFC):
-				gp.Sample_sa(raster, InPointsFC, OutPointsFC, "")
-				print "\t" + os.path.basename(raster) + " extracted"
-			else:
-				print "\t" + os.path.basename(raster) + " extracted"
-		
-		# Get a list of dbfs 
-		dbfList = sorted(glob.glob(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "*.dbf"))
-		for dbf in dbfList:
-			InData = diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_bio_1.dbf"
-			if not os.path.basename(dbf)[-9:] == "bio_1.dbf":
-				fields = os.path.basename(dbf)[:-4].split("_")[-2:]
-				gp.joinfield (InData, "mask", dbf, "mask", fields[0] + "_" + fields[1])
-				print dbf + " joined"
-				# os.remove(dbf)
+				#Process: Sample...
+				if not gp.Exists(OutPointsFC):
+					gp.Sample_sa(raster, InPointsFC, OutPointsFC, "")
+					print "\t" + os.path.basename(raster) + " extracted"
+				else:
+					print "\t" + os.path.basename(raster) + " extracted"
+			
+			# Get a list of dbfs 
+			dbfList = sorted(glob.glob(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "*.dbf"))
+			for dbf in dbfList:
+				InData = diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_bio_1.dbf"
+				if not os.path.basename(dbf)[-9:] == "bio_1.dbf":
+					fields = os.path.basename(dbf)[:-4].split("_")[-2:]
+					gp.joinfield (InData, "mask", dbf, "mask", fields[0] + "_" + fields[1])
+					print dbf + " joined"
+					# os.remove(dbf)
 
-		xmlList = sorted(glob.glob(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "*.xml"))
-		for xml in xmlList:
-			os.remove(xml)
+			xmlList = sorted(glob.glob(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "*.xml"))
+			for xml in xmlList:
+				os.remove(xml)
 
-		checkTXT = open(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_done.txt", "w")
-		checkTXT.close()
+			checkTXT = open(diroutpoints + "\\SRES_" + scenario + "_" + model + "_" + period + "_done.txt", "w")
+			checkTXT.close()
 
 # for model in modellist:
 	# for period in periodlist:
