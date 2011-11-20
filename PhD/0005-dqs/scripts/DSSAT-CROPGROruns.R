@@ -96,7 +96,7 @@ createControlFiles <- function() {
           s <- as.numeric(gsub("s-","",sep[2]))
         } else {
           p <- NA
-          s <- as.numeric(gsub("s-","",sep[2]))
+          s <- as.numeric(gsub("s-","",f))
         }
         outrow <- data.frame(TYPE=ty,VAR=va,SCALE=sc,P=p,SEED=s)
         if (f==fList[1]) {
@@ -203,7 +203,7 @@ runPSModel <- function(bDir,ty,v,sc,s,p=NA) {
     wthList <- lapply(wthList,function(x,idir,odir) {k<-file.copy(paste(idir,"/",x,sep=""),paste(odir,"/",x,sep=""))},inpFolder,xDir)
     
     #define folders for cropgro optim
-    obs <- paste(sp_folder,"/p-",p,"_s-",s,"/obsyield.txt",sep="")
+    obs <- paste(inPSFolder,"/obsyield.txt",sep="")
     opt <- optSLPF(xDir,xDir,obs,slpfStep=0.05,perturbed=T) #optimise
     write.csv(opt[[1]],paste(sp_folder,"/p-",p,"_s-",s,"/optimisation.csv",sep=""),quote=T,row.names=F)
     write.csv(opt[[2]],paste(sp_folder,"/p-",p,"_s-",s,"/timeseries.csv",sep=""),quote=T,row.names=F)
@@ -340,6 +340,8 @@ accuracy <- function(expDir,obsYield) {
 runCROPGRO <- function(expDir) {
   #This will run CROPGRO in the specified
   setwd(expDir)
+  outList <- list.files(pattern=".OUT")
+  outList <- lapply(outList,function(x,idir) {k<-file.remove(paste(idir,"/",x,sep=""))},expDir)
   system("C:\\DSSAT45\\DSCSM045.EXE CRGRO045 B DSSBatch.v45",show.output.on.console=F)
 }
 
@@ -347,6 +349,8 @@ runCROPGRO <- function(expDir) {
 runCROPGROPS <- function(expDir) {
   #This will run CROPGRO in the specified
   setwd(expDir)
+  outList <- list.files(pattern=".OUT")
+  outList <- lapply(outList,function(x,idir) {k<-file.remove(paste(idir,"/",x,sep=""))},expDir)
   system("DSCSM045.EXE CRGRO045 B DSSBatch.v45",show.output.on.console=F)
 }
 
