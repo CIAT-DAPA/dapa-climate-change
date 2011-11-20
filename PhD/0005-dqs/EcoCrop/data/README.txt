@@ -1,0 +1,1 @@
+Query_Result.tab is the latest version of the query received from Hector. Anything inside the folder _old is not to be used.

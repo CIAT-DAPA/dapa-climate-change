@@ -1,0 +1,8 @@
+glam-r2-param-gnut-cal-guj.txt                     !Parameter file, mandatory
+inputs_gujarat/weather                             !Weather file location and root name, mandatory
+inputs/ascii/soil/soiltypes3.txt                   !Soil lookup table, used if flagged in parameter file (UIF)
+inputs/ascii/soil/soilcodes.txt                    !Text file (lat, lon, soilcode), UIF
+inputs/ascii/sow/sowing.txt                        !Sowing window file (lat, lon, IPDATE), UIF
+inputs_gujarat/yield/obsyield.txt                  !Observed yield file: text file (lat, lon, time, Y), man. for HYP only
+nofile                                             !YGP file: text file (lat, lon, YGP), UIF
+
