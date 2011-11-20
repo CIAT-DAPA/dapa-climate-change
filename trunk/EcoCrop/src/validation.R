@@ -31,7 +31,8 @@ extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 	a <- area(rsl); a[which(is.na(rsl[]))] <- NA
 	#Select analysis field and create output data frame
 	anField <- grep(field, colnames(shpData))
-	outmx <- cbind(as.numeric(rownames(shpData)), as.numeric(shpData[,anField])); outmx <- as.data.frame(outmx); names(outmx) <- c("ID",field)
+	outmx <- cbind(as.numeric(rownames(shpData)), as.numeric(shpData[,anField]))
+  outmx <- as.data.frame(outmx); names(outmx) <- c("ID",field)
 	outmx[which(outmx[,2] == naValue),2] <- NA
 	outmx$ME <- rep(NA,times=nrow(outmx)) #average
 	outmx$MZ <- rep(NA,times=nrow(outmx)) #average without zeros
@@ -78,22 +79,22 @@ extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 	return(outmx.final)
 }
 
-valMetrics <- function(mx, pres.field) {
+valMetrics <- function(mx, pres.field,thresh=0) {
 	anField <- grep(pres.field, colnames(mx))
 	if (length(anField != 1)) {anField <- anField[1]}
 	#sub-table for more specific metrics
 	met <- cbind(mx[,anField],mx$PS)
 	met <- met[which(!is.na(met[,1])),]; met <- met[which(!is.na(met[,2])),] #get rid of NAs
-	#true positive rate
-	ntp <- length(which(met[,2] > 0 & met[,1] == 1))
+	#true positive rate (from the green how many are flagged suitable)
+	ntp <- length(which(met[,2] > thresh & met[,1] == 1))
 	tpr <- ntp/length(which(met[,1] == 1))
-	#false negative rate
-	nfp <- length(which(met[,2] == 0 & met[,1] == 1))
-	fpr <- nfp/length(which(met[,1] == 1))
-	#true negative rate (if absences are available)
-	if (length(which(met[,1] == 0)) != 0) {
-		ntn <- length(which(met[,2] > 0 & met[,1] == 0))
-		tnr <- ntn / length(which(met[,1] == 0))
+	#false negative rate (from the non suitable how many are green)
+	nfp <- length(which(met[,2] <= thresh & met[,1] == 1))
+	fpr <- nfp/length(which(met[,2] <= thresh))
+	#true negative rate (if absences are available) (from the non-suitable how many are red)
+	if (length(which(met[,1] <= thresh)) != 0) {
+		ntn <- length(which(met[,2] <= thresh & met[,1] == 0))
+		tnr <- ntn / length(which(met[,2] <= thresh))
 	} else {tnr <- NA}
 	#object to return
 	rm(mx); rm(met); gc()

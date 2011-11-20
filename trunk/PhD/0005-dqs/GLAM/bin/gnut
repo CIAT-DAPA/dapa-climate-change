@@ -1,0 +1,45 @@
+# ------------------Macro-Defs---------------------
+#F90=ifort -traceback
+#F90=ifort -O3 -traceback
+#F90=ifort  -g -warn errors -warn noalignments -check bounds -check format -check output_conversion -traceback
+#F90=ifort -g -warn -check -traceback #Max warnings
+F90=ifort -g -warn errors -warn noalignments -check bounds -check format -check output_conversion -traceback
+OBJS  =  common_blocks.o driver.o metcalcs.o watbal.o output.o input.o groundnut.o opt.o  
+# -------------------End-macro-Defs---------------------------
+
+# Here is the link step 
+driver:$(OBJS)
+	 $(F90) $(OBJS) -o glam-gnut /apps/netcdf-3.6.1-ifc/lib/libnetcdf.a /apps/nag/libnag.a
+
+# Here are the compile steps
+
+common_blocks.o: ./common_blocks.f90
+	$(F90)  -c ./common_blocks.f90
+
+metcalcs.o: ./metcalcs.f90 common_blocks.o
+	$(F90)  -c ./metcalcs.f90
+
+watbal.o: ./watbal.f90  common_blocks.o
+	$(F90)  -c ./watbal.f90
+
+output.o: ./output.f90 common_blocks.o
+	$(F90)  -c ./output.f90 #-L/nfs/see-fs-01_app1/netcdf-3.6.1-ifc/linux/lib/libnetcdf.a -lnetcdf 
+
+input.o: ./input.f90 common_blocks.o 
+	$(F90)  -c ./input.f90  #-L/nfs/see-fs-01_app1/netcdf-3.6.1-ifc/linux/lib/libnetcdf.a -lnetcdf
+
+groundnut.o: ./groundnut.f90  common_blocks.o 
+	$(F90)  -c ./groundnut.f90 #-L/nfs/see-fs-01_app1/nag/libnag.a -lnag
+
+driver.o: ./driver.f90 common_blocks.o 
+	$(F90)  -c ./driver.f90 
+
+opt.o: ./opt.f90 common_blocks.o 
+	$(F90)  -c ./opt.f90
+
+# This entry allows you to type " make clean " to get rid of
+# all object and module files 
+clean:
+	rm -f -r f_{files,modd}* *.o *.mod *.M *.d V*.inc *.vo \
+	V*.f *.dbg album F.err
+
