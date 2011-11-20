@@ -46,7 +46,7 @@ experiments <- data.frame(TYPE=type,VAR=variable,SCALE=scale)
 #control_list <- read.csv(paste(bd,"/bin/control/p_prec_climate_test.csv",sep="")) #load test control file
 
 library(snowfall)
-sfInit(parallel=T,cpus=4)
+sfInit(parallel=T,cpus=5)
 
 #export functions
 sfExport("accuracy")
