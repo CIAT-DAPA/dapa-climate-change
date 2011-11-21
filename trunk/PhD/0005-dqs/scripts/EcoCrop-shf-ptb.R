@@ -142,15 +142,17 @@ for (v in c("prec","tmean","tmin")) {
     cat("Processing:",v,"/ s =",seed,"\n")
     outPth <- paste(outDir,"/",v,"_s-",seed,sep="") #create folder
     if (!file.exists(outPth)) {dir.create(outPth)} #create folder
-    new_values <- apply(orig_values,1,apply_shuff_seas,seed) #get new rasters
-    
-    for (m in 1:12) { #loop to write monthly files
-      rs <- raster(stk)
-      rs[] <- new_values[m,]
-      writeRaster(rs,paste(outPth,"/",v,"_",m,".asc",sep=""),format='ascii',overwrite=T)
-      rm(rs); g=gc(); rm(g)
+    if (!file.exists(paste(outPth,"/",v,"_12.asc",sep=""))) {
+      new_values <- apply(orig_values,1,apply_shuff_seas,seed) #get new rasters
+      
+      for (m in 1:12) { #loop to write monthly files
+        rs <- raster(stk)
+        rs[] <- new_values[m,]
+        writeRaster(rs,paste(outPth,"/",v,"_",m,".asc",sep=""),format='ascii',overwrite=T)
+        rm(rs); g=gc(); rm(g)
+      }
+      rm(new_values); g=gc(); rm(g)
     }
-    rm(new_values); g=gc(); rm(g)
   }
   rm(stk); rm(orig_values); g=gc(); rm(g)
 }
