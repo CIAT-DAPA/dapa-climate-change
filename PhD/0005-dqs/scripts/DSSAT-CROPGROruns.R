@@ -33,12 +33,16 @@ sfExport("writeSoilFile")
 sfExport("bd")
 
 #run the parallel function looping through perturbed values
-control_list <- read.csv(paste(bd,"/bin/control/p_prec_climate.csv",sep="")) #load control file
+control_list <- read.csv(paste(bd,"/bin/control/s_prec_wyear.csv",sep="")) #load control file
 p_unique <- unique(control_list$P)
 for (pval in p_unique) {
   cat("Process",pval,"\n")
   tp <- control_list$TYPE[1]; va <- control_list$VAR[1]; sca <- control_list$SCALE[1]
-  reduced_list <- control_list[which(control_list$P==pval),]
+  if (is.na(pval)) {
+    reduced_list <- control_list
+  } else {
+    reduced_list <- control_list[which(control_list$P==pval),]
+  }
   s_list <- reduced_list$SEED
   controlPS <- function(i) { #define a new function
     #cat(paste(x[1],x[2],x[3],x[4],x[5]),"\n")
