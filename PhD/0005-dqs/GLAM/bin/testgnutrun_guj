@@ -1,3 +1,0 @@
-make -f gnut
-\cp filenames-gnut-run-guj.txt filenames.txt
-glam-gnut
