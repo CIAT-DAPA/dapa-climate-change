@@ -183,8 +183,8 @@ runPSModel <- function(bDir,ty,v,sc,s,p=NA) {
     #define folders for cropgro optim
     obs <- paste(inPSFolder,"/obsyield.txt",sep="")
     opt <- optSLPF(xDir,xDir,obs,slpfStep=0.05,perturbed=T) #optimise
-    write.csv(opt[[1]],paste(sp_folder,"/p-",p,"_s-",s,"/optimisation.csv",sep=""),quote=T,row.names=F)
-    write.csv(opt[[2]],paste(sp_folder,"/p-",p,"_s-",s,"/timeseries.csv",sep=""),quote=T,row.names=F)
+    write.csv(opt[[1]],paste(inPSFolder,"/optimisation.csv",sep=""),quote=T,row.names=F)
+    write.csv(opt[[2]],paste(inPSFolder,"/timeseries.csv",sep=""),quote=T,row.names=F)
     #control files
     file.remove(paste(inPSFolder,"/proc.lock",sep=""))
     zz <- file(paste(inPSFolder,"/proc.done",sep=""),open="w");close(zz)
