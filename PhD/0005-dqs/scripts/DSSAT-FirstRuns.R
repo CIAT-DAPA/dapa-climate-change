@@ -1,8 +1,11 @@
 #Julian Ramirez-Villegas
 #November 2011
 #CIAT / CCAFS / UoL
-stop("error")
 
+#Plot the results of the first runs
+source("DSSAT-functions.R")
+
+firstOpt()
 setwd("D:/CIAT_work/GLAM/PNAS-paper/DSSAT-PNUT")
 
 rs <- read.csv("FirstRuns.csv")
