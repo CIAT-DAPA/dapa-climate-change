@@ -124,16 +124,17 @@ apply_modif_spat <- function(rs,s,p) {
 library(raster)
 rstDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse"
 outDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/s-seasonal"
-wthDir <- "D:/CIAT_work/GLAM/PNAS-paper/GJ-weather/shuf-pert/dqs_data_shuffled/temp/wyear"
 
 #Loop through variables to perform the seasonal shuffling
 for (v in c("prec","tmean","tmin")) {
   stk <- stack(paste(rstDir,"/",v,"_",c(1:12),".asc",sep=""))
   orig_values <- extract(stk,1:ncell(stk)) #Extract monthly values all cells
-  if (v == "tmin" | v == "tmax") {
+  if (v == "tmin" | v == "tmean") {
+    wthDir <- "D:/CIAT_work/GLAM/PNAS-paper/GJ-weather/shuf-pert/dqs_data_shuffled/temp/wyear"
     sList <- list.files(wthDir,pattern="tmax_s-") #List of unique seeds from Jim data
     sList <- gsub("tmax_s-","",sList); sList <- as.numeric(gsub(".dat","",sList))
   } else {
+    wthDir <- "D:/CIAT_work/GLAM/PNAS-paper/GJ-weather/shuf-pert/dqs_data_shuffled/prec/wyear"
     sList <- list.files(wthDir,pattern="s-") #List of unique seeds from Jim data
     sList <- gsub("s-","",sList); sList <- as.numeric(gsub(".dat","",sList))
   }
