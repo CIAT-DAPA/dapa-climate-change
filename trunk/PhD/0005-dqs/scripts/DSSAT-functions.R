@@ -106,7 +106,7 @@ testParallel <- function(bDir,x=1) {
   s <- s_list[1] #define seed
   
   #run model
-  #opt_ps <- runPSModel(bDir,ty=experiments$TYPE[x],v=experiments$VAR[x],sc=experiments$SCALE[x],s=1056,p=0)
+  opt_ps <- runPSModel(bDir,ty=experiments$TYPE[x],v=experiments$VAR[x],sc=experiments$SCALE[x],s=s,p=p)
   opt_ps <- runPSModel(bDir,ty="p",v="prec",sc="climate",s=997,p=99)
   
   #parallelise
