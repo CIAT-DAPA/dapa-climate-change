@@ -33,7 +33,7 @@ sfExport("writeSoilFile")
 sfExport("bd")
 
 #run the parallel function looping through perturbed values
-control_list <- read.csv(paste(bd,"/bin/control/s_prec_wyear.csv",sep="")) #load control file
+control_list <- read.csv(paste(bd,"/bin/control/s_prec_all.csv",sep="")) #load control file
 p_unique <- unique(control_list$P)
 for (pval in p_unique) {
   cat("Process",pval,"\n")
@@ -54,7 +54,4 @@ for (pval in p_unique) {
   system.time(sfSapply(as.vector(s_list), controlPS))
 }
 
-#stop the cluster
-sfStop()
-
-
+sfStop() #stop the cluster

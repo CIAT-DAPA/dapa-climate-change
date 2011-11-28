@@ -1,6 +1,5 @@
 #### LIBRARIES: raster, maptools, rgdal, sp
 ####
-stop("no")
 
 #sources dir
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop"
@@ -9,12 +8,59 @@ source(paste(src.dir,"/src/EcoCrop.R",sep=""))
 source(paste(src.dir,"/src/accuracy.R",sep=""))
 source(paste(src.dir.ps,"/EcoCrop-evaluation_ps.R",sep=""))
 
-bd <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT"
+#1. create experiment list
+createExperiments <- function(bDir) {
+  expList <- list.files(paste(bDir,"/shuffle-perturb/climate",sep="")) #list experiments
+  for (exp in expList) { #loop through list
+    expRow <- data.frame(TYPE=strsplit(exp,"-",fixed=T)[[1]][1],SCALE=strsplit(exp,"-",fixed=T)[[1]][2],VAR=c("tmin","tmean","prec"))
+    if (exp == expList[1]) {
+      experiments <- expRow
+    } else {
+      experiments <- rbind(experiments,expRow) #append data frame
+    }
+  }
+  return(experiments)
+}
 
-EcoCrop_ps(bd,ty="p",va="prec",sc="seasonal",s=1056,p=99)
+#2. create control files
+createControls <- function(bDir) {
+  experiments <- createExperiments(bDir)
+  for (x in 1:nrow(experiments)) {
+    sp_dir <- paste(bDir,"/shuffle-perturb/climate",sep="") #base climate dir
+    ty <- experiments$TYPE[x]; sc <- experiments$SCALE[x]; va <- experiments$VAR[x] #details of exp.
+    SPDataDir <- paste(sp_dir,"/",ty,"-",sc,sep="") #data storage dir
+    if (ty == "p") {
+      pList <- c(0:299)
+      runsList <- list.files(SPDataDir,pattern=paste(va,"_p-0_s-",sep="")) #list to get seeds
+      sList <- as.numeric(gsub(paste(va,"_p-0_s-",sep=""),"",runsList)) #get seeds
+    } else {
+      pList <- NA
+      runsList <- list.files(SPDataDir,pattern=paste(va)) #list to get seeds (shuffled)
+      sList <- as.numeric(gsub(paste(va,"_s-",sep=""),"",runsList)) #get seeds
+    }
+    
+    for (pval in pList) {
+      for (seed in sList) {
+        cRow <- data.frame(TYPE=ty,SCALE=sc,VAR=va,P=pval,SEED=seed)
+        if (is.na(pval)) {
+          if (seed==sList[1]) {
+            controlList <- cRow
+          } else {
+            controlList <- rbind(controlList,cRow)
+          }
+        } else {
+          if (pval==pList[1] & seed==sList[1]) {
+            controlList <- cRow
+          } else {
+            controlList <- rbind(controlList,cRow)
+          }
+        }
+      }
+    }
+    write.csv(controlList,paste(bDir,"/bin/control/",ty,"_",va,"_",sc,".csv",sep=""),row.names=F,quote=F)
+  }
+}
 
-#1. create control files
-#2. write the small looped wrapper
 
 ################## this is the perturb function
 EcoCrop_ps <- function(bDir,ty,va,sc,s,p) {
@@ -106,3 +152,4 @@ EcoCrop_ps <- function(bDir,ty,va,sc,s,p) {
     zz <- file(paste(psDataDir,"/proc.done",sep=""),open="w");close(zz)
   }
 }
+
