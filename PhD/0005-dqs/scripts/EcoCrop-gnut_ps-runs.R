@@ -22,7 +22,7 @@ sfInit(parallel=T,cpus=nproc) #initiate cluster
 sfExport("bd")
 sfExport("src.dir.ps")
 
-control_list <- read.csv(paste(bd,"/bin/control/s_tmin_seasonal.csv",sep="")) #load control file
+control_list <- read.csv(paste(bd,"/bin/control/s_prec_seasonal.csv",sep="")) #load control file
 p_unique <- unique(control_list$P)
 for (pval in p_unique) {
   cat("Process",pval,"\n")
