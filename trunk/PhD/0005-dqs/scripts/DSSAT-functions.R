@@ -305,6 +305,11 @@ accuracy <- function(expDir,obsYield) {
   OBYL <- yData$OBYL
   rm(yData)
   
+  #complete HWAH with NA if length is not same
+  if (length(OBYL) != length(HWAH)) {
+    HWAH <- c(HWAH,rep(NA,times=(length(OBYL)-length(HWAH))))
+  }
+  
   #Calculating metrics
   rmse <- sqrt(sum((HWAH-OBYL)^2)/length(OBYL))
   corr <- cor(HWAH,OBYL)
