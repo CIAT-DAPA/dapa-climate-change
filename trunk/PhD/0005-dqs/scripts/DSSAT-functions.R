@@ -230,11 +230,11 @@ firstOpt <- function() {
   tiff("D:/CIAT_work/GLAM/PNAS-paper/DSSAT-PNUT/best-pred.tiff",compression='lzw',res=300,
        pointsize=8,width=1500,height=1000)
   par(mar=c(4.5,4.5,1,1),cex=0.8)
-  plot(values$YEAR,values$HWAH,type="p",pch=20,
+  plot(values$YEAR,values$OBYL,type="p",pch=20,
        xlab="Year",ylab="Yield (kg/ha)",xlim=c(1966,1989),ylim=c(mn,mx))
-  lines(values$YEAR,values$HWAH)
-  points(values$YEAR,values$OBYL,type="p",pch=20,col='red')
-  lines(values$YEAR,values$OBYL,col='red')
+  lines(values$YEAR,values$OBYL,col='black')
+  points(values$YEAR,values$HWAH,type="p",pch=20,col='red')
+  lines(values$YEAR,values$HWAH,col='red')
   grid()
   legend(1970,1800,legend=c("Observed","Modelled"),col=c("black","red"),lty=c(1,1),pch=c(20,20),cex=1.2)
   dev.off()
