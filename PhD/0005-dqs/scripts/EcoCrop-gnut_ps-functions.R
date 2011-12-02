@@ -28,7 +28,7 @@ createControls <- function(bDir) {
   for (x in 1:nrow(experiments)) {
     sp_dir <- paste(bDir,"/shuffle-perturb/climate",sep="") #base climate dir
     ty <- experiments$TYPE[x]; sc <- experiments$SCALE[x]; va <- experiments$VAR[x] #details of exp.
-    SPDataDir <- paste(sp_dir,"/",ty,"_",va,"_",sc,sep="") #data storage dir
+    SPDataDir <- paste(sp_dir,"/",va,"_",ty,"_",sc,sep="") #data storage dir
     cat("Process",paste(ty),"/",paste(va),"/",paste(sc),"\n")
     if (ty == "p") {
       pList <- c(0:299)
