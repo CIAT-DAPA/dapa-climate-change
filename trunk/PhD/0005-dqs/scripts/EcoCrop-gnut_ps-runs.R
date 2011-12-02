@@ -10,9 +10,9 @@ stop("error")
 ####################################################
 #### THESE TWO NEED TO BE CHANGED IN A MACHINE ####
 ####################################################
-bd <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT"
-src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
-nproc <- 5
+#bd <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT"
+#src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
+#nproc <- 5
 ####################################################
 ####################################################
 library(snowfall) #load library
