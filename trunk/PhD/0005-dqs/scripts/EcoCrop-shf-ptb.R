@@ -31,7 +31,7 @@ sList <- gsub("tmax_p-0_s-","",sList); sList <- as.numeric(gsub(".dat","",sList)
 
 #Loop through variables to perform the seasonal modifications
 for (v in c("prec","tmean","tmin")) {
-  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/p_",v,"_seasonal",sep="")
+  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/",v,"_p_seasonal",sep="")
   if (!file.exists(outDir)) {dir.create(outDir)}
   stk <- stack(paste(rstDir,"/",v,"_",c(1:12),".asc",sep=""))
   orig_values <- extract(stk,1:ncell(stk)) #Extract monthly values all cells
@@ -83,7 +83,7 @@ sList <- gsub("tmax_p-0_s-","",sList); sList <- as.numeric(gsub(".dat","",sList)
 
 #Loop through variables to perform the spatial modifications
 for (v in c("prec","tmean","tmin")) {
-  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/p_",v,"_spatial",sep="")
+  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/",v,"_p_spatial",sep="")
   if (!file.exists(outDir)) {dir.create(outDir)}
   stk <- paste(rstDir,"/",v,"_",c(1:12),".asc",sep="") #vector of filenames
   stk <- sapply(stk,list) #list of filenames
@@ -128,7 +128,7 @@ rstDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse"
 
 #Loop through variables to perform the seasonal shuffling
 for (v in c("prec","tmean","tmin")) {
-  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/s_",v,"_seasonal",sep="")
+  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/",v,"_s_seasonal",sep="")
   if (!file.exists(outDir)) {dir.create(outDir)}
   stk <- stack(paste(rstDir,"/",v,"_",c(1:12),".asc",sep=""))
   orig_values <- extract(stk,1:ncell(stk)) #Extract monthly values all cells
