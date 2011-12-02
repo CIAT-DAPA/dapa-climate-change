@@ -12,7 +12,7 @@ source(paste(src.dir.ps,"/EcoCrop-evaluation_ps.R",sep=""))
 createExperiments <- function(bDir) {
   expList <- list.files(paste(bDir,"/shuffle-perturb/climate",sep="")) #list experiments
   for (exp in expList) { #loop through list
-    expRow <- data.frame(TYPE=strsplit(exp,"_",fixed=T)[[1]][1],SCALE=strsplit(exp,"_",fixed=T)[[1]][3],VAR=strsplit(exp,"_",fixed=T)[[1]][2])
+    expRow <- data.frame(TYPE=strsplit(exp,"_",fixed=T)[[1]][2],SCALE=strsplit(exp,"_",fixed=T)[[1]][3],VAR=strsplit(exp,"_",fixed=T)[[1]][1])
     if (exp == expList[1]) {
       experiments <- expRow
     } else {
