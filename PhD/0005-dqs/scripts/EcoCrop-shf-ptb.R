@@ -25,13 +25,14 @@ stop("error")
 library(raster)
 percent_std_dev <- seq(0,299,by=1)
 rstDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse"
-outDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/p-seasonal"
 wthDir <- "D:/CIAT_work/GLAM/PNAS-paper/GJ-weather/shuf-pert/dqs_data/mtemp/season"
 sList <- list.files(wthDir,pattern="tmax_p-0_s-") #List of unique seeds
 sList <- gsub("tmax_p-0_s-","",sList); sList <- as.numeric(gsub(".dat","",sList))
 
 #Loop through variables to perform the seasonal modifications
 for (v in c("prec","tmean","tmin")) {
+  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/p_",v,"_seasonal",sep="")
+  if (!file.exists(outDir)) {dir.create(outDir)}
   stk <- stack(paste(rstDir,"/",v,"_",c(1:12),".asc",sep=""))
   orig_values <- extract(stk,1:ncell(stk)) #Extract monthly values all cells
   for (seed in sList) {
@@ -76,13 +77,14 @@ apply_modif_seas <- function(orig_value,s,p) {
 library(raster)
 percent_std_dev <- seq(0,299,by=1)
 rstDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse"
-outDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/p-spatial"
 wthDir <- "D:/CIAT_work/GLAM/PNAS-paper/GJ-weather/shuf-pert/dqs_data/mtemp/season"
 sList <- list.files(wthDir,pattern="tmax_p-0_s-") #List of unique seeds
 sList <- gsub("tmax_p-0_s-","",sList); sList <- as.numeric(gsub(".dat","",sList))
 
 #Loop through variables to perform the spatial modifications
 for (v in c("prec","tmean","tmin")) {
+  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/p_",v,"_spatial",sep="")
+  if (!file.exists(outDir)) {dir.create(outDir)}
   stk <- paste(rstDir,"/",v,"_",c(1:12),".asc",sep="") #vector of filenames
   stk <- sapply(stk,list) #list of filenames
   stk <- lapply(stk,raster) #list of rasters
@@ -123,10 +125,11 @@ apply_modif_spat <- function(rs,s,p) {
 #Seasonal shuffling configuration
 library(raster)
 rstDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse"
-outDir <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/s-seasonal"
 
 #Loop through variables to perform the seasonal shuffling
 for (v in c("prec","tmean","tmin")) {
+  outDir <- paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/climate/s_",v,"_seasonal",sep="")
+  if (!file.exists(outDir)) {dir.create(outDir)}
   stk <- stack(paste(rstDir,"/",v,"_",c(1:12),".asc",sep=""))
   orig_values <- extract(stk,1:ncell(stk)) #Extract monthly values all cells
   if (v == "tmin" | v == "tmean") {
