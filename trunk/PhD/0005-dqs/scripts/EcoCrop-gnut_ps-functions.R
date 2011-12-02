@@ -12,7 +12,7 @@ source(paste(src.dir.ps,"/EcoCrop-evaluation_ps.R",sep=""))
 createExperiments <- function(bDir) {
   expList <- list.files(paste(bDir,"/shuffle-perturb/climate",sep="")) #list experiments
   for (exp in expList) { #loop through list
-    expRow <- data.frame(TYPE=strsplit(exp,"-",fixed=T)[[1]][1],SCALE=strsplit(exp,"-",fixed=T)[[1]][2],VAR=c("tmin","tmean","prec"))
+    expRow <- data.frame(TYPE=strsplit(exp,"_",fixed=T)[[1]][1],SCALE=strsplit(exp,"_",fixed=T)[[1]][3],VAR=strsplit(exp,"_",fixed=T)[[1]][2])
     if (exp == expList[1]) {
       experiments <- expRow
     } else {
@@ -28,7 +28,8 @@ createControls <- function(bDir) {
   for (x in 1:nrow(experiments)) {
     sp_dir <- paste(bDir,"/shuffle-perturb/climate",sep="") #base climate dir
     ty <- experiments$TYPE[x]; sc <- experiments$SCALE[x]; va <- experiments$VAR[x] #details of exp.
-    SPDataDir <- paste(sp_dir,"/",ty,"-",sc,sep="") #data storage dir
+    SPDataDir <- paste(sp_dir,"/",ty,"_",va,"_",sc,sep="") #data storage dir
+    cat("Process",paste(ty),"/",paste(va),"/",paste(sc),"\n")
     if (ty == "p") {
       pList <- c(0:299)
       runsList <- list.files(SPDataDir,pattern=paste(va,"_p-0_s-",sep="")) #list to get seeds
@@ -65,7 +66,7 @@ createControls <- function(bDir) {
 ################## this is the perturb function
 EcoCrop_ps <- function(bDir,ty,va,sc,s,p) {
   #check if model was run, if not, create lock file
-  psDir <- paste(bDir,"/shuffle-perturb/climate/",ty,"-",sc,sep="")
+  psDir <- paste(bDir,"/shuffle-perturb/climate/",ty,"_",va,"_",sc,sep="")
   if (is.na(p)) {
     psDataDir <- paste(psDir,"/",va,"_s-",s,sep="")
   } else {
