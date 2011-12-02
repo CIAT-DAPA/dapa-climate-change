@@ -1,7 +1,7 @@
 #Julian Ramirez-Villegas
 #November 2011
 #CIAT / CCAFS / UoL
-stop("error")
+#stop("error")
 
 #Fist test of the function
 #EcoCrop_ps(bd,ty="s",va="tmin",sc="seasonal",s=1000,p=NA)
@@ -13,6 +13,7 @@ stop("error")
 #bd <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT"
 #src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
 #nproc <- 5
+#conList <- "s_prec_seasonal.csv"
 ####################################################
 ####################################################
 library(snowfall) #load library
@@ -22,7 +23,7 @@ sfInit(parallel=T,cpus=nproc) #initiate cluster
 sfExport("bd")
 sfExport("src.dir.ps")
 
-control_list <- read.csv(paste(bd,"/bin/control/s_prec_seasonal.csv",sep="")) #load control file
+control_list <- read.csv(paste(bd,"/bin/control/,",conList,sep="")) #load control file
 p_unique <- unique(control_list$P)
 for (pval in p_unique) {
   cat("Process",pval,"\n")
