@@ -63,7 +63,7 @@ createControls <- function(bDir) {
 ################## this is the perturb function
 EcoCrop_ps <- function(bDir,ty,va,sc,s,p) {
   #check if model was run, if not, create lock file
-  psDir <- paste(bDir,"/shuffle-perturb/climate/",ty,"_",va,"_",sc,sep="")
+  psDir <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
   if (is.na(p)) {
     psDataDir <- paste(psDir,"/",va,"_s-",s,sep="")
   } else {
