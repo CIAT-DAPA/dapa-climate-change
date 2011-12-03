@@ -8,10 +8,11 @@
 
 #3. write the small looped wrapper
 ####################################################
-#### THESE TWO NEED TO BE CHANGED IN A MACHINE ####
+#### THESE FIVE NEED TO BE CHANGED IN A MACHINE ####
 ####################################################
 #bd <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT"
 #src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop"
 #nproc <- 5
 #conList <- "s_prec_seasonal.csv"
 ####################################################
@@ -35,7 +36,8 @@ for (pval in p_unique) {
   }
   s_list <- reduced_list$SEED
   controlPS <- function(i) { #define a new function
-    system(paste("Rscript --vanilla --no-save D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts/EcoCrop-PSBatchRun.R",bd,src.dir.ps,tp,v,sca,i,pval))
+    system(paste("Rscript --vanilla --no-save D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts/EcoCrop-PSBatchRun.R",
+                 bd,src.dir.ps,src.dir,tp,v,sca,i,pval))
   }
   sfExport("tp");sfExport("v");sfExport("sca");sfExport("pval")
   system.time(sfSapply(as.vector(s_list), controlPS))
