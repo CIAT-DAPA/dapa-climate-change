@@ -2,11 +2,8 @@
 ####
 
 #sources dir
-src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop"
-src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
-source(paste(src.dir,"/src/EcoCrop.R",sep=""))
-source(paste(src.dir,"/src/accuracy.R",sep=""))
-source(paste(src.dir.ps,"/EcoCrop-evaluation_ps.R",sep=""))
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop"
+#src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
 
 #1. create experiment list
 createExperiments <- function(bDir) {
@@ -66,7 +63,7 @@ createControls <- function(bDir) {
 ################## this is the perturb function
 EcoCrop_ps <- function(bDir,ty,va,sc,s,p) {
   #check if model was run, if not, create lock file
-  psDir <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
+  psDir <- paste(bDir,"/shuffle-perturb/climate/",ty,"_",va,"_",sc,sep="")
   if (is.na(p)) {
     psDataDir <- paste(psDir,"/",va,"_s-",s,sep="")
   } else {
