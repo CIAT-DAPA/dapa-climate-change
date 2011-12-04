@@ -23,6 +23,7 @@ sfInit(parallel=T,cpus=nproc) #initiate cluster
 #export directories
 sfExport("bd")
 sfExport("src.dir.ps")
+sfExport("src.dir")
 
 control_list <- read.csv(paste(bd,"/bin/control/",conList,sep="")) #load control file
 p_unique <- unique(control_list$P)
@@ -36,7 +37,7 @@ for (pval in p_unique) {
   }
   s_list <- reduced_list$SEED
   controlPS <- function(i) { #define a new function
-    system(paste("Rscript --vanilla --no-save D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts/EcoCrop-PSBatchRun.R",
+    system(paste("Rscript --vanilla --no-save",src.dir.ps,"/EcoCrop-PSBatchRun.R",
                  bd,src.dir.ps,src.dir,tp,v,sca,i,pval))
   }
   sfExport("tp");sfExport("v");sfExport("sca");sfExport("pval")

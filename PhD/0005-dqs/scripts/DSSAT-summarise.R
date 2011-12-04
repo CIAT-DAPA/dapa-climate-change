@@ -10,7 +10,6 @@ source(paste(src.dir,"/DSSAT-functions.R",sep=""))
 #base dir
 bd <- "D:/CIAT_work/GLAM/PNAS-paper/DSSAT-PNUT"
 
-
 #function to get the summarised data and plot the results in boxplot
 shuffleSummary <- function(bDir) {
   experiments <- createExpMat(bDir)[11:20,]
