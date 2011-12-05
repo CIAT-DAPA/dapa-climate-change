@@ -1,5 +1,5 @@
 import os, sys, glob, string, shutil
-#python copy.py O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_10min G:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_10min
+#python copy.py O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_2_5min O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_2_5min
 
 dirbase = sys.argv[1]
 dirout = sys.argv[2]
@@ -10,7 +10,7 @@ for model in modellist:
 	print dirbase + "\\" + str(model) + "\n"
 	if not os.path.exists(dirout + "\\" + str(model)):
 		os.system('mkdir ' + dirout + "\\" + str(model))
-		os.system("xcopy /fe " +  dirbase + "\\" + str(model) + " " + dirout + "\\" + str(model))
+		os.system("xcopy /fe " +  dirbase + "\\" + str(model) + "\\2020_2049 " + dirout + "\\" + str(model))+ "\\2020_2049"
 	# periodlist = sorted(os.listdir(dirbase + "\\" + str(model)))
 	# for period in periodlist:
 		# print dirbase + "\\" + str(model) + "\\" + str(period) + "\n"
