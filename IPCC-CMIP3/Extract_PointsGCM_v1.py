@@ -44,7 +44,7 @@ modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\
 # variable = "bio"
 print "Available models: " + str(modellist)
 
-for model in modellist[:6]:
+for model in modellist[6:]:
 	# for period in periodlist:
 	period = "2020_2049"
 	print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
