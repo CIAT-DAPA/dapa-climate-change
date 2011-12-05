@@ -14,8 +14,15 @@
 #src.dir.ps <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop"
 #nproc <- 5
-#conList <- "s_prec_seasonal.csv"
+#conList <- "p_prec_seasonal.csv"
 ####################################################
+bd <- "/andromeda_data1/jramirez/dqs/EcoCrop-GNUT"
+src.dir.ps <- "/home/jramirez/dapa-climate-change/PhD/0005-dqs/scripts"
+src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop"
+nproc <- 20
+conList <- "p_prec_seasonal.csv"
+#system(paste("Rscript --vanilla --no-save",paste(src.dir.ps,"/EcoCrop-PSBatchRun.R",sep=""),
+#                 bd,src.dir.ps,src.dir,tp,v,sca,s,pval))
 ####################################################
 library(snowfall) #load library
 sfInit(parallel=T,cpus=nproc) #initiate cluster
@@ -37,7 +44,7 @@ for (pval in p_unique) {
   }
   s_list <- reduced_list$SEED
   controlPS <- function(i) { #define a new function
-    system(paste("Rscript --vanilla --no-save",src.dir.ps,"/EcoCrop-PSBatchRun.R",
+    system(paste("Rscript --vanilla --no-save",paste(src.dir.ps,"/EcoCrop-PSBatchRun.R",sep=""),
                  bd,src.dir.ps,src.dir,tp,v,sca,i,pval))
   }
   sfExport("tp");sfExport("v");sfExport("sca");sfExport("pval")
