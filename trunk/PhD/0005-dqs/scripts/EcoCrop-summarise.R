@@ -10,70 +10,73 @@ source(paste(src.dir,"/EcoCrop-gnut_ps-functions.R",sep=""))
 #base dir
 bd <- "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT"
 
-#function to get the summarised data and plot the results in boxplot
-shuffleSummary <- function(bDir) {
-  experiments <- createExperiments(bDir)
-  for (i in 1:nrow(experiments)) {
-    cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
-    ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
-    sp_folder <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
-    performance <- read.csv(paste(sp_folder,"/performance.csv",sep=""))
-    if (i==1) {
-      perf <- performance
-    } else {
-      perf <- rbind(perf,performance)
-    }
-  }
-  write.csv(perf,paste(bDir,"/shuffle-perturb_results/s-performance.csv",sep=""),quote=F,row.names=F)
-}
+#do the summarising
+summariseExperiments(bd)
+shuffleSummary(bd)
 
 #read in files again to avoid re-running the above
 perf <- read.csv(paste(bd,"/shuffle-perturb_results/s-performance.csv",sep=""))
+perf$LEGEND <- paste(toupper(perf$VAR)," (",toupper(perf$SCALE),")",sep="") #add legend column
 
 #here you need to plot the stuff
+tifName <- paste(bd,"/shuffle-perturb_results/s-performance_rmse-test.tif",sep="")
+tiff(tifName,res=300,pointsize=8,width=800,height=600,units="px",compression="lzw")
+par(mar=c(5,10,1,1),cex=0.6,las=2,lwd=0.5)
+boxplot(perf$RMSE.TEST~perf$LEGEND,
+        col="grey",lty=1,ylim=c(0,1),
+        pch=20,outwex=0.3,
+        xlab="Test RMSE",
+        horizontal=T,boxwex=0.4)
+abline(v=0.295,lwd=0.7,lty=1,col="red")
+abline(v=seq(0,1,by=0.1),lwd=0.6,lty=2,col="grey50")
+dev.off()
+
+tifName <- paste(bd,"/shuffle-perturb_results/s-performance_or-test.tif",sep="")
+tiff(tifName,res=300,pointsize=8,width=800,height=600,units="px",compression="lzw")
+par(mar=c(5,10,1,1),cex=0.6,las=2,lwd=0.5)
+boxplot(perf$OR.TEST~perf$LEGEND,
+        col="grey",lty=1,ylim=c(0,1),
+        pch=20,outwex=0.3,
+        xlab="Test RMSE",
+        horizontal=T,boxwex=0.4)
+abline(v=0.0183,lwd=0.7,lty=1,col="red")
+abline(v=seq(0,1,by=0.1),lwd=0.6,lty=2,col="grey50")
+dev.off()
 
 
-####################################################################################
-####################################################################################
-#function to summarise experiments
-summariseExperiments <- function(bDir) {
-  experiments <- createExperiments(bDir) #change when perturbed runs are ready
-  for (i in 1:nrow(experiments)) {
-    ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
-    cat("\n")
-    cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
-    #list folders and loop to get what we need
-    sp_folder <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
-    if (!file.exists(paste(sp_folder,"/timeseries.csv",sep=""))) {
-      f_list <- list.files(sp_folder); f_list <- f_list[grep("s-",f_list)]
-      
-      for (f_name in f_list) {
-        if (ty == "s") { #get experimental details
-          p <- NA
-          s <- as.numeric(gsub(paste(va,"_s-",sep=""),"",f_name))
-        } else {
-          p <- as.numeric(gsub("p-","",strsplit(f_name,"_")[[1]][2]))
-          s <- as.numeric(gsub("s-","",strsplit(f_name,"_")[[1]][3]))
-        }
-        cat("reading in experiment s =",s,"/ p =",p,"\n")
-        PSDataFolder <- paste(sp_folder,"/",f_name,sep="") #data folder
-        acc <- read.csv(paste(PSDataFolder,"/accuracy-metrics.csv",sep="")) #load optimisation curve
-        eva <- read.csv(paste(PSDataFolder,"/evaluation.csv",sep="")) #load time series
-        
-        #get the performance row
-        per_row <- data.frame(TYPE=ty,VAR=va,SCALE=sc,P=p,SEED=s,
-                              RMSE.TEST=acc$TEST.ERROR,OR.TEST=acc$TEST.OMISSION.RATE,
-                              RMSE.TRAIN=acc$TRAIN.ERROR,OR.TRAIN=acc$TRAIN.OMISSION.RATE,
-                              TPR=eva$TPR,FPR=eva$FPR,TNR=eva$TNR)
-        if (f_name==f_list[1]) { #summarise
-          performance <- per_row
-        } else {
-          performance <- rbind(performance,per_row)
-        }
-      }
-      
-      write.csv(performance,paste(sp_folder,"/performance.csv",sep=""),row.names=F,quote=F)
-      rm(performance);rm(timeseries);g=gc();rm(g)
-    }
+tifName <- paste(bd,"/shuffle-perturb_results/s-performance_rmse-or-test.tif",sep="")
+tiff(tifName,res=300,pointsize=10,width=1000,height=1000,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=0.6,las=2,lwd=0.8)
+uniqueLeg <- unique(perf$LEGEND)
+count<-1
+for (leg in uniqueLeg) {
+  me.rmse <- mean(perf$RMSE.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  mx.rmse <- max(perf$RMSE.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  mn.rmse <- min(perf$RMSE.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  sd.rmse <- sd(perf$RMSE.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  
+  me.or <- mean(perf$OR.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  mx.or <- max(perf$OR.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  mn.or <- min(perf$OR.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  sd.or <- sd(perf$OR.TEST[which(perf$LEGEND==leg)],na.rm=T)
+  
+  if (leg == uniqueLeg[1]) {
+    plot(me.or,me.rmse,pch=20,xlim=c(0,1),ylim=c(0,1),
+         xlab='OR',ylab='RMSE')
+    lines(x=c(mn.or,mx.or),y=c(me.rmse,me.rmse),lty=1,lwd=1.2)
+    lines(x=c(me.or,me.or),y=c(mn.rmse,mx.rmse),lty=1,lwd=1.2)
+    #text(me.or+0.05,me.rmse+0.05,paste(leg))
+  } else {
+    points(me.or,me.rmse,pch=20+count)
+    lines(x=c(mn.or,mx.or),y=c(me.rmse,me.rmse),lty=1,lwd=1.2)
+    lines(x=c(me.or,me.or),y=c(mn.rmse,mx.rmse),lty=1,lwd=1.2)
+    #text(me.or+0.05,me.rmse+0.05,paste(leg))
   }
+  count <- count+1
 }
+grid()
+abline(h=0.5,lty=2); abline(v=0.1,lty=2)
+abline(h=0.295,lty=1,col='red'); abline(v=0.0183,lty=1,col='red')
+legend(0.6,1,cex=0.9,pch=c(20,21,22),legend=c("Precipitation","Tmean","Tmin"))
+dev.off()
+
