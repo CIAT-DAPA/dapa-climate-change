@@ -3,8 +3,10 @@
 #December 2011
 stop("error")
 
-source("D:/CIAT_work/crop-modelling/GHCND-GSOD-functions.R")
+src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
+#base dir
 bDir <- "D:/CIAT_work/crop-modelling/climate-data"; setwd(bDir)
 gsodDir <- paste(bDir,"/gsod-daily",sep="")
 
