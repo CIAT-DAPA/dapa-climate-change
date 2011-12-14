@@ -20,7 +20,7 @@ bd <- "/andromeda_data1/jramirez/dqs/EcoCrop-GNUT"
 src.dir.ps <- "/home/jramirez/dapa-climate-change/PhD/0005-dqs/scripts"
 src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop"
 nproc <- 20
-conList <- "p_prec_seasonal.csv"
+conList <- "p_tmean_seasonal.csv"
 #system(paste("Rscript --vanilla --no-save",paste(src.dir.ps,"/EcoCrop-PSBatchRun.R",sep=""),
 #                 bd,src.dir.ps,src.dir,tp,v,sca,s,pval))
 ####################################################

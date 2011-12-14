@@ -33,7 +33,7 @@ sfExport("writeSoilFile")
 sfExport("bd")
 
 #run the parallel function looping through perturbed values
-control_list <- read.csv(paste(bd,"/bin/control/p_yield_season.csv",sep="")) #load control file
+control_list <- read.csv(paste(bd,"/bin/control/p_tmin_season.csv",sep="")) #load control file
 p_unique <- unique(control_list$P)
 for (pval in p_unique) {
   cat("Process",pval,"\n")
