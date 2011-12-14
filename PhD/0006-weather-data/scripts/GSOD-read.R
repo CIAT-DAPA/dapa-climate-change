@@ -71,8 +71,8 @@ IDs <- paste("USAF",gsod.afr$USAF,"_WBAN",gsod.afr$WBAN,sep="")
 count <- 1
 for (yr in yearSeries[1:5]) {
   cat(yr,paste("(",count," out of ",length(yearSeries),")",sep=""),"\n")
-  gdir <- paste(gsodDir,"/gsod_",yr,sep="")
-  ogdir <- paste(gsodDir,"/gsod_",yr,"_out",sep=""); if (!file.exists(ogdir)) {dir.create(ogdir)}
+  gdir <- paste(gsodDir,"/",yr,sep="")
+  ogdir <- paste(gsodDir,"/",yr,"_out",sep=""); if (!file.exists(ogdir)) {dir.create(ogdir)}
   controlConvert <- function(i) { #define a new function
     convertGSOD(i,yr,gdir,ogdir)
   }
