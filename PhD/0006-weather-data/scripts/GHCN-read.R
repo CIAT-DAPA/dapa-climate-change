@@ -56,11 +56,11 @@ yearSeries <- c(1960:2010)
 
 ########################### FOR GHCN-D #######################################
 ####################################### ######################################
-ghcn.dates <- as.data.frame(matrix(ncol=367,nrow=nrow(ghcn.afr))) #matrix
+ghcn.dates <- as.data.frame(matrix(ncol=367,nrow=nrow(ghcn.sas))) #matrix
 colnames(ghcn.dates) <- c("ID",1:366) #names of columns
-ghcn.dates$ID <- ghcn.afr$ID #stations IDs into dates matrix
+ghcn.dates$ID <- ghcn.sas$ID #stations IDs into dates matrix
 ddir <- paste(ghcnDir,"/ghcnd_all",sep="")
-odir <- paste(ghcnDir,"/ghcnd_afr",sep=""); if (!file.exists(odir)) {dir.create(odir)}
+odir <- paste(ghcnDir,"/ghcnd_sas",sep=""); if (!file.exists(odir)) {dir.create(odir)}
 
 #do the snowfall stuff here
 library(snowfall)
@@ -81,13 +81,22 @@ sfExport("bDir")
 count <- 1
 for (id in ghcn.dates$ID) {
   cat(id,paste("(",count," out of ",length(ghcn.dates$ID),")",sep=""),"\n")
-  controlConvert <- function(i) { #define a new function
-    convertGHCND(id,i,ddir,odir)
+  outDir <- paste(odir,"/",id,sep="")
+  if (file.exists(outDir)) { #check if files exist in folder
+    fl <- list.files(outDir,pattern=".csv")
+  } else {
+    fl <- 0
   }
-  sfExport("id")
-  system.time(sfSapply(as.vector(yearSeries), controlConvert))
+  
+  if (length(fl) != 51) {
+    controlConvert <- function(i) { #define a new function
+      convertGHCND(id,i,ddir,odir)
+    }
+    sfExport("id")
+    system.time(sfSapply(as.vector(yearSeries), controlConvert))
+  }
   count <- count+1
 }
 
-
+sfStop()
 #ghcn.dates[1,2:(nday+1)] <- wData$PRCP #to put data into complete matrix for that year
