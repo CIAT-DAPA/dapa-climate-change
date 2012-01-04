@@ -80,3 +80,42 @@ abline(h=0.295,lty=1,col='red'); abline(v=0.0183,lty=1,col='red')
 legend(0.6,1,cex=0.9,pch=c(20,21,22),legend=c("Precipitation","Tmean","Tmin"))
 dev.off()
 
+
+#tpr, tnr, fpr
+tifName <- paste(bd,"/shuffle-perturb_results/s-performance_tpr.tif",sep="")
+tiff(tifName,res=300,pointsize=8,width=800,height=600,units="px",compression="lzw")
+par(mar=c(5,10,1,1),cex=0.6,las=2,lwd=0.5)
+boxplot(perf$TPR~perf$LEGEND,
+        col="grey",lty=1,ylim=c(0,1),
+        pch=20,outwex=0.3,
+        xlab="True Positive Rate",
+        horizontal=T,boxwex=0.4)
+abline(v=0.97,lwd=0.7,lty=1,col="red")
+abline(v=seq(0,1,by=0.1),lwd=0.6,lty=2,col="grey50")
+dev.off()
+
+
+tifName <- paste(bd,"/shuffle-perturb_results/s-performance_tnr.tif",sep="")
+tiff(tifName,res=300,pointsize=8,width=800,height=600,units="px",compression="lzw")
+par(mar=c(5,10,1,1),cex=0.6,las=2,lwd=0.5)
+boxplot(perf$TNR~perf$LEGEND,
+        col="grey",lty=1,ylim=c(0,1),
+        pch=20,outwex=0.3,
+        xlab="True Negative Rate",
+        horizontal=T,boxwex=0.4)
+abline(v=0.877,lwd=0.7,lty=1,col="red")
+abline(v=seq(0,1,by=0.1),lwd=0.6,lty=2,col="grey50")
+dev.off()
+
+
+tifName <- paste(bd,"/shuffle-perturb_results/s-performance_fpr.tif",sep="")
+tiff(tifName,res=300,pointsize=8,width=800,height=600,units="px",compression="lzw")
+par(mar=c(5,10,1,1),cex=0.6,las=2,lwd=0.5)
+boxplot(perf$FPR~perf$LEGEND,
+        col="grey",lty=1,ylim=c(0,1),
+        pch=20,outwex=0.3,
+        xlab="False Positive Rate",
+        horizontal=T,boxwex=0.4)
+abline(v=0.0302,lwd=0.7,lty=1,col="red")
+abline(v=seq(0,1,by=0.1),lwd=0.6,lty=2,col="grey50")
+dev.off()
