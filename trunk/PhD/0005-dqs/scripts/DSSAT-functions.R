@@ -383,24 +383,34 @@ writeSoilFile <- function(path,slpf) {
 
 ######## summarising functions
 #function to get the summarised data and plot the results in boxplot
-shuffleSummary <- function(bDir) {
-  experiments <- createExpMat(bDir)[11:20,]
-  for (i in 1:nrow(experiments)) {
-    cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
-    ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
-    sp_folder <- paste(bDir,"/GJ-weather/shuf-pert/",ty,"_",va,"_",sc,sep="")
-    performance <- read.csv(paste(sp_folder,"/performance.csv",sep=""))
-    timeseries <- read.csv(paste(sp_folder,"/timeseries.csv",sep=""))
-    if (i==1) {
-      perf <- performance
-      tims <- timeseries
-    } else {
-      perf <- rbind(perf,performance)
-      tims <- rbind(tims,timeseries)
+generalSummary <- function(bDir) {
+  expList <- createExpMat(bDir)
+  types <- unique(expList$TYPE)
+  for (typ in types) {
+    experiments <- expList[which(expList$TYPE==typ),]
+    #define output names
+    out_perf <- paste(bDir,"/GJ-weather/shuf-pert_results/",typ,"-performance.csv",sep="")
+    out_tims <- paste(bDir,"/GJ-weather/shuf-pert_results/",typ,"-timeseries.csv",sep="")
+    #if not exists open and do process
+    if (!file.exists(out_tims) & !file.exists(out_perf)) {
+      for (i in 1:nrow(experiments)) {
+        ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
+        cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
+        sp_folder <- paste(bDir,"/GJ-weather/shuf-pert/",ty,"_",va,"_",sc,sep="")
+        performance <- read.csv(paste(sp_folder,"/performance.csv",sep=""))
+        timeseries <- read.csv(paste(sp_folder,"/timeseries.csv",sep=""))
+        if (i==1) {
+          perf <- performance
+          tims <- timeseries
+        } else {
+          perf <- rbind(perf,performance)
+          tims <- rbind(tims,timeseries)
+        }
+      }
+      write.csv(perf,out_perf,quote=F,row.names=F)
+      write.csv(tims,out_tims,quote=F,row.names=F)
     }
   }
-  write.csv(perf,paste(bDir,"/GJ-weather/shuf-pert_results/s-performance.csv",sep=""),quote=F,row.names=F)
-  write.csv(tims,paste(bDir,"/GJ-weather/shuf-pert_results/s-timeseries.csv",sep=""),quote=F,row.names=F)
 }
 
 
@@ -408,7 +418,7 @@ shuffleSummary <- function(bDir) {
 ####################################################################################
 #function to summarise experiments
 summariseExperiments <- function(bDir) {
-  experiments <- createExpMat(bDir)[11:19,] #change when perturbed runs are ready
+  experiments <- createExpMat(bDir) #change when perturbed runs are ready
   for (i in 1:nrow(experiments)) {
     ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
     cat("\n")
@@ -418,7 +428,35 @@ summariseExperiments <- function(bDir) {
     if (!file.exists(paste(sp_folder,"/timeseries.csv",sep=""))) {
       f_list <- list.files(sp_folder); f_list <- f_list[grep("s-",f_list)]
       
-      for (f_name in f_list) {
+      #verify whether preliminary files exist
+      nfil <- length(f_list)/1000
+      pfc <- 1
+      for (pf in 1:nfil) {
+        per_file <- paste(sp_folder,"/performance_",pf,".csv",sep="")
+        tse_file <- paste(sp_folder,"/timeseries_",pf,".csv",sep="")
+        
+        if (file.exists(per_file) & file.exists(tse_file)) {
+          cat("Block",pf,"was already analysed, skipping files \n")
+          to_skip <- ((pf-1)*1000+1):((pf-1)*1000+1000)
+          if (pfc==1) {
+            cum_skipped <- to_skip
+          } else {
+            cum_skipped <- c(cum_skipped,to_skip)
+          }
+          pfc <- pfc+1
+        }
+      }
+      
+      #reducing f_list
+      if (pfc>1) {
+        f_list_red <- f_list[-cum_skipped]
+      } else {
+        f_list_red <- f_list
+      }
+      
+      fcount <- 1
+      scount <- pfc
+      for (f_name in f_list_red) {
         cat("reading in experiment",f_name,"\n")
         PSDataFolder <- paste(sp_folder,"/",f_name,sep="") #data folder
         opt <- read.csv(paste(PSDataFolder,"/optimisation.csv",sep="")) #load optimisation curve
@@ -443,15 +481,41 @@ summariseExperiments <- function(bDir) {
         #get the best time series
         best_tse <- data.frame(TYPE=ty,VAR=va,SCALE=sc,P=p,SEED=s,SLPF=best_slpf,
                                YEAR=best_tser$YEAR,HWAH=best_tser$HWAH,OBYL=best_tser$OBYL)
-        if (f_name==f_list[1]) { #summarise
+        if (fcount==1) { #summarise
           performance <- per_row
           timeseries <- best_tse
         } else {
           performance <- rbind(performance,per_row)
           timeseries <- rbind(timeseries,best_tse)
         }
+        
+        #restart counter and write preliminary file to avoid heavy matrices, these will
+        #be merged at the end
+        if (fcount==1000) {
+          write.csv(performance,paste(sp_folder,"/performance_",scount,".csv",sep=""),row.names=F,quote=F)
+          write.csv(timeseries,paste(sp_folder,"/timeseries_",scount,".csv",sep=""),row.names=F,quote=F)
+          scount <- scount+1
+          fcount <- 1
+          rm(performance); rm(timeseries); g=gc(); rm(g)
+        } else {
+          fcount <- fcount+1
+        }
       }
       
+      if (nfil>1) {
+        cat("Concatenating ")
+        for (sc in 1:nfil) {
+          per_pre <- read.csv(paste(sp_folder,"/performance_",sc,".csv",sep=""))
+          tim_pre <- read.csv(paste(sp_folder,"/timeseries_",sc,".csv",sep=""))
+          if (sc==1) {
+            performance <- per_pre
+            timeseries <- tim_pre
+          } else {
+            performance <- rbind(performance,per_pre)
+            timeseries <- rbind(timeseries,tim_pre)
+          }
+        }
+      }
       write.csv(performance,paste(sp_folder,"/performance.csv",sep=""),row.names=F,quote=F)
       write.csv(timeseries,paste(sp_folder,"/timeseries.csv",sep=""),row.names=F,quote=F)
       

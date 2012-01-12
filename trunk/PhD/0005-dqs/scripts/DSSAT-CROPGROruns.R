@@ -13,7 +13,7 @@ source(paste(src.dir,"/DSSAT-functions.R",sep=""))
 ####################################################
 #### THESE TWO NEED TO BE CHANGED IN A MACHINE ####
 ####################################################
-bd <- "D:/CIAT_work/GLAM/PNAS-paper/DSSAT-PNUT"
+bd <- "E:/PhD-work/data-quality-study/DSSAT-PNUT"
 nproc <- 5
 ####################################################
 ####################################################
@@ -33,7 +33,7 @@ sfExport("writeSoilFile")
 sfExport("bd")
 
 #run the parallel function looping through perturbed values
-control_list <- read.csv(paste(bd,"/bin/control/p_tmin_season.csv",sep="")) #load control file
+control_list <- read.csv(paste(bd,"/bin/control/p_prec_climate.csv",sep="")) #load control file
 p_unique <- unique(control_list$P)
 for (pval in p_unique) {
   cat("Process",pval,"\n")
