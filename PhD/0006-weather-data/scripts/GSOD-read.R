@@ -7,8 +7,8 @@ src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
 #base dir
-bDir <- "D:/CIAT_work/crop-modelling/climate-data"; setwd(bDir)
-gsodDir <- paste(bDir,"/gsod-daily",sep="")
+bDir <- "E:/PhD-work/climate-data-assessment/comparisons/input-data/"; setwd(bDir)
+gsodDir <- paste(bDir,"/gsod-weather-stations",sep="")
 
 #gsod stations
 stations.gsod <- read.csv(paste(gsodDir,"/ish-history.csv",sep=""))
@@ -71,10 +71,10 @@ sfExport("bDir")
 IDs <- paste("USAF",gsod.afr$USAF,"_WBAN",gsod.afr$WBAN,sep="")
 
 count <- 1
-for (yr in yearSeries[1:5]) {
+for (yr in yearSeries) {
   cat(yr,paste("(",count," out of ",length(yearSeries),")",sep=""),"\n")
   gdir <- paste(gsodDir,"/",yr,sep="")
-  ogdir <- paste(gsodDir,"/",yr,"_out",sep=""); if (!file.exists(ogdir)) {dir.create(ogdir)}
+  ogdir <- paste(gsodDir,"/",yr,"_out-afr",sep=""); if (!file.exists(ogdir)) {dir.create(ogdir)}
   controlConvert <- function(i) { #define a new function
     convertGSOD(i,yr,gdir,ogdir)
   }
