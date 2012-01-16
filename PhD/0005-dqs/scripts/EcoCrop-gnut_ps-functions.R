@@ -14,9 +14,37 @@ summariseExperiments <- function(bDir) {
     cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
     #list folders and loop to get what we need
     sp_folder <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
-    if (!file.exists(paste(sp_folder,"/timeseries.csv",sep=""))) {
+    if (!file.exists(paste(sp_folder,"/performance.csv",sep=""))) {
       f_list <- list.files(sp_folder); f_list <- f_list[grep("s-",f_list)]
       
+      #verify whether preliminary files exist
+      nfil <- length(f_list)/1000
+      pfc <- 1
+      for (pf in 1:nfil) {
+        per_file <- paste(sp_folder,"/performance_",pf,".csv",sep="")
+        
+        if (file.exists(per_file)) {
+          cat("Block",pf,"was already analysed, skipping files \n")
+          to_skip <- ((pf-1)*1000+1):((pf-1)*1000+1000)
+          if (pfc==1) {
+            cum_skipped <- to_skip
+          } else {
+            cum_skipped <- c(cum_skipped,to_skip)
+          }
+          pfc <- pfc+1
+        }
+      }
+      
+      #reducing f_list
+      if (pfc>1) {
+        f_list_red <- f_list[-cum_skipped]
+      } else {
+        f_list_red <- f_list
+      }
+      
+      #reading individual model runs
+      fcount <- 1
+      scount <- pfc
       for (f_name in f_list) {
         if (ty == "s") { #get experimental details
           p <- NA
@@ -35,13 +63,35 @@ summariseExperiments <- function(bDir) {
                               RMSE.TEST=acc$TEST.ERROR,OR.TEST=acc$TEST.OMISSION.RATE,
                               RMSE.TRAIN=acc$TRAIN.ERROR,OR.TRAIN=acc$TRAIN.OMISSION.RATE,
                               TPR=eva$TPR,FPR=eva$FPR,TNR=eva$TNR)
-        if (f_name==f_list[1]) { #summarise
+        if (fcount==1) { #summarise
           performance <- per_row
         } else {
           performance <- rbind(performance,per_row)
         }
+        
+        #restart counter and write preliminary file to avoid heavy matrices, these will
+        #be merged at the end
+        if (fcount==1000) {
+          write.csv(performance,paste(sp_folder,"/performance_",scount,".csv",sep=""),row.names=F,quote=F)
+          scount <- scount+1
+          fcount <- 1
+          rm(performance); g=gc(); rm(g)
+        } else {
+          fcount <- fcount+1
+        }
       }
       
+      if (nfil>1) {
+        cat("Concatenating ")
+        for (sc in 1:nfil) {
+          per_pre <- read.csv(paste(sp_folder,"/performance_",sc,".csv",sep=""))
+          if (sc==1) {
+            performance <- per_pre
+          } else {
+            performance <- rbind(performance,per_pre)
+          }
+        }
+      }
       write.csv(performance,paste(sp_folder,"/performance.csv",sep=""),row.names=F,quote=F)
       rm(performance);g=gc();rm(g)
     }
@@ -49,20 +99,29 @@ summariseExperiments <- function(bDir) {
 }
 
 #function to get the summarised data and plot the results in boxplot
-shuffleSummary <- function(bDir) {
-  experiments <- createExperiments(bDir)
-  for (i in 1:nrow(experiments)) {
-    ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
-    cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
-    sp_folder <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
-    performance <- read.csv(paste(sp_folder,"/performance.csv",sep=""))
-    if (i==1) {
-      perf <- performance
-    } else {
-      perf <- rbind(perf,performance)
+generalSummary <- function(bDir) {
+  expList <- createExperiments(bDir)
+  types <- unique(expList$TYPE)
+  for (typ in types) {
+    experiments <- expList[which(expList$TYPE==typ),]
+    #define output names
+    out_perf <- paste(bDir,"/shuffle-perturb/climate_results/",typ,"-performance.csv",sep="")
+    #if not exists open and do process
+    if (!file.exists(out_perf)) {
+      for (i in 1:nrow(experiments)) {
+        ty <- experiments$TYPE[i]; va <- experiments$VAR[i]; sc <- experiments$SCALE[i] #get data from matrix
+        cat("processing",paste(ty),"/",paste(va),"/",paste(sc),"\n")
+        sp_folder <- paste(bDir,"/shuffle-perturb/climate/",va,"_",ty,"_",sc,sep="")
+        performance <- read.csv(paste(sp_folder,"/performance.csv",sep=""))
+        if (i==1) {
+          perf <- performance
+        } else {
+          perf <- rbind(perf,performance)
+        }
+      }
+      write.csv(perf,out_perf,quote=F,row.names=F)
     }
   }
-  write.csv(perf,paste(bDir,"/shuffle-perturb_results/s-performance.csv",sep=""),quote=F,row.names=F)
 }
 
 
