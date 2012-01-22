@@ -1,11 +1,13 @@
 #### LIBRARIES: raster, maptools, rgdal, sp
 ####
+stop("Error: do not source this whole thing!")
 
 #Getting unique coordinates
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
 source(paste(src.dir,"/getUniqueCoord.R",sep="")) #loading the function
 
-bDir <- "E:/PhD-work/crop-modelling/EcoCrop"
+rDir <- "E:/PhD-work/crop-modelling"
+bDir <- paste(rDir,"/EcoCrop",sep="")
 crop <- "barl"
 cDir <- paste(bDir,"/models/EcoCrop-",toupper(crop),sep="")
 
@@ -17,48 +19,51 @@ rs <- getUniqueCoord(rs, fields=flds, resol=2.5/60) #running the function #field
 #Dummy part of unloading and re-loading the data
 write.csv(rs, paste(cDir,"/analyses/data/dataset2_5m.csv",sep=""), row.names=F, quote=T) #write outcome into new file
 rs <- rs[which(rs$IS_UNIQUE == TRUE),] #selecting unique records
-write.csv(rs, "F:/EcoCrop-development/analyses/data/unique2_5m.csv", row.names=F, quote=T) #write new dataset only containing unique records
-rs <- read.csv("F:/EcoCrop-development/analyses/data/unique2_5m.csv") #re-loading the data
+write.csv(rs, paste(cDir,"/analyses/data/unique2_5m.csv",sep=""), row.names=F, quote=T) #write new dataset only containing unique records
+rs <- read.csv(paste(cDir,"/analyses/data/unique2_5m.csv",sep="")) #re-loading the data
 nrow(rs)
 
 #Splitting in test/train datasets
-source("./src/randomSplit.R")
+source(paste(src.dir,"/randomSplit.R",sep=""))
 rs <- randomSplit(rs, 20) #20 is percentage of data to be taken out
 
 #Plot & write test and train datasets separately
-jpeg("F:/EcoCrop-development/analyses/img/test_train.jpg", quality=100, height=600, width=600)
-plot(cbind(rs$Longitude[which(rs$TEST_TRAIN == "TEST")], rs$Latitude[which(rs$TEST_TRAIN == "TEST")]), pch="+", col="red", xlim=c(-20,90), ylim=c(-30,30), xlab="", ylab="")
+tiff(paste(cDir,"/analyses/img/test_train.tiff",sep=""), compression="lzw",res=150, height=900, width=1200)
+plot(cbind(rs$LONGITUDED[which(rs$TEST_TRAIN == "TEST")], rs$LATITUDED[which(rs$TEST_TRAIN == "TEST")]), pch="+", col="red", xlim=c(-20,90), ylim=c(-30,30), xlab="", ylab="")
 library(maptools); data(wrld_simpl); plot(wrld_simpl, add=T)
-points(cbind(rs$Longitude[which(rs$TEST_TRAIN == "TRAIN")], rs$Latitude[which(rs$TEST_TRAIN == "TRAIN")]), pch=20, col="blue", cex=0.5)
+points(cbind(rs$LONGITUDED[which(rs$TEST_TRAIN == "TRAIN")], rs$LATITUDED[which(rs$TEST_TRAIN == "TRAIN")]), pch=20, col="blue", cex=0.5)
+grid()
 dev.off()
 
-write.csv(rs, "F:/EcoCrop-development/analyses/data/unique.csv", row.names=F, quote=T) #write unique records with new field TRAIN/TEST
-write.csv(rs[which(rs$TEST_TRAIN == "TEST"),], "F:/EcoCrop-development/analyses/data/test.csv", row.names=F, quote=T) #reselect and store test data
-write.csv(rs[which(rs$TEST_TRAIN == "TRAIN"),], "F:/EcoCrop-development/analyses/data/train.csv", row.names=F, quote=T) #reselect and store train data
+write.csv(rs, paste(cDir,"/analyses/data/unique.csv",sep=""), row.names=F, quote=T) #write unique records with new field TRAIN/TEST
+write.csv(rs[which(rs$TEST_TRAIN == "TEST"),], paste(cDir,"/analyses/data/test.csv",sep=""), row.names=F, quote=T) #reselect and store test data
+write.csv(rs[which(rs$TEST_TRAIN == "TRAIN"),], paste(cDir,"/analyses/data/train.csv",sep=""), row.names=F, quote=T) #reselect and store train data
 
 #Extracting climate data
-source("./src/extractClimateData.R")
-rs <- read.csv("F:/EcoCrop-development/analyses/data/unique.csv") #load unique records
+source(paste(src.dir,"/extractClimateData.R",sep=""))
+rs <- read.csv(paste(cDir,"/analyses/data/unique.csv",sep="")) #load unique records
 for (v in c("prec", "tmin", "tmean", "tmax")) {
-	rs <- extractMonthlyData(wd="F:/EcoCrop-development/climate/global_2_5min", variable=v, ext=".asc", rs, fields=c(18,17), verbose=T)
+	rs <- extractMonthlyData(wd=paste(rDir,"/climate-data/worldclim/afasia_2_5min",sep=""),
+                                    variable=v, ext=".asc", rs, fields=flds, verbose=T)
 }
-write.csv(rs, "F:/EcoCrop-development/analyses/data/climates.csv", row.names=F, quote=T)
+write.csv(rs, paste(cDir,"/analyses/data/climates.csv",sep=""), row.names=F, quote=T)
 
 #Calculating gs parameters for calibration
-source("./src/calibrationParameters.R")
-rs <- read.csv("F:/EcoCrop-development/analyses/data/climates.csv")
-rs <- calibrationParameters(rs, gs=6, verbose=T)
-write.csv(rs, "F:/EcoCrop-development/analyses/data/calibration.csv", row.names=F, quote=T)
+source(paste(src.dir,"/calibrationParameters.R",sep=""))
+rs <- read.csv(paste(cDir,"/analyses/data/climates.csv",sep=""))
+rs <- calibrationParameters(rs, gs=4, verbose=T)
+write.csv(rs, paste(cDir,"/analyses/data/calibration.csv",sep=""), row.names=F, quote=T)
 
 #Get calibration parameters
-source("./src/getParameters.R")
-dataset <- read.csv("F:/EcoCrop-development/analyses/data/calibration.csv")
+source(paste(src.dir,"/getParameters.R",sep=""))
+dataset <- read.csv(paste(cDir,"/analyses/data/calibration.csv",sep=""))
 for (gs in 1:12) {
 	plotdata <- dataset[,grep(paste("GS", gs, "_", sep=""), names(dataset))]
 	varList <- c("prec", "tmean", "tmin", "tmax")
 	v <- 1
 	for (varn in varList) {
-		calPar <- getParameters(plotdata[,v], nb=200, plotit=T, plotdir="F:/EcoCrop-development/analyses/img", gs=gs, varname=varn)
+		calPar <- getParameters(plotdata[,v], nb=200, plotit=T, 
+                            plotdir=paste(cDir,"/analyses/img",sep=""), gs=gs, varname=varn)
 		if (v == 1 & gs == 1) {finalTable <- calPar} else {finalTable <- rbind(finalTable, calPar)}
 		v <- v+1
 	}
@@ -68,24 +73,31 @@ for (gs in c("MEAN", "MODE", "MAX", "MIN")) {
 	varList <- c("prec", "tmean", "tmin", "tmax")
 	v <- 1
 	for (varn in varList) {
-		calPar <- getParameters(plotdata[,v], nb=200, plotit=T, plotdir="F:/EcoCrop-development/analyses/img", gs=gs, varname=varn)
+		calPar <- getParameters(plotdata[,v], nb=200, plotit=T, 
+                            plotdir=paste(cDir,"/analyses/img",sep=""), gs=gs, varname=varn)
 		finalTable <- rbind(finalTable, calPar)
 		v <- v+1
 	}
 }
-write.csv(finalTable, "F:/EcoCrop-development/analyses/data/calibration-parameters.csv", row.names=F)
+write.csv(finalTable, paste(cDir,"/analyses/data/calibration-parameters.csv",sep=""), row.names=F)
 
 #Running the model
-source("./src/EcoCrop.R")
+source(paste(src.dir,"/EcoCrop.R",sep=""))
 for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) {
 	cat("GS", gs, "\n")
-	p <- read.csv("F:/EcoCrop-development/analyses/data/calibration-parameters.csv")
+	p <- read.csv(paste(cDir,"/analyses/data/calibration-parameters.csv",sep=""))
 	p <- p[which(p$GS==gs),]
 	vl <- c("tmean","tmin","tmax")
 	for (rw in 2:4) {
-		if (!file.exists(paste("F:/EcoCrop-development/analyses/runs/", gs, "-sorghum-",vl[rw-1],"-suitability.jpg",sep=""))) {
-			eco <- suitCalc(climPath='F:/EcoCrop-development/climate/afasia_2_5min', Gmin=180,Gmax=180,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],Ropmax=p$OPMAX[1],Rmax=p$MAX[1], outfolder='F:/EcoCrop-development/analyses/runs', cropname=paste(gs,'-sorghum-',vl[rw-1],sep=""))
-			jpeg(paste("F:/EcoCrop-development/analyses/runs/", gs, "-sorghum-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
+    jpegFile <- paste(cDir,"/analyses/runs/", gs, "-",crop,"-",vl[rw-1],"-suitability.jpg",sep="")
+		if (!file.exists(jpegFile)) {
+			eco <- suitCalc(climPath=paste(rDir,"/climate-data/worldclim/afasia_2_5min",sep=""), 
+                      Gmin=120,Gmax=120,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],
+                      Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
+                      Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
+                      outfolder=paste(cDir,'/analyses/runs', sep=""),
+                      cropname=paste(gs,'-',crop,'-',vl[rw-1],sep=""))
+			jpeg(jpegFile, quality=100, height=900,width=1200,units="px")
 			plot(eco)
 			dev.off()
 		}
