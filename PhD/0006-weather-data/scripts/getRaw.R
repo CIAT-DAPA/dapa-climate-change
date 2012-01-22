@@ -5,7 +5,7 @@ stop("error")
 
 #source folder
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
-source(paste(src.dir,"/getRaw-functions.R",sep=""))
+source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
 inDir <- "E:/PhD-work/crop-modelling/climate-data"
 gdir <- paste(inDir,"/gsod-daily",sep="")

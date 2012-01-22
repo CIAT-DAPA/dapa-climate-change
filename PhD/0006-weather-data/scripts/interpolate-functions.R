@@ -5,6 +5,59 @@
 #load libraries
 library(raster)
 
+########################################################
+#function to extract rainfall values from interpolated grids based on xy coordinates (lon,lat)
+extractRainfall <- function(yDir,rname,lon,lat,dayList) {
+  for (d in dayList) {
+    cat("Extracting day",d,"\n")
+    #read the raster
+    dDir <- paste(yDir,"/",d,sep="")
+    rs <- raster(paste(dDir,"/",rname,".asc",sep=""))
+    rs[which(rs[]<0)] <- 0
+    val <- extract(rs,cbind(X=lon,Y=lat))
+    
+    if (d==dayList[1]) {
+      rainfall <- val
+    } else {
+      rainfall <- c(rainfall,val)
+    }
+  }
+  return(data.frame(DOY=dList,RAIN=rainfall))
+}
+
+
+#function to create a gif file with all days of a year
+#Function to reate a list
+createGIF <- function(yDir,rname,wd,ht,dayList) {
+  png(file="day_%003d.png", width=wd, height=ht)
+    for (d in dayList) {
+      cat("Plotting day",d,"\n")
+      #read the raster for eaf
+      dDir <- paste(yDir,"/",d,sep="")
+      rs <- raster(paste(dDir,"/",rname,".asc",sep=""))
+      rs[which(rs[]<0)] <- 0
+      #plot the raster
+      plot(rs,zlim=c(0,500),col=colorRampPalette(c("light blue","blue","purple"))(100),
+           main=paste("Day",d))
+      plot(wrld_simpl,add=T)
+      #text(.5, .5, d, cex = 1.2)
+    }
+  dev.off()
+  
+  # convert the .png files to one .gif file using ImageMagick. 
+  # The system() function executes the command as if it was done
+  # in the terminal. the -delay flag sets the time between showing
+  # the frames, i.e. the speed of the animation.
+  ff <- file("conv.bat","w")
+  cat("convert -delay 10 *.png ",paste(rname,".gif",sep=""),"\n",file=ff); close(ff)
+  system("conv.bat"); ff <- file.remove("conv.bat")
+  
+  # remove the single png files
+  ff <- file.remove(list.files(pattern=".png"))
+  return(paste(rname,".gif",sep=""))
+}
+
+
 #function to interpolate a given day
 interpolateDay <- function(day,gData,intDir,yr,rg) {
   

@@ -1,0 +1,32 @@
+ID,MIRCA_ID,MIRCA_NAME,Monfreda_NAME,SPAM_NAME,ABRV
+1,1,Wheat,wheat,wheat,whea
+2,2,Maize,maize,maize,maiz
+3,3,Rice,rice,rice,rice
+4,4,Barley,barley,barley,barl
+5,5,Rye,NA,NA,NA
+6,7,Sorghum,sorghum,sorghum,sorg
+7,8,Soybeans,NA,NA,NA
+8,9,Sunflower,NA,NA,NA
+9,10,Potatoes,potato,potato,pota
+10,11,Cassava,cassava,cassava,cass
+11,12,Sugar cane,NA,NA,NA
+12,13,Sugar beet,NA,NA,NA
+13,14,Oil palm,NA,NA,NA
+14,15,Rape seed / Canola,NA,NA,NA
+15,16,Groundnuts / Peanuts,groundnut,Groundnut,gnut
+16,17,Pulses,NA,NA,NA
+17,18,Citrus,NA,NA,NA
+18,19,Date palm,NA,NA,NA
+19,20,Grapes / Vine,NA,NA,NA
+20,21,Cotton,NA,NA,NA
+21,22,Cocoa,NA,NA,NA
+22,23,Coffee,NA,NA,NA
+23,24,Others perennial,NA,NA,NA
+24,25,Fodder grasses,NA,NA,NA
+25,26,Others annual.,NA,NA,NA
+26,NA,Beans,bean,beans,bean
+27,NA,Chickpea,chickpea,NA,chkp
+28,NA,Cowpea,cowpea,NA,cowp
+29,6,Millet,millet,millet,milf
+30,6,Millet,millet,millet,milp
+31,NA,NA,yam,NA,yams
