@@ -13,14 +13,14 @@ source(paste(src.dir,"/interpolate-functions.R",sep=""))
 
 #defining basic stuff
 anuDir <- "C:/anu/Anuspl43/bin"
-inDir <- "E:/PhD-work/crop-modelling/climate-data"
+inDir <- "F:/PhD-work/crop-modelling/climate-data"
 gdir <- paste(inDir,"/gsod-daily",sep="")
 hdir <- paste(inDir,"/ghcn-daily",sep="")
-re <- "afr"
+re <- "sas"
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=5) #initiate cluster
+sfInit(parallel=T,cpus=4) #initiate cluster
 
 #export functions
 sfExport("interpolateDay")
@@ -73,4 +73,8 @@ for (ye in 1960:2010) {
 sfStop()
 
 
-
+## testing
+# for (i in 1:nd) {
+#   cat(i," ")
+#   interpolateDay(i,gaData,iDir,ye,re)
+# }
