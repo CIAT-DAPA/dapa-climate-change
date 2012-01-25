@@ -37,8 +37,8 @@ createGIF <- function(yDir,rname,wd,ht,dayList) {
       rs <- raster(paste(dDir,"/",rname,".asc",sep=""))
       rs[which(rs[]<0)] <- 0
       #plot the raster
-      plot(rs,zlim=c(0,500),col=colorRampPalette(c("light blue","blue","purple"))(100),
-           main=paste("Day",d))
+      plot(rs,zlim=c(0,150),col=colorRampPalette(c("light blue","blue","purple"))(100),
+           main=paste("Day",d),useRaster=F)
       plot(wrld_simpl,add=T)
       #text(.5, .5, d, cex = 1.2)
     }
@@ -66,10 +66,10 @@ interpolateDay <- function(day,gData,intDir,yr,rg) {
   oDir <- paste(oyrDir,"/",day,sep=""); if (!file.exists(oDir)) {dir.create(oDir)}
   setwd(oDir)
   
-  if (!file.exists("rain_waf.asc")) {
+  if (!file.exists("rain_waf.asc") & rg == "afr" | !file.exists("rain_igp.asc") & rg == "sas") {
     intMx <- gData[,c(1:4,4+day)] #get data for that day
     names(intMx) <- c("ID","LON","LAT","ALT","RAIN") #rename matrix
-    intMx <- intMx[which(!is.na(intMx$RAIN)),] #remove all rows with NAs
+    intMx <- intMx[which(!is.na(intMx$RAIN)),] #remove all rows with NAs in rainfall
     intMx$RAIN <- intMx$RAIN*10
     
     #reduce number of stations (one per 1 degree cell)
@@ -77,76 +77,103 @@ interpolateDay <- function(day,gData,intDir,yr,rg) {
     intMx$cells <- cellFromXY(rs,cbind(intMx$LON,intMx$LAT))
     uCells <- unique(intMx$cells)
     
-    for (cell in uCells) {
-      selCells <- intMx[which(intMx$cells==cell),]
-      if (nrow(selCells)>1) { #if there are many stations in that cell then average the locations
-        outLine <- data.frame(ID=paste("MNCELL",cell,sep=""),
-                              LON=mean(selCells$LON,na.rm=T),LAT=mean(selCells$LAT,na.rm=T),
-                              ALT=mean(selCells$ALT,na.rm=T),RAIN=mean(selCells$RAIN,na.rm=T))
-      } else {
-        outLine <- selCells; outLine$cells <- NULL
+    
+    if (nrow(intMx)!= 0) {
+      for (cell in uCells) {
+        selCells <- intMx[which(intMx$cells==cell),]
+        if (nrow(selCells)>1) { #if there are many stations in that cell then average the locations
+          outLine <- data.frame(ID=paste("MNCELL",cell,sep=""),
+                                LON=mean(selCells$LON,na.rm=T),LAT=mean(selCells$LAT,na.rm=T),
+                                ALT=mean(selCells$ALT,na.rm=T),RAIN=mean(selCells$RAIN,na.rm=T))
+        } else {
+          outLine <- selCells; outLine$cells <- NULL
+        }
+        
+        if (cell==uCells[1]) { #rbinding
+          outIntMx <- outLine
+        } else {
+          outIntMx <- rbind(outIntMx,outLine)
+        }
       }
-      
-      if (cell==uCells[1]) { #rbinding
-        outIntMx <- outLine
-      } else {
-        outIntMx <- rbind(outIntMx,outLine)
-      }
+    } else {
+      outIntMx <- intMx
+    }
+    
+    #check if there is any record with missing altitude
+    altNA <- which(is.na(outIntMx$ALT))
+    if (length(altNA)>0) {
+      elev <- raster(paste(intDir,"/0_files/alt-glo.asc",sep=""))
+      altVals <- extract(elev,cbind(X=outIntMx$LON[altNA],Y=outIntMx$LAT[altNA]))
+      outIntMx$ALT[altNA] <- altVals
     }
     
     #writing spline training file
     oDatFile <- paste(oDir,"/training.dat",sep="")
     writeDat(outIntMx,filename=oDatFile)
-    
-    #creating run file and running
-    createRunFile(intMx, filename="training.dat", variable='rain',
-                  varUnits='millimetres', ivars=3, icovars=0, sivars=0, sicovars=0, sp.order=2, nsurf=1)
-    fw <- file("rain_fit.bat", open="w") #Running
-    cat(anuDir, "/splina < rainfit.cmd > rainfit.log\n", sep="", file=fw)
-    close(fw)
-    system("rain_fit.bat")
-    
-    if (rg=='afr') { #projecting
-      #East Africa
-      alt <- raster(paste(intDir,"/0_files/alt-prj-eaf.asc",sep=""))
-      gFiles <- c(paste(intDir,"/0_files/lon-prj-eaf.asc",sep=""),
-                  paste(intDir,"/0_files/lat-prj-eaf.asc",sep=""),
-                  paste(intDir,"/0_files/alt-prj-eaf.asc",sep=""))
-      createPrjFile(alt, variable="rain", nsurf=1, gridfiles=gFiles)
-      fw <- file("rain_prj_eaf.bat", open="w")
-      cat(paste(anuDir, "/lapgrd < rainprj.cmd > rainprj.log\n",sep=""), file=fw)
+    if (nrow(outIntMx)>10) {
+      #creating run file and running
+      createRunFile(intMx, filename="training.dat", variable='rain',
+                    varUnits='millimetres', ivars=3, icovars=0, sivars=0, sicovars=0, sp.order=2, nsurf=1)
+      fw <- file("rain_fit.bat", open="w") #Running
+      cat(anuDir, "/splina < rainfit.cmd > rainfit.log\n", sep="", file=fw)
       close(fw)
-      system("rain_prj_eaf.bat")
-      rs <- raster("rain_1.asc")
-      rs <- rs/10; rs <- writeRaster(rs,"rain_eaf.asc",format='ascii',overwrite=T)
-      fr <- file.remove("rain_1.asc")
-      #West Africa
-      alt <- raster(paste(intDir,"/0_files/alt-prj-waf.asc",sep=""))
-      gFiles <- c(paste(intDir,"/0_files/lon-prj-waf.asc",sep=""),
-                  paste(intDir,"/0_files/lat-prj-waf.asc",sep=""),
-                  paste(intDir,"/0_files/alt-prj-waf.asc",sep=""))
-      createPrjFile(alt, variable="rain", nsurf=1, gridfiles=gFiles)
-      fw <- file("rain_prj_waf.bat", open="w")
-      cat(paste(anuDir, "/lapgrd < rainprj.cmd > rainprj.log\n",sep=""), file=fw)
+      system("rain_fit.bat")
+      
+      if (!file.exists("rain.sur")) { #if failed then remove one of the zeros (for some reason this fixes it)
+        zeros <- which(outIntMx$RAIN==0)
+        randSel <- sample(zeros,1)
+        writeDat(outIntMx[-randSel,],filename=oDatFile)
+        system("rain_fit.bat")
+        writeDat(outIntMx,filename=oDatFile) #re-writing the correct stations file
+      }
+      
+      if (rg=='afr') { #projecting
+        #East Africa
+        alt <- raster(paste(intDir,"/0_files/alt-prj-eaf.asc",sep=""))
+        gFiles <- c(paste(intDir,"/0_files/lon-prj-eaf.asc",sep=""),
+                    paste(intDir,"/0_files/lat-prj-eaf.asc",sep=""),
+                    paste(intDir,"/0_files/alt-prj-eaf.asc",sep=""))
+        createPrjFile(alt, variable="rain", nsurf=1, gridfiles=gFiles)
+        fw <- file("rain_prj_eaf.bat", open="w")
+        cat(paste(anuDir, "/lapgrd < rainprj.cmd > rainprj.log\n",sep=""), file=fw)
+        close(fw)
+        system("rain_prj_eaf.bat")
+        rs <- raster("rain_1.asc")
+        rs <- rs/10; rs <- writeRaster(rs,"rain_eaf.asc",format='ascii',overwrite=T)
+        fr <- file.remove("rain_1.asc")
+        #West Africa
+        alt <- raster(paste(intDir,"/0_files/alt-prj-waf.asc",sep=""))
+        gFiles <- c(paste(intDir,"/0_files/lon-prj-waf.asc",sep=""),
+                    paste(intDir,"/0_files/lat-prj-waf.asc",sep=""),
+                    paste(intDir,"/0_files/alt-prj-waf.asc",sep=""))
+        createPrjFile(alt, variable="rain", nsurf=1, gridfiles=gFiles)
+        fw <- file("rain_prj_waf.bat", open="w")
+        cat(paste(anuDir, "/lapgrd < rainprj.cmd > rainprj.log\n",sep=""), file=fw)
+        close(fw)
+        system("rain_prj_waf.bat")
+        rs <- raster("rain_1.asc")
+        rs <- rs/10; rs <- writeRaster(rs,"rain_waf.asc",format='ascii',overwrite=T)
+        fr <- file.remove("rain_1.asc")
+      } else if (rg=='sas') {
+        #igp
+        alt <- raster(paste(intDir,"/0_files/alt-prj-igp.asc",sep=""))
+        gFiles <- c(paste(intDir,"/0_files/lon-prj-igp.asc",sep=""),
+                    paste(intDir,"/0_files/lat-prj-igp.asc",sep=""),
+                    paste(intDir,"/0_files/alt-prj-igp.asc",sep=""))
+        createPrjFile(alt, variable="rain", nsurf=1, gridfiles=gFiles)
+        fw <- file("rain_prj_igp.bat", open="w")
+        cat(paste(anuDir, "/lapgrd < rainprj.cmd > rainprj.log\n",sep=""), file=fw)
+        close(fw)
+        system("rain_prj_igp.bat")
+        rs <- raster("rain_1.asc")
+        rs <- rs/10; rs <- writeRaster(rs,"rain_igp.asc",format='ascii')
+        fr <- file.remove("rain_1.asc")
+      }
+    } else {
+      cat("Too few data points \n")
+      fw <- file("process.fail", open="w") #Running
+      cat("Process was failed because there were too few data points \n", file=fw)
       close(fw)
-      system("rain_prj_waf.bat")
-      rs <- raster("rain_1.asc")
-      rs <- rs/10; rs <- writeRaster(rs,"rain_waf.asc",format='ascii',overwrite=T)
-      fr <- file.remove("rain_1.asc")
-    } else if (rg=='sas') {
-      #igp
-      alt <- raster(paste(intDir,"/0_files/alt-prj-igp.asc",sep=""))
-      gFiles <- c(paste(intDir,"/0_files/lon-prj-igp.asc",sep=""),
-                  paste(intDir,"/0_files/lat-prj-igp.asc",sep=""),
-                  paste(intDir,"/0_files/alt-prj-igp.asc",sep=""))
-      createPrjFile(alt, variable="rain", nsurf=1, gridfiles=gFiles)
-      fw <- file("rain_prj_igp.bat", open="w")
-      cat(paste(anuDir, "/lapgrd < rainprj.cmd > rainprj.log\n",sep=""), file=fw)
-      close(fw)
-      system("rain_prj_igp.bat")
-      rs <- raster("rain_1.asc")
-      rs <- rs/10; rs <- writeRaster(rs,"rain_igp.asc",format='ascii')
-      fr <- file.remove("rain_1.asc")
     }
   }
   return("Done!")
@@ -189,6 +216,9 @@ varUnits="metres", ivars=3, icovars=0, sivars=0, sicovars=0, sp.order=2, nsurf=1
     unit <- umx$ID[which(umx$UNIT == tolower(varUnits))]
   }
   
+  #removing any -999 from the elevation data
+  altData <- inData$ALT[which(inData$ALT!=-999)]
+  
   #Opening file in write mode
   fw <- file(paste(variable, "fit.cmd", sep=""), open="w")
   
@@ -201,7 +231,7 @@ varUnits="metres", ivars=3, icovars=0, sivars=0, sicovars=0, sp.order=2, nsurf=1
   cat(sicovars, "\n",sep="",file=fw) #Surface independent covariates
   cat(min(inData$LON), " ", max(inData$LON), " ", 0, " ", 5, "\n", sep="",file=fw) #Independent variable 1 limits transf. and unit code 
   cat(min(inData$LAT), " ", max(inData$LAT), " ", 0, " ", 5, "\n", sep="",file=fw) #Independent variable 2 limits transf. and unit code
-  cat(min(inData$ALT), " ", max(inData$ALT), " ", 1, " ", 1, "\n", sep="",file=fw) #Independent variable 3 limits transf. and unit code
+  cat(min(altData,na.rm=T), " ", max(altData,na.rm=T), " ", 1, " ", 1, "\n", sep="",file=fw) #Independent variable 3 limits transf. and unit code
   cat("1000\n", sep="",file=fw)
   cat("0\n",sep="",file=fw) #Dependent variable transformation
   cat(sp.order, "\n",sep="",file=fw) #Order of spline
@@ -275,7 +305,7 @@ createPrjFile <- function(msk, variable="prec", nsurf=0, gridfiles=c("longitude.
       cat(variable, "_", srf, ".asc\n", sep="", file=fw) #Output file name
     }
   }
-  cat("(",ncol(msk), "f", 9.3, ")\n", sep="", file=fw) #Output file format
+  cat("(",ncol(msk), "f", 10.3, ")\n", sep="", file=fw) #Output file format
   
   #Last line
   cat("\n",file=fw)

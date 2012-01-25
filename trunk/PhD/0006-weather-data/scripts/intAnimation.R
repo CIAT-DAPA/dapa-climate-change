@@ -7,7 +7,7 @@ library(raster); library(maptools); data(wrld_simpl); library(rgdal)
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
 source(paste(src.dir,"/interpolate-functions.R",sep=""))
 
-bDir <- "E:/PhD-work/crop-modelling/climate-data"
+bDir <- "F:/PhD-work/crop-modelling/climate-data"
 iDir <- paste(bDir,"/daily-interpolations",sep="")
 
 re <- "afr"
