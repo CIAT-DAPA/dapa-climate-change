@@ -6,7 +6,7 @@ stop("Error: do not source this whole thing!")
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
 source(paste(src.dir,"/getUniqueCoord.R",sep="")) #loading the function
 
-rDir <- "F:/PhD-work/crop-modelling"
+rDir <- "D:/CIAT_work/crop-modelling"
 bDir <- paste(rDir,"/EcoCrop",sep="")
 crop <- "barl"
 cDir <- paste(bDir,"/models/EcoCrop-",toupper(crop),sep="")
@@ -287,47 +287,73 @@ for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) {
 # write.csv(cres, paste(cDir,"/analyses/data/entropy-curves-merged.csv",sep=""), row.names=F)
 
 
-#################################################
-### NEED TO ORGANISE HARVESTED AREA DATA FIRST !!
-#################################################
+##########################################################
+### HERE YOU NEED TO ORGANISE HARVESTED AREA DATA FIRST !!
+##########################################################
+#Evaluation stuff...
+setwd(src.dir)
+source("validation.R")
+source("createMask.R")
 
-#Validation stuff... got to validate 1(!),2(!),3(!),4(!),5(!),6(!),7(!),ME(!),MO,MX
-setwd("D:/_tools/dapa-climate-change/trunk/EcoCrop")
-source("./src/validation.R")
-source("./src/createMask.R")
-rsl <- raster("F:/EcoCrop-development/analyses/runs/MAX-sorghum-merged_suitability.asc")
-shp.faostat <- "F:/EcoCrop-development/agricultural-data/FAOSTAT/afasia-adm0-sorghum.shp"
-shp.agromaps1 <- "F:/EcoCrop-development/agricultural-data/agroMAPS/_shapefiles/sorghum-adm1.shp"
-shp.agromaps2 <- "F:/EcoCrop-development/agricultural-data/agroMAPS/_shapefiles/sorghum-adm2.shp"
-shp.countrystat1 <- "F:/EcoCrop-development/agricultural-data/countrySTAT/shapefiles/sorghum-adm1.shp"
-shp.countrystat2 <- "F:/EcoCrop-development/agricultural-data/countrySTAT/shapefiles/sorghum-adm2.shp"
-shp.icrisat <- "F:/EcoCrop-development/agricultural-data/Leeds/IND2-sorg-to.shp"
-oblist <- ls(pattern="shp")
-for (ob in oblist) {
-	cat("Processing", ob, "\n")
-	shp <- readShapePoly(get(ob))
-	if (ob == "shp.faostat") {field <- "ISPRES"} else {field <- "Is_present"}
-	res <- extractFromShape(shp, field, naValue=-9999, rsl)
-	write.csv(res, paste("F:/EcoCrop-development/analyses/validation/gs-MODE/", ob, ".csv", sep=""))
-	#res <- read.csv(paste("F:/EcoCrop-development/analyses/validation/", ob, ".csv", sep=""))
-	mets <- valMetrics(res, pres.field=field)
-	if (ob == oblist[1]) {
-		rr <- cbind(SHP=ob, mets)
-	} else {
-		rr <- rbind(rr, cbind(SHP=ob, mets))
-	}
-	rm(res); rm(shp); rm(mets); gc()
+#loop through different growing seasons
+for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) {
+  evDir <- paste(cDir,"/analyses/evaluation/gs-",gs,sep="")
+  if (!file.exists(evDir)) {dir.create(evDir)}
+  
+  #looping through different parameter sets
+  for (vl in c("tmean","tmin","tmax")) {
+    #process only if rates-%vl%.csv does not exist
+    if (!file.exists(paste(evDir,"/rates-",vl,".csv",sep=""))) {
+      #load raster
+      rsl <- raster(paste(cDir,"/analyses/runs/",gs,"-",crop,"-",vl,"_suitability.asc",sep=""))
+      
+      #reference the reported crop distribution shapefiles
+      shp.faostat <- c(paste(cDir,"/agricultural-data/FAOSTAT/faostat-adm0-joined.shp",sep=""),"HSBPRES")
+      shp.agromaps1 <- c(paste(cDir,"/agricultural-data/agroMAPS/agromaps-adm1-joined.shp",sep=""),"ISPRESENT")
+      shp.agromaps2 <- c(paste(cDir,"/agricultural-data/agroMAPS/agromaps-adm2-joined.shp",sep=""),"ispresent")
+      
+      #list the referred shapefiles
+      oblist <- ls(pattern="shp")
+      
+      #loop through each shapefile
+      for (ob in oblist) {
+      	cat("Processing", ob, "\n")
+        
+        #process only if shp.*-%vl%.csv does not exist else only load
+        if (!file.exists(paste(evDir,"/", ob, "-",vl,".csv", sep=""))) {
+        	shp <- readShapePoly(get(ob)[1]) #load shapefile
+        	field <- get(ob)[2] #get field name
+        	result <- extractFromShape(shp, field, naValue=-9999, rsl) #get 
+        	write.csv(result, paste(evDir,"/", ob, "-",vl,".csv", sep=""),row.names=F)
+          rm(shp); g=gc(); rm(g)
+        } else {
+          result <- read.csv(paste(evDir,"/", ob, "-",vl,".csv", sep=""))
+        }
+      	#calculate model evaluation metrics
+      	mets <- valMetrics(result, pres.field=field)
+        
+        #cat metrics onto matrix
+      	if (ob == oblist[1]) {
+      		rr <- cbind(SHP=ob, mets)
+      	} else {
+      		rr <- rbind(rr, cbind(SHP=ob, mets))
+      	}
+      	rm(result); rm(mets); g=gc(); rm(g)
+      }
+      write.csv(rr, paste(evDir,"/rates-",vl,".csv",sep=""), quote=F, row.names=F)
+      rm(rr); g=gc(); rm(g)
+    }
+  }
 }
-write.csv(rr, "F:/EcoCrop-development/analyses/validation/gs-MODE/rates.csv", quote=F, row.names=F)
 
 
-#Validation for all adm1 and all adm2 (sorghum specific)
-source(paste(src.dir,"/validation.R",sep=""))
-dataf1 <- rbind(read.csv("./data/validation/shp.agromaps1.csv")[,1:12],read.csv("./data/validation/shp.countrystat1.csv")[,1:12])
-mets <- cbind(TYPE="adm1", valMetrics(dataf1, pres.field="Is_present"))
-dataf2 <- rbind(read.csv("./data/validation/shp.agromaps2.csv")[,1:12],read.csv("./data/validation/shp.countrystat2.csv")[,1:12],read.csv("./data/validation/shp.icrisat.csv")[,1:12])
-mets <- rbind(mets, cbind(TYPE="adm2", valMetrics(dataf2, pres.field="Is_present")))
-write.csv(mets, "./data/validation/rates-merged.csv", quote=F, row.names=F)
+# #Validation for all adm1 and all adm2 (sorghum specific)
+# source(paste(src.dir,"/validation.R",sep=""))
+# dataf1 <- rbind(read.csv("./data/validation/shp.agromaps1.csv")[,1:12],read.csv("./data/validation/shp.countrystat1.csv")[,1:12])
+# mets <- cbind(TYPE="adm1", valMetrics(dataf1, pres.field="Is_present"))
+# dataf2 <- rbind(read.csv("./data/validation/shp.agromaps2.csv")[,1:12],read.csv("./data/validation/shp.countrystat2.csv")[,1:12],read.csv("./data/validation/shp.icrisat.csv")[,1:12])
+# mets <- rbind(mets, cbind(TYPE="adm2", valMetrics(dataf2, pres.field="Is_present")))
+# write.csv(mets, "./data/validation/rates-merged.csv", quote=F, row.names=F)
 
 
 #Projection onto future
