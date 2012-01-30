@@ -10,7 +10,7 @@ source(paste(src.dir,"/interpolate-functions.R",sep=""))
 bDir <- "F:/PhD-work/crop-modelling/climate-data"
 iDir <- paste(bDir,"/daily-interpolations",sep="")
 
-re <- "afr"
+re <- "sas"
 
 for (ye in 1960:2010) {
   yd <- paste(iDir,"/",ye,"-",re,sep="")
@@ -29,6 +29,6 @@ for (ye in 1960:2010) {
     if (!file.exists("rain_eaf.gif")) {eaf <- createGIF(yd,"rain_eaf",550,700,dList)}
     if (!file.exists("rain_waf.gif")) {waf <- createGIF(yd,"rain_waf",700,500,dList)}
   } else {
-    if (!file.exists("rain_igp.gif")) {igp <- createGIF("rain_igp")}
+    if (!file.exists("rain_igp.gif")) {igp <- createGIF(yd,"rain_igp",700,600,dList)}
   }
 }
