@@ -16,7 +16,7 @@ anuDir <- "C:/anu/Anuspl43/bin"
 inDir <- "F:/PhD-work/crop-modelling/climate-data"
 gdir <- paste(inDir,"/gsod-daily",sep="")
 hdir <- paste(inDir,"/ghcn-daily",sep="")
-re <- "sas"
+re <- "afr"
 
 #parallelisation
 library(snowfall)

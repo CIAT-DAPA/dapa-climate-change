@@ -32,13 +32,21 @@ createGIF <- function(yDir,rname,wd,ht,dayList) {
   png(file="day_%003d.png", width=wd, height=ht)
     for (d in dayList) {
       cat("Plotting day",d,"\n")
-      #read the raster for eaf
       dDir <- paste(yDir,"/",d,sep="")
-      rs <- raster(paste(dDir,"/",rname,".asc",sep=""))
-      rs[which(rs[]<0)] <- 0
-      #plot the raster
-      plot(rs,zlim=c(0,150),col=colorRampPalette(c("light blue","blue","purple"))(100),
-           main=paste("Day",d),useRaster=F)
+      #read the raster if exists, else plot a dummy 1 raster
+      if (file.exists(paste(dDir,"/",rname,".asc",sep=""))) {
+        rs <- raster(paste(dDir,"/",rname,".asc",sep=""))
+        rs[which(rs[]<0)] <- 0
+        #plot the raster
+        plot(rs,zlim=c(0,150),col=colorRampPalette(c("light blue","blue","purple"))(100),
+             main=paste("Day",d),useRaster=F)
+      } else {
+        rs <- raster(paste(dDir,"/./../0_files/",rname,"_dummy.asc",sep=""))
+        rs[which(!is.na(rs[]))] <- 1
+        plot(rs,zlim=c(0,1),col=colorRampPalette(c("grey 60","grey 90"))(10),
+             main=paste("Day",d,":: No data"),useRaster=F)
+      }
+      
       plot(wrld_simpl,add=T)
       #text(.5, .5, d, cex = 1.2)
     }
