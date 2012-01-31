@@ -28,7 +28,7 @@ extractRainfall <- function(yDir,rname,lon,lat,dayList) {
 
 #function to create a gif file with all days of a year
 #Function to reate a list
-createGIF <- function(yDir,rname,wd,ht,dayList) {
+createGIF <- function(yDir,rname,wd,ht,dayList,dummy) {
   png(file="day_%003d.png", width=wd, height=ht)
     for (d in dayList) {
       cat("Plotting day",d,"\n")
@@ -41,7 +41,7 @@ createGIF <- function(yDir,rname,wd,ht,dayList) {
         plot(rs,zlim=c(0,150),col=colorRampPalette(c("light blue","blue","purple"))(100),
              main=paste("Day",d),useRaster=F)
       } else {
-        rs <- raster(paste(dDir,"/./../0_files/",rname,"_dummy.asc",sep=""))
+        rs <- raster(dummy)
         rs[which(!is.na(rs[]))] <- 1
         plot(rs,zlim=c(0,1),col=colorRampPalette(c("grey 60","grey 90"))(10),
              main=paste("Day",d,":: No data"),useRaster=F)

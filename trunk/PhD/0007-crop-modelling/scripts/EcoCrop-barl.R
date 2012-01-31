@@ -6,7 +6,7 @@ stop("Error: do not source this whole thing!")
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
 source(paste(src.dir,"/getUniqueCoord.R",sep="")) #loading the function
 
-rDir <- "D:/CIAT_work/crop-modelling"
+rDir <- "F:/PhD-work/crop-modelling"
 bDir <- paste(rDir,"/EcoCrop",sep="")
 crop <- "barl"
 cDir <- paste(bDir,"/models/EcoCrop-",toupper(crop),sep="")
@@ -358,42 +358,31 @@ for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) {
 
 #Projection onto future
 source(paste(src.dir,"/futureRuns.tmp.R",sep=""))
+source(paste(src.dir,"/EcoCrop.R",sep=""))
+source(paste(src.dir,"/suitMerge.R",sep=""))
+
 gls <- c("bccr_bcm2_0","cccma_cgcm3_1_t47","cccma_cgcm3_1_t63","cnrm_cm3","csiro_mk3_0",
 "csiro_mk3_5","gfdl_cm2_0","gfdl_cm2_1","giss_aom","giss_model_eh","giss_model_er","iap_fgoals1_0_g",
 "ingv_echam4","inm_cm3_0","ipsl_cm4","miroc3_2_hires","miroc3_2_medres","miub_echo_g",
 "mpi_echam5","mri_cgcm2_3_2a","ncar_ccsm3_0","ncar_pcm1","ukmo_hadcm3","ukmo_hadgem1")
-bDir="F:/EcoCrop-development"
+
 for (gcm in gls) {
 	cat(gcm, "\n")
-	fDir <- paste(bDir, "/climate/afasia_2_5min_future", sep="")
-	rDir <- paste(bDir, "/analyses/runs-future/", gcm, sep="")
-	pDir <- paste(bDir, "/analyses/runs", sep="")
-	#Uncompressing the ascii files
-	zDir <- paste(fDir, "/", gcm, "/2020_2049/_asciis", sep="")
-	aDir <- paste(fDir, "/", gcm, "/2020_2049", sep="")
-	vList <- c("prec", "tmin", "tmax", "tmean")
-	for (v in vList) {
-		f <- paste(zDir, "/", v, "_asc.zip", sep="")
-		fd <- paste(aDir, "/", v, "_asc.zip", sep="")
-		cat("Copy..."); file.copy(f, fd)
-		cat("Unzip..."); unzip(fd, files=NULL, exdir=aDir)
-		cat("Remove dup... \n"); file.remove(fd)
-	}
+	fDir <- paste(rDir, "/climate-data/worldclim/afasia_10min_future", sep="") #future climate data dir
+	frDir <- paste(cDir, "/analyses/runs-future/", gcm, sep="") #future runs dir
+  if (!file.exists(frDir)) {dir.create(frDir)} #create future runs dir
+	prDir <- paste(cDir, "/analyses/runs", sep="") #present-day runs dir
+	aDir <- paste(fDir, "/", gcm, sep="") #gcm specific directory
+  if (!file.exists(aDir)) {dir.create(aDir)} #create gcm specific folder
+  
 	#Run the function
-	fut <- futruns(climdir=aDir, oDir=rDir, cDir=pDir, gs=3, gsl=180, 
-		parlist="F:/EcoCrop-development/analyses/data/calibration-parameters.csv", cropname="sorghum", 
-		ow.runs=F, ow.merge=T)
-	#Delete ascii files
-	vList <- c("prec", "tmin", "tmax", "tmean")
-	for (v in vList) {
-		fList <- list.files(aDir, pattern=v)
-		for (f in fList) {
-			if (file.exists(paste(aDir, "/", f, sep=""))) {file.remove(paste(aDir, "/", f, sep=""))}
-		}
-	}
+	fut <- futruns(climdir=aDir, oDir=frDir, cDir=prDir, gs=1, gsl=120, 
+                 parlist=paste(cDir,"/analyses/data/calibration-parameters.csv",sep=""), 
+                 cropname=crop, run.type="tmean", ow.runs=F, ow.merge=NA)
 }
 
 
+##############################################################
 #Calculate impact metrics per countries and for the study area
 source(paste(src.dir,"/impacts.R",sep=""))
 bd <- "F:/EcoCrop-development/analyses"
