@@ -28,7 +28,13 @@ region <- "eaf"
 alt_rs <- raster(paste(bd,"/daily-interpolations/0_files/alt-prj-",region,".asc",sep=""))
 xy <- xyFromCell(alt_rs,which(!is.na(alt_rs[])))
 
-rmx <- extractIntCRU(lon=xy[1,1],lat=xy[1,2],bd,ye,region,ndm)
+for (ye in 1960:2009) {
+  for (i in 1:nrow(xy)) {
+    rmx <- extractIntCRU(lon=xy[i,1],lat=xy[i,2],bd,ye,region,ndm)
+    
+  }
+}
+
 
 plot(1:12,rmx$CRU_RAIN,type='l',col="black",ylim=c(min(rmx$CRU_RAIN,rmx$INT_RAIN),max(rmx$CRU_RAIN,rmx$INT_RAIN)))
 lines(1:12,rmx$INT_RAIN,type='l',col="red",ylim=c(min(rmx$CRU_RAIN,rmx$INT_RAIN),max(rmx$CRU_RAIN,rmx$INT_RAIN)))
