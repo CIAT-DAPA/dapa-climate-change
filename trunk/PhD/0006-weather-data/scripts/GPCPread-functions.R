@@ -43,6 +43,7 @@ createASCII <- function(filename,aiDir,ncDir) {
 #function to convert the grads file to NetCDF
 gradsToNC <- function(filename,grDir,ncDir,softPath) {
   #copy gunzip the file
+  setwd(softPath)
   x <- file.copy(paste(grDir,"/",filename,sep=""),filename)
   system(paste("7za x",filename),show.output.on.console=F)
   fname <- substr(filename,1,(nchar(filename)-3))
