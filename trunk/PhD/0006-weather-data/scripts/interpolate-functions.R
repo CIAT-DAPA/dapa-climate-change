@@ -5,6 +5,78 @@
 #load libraries
 library(raster)
 
+###############################################
+#Extract the data from CRU and daily interpolated surfaces
+extractIntCRU <- function(lon,lat,bDir,year,re,ndaysMth) {
+  #folders and other stuff
+  intDir <- paste(bDir,"/daily-interpolations",sep="")
+  cruDir <- paste(bDir,"/CRU_TS_v3-1_data/monthly_grids",sep="")
+  
+  #region details
+  if (re=="eaf" | re=="waf") {rg <- "afr"} else {rg <- "sas"}
+  rsDir <- paste(intDir,"/",year,"-",rg,sep="")
+  
+  #julian dates data.frame
+  nd <- leap(year)
+  theRow <- which(row.names(ndaysMth)==year)
+  jDates <- data.frame(MONTH=rep(names(ndaysMth),times=as.numeric(ndaysMth[theRow,])),JDAY=1:nd,
+                     DOM=rep(as.numeric(ndaysMth[theRow,]),times=as.numeric(ndaysMth[theRow,])))
+  
+  #load dummy raster
+  dumm <- raster(paste(intDir,"/0_files/rain_",re,"_dummy.asc",sep="")); dumm[] <- NA
+  
+  #First verify if each raster exists, else create an all-NA raster there
+  cat("Verifying existence of raster data \n")
+  mcount <- 0
+  for (i in 1:nd) {
+    rsTest <- paste(rsDir,"/",i,"/rain_",re,".asc",sep="")
+    if (!file.exists(rsTest)) { #if file does not exist then create it
+      writeRaster(dumm,rsTest,format='ascii',overwrite=F)
+      mcount <- mcount+1
+    }
+  }
+  if (mcount > 0) { #text to state the creation
+    cat(mcount, "files were missing and created as all-NA rasters \n")
+  } else {
+    cat("No files were missing \n")
+  }
+  
+  #loop through months
+  for (mth in month.abb) {
+    #load the cru rasters
+    mnth <- which(names(ndaysMth)==mth)
+    cruRaster <- raster(paste(cruDir,"/pre/pre_",year,"_",mnth,sep=""))
+    
+    #load interpolated stack for this month
+    theCol <- which(names(ndaysMth)==mth)
+    ndays <- ndaysMth[theRow,theCol]
+    iday <- min(jDates$JDAY[which(jDates$MONTH==mth)])
+    eday <- max(jDates$JDAY[which(jDates$MONTH==mth)])
+    
+    #Now loading the daily data
+    cat("Loading days",iday,"to",eday,"(",mth,")\n")
+    intStk <- stack(paste(rsDir,"/",iday:eday,"/rain_",re,".asc",sep=""))
+    
+    #extract data for given lon,lats and neighbors (corners)
+    xyMat <- expand.grid(X=c(lon-0.25,lon,lon+0.25),
+                         Y=c(lat-0.25,lat,lat+0.25))
+    cruCell <- unique(cellFromXY(cruRaster,xyMat))
+    intVals <- extract(intStk,cbind(X=lon,Y=lat))
+    intVals[which(intVals<0)] <- 0
+    cruVals <- extract(cruRaster,cruCell)
+    
+    resrow <- data.frame(LON=lon,LAT=lat,CRU_RAIN=mean(cruVals,na.rm=T),INT_RAIN=sum(intVals,na.rm=T))
+    
+    if (mth == month.abb[1]) {
+      resMx <- resrow
+    } else {
+      resMx <- rbind(resMx,resrow)
+    }
+  }
+  return(resMx)
+}
+
+
 ########################################################
 #function to extract rainfall values from interpolated grids based on xy coordinates (lon,lat)
 extractRainfall <- function(yDir,rname,lon,lat,dayList) {

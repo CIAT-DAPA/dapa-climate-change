@@ -384,21 +384,41 @@ for (gcm in gls) {
 
 ##############################################################
 #Calculate impact metrics per countries and for the study area
+library(maptools)
 source(paste(src.dir,"/impacts.R",sep=""))
-bd <- "F:/EcoCrop-development/analyses"
-cd <- paste(bd, "/runs", sep="")
-fd <- paste(bd, "/runs-future/", sep="")
-shname <- "starea-countries.shp" #starea-countries selcountries
-sh <- readShapePoly(paste("F:/EcoCrop-development/analysis-mask/", shname, sep=""))
+source(paste(src.dir,"/createMask.R",sep=""))
+
+#folders
+cd <- paste(cDir, "/analyses/runs", sep="")
+fd <- paste(cDir, "/analyses/runs-future/", sep="")
+imd <- paste(cDir,"/analyses/impacts",sep=""); if (!file.exists(imd)) {dir.create(imd)}
+
+#define and read the shapefile
+shname <- "selcountries.shp" #starea-countries selcountries
+sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
+
+#define other stuff
+gs <- 1
+run.type <- "tmean"
+
+#loop the GCMs
 gls <- list.files(fd)
 for (gcm in gls) {
 	cat("Model", gcm, "\n")
-	od <- paste(bd, "/impacts/", gcm, sep="")
+  
+  #GCM specific folders (i/o)
+	od <- paste(cDir, "/analyses/impacts/", gcm, sep="")
 	if (!file.exists(od)) {dir.create(od)}
-	id <- paste(fd, gcm, sep="")
-	r1 <- raster(paste(cd, "/3-sorghum-merged_suitability.asc", sep="")) #current
-	r2 <- raster(paste(id, "/3-sorghum-merged_suitability.asc", sep="")) #future
-	pp <- iMetrix(r1,r2,sh,od, chggrid=F, impact=T, classes=T)
+	id <- paste(fd, "/", gcm, sep="")
+	r1 <- raster(paste(cd, "/",gs,"-",crop,"-",run.type,"_suitability.asc", sep="")) #current
+	r2 <- raster(paste(id, "/",gs,"-",crop,"-",run.type,"_suitability.asc", sep="")) #future
+  
+  #Calculate the metrics
+  if (shname == "selcountries.shp") {
+	  pp <- iMetrix(r1,r2,sh,od, chggrid=T, impact=T, classes=T)
+  } else {
+    pp <- iMetrix(r1,r2,sh,od, chggrid=F, impact=T, classes=T)
+  }
 	
 	im <- cbind(GCM=rep(gcm,times=nrow(pp$IMPACT)), pp$IMPACT)
 	cl <- cbind(GCM=rep(gcm,times=nrow(pp$CLASSES)), pp$CLASSES)
@@ -412,20 +432,29 @@ for (gcm in gls) {
 	}
 	rm(im); rm(cl)
 }
-write.csv(res.im, paste(bd, "/impacts/impacts-", shname, ".csv", sep=""), quote=T, row.names=F)
-write.csv(res.cl, paste(bd, "/impacts/classes-", shname, ".csv", sep=""), quote=T, row.names=F)
+write.csv(res.im, paste(imd, "/impacts-", shname, ".csv", sep=""), quote=T, row.names=F)
+write.csv(res.cl, paste(imd, "/classes-", shname, ".csv", sep=""), quote=T, row.names=F)
 
 
+###################################################
 #Average and uncertainties
 #Creating the stack
-source("./src/uncertainty.R")
-gcmDir <- "F:/EcoCrop-development/analyses/impacts"
+source(paste(src.dir,"/uncertainty-v2.R",sep=""))
+
+#Analysis folders
+gcmDir <- paste(cDir,"/analyses/impacts",sep="")
 gcmList <- list.files(gcmDir); gcmList <- gcmList[-grep(".shp", gcmList)]
+unDir <- paste(cDir,"/analyses/uncertainties",sep="")
+if (!file.exists(unDir)) {dir.create(unDir)}
+
+#Precalculated suitability change raster (must have been calculated in previous step)
 rsn <- "1-Study area-suitability-change"
+
+#loop through GCMs
 for (gcm in gcmList) {
 	cat(gcm, "\n")
-	rDir <- paste(gcmDir, "/", gcm, sep="")
-	rs <- raster(paste(rDir, "/", rsn, ".asc", sep=""))
+	rsDir <- paste(gcmDir, "/", gcm, sep="")
+	rs <- raster(paste(rsDir, "/", rsn, ".asc", sep=""))
 	#v <- extract(rs, xy)
 	assign(gcm, rs); rm(rs)
 
@@ -436,24 +465,37 @@ for (gcm in gcmList) {
 	}
 }
 gcmstack <- stack(gcmstack)
-uc <- uncertainties(gcmstack, outFolder="F:/EcoCrop-development/analyses/uncertainties")
+uc <- uncertainties(gcmstack, outFolder=unDir)
 
+
+########################################################
 #Calculate currently suitable and future suitable area
-setwd("D:/_tools/dapa-climate-change/trunk/EcoCrop")
 source(paste(src.dir,"/impacts.R",sep=""))
-bd <- "F:/EcoCrop-development/analyses"
-#cd <- paste(bd, "/runs", sep="")
-fd <- paste(bd, "/runs-future/", sep="")
-shname <- "starea-countries.shp" #starea-countries selcountries
-sh <- readShapePoly(paste("F:/EcoCrop-development/analysis-mask/", shname, sep=""))
-#r1 <- raster(paste(cd, "/3-sorghum-merged_suitability.asc", sep="")) #current
-#cp <- suitArea(r1, sh)
-#write.csv(cp, paste(bd, "/impacts/current-area-", shname,".csv", sep=""), row.names=F, quote=T)
+
+#directories
+bd <- paste(cDir,"/analyses",sep="")
+cd <- paste(bd, "/runs", sep="")
+fd <- paste(bd, "/runs-future", sep="")
+
+#shape to work with
+shname <- "selcountries.shp" #starea-countries selcountries
+sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
+
+#define other stuff
+gs <- 1
+run.type <- "tmean"
+
+#load and run stuff for current (comment if already done)
+r1 <- raster(paste(cd, "/",gs,"-",crop,"-",run.type,"_suitability.asc", sep="")) #current
+cp <- suitArea(r1, sh)
+write.csv(cp, paste(bd, "/impacts/current-area-", shname,".csv", sep=""), row.names=F, quote=T)
+
+#load and run stuff for each of the future predictions
 gls <- list.files(fd)
 for (gcm in gls) {
 	cat("Model", gcm, "\n")
-	id <- paste(fd, gcm, sep="")
-	r2 <- raster(paste(id, "/3-sorghum-merged_suitability.asc", sep="")) #future
+	id <- paste(fd, "/", gcm, sep="")
+	r2 <- raster(paste(id, "/",gs,"-",crop,"-",run.type,"_suitability.asc", sep="")) #future
 	pp <- suitArea(r2,sh)
 	im <- cbind(GCM=rep(gcm,times=nrow(pp)), pp)
 	
@@ -465,3 +507,4 @@ for (gcm in gls) {
 	rm(im)
 }
 write.csv(res.im, paste(bd, "/impacts/future-area-", shname, ".csv", sep=""), quote=T, row.names=F)
+
