@@ -21,8 +21,18 @@ xy <- as.data.frame(xyFromCell(msk,1:ncell(msk)))
 xy$CELL <- 1:ncell(msk)
 if (!file.exists(paste(powerDir,"/0_files",sep=""))) {dir.create(paste(powerDir,"/0_files",sep=""))}
 
+#Regional output folder
 od <- paste(powerDir,"/data-",reg,sep="")
 if (!file.exists(od)) {dir.create(od)}
+
+#parallelisation
+library(snowfall)
+sfInit(parallel=T,cpus=8) #initiate cluster
+
+#export functions and data
+sfExport("getPOWER")
+sfExport("xy")
+sfExport("od")
 
 controlDownload <- function(i) {
   require(XML); require(raster)
@@ -37,14 +47,8 @@ controlDownload <- function(i) {
   }
 }
 
+system.time(sfSapply(as.vector(1960:2009), controlCompare))
 
-#parallelisation
-library(snowfall)
-sfInit(parallel=T,cpus=8) #initiate cluster
-
-#export functions and data
-sfExport("getPOWER")
-sfExport("xy")
 
 ###################################################
 #Function to get the NASA POWER data
