@@ -29,6 +29,19 @@ if (!file.exists(od)) {dir.create(od)}
 library(snowfall)
 sfInit(parallel=T,cpus=8) #initiate cluster
 
+#loading mask to get XYs
+msk <- raster(paste(powerDir,"/0_files/rain_",reg,"_dummy.asc",sep=""))
+xy <- as.data.frame(xyFromCell(msk,1:ncell(msk)))
+xy$CELL <- 1:ncell(msk)
+
+#Regional output folder
+od <- paste(powerDir,"/data-",reg,sep="")
+if (!file.exists(od)) {dir.create(od)}
+
+#parallelisation
+library(snowfall)
+sfInit(parallel=T,cpus=8) #initiate cluster
+
 #export functions and data
 sfExport("getPOWER")
 sfExport("xy")
@@ -47,22 +60,24 @@ controlDownload <- function(i) {
   }
 }
 
-system.time(sfSapply(as.vector(1960:2009), controlCompare))
+system.time(sfSapply(as.vector(1:ncell(xy)), controlDownload))
 
 
 ###################################################
 #Function to get the NASA POWER data
 getPOWER <- function(lat,lon,outDir) {
   setwd(outDir)
-  baseURL <- "http://power.larc.nasa.gov/cgi-bin/cgiwrap/solar/agro.cgi?email=agroclim%40larc.nasa.gov&step=1&lat="
-  theurl <- paste(baseURL,lat,"&lon=",lon,"&ms=1&ds=1&ys=1997&me=9&de=1&ye=2009&submit=Yes&p=RAIN",sep="")
-  doc <- htmlTreeParse(theurl,useInternalNodes=T)
-  x <- xpathApply(doc, "//body", xmlValue)
-  x <- x[[1]]; x <- substring(x,1)
-  fx <- file("temp.wth","w")
-  writeLines(x,fx)
-  close(fx)
-  y <- read.fortran("test.wth",skip=26,format=c("I6","I5","8F7"))
+  if (!file.exists("temp.wth")) {
+    baseURL <- "http://power.larc.nasa.gov/cgi-bin/cgiwrap/solar/agro.cgi?email=agroclim%40larc.nasa.gov&step=1&lat="
+    theurl <- paste(baseURL,lat,"&lon=",lon,"&ms=1&ds=1&ys=1997&me=9&de=1&ye=2009&submit=Yes&p=RAIN",sep="")
+    doc <- htmlTreeParse(theurl,useInternalNodes=T)
+    x <- xpathApply(doc, "//body", xmlValue)
+    x <- x[[1]]; x <- substring(x,1)
+    fx <- file("temp.wth","w")
+    writeLines(x,fx)
+    close(fx)
+  }
+  y <- read.fortran("temp.wth",skip=26,format=c("I6","I5","8F7"))
   names(y) <- c("WEYR","WEDAY","SRAD","TMAX","TMIN","RAIN","WIND","DEW","T2M","RH2M")
   write.csv(y[1:(nrow(y)-1),],"data.csv",quote=F,row.names=F)
 }
