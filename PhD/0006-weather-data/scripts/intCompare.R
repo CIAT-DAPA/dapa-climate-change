@@ -11,104 +11,101 @@ source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 #folders and locations
 bd <- "F:/PhD-work/crop-modelling/climate-data"
 
-#details
-ye <- 1960
-
 #Determine if leap year or not (calculate number of days)
-nd <- leap(ye)
 ndm <- ts(diff(seq(as.Date("1960-01-01"), as.Date("2010-01-01"), by = "month")), 
                start = c(1960, 01), freq = 12) #get days in each month of time series
 ndm <- data.frame(matrix(ndm,ncol=12,byrow=T))
 row.names(ndm) <- c(1960:2009)
 names(ndm) <- month.abb
 
-#load altitude raster to get the xy coordinates of the points to validate
+#set up region and output folder
 region <- "eaf"
+if (region=="eaf" | region=="waf") {rgn <- "afr"} else {rgn <- "sas"}
 
+#load altitude raster to get the xy coordinates of the points to validate
 alt_rs <- raster(paste(bd,"/daily-interpolations/0_files/alt-prj-",region,".asc",sep=""))
 xy <- xyFromCell(alt_rs,which(!is.na(alt_rs[])))
 
-for (ye in 1960:2009) {
-  for (i in 1:nrow(xy)) {
-    rmx <- extractIntCRU(lon=xy[i,1],lat=xy[i,2],bd,ye,region,ndm)
-    
-  }
-}
+#parallelisation
+library(snowfall)
+sfInit(parallel=T,cpus=3) #initiate cluster
 
+#export functions
+sfExport("leap")
+sfExport("extractIntCRU")
 
-plot(1:12,rmx$CRU_RAIN,type='l',col="black",ylim=c(min(rmx$CRU_RAIN,rmx$INT_RAIN),max(rmx$CRU_RAIN,rmx$INT_RAIN)))
-lines(1:12,rmx$INT_RAIN,type='l',col="red",ylim=c(min(rmx$CRU_RAIN,rmx$INT_RAIN),max(rmx$CRU_RAIN,rmx$INT_RAIN)))
+#export variables
+sfExport("bd")
+sfExport("region")
+sfExport("rgn")
+sfExport("alt_rs")
+sfExport("xy")
+sfExport("ndm")
 
-
-###############################################
-#Extract the data
-extractIntCRU <- function(lon,lat,bDir,year,re,ndaysMth) {
-  #folders and other stuff
-  intDir <- paste(bDir,"/daily-interpolations",sep="")
-  cruDir <- paste(bDir,"/CRU_TS_v3-1_data/monthly_grids",sep="")
+#Control function for the comparison
+controlCompare <- function(ye) {
+  library(raster)
   
-  #region details
-  if (re=="eaf" | re=="waf") {rg <- "afr"} else {rg <- "sas"}
-  rsDir <- paste(intDir,"/",year,"-",rg,sep="")
+  #output folder
+  oDir <- paste(bd,"/daily-interpolations/",ye,"-",rgn,"-eval",sep="")
+  if (!file.exists(oDir)) {dir.create(oDir)}
+  oRawDir <- paste(oDir,"/raw_eval_data",sep="")
+  if (!file.exists(oRawDir)) {dir.create(oRawDir)}
   
-  #julian dates data.frame
-  theRow <- which(row.names(ndaysMth)==year)
-  jDates <- data.frame(MONTH=rep(names(ndaysMth),times=as.numeric(ndaysMth[theRow,])),JDAY=1:nd,
-                     DOM=rep(as.numeric(ndaysMth[theRow,]),times=as.numeric(ndaysMth[theRow,])))
+  #naming output files
+  ormx <- paste(oDir,"/raw_eval_data-",region,".csv",sep="")
+  omet <- paste(oDir,"/metrics-",region,".csv",sep="")
+  ofig <- paste(oDir,"/cru_vs_int-",region,".tif",sep="")
   
-  #load dummy raster
-  dumm <- raster(paste(intDir,"/0_files/rain_",re,"_dummy.asc",sep="")); dumm[] <- NA
-  
-  #First verify if each raster exists, else create an all-NA raster there
-  cat("Verifying existence of raster data \n")
-  mcount <- 0
-  for (i in 1:366) {
-    rsTest <- paste(rsDir,"/",i,"/rain_",re,".asc",sep="")
-    if (!file.exists(rsTest)) { #if file does not exist then create it
-      writeRaster(dumm,rsTest,format='ascii',overwrite=F)
-      mcount <- mcount+1
+  #if metrics file does not exist then repeat year
+  if (!file.exists(ofig)) {
+    for (i in 1:nrow(xy)) {
+      cat("\nProcessing cell",i,"of",nrow(xy),"\n")
+      
+      #Process or load the cell data
+      ormxPre <- paste(oRawDir,"/",region,"-raw_eval_data-cell-",i,".csv",sep="")
+      if (!file.exists(ormxPre)) {
+        rmx <- extractIntCRU(lon=xy[i,1],lat=xy[i,2],bd,ye,region,ndm)
+        rmx$CRU_RAIN <- rmx$CRU_RAIN*0.1
+        rmx <- cbind(CELL=i,rmx)
+        write.csv(rmx, ormxPre,quote=F,row.names=F)
+      } else {
+        rmx <- read.csv(ormxPre)
+      }
+      
+      #calculate some type of metric here (correlation, total bias, rmse) and cat everything
+      rmse <- (rmx$CRU_RAIN-rmx$INT_RAIN)^2
+      rmse <- sqrt(sum(rmse)/12)
+      corr <- cor(rmx$INT_RAIN,rmx$CRU_RAIN)
+      bias <- sum(rmx$CRU_RAIN-rmx$INT_RAIN)
+      resrow <- data.frame(CELL=i,LON=xy[i,1],LAT=xy[i,2],RMSE=rmse,CORR=corr,BIAS=bias)
+      
+      #concatenating all processed cells
+      if (i == 1) {
+        resall <- resrow
+        rmxall <- rmx
+      } else {
+        resall <- rbind(resall,resrow)
+        rmxall <- rbind(rmxall,rmx)
+      }
     }
-  }
-  if (mcount > 0) { #text to state the creation
-    cat(mcount, "files were missing and created as all-NA rasters \n")
+    #writing the data
+    write.csv(rmxall,ormx,quote=F,row.names=F)
+    write.csv(resall,omet,quote=F,row.names=F)
+    
+    #plotting the x-y graph
+    lims <- c(0,max(rmxall$CRU_RAIN,rmxall$INT_RAIN,na.rm=T))
+    tiff(ofig,compression="lzw",res=150,height=1000,1000)
+    plot(rmxall$CRU_RAIN,rmxall$INT_RAIN,xlim=lims,ylim=lims,pch=20,cex=0.8,
+         xlab="CRU Rainfall (mm)",ylab="Interpolated Rainfall (mm)")
+    abline(0,1)
+    grid()
+    dev.off()
   } else {
-    cat("No files were missing \n")
+    cat("Year",ye,"already evaluated \n")
   }
-  
-  #loop through months
-  for (mth in month.abb) {
-    #load the cru rasters
-    mnth <- which(names(ndaysMth)==mth)
-    cruRaster <- raster(paste(cruDir,"/pre/pre_",year,"_",mnth,sep=""))
-    
-    #load interpolated stack for this month
-    theCol <- which(names(ndaysMth)==mth)
-    ndays <- ndaysMth[theRow,theCol]
-    iday <- min(jDates$JDAY[which(jDates$MONTH==mth)])
-    eday <- max(jDates$JDAY[which(jDates$MONTH==mth)])
-    
-    #Now loading the daily data
-    cat("Loading days",iday,"to",eday,"(",mth,")\n")
-    intStk <- stack(paste(rsDir,"/",iday:eday,"/rain_",re,".asc",sep=""))
-    
-    #extract data for given lon,lats and neighbors (corners)
-    xyMat <- expand.grid(X=c(lon-0.25,lon,lon+0.25),
-                         Y=c(lat-0.25,lat,lat+0.25))
-    cruCell <- unique(cellFromXY(cruRaster,xyMat))
-    intVals <- extract(intStk,cbind(X=lon,Y=lat))
-    intVals[which(intVals<0)] <- 0
-    cruVals <- extract(cruRaster,cruCell)
-    
-    resrow <- data.frame(LON=lon,LAT=lat,CRU_RAIN=mean(cruVals,na.rm=T),INT_RAIN=sum(intVals,na.rm=T))
-    
-    if (mth == month.abb[1]) {
-      resMx <- resrow
-    } else {
-      resMx <- rbind(resMx,resrow)
-    }
-  }
-  return(resMx)
 }
 
-
+#run the control function
+system.time(sfSapply(as.vector(1960:2009), controlCompare))
 

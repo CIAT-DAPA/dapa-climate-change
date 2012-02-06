@@ -7,7 +7,7 @@
 require(rgdal)
 require(raster)
 require(maptools)
-source("./src/createMask.R")
+#source("./src/createMask.R")
 
 suitchg <- function(x, y, oDir, preffix=NA, writeRaster=T) { #x current, y future
 	rs <- y - x

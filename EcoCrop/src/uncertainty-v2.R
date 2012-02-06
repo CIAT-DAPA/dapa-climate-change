@@ -60,7 +60,6 @@ uncertain <- function(x) {
 
 #Block calculation
 #Final grid naming and creation
-
 uncertainties <- function(instack, outFolder="F:/EcoCrop-development/testing") {
 	if (!file.exists(outFolder)) {dir.create(outFolder)}
 	
