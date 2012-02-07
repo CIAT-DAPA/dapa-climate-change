@@ -1,14 +1,15 @@
-# Download geographic data and return as R object
-# Author: Robert J. Hijmans, r.hijmans@gmail.com
-# License GPL3
-# Version 0.1
-# October 2008
+#Julian Ramirez-Villegas
+#January 2012
+#CIAT / CCAFS / UoL
 
 #http://power.larc.nasa.gov/cgi-bin/cgiwrap/solar/agro.cgi?email=agroclim%40larc.nasa.gov&step=1
 #&lat=3&lon=75&ms=1&ds=1&ys=1997&me=9&de=1&ye=2009&submit=Yes&p=RAIN
 
 require(XML)
 require(raster)
+
+src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
+source(paste(src.dir,"/getPOWER-functions.R",sep=""))
 
 #Basic data
 bDir <- "F:/PhD-work/crop-modelling/climate-data"
@@ -54,31 +55,15 @@ controlDownload <- function(i) {
   cd <- paste(od,"/cell-",i,sep="")
   if (!file.exists(cd)) {dir.create(cd)}
   if (!file.exists(paste(cd,"/data.csv",sep=""))) {
-    getPOWER(lat=xy$x[i],lon=xy$y[i],cd)
+    getPOWER(lat=xy$y[i],lon=xy$x[i],cd)
   } else {
     cat("Cell data already downloaded \n")
   }
 }
 
+#run the control function
 system.time(sfSapply(as.vector(1:ncell(xy)), controlDownload))
 
-
-###################################################
-#Function to get the NASA POWER data
-getPOWER <- function(lat,lon,outDir) {
-  setwd(outDir)
-  if (!file.exists("temp.wth")) {
-    baseURL <- "http://power.larc.nasa.gov/cgi-bin/cgiwrap/solar/agro.cgi?email=agroclim%40larc.nasa.gov&step=1&lat="
-    theurl <- paste(baseURL,lat,"&lon=",lon,"&ms=1&ds=1&ys=1997&me=9&de=1&ye=2009&submit=Yes&p=RAIN",sep="")
-    doc <- htmlTreeParse(theurl,useInternalNodes=T)
-    x <- xpathApply(doc, "//body", xmlValue)
-    x <- x[[1]]; x <- substring(x,1)
-    fx <- file("temp.wth","w")
-    writeLines(x,fx)
-    close(fx)
-  }
-  y <- read.fortran("temp.wth",skip=26,format=c("I6","I5","8F7"))
-  names(y) <- c("WEYR","WEDAY","SRAD","TMAX","TMIN","RAIN","WIND","DEW","T2M","RH2M")
-  write.csv(y[1:(nrow(y)-1),],"data.csv",quote=F,row.names=F)
-}
+#stop the cluster
+sfStop()
 
