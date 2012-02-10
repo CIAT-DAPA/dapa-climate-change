@@ -107,7 +107,7 @@ controlCompare <- function(ye) {
 }
 
 #run the control function
-system.time(sfSapply(as.vector(1960:2009), controlCompare))
+system.time(sfSapply(as.vector(1969:2009), controlCompare))
 
 #stop the cluster
 sfStop()
