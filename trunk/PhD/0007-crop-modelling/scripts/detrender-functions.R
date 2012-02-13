@@ -6,8 +6,8 @@
 
 ##############################################################################
 #Function to create a raster layer out from the district-level yield data for a given year
-createYearRaster <- function(xData,dis_rs,ye,prefix,IDField)
-  yField <- paste(prefix,ye,sep=""){
+createYearRaster <- function(xData,dis_rs,ye,prefix,IDField) {
+  yField <- paste(prefix,ye,sep="")
   out_rs <- raster(rs)
   in_dat <- data.frame(xData[,IDField],xData[,yField])
   

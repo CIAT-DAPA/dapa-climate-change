@@ -5,12 +5,15 @@ stop("Do not run whole thing")
 
 #libraries
 library(maptools); library(rgdal); library(raster)
+data(wrld_simpl)
 
 #sourcing important functions
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
+#src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop/src"
 source(paste(src.dir,"/createMask.R",sep=""))
 
 src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir2 <- "/home/jramirez/dapa-climate-change/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
@@ -60,7 +63,7 @@ fou <- read.csv(paste(cd,"/data/detrended-IND2-gnut-fourier.csv",sep=""))
 if (!file.exists(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))) {
   sData <- calcSummary(yieldData,"DISID",yfds,hfds,pfds,1900+(iyr:fyr),cd)
 } else {
-  sData <- read.csv(paste(cDir,"/data/detrended-IND2-gnut-summary.csv",sep=""))
+  sData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))
 }
 
 ##################################################################################
@@ -77,11 +80,11 @@ if (!file.exists(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))) {
 resol <- 1/60
 
 #clean mask raster
-if (!file.exists(paste(cDir,"/raster/india-1min-msk.asc",sep=""))) {
+if (!file.exists(paste(cd,"/raster/india-1min-msk.asc",sep=""))) {
   rs <- createMask(shp,resol)
-  rs <- writeRaster(rs,paste(cDir,"/raster/india-1min-msk.asc",sep=""),format='ascii')
+  rs <- writeRaster(rs,paste(cd,"/raster/india-1min-msk.asc",sep=""),format='ascii')
 } else {
-  rs <- raster(paste(cDir,"/raster/india-1min-msk.asc",sep=""))
+  rs <- raster(paste(cd,"/raster/india-1min-msk.asc",sep=""))
 }
 
 #raster with district IDs
@@ -94,13 +97,48 @@ if (!file.exists(paste(cd,"/raster/india-1min-disid.asc",sep=""))) {
 
 x <- createSummaryRasters(rs,rk,sData,"DISID",cd)
 
+#plot the summary rasters
+sumDir <- paste(cd,"/raster/summaries",sep="")
+ascList <- list.files(sumDir)
 
-#Function to put the district data of a year into a raster and return it
+for (asc in ascList) {
+  #loading raster
+  cat("\nLoading raster",asc,"\n")
+  rs <- raster(paste(sumDir,"/",asc,sep=""))
+  tiffName <- paste(sumDir,"/",strsplit(asc,".",fixed=T)[[1]][1],".tif",sep="")
+  ht <- 1000
+  fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
+  wt <- ht*(fct-.1)
+  
+  #get colors
+  cat("Get legend stuff \n")
+  brks <- unique(quantile(rs[],na.rm=T,probs=seq(0,1,by=0.05)))
+  brks.lab <- round(brks,0)
+  cols <- c("grey 70",colorRampPalette(c("pink","red"))(length(brks)))
+  
+  #create the tiff
+  cat("Now the plot \n")
+  tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+  par(mar=c(3,3,1,3.5))
+  plot(rs,
+       col=cols,
+       breaks=brks,lab.breaks=brks.lab,
+       useRaster=T,
+       horizontal=T,
+       legend.shrink=0.95)
+  plot(shp,add=T,border="white",lwd=0.2)
+  plot(wrld_simpl,add=T,lwd=0.8)
+  dev.off()
+}
+
+
+#Function to put the district data of a year into a raster and return it back
+#preliminary step before the upscaling to gricells
 outYearDir <- paste(cd,"/raster/yearly",sep="")
 if (!file.exists(outYearDir)) {dir.create(outYearDir)}
 
 dataType <- "raw"
-outDataDir <- paste(outYearDir,"/",dataType,"-",sep="")
+outDataDir <- paste(outYearDir,"/",dataType,sep="")
 if (!file.exists(outDataDir)) {dir.create(outDataDir)}
 
 #loop through years
