@@ -18,6 +18,7 @@ source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
 bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+#bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
 cropName <- "gnut"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
@@ -47,11 +48,11 @@ pfds <- paste("T",iyr:fyr,sep="") #total production
 x <- detrendAll(yieldData,"DISID",yfds,1900+(iyr:fyr),cd)
 
 #load data to not re-process everything again
-raw <- read.csv(paste(cd,"/data/detrended-IND2-gnut-raw.csv",sep=""))
-loe <- read.csv(paste(cd,"/data/detrended-IND2-gnut-loess.csv",sep=""))
-lin <- read.csv(paste(cd,"/data/detrended-IND2-gnut-linear.csv",sep=""))
-qua <- read.csv(paste(cd,"/data/detrended-IND2-gnut-quadratic.csv",sep=""))
-fou <- read.csv(paste(cd,"/data/detrended-IND2-gnut-fourier.csv",sep=""))
+rawData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-raw.csv",sep=""))
+loeData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-loess.csv",sep=""))
+linData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-linear.csv",sep=""))
+quaData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-quadratic.csv",sep=""))
+fouData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-fourier.csv",sep=""))
 
 # plot(rawdat$YEAR,rawdat$YIELD,pch=20,cex=0.8,ylim=c(0,1500)); lines(rawdat$YEAR,rawdat$YIELD)
 # points(loedat$YEAR,loedat$YIELD,pch=20,cex=0.8,col="red"); lines(loedat$YEAR,loedat$YIELD,col="red")
@@ -93,6 +94,7 @@ if (!file.exists(paste(cd,"/raster/india-1min-disid.asc",sep=""))) {
   rk <- writeRaster(rk,paste(cd,"/raster/india-1min-disid.asc",sep=""),format='ascii')
 } else {
   rk <- raster(paste(cd,"/raster/india-1min-disid.asc",sep=""))
+  rk <- readAll(rk)
 }
 
 x <- createSummaryRasters(rs,rk,sData,"DISID",cd)
@@ -137,25 +139,40 @@ for (asc in ascList) {
 outYearDir <- paste(cd,"/raster/yearly",sep="")
 if (!file.exists(outYearDir)) {dir.create(outYearDir)}
 
-dataType <- "raw"
+dataType <- "loess"
+inyData <- loeData
 outDataDir <- paste(outYearDir,"/",dataType,sep="")
 if (!file.exists(outDataDir)) {dir.create(outDataDir)}
 
 #loop through years
 for (year in 66:95) {
   cat("Processing year",(1900+year),"\n")
-  yr_rs <- createYearRaster(raw,rk,year,"Y","DISID")
-  outName <- paste(outDataDir,"/",type,"-",year,".asc",sep="")
+  yr_rs <- createYearRaster(rawData,rk,year,"Y","DISID")
+  outName <- paste(outDataDir,"/",dataType,"-",year,".asc",sep="")
   yr_rs <- writeRaster(yr_rs,outName,format="ascii")
   rm(yr_rs); g=gc(); rm(g)
 }
 
+####!!!!
+#or parallelise years
+library(snowfall)
+sfInit(parallel=T,cpus=15) #initiate cluster
 
+#export functions
+sfExport("createYearRaster")
 
+#export variables
+sfExport("inyData")
+sfExport("outYearDir")
+sfExport("outDataDir")
+sfExport("rk")
+sfExport("dataType")
 
+#run the control function
+system.time(sfSapply(as.vector(66:95), controlYear))
 
-
-
+#stop the cluster
+sfStop()
 
 
 

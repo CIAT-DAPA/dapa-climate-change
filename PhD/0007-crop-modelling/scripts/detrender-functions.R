@@ -4,11 +4,29 @@
 
 #Functions for yield data detrending
 
+###############################################################################
+#Control function for parallelisation
+#Note: some objects need to be exported to nodes before running this
+controlYear <- function(year) {
+  library(raster)
+  cat("Processing year",(1900+year),"\n")
+  outName <- paste(outDataDir,"/",dataType,"-",year,".asc",sep="")
+  if (!file.exists(outName)) {
+    yr_rs <- createYearRaster(inyData,rk,year,"Y","DISID")
+    yr_rs <- writeRaster(yr_rs,outName,format="ascii")
+    rm(yr_rs); g=gc(); rm(g)
+    cat("Done\n")
+  } else {
+    cat("File already exists \n")
+  }
+}
+
+
 ##############################################################################
 #Function to create a raster layer out from the district-level yield data for a given year
 createYearRaster <- function(xData,dis_rs,ye,prefix,IDField) {
   yField <- paste(prefix,ye,sep="")
-  out_rs <- raster(rs)
+  out_rs <- raster(dis_rs)
   in_dat <- data.frame(xData[,IDField],xData[,yField])
   
   disCount <- 1

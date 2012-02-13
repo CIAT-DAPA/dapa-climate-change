@@ -508,3 +508,17 @@ for (gcm in gls) {
 }
 write.csv(res.im, paste(bd, "/impacts/future-area-", shname, ".csv", sep=""), quote=T, row.names=F)
 
+
+##########################################################################
+#create images and figures of modelling results
+
+
+
+
+
+
+
+
+
+
+
