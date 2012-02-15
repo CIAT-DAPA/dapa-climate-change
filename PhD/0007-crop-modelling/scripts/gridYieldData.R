@@ -58,7 +58,7 @@ xy <- data.frame(CELL=which(!is.na(dumm[])),xy)
 #   2.4. parallelise years and grid the data
 #o
 library(snowfall)
-sfInit(parallel=T,cpus=2) #initiate cluster
+sfInit(parallel=T,cpus=15) #initiate cluster
 
 #export functions
 sfExport("weightValues")
