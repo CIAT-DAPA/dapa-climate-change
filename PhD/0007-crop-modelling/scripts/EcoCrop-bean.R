@@ -389,7 +389,7 @@ for (gcm in gls) {
   if (!file.exists(aDir)) {dir.create(aDir)} #create gcm specific folder
   
 	#Run the function
-	fut <- futruns(climdir=aDir, oDir=frDir, cDir=prDir, gs=1, gsl=120, 
+	fut <- futruns(climdir=aDir, oDir=frDir, cDir=prDir, gs=1, gsl=90, 
                  parlist=paste(cDir,"/analyses/data/calibration-parameters.csv",sep=""), 
                  cropname=crop, run.type="tmean", ow.runs=F, ow.merge=NA)
 }
