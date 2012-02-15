@@ -1,0 +1,71 @@
+CID,Country,Region
+1,Afghanistan,MEA
+2,Algeria,NAF
+3,Angola,SAF
+4,Bangladesh,SAS
+5,Benin,WAF
+6,Bhutan,SAS
+7,Botswana,SAF
+8,Burkina Faso,SAH
+9,Burundi,EAF
+10,Cameroon,CAF
+11,Central African Republic,CAF
+12,Chad,SAH
+13,Congo (Brazzaville),CAF
+14,Congo (Kinshasa),CAF
+15,Cote D'Ivoire,WAF
+16,Djibouti,EAF
+17,Egypt,NAF
+18,Equatorial Guinea,NAF
+19,Eritrea,EAF
+20,Ethiopia,EAF
+21,Gabon,CAF
+22,Gambia The,WAF
+23,Ghana,WAF
+24,Guinea,WAF
+25,Guinea-Bissau,WAF
+26,India,SAS
+27,Iran,WAS
+28,Iraq,WAS
+29,Israel,WAS
+30,Jordan,WAS
+31,Kenya,EAF
+32,Kuwait,WAS
+33,Lebanon,WAS
+34,Lesotho,SAF
+35,Liberia,WAF
+36,Libya,NAF
+37,Madagascar,EAF
+38,Malawi,SAF
+39,Mali,SAH
+40,Mauritania,NAF
+41,Morocco,NAF
+42,Mozambique,SAF
+43,Namibia,SAF
+44,Nepal,SAS
+45,Niger,SAH
+46,Nigeria,WAF
+47,Oman,WAS
+48,Pakistan,SAS
+49,Palestine,WAS
+50,Qatar,WAS
+51,Rwanda,EAF
+52,Saudi Arabia,WAS
+53,Senegal,WAF
+54,Sierra Leone,WAF
+55,Somalia,EAF
+56,Somaliland,NAF
+57,South Africa,SAF
+58,Sri Lanka,SAS
+59,Sudan,SAH
+60,Swaziland,NAF
+61,Syria,MEA
+62,Tanzania,EAF
+63,Togo,WAF
+64,Tunisia,NAF
+65,Uganda,EAF
+66,United Arab Emirates,WAS
+67,Western Sahara,NAF
+68,Yemen,WAS
+69,Zambia,SAF
+70,Zimbabwe,SAF

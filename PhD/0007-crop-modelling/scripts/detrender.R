@@ -17,7 +17,7 @@ src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
-bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+bDir <- "H:/" #"F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 #bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
 cropName <- "gnut"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
@@ -71,11 +71,6 @@ if (!file.exists(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))) {
 ##################################################################################
 #2. For each of the years create a 1x1 degree grid with the detrended series by
 #   2.1. Create a 1x1 min resolution raster with the districts
-#   2.2. Create a 1x1 min resolution raster with the 1x1 degree cells
-#   2.3. Calculate areas per pixel
-#   2.4. Loop through cells and calculate the proportion of each district (per year)
-#   2.5. Calculate the average by weighting the values of yield times 
-#        the area divided by sum of areas (per year)
 
 #convert shape to raster (if not exists) for assigning values and then plot
 resol <- 1/60
@@ -139,8 +134,8 @@ for (asc in ascList) {
 outYearDir <- paste(cd,"/raster/yearly",sep="")
 if (!file.exists(outYearDir)) {dir.create(outYearDir)}
 
-dataType <- "loess"
-inyData <- loeData
+dataType <- "fourier"
+inyData <- fouData
 outDataDir <- paste(outYearDir,"/",dataType,sep="")
 if (!file.exists(outDataDir)) {dir.create(outDataDir)}
 
@@ -173,6 +168,7 @@ system.time(sfSapply(as.vector(66:95), controlYear))
 
 #stop the cluster
 sfStop()
+
 
 
 

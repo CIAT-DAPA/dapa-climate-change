@@ -3,7 +3,6 @@
 #CIAT / CCAFS / UoL
 
 #Functions for yield data detrending
-
 ###############################################################################
 #Control function for parallelisation
 #Note: some objects need to be exported to nodes before running this
