@@ -48,10 +48,9 @@ if (!file.exists(paste(cDir,"/raster/india-1min-1d_cells_area.asc",sep=""))) {
 }
 
 rs_dis <- raster(paste(cDir,"/raster/india-1min-disid.asc",sep=""))
-year <- 66
 method <- "fourier"
 outDir <- paste(cDir,"/raster/gridded/",method,sep="")
-if (!file.exists(outDir)) {dir.create(outDir)}
+if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
 
 xy <- xyFromCell(dumm,which(!is.na(dumm[])))
 xy <- data.frame(CELL=which(!is.na(dumm[])),xy)
@@ -79,13 +78,6 @@ system.time(sfSapply(as.vector(66:95), controlGridding))
 
 #stop the cluster
 sfStop()
-
-yield_rs <- raster(paste(cDir,"/raster/yearly/",method,"/",method,"-",year,".asc",sep=""))
-x <- apply(data.frame(CELLID=1:nrow(xy)),1,weightValues,rs_dis,rs_c,rs_a,yield_rs)
-
-x <- weightValues(1,rs_dis,rs_c,rs_a,yield_rs)
-
-
 
 
 
