@@ -1,6 +1,7 @@
 #Julian Ramirez-Villegas
 #February 2012
 #CIAT / CCAFS / UoL
+stop("Do not run whole thing")
 
 #libraries
 library(maptools); library(rgdal); library(raster)
