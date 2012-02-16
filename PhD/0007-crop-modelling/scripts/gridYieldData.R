@@ -48,7 +48,7 @@ if (!file.exists(paste(cDir,"/raster/india-1min-1d_cells_area.asc",sep=""))) {
 }
 
 rs_dis <- raster(paste(cDir,"/raster/india-1min-disid.asc",sep=""))
-method <- "fourier"
+method <- "raw"
 outDir <- paste(cDir,"/raster/gridded/",method,sep="")
 if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
 

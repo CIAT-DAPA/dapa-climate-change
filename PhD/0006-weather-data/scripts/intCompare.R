@@ -5,6 +5,7 @@ stop("Error: do not run whole thing \n")
 
 library(raster)
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
+#src.dir <- "/home/jramirez/dapa-climate-change/PhD/0006-weather-data/scripts"
 source(paste(src.dir,"/interpolate-functions.R",sep=""))
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
