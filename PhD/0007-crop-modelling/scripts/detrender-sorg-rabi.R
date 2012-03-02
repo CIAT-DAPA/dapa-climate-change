@@ -17,9 +17,9 @@ src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
-bDir <- "H:/" #"F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 #bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
-cropName <- "gnut"
+cropName <- "sorg-rabi"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
 #set DOS emulator folder
@@ -27,17 +27,17 @@ eDir <- "C:/Program Files (x86)/DOSBox-0.74"
 dDir <- "F:/PhD-work/GLAM/detrending/smoothr"
 
 #load shapefile and define characteristics
-shp <- paste(cd,"/shp/IND2-",tolower(cropName),".shp",sep="")
+shp <- paste(cd,"/shp/IND2-sorg.shp",sep="")
 shp <- readShapePoly(shp)
 relField <- "DISID" #relational field
 adm2Field <- "NAME_1" #field of adm1 names
 adm2Field <- "NAME_2" #field of adm2 names
 
 #read historic yield data
-yieldData <- read.table(paste(cDir,"/data/IND2-gnut.tab",sep=""),sep="\t",header=T)
+yieldData <- read.table(paste(cd,"/data/IND2-",cropName,".tab",sep=""),sep="\t",header=T)
 
 #1. Detrend each of the districts data using lowess, linear or polynomial regression and do summaries
-iyr <- 66; fyr <- 95
+iyr <- 66; fyr <- 98
 
 #important fields
 yfds <- paste("Y",iyr:fyr,sep="") #yield
@@ -45,7 +45,7 @@ hfds <- paste("H",iyr:fyr,sep="") #area harvested
 pfds <- paste("T",iyr:fyr,sep="") #total production
 
 #detrend all districts
-x <- detrendAll(yieldData,"DISID",yfds,1900+(iyr:fyr),cd)
+x <- detrendAll(yieldData,"DISID",yfds,iyr,fyr,cd,cropName)
 
 
 

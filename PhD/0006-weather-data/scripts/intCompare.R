@@ -11,6 +11,7 @@ source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
 #folders and locations
 bd <- "F:/PhD-work/crop-modelling/climate-data"
+#bd <- "/andromeda_data1/jramirez/crop-modelling/climate-data"
 
 #Determine if leap year or not (calculate number of days)
 ndm <- ts(diff(seq(as.Date("1960-01-01"), as.Date("2010-01-01"), by = "month")), 
@@ -29,7 +30,7 @@ xy <- xyFromCell(alt_rs,which(!is.na(alt_rs[])))
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=3) #initiate cluster
+sfInit(parallel=T,cpus=15) #initiate cluster
 
 #export functions
 sfExport("leap")

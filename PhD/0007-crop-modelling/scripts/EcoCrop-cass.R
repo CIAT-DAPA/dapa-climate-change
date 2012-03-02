@@ -8,7 +8,7 @@ source(paste(src.dir,"/getUniqueCoord.R",sep="")) #loading the function
 
 rDir <- "F:/PhD-work/crop-modelling"
 bDir <- paste(rDir,"/EcoCrop",sep="")
-crop <- "bean"
+crop <- "cass"
 cDir <- paste(bDir,"/models/EcoCrop-",toupper(crop),sep="")
 
 rs <- read.csv(paste(cDir,"/analyses/data/",crop,"-afasia.csv",sep="")) #load the data
@@ -51,7 +51,7 @@ write.csv(rs, paste(cDir,"/analyses/data/climates.csv",sep=""), row.names=F, quo
 #Calculating gs parameters for calibration
 source(paste(src.dir,"/calibrationParameters.R",sep=""))
 rs <- read.csv(paste(cDir,"/analyses/data/climates.csv",sep=""))
-rs <- calibrationParameters(rs, gs=3, verbose=T)
+rs <- calibrationParameters(rs, gs=8, verbose=T)
 write.csv(rs, paste(cDir,"/analyses/data/calibration.csv",sep=""), row.names=F, quote=T)
 
 #Get calibration parameters
@@ -84,8 +84,8 @@ write.csv(finalTable, paste(cDir,"/analyses/data/calibration-parameters.no.csv",
 #replace the existing stuff by the Beebe et al. (2011) parameterisation
 finalTable2 <- data.frame(matrix(ncol=ncol(finalTable),nrow=2))
 names(finalTable2) <- names(finalTable)
-finalTable2[1,] <- c(1,"prec",0,200,363,450,710)
-finalTable2[2,] <- c(1,"tmean",0,136,175,231,256)
+finalTable2[1,] <- c(1,"prec",0,300,800,2200,2800)
+finalTable2[2,] <- c(1,"tmean",0,150,220,320,450)
 write.csv(finalTable2, paste(cDir,"/analyses/data/calibration-parameters.csv",sep=""), row.names=F)
 
 
@@ -102,7 +102,7 @@ source(paste(src.dir,"/EcoCrop.R",sep=""))
     jpegFile <- paste(cDir,"/analyses/runs/", gs, "-",crop,"-",vl[rw-1],"-suitability.jpg",sep="")
 		if (!file.exists(jpegFile)) {
 			eco <- suitCalc(climPath=paste(rDir,"/climate-data/worldclim/afasia_10min",sep=""), 
-                      Gmin=90,Gmax=90,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],
+                      Gmin=240,Gmax=240,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],
                       Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
                       Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
                       outfolder=paste(cDir,'/analyses/runs', sep=""),
@@ -389,7 +389,7 @@ for (gcm in gls) {
   if (!file.exists(aDir)) {dir.create(aDir)} #create gcm specific folder
   
 	#Run the function
-	fut <- futruns(climdir=aDir, oDir=frDir, cDir=prDir, gs=1, gsl=90, 
+	fut <- futruns(climdir=aDir, oDir=frDir, cDir=prDir, gs=1, gsl=240, 
                  parlist=paste(cDir,"/analyses/data/calibration-parameters.csv",sep=""), 
                  cropname=crop, run.type="tmean", ow.runs=F, ow.merge=NA)
 }
@@ -407,7 +407,7 @@ fd <- paste(cDir, "/analyses/runs-future/", sep="")
 imd <- paste(cDir,"/analyses/impacts",sep=""); if (!file.exists(imd)) {dir.create(imd)}
 
 #define and read the shapefile
-shname <- "starea-countries.shp" #starea-countries selcountries
+shname <- "selcountries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
@@ -491,7 +491,7 @@ cd <- paste(bd, "/runs", sep="")
 fd <- paste(bd, "/runs-future", sep="")
 
 #shape to work with
-shname <- "starea-countries.shp" #starea-countries selcountries
+shname <- "selcountries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
@@ -719,10 +719,10 @@ tiff(paste(imgdir,"/pia_nia_ratio-boxplot.tif",sep=""),res=300,pointsize=10,widt
      height=1000,units="px",compression="lzw")
 par(mar=c(6,4,1,1),cex=0.6,las=2,lwd=0.6)
 boxplot(x$PIA_NIA_RATIO~x$Region,col="grey",boxwex=0.5,
-        pch=20,outwex=0.2,horizontal=T,ylim=c(0,10),
+        pch=20,outwex=0.2,horizontal=T,ylim=c(0,100),
         xlab="Positively to negatively impacted area ratio")
 abline(v=0,lwd=0.7,lty=2)
-abline(v=seq(0,10,by=2),lwd=0.6,lty=2,col="grey50")
+abline(v=seq(0,200,by=10),lwd=0.6,lty=2,col="grey50")
 dev.off()
 
 
