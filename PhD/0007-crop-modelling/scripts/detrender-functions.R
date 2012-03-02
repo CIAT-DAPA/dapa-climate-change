@@ -34,6 +34,7 @@ createYearRaster <- function(xData,dis_rs,ye,prefix,IDField) {
     out_rs[which(dis_rs[]==dis)] <- xData[disCount,yField]
     disCount <- disCount+1
   }
+  out_rs[which(out_rs[]==-9999)] <- NA
   return(out_rs)
 }
 
