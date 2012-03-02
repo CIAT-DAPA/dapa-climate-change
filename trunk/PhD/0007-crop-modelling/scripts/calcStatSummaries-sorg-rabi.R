@@ -17,27 +17,35 @@ src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
-bDir <- "H:/" #"F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 #bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
-cropName <- "gnut"
+cropName <- "sorg-rabi"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
 #load shapefile
 shp <- paste(cd,"/shp/IND2-",tolower(cropName),".shp",sep="")
 shp <- readShapePoly(shp)
 
+#important fields
+iyr <- 66; fyr <- 98
+yfds <- paste("Y",iyr:fyr,sep="") #yield
+hfds <- paste("H",iyr:fyr,sep="") #area harvested
+pfds <- paste("T",iyr:fyr,sep="") #total production
+
 #load detrended data
-rawData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-raw.csv",sep=""))
-loeData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-loess.csv",sep=""))
-linData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-linear.csv",sep=""))
-quaData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-quadratic.csv",sep=""))
-fouData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-fourier.csv",sep=""))
+yieldData <- read.table(paste(cd,"/data/IND2-",cropName,".tab",sep=""),sep="\t",header=T)
+rawData <- read.csv(paste(cd,"/data/detrended-IND2-",cropName,"-raw.csv",sep=""))
+loeData <- read.csv(paste(cd,"/data/detrended-IND2-",cropName,"-loess.csv",sep=""))
+linData <- read.csv(paste(cd,"/data/detrended-IND2-",cropName,"-linear.csv",sep=""))
+quaData <- read.csv(paste(cd,"/data/detrended-IND2-",cropName,"-quadratic.csv",sep=""))
+fouData <- read.csv(paste(cd,"/data/detrended-IND2-",cropName,"-fourier.csv",sep=""))
 
 #Calculate or load the summary data
-if (!file.exists(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))) {
-  sData <- calcSummary(yieldData,"DISID",yfds,hfds,pfds,1900+(iyr:fyr),cd)
+if (!file.exists(paste(cd,"/data/detrended-IND2-",cropName,"-summary.csv",sep=""))) {
+  sData <- calcSummary(yieldData,"DISID",yfds,hfds,pfds,1900+(iyr:fyr),cd,cropName,
+                       raw=rawData,loe=loeData,lin=linData,qua=quaData,fou=fouData)
 } else {
-  sData <- read.csv(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))
+  sData <- read.csv(paste(cd,"/data/detrended-IND2-",cropName,"-summary.csv",sep=""))
 }
 
 ##################################################################################
@@ -49,19 +57,19 @@ if (!file.exists(paste(cd,"/data/detrended-IND2-gnut-summary.csv",sep=""))) {
 resol <- 1/60
 
 #clean mask raster
-if (!file.exists(paste(cd,"/raster/india-1min-msk.asc",sep=""))) {
+if (!file.exists(paste(bDir,"/0_base_grids/india-1min-msk.asc",sep=""))) {
   rs <- createMask(shp,resol)
-  rs <- writeRaster(rs,paste(cd,"/raster/india-1min-msk.asc",sep=""),format='ascii')
+  rs <- writeRaster(rs,paste(cd,"/0_base_grids/india-1min-msk.asc",sep=""),format='ascii')
 } else {
-  rs <- raster(paste(cd,"/raster/india-1min-msk.asc",sep=""))
+  rs <- raster(paste(bDir,"/0_base_grids/india-1min-msk.asc",sep=""))
 }
 
 #raster with district IDs
-if (!file.exists(paste(cd,"/raster/india-1min-disid.asc",sep=""))) {
+if (!file.exists(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))) {
   rk <- rasterize(shp,rs,field="DISID")
-  rk <- writeRaster(rk,paste(cd,"/raster/india-1min-disid.asc",sep=""),format='ascii')
+  rk <- writeRaster(rk,paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""),format='ascii')
 } else {
-  rk <- raster(paste(cd,"/raster/india-1min-disid.asc",sep=""))
+  rk <- raster(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))
   rk <- readAll(rk)
 }
 
@@ -101,4 +109,3 @@ for (asc in ascList) {
   plot(wrld_simpl,add=T,lwd=0.8)
   dev.off()
 }
-

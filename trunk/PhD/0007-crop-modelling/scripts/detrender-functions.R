@@ -58,23 +58,39 @@ createSummaryRasters <- function(msk_rs,dis_rs,stats,IDField,cDir) {
   for (j in 1:length(districts)) {
     dis <- districts[j]
     cat("Processing district",dis,"\n")
-    harea.mean[which(rk[]==dis)] <- outAll$HAREA_MEAN[j]
-    harea.sd[which(rk[]==dis)] <- outAll$HAREA_SD[j]
-    tprod.mean[which(rk[]==dis)] <- outAll$TPROD_MEAN[j]
-    tprod.sd[which(rk[]==dis)] <- outAll$TPROD_SD[j]
-    yield.raw.mean[which(rk[]==dis)] <- outAll$YIELD_RAW_MEAN[j]
-    yield.raw.sd[which(rk[]==dis)] <- outAll$YIELD_RAW_SD[j]
-    yield.loe.mean[which(rk[]==dis)] <- outAll$YIELD_LOE_MEAN[j]
-    yield.loe.sd[which(rk[]==dis)] <- outAll$YIELD_LOE_SD[j]
-    yield.lin.mean[which(rk[]==dis)] <- outAll$YIELD_LIN_MEAN[j]
-    yield.lin.sd[which(rk[]==dis)] <- outAll$YIELD_LIN_SD[j]
-    yield.qua.mean[which(rk[]==dis)] <- outAll$YIELD_QUA_MEAN[j]
-    yield.qua.sd[which(rk[]==dis)] <- outAll$YIELD_QUA_SD[j]
-    yield.fou.mean[which(rk[]==dis)] <- outAll$YIELD_FOU_MEAN[j]
-    yield.fou.sd[which(rk[]==dis)] <- outAll$YIELD_FOU_SD[j]
+    harea.mean[which(rk[]==dis)] <- stats$HAREA_MEAN[j]
+    harea.sd[which(rk[]==dis)] <- stats$HAREA_SD[j]
+    tprod.mean[which(rk[]==dis)] <- stats$TPROD_MEAN[j]
+    tprod.sd[which(rk[]==dis)] <- stats$TPROD_SD[j]
+    yield.raw.mean[which(rk[]==dis)] <- stats$YIELD_RAW_MEAN[j]
+    yield.raw.sd[which(rk[]==dis)] <- stats$YIELD_RAW_SD[j]
+    yield.loe.mean[which(rk[]==dis)] <- stats$YIELD_LOE_MEAN[j]
+    yield.loe.sd[which(rk[]==dis)] <- stats$YIELD_LOE_SD[j]
+    yield.lin.mean[which(rk[]==dis)] <- stats$YIELD_LIN_MEAN[j]
+    yield.lin.sd[which(rk[]==dis)] <- stats$YIELD_LIN_SD[j]
+    yield.qua.mean[which(rk[]==dis)] <- stats$YIELD_QUA_MEAN[j]
+    yield.qua.sd[which(rk[]==dis)] <- stats$YIELD_QUA_SD[j]
+    yield.fou.mean[which(rk[]==dis)] <- stats$YIELD_FOU_MEAN[j]
+    yield.fou.sd[which(rk[]==dis)] <- stats$YIELD_FOU_SD[j]
   }
   outSumDir <- paste(cDir,"/raster/summaries",sep="")
   if (!file.exists(outSumDir)) {dir.create(outSumDir)}
+  
+  #set the data correctly
+  harea.mean[which(harea.mean[]==-9999)] <- NA
+  harea.sd[which(harea.sd[]==-9999)] <- NA
+  tprod.mean[which(tprod.mean[]==-9999)] <- NA
+  tprod.sd[which(tprod.sd[]==-9999)] <- NA
+  yield.raw.mean[which(yield.raw.mean[]==-9999)] <- NA
+  yield.raw.sd[which(yield.raw.sd[]==-9999)] <- NA
+  yield.loe.mean[which(yield.loe.mean[]==-9999)] <- NA
+  yield.loe.sd[which(yield.loe.sd[]==-9999)] <- NA
+  yield.lin.mean[which(yield.lin.mean[]==-9999)] <- NA
+  yield.lin.sd[which(yield.lin.sd[]==-9999)] <- NA
+  yield.qua.mean[which(yield.qua.mean[]==-9999)] <- NA
+  yield.qua.sd[which(yield.qua.sd[]==-9999)] <- NA
+  yield.fou.mean[which(yield.fou.mean[]==-9999)] <- NA
+  yield.fou.sd[which(yield.fou.mean[]==-9999)] <- NA
   
   #Write individual rasters
   harea.mean <- writeRaster(harea.mean,paste(outSumDir,"/harea-mean.asc",sep=""),format="ascii")
@@ -98,7 +114,7 @@ createSummaryRasters <- function(msk_rs,dis_rs,stats,IDField,cDir) {
 ################################################################################
 ################################################################################
 #calculate average historical area and other statistics
-calcSummary <- function(yield,IDField,yFields,hFields,pFields,yrSeries,cDir) {
+calcSummary <- function(yield,IDField,yFields,hFields,pFields,yrSeries,cDir,cropName,raw,loe,lin,qua,fou) {
   districts <- unique(yield[,IDField])
   for (j in 1:length(districts)) {
     dis <- districts[j]
@@ -128,9 +144,14 @@ calcSummary <- function(yield,IDField,yFields,hFields,pFields,yrSeries,cDir) {
     #remove any -9999 row in harv area and production data
     hdat <- hdat[which(hdat$HAREA!=-9999),]
     pdat <- pdat[which(pdat$TPROD!=-9999),]
+    rawdat <- rawdat[which(rawdat$YIELD!=-9999),]
+    loedat <- loedat[which(loedat$YIELD!=-9999),]
+    lindat <- lindat[which(lindat$YIELD!=-9999),]
+    quadat <- quadat[which(quadat$YIELD!=-9999),]
+    foudat <- foudat[which(foudat$YIELD!=-9999),]
     
-    outRow <- data.frame(DISID=dis,HAREA_MEAN=mean(hdat$HAREA),HAREA_SD=sd(hdat$HAREA),
-                         TPROD_MEAN=mean(pdat$TPROD),TPROD_SD=sd(pdat$TPROD),
+    outRow <- data.frame(DISID=dis,HAREA_MEAN=mean(hdat$HAREA,na.rm=T),HAREA_SD=sd(hdat$HAREA,na.rm=T),
+                         TPROD_MEAN=mean(pdat$TPROD,na.rm=T),TPROD_SD=sd(pdat$TPROD,na.rm=T),
                          YIELD_RAW_MEAN=mean(rawdat$YIELD,na.rm=T),YIELD_RAW_SD=sd(rawdat$YIELD,na.rm=T),
                          YIELD_LOE_MEAN=mean(loedat$YIELD,na.rm=T),YIELD_LOE_SD=sd(loedat$YIELD,na.rm=T),
                          YIELD_LIN_MEAN=mean(lindat$YIELD,na.rm=T),YIELD_LIN_SD=sd(lindat$YIELD,na.rm=T),
@@ -143,7 +164,7 @@ calcSummary <- function(yield,IDField,yFields,hFields,pFields,yrSeries,cDir) {
       outAll <- rbind(outAll,outRow)
     }
   }
-  write.csv(outAll,paste(cDir,"/data/detrended-IND2-gnut-summary.csv",sep=""),row.names=F,quote=F)
+  write.csv(outAll,paste(cDir,"/data/detrended-IND2-",cropName,"-summary.csv",sep=""),row.names=F,quote=F)
   return(outAll)
 }
 
@@ -152,7 +173,8 @@ calcSummary <- function(yield,IDField,yFields,hFields,pFields,yrSeries,cDir) {
 ############################################################################
 ############################################################################
 #Wrapper: this would do the yield detrending for all districts
-detrendAll <- function(yield,IDField,yFields,yrSeries,cDir) {
+detrendAll <- function(yield,IDField,yFields,iyr,fyr,cDir,cropName) {
+  yrSeries <- 1900+(iyr:fyr)
   districts <- unique(yield[,IDField])
   for (j in 1:length(districts)) {
     dis <- districts[j]
@@ -162,7 +184,8 @@ detrendAll <- function(yield,IDField,yFields,yrSeries,cDir) {
     names(ydat) <- c(IDField,"YEAR","YIELD"); row.names(ydat) <- 1:nrow(ydat)
     
     #run the wrapper
-    x <- detrendWrapper(ydat)
+    limit <- round(nrow(ydat)*.75)
+    x <- detrendWrapper(ydat,dis,lim=limit,iyr,fyr)
     
     if (j==1) {
       raw <- x$RAW
@@ -178,11 +201,11 @@ detrendAll <- function(yield,IDField,yFields,yrSeries,cDir) {
       fou <- rbind(fou,x$FOURIER)
     }
   }
-  write.csv(raw,paste(cDir,"/data/detrended-IND2-gnut-raw.csv",sep=""),quote=F,row.names=F)
-  write.csv(loe,paste(cDir,"/data/detrended-IND2-gnut-loess.csv",sep=""),quote=F,row.names=F)
-  write.csv(lin,paste(cDir,"/data/detrended-IND2-gnut-linear.csv",sep=""),quote=F,row.names=F)
-  write.csv(qua,paste(cDir,"/data/detrended-IND2-gnut-quadratic.csv",sep=""),quote=F,row.names=F)
-  write.csv(fou,paste(cDir,"/data/detrended-IND2-gnut-fourier.csv",sep=""),quote=F,row.names=F)
+  write.csv(raw,paste(cDir,"/data/detrended-IND2-",cropName,"-raw.csv",sep=""),quote=F,row.names=F)
+  write.csv(loe,paste(cDir,"/data/detrended-IND2-",cropName,"-loess.csv",sep=""),quote=F,row.names=F)
+  write.csv(lin,paste(cDir,"/data/detrended-IND2-",cropName,"-linear.csv",sep=""),quote=F,row.names=F)
+  write.csv(qua,paste(cDir,"/data/detrended-IND2-",cropName,"-quadratic.csv",sep=""),quote=F,row.names=F)
+  write.csv(fou,paste(cDir,"/data/detrended-IND2-",cropName,"-fourier.csv",sep=""),quote=F,row.names=F)
   return(paste(cDir,"/data",sep=""))
 }
 
@@ -190,12 +213,13 @@ detrendAll <- function(yield,IDField,yFields,yrSeries,cDir) {
 
 ######################################################
 #Detrend wrapper to consider different availability cases
-detrendWrapper <- function(yd) {
+detrendWrapper <- function(yd,dis,lim=23,iyr,fyr) {
   #count NAs and zeros
+  yd$YIELD[which(yd$YIELD==0)] <- -9999
   zeros <- length(which(yd$YIELD==0))
   nas <- length(which(yd$YIELD==-9999))
   #case 1 the yields are all zero this district has no area of that crop
-  if (zeros>23) {
+  if (nas>lim) {
     #do not detrend if there are less than 23 yield records (district is useless for modelling)
     #create data frames for each method and for raw data
     df.rw <- data.frame(DISID=dis,t(yd$YIELD))
