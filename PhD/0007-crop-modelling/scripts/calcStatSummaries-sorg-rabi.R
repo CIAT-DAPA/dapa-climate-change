@@ -23,7 +23,7 @@ cropName <- "sorg-rabi"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
 #load shapefile
-shp <- paste(cd,"/shp/IND2-",tolower(cropName),".shp",sep="")
+shp <- paste(cd,"/shp/IND2-",cropName,".shp",sep="")
 shp <- readShapePoly(shp)
 
 #important fields
