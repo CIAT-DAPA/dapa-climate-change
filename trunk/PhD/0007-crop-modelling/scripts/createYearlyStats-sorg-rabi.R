@@ -39,8 +39,8 @@ rk <- readAll(rk)
 outYearDir <- paste(cd,"/raster/yearly",sep="")
 if (!file.exists(outYearDir)) {dir.create(outYearDir)}
 
-dataType <- "raw"
-inyData <- rawData
+dataType <- "fou"
+inyData <- fouData
 outDataDir <- paste(outYearDir,"/",dataType,sep="")
 if (!file.exists(outDataDir)) {dir.create(outDataDir)}
 
