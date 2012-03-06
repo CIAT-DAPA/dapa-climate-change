@@ -408,11 +408,11 @@ fd <- paste(cDir, "/analyses/runs-future/", sep="")
 imd <- paste(cDir,"/analyses/impacts",sep=""); if (!file.exists(imd)) {dir.create(imd)}
 
 #define and read the shapefile
-shname <- "selcountries.shp" #starea-countries selcountries
+shname <- "starea-countries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
-gs <- "MAX"
+gs <- "MEAN"
 run.type <- "tmean"
 
 #loop the GCMs
@@ -496,7 +496,7 @@ shname <- "starea-countries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
-gs <- "MAX"
+gs <- "MEAN"
 run.type <- "tmean"
 
 #load and run stuff for current (comment if already done)

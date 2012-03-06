@@ -58,7 +58,7 @@ createSummaryRasters <- function(msk_rs,dis_rs,stats,IDField,cDir) {
   #loop through districts to produce maps of all summary metrics
   for (j in 1:length(districts)) {
     dis <- districts[j]
-    cat("Processing district",dis,"(",j"of",length(districts),")","\n")
+    cat("Processing district",dis,"(",j,"of",length(districts),")","\n")
     harea.mean[which(rk[]==dis)] <- stats$HAREA_MEAN[j]
     harea.sd[which(rk[]==dis)] <- stats$HAREA_SD[j]
     tprod.mean[which(rk[]==dis)] <- stats$TPROD_MEAN[j]
