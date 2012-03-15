@@ -19,7 +19,7 @@ source(paste(src.dir2,"/detrender-functions.R",sep=""))
 #set the working folder
 bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 #bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
-cropName <- "sorg-khariff"
+cropName <- "wheat"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
 #load detrended data

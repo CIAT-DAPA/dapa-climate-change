@@ -18,7 +18,7 @@ shp <- readShapePoly("./analysis-mask/adm_data_shp/adm1_update1.shp")
 shData <- shp@data
 
 #load raster
-cropName <- "cass"
+cropName <- "whea"
 mon <- raster(paste("./models/EcoCrop-",toupper(cropName),"/cropdist/monfreda.asc",sep=""))
 spa <- raster(paste("./models/EcoCrop-",toupper(cropName),"/cropdist/spam.asc",sep=""))
 
