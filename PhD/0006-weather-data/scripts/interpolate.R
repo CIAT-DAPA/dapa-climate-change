@@ -20,7 +20,7 @@ re <- "afr"
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=4) #initiate cluster
+sfInit(parallel=T,cpus=3) #initiate cluster
 
 #export functions
 sfExport("interpolateDay")
@@ -37,7 +37,7 @@ sfExport("hdir")
 sfExport("re")
 
 count <- 1
-for (ye in 1960:2010) {
+for (ye in 1960:2009) {
   cat("Processing",ye,"\n")
   
   #loading the input data
