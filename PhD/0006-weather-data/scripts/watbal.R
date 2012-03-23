@@ -13,6 +13,9 @@ a_eslope=611.2
 b_eslope=17.67
 c_eslope=243.5
 
+#transform solar radiation from W/m2 to MJ/m2
+#DAILYRAD(K)=DAILYRAD(K)*60*60*24/1000000
+
 peest <- function(srad,tmin,tmax) {
   tmean <- (tmin+tmax)/2
   
