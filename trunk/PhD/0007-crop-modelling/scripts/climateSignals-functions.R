@@ -2,6 +2,192 @@
 #March 2012
 #CIAT / CCAFS / UoL
 
+#get relevant growing season metrics for a given year
+processYear <- function(ncFile,year,x,y,tempDir,sradDir) {
+  cat("\nProcessing year",year,"\n")
+  nd <- leap(year)
+  
+  #extract daily weather from Indian TropMet grids
+  out_all <- extractDaily(ncFile,x,y,year,nd)
+  
+  #i need to first calculate the potential evapotranspiration. I will use the Priestley-Taylor equation
+  #main references:
+  #                 *Weis and Menzel (2008)
+  #                 *Challinor et al. (2004)
+  #
+  
+  #need to load monthly temperature data
+  #read 14 months
+  cat("Extracting temperature data \n")
+  tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn/tmn_",(year-1),"_12",sep=""),
+                    paste(tempDir,"/monthly_grids/tmn/tmn_",year,"_",1:12,sep=""),
+                    paste(tempDir,"/monthly_grids/tmn/tmn_",(year+1),"_1",sep="")))
+  tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+  daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
+  out_all$TMIN <- daily_tmin #put data into matrix
+  
+  tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx/tmx_",(year-1),"_12",sep=""),
+                    paste(tempDir,"/monthly_grids/tmx/tmx_",year,"_",1:12,sep=""),
+                    paste(tempDir,"/monthly_grids/tmx/tmx_",(year+1),"_1",sep="")))
+  tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+  daily_tmax <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
+  out_all$TMAX <- daily_tmax #put data into matrix
+  
+  #load monthly solar radiation data
+  cat("Extracting solar radiation data \n")
+  srad_stk <- stack(c(paste(sradDir,"/srad/srad_","12.asc",sep=""),
+                    paste(sradDir,"/srad/srad_",1:12,".asc",sep=""),
+                    paste(sradDir,"/srad/srad_","1.asc",sep="")))
+  srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
+  daily_srad <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
+  out_all$SRAD <- daily_srad*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+  
+  #Calculate the water balance
+  cat("Calculating water balance \n")
+  out_all$ETMAX <- NA; out_all$AVAIL <- NA; out_all$ERATIO <- NA
+  out_all$CUM_RAIN <- NA; out_all$RUNOFF <- NA; out_all$DEMAND <- NA
+  out_all <- watbal_wrapper(out_all)
+  
+  #calculate growing seasons
+  cat("Find out growing seasons \n")
+  gs <- gsl_find(out_all$ERATIO,ea_thresh=0.5,n_start=5,n_end=12,sd_default=165,ed_default=225)
+  gs$GSL <- gs$END-gs$START
+  
+  # plot(out_all$DAY,out_all$RAIN,ty="l")
+  # plot(out_all$DAY,out_all$TMIN,ty="l")
+  # plot(out_all$DAY,out_all$TMAX,ty="l")
+  # plot(out_all$DAY,out_all$SRAD,ty="l")
+  # plot(out_all$DAY,out_all$ERATIO,ty="l"); abline(h=0.35,col="red",lty=2); abline(h=0.5,col="red")
+  # plot(out_all$DAY,out_all$RUNOFF,ty="l")
+  # plot(out_all$DAY,out_all$AVAIL,ty="l")
+  # plot(out_all$DAY,out_all$ETMAX,ty="l")
+  # plot(out_all$DAY,out_all$CUM_RAIN,ty="l")
+  # plot(out_all$DAY,out_all$DEMAND,ty="l")
+  # plot(out_all$DAY,out_all$ERATIO,ty="l",ylim=c(-0.05,1)); abline(h=0.35,col="red",lty=2); abline(h=0.5,col="red")
+  
+  # for (i in 1:nrow(gs)) {
+  #   lines(x=gs[i,1:2],y=c(-0.025,-0.025),lwd=2,col="blue")
+  # }
+  
+  #select the longest growing season
+  cat("Getting final climate metrics \n")
+  gs_sel <- gs[which(gs$GSL==max(gs$GSL)),]
+  gs_data <- gs_metrics(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40,year)
+  gs_data <- cbind(YEAR=year,gs_data)
+  
+  return(gs_data)
+}
+
+
+
+#determine indicators
+# 1. number of stress days (days with ea_thresh<0.15)
+# 2. number of rain days
+# 3. maximum number of consecutive dry days
+# 4. number of days with temperature >10 (Challinor et al. 2004)
+# 5. number of days with temperature >28
+# 5. number of days with temperature >34
+# 6. number of days with temperature >40
+# 7. number of days with temperature >50
+# 8. total rainfall during growing period
+# 9. growing degree days with temperature above 10 Celsius
+
+#calculate gs metrics
+gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40,year) {
+  stress_days <- 0; rain_days <- 0; cons_dd <- 0; ddays <- 0
+  tb <- 0; to <- 0; tx <- 0; txcrit <- 0; txlim <- 0
+  rain <- 0; gdd <- 0
+  
+  gs_tmean <- (out_all$TMIN + out_all$TMAX)/2
+  gs_tmean <- mean(gs_tmean)
+  
+  #matrix of dates
+  dgrid <- createDateGrid(year)
+  dgrid$MONTH <- substr(dgrid$MTH.DAY,1,3)
+  dgrid$MONTH <- as.numeric(gsub("M","",dgrid$MONTH))
+  
+  #calc Q1, Q2, Q3, Q4  raindays, rain, tmean
+  days_q1 <- which(dgrid$MONTH %in% c(1:3))
+  rain_q1 <- sum(out_all$RAIN[days_q1])
+  tean_q1 <- (out_all$TMIN + out_all$TMAX)/2
+  tean_q1 <- mean(tean_q1[days_q1])
+  rdays_q1 <- length(which(out_all$RAIN[days_q1] > 0))
+  
+  days_q2 <- which(dgrid$MONTH %in% c(4:6))
+  rain_q2 <- sum(out_all$RAIN[days_q2])
+  tean_q2 <- (out_all$TMIN + out_all$TMAX)/2
+  tean_q2 <- mean(tean_q2[days_q2])
+  rdays_q2 <- length(which(out_all$RAIN[days_q2] > 0))
+  
+  days_q3 <- which(dgrid$MONTH %in% c(7:9))
+  rain_q3 <- sum(out_all$RAIN[days_q3])
+  tean_q3 <- (out_all$TMIN + out_all$TMAX)/2
+  tean_q3 <- mean(tean_q3[days_q3])
+  rdays_q3 <- length(which(out_all$RAIN[days_q3] > 0))
+  
+  days_q4 <- which(dgrid$MONTH %in% c(10:12))
+  rain_q4 <- sum(out_all$RAIN[days_q4])
+  tean_q4 <- (out_all$TMIN + out_all$TMAX)/2
+  tean_q4 <- mean(tean_q4[days_q4])
+  rdays_q4 <- length(which(out_all$RAIN[days_q4] > 0))
+  
+  #calc SEM1, SEM2
+  days_s1 <- which(dgrid$MONTH %in% c(1:6))
+  rain_s1 <- sum(out_all$RAIN[days_s1])
+  tean_s1 <- (out_all$TMIN + out_all$TMAX)/2
+  tean_s1 <- mean(tean_s1[days_s1])
+  rdays_s1 <- length(which(out_all$RAIN[days_s1] > 0))
+  
+  days_s2 <- which(dgrid$MONTH %in% c(7:12))
+  rain_s2 <- sum(out_all$RAIN[days_s2])
+  tean_s2 <- (out_all$TMIN + out_all$TMAX)/2
+  tean_s2 <- mean(tean_s2[days_s2])
+  rdays_s2 <- length(which(out_all$RAIN[days_s2] > 0))
+  
+  #loop through growing season days
+  for (gday in gs_sel$START:gs_sel$END) {
+    if (out_all$ERATIO[gday] < thresh) {stress_days <- stress_days+1}
+    if (out_all$RAIN[gday] > 0) {rain_days <- rain_days+1}
+    if (out_all$RAIN[gday] == 0) {
+      #cat(ddays," ")
+      ddays <- ddays+1
+      if (ddays >= cons_dd) {
+        cons_dd <- ddays
+      }
+    } else {
+      ddays <- 0
+    }
+    tmean <- (out_all$TMIN[gday]+out_all$TMAX[gday])/2
+    if (tmean > 10) {tb <- tb+1}
+    if (tmean > 28) {to <- to+1}
+    if (tmean > 50) {tx <- tx+1}
+    if (out_all$TMAX[gday] > 34) {txcrit <- txcrit+1}
+    if (out_all$TMAX[gday] > 40) {txlim <- txlim+1}
+    rain <- rain+out_all$RAIN[gday]
+    
+    if (tmean < tbase) {
+      gdd <- gdd+0
+    } else  if (tmean >= tbase & tmean <= topt) {
+      gdd <- gdd + (tmean-tbase)
+    } else if (tmean > topt) {
+      gdd <- gdd + (topt-tbase)
+    }
+    
+  }
+  out <- data.frame(RAIN=rain,GDD=gdd,STRESS_DAYS=stress_days,RDAYS=rain_days,
+                    X_CONS_DD=cons_dd,D_TB=tb,D_TO=to,D_TX=tx,
+                    D_TXCRIT=txcrit,D_TXLIM=txlim,GS_TMEAN=gs_tmean,
+                    Q1_TMEAN=tean_q1,Q1_RAIN=rain_q1,Q1_RDAYS=rdays_q1,
+                    Q2_TMEAN=tean_q2,Q2_RAIN=rain_q2,Q2_RDAYS=rdays_q2,
+                    Q3_TMEAN=tean_q3,Q3_RAIN=rain_q3,Q3_RDAYS=rdays_q3,
+                    Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,
+                    S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,
+                    S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2)
+  return(out)
+}
+
+
+
 #to linearise monthly data
 linearise <- function(input_vals) {
   day_mid <- c(-15,16,45,75,106,136,167,197,228,259,289,320,350,381)
