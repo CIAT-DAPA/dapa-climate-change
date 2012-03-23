@@ -70,11 +70,11 @@ getRawGSOD <- function(gsodDir,yr,rg) {
       
       #make NA all those data that are untrustable, RAIN.FLAG == I | A | B | C | E
       stData$RAIN[which(stData$RAIN.FLAG=="I")] <- NA
-      stData$RAIN[which(stData$RAIN.FLAG=="A")] <- NA
-      stData$RAIN[which(stData$RAIN.FLAG=="B")] <- NA
-      stData$RAIN[which(stData$RAIN.FLAG=="C")] <- NA
-      stData$RAIN[which(stData$RAIN.FLAG=="E")] <- NA
-      
+#       stData$RAIN[which(stData$RAIN.FLAG=="A")] <- NA
+#       stData$RAIN[which(stData$RAIN.FLAG=="B")] <- NA
+#       stData$RAIN[which(stData$RAIN.FLAG=="C")] <- NA
+#       stData$RAIN[which(stData$RAIN.FLAG=="E")] <- NA
+#       
       #put everything onto matrix
       dd <- stData$RAIN; if (length(dd) == 365) {dd <- c(dd,NA)}
       dayMx[which(dayMx$ID==id),7:372] <- dd
