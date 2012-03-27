@@ -39,6 +39,8 @@ y_eyr <- 1995
 
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
 ydDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
+oDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/signals",sep="")
+if (!file.exists(oDir)) {dir.create(oDir)}
 
 #create mask
 metFile <- raster(ncFile,band=0)
@@ -52,19 +54,48 @@ pCells <- data.frame(CELL=1:ncell(msk))
 pCells$X <- xFromCell(msk,pCells$CELL); pCells$Y <- yFromCell(msk,pCells$CELL)
 pCells$Z <- extract(msk,cbind(X=pCells$X,Y=pCells$Y))
 pCells <- pCells[which(!is.na(pCells$Z)),]
+write.csv(pCells,paste(oDir,"/cells-process.csv",sep=""),quote=F,row.names=F)
 
 # plot(msk)
 # text(x=pCells$X,y=pCells$Y,labels=pCells$CELL,cex=0.35)
 
-cell <- 959 #565
+#parallelisation
+library(snowfall)
+sfInit(parallel=T,cpus=4) #initiate cluster
+
+#export functions and data
+sfExport("pCells")
+sfExport("oDir")
+sfExport("ncFile")
+sfExport("ydDir")
+sfExport("bDir")
+sfExport("sradDir")
+sfExport("tempDir")
+sfExport("y_iyr")
+sfExport("y_eyr")
+sfExport("src.dir")
+sfExport("src.dir2")
+
+#run the control function
+#system.time(sfSapply(as.vector(pCells$CELL), cell_wrapper))
+system.time(sfSapply(as.vector(pCells$CELL[187:341]), cell_wrapper))
+
+#stop the cluster
+sfStop()
+
+
+#cell_wrapper(600)
+
+
+#for a given cell extract the yield data and make the correlation
+techn <- "loe"
+yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",(y_iyr-1900):(y_eyr-1900),".asc",sep=""))
+
+cell <- pCells$CELL[50]
 x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
 
-#loop through years
-for (yr in y_iyr:y_eyr) {
-  gs_data <- processYear(ncFile=ncFile,year=yr,x,y,tempDir=tempDir,sradDir=sradDir)
-  if (year==y_iyr) {
-      gs_out <- gs_data
-    } else {
-      gs_out <- rbind(gs_out,gs_data)
-    }
-}
+yd_vals <- extract(yd_stk,cbind(X=x,Y=y))
+cl_data <- read.csv(paste(oDir,"/climate_cell-",cell,".csv",sep=""))
+
+
+
