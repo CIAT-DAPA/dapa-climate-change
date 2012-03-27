@@ -2,6 +2,29 @@
 #March 2012
 #CIAT / CCAFS / UoL
 
+
+#wrap for a given cell to be able to further parallelise
+cell_wrapper <- function(cell) {
+  library(raster)
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+  source(paste(src.dir,"/watbal.R",sep=""))
+  source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+  if (!file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
+    x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
+    #loop through years
+    for (yr in y_iyr:y_eyr) {
+      gs_data <- processYear(ncFile=ncFile,year=yr,x,y,tempDir=tempDir,sradDir=sradDir)
+      if (yr==y_iyr) {
+        gs_out <- gs_data
+      } else {
+        gs_out <- rbind(gs_out,gs_data)
+      }
+    }
+    write.csv(gs_out,paste(oDir,"/climate_cell-",cell,".csv",sep=""),quote=F,row.names=F)
+  }
+}
+
+
 #get relevant growing season metrics for a given year
 processYear <- function(ncFile,year,x,y,tempDir,sradDir) {
   cat("\nProcessing year",year,"\n")
@@ -19,26 +42,62 @@ processYear <- function(ncFile,year,x,y,tempDir,sradDir) {
   #need to load monthly temperature data
   #read 14 months
   cat("Extracting temperature data \n")
-  tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn/tmn_",(year-1),"_12",sep=""),
-                    paste(tempDir,"/monthly_grids/tmn/tmn_",year,"_",1:12,sep=""),
-                    paste(tempDir,"/monthly_grids/tmn/tmn_",(year+1),"_1",sep="")))
+  tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year-1),"_12.asc",sep=""),
+                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",year,"_",1:12,".asc",sep=""),
+                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year+1),"_1.asc",sep="")))
   tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+  
+  #if tmax data is NA then extract from nearest pixel
+  if (is.na(tmin_vals[1])) {
+    rs_t <- raster(tmin_stk)
+    rs_t[] <- 1:ncell(rs_t)
+    
+    rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+    rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
+    xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+    tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+  }
+  
   daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
   out_all$TMIN <- daily_tmin #put data into matrix
   
-  tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx/tmx_",(year-1),"_12",sep=""),
-                    paste(tempDir,"/monthly_grids/tmx/tmx_",year,"_",1:12,sep=""),
-                    paste(tempDir,"/monthly_grids/tmx/tmx_",(year+1),"_1",sep="")))
+  tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year-1),"_12.asc",sep=""),
+                    paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",year,"_",1:12,".asc",sep=""),
+                    paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year+1),"_1.asc",sep="")))
   tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+  
+  #if tmax data is NA then extract from nearest pixel
+  if (is.na(tmax_vals[1])) {
+    rs_t <- raster(tmax_stk)
+    rs_t[] <- 1:ncell(rs_t)
+    
+    rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+    rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
+    xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+    tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+  }
+  
   daily_tmax <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
   out_all$TMAX <- daily_tmax #put data into matrix
   
   #load monthly solar radiation data
   cat("Extracting solar radiation data \n")
-  srad_stk <- stack(c(paste(sradDir,"/srad/srad_","12.asc",sep=""),
-                    paste(sradDir,"/srad/srad_",1:12,".asc",sep=""),
-                    paste(sradDir,"/srad/srad_","1.asc",sep="")))
+  srad_stk <- stack(c(paste(sradDir,"/srad_1dd/srad_","12.asc",sep=""),
+                    paste(sradDir,"/srad_1dd/srad_",1:12,".asc",sep=""),
+                    paste(sradDir,"/srad_1dd/srad_","1.asc",sep="")))
   srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
+  
+  #if radiation data is NA then extract from nearest pixel
+  if (is.na(srad_vals[1])) {
+    rs_t <- raster(srad_stk)
+    rs_t[] <- 1:ncell(rs_t)
+    
+    rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+    rs_d[which(is.na(srad_stk[[1]][]))] <- NA
+    xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+    srad_vals <- extract(srad_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+  }
+  
   daily_srad <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
   out_all$SRAD <- daily_srad*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
   
