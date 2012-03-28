@@ -34,6 +34,7 @@ y_eyr <- 1995
               #upto 30th November - in Peninsular Zone
 #     5. Very early: mid-October (De et al. 1983) (http://journals.cambridge.org/action/displayAbstract?fromPage=online&aid=4596924)
 #     6. Planting should be done when tmean < 22C
+#     7. Harvest is likely to be ~April
 
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
 ydDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
@@ -58,8 +59,7 @@ write.csv(pCells,paste(oDir,"/cells-process.csv",sep=""),quote=F,row.names=F)
 # text(x=pCells$X,y=pCells$Y,labels=pCells$CELL,cex=0.35)
 
 ###Parameters
-sd_default=165; ed_default=225
-thresh=0.5
+sd_default=165; ed_default=225; thresh=50
 tbase=0; topt=22; tmax=30
 tcrit=34; tlim=100
 
@@ -68,6 +68,8 @@ library(snowfall)
 sfInit(parallel=T,cpus=4) #initiate cluster
 
 #export functions and data
+sfExport("sd_default"); sfExport("ed_default"); sfExport("thresh")
+sfExport("tbase"); sfExport("topt"); sfExport("tmax"); sfExport("tcrit"); sfExport("tlim")
 sfExport("pCells")
 sfExport("oDir")
 sfExport("ncFile")

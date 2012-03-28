@@ -70,6 +70,8 @@ library(snowfall)
 sfInit(parallel=T,cpus=4) #initiate cluster
 
 #export functions and data
+sfExport("sd_default"); sfExport("ed_default"); sfExport("thresh")
+sfExport("tbase"); sfExport("topt"); sfExport("tmax"); sfExport("tcrit"); sfExport("tlim")
 sfExport("pCells")
 sfExport("oDir")
 sfExport("ncFile")
