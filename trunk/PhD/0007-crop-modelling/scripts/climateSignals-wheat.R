@@ -23,19 +23,17 @@ y_iyr <- 1966
 y_eyr <- 1995
 
 #Planting dates as in literature
-#summer (only separated in Sardana and Kandhola 2007):
-#         1. End of April to early May
-#khariff: summer rainfed. 
-#         1. From first week of June to last week of July (Talawar 2004) (regular and late monsoon)
-#         2. From end of May to early June (Sardana and Kandhola 2007) (pre-monsoon)
-#         3. Third week of June (Singh and Oswalt 1995)
-#         4. First half of July (Singh et al. 1986)
-#         5. 20th April (normal summer) (Harinath and Vasanthi 1998 http://www.indianjournals.com/ijor.aspx?target=ijor:ijpp1&volume=26&issue=2&article=001)
-#rabi: winter irrigated
-#         1. From mid December to mid January (Ramadoss and Myers 2004 http://www.regional.org.au/au/asa/2004/poster/4/1/2/1243_ramadoss.htm)
-#         2. Mid September to first of November
-#         3. Early rabi: 5-20 October (Harinath and Vasanthi 1998 http://www.indianjournals.com/ijor.aspx?target=ijor:ijpp1&volume=26&issue=2&article=001)
-#         4. Normal rabi: 5 November (Harinath and Vasanthi 1998 http://www.indianjournals.com/ijor.aspx?target=ijor:ijpp1&volume=26&issue=2&article=001)
+#     1. Early: 10 November (Lobell et al. 2012)
+#     2. Normal: 25 November (Lobell et al. 2012)
+#     3. Late: 10 December (Lobell et al. 2012)
+#     4. Last Dates upto which sowing would be economical are 
+#        (http://krishisewa.com/articles/w_sowing.html)
+#        zones at (http://krishisewa.com/krishi/Azone.html)
+              #upto 25th December - in North-West plain Zone
+              #upto 10th December - in North-East plain & Central Zone
+              #upto 30th November - in Peninsular Zone
+#     5. Very early: mid-October (De et al. 1983) (http://journals.cambridge.org/action/displayAbstract?fromPage=online&aid=4596924)
+#     6. Planting should be done when tmean < 22C
 
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
 ydDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
@@ -62,8 +60,8 @@ write.csv(pCells,paste(oDir,"/cells-process.csv",sep=""),quote=F,row.names=F)
 ###Parameters
 sd_default=165; ed_default=225
 thresh=0.5
-tbase=10; topt=28; tmax=50
-tcrit=34; tlim=40
+tbase=0; topt=22; tmax=30
+tcrit=34; tlim=100
 
 #parallelisation
 library(snowfall)
