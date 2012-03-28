@@ -77,8 +77,7 @@ sfExport("src.dir")
 sfExport("src.dir2")
 
 #run the control function
-#system.time(sfSapply(as.vector(pCells$CELL), cell_wrapper))
-system.time(sfSapply(as.vector(pCells$CELL[187:341]), cell_wrapper))
+system.time(sfSapply(as.vector(pCells$CELL), cell_wrapper))
 
 #stop the cluster
 sfStop()
@@ -89,13 +88,78 @@ sfStop()
 
 #for a given cell extract the yield data and make the correlation
 techn <- "loe"
-yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",(y_iyr-1900):(y_eyr-1900),".asc",sep=""))
 
-cell <- pCells$CELL[50]
-x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
+calcSignals <- function(techn,ydDir,oDir) {
+  #loading yield data stack
+  yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",(y_iyr-1900):(y_eyr-1900),".asc",sep=""))
+  
+  #loop through gridcells
+  for (cell in pCells$CELL) {
+    cat("Processing cell",cell,"\n")
+    x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
+    
+    yd_vals <- extract(yd_stk,cbind(X=x,Y=y))
+    if (file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
+      cl_data <- read.csv(paste(oDir,"/climate_cell-",cell,".csv",sep=""))
+      
+      all_data <- cl_data
+      all_data$YIELD <- t(yd_vals)
+      all_data <- all_data[which(all_data$YIELD!=0),]
+      all_data <- all_data[which(!is.na(all_data$YIELD)),]
+      
+      env_vars <- names(all_data)[2:30]
+      
+      #loop through each possible variable
+      for (evar in env_vars) {
+        #perform the correlation test
+        if (nrow(all_data)>=2) {
+          ct <- cor.test(all_data$YIELD,all_data[,evar])
+        } else {
+          ct <- list()
+          ct$estimate <- NA
+          ct$p.value <- NA
+        }
+        if (evar == env_vars[1]) {
+          out_row <- data.frame(CELL=cell,LON=x,LAT=y,NOBS=nrow(all_data),R=ct$estimate,PVAL=ct$p.value)
+          names(out_row)[5:6] <- c(paste(evar,c(".R",".PVAL"),sep=""))
+          out_all <- out_row
+        } else {
+          out_row <- data.frame(R=ct$estimate,PVAL=ct$p.value)
+          names(out_row) <- c(paste(evar,c(".R",".PVAL"),sep=""))
+          out_all <- cbind(out_all,out_row)
+        }
+      }
+    } else {
+      out_all <- c(cell,x,y,0,rep(NA,times=58))
+    }
+    
+    if (cell == pCells$CELL[1]) {
+      out_sign <- out_all
+    } else {
+      out_sign <- rbind(out_sign,out_all)
+    }
+  }
+  oSignDir <- paste(oDir,"/1dd_signals",sep="")
+  if (!file.exists(oSignDir)) {dir.create(oSignDir)}
+  
+  oTechDir <- paste(oSignDir,"/loe-signals",sep="")
+  if (!file.exists(oTechDir)) {dir.create(oTechDir)}
+  
+  write.csv(out_sign,paste(oTechDir,"/signals-",techn,".csv",sep=""),quote=F,row.names=F)
+  
+  #write rasters
+  rs_names <- names(out_sign)[5:ncol(out_sign)]
+  cat("Writing rasters\n")
+  for (rname in rs_names) {
+    out_rs <- raster(msk)
+    out_rs[pCells$CELL] <- out_sign[,rname]
+    #plot(out_rs)
+    out_rs <- writeRaster(out_rs,paste(oTechDir,"/",techn,"-",rname,".asc",sep=""),format="ascii")
+  }
+  return(oTechDir)
+}
 
-yd_vals <- extract(yd_stk,cbind(X=x,Y=y))
-cl_data <- read.csv(paste(oDir,"/climate_cell-",cell,".csv",sep=""))
+
 
 
 
