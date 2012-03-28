@@ -13,7 +13,9 @@ cell_wrapper <- function(cell) {
     x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
     #loop through years
     for (yr in y_iyr:y_eyr) {
-      gs_data <- processYear(ncFile=ncFile,year=yr,x,y,tempDir=tempDir,sradDir=sradDir)
+      gs_data <- processYear(ncFile=ncFile,year=yr,x,y,tempDir=tempDir,sradDir=sradDir,
+                             sd_default=sd_default,ed_default=ed_default,thresh=thresh,
+                             tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
       if (yr==y_iyr) {
         gs_out <- gs_data
       } else {
@@ -26,7 +28,8 @@ cell_wrapper <- function(cell) {
 
 
 #get relevant growing season metrics for a given year
-processYear <- function(ncFile,year,x,y,tempDir,sradDir) {
+processYear <- function(ncFile,year,x,y,tempDir,sradDir,sd_default=165,ed_default=225,
+                        thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40) {
   cat("\nProcessing year",year,"\n")
   nd <- leap(year)
   
@@ -109,7 +112,7 @@ processYear <- function(ncFile,year,x,y,tempDir,sradDir) {
   
   #calculate growing seasons
   cat("Find out growing seasons \n")
-  gs <- gsl_find(out_all$ERATIO,ea_thresh=0.5,n_start=5,n_end=12,sd_default=165,ed_default=225)
+  gs <- gsl_find(out_all$ERATIO,ea_thresh=0.5,n_start=5,n_end=12,sd_default=sd_default,ed_default=ed_default)
   gs$GSL <- gs$END-gs$START
   
   # plot(out_all$DAY,out_all$RAIN,ty="l")
@@ -131,7 +134,7 @@ processYear <- function(ncFile,year,x,y,tempDir,sradDir) {
   #select the longest growing season
   cat("Getting final climate metrics \n")
   gs_sel <- gs[which(gs$GSL==max(gs$GSL)),]
-  gs_data <- gs_metrics(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40,year)
+  gs_data <- gs_metrics(out_all,gs_sel,thresh=thresh,tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim,year)
   gs_data <- cbind(YEAR=year,gs_data)
   
   return(gs_data)
