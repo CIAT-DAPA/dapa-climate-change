@@ -9,7 +9,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python CopyRasters.py F:\NewFolder G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\daily_grids\2028\Wsmean"
+	print "   - ie: python CopyRasters.py D:\Workspace\Danny\all\all_grids D:\Workspace\Danny\all\Monfreda_Without_0"
 	sys.exit(1)
 
 # Arguments
@@ -25,8 +25,20 @@ gp.workspace = dirbase
 
 # Get a list of grids in the workspace of each folder
 print "\t ..listing grids into " + gp.workspace
-rasters = sorted(gp.ListRasters("", "GRID"))
+
+# for month in range(1, 12 + 1, 1):
+	# raster = gp.workspace + "\\tean_" + str(month)
+	# gp.copy_management(raster, dirout + "\\tmean_" + str(month))
+	
+rasters = sorted(gp.ListRasters("*_ha", "GRID"))
 for raster in rasters:
-	gp.copy_management(raster, dirout + "\\" + raster)
+	# gp.copy_management(raster, dirout + "\\" + raster)
+	gp.CheckOutExtension("Spatial")
+	InExpression = 'setnull("' + raster + '" == 0,"' + raster + '")'
+	print InExpression
+	OutRaster = dirout + "\\" + raster
+	gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
+    # Check out Spatial Analyst extension license
+    
 	
 print "\t ..done!!"

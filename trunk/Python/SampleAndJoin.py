@@ -16,12 +16,12 @@ print "   EXTRACT VALUES   "
 print "~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
-gp.workspace = "W:\ClimateData\WorldClim_data\Global_30s"
-mask = "D:\Workspace\Nyando.shp"
-variables = ["prec", "tmin", "tmax", "tmean"]
+gp.workspace = "D:\Workspace\summary\2020_2049"
+mask = "D:\Workspace\col_summarice\col_centroids.shp"
+# variables = ["prec", "tmin", "tmax", "tmean"]
 
 # Get a list of grids in the workspace of each folder
-dsList = gp.ListDatasets("*", "all")
+dsList = gp.ListRasters("*", "")
 
 lista = ""
 for ds in dsList:
@@ -29,7 +29,7 @@ for ds in dsList:
 
 	#Set local variables
 	InPointsFC = mask 
-	OutPointsFC = "D:\\Workspace\\Nyando\\" + ds + ".dbf"
+	OutPointsFC = gp.workspace + "\\" + ds + ".dbf"
 
 	#Check out Spatial Analyst extension license
 	gp.CheckOutExtension("Spatial")
@@ -37,17 +37,17 @@ for ds in dsList:
 	#Process: Cell Statistics...
 	gp.Sample_sa(ds, InPointsFC, OutPointsFC, "")
 
-gp.workspace = "D:\Workspace\Nyando"
+# gp.workspace = "D:\Workspace\Nyando"
 
-# Get a list of shps 
-for variable in variables:
+# # Get a list of shps 
+# for variable in variables:
 
-	for month in range (2, 12 + 1, 1):
+	# for month in range (2, 12 + 1, 1):
 	
-		print str(variable) + " " + str(month)
-		InData = gp.workspace + "\\" + str(variable) + "_1.dbf"
-		JoinData = gp.workspace + "\\" + str(variable) + "_" + str(month) + ".dbf"
-		gp.joinfield (InData, "mask", JoinData, "mask", str(variable) + "_" + str(month))
+		# print str(variable) + " " + str(month)
+		# InData = gp.workspace + "\\" + str(variable) + "_1.dbf"
+		# JoinData = gp.workspace + "\\" + str(variable) + "_" + str(month) + ".dbf"
+		# gp.joinfield (InData, "mask", JoinData, "mask", str(variable) + "_" + str(month))
 		
 
 print "done"
