@@ -18,7 +18,7 @@ print "\n"
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ExtractValues_WorldClim.py K:\ClimateData\WorldClim_data\Global_10min D:\Workspace\Osana\uruguay.shp D:\Workspace\Osana\wc_uruguay"
+	print "   - ie: python ExtractValues_WorldClim.py K:\ClimateData\WorldClim_data\Global_30s D:\Workspace\jramirez\lushoto.shp D:\Workspace\Flora\extract_wc_8"
 	sys.exit(1)
 gp.CheckOutExtension("Spatial")
 # Arguments

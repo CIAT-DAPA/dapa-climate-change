@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Average_GCMDownscaled_interpolations.py L:\climate_change\IPCC_CMIP3 A2 D:\climate_change\IPCC_CMIP3\ 30s interpolations D:\Masks\COL_adm\COL_adm0.dbf"
+	print "   - ie: python Average_GCMDownscaled_interpolations.py L:\climate_change\IPCC_CMIP3 A2 D:\climate_change\IPCC_CMIP3 30s interpolations D:\Masks\COL_adm\COL_adm0.dbf"
 	print "   Syntax	: <code.py>, <dirbase>, <scenario>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   dirout	: Out folder of txt describe archive"
@@ -84,52 +84,70 @@ for period in periodlist:
 				print "\n cutting " + variable + " done"
 	
 		LISTA2 = '"' + diroutcut + "\\tmax;" + diroutcut + '\\tmin"'
-		print LISTA2
+
 		if not gp.Exists(diroutcut + "\\tmean"):
 			gp.CellStatistics_sa(LISTA2, diroutcut + "\\tmean", "MEAN")
 		
 
-# for period in periodlist:
+print "Correcting grids"
+		
+for model in modellist:
+	for period in periodlist:
+
+		raster = dirout + "\\SRES_" + scenario + "\\" + type + "\\" + model + "\\" + period + "\\_cut\\tmean"
+		print model, period, os.path.basename(raster)
+		InExpression = raster + " / 100" 
+		gp.SingleOutputMapAlgebra_sa(InExpression, raster + "_c")
+		
+		raster2 = dirout + "\\SRES_" + scenario + "\\" + type + "\\" + model + "\\" + period + "\\_cut\\prec"
+		print model, period, os.path.basename(raster2)
+		InExpression = raster2 + " / 100" 
+		gp.SingleOutputMapAlgebra_sa(InExpression, raster2 + "_c")
+
+for period in periodlist:
 	
-	# lista = ""	
-	# for model in modellist:
-		# raster = dirout + "\\SRES_" + scenario + "\\" + type + "\\" + model + "\\" + period + "\\_cut\\tmean"
-		# print " adding.. " + raster
-		# lista = lista + ";" + raster
-	# LISTA = "\"" + lista[1:] + "\""
-	# print LISTA
-	# print "averaging \n"
-
-	# diroutSta = dirout + "\\SRES_" + scenario + "\\" + type
-
-	# gp.CellStatistics_sa(LISTA, diroutSta + "\\mean_t", "MEAN")
-	# gp.CellStatistics_sa(LISTA, diroutSta + "\\range_t", "RANGE")
-	# gp.CellStatistics_sa(LISTA, diroutSta + "\\std_t", "STD")
-	# InExpression = diroutSta + "\\std_t" + " / " + diroutSta + "\\mean_t"
-	# gp.SingleOutputMapAlgebra_sa(InExpression, diroutSta + "\\cv_t")
-
-	# print "done!"
-
-# for period in periodlist:
+	lista = ""	
+	for model in modellist:
+		raster = dirout + "\\SRES_" + scenario + "\\" + type + "\\" + model + "\\" + period + "\\_cut\\tmean_c"
+		print " adding.. " + raster
+		lista = lista + ";" + raster
+	LISTA = "\"" + lista[1:] + "\""
 	
-	# lista = ""	
-	# for model in modellist:
-		# raster = dirout + "\\SRES_" + scenario + "\\" + type + "\\" + model + "\\" + period + "\\_cut\\prec"
-		# print " adding.. " + raster
-		# lista = lista + ";" + raster
-	# LISTA = "\"" + lista[1:] + "\""
-	# print LISTA
-	# print "averaging \n"
 
-	# diroutSta = dirout + "\\SRES_" + scenario + "\\" + type
+	diroutSta = dirout + "\\SRES_" + scenario + "\\" + type + "\\summary\\" + period
+	if not os.path.exists(diroutSta):
+		os.system('mkdir ' + diroutSta)
+	
+	print period, model, "tmean_c, mean"
+	gp.CellStatistics_sa(LISTA, diroutSta + "\\mean_t", "MEAN")
+	print period, model, "tmean_c, range"
+	gp.CellStatistics_sa(LISTA, diroutSta + "\\range_t", "RANGE")
+	print period, model, "tmean_c, std"
+	gp.CellStatistics_sa(LISTA, diroutSta + "\\std_t", "STD")
+	print period, model, "tmean_c, cv"
+	InExpression = diroutSta + "\\std_t" + " / " + diroutSta + "\\mean_t"
+	gp.SingleOutputMapAlgebra_sa(InExpression, diroutSta + "\\cv_t")
 
-	# gp.CellStatistics_sa(LISTA, diroutSta + "\\mean_p", "MEAN")
-	# gp.CellStatistics_sa(LISTA, diroutSta + "\\range_p", "RANGE")
-	# gp.CellStatistics_sa(LISTA, diroutSta + "\\std_p", "STD")
-	# InExpression = diroutSta + "\\std_p" + " / " + diroutSta + "\\mean_p"
-	# gp.SingleOutputMapAlgebra_sa(InExpression, diroutSta + "\\cv_p")
+	print "done!"
 
-	# print "done!"
+	lista = ""	
+	for model in modellist:
+		raster = dirout + "\\SRES_" + scenario + "\\" + type + "\\" + model + "\\" + period + "\\_cut\\prec_c"
+		print " adding.. " + raster
+		lista = lista + ";" + raster
+	LISTA2 = "\"" + lista[1:] + "\""
+
+	print period, model, "prec_c, mean"
+	gp.CellStatistics_sa(LISTA2, diroutSta + "\\mean_p", "MEAN")
+	print period, model, "prec_c, range"
+	gp.CellStatistics_sa(LISTA2, diroutSta + "\\range_p", "RANGE")
+	print period, model, "prec_c, std"
+	gp.CellStatistics_sa(LISTA2, diroutSta + "\\std_p", "STD")
+	InExpression = diroutSta + "\\std_p" + " / " + diroutSta + "\\mean_p"
+	print period, model, "prec_c, cv"
+	gp.SingleOutputMapAlgebra_sa(InExpression, diroutSta + "\\cv_p")
+
+	print "done!"
 	
 	
 
