@@ -12,9 +12,9 @@ src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
 source(paste(src.dir,"/getPOWER-functions.R",sep=""))
 
 #Basic data
-bDir <- "F:/PhD-work/crop-modelling/climate-data"
+bDir <- "D:/CIAT_work/crop-modelling/climate-data"
 powerDir <- paste(bDir,"/POWER-daily",sep="")
-reg <- "eaf"
+reg <- "igp"
 
 #loading mask to get XYs
 msk <- raster(paste(powerDir,"/0_files/rain_",reg,"_dummy.asc",sep=""))
@@ -26,10 +26,6 @@ if (!file.exists(paste(powerDir,"/0_files",sep=""))) {dir.create(paste(powerDir,
 od <- paste(powerDir,"/data-",reg,sep="")
 if (!file.exists(od)) {dir.create(od)}
 
-#parallelisation
-library(snowfall)
-sfInit(parallel=T,cpus=8) #initiate cluster
-
 #loading mask to get XYs
 msk <- raster(paste(powerDir,"/0_files/rain_",reg,"_dummy.asc",sep=""))
 xy <- as.data.frame(xyFromCell(msk,1:ncell(msk)))
@@ -41,7 +37,7 @@ if (!file.exists(od)) {dir.create(od)}
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=8) #initiate cluster
+sfInit(parallel=T,cpus=4) #initiate cluster
 
 #export functions and data
 sfExport("getPOWER")
@@ -54,15 +50,16 @@ controlDownload <- function(i) {
   #cell output folder
   cd <- paste(od,"/cell-",i,sep="")
   if (!file.exists(cd)) {dir.create(cd)}
-  if (!file.exists(paste(cd,"/data.csv",sep=""))) {
-    getPOWER(lat=xy$y[i],lon=xy$x[i],cd)
+  if (!file.exists(paste(cd,"/data_1983-1996.csv",sep=""))) {
+    getPOWER(lat=xy$y[i],lon=xy$x[i],cd,1983,1996)
   } else {
     cat("Cell data already downloaded \n")
   }
 }
 
 #run the control function
-system.time(sfSapply(as.vector(1:ncell(xy)), controlDownload))
+
+system.time(sfSapply(as.vector(1:nrow(xy)), controlDownload))
 
 #stop the cluster
 sfStop()
