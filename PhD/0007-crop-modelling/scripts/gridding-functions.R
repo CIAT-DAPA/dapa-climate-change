@@ -2,6 +2,35 @@
 #February 2012
 #CIAT / CCAFS / UoL
 
+
+#####################################################################
+#function wrapper for gridding a given grid
+#inRs is the high resolution raster with gridvalues to be scaled out
+#outRs is the name and path of output raster
+#naVal is the NA value for those cells that are not already NA
+#rs_dis is a high resolution raster with district IDs
+#rs_c is the reference coarse resolution raster
+#rs_a is a raster containing the area of each coarse gridcell
+#xy is the list of xy values of cells
+gridRaster <- function(inRs,outRs,naVal=-9999,rs_dis,rs_c,rs_a,xy) {
+  library(raster)
+  if (!file.exists(outRs)) {
+    inRs[which(inRs[]==naVal)] <- 0
+    rs_dis <- readAll(rs_dis)
+    rs_c <- readAll(rs_c)
+    rs_a <- readAll(rs_a)
+    
+    #apply the function to the cells 
+    x <- apply(data.frame(CELLID=1:nrow(xy)),1,weightValues,rs_dis,rs_c,rs_a,inRs)
+    
+    #create and write output raster
+    out_rs <- raster(dumm)
+    out_rs[which(!is.na(dumm[]))] <- x
+    out_rs <- writeRaster(out_rs,outRs,format="ascii")
+  }
+}
+
+
 #Functions for yield data gridding
 #####################################################################
 #function wrapper for parallelising the process over years

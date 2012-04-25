@@ -37,8 +37,11 @@ y_eyr <- 1995
 #     7. Harvest is likely to be ~April
 
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
-ydDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
-oDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/signals",sep="")
+mthRainAsc <- paste(bDir,"/climate-data/IND-TropMet",sep="")
+
+cropDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT",sep="")
+ydDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT/raster/gridded",sep="")
+oDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT/signals",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #create mask
@@ -47,32 +50,53 @@ yldFile <- raster(paste(ydDir,"/raw/raw-66.asc",sep=""))
 msk <- maskCreate(metFile,yldFile)
 
 ############
-#determine planting date using pjones algorithm?
 
 pCells <- data.frame(CELL=1:ncell(msk))
 pCells$X <- xFromCell(msk,pCells$CELL); pCells$Y <- yFromCell(msk,pCells$CELL)
 pCells$Z <- extract(msk,cbind(X=pCells$X,Y=pCells$Y))
 pCells <- pCells[which(!is.na(pCells$Z)),]
-write.csv(pCells,paste(oDir,"/cells-process.csv",sep=""),quote=F,row.names=F)
+
+if (!file.exists(paste(oDir,"/cells-process.csv",sep=""))) {
+  write.csv(pCells,paste(oDir,"/cells-process.csv",sep=""),quote=F,row.names=F)
+}
 
 # plot(msk)
 # text(x=pCells$X,y=pCells$Y,labels=pCells$CELL,cex=0.35)
 
-###Parameters
-sd_default=165; ed_default=225; thresh=50
-tbase=0; topt=22; tmax=30
-tcrit=34; tlim=100
+#For irrigated use the Sacks et al. (2010) data
+#load sacks data (scaled to 1dd)
+pday <- raster(paste(cropDir,"/calendar/wwin/plant_lr.asc",sep="")) #planting date
+hday <- raster(paste(cropDir,"/calendar/wwin/harvest_lr.asc",sep="")) #harvest date
+
+#calculate growing season duration
+hdaym <- hday
+hdaym[which(hday[] < pday[])] <- hdaym[which(hday[] < pday[])] + 365
+gdur <- hdaym-pday
+
+#plot(gdur)
+
+#pick a cell and year for a test case
+#yr <- 1966
+#cell <- 427
+
+#x <- cell_wrapper_irr(427)
+
+###############################################################
+###### parallelise the analyses
+tbase=1; topt=22.1; tmax=35.4; tcrit=34; tlim=40
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=4) #initiate cluster
+sfInit(parallel=T,cpus=3) #initiate cluster
 
 #export functions and data
-sfExport("sd_default"); sfExport("ed_default"); sfExport("thresh")
 sfExport("tbase"); sfExport("topt"); sfExport("tmax"); sfExport("tcrit"); sfExport("tlim")
+sfExport("pday"); sfExport("hday")
 sfExport("pCells")
 sfExport("oDir")
 sfExport("ncFile")
+sfExport("mthRainAsc")
+sfExport("cropDir")
 sfExport("ydDir")
 sfExport("bDir")
 sfExport("sradDir")
@@ -83,89 +107,21 @@ sfExport("src.dir")
 sfExport("src.dir2")
 
 #run the control function
-system.time(sfSapply(as.vector(pCells$CELL), cell_wrapper))
+system.time(sfSapply(as.vector(pCells$CELL), cell_wrapper_irr))
 
 #stop the cluster
 sfStop()
 
 
-#cell_wrapper(600)
-
-
+########################################################################
 #for a given cell extract the yield data and make the correlation
+########################################################################
 techn <- "loe"
 
-calcSignals <- function(techn,ydDir,oDir) {
-  #loading yield data stack
-  yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",(y_iyr-1900):(y_eyr-1900),".asc",sep=""))
-  
-  #loop through gridcells
-  for (cell in pCells$CELL) {
-    cat("Processing cell",cell,"\n")
-    x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
-    
-    yd_vals <- extract(yd_stk,cbind(X=x,Y=y))
-    if (file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
-      cl_data <- read.csv(paste(oDir,"/climate_cell-",cell,".csv",sep=""))
-      
-      all_data <- cl_data
-      all_data$YIELD <- t(yd_vals)
-      all_data <- all_data[which(all_data$YIELD!=0),]
-      all_data <- all_data[which(!is.na(all_data$YIELD)),]
-      
-      env_vars <- names(all_data)[2:30]
-      
-      #loop through each possible variable
-      for (evar in env_vars) {
-        #perform the correlation test
-        if (nrow(all_data)>=2) {
-          ct <- cor.test(all_data$YIELD,all_data[,evar])
-        } else {
-          ct <- list()
-          ct$estimate <- NA
-          ct$p.value <- NA
-        }
-        if (evar == env_vars[1]) {
-          out_row <- data.frame(CELL=cell,LON=x,LAT=y,NOBS=nrow(all_data),R=ct$estimate,PVAL=ct$p.value)
-          names(out_row)[5:6] <- c(paste(evar,c(".R",".PVAL"),sep=""))
-          out_all <- out_row
-        } else {
-          out_row <- data.frame(R=ct$estimate,PVAL=ct$p.value)
-          names(out_row) <- c(paste(evar,c(".R",".PVAL"),sep=""))
-          out_all <- cbind(out_all,out_row)
-        }
-      }
-    } else {
-      out_all <- c(cell,x,y,0,rep(NA,times=58))
-    }
-    
-    if (cell == pCells$CELL[1]) {
-      out_sign <- out_all
-    } else {
-      out_sign <- rbind(out_sign,out_all)
-    }
-  }
-  oSignDir <- paste(oDir,"/1dd_signals",sep="")
-  if (!file.exists(oSignDir)) {dir.create(oSignDir)}
-  
-  oTechDir <- paste(oSignDir,"/loe-signals",sep="")
-  if (!file.exists(oTechDir)) {dir.create(oTechDir)}
-  
-  write.csv(out_sign,paste(oTechDir,"/signals-",techn,".csv",sep=""),quote=F,row.names=F)
-  
-  #write rasters
-  rs_names <- names(out_sign)[5:ncol(out_sign)]
-  cat("Writing rasters\n")
-  for (rname in rs_names) {
-    out_rs <- raster(msk)
-    out_rs[pCells$CELL] <- out_sign[,rname]
-    #plot(out_rs)
-    out_rs <- writeRaster(out_rs,paste(oTechDir,"/",techn,"-",rname,".asc",sep=""),format="ascii")
-  }
-  return(oTechDir)
-}
-
-
-
+#for a given cell extract the yield data and make the correlation for each detrending technique
+x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir)
 
 
