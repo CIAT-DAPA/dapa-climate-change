@@ -2,8 +2,133 @@
 #March 2012
 #CIAT / CCAFS / UoL
 
+#plot the calculated signals
+plotSignals <- function(techn="lin",oDir,pval) {
+  library(maptools); data(wrld_simpl)
+  
+  #define signal dir and create output dir
+  signalDir <- paste(oDir,"/1dd_signals/",techn,"-signals",sep="")
+  figDir <- paste(oDir,"/1dd_signals/",techn,"-signals/figures",sep="")
+  if (!file.exists(figDir)) {dir.create(figDir)}
+  
+  #list rasters
+  rList <- list.files(signalDir,pattern="\\.R.asc")
+  rList <- gsub(paste(techn,"-",sep=""),"",rList)
+  rList <- gsub(paste(".R.asc"),"",rList)
+  
+  #loop through rasters
+  for (rName in rList) {
+    cat("plotting",rName,"\n")
+    #reading raster
+    rs <- raster(paste(signalDir,"/",techn,"-",rName,".R.asc",sep=""))
+    pv <- raster(paste(signalDir,"/",techn,"-",rName,".PVAL.asc",sep=""))
+    
+    xt <- extent(c(rs@extent@xmin,95,rs@extent@ymin,35))
+    rs <- crop(rs,xt)
+    pv <- crop(pv,xt)
+    
+    #select cells that are below a given pval (normally 0.05 or 0.1)
+    pv_cells <- xyFromCell(pv,which(pv[] <= pval))
+    
+    #get plot area
+    ht <- 1500
+    ratio <- (rs@extent@xmax - rs@extent@xmin)/(rs@extent@ymax - rs@extent@ymin)+0.15
+    wt <- ht/ratio
+    
+    #generate breaks
+    brks <- seq(-1,1,by=0.1)
+    nb <- length(brks)-1
+    cols <- colorRampPalette(c("red","orange","yellow","gray 80","light blue","blue","dark blue"))(nb)
+    
+    #create tiff image
+    tiff(paste(figDir,"/",rName,".tif",sep=""),res=300,compression="lzw",height=ht,width=wt,pointsize=8)
+    par(mar=c(3,3,1,1))
+    plot(rs,col=cols,breaks=brks,lab.breaks=brks,
+         horizontal=T,axes=T,zlim=c(-1,1),legend.width=1,
+         legend.shrink=0.95,useRaster=T)
+    points(pv_cells,pch=20,cex=0.75)
+    plot(wrld_simpl,add=T)
+    grid()
+    dev.off()
+  }
+}
 
-#wrap for a given cell to be able to further parallelise
+
+#
+#calculate climate signals (correlations) over all gridcells
+calcSignals <- function(techn,ydDir,oDir) {
+  #loading yield data stack
+  yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",(y_iyr-1900):(y_eyr-1900),".asc",sep=""))
+  
+  #loop through gridcells
+  for (cell in pCells$CELL) {
+    cat("Processing cell",cell,"\n")
+    x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
+    
+    yd_vals <- extract(yd_stk,cbind(X=x,Y=y))
+    if (file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
+      cl_data <- read.csv(paste(oDir,"/climate_cell-",cell,".csv",sep=""))
+      
+      all_data <- cl_data
+      all_data$YIELD <- t(yd_vals)
+      all_data <- all_data[which(all_data$YIELD!=0),]
+      all_data <- all_data[which(!is.na(all_data$YIELD)),]
+      
+      env_vars <- names(all_data)[2:30]
+      
+      #loop through each possible variable
+      for (evar in env_vars) {
+        #perform the correlation test
+        if (nrow(all_data)>=2) {
+          ct <- cor.test(all_data$YIELD,all_data[,evar])
+        } else {
+          ct <- list()
+          ct$estimate <- NA
+          ct$p.value <- NA
+        }
+        if (evar == env_vars[1]) {
+          out_row <- data.frame(CELL=cell,LON=x,LAT=y,NOBS=nrow(all_data),R=ct$estimate,PVAL=ct$p.value)
+          names(out_row)[5:6] <- c(paste(evar,c(".R",".PVAL"),sep=""))
+          out_all <- out_row
+        } else {
+          out_row <- data.frame(R=ct$estimate,PVAL=ct$p.value)
+          names(out_row) <- c(paste(evar,c(".R",".PVAL"),sep=""))
+          out_all <- cbind(out_all,out_row)
+        }
+      }
+    } else {
+      out_all <- c(cell,x,y,0,rep(NA,times=58))
+    }
+    
+    if (cell == pCells$CELL[1]) {
+      out_sign <- out_all
+    } else {
+      out_sign <- rbind(out_sign,out_all)
+    }
+  }
+  oSignDir <- paste(oDir,"/1dd_signals",sep="")
+  if (!file.exists(oSignDir)) {dir.create(oSignDir)}
+  
+  oTechDir <- paste(oSignDir,"/",techn,"-signals",sep="")
+  if (!file.exists(oTechDir)) {dir.create(oTechDir)}
+  
+  write.csv(out_sign,paste(oTechDir,"/signals-",techn,".csv",sep=""),quote=F,row.names=F)
+  
+  #write rasters
+  rs_names <- names(out_sign)[5:ncol(out_sign)]
+  cat("Writing rasters\n")
+  for (rname in rs_names) {
+    out_rs <- raster(msk)
+    out_rs[pCells$CELL] <- out_sign[,rname]
+    #plot(out_rs)
+    out_rs <- writeRaster(out_rs,paste(oTechDir,"/",techn,"-",rname,".asc",sep=""),format="ascii")
+  }
+  return(oTechDir)
+}
+
+
+
+#wrap for a given cell to be able to further parallelise (for rainfed crops)
 cell_wrapper <- function(cell) {
   library(raster)
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
@@ -13,7 +138,7 @@ cell_wrapper <- function(cell) {
     x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
     #loop through years
     for (yr in y_iyr:y_eyr) {
-      gs_data <- processYear(ncFile=ncFile,year=yr,x,y,tempDir=tempDir,sradDir=sradDir,
+      gs_data <- processYear(ncFile=ncFile,mthRainAsc=mthRainAsc,year=yr,x,y,tempDir=tempDir,sradDir=sradDir,
                              sd_default=sd_default,ed_default=ed_default,thresh=thresh,
                              tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
       if (yr==y_iyr) {
@@ -27,14 +152,49 @@ cell_wrapper <- function(cell) {
 }
 
 
-#get relevant growing season metrics for a given year
-processYear <- function(ncFile,year,x,y,tempDir,sradDir,sd_default=165,ed_default=225,
+################################################################################
+#wrap for a given cell to be able to further parallelise (for irrigated crops)
+cell_wrapper_irr <- function(cell) {
+  library(raster); library(rgdal)
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+  source(paste(src.dir,"/watbal.R",sep=""))
+  source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+  
+  if (!file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
+    #location of cell
+    x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
+    
+    #extract planting dates
+    thisPDay <- round(extract(pday,cbind(X=x,Y=y)),0)
+    thisHDay <- round(extract(hday,cbind(X=x,Y=y)),0)
+    
+    #loop through years
+    for (yr in y_iyr:y_eyr) {
+      cat(yr,"\n")
+      gsmet <- processYear_irr(lon=x,lat=y,year=yr,pDay=thisPDay,hDay=thisHDay,ncFile=ncFile,
+                               mthRainAsc=mthRainAsc,tempDir=tempDir,sradDir=sradDir,
+                               tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
+      
+      if (yr==y_iyr) {
+        gs_out <- gsmet
+      } else {
+        gs_out <- rbind(gs_out,gsmet)
+      }
+    }
+    write.csv(gs_out,paste(oDir,"/climate_cell-",cell,".csv",sep=""),quote=F,row.names=F)
+  }
+}
+
+
+#get relevant growing season metrics for a given year for a rainfed crop
+#that is, using PGJ basic watbal algorithm
+processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,sd_default=165,ed_default=225,
                         thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40) {
   cat("\nProcessing year",year,"\n")
   nd <- leap(year)
   
   #extract daily weather from Indian TropMet grids
-  out_all <- extractDaily(ncFile,x,y,year,nd)
+  out_all <- extractDaily(ncFile,x,y,year,nd,mthRainAsc)
   
   #i need to first calculate the potential evapotranspiration. I will use the Priestley-Taylor equation
   #main references:
@@ -141,8 +301,29 @@ processYear <- function(ncFile,year,x,y,tempDir,sradDir,sd_default=165,ed_defaul
 }
 
 
+####################################################################################
+####################################################################################
+#Wrapper to extract the growing season data for irrigated crops
+processYear_irr <- function(lon,lat,year,pDay,hDay,ncFile,mthRainAsc,tempDir,sradDir,tbase,topt,tmax,tcrit,tlim) {
+  #extract weather series
+  cat("extract weather series\n")
+  wthSeries <- getGSWeather(x=lon,y=lat,yr=year,thisPDay=pDay,thisHDay=hDay,
+                            ncFile=ncFile,mthRainAsc=mthRainAsc,tempDir=tempDir,sradDir=sradDir)
+  
+  #here calculate the growing season and whole year metrics
+  gsWth <- wthSeries$WTH_GS; row.names(gsWth) <- gsWth$DAY
+  yrWth <- wthSeries$WTH_ALL
+  
+  #calculate growing season and yearly seasonal metrics
+  cat("\ncalculating gs and seasonal metrics\n")
+  gsm <- gs_metrics_irr(yr=year,wth_gs=gsWth,wth_all=yrWth,tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
+  gsm <- cbind(YEAR=year,gsm)
+  return(gsm)
+}
 
-#determine indicators
+
+
+#determine indicators for a rainfed crop
 # 1. number of stress days (days with ea_thresh<0.15)
 # 2. number of rain days
 # 3. maximum number of consecutive dry days
@@ -154,7 +335,7 @@ processYear <- function(ncFile,year,x,y,tempDir,sradDir,sd_default=165,ed_defaul
 # 8. total rainfall during growing period
 # 9. growing degree days with temperature above 10 Celsius
 
-#calculate gs metrics
+#calculate gs metrics for a rainfed crop
 gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40,year) {
   stress_days <- 0; rain_days <- 0; cons_dd <- 0; ddays <- 0
   tb <- 0; to <- 0; tx <- 0; txcrit <- 0; txlim <- 0
@@ -220,9 +401,9 @@ gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=
       ddays <- 0
     }
     tmean <- (out_all$TMIN[gday]+out_all$TMAX[gday])/2
-    if (tmean > 10) {tb <- tb+1}
-    if (tmean > 28) {to <- to+1}
-    if (tmean > 50) {tx <- tx+1}
+    if (tmean > tbase) {tb <- tb+1}
+    if (tmean > topt) {to <- to+1}
+    if (tmean > tmax) {tx <- tx+1}
     if (out_all$TMAX[gday] > 34) {txcrit <- txcrit+1}
     if (out_all$TMAX[gday] > 40) {txlim <- txlim+1}
     rain <- rain+out_all$RAIN[gday]
@@ -245,6 +426,130 @@ gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=
                     Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,
                     S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,
                     S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2)
+  return(out)
+}
+
+
+#######################################################################
+#Calculate growing season and overall year metrics for irrigated crops
+#######################################################################
+gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=34,tlim=40) {
+  #init routine values
+  tb <- 0; to <- 0; tx <- 0; gdd <- 0
+  ddays <- 0; cons_dd <- 0
+  
+  #total radiation during the growing season
+  gs_srad <- sum(wth_gs$SRAD)
+  
+  #mean temperature during the growing season
+  gs_tmean <- (wth_gs$TMAX + wth_gs$TMIN) / 2
+  gs_tmean <- mean(gs_tmean)
+  
+  #number of days Tmax above an HTS threshold (Tcrit)
+  d_tcrit <- length(which(wth_gs$TMAX >= tcrit))
+  
+  #number of days Tmax above an HTS threshold (Tlim)
+  d_tlim <- length(which(wth_gs$TMAX >= tlim))
+  
+  #growing degree days using Tb, Topt and Tmax
+  for (d in 1:nrow(wth_gs)) {
+    tmean <- (wth_gs$TMIN[d]+wth_gs$TMAX[d])/2
+    
+    #number of days above Tb, Topt and Tmax, respectively
+    if (tmean > tbase) {tb <- tb+1}
+    if (tmean > topt) {to <- to+1}
+    if (tmean > tmax) {tx <- tx+1}
+    
+    if (tmean < tbase) {
+      gdd <- gdd+0
+    } else  if (tmean >= tbase & tmean <= topt) {
+      gdd <- gdd + (tmean-tbase)
+    } else if (tmean > topt) {
+      gdd <- gdd + (topt-tbase)
+    }
+    
+    #max number of dry days
+    if (wth_gs$RAIN[d] == 0) {
+      ddays <- ddays+1
+      if (ddays >= cons_dd) {
+        cons_dd <- ddays
+      }
+    } else {
+      ddays <- 0
+    }
+  }
+  
+  
+  #total rainfall during the growing season
+  gs_rain <- sum(wth_gs$RAIN)
+  
+  #number of rain days during the growing season
+  gs_rdays <- length(which(wth_gs$RAIN > 0))
+  
+  #matrix of dates
+  dgrid <- createDateGrid(yr)
+  dgrid$MONTH <- substr(dgrid$MTH.DAY,1,3)
+  dgrid$MONTH <- as.numeric(gsub("M","",dgrid$MONTH))
+  
+  #q1 stuff
+  days_q1 <- which(dgrid$MONTH %in% c(1:3))
+  rain_q1 <- sum(wth_all$RAIN[days_q1])
+  tean_q1 <- (wth_all$TMIN + wth_all$TMAX)/2
+  tean_q1 <- mean(tean_q1[days_q1])
+  rdays_q1 <- length(which(wth_all$RAIN[days_q1] > 0))
+  srad_q1 <- sum(wth_all$SRAD[days_q1])
+  
+  #q2 stuff
+  days_q2 <- which(dgrid$MONTH %in% c(4:6))
+  rain_q2 <- sum(wth_all$RAIN[days_q2])
+  tean_q2 <- (wth_all$TMIN + wth_all$TMAX)/2
+  tean_q2 <- mean(tean_q2[days_q2])
+  rdays_q2 <- length(which(wth_all$RAIN[days_q2] > 0))
+  srad_q2 <- sum(wth_all$SRAD[days_q2])
+  
+  #q3 stuff
+  days_q3 <- which(dgrid$MONTH %in% c(7:9))
+  rain_q3 <- sum(wth_all$RAIN[days_q3])
+  tean_q3 <- (wth_all$TMIN + wth_all$TMAX)/2
+  tean_q3 <- mean(tean_q3[days_q3])
+  rdays_q3 <- length(which(wth_all$RAIN[days_q3] > 0))
+  srad_q3 <- sum(wth_all$SRAD[days_q3])
+  
+  #q4 stuff
+  days_q4 <- which(dgrid$MONTH %in% c(10:12))
+  rain_q4 <- sum(wth_all$RAIN[days_q4])
+  tean_q4 <- (wth_all$TMIN + wth_all$TMAX)/2
+  tean_q4 <- mean(tean_q4[days_q4])
+  rdays_q4 <- length(which(wth_all$RAIN[days_q4] > 0))
+  srad_q4 <- sum(wth_all$SRAD[days_q4])
+  
+  #s1 stuff
+  days_s1 <- which(dgrid$MONTH %in% c(1:6))
+  rain_s1 <- sum(wth_all$RAIN[days_s1])
+  tean_s1 <- (wth_all$TMIN + wth_all$TMAX)/2
+  tean_s1 <- mean(tean_s1[days_s1])
+  rdays_s1 <- length(which(wth_all$RAIN[days_s1] > 0))
+  srad_s1 <- sum(wth_all$SRAD[days_s1])
+  
+  #s2 stuff
+  days_s2 <- which(dgrid$MONTH %in% c(7:12))
+  rain_s2 <- sum(wth_all$RAIN[days_s2])
+  tean_s2 <- (wth_all$TMIN + wth_all$TMAX)/2
+  tean_s2 <- mean(tean_s2[days_s2])
+  rdays_s2 <- length(which(wth_all$RAIN[days_s2] > 0))
+  srad_s2 <- sum(wth_all$SRAD[days_s2])
+  
+  #output row
+  out <- data.frame(RAIN=gs_rain,GDD=gdd,RDAYS=gs_rdays,GS_SRAD=gs_srad,
+                    X_CONS_DD=cons_dd,D_TB=tb,D_TO=to,D_TX=tx,
+                    D_TXCRIT=d_tcrit,D_TXLIM=d_tlim,GS_TMEAN=gs_tmean,
+                    Q1_TMEAN=tean_q1,Q1_RAIN=rain_q1,Q1_RDAYS=rdays_q1,Q1_SRAD=srad_q1,
+                    Q2_TMEAN=tean_q2,Q2_RAIN=rain_q2,Q2_RDAYS=rdays_q2,Q2_SRAD=srad_q2,
+                    Q3_TMEAN=tean_q3,Q3_RAIN=rain_q3,Q3_RDAYS=rdays_q3,Q3_SRAD=srad_q3,
+                    Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,Q4_SRAD=srad_q4,
+                    S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,S1_SRAD=srad_s1,
+                    S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2,S2_SRAD=srad_s2)
+  
   return(out)
 }
 
@@ -286,6 +591,290 @@ maskCreate <- function(met,yld) {
 }
 
 
+#########################################################################################
+#########################################################################################
+#extract a year's series of weather conditions for a growing season specified by the planting
+#and harvest date (normally from Sacks et al. 2010)
+getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,sradDir) {
+  
+  #
+  #Verify if planting date is before or after harvest date
+  if (thisPDay >= thisHDay) {
+    cat("crop was planted in previous year, extracting that weather data also \n")
+    pyr <- yr-1
+    sowPos <- findNCPos(pyr,thisPDay)
+    harPos <- findNCPos(yr,thisHDay)
+    
+    cat("planting year: ")
+    nd <- leap(pyr)
+    rainPlant <- extractDaily(ncFile,x,y,pyr,nd,mthRainAsc)
+    
+    nd <- leap(yr)
+    cat("harvest year: ")
+    rainHarv <- extractDaily(ncFile,x,y,yr,nd,mthRainAsc)
+    
+    #do a dataset with the actual planting dates
+    wthGS <- rbind(rainPlant[thisPDay:(nrow(rainPlant)),],rainHarv[1:thisHDay,])
+    wthGS$DAY <- 1:nrow(wthGS)
+    
+    #do a dataset with half one year to half the next
+    if (nd == 365) {
+      wthAll <- rbind(rainPlant[183:(nrow(rainPlant)),],rainHarv[1:182,])
+    } else {
+      wthAll <- rbind(rainPlant[183:(nrow(rainPlant)),],rainHarv[1:183,])
+    }
+    wthAll$DAY <- 1:nrow(wthAll)
+    
+    #get the temperature data, planting year
+    cat("extracting min temperature data \n")
+    tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(pyr-1),"_12.asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",pyr,"_",1:12,".asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(pyr+1),"_1.asc",sep="")))
+    tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+    
+    #if tmin data is NA then extract from nearest pixel
+    if (is.na(tmin_vals[1])) {
+      rs_t <- raster(tmin_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    nd <- leap(pyr)
+    daily_tminPlant <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
+    
+    #harvest year
+    tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(yr-1),"_12.asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",yr,"_",1:12,".asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(yr+1),"_1.asc",sep="")))
+    tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+    
+    #if tmin data is NA then extract from nearest pixel
+    if (is.na(tmin_vals[1])) {
+      rs_t <- raster(tmin_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    nd <- leap(yr)
+    daily_tminHarv <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
+    
+    #do a dataset with the actual planting dates
+    tminGS <- c(daily_tminPlant[thisPDay:(length(daily_tminPlant))],daily_tminHarv[1:thisHDay])
+    wthGS$TMIN <- tminGS
+    
+    #do a dataset with half one year to half the next
+    if (nd == 365) {
+      tminAll <- c(daily_tminPlant[183:(length(daily_tminPlant))],daily_tminHarv[1:182])
+    } else {
+      tminAll <- c(daily_tminPlant[183:(length(daily_tminPlant))],daily_tminHarv[1:183])
+    }
+    wthAll$TMIN <- tminAll
+    
+    
+    ###### Maximum temperature, planting year
+    cat("extracting max temperature data \n")
+    tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(pyr-1),"_12.asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",pyr,"_",1:12,".asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(pyr+1),"_1.asc",sep="")))
+    tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+    
+    #if tmax data is NA then extract from nearest pixel
+    if (is.na(tmax_vals[1])) {
+      rs_t <- raster(tmax_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    nd <- leap(pyr)
+    daily_tmaxPlant <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
+    
+    #harvest year
+    tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(yr-1),"_12.asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",yr,"_",1:12,".asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(yr+1),"_1.asc",sep="")))
+    tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+    
+    #if tmax data is NA then extract from nearest pixel
+    if (is.na(tmax_vals[1])) {
+      rs_t <- raster(tmax_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    nd <- leap(yr)
+    daily_tmaxHarv <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
+    
+    #do a dataset with the actual planting dates
+    tmaxGS <- c(daily_tmaxPlant[thisPDay:(length(daily_tmaxPlant))],daily_tmaxHarv[1:thisHDay])
+    wthGS$TMAX <- tmaxGS
+    
+    #do a dataset with half one year to half the next
+    if (nd == 365) {
+      tmaxAll <- c(daily_tmaxPlant[183:(length(daily_tmaxPlant))],daily_tmaxHarv[1:182])
+    } else {
+      tmaxAll <- c(daily_tmaxPlant[183:(length(daily_tmaxPlant))],daily_tmaxHarv[1:183])
+    }
+    wthAll$TMAX <- tmaxAll
+    
+    #get the radiation data
+    #load monthly solar radiation data
+    cat("extracting solar radiation data \n")
+    srad_stk <- stack(c(paste(sradDir,"/srad_1dd/srad_","12.asc",sep=""),
+                        paste(sradDir,"/srad_1dd/srad_",1:12,".asc",sep=""),
+                        paste(sradDir,"/srad_1dd/srad_","1.asc",sep="")))
+    srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
+    
+    #if radiation data is NA then extract from nearest pixel
+    if (is.na(srad_vals[1])) {
+      rs_t <- raster(srad_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(srad_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      srad_vals <- extract(srad_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    nd <- leap(pyr)
+    daily_sradPlant <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
+    
+    nd <- leap(yr)
+    daily_sradHarv <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
+    
+    #planting to harvest
+    sradGS <- c(daily_sradPlant[thisPDay:(length(daily_sradPlant))],daily_sradHarv[1:thisHDay])
+    wthGS$SRAD <- sradGS*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+    
+    #whole year
+    if (nd == 365) {
+      sradAll <- c(daily_sradPlant[183:(length(daily_sradPlant))],daily_sradHarv[1:182])
+    } else {
+      sradAll <- c(daily_sradPlant[183:(length(daily_sradPlant))],daily_sradHarv[1:183])
+    }
+    wthAll$SRAD <- sradAll*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+    
+  } else {
+    
+    ########################################
+    #####Crop was planted in the same year
+    ########################################
+    cat("crop was planted and harvested in the same year \n")
+    
+    #extract rainfall
+    nd <- leap(yr)
+    rain_daily <- extractDaily(ncFile,x,y,yr,nd,mthRainAsc)
+    
+    #do a dataset with the actual planting dates
+    wthGS <- rbind(rain_daily[thisPDay:thisHDay,])
+    wthGS$DAY <- 1:nrow(wthGS)
+    
+    #do a dataset with half one year to half the next
+    wthAll <- rain_daily
+    
+    #get the temperature data
+    cat("extracting min temperature data \n")
+    tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(yr-1),"_12.asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",yr,"_",1:12,".asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(yr+1),"_1.asc",sep="")))
+    tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+    
+    #if tmin data is NA then extract from nearest pixel
+    if (is.na(tmin_vals[1])) {
+      rs_t <- raster(tmin_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
+    
+    #do a dataset with the actual planting dates
+    tminGS <- c(daily_tmin[thisPDay:thisHDay])
+    wthGS$TMIN <- tminGS
+    
+    #put into whole year dataset
+    wthAll$TMIN <- daily_tmin
+    
+    
+    ###### Maximum temperature, planting year
+    cat("extracting max temperature data \n")
+    tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(yr-1),"_12.asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",yr,"_",1:12,".asc",sep=""),
+                        paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(yr+1),"_1.asc",sep="")))
+    tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+    
+    #if tmax data is NA then extract from nearest pixel
+    if (is.na(tmax_vals[1])) {
+      rs_t <- raster(tmax_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    daily_tmax <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
+    
+    #do a dataset with the actual planting dates
+    tmaxGS <- c(daily_tmax[thisPDay:thisHDay])
+    wthGS$TMAX <- tmaxGS
+    
+    #do a dataset with half one year to half the next
+    wthAll$TMAX <- daily_tmax
+    
+    #get the radiation data
+    #load monthly solar radiation data
+    cat("extracting solar radiation data \n")
+    srad_stk <- stack(c(paste(sradDir,"/srad_1dd/srad_","12.asc",sep=""),
+                        paste(sradDir,"/srad_1dd/srad_",1:12,".asc",sep=""),
+                        paste(sradDir,"/srad_1dd/srad_","1.asc",sep="")))
+    srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
+    
+    #if radiation data is NA then extract from nearest pixel
+    if (is.na(srad_vals[1])) {
+      rs_t <- raster(srad_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(srad_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      srad_vals <- extract(srad_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
+    daily_srad <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
+    
+    #planting to harvest
+    sradGS <- c(daily_srad[thisPDay:thisHDay])
+    wthGS$SRAD <- sradGS*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+    
+    #whole year
+    wthAll$SRAD <- daily_srad*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+  }
+  return(list(WTH_GS=wthGS,WTH_ALL=wthAll))
+}
+
+
+######################################################################
 #find out what is the continous date that i refer to in the nc file
 findNCPos <- function(thisYr,thisDay) {
   tropMet_iyr <- 1960
@@ -307,13 +896,21 @@ findNCPos <- function(thisYr,thisDay) {
 }
 
 
-extractDaily <- function(ncFile,x,y,year,nd) {
+extractDaily <- function(ncFile,x,y,year,nd,mthRainAsc) {
   cat("extracting daily data \n")
+  
+  #randomly pick if from NC or from Asciis (only done once at the beginning of extraction)
+  rint <- round(rnorm(1,0.5,0.1),0)
+  
   #loop and extract days
   for (d in 1:nd) {
-    #cat(d," ")
-    ncPos <- findNCPos(year,d)
-    rs <- raster(ncFile,band=ncPos)
+    #if the random value is 0 use netCDF
+    if (rint==0) {
+      ncPos <- findNCPos(year,d)
+      rs <- raster(ncFile,band=ncPos)
+    } else { #if random value is 1 use ASCII
+      rs <- raster(paste(mthRainAsc,"/",year,"/rain-",d,".asc",sep=""))
+    }
     out_row <- data.frame(DAY=d,RAIN=extract(rs,cbind(X=x,Y=y)))
     if (d==1) {
       out_all <- out_row
@@ -323,3 +920,4 @@ extractDaily <- function(ncFile,x,y,year,nd) {
   }
   return(out_all)
 }
+
