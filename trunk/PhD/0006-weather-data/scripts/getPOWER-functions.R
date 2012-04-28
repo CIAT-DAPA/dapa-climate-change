@@ -7,11 +7,16 @@ require(raster)
 
 #read the data for a given row of a day (to be used in a sapply way)
 #do it using an apply function to speed it up and get the data sorted out quickly
-getDataDay <- function(i,sk=0,dDir) {
-  wthData <- read.csv(paste(dDir,"/cell-",i,"/data.csv",sep=""),nrows=1,skip=sk)
+getDataDay <- function(i,sk=0,dDir,yi=NA,yf=NA,whichVar="RAIN") {
+  if (is.na(yearIni)) {
+    wthData <- read.csv(paste(dDir,"/cell-",i,"/data.csv",sep=""),nrows=1,skip=sk)
+  } else {
+    wthData <- read.csv(paste(dDir,"/cell-",i,"/data_",yi,"-",yf,".csv",sep=""),nrows=1,skip=sk)
+  }
+  
   names(wthData) <- c("WEYR","WEDAY","SRAD","TMAX","TMIN","RAIN","WIND","DEW","T2M","RH2M")
-  rainData <- wthData$RAIN
-  return(rainData)
+  varData <- wthData[,whichVar]
+  return(varData)
 }
 
 
