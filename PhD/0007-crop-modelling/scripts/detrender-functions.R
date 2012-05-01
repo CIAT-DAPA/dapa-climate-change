@@ -175,7 +175,11 @@ calcSummary <- function(yield,IDField,yFields,hFields,pFields,yrSeries,cDir,crop
 ############################################################################
 #Wrapper: this would do the yield detrending for all districts
 detrendAll <- function(yield,IDField,yFields,iyr,fyr,cDir,cropName) {
-  yrSeries <- 1900+(iyr:fyr)
+  if (fyr < iyr) {
+    yrSeries <- (1900+iyr):(2000+fyr)
+  } else {
+    yrSeries <- 1900+(iyr:fyr)
+  }
   districts <- unique(yield[,IDField])
   for (j in 1:length(districts)) {
     dis <- districts[j]
@@ -215,6 +219,14 @@ detrendAll <- function(yield,IDField,yFields,iyr,fyr,cDir,cropName) {
 ######################################################
 #Detrend wrapper to consider different availability cases
 detrendWrapper <- function(yd,dis,lim=23,iyr,fyr) {
+  #which time series
+  if (fyr < iyr) {
+    tser <- (1900+iyr):(2000+fyr)
+  } else {
+    tser <- 1900+(iyr:fyr)
+  }
+  tser <- substr(tser,3,4)
+  
   #count NAs and zeros
   yd$YIELD[which(yd$YIELD==0)] <- -9999
   zeros <- length(which(yd$YIELD==0))
@@ -224,7 +236,8 @@ detrendWrapper <- function(yd,dis,lim=23,iyr,fyr) {
     #do not detrend if there are less than 23 yield records (district is useless for modelling)
     #create data frames for each method and for raw data
     df.rw <- data.frame(DISID=dis,t(yd$YIELD))
-    names(df.rw) <- c("DISID",paste("Y",iyr:fyr,sep=""))
+    
+    names(df.rw) <- c("DISID",paste("Y",tser,sep=""))
     df.lo <- df.rw #loess
     df.li <- df.rw #linear
     df.qa <- df.rw #quadratic
@@ -247,15 +260,15 @@ detrendWrapper <- function(yd,dis,lim=23,iyr,fyr) {
     
     #create data frames for each method and for raw data
     df.rw <- data.frame(DISID=dis,t(yd$YIELD)) #raw
-    names(df.rw) <- c("DISID",paste("Y",iyr:fyr,sep="")) #raw
+    names(df.rw) <- c("DISID",paste("Y",tser,sep="")) #raw
     df.lo <- data.frame(DISID=dis,t(yd$LOESS_ADJ)) #loess
-    names(df.lo) <- c("DISID",paste("Y",iyr:fyr,sep="")) #loess
+    names(df.lo) <- c("DISID",paste("Y",tser,sep="")) #loess
     df.li <- data.frame(DISID=dis,t(yd$LM_ADJ)) #linear
-    names(df.li) <- c("DISID",paste("Y",iyr:fyr,sep="")) #linear
+    names(df.li) <- c("DISID",paste("Y",tser,sep="")) #linear
     df.qa <- data.frame(DISID=dis,t(yd$PM_ADJ)) #quadratic
-    names(df.qa) <- c("DISID",paste("Y",iyr:fyr,sep="")) #quadratic
+    names(df.qa) <- c("DISID",paste("Y",tser,sep="")) #quadratic
     df.sm <- data.frame(DISID=dis,t(yd$SMTH_ADJ)) #fourier smoothing
-    names(df.sm) <- c("DISID",paste("Y",iyr:fyr,sep="")) #fourier smoothing
+    names(df.sm) <- c("DISID",paste("Y",tser,sep="")) #fourier smoothing
     
   } else if (nas==nrow(yd)) {
     #case 3 the yields are all NA (-9999) this district I will put NA to everything
@@ -284,30 +297,30 @@ detrendWrapper <- function(yd,dis,lim=23,iyr,fyr) {
     
     #create data frames for each method and for raw data
     df.rw <- data.frame(DISID=dis,t(yd$YIELD)) #raw
-    names(df.rw) <- c("DISID",paste("Y",iyr:fyr,sep="")) #raw
+    names(df.rw) <- c("DISID",paste("Y",tser,sep="")) #raw
     df.lo <- data.frame(DISID=dis,t(yd$LOESS_ADJ)) #loess
-    names(df.lo) <- c("DISID",paste("Y",iyr:fyr,sep="")) #loess
+    names(df.lo) <- c("DISID",paste("Y",tser,sep="")) #loess
     df.li <- data.frame(DISID=dis,t(yd$LM_ADJ)) #linear
-    names(df.li) <- c("DISID",paste("Y",iyr:fyr,sep="")) #linear
+    names(df.li) <- c("DISID",paste("Y",tser,sep="")) #linear
     df.qa <- data.frame(DISID=dis,t(yd$PM_ADJ)) #quadratic
-    names(df.qa) <- c("DISID",paste("Y",iyr:fyr,sep="")) #quadratic
+    names(df.qa) <- c("DISID",paste("Y",tser,sep="")) #quadratic
     df.sm <- data.frame(DISID=dis,t(yd$SMTH_ADJ)) #fourier smoothing
-    names(df.sm) <- c("DISID",paste("Y",iyr:fyr,sep="")) #fourier smoothing
+    names(df.sm) <- c("DISID",paste("Y",tser,sep="")) #fourier smoothing
     
   } else {
     #case 5 the data are all ok
     yd <- detrendAllMethods(yd,eDir,dDir)
     #create data frames for each method and for raw data
     df.rw <- data.frame(DISID=dis,t(yd$YIELD)) #raw
-    names(df.rw) <- c("DISID",paste("Y",iyr:fyr,sep="")) #raw
+    names(df.rw) <- c("DISID",paste("Y",tser,sep="")) #raw
     df.lo <- data.frame(DISID=dis,t(yd$LOESS_ADJ)) #loess
-    names(df.lo) <- c("DISID",paste("Y",iyr:fyr,sep="")) #loess
+    names(df.lo) <- c("DISID",paste("Y",tser,sep="")) #loess
     df.li <- data.frame(DISID=dis,t(yd$LM_ADJ)) #linear
-    names(df.li) <- c("DISID",paste("Y",iyr:fyr,sep="")) #linear
+    names(df.li) <- c("DISID",paste("Y",tser,sep="")) #linear
     df.qa <- data.frame(DISID=dis,t(yd$PM_ADJ)) #quadratic
-    names(df.qa) <- c("DISID",paste("Y",iyr:fyr,sep="")) #quadratic
+    names(df.qa) <- c("DISID",paste("Y",tser,sep="")) #quadratic
     df.sm <- data.frame(DISID=dis,t(yd$SMTH_ADJ)) #fourier smoothing
-    names(df.sm) <- c("DISID",paste("Y",iyr:fyr,sep="")) #fourier smoothing
+    names(df.sm) <- c("DISID",paste("Y",tser,sep="")) #fourier smoothing
   }
   return(list(RAW=df.rw,LOESS=df.lo,LINEAR=df.li,QUADRATIC=df.qa,FOURIER=df.sm))
 }
