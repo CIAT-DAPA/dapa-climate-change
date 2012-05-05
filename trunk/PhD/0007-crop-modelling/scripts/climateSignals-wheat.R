@@ -4,18 +4,28 @@
 stop("Do not runt the whole thing")
 
 #sourcing needed functions
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+#local
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+
+#eljefe
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+#src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir,"/watbal.R",sep=""))
-
-src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
 
 library(raster)
 
-#Climate signals on yield for Indian Groundnuts
+#Climate signals on yield for Indian wheat
 
-bDir <- "F:/PhD-work/crop-modelling"
+#local
+#bDir <- "F:/PhD-work/crop-modelling"
+
+#eljefe
+#bDir <- "~/PhD-work/crop-modelling"
+
 sradDir <- paste(bDir,"/climate-data/CRU_CL_v1-1_data",sep="")
 tempDir <- paste(bDir,"/climate-data/CRU_TS_v3-1_data",sep="")
 
@@ -87,7 +97,7 @@ tbase=1; topt=22.1; tmax=35.4; tcrit=34; tlim=40
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=3) #initiate cluster
+sfInit(parallel=T,cpus=10) #initiate cluster
 
 #export functions and data
 sfExport("tbase"); sfExport("topt"); sfExport("tmax"); sfExport("tcrit"); sfExport("tlim")
