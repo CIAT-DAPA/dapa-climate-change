@@ -8,17 +8,26 @@ library(maptools); library(rgdal); library(raster)
 data(wrld_simpl)
 
 #sourcing important functions
-src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
-#src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop/src"
-source(paste(src.dir,"/createMask.R",sep=""))
+#local
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
+#src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
-src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#andromeda
+#src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop/src"
 #src.dir2 <- "/home/jramirez/dapa-climate-change/PhD/0007-crop-modelling/scripts"
+
+#eljefe
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop/src"
+#src.dir2<-"~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+
+source(paste(src.dir,"/createMask.R",sep=""))
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
-bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+#bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 #bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
+#bDir <- "~/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+
 cropName <- "rice"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
@@ -27,15 +36,17 @@ shp <- paste(cd,"/shp/IND2-",tolower(cropName),".shp",sep="")
 shp <- readShapePoly(shp)
 
 #important fields
-yfds <- paste("Y",tser,sep="") #yield
-hfds <- paste("H",tser,sep="") #area harvested
-pfds <- paste("T",tser,sep="") #total production
-
+iyr <- 66; fyr <- 04
 if (fyr < iyr) {
   tser <- (1900+iyr):(2000+fyr)
 } else {
   tser <- 1900+(iyr:fyr)
 }
+tser <- substr(tser,3,4)
+
+yfds <- paste("Y",tser,sep="") #yield
+hfds <- paste("H",tser,sep="") #area harvested
+pfds <- paste("T",tser,sep="") #total production
 
 #load detrended data
 yieldData <- read.table(paste(cd,"/data/IND2-",cropName,".tab",sep=""),sep="\t",header=T)
@@ -70,12 +81,20 @@ if (!file.exists(paste(cd,"/0_base_grids/india-1min-msk.asc",sep=""))) {
 }
 
 #raster with district IDs
-if (!file.exists(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))) {
+if (!file.exists(paste(cd,"/0_base_grids/india-1min-disid.asc",sep=""))) {
   rk <- rasterize(shp,rs,field="DISID")
-  rk <- writeRaster(rk,paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""),format='ascii')
+  rk <- writeRaster(rk,paste(cd,"/0_base_grids/india-1min-disid.asc",sep=""),format='ascii')
 } else {
-  rk <- raster(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))
+  rk <- raster(paste(cd,"/0_base_grids/india-1min-disid.asc",sep=""))
   rk <- readAll(rk)
+}
+
+if (!file.exists(paste(cd,"/raster",sep=""))) {
+  dir.create(paste(cd,"/raster",sep=""))
+}
+
+if (!file.exists(paste(cd,"/raster/summaries",sep=""))) {
+  dir.create(paste(cd,"/raster/summaries",sep="")))
 }
 
 x <- createSummaryRasters(rs,rk,sData,"DISID",cd)
@@ -96,21 +115,21 @@ for (asc in ascList) {
   
   #get colors
   cat("Get legend stuff \n")
-  brks <- unique(quantile(rs[],na.rm=T,probs=seq(0,1,by=0.05)))
-  brks.lab <- round(brks,0)
+  brks <- unique(round(quantile(rs[],na.rm=T,probs=seq(0,1,by=0.05)),1))
+  brks.lab <- brks #round(brks,1)
   cols <- c("grey 70",colorRampPalette(c("pink","red"))(length(brks)))
   
   #create the tiff
   cat("Now the plot \n")
-  tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
-  par(mar=c(3,3,1,3.5))
+  tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=7)
+  par(mar=c(3,3,1,1))
   plot(rs,
        col=cols,
        breaks=brks,lab.breaks=brks.lab,
-       useRaster=T,
+#       useRaster=T,
        horizontal=T,
        legend.shrink=0.95)
-  plot(shp,add=T,border="white",lwd=0.2)
+  plot(shp,add=T,border="white",lwd=0.1)
   plot(wrld_simpl,add=T,lwd=0.8)
   dev.off()
 }
