@@ -40,7 +40,7 @@ if (!file.exists(paste(bDir,"/0_base_grids/india-1min-1d_cells.asc",sep=""))) {
 
 #   2.3. Calculate areas per pixel
 if (!file.exists(paste(bDir,"/0_base_grids/india-1min-1d_cells_area.asc",sep=""))) {
-  rs_a <- area(rs)
+  rs_a <- area(rs_c)
   rs_a <- writeRaster(rs_a,paste(bDir,"/0_base_grids/india-1min-1d_cells_area.asc",sep=""),
                          format='ascii',overwrite=T)
 } else {
