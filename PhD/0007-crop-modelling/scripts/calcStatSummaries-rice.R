@@ -104,11 +104,14 @@ x <- createSummaryRasters(rs,rk,sData,"DISID",cd)
 sumDir <- paste(cd,"/raster/summaries",sep="")
 ascList <- list.files(sumDir)
 
+imgOutDir <- paste(sumDir,"/images",sep="")
+if (!file.exists(imgOutDir)) {dir.create(imgOutDir)}
+
 for (asc in ascList) {
   #loading raster
   cat("\nLoading raster",asc,"\n")
   rs <- raster(paste(sumDir,"/",asc,sep=""))
-  tiffName <- paste(sumDir,"/",strsplit(asc,".",fixed=T)[[1]][1],".tif",sep="")
+  tiffName <- paste(imgOutDir,"/",strsplit(asc,".",fixed=T)[[1]][1],".tif",sep="")
   ht <- 1000
   fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
   wt <- ht*(fct-.1)

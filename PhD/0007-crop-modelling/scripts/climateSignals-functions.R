@@ -27,6 +27,10 @@ plotSignals <- function(techn="lin",oDir,pval) {
     rs <- crop(rs,xt)
     pv <- crop(pv,xt)
     
+    if (length(which(is.na(rs[]))) == ncell(rs)) {
+      rs[] <- 0
+    }
+    
     #select cells that are below a given pval (normally 0.05 or 0.1)
     pv_cells <- xyFromCell(pv,which(pv[] <= pval))
     
@@ -46,7 +50,9 @@ plotSignals <- function(techn="lin",oDir,pval) {
     plot(rs,col=cols,breaks=brks,lab.breaks=brks,
          horizontal=T,axes=T,zlim=c(-1,1),legend.width=1,
          legend.shrink=0.95,useRaster=T)
-    points(pv_cells,pch=20,cex=0.75)
+    if (nrow(pv_cells)>0) {
+      points(pv_cells,pch=20,cex=0.75)
+    }
     plot(wrld_simpl,add=T)
     grid()
     dev.off()
@@ -56,9 +62,14 @@ plotSignals <- function(techn="lin",oDir,pval) {
 
 #
 #calculate climate signals (correlations) over all gridcells
-calcSignals <- function(techn,ydDir,oDir) {
+calcSignals <- function(techn,ydDir,oDir,tser) {
   #loading yield data stack
-  yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",(y_iyr-1900):(y_eyr-1900),".asc",sep=""))
+  yd_stk <- stack(paste(ydDir,"/",techn,"/",techn,"-",tser,".asc",sep=""))
+  
+  #read example climate cell to get names of fields
+  clCellList <- list.files(oDir,pattern="climate_cell-")
+  cl_dumm <- read.csv(paste(oDir,"/",clCellList[1],sep=""))
+  env_vars <- names(cl_dumm)[2:ncol(cl_dumm)]
   
   #loop through gridcells
   for (cell in pCells$CELL) {
@@ -66,6 +77,7 @@ calcSignals <- function(techn,ydDir,oDir) {
     x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
     
     yd_vals <- extract(yd_stk,cbind(X=x,Y=y))
+    
     if (file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
       cl_data <- read.csv(paste(oDir,"/climate_cell-",cell,".csv",sep=""))
       
@@ -74,13 +86,17 @@ calcSignals <- function(techn,ydDir,oDir) {
       all_data <- all_data[which(all_data$YIELD!=0),]
       all_data <- all_data[which(!is.na(all_data$YIELD)),]
       
-      env_vars <- names(all_data)[2:30]
-      
       #loop through each possible variable
       for (evar in env_vars) {
         #perform the correlation test
         if (nrow(all_data)>=2) {
-          ct <- cor.test(all_data$YIELD,all_data[,evar])
+          if (length(unique(all_data$YIELD)) > 2 & length(unique(all_data[,evar])) > 2) {
+            ct <- cor.test(all_data$YIELD,all_data[,evar])
+          } else {
+            ct <- list()
+            ct$estimate <- NA
+            ct$p.value <- NA
+          }
         } else {
           ct <- list()
           ct$estimate <- NA
@@ -97,7 +113,24 @@ calcSignals <- function(techn,ydDir,oDir) {
         }
       }
     } else {
-      out_all <- c(cell,x,y,0,rep(NA,times=58))
+      
+      for (evar in env_vars) {
+        #blank list of -dummy correlation test
+        ct <- list()
+        ct$estimate <- NA
+        ct$p.value <- NA
+        
+        if (evar == env_vars[1]) {
+          out_row <- data.frame(CELL=cell,LON=x,LAT=y,NOBS=nrow(all_data),R=ct$estimate,PVAL=ct$p.value)
+          names(out_row)[5:6] <- c(paste(evar,c(".R",".PVAL"),sep=""))
+          out_all <- out_row
+        } else {
+          out_row <- data.frame(R=ct$estimate,PVAL=ct$p.value)
+          names(out_row) <- c(paste(evar,c(".R",".PVAL"),sep=""))
+          out_all <- cbind(out_all,out_row)
+        }
+      }
+      
     }
     
     if (cell == pCells$CELL[1]) {
@@ -136,9 +169,15 @@ cell_wrapper <- function(cell) {
   source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
   if (!file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
     x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
+    
+    #extract planting dates default
+    thisPDay <- round(extract(pday,cbind(X=x,Y=y)),0)
+    thisHDay <- round(extract(hday,cbind(X=x,Y=y)),0)
+    
     #loop through years
     for (yr in y_iyr:y_eyr) {
-      gs_data <- processYear(ncFile=ncFile,mthRainAsc=mthRainAsc,year=yr,x,y,tempDir=tempDir,sradDir=sradDir,
+      gs_data <- processYear(ncFile=ncFile,mthRainAsc=mthRainAsc,year=yr,x,y,
+                             tempDir=tempDir,sradDir=sradDir,era40Dir=era40Dir,
                              sd_default=sd_default,ed_default=ed_default,thresh=thresh,
                              tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
       if (yr==y_iyr) {
@@ -173,8 +212,9 @@ cell_wrapper_irr <- function(cell) {
       cat(yr,"\n")
       gsmet <- processYear_irr(lon=x,lat=y,year=yr,pDay=thisPDay,hDay=thisHDay,ncFile=ncFile,
                                mthRainAsc=mthRainAsc,tempDir=tempDir,sradDir=sradDir,
-                               tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
-      
+                               era40Dir=era40Dir,tbase=tbase,topt=topt,tmax=tmax,
+                               tcrit=tcrit,tlim=tlim)
+            
       if (yr==y_iyr) {
         gs_out <- gsmet
       } else {
@@ -185,22 +225,30 @@ cell_wrapper_irr <- function(cell) {
   }
 }
 
+# pyr <- processYear(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_default=165,ed_default=225,
+#                    thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40)
 
 #get relevant growing season metrics for a given year for a rainfed crop
 #that is, using PGJ basic watbal algorithm
-processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,sd_default=165,ed_default=225,
+processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_default=165,ed_default=225,
                         thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40) {
   cat("\nProcessing year",year,"\n")
   nd <- leap(year)
   
   #extract daily weather from Indian TropMet grids
+  cat("daily rainfall: ")
   out_all <- extractDaily(ncFile,x,y,year,nd,mthRainAsc)
   
-  #i need to first calculate the potential evapotranspiration. I will use the Priestley-Taylor equation
-  #main references:
+  #i need to first calculate the potential evapotranspiration. 
+  #I will use the Priestley-Taylor equation. Main references:
   #                 *Weis and Menzel (2008)
   #                 *Challinor et al. (2004)
   #
+  
+  #extract solar radiation from ERA40 reanalysis
+  cat("daily solar radiation from ERA40: ")
+  sradERA40 <- extractERA(era40.dir=era40Dir,x,y,year,nd,varName="srad")
+  out_all$SRAD <- sradERA40$SRAD
   
   #need to load monthly temperature data
   #read 14 months
@@ -262,7 +310,9 @@ processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,sd_default=16
   }
   
   daily_srad <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
-  out_all$SRAD <- daily_srad*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+  out_all$SRAD_CL <- daily_srad*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
+  
+  out_all_tmp <- out_all; out_all$SRAD_CL <- NULL
   
   #Calculate the water balance
   cat("Calculating water balance \n")
@@ -291,6 +341,9 @@ processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,sd_default=16
   #   lines(x=gs[i,1:2],y=c(-0.025,-0.025),lwd=2,col="blue")
   # }
   
+  out_all$SRAD_E40 <- out_all$SRAD
+  out_all$SRAD <- out_all_tmp$SRAD_CL
+  
   #select the longest growing season
   cat("Getting final climate metrics \n")
   gs_sel <- gs[which(gs$GSL==max(gs$GSL)),]
@@ -304,11 +357,12 @@ processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,sd_default=16
 ####################################################################################
 ####################################################################################
 #Wrapper to extract the growing season data for irrigated crops
-processYear_irr <- function(lon,lat,year,pDay,hDay,ncFile,mthRainAsc,tempDir,sradDir,tbase,topt,tmax,tcrit,tlim) {
+processYear_irr <- function(lon,lat,year,pDay,hDay,ncFile,mthRainAsc,tempDir,sradDir,era40Dir,tbase,topt,tmax,tcrit,tlim) {
   #extract weather series
   cat("extract weather series\n")
   wthSeries <- getGSWeather(x=lon,y=lat,yr=year,thisPDay=pDay,thisHDay=hDay,
-                            ncFile=ncFile,mthRainAsc=mthRainAsc,tempDir=tempDir,sradDir=sradDir)
+                            ncFile=ncFile,mthRainAsc=mthRainAsc,tempDir=tempDir,
+                            sradDir=sradDir,era40Dir=era40Dir)
   
   #here calculate the growing season and whole year metrics
   gsWth <- wthSeries$WTH_GS; row.names(gsWth) <- gsWth$DAY
@@ -344,6 +398,9 @@ gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=
   gs_tmean <- (out_all$TMIN + out_all$TMAX)/2
   gs_tmean <- mean(gs_tmean)
   
+  gs_srad <- sum(out_all$SRAD)
+  gs_e40_srad <- sum(out_all$SRAD_E40)
+  
   #matrix of dates
   dgrid <- createDateGrid(year)
   dgrid$MONTH <- substr(dgrid$MTH.DAY,1,3)
@@ -355,24 +412,32 @@ gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=
   tean_q1 <- (out_all$TMIN + out_all$TMAX)/2
   tean_q1 <- mean(tean_q1[days_q1])
   rdays_q1 <- length(which(out_all$RAIN[days_q1] > 0))
+  srad_q1 <- sum(out_all$SRAD[days_q1])
+  srad_e40_q1 <- sum(out_all$SRAD_E40[days_q1])
   
   days_q2 <- which(dgrid$MONTH %in% c(4:6))
   rain_q2 <- sum(out_all$RAIN[days_q2])
   tean_q2 <- (out_all$TMIN + out_all$TMAX)/2
   tean_q2 <- mean(tean_q2[days_q2])
   rdays_q2 <- length(which(out_all$RAIN[days_q2] > 0))
-  
+  srad_q2 <- sum(out_all$SRAD[days_q2])
+  srad_e40_q2 <- sum(out_all$SRAD_E40[days_q2])
+    
   days_q3 <- which(dgrid$MONTH %in% c(7:9))
   rain_q3 <- sum(out_all$RAIN[days_q3])
   tean_q3 <- (out_all$TMIN + out_all$TMAX)/2
   tean_q3 <- mean(tean_q3[days_q3])
   rdays_q3 <- length(which(out_all$RAIN[days_q3] > 0))
+  srad_q3 <- sum(out_all$SRAD[days_q3])
+  srad_e40_q3 <- sum(out_all$SRAD_E40[days_q3])
   
   days_q4 <- which(dgrid$MONTH %in% c(10:12))
   rain_q4 <- sum(out_all$RAIN[days_q4])
   tean_q4 <- (out_all$TMIN + out_all$TMAX)/2
   tean_q4 <- mean(tean_q4[days_q4])
   rdays_q4 <- length(which(out_all$RAIN[days_q4] > 0))
+  srad_q4 <- sum(out_all$SRAD[days_q4])
+  srad_e40_q4 <- sum(out_all$SRAD_E40[days_q4])
   
   #calc SEM1, SEM2
   days_s1 <- which(dgrid$MONTH %in% c(1:6))
@@ -380,12 +445,16 @@ gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=
   tean_s1 <- (out_all$TMIN + out_all$TMAX)/2
   tean_s1 <- mean(tean_s1[days_s1])
   rdays_s1 <- length(which(out_all$RAIN[days_s1] > 0))
+  srad_s1 <- sum(out_all$SRAD[days_s1])
+  srad_e40_s1 <- sum(out_all$SRAD_E40[days_s1])
   
   days_s2 <- which(dgrid$MONTH %in% c(7:12))
   rain_s2 <- sum(out_all$RAIN[days_s2])
   tean_s2 <- (out_all$TMIN + out_all$TMAX)/2
   tean_s2 <- mean(tean_s2[days_s2])
   rdays_s2 <- length(which(out_all$RAIN[days_s2] > 0))
+  srad_s2 <- sum(out_all$SRAD[days_s2])
+  srad_e40_s2 <- sum(out_all$SRAD_E40[days_s2])
   
   #loop through growing season days
   for (gday in gs_sel$START:gs_sel$END) {
@@ -417,15 +486,15 @@ gs_metrics <- function(out_all,gs_sel,thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=
     }
     
   }
-  out <- data.frame(RAIN=rain,GDD=gdd,STRESS_DAYS=stress_days,RDAYS=rain_days,
-                    X_CONS_DD=cons_dd,D_TB=tb,D_TO=to,D_TX=tx,
-                    D_TXCRIT=txcrit,D_TXLIM=txlim,GS_TMEAN=gs_tmean,
-                    Q1_TMEAN=tean_q1,Q1_RAIN=rain_q1,Q1_RDAYS=rdays_q1,
-                    Q2_TMEAN=tean_q2,Q2_RAIN=rain_q2,Q2_RDAYS=rdays_q2,
-                    Q3_TMEAN=tean_q3,Q3_RAIN=rain_q3,Q3_RDAYS=rdays_q3,
-                    Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,
-                    S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,
-                    S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2)
+  out <- data.frame(RAIN=rain,SRAD=gs_srad,SRAD_E40=gs_e40_srad,GDD=gdd,
+                    STRESS_DAYS=stress_days,RDAYS=rain_days,X_CONS_DD=cons_dd,
+                    D_TB=tb,D_TO=to,D_TX=tx,D_TXCRIT=txcrit,D_TXLIM=txlim,GS_TMEAN=gs_tmean,
+                    Q1_TMEAN=tean_q1,Q1_RAIN=rain_q1,Q1_RDAYS=rdays_q1,Q1_SRAD=srad_q1,Q1_E40_SRAD=srad_e40_q1,
+                    Q2_TMEAN=tean_q2,Q2_RAIN=rain_q2,Q2_RDAYS=rdays_q2,Q2_SRAD=srad_q2,Q2_E40_SRAD=srad_e40_q2,
+                    Q3_TMEAN=tean_q3,Q3_RAIN=rain_q3,Q3_RDAYS=rdays_q3,Q3_SRAD=srad_q3,Q3_E40_SRAD=srad_e40_q3,
+                    Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,Q4_SRAD=srad_q4,Q4_E40_SRAD=srad_e40_q4,
+                    S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,S1_SRAD=srad_s1,S1_E40_SRAD=srad_e40_s1,
+                    S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2,S2_SRAD=srad_s2,S2_E40_SRAD=srad_e40_s2)
   return(out)
 }
 
@@ -440,6 +509,7 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   
   #total radiation during the growing season
   gs_srad <- sum(wth_gs$SRAD)
+  gs_srad_e40 <- sum(wth_gs$SRAD_E40)
   
   #mean temperature during the growing season
   gs_tmean <- (wth_gs$TMAX + wth_gs$TMIN) / 2
@@ -498,6 +568,7 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   tean_q1 <- mean(tean_q1[days_q1])
   rdays_q1 <- length(which(wth_all$RAIN[days_q1] > 0))
   srad_q1 <- sum(wth_all$SRAD[days_q1])
+  srad_e40_q1 <- sum(wth_all$SRAD_E40[days_q1])
   
   #q2 stuff
   days_q2 <- which(dgrid$MONTH %in% c(4:6))
@@ -506,6 +577,7 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   tean_q2 <- mean(tean_q2[days_q2])
   rdays_q2 <- length(which(wth_all$RAIN[days_q2] > 0))
   srad_q2 <- sum(wth_all$SRAD[days_q2])
+  srad_e40_q2 <- sum(wth_all$SRAD_E40[days_q2])
   
   #q3 stuff
   days_q3 <- which(dgrid$MONTH %in% c(7:9))
@@ -514,6 +586,7 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   tean_q3 <- mean(tean_q3[days_q3])
   rdays_q3 <- length(which(wth_all$RAIN[days_q3] > 0))
   srad_q3 <- sum(wth_all$SRAD[days_q3])
+  srad_e40_q3 <- sum(wth_all$SRAD_E40[days_q3])
   
   #q4 stuff
   days_q4 <- which(dgrid$MONTH %in% c(10:12))
@@ -522,6 +595,7 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   tean_q4 <- mean(tean_q4[days_q4])
   rdays_q4 <- length(which(wth_all$RAIN[days_q4] > 0))
   srad_q4 <- sum(wth_all$SRAD[days_q4])
+  srad_e40_q4 <- sum(wth_all$SRAD_E40[days_q4])
   
   #s1 stuff
   days_s1 <- which(dgrid$MONTH %in% c(1:6))
@@ -530,6 +604,7 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   tean_s1 <- mean(tean_s1[days_s1])
   rdays_s1 <- length(which(wth_all$RAIN[days_s1] > 0))
   srad_s1 <- sum(wth_all$SRAD[days_s1])
+  srad_e40_s1 <- sum(wth_all$SRAD_E40[days_s1])
   
   #s2 stuff
   days_s2 <- which(dgrid$MONTH %in% c(7:12))
@@ -538,17 +613,18 @@ gs_metrics_irr <- function(yr,wth_gs,wth_all,tbase=1,topt=22.1,tmax=35.4,tcrit=3
   tean_s2 <- mean(tean_s2[days_s2])
   rdays_s2 <- length(which(wth_all$RAIN[days_s2] > 0))
   srad_s2 <- sum(wth_all$SRAD[days_s2])
+  srad_e40_s2 <- sum(wth_all$SRAD_E40[days_s2])
   
   #output row
-  out <- data.frame(RAIN=gs_rain,GDD=gdd,RDAYS=gs_rdays,GS_SRAD=gs_srad,
+  out <- data.frame(RAIN=gs_rain,GDD=gdd,RDAYS=gs_rdays,GS_SRAD=gs_srad,GS_SRAD_E40=gs_srad_e40,
                     X_CONS_DD=cons_dd,D_TB=tb,D_TO=to,D_TX=tx,
                     D_TXCRIT=d_tcrit,D_TXLIM=d_tlim,GS_TMEAN=gs_tmean,
-                    Q1_TMEAN=tean_q1,Q1_RAIN=rain_q1,Q1_RDAYS=rdays_q1,Q1_SRAD=srad_q1,
-                    Q2_TMEAN=tean_q2,Q2_RAIN=rain_q2,Q2_RDAYS=rdays_q2,Q2_SRAD=srad_q2,
-                    Q3_TMEAN=tean_q3,Q3_RAIN=rain_q3,Q3_RDAYS=rdays_q3,Q3_SRAD=srad_q3,
-                    Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,Q4_SRAD=srad_q4,
-                    S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,S1_SRAD=srad_s1,
-                    S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2,S2_SRAD=srad_s2)
+                    Q1_TMEAN=tean_q1,Q1_RAIN=rain_q1,Q1_RDAYS=rdays_q1,Q1_SRAD=srad_q1,Q1_SRAD_E40=srad_e40_q1,
+                    Q2_TMEAN=tean_q2,Q2_RAIN=rain_q2,Q2_RDAYS=rdays_q2,Q2_SRAD=srad_q2,Q2_SRAD_E40=srad_e40_q2,
+                    Q3_TMEAN=tean_q3,Q3_RAIN=rain_q3,Q3_RDAYS=rdays_q3,Q3_SRAD=srad_q3,Q3_SRAD_E40=srad_e40_q3,
+                    Q4_TMEAN=tean_q4,Q4_RAIN=rain_q4,Q4_RDAYS=rdays_q4,Q4_SRAD=srad_q4,Q4_SRAD_E40=srad_e40_q4,
+                    S1_TMEAN=tean_s1,S1_RAIN=rain_s1,S1_RDAYS=rdays_s1,S1_SRAD=srad_s1,S1_SRAD_E40=srad_e40_s1,
+                    S2_TMEAN=tean_s2,S2_RAIN=rain_s2,S2_RDAYS=rdays_s2,S2_SRAD=srad_s2,S2_SRAD_E40=srad_e40_s2)
   
   return(out)
 }
@@ -591,11 +667,12 @@ maskCreate <- function(met,yld) {
 }
 
 
+
 #########################################################################################
 #########################################################################################
 #extract a year's series of weather conditions for a growing season specified by the planting
 #and harvest date (normally from Sacks et al. 2010)
-getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,sradDir) {
+getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,sradDir,era40Dir) {
   
   #
   #Verify if planting date is before or after harvest date
@@ -624,6 +701,25 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       wthAll <- rbind(rainPlant[183:(nrow(rainPlant)),],rainHarv[1:183,])
     }
     wthAll$DAY <- 1:nrow(wthAll)
+    
+    #get the srad data from ERA40
+    #extract era40 data
+    cat("planting year: ")
+    nd <- leap(pyr)
+    sradDay_plant <- extractERA(era40.dir=era40Dir,x=x,y=y,year=pyr,nd=nd,varName="srad")
+    
+    nd <- leap(yr)
+    cat("harvest year: ")
+    sradDay_harv <- extractERA(era40.dir=era40Dir,x=x,y=y,year=yr,nd=nd,varName="srad")
+    
+    wthGS$SRAD_E40 <- c(sradDay_plant$SRAD[thisPDay:(nrow(sradDay_plant))],
+                    sradDay_harv$SRAD[1:thisHDay])
+    
+    if (nd == 365) {
+      wthAll$SRAD_E40 <- c(sradDay_plant$SRAD[183:(nrow(sradDay_plant))],sradDay_plant$SRAD[1:182])
+    } else {
+      wthAll$SRAD_E40 <- c(sradDay_plant$SRAD[183:(nrow(sradDay_plant))],sradDay_plant$SRAD[1:183])
+    }
     
     #get the temperature data, planting year
     cat("extracting min temperature data \n")
@@ -787,6 +883,11 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
     #do a dataset with half one year to half the next
     wthAll <- rain_daily
     
+    #extract solar radiation
+    sradDay <- extractERA(era40.dir=era40Dir,x=x,y=y,year=yr,nd=nd,varName="srad")
+    wthGS$SRAD_E40 <- sradDay$SRAD[thisPDay:thisHDay] #put into growing season weather
+    wthAll$SRAD_E40 <- sradDay$SRAD
+    
     #get the temperature data
     cat("extracting min temperature data \n")
     tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(yr-1),"_12.asc",sep=""),
@@ -901,9 +1002,10 @@ extractDaily <- function(ncFile,x,y,year,nd,mthRainAsc) {
   
   #randomly pick if from NC or from Asciis (only done once at the beginning of extraction)
   rint <- round(rnorm(1,0.5,0.1),0)
-  
+  #if (rint == 0) {cat("using nc \n")} else {cat("using asc\n")}
   #loop and extract days
   for (d in 1:nd) {
+    #cat(d," ",sep="")
     #if the random value is 0 use netCDF
     if (rint==0) {
       ncPos <- findNCPos(year,d)
@@ -918,6 +1020,28 @@ extractDaily <- function(ncFile,x,y,year,nd,mthRainAsc) {
       out_all <- rbind(out_all,out_row)
     }
   }
+  #cat("\n")
   return(out_all)
 }
 
+
+################################################################
+#extract ERA40 data for a given variable specified by varName
+#in a given location specified by x,y, and year
+extractERA <- function(era40.dir,x,y,year,nd,varName="srad") {
+  cat("extracting daily ERA40 data \n")
+  
+  era40DataDir <- paste(era40.dir,"/daily_data_",tolower(varName),"/",year,sep="")
+  
+  for (d in 1:nd) {
+    rs <- raster(paste(era40DataDir,"/",tolower(varName),"_",d,".asc",sep=""))
+    out_row <- data.frame(DAY=d,VALUE=extract(rs,cbind(X=x,Y=y)))
+    if (d==1) {
+      out_all <- out_row
+    } else {
+      out_all <- rbind(out_all,out_row)
+    }
+  }
+  names(out_all) <- c("DAY",toupper(varName))
+  return(out_all)
+}

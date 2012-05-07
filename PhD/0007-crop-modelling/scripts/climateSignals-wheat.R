@@ -49,6 +49,8 @@ y_eyr <- 1995
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
 mthRainAsc <- paste(bDir,"/climate-data/IND-TropMet",sep="")
 
+era40Dir <- paste(bDir,"/climate-data/ERA-40",sep="")
+
 cropDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT",sep="")
 ydDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT/raster/gridded",sep="")
 oDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT/signals",sep="")
@@ -87,8 +89,7 @@ gdur <- hdaym-pday
 
 #pick a cell and year for a test case
 #yr <- 1966
-#cell <- 427
-
+#cell <- 427 #856
 #x <- cell_wrapper_irr(427)
 
 ###############################################################
@@ -111,13 +112,22 @@ sfExport("ydDir")
 sfExport("bDir")
 sfExport("sradDir")
 sfExport("tempDir")
+sfExport("era40Dir")
 sfExport("y_iyr")
 sfExport("y_eyr")
 sfExport("src.dir")
 sfExport("src.dir2")
 
+#remove all those cells in the list that do not exist
+cellList <- NULL
+for (cell in pCells$CELL) {
+  if (!file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
+    cellList <- c(cellList,cell)
+  }
+}
+
 #run the control function
-system.time(sfSapply(as.vector(pCells$CELL), cell_wrapper_irr))
+system.time(sfSapply(as.vector(cellList), cell_wrapper_irr))
 
 #stop the cluster
 sfStop()
@@ -126,12 +136,21 @@ sfStop()
 ########################################################################
 #for a given cell extract the yield data and make the correlation
 ########################################################################
-techn <- "loe"
+
+#important fields
+iyr <- 66; fyr <- 95
+if (fyr < iyr) {
+  tser <- (1900+iyr):(2000+fyr)
+} else {
+  tser <- 1900+(iyr:fyr)
+}
+tser <- substr(tser,3,4)
+
 
 #for a given cell extract the yield data and make the correlation for each detrending technique
-x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir,tser)
 
 
