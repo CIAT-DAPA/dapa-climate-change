@@ -14,7 +14,8 @@ stop("Do not runt the whole thing")
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir,"/watbal.R",sep=""))
-source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+#source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir2,"/climateSignals-functions.v2.R",sep=""))
 
 library(raster)
 
@@ -25,9 +26,13 @@ library(raster)
 #eljefe
 #bDir <- "~/PhD-work/crop-modelling"
 
-sradDir <- paste(bDir,"/climate-data/CRU_CL_v1-1_data",sep="")
-tempDir <- paste(bDir,"/climate-data/CRU_TS_v3-1_data",sep="")
-era40Dir <- paste(bDir,"/climate-data/ERA-40",sep="")
+#sradDir <- paste(bDir,"/climate-data/CRU_CL_v1-1_data",sep="")
+#tempDir <- paste(bDir,"/climate-data/CRU_TS_v3-1_data",sep="")
+#era40Dir <- paste(bDir,"/climate-data/ERA-40",sep="")
+
+sradDir <- paste(bDir,"/climate-data/gridcell-data/IND/cru_srad",sep="")
+tempDir <- paste(bDir,"/climate-data/gridcell-data/IND",sep="")
+era40Dir <- paste(bDir,"/climate-data/gridcell-data/IND/srad_e40",sep="")
 
 y_iyr <- 1966
 y_eyr <- 1998
@@ -38,7 +43,8 @@ y_eyr <- 1998
 
 
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
-mthRainAsc <- paste(bDir,"/climate-data/IND-TropMet",sep="")
+#mthRainAsc <- paste(bDir,"/climate-data/IND-TropMet",sep="")
+mthRainAsc <- paste(bDir,"/climate-data/gridcell-data/IND/rain",sep="")
 
 cropDir <- paste(bDir,"/GLAM/climate-signals-yield/SORG-KHARIFF",sep="")
 ydDir <- paste(bDir,"/GLAM/climate-signals-yield/SORG-KHARIFF/raster/gridded",sep="")

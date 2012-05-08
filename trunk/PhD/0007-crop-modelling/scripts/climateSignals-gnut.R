@@ -14,7 +14,8 @@ stop("Do not runt the whole thing")
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir,"/watbal.R",sep=""))
-source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+#source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir2,"/climateSignals-functions.v2.R",sep="")) #improved version!
 
 library(raster)
 
@@ -25,9 +26,13 @@ library(raster)
 #eljefe
 #bDir <- "~/PhD-work/crop-modelling"
 
-sradDir <- paste(bDir,"/climate-data/CRU_CL_v1-1_data",sep="")
-tempDir <- paste(bDir,"/climate-data/CRU_TS_v3-1_data",sep="")
-era40Dir <- paste(bDir,"/climate-data/ERA-40",sep="")
+# sradDir <- paste(bDir,"/climate-data/CRU_CL_v1-1_data",sep="")
+# tempDir <- paste(bDir,"/climate-data/CRU_TS_v3-1_data",sep="")
+# era40Dir <- paste(bDir,"/climate-data/ERA-40",sep="")
+
+sradDir <- paste(bDir,"/climate-data/gridcell-data/IND/cru_srad",sep="")
+tempDir <- paste(bDir,"/climate-data/gridcell-data/IND",sep="")
+era40Dir <- paste(bDir,"/climate-data/gridcell-data/IND/srad_e40",sep="")
 
 y_iyr <- 1966
 y_eyr <- 1995
@@ -48,7 +53,8 @@ y_eyr <- 1995
 #         4. Normal rabi: 5 November (Harinath and Vasanthi 1998 http://www.indianjournals.com/ijor.aspx?target=ijor:ijpp1&volume=26&issue=2&article=001)
 
 ncFile <- paste(bDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
-mthRainAsc <- paste(bDir,"/climate-data/IND-TropMet",sep="")
+#mthRainAsc <- paste(bDir,"/climate-data/IND-TropMet",sep="")
+mthRainAsc <- paste(bDir,"/climate-data/gridcell-data/IND/rain",sep="")
 
 cropDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT",sep="")
 ydDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
