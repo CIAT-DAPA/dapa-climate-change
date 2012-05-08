@@ -1034,8 +1034,12 @@ extractERA <- function(era40.dir,x,y,year,nd,varName="srad") {
   era40DataDir <- paste(era40.dir,"/daily_data_",tolower(varName),"/",year,sep="")
   
   for (d in 1:nd) {
-    rs <- raster(paste(era40DataDir,"/",tolower(varName),"_",d,".asc",sep=""))
-    out_row <- data.frame(DAY=d,VALUE=extract(rs,cbind(X=x,Y=y)))
+    if (!file.exists(paste(era40DataDir,"/",tolower(varName),"_",d,".asc",sep=""))) {
+      out_row <- data.frame(DAY=d,VALUE=NA)
+    } else {
+      rs <- raster(paste(era40DataDir,"/",tolower(varName),"_",d,".asc",sep=""))
+      out_row <- data.frame(DAY=d,VALUE=extract(rs,cbind(X=x,Y=y)))
+    }
     if (d==1) {
       out_all <- out_row
     } else {
