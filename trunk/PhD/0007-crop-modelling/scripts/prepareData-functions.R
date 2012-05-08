@@ -15,14 +15,14 @@ prepareCellData <- function(cell) {
   #grab cell details (lon,lat)
   x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
   
-  cat("/n########################################################\n")
+  cat("\n########################################################\n")
   cat("#### Extracting data for gridcell",cell,"#### \n")
   cat("#### located in",x,"and",y,"####\n")
   cat("########################################################\n")
   
   #############################################################
   #extract daily rainfall in a loop of years
-  cat("/n########################################################\n")
+  cat("\n########################################################\n")
   cat("#### Extracting daily rainfall \n")
   cat("########################################################\n")
   
@@ -49,7 +49,7 @@ prepareCellData <- function(cell) {
   
   #############################################################
   #extract ERA40 solar radiation data
-  cat("/n########################################################\n")
+  cat("\n########################################################\n")
   cat("#### Extracting daily solar rad from ERA40 \n")
   cat("########################################################\n")
   
@@ -77,7 +77,7 @@ prepareCellData <- function(cell) {
   
   #############################################################
   #extract minimum temperature from CRU datasets (monthly)
-  cat("/n########################################################\n")
+  cat("\n########################################################\n")
   cat("#### Extracting monthly min temperature from CRU \n")
   cat("########################################################\n")
   
@@ -101,7 +101,7 @@ prepareCellData <- function(cell) {
   
   #############################################################
   #extract maximum temperature from CRU datasets (monthly)
-  cat("/n########################################################\n")
+  cat("\n########################################################\n")
   cat("#### Extracting monthly max temperature from CRU \n")
   cat("########################################################\n")
   
@@ -124,7 +124,7 @@ prepareCellData <- function(cell) {
   
   #############################################################
   #extracting solar radiation data (climatological)
-  cat("/n########################################################\n")
+  cat("\n########################################################\n")
   cat("#### Extracting climatological solar radiation from CRU \n")
   cat("########################################################\n")
   
