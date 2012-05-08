@@ -66,7 +66,7 @@ if (!file.exists(paste(oDir,"/cells-process.csv",sep=""))) {
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=2) #initiate cluster
+sfInit(parallel=T,cpus=13) #initiate cluster
 
 #export functions and data
 sfExport("pCells")

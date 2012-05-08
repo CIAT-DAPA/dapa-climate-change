@@ -91,6 +91,18 @@ prepareCellData <- function(cell) {
       cat("extracting",year,": monthly min temperature \n")
       tmin_stk <- stack(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",year,"_",1:12,".asc",sep=""))
       tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+      
+      #if tmin data is NA then extract from nearest pixel
+      if (is.na(tmin_vals[1])) {
+        rs_t <- raster(tmin_stk)
+        rs_t[] <- 1:ncell(rs_t)
+        
+        rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+        rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
+        xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+        tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      }
+      
       row_df <- as.data.frame(t(c(year,tmin_vals)))
       names(row_df) <- c("YEAR",paste("MONTH",1:12,sep=""))
       allDD_tmin <- rbind(allDD_tmin,row_df)
@@ -115,6 +127,18 @@ prepareCellData <- function(cell) {
       cat("extracting",year,": monthly max temperature \n")
       tmax_stk <- stack(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",year,"_",1:12,".asc",sep=""))
       tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+      
+      #if tmax data is NA then extract from nearest pixel
+      if (is.na(tmax_vals[1])) {
+        rs_t <- raster(tmax_stk)
+        rs_t[] <- 1:ncell(rs_t)
+        
+        rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+        rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
+        xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+        tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
+      }
+      
       row_df <- as.data.frame(t(c(year,tmax_vals)))
       names(row_df) <- c("YEAR",paste("MONTH",1:12,sep=""))
       allDD_tmax <- rbind(allDD_tmax,row_df)
@@ -137,6 +161,18 @@ prepareCellData <- function(cell) {
     cat("extracting : climatological solar radiation \n")
     srad_stk <- stack(paste(sradDir,"/srad_1dd/srad_",1:12,".asc",sep=""))
     srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
+    
+    #if radiation data is NA then extract from nearest pixel
+    if (is.na(srad_vals[1])) {
+      rs_t <- raster(srad_stk)
+      rs_t[] <- 1:ncell(rs_t)
+      
+      rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
+      rs_d[which(is.na(srad_stk[[1]][]))] <- NA
+      xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
+      srad_vals <- extract(srad_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    }
+    
     row_df <- as.data.frame(t(c(year,srad_vals)))
     names(row_df) <- c("YEAR",paste("MONTH",1:12,sep=""))
     allDD_srad <- rbind(allDD_srad,row_df)

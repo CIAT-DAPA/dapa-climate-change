@@ -266,7 +266,7 @@ processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_d
     rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
     rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
     xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-    tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
   }
   
   daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
@@ -285,7 +285,7 @@ processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_d
     rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
     rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
     xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-    tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+    tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
   }
   
   daily_tmax <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
@@ -736,7 +736,7 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
       rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
       xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
     }
     
     nd <- leap(pyr)
@@ -756,7 +756,7 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
       rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
       xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
     }
     
     nd <- leap(yr)
@@ -790,7 +790,7 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
       rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
       xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
     }
     
     nd <- leap(pyr)
@@ -810,7 +810,7 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
       rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
       xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
     }
     
     nd <- leap(yr)
@@ -903,7 +903,7 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
       rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
       xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
     }
     
     daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
@@ -931,7 +931,7 @@ getGSWeather <- function(x,y,yr,thisPDay,thisHDay,ncFile,mthRainAsc,tempDir,srad
       rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
       rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
       xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
+      tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))*0.1
     }
     
     daily_tmax <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
