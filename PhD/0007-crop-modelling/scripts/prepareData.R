@@ -6,8 +6,8 @@ stop("Do not runt the whole thing")
 #extract daily data for all cells in a domain to create 
 
 #local
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
-src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+# src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+# src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
 #eljefe
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
@@ -23,7 +23,7 @@ library(raster)
 
 #Climate signals on yield for Indian sorghum
 #local
-bDir <- "F:/PhD-work/crop-modelling"
+# bDir <- "F:/PhD-work/crop-modelling"
 
 #eljefe
 #bDir <- "~/PhD-work/crop-modelling"
@@ -70,11 +70,11 @@ sfInit(parallel=T,cpus=13) #initiate cluster
 
 #export functions and data
 sfExport("pCells")
+sfExport("bDir")
 sfExport("oGridDir")
 sfExport("oDir")
 sfExport("ncFile")
 sfExport("mthRainAsc")
-sfExport("bDir")
 sfExport("sradDir")
 sfExport("tempDir")
 sfExport("era40Dir")
@@ -83,8 +83,16 @@ sfExport("y_eyr")
 sfExport("src.dir")
 sfExport("src.dir2")
 
+#remove all those cells in the list that do not exist
+cellList <- NULL
+for (cell in pCells$CELL) {
+  if (!file.exists(paste(oDir,"/cru_srad/cell-",cell,".csv",sep=""))) {
+    cellList <- c(cellList,cell)
+  }
+}
+
 #run the control function
-system.time(sfSapply(as.vector(pCells$CELL), prepareCellData))
+system.time(sfSapply(as.vector(cellList), prepareCellData))
 
 #stop the cluster
 sfStop()
