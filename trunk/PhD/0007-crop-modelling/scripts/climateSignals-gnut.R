@@ -90,8 +90,7 @@ gdur <- hdaym-pday
 ############################################################################
 ############################################################################
 ###Parameters
-sd_default=165; ed_default=225
-thresh=0.5
+sd_default=165; ed_default=225; thresh=0.5
 tbase=10; topt=28; tmax=50
 tcrit=34; tlim=40
 
@@ -100,7 +99,7 @@ if (!file.exists(oDir)) {dir.create(oDir)}
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=2) #initiate cluster
+sfInit(parallel=T,cpus=12) #initiate cluster
 
 #export functions and data
 sfExport("sd_default"); sfExport("ed_default"); sfExport("thresh")
@@ -147,11 +146,10 @@ tser <- substr(tser,3,4)
 
 
 #for a given cell extract the yield data and make the correlation for each detrending technique
-x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir)
-
+x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir,tser)
 
 #plot all the rasters (correlations and p values)
 x <- plotSignals(techn="lin",oDir,pval=0.1)
@@ -167,20 +165,16 @@ x <- plotSignals(techn="qua",oDir,pval=0.1)
 ############################################################################
 ############################################################################
 ###Parameters
-sd_default=165; ed_default=225
-thresh=0.5
-tbase=10; topt=28; tmax=50
-tcrit=34; tlim=40
+tbase=10; topt=28; tmax=50; tcrit=34; tlim=40
 
-oDir <- paste(oDir,"/ea_ep_ratio",sep="")
+oDir <- paste(oDir,"/sacks_pdate",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=2) #initiate cluster
+sfInit(parallel=T,cpus=12) #initiate cluster
 
 #export functions and data
-sfExport("sd_default"); sfExport("ed_default"); sfExport("thresh")
 sfExport("tbase"); sfExport("topt"); sfExport("tmax"); sfExport("tcrit"); sfExport("tlim")
 sfExport("pday"); sfExport("hday")
 sfExport("pCells")
@@ -206,7 +200,7 @@ for (cell in pCells$CELL) {
 }
 
 #run the control function
-system.time(sfSapply(as.vector(cellList), cell_wrapper))
+system.time(sfSapply(as.vector(cellList), cell_wrapper_irr))
 
 #stop the cluster
 sfStop()
