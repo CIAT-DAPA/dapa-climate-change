@@ -1,5 +1,6 @@
 #Julian Ramirez-Villegas
 #March 2012
+#Modified May 2012 to be more efficient (see prepareData.R and prepareData-functions.R)
 #CIAT / CCAFS / UoL
 
 #plot the calculated signals
@@ -176,7 +177,7 @@ cell_wrapper <- function(cell) {
     
     #loop through years
     for (yr in y_iyr:y_eyr) {
-      gs_data <- processYear(ncFile=ncFile,mthRainAsc=mthRainAsc,year=yr,x,y,
+      gs_data <- processYear(cell,ncFile=ncFile,mthRainAsc=mthRainAsc,year=yr,x,y,
                              tempDir=tempDir,sradDir=sradDir,era40Dir=era40Dir,
                              sd_default=sd_default,ed_default=ed_default,thresh=thresh,
                              tbase=tbase,topt=topt,tmax=tmax,tcrit=tcrit,tlim=tlim)
@@ -230,14 +231,24 @@ cell_wrapper_irr <- function(cell) {
 
 #get relevant growing season metrics for a given year for a rainfed crop
 #that is, using PGJ basic watbal algorithm
-processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_default=165,ed_default=225,
+processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_default=165,ed_default=225,
                         thresh=0.5,tbase=10,topt=28,tmax=50,tcrit=34,tlim=40) {
   cat("\nProcessing year",year,"\n")
   nd <- leap(year)
   
   #extract daily weather from Indian TropMet grids
-  cat("daily rainfall: ")
-  out_all <- extractDaily(ncFile,x,y,year,nd,mthRainAsc)
+  cat("daily rainfall: loading...\n ")
+  #out_all <- extractDaily(ncFile,x,y,year,nd,mthRainAsc)
+  out_all <- read.csv(paste(mthRainAsc,"/cell-",cell,".csv",sep=""))
+  out_all <- out_all[which(out_all$YEAR==year),]
+  out_all$YEAR <- NULL
+  
+  if (nd == 365) {
+    out_all$DAY366 <- NULL
+  }
+  
+  out_all <- as.data.frame(t(out_all)); row.names(out_all) <- 1:nd; names(out_all) <- "RAIN"
+  out_all <- data.frame(DAY=1:nd,RAIN=out_all$RAIN)
   
   #i need to first calculate the potential evapotranspiration. 
   #I will use the Priestley-Taylor equation. Main references:
@@ -246,17 +257,28 @@ processYear <- function(ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir,sd_d
   #
   
   #extract solar radiation from ERA40 reanalysis
-  cat("daily solar radiation from ERA40: ")
-  sradERA40 <- extractERA(era40.dir=era40Dir,x,y,year,nd,varName="srad")
+  cat("daily solar radiation from ERA40: loading...\n")
+  #sradERA40 <- extractERA(era40.dir=era40Dir,x,y,year,nd,varName="srad")
+  sradERA40 <- read.csv(paste(era40Dir,"/cell-",cell,".csv",sep=""))
+  sradERA40 <- sradERA40[which(sradERA40$YEAR==year),]
+  sradERA40$YEAR <- NULL
+  
+  if (nd == 365) {
+    sradERA40$DAY366 <- NULL
+  }
+  
+  sradERA40 <- as.data.frame(t(sradERA40)); row.names(sradERA40) <- 1:nd; names(sradERA40) <- "SRAD"
   out_all$SRAD <- sradERA40$SRAD
   
   #need to load monthly temperature data
   #read 14 months
   cat("Extracting temperature data \n")
-  tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year-1),"_12.asc",sep=""),
-                      paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",year,"_",1:12,".asc",sep=""),
-                      paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year+1),"_1.asc",sep="")))
-  tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+  #tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year-1),"_12.asc",sep=""),
+  #                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",year,"_",1:12,".asc",sep=""),
+  #                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year+1),"_1.asc",sep="")))
+  #tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
+  
+  tmin_vals <- 
   
   #if tmax data is NA then extract from nearest pixel
   if (is.na(tmin_vals[1])) {
