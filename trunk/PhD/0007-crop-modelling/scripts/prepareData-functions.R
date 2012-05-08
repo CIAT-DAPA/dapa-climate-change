@@ -173,7 +173,7 @@ prepareCellData <- function(cell) {
       srad_vals <- extract(srad_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
     }
     
-    row_df <- as.data.frame(t(c(year,srad_vals)))
+    row_df <- as.data.frame(t(c("CLIM",srad_vals)))
     names(row_df) <- c("YEAR",paste("MONTH",1:12,sep=""))
     allDD_srad <- rbind(allDD_srad,row_df)
     write.csv(allDD_srad,paste(oDataDir,"/cell-",cell,".csv",sep=""),quote=F,row.names=F)
