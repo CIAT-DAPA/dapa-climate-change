@@ -14,7 +14,7 @@ stop("Do not runt the whole thing")
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir,"/watbal.R",sep=""))
-source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir2,"/climateSignals-functions.v2.R",sep=""))
 
 library(raster)
 
