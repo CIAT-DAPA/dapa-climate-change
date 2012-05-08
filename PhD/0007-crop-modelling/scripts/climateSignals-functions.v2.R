@@ -167,7 +167,7 @@ cell_wrapper <- function(cell) {
   library(raster)
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
   source(paste(src.dir,"/watbal.R",sep=""))
-  source(paste(src.dir2,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir2,"/climateSignals-functions.v2.R",sep=""))
   if (!file.exists(paste(oDir,"/climate_cell-",cell,".csv",sep=""))) {
     x <- pCells$X[which(pCells$CELL==cell)]; y <- pCells$Y[which(pCells$CELL==cell)]
     
@@ -272,64 +272,43 @@ processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir
   
   #need to load monthly temperature data
   #read 14 months
-  cat("Extracting temperature data \n")
+  cat("Extracting temperature data : loading...\n")
   #tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year-1),"_12.asc",sep=""),
   #                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",year,"_",1:12,".asc",sep=""),
   #                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year+1),"_1.asc",sep="")))
   #tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
   
-  tmin_vals <- 
-  
-  #if tmax data is NA then extract from nearest pixel
-  if (is.na(tmin_vals[1])) {
-    rs_t <- raster(tmin_stk)
-    rs_t[] <- 1:ncell(rs_t)
-    
-    rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
-    rs_d[which(is.na(tmin_stk[[1]][]))] <- NA
-    xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-    tmin_vals <- extract(tmin_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
-  }
+  tmin_vals <- read.csv(paste(tempDir,"/cru_tmn/cell-",cell,".csv",sep=""))
+  tmin_vals <- tmin_vals[which(tmin_vals$YEAR==year | tmin_vals$YEAR==(year-1) | tmin_vals$YEAR==(year+1)),]
+  tmin_vals$YEAR <- NULL
+  tmin_vals <- c(tmin_vals$MONTH12[1],as.numeric(tmin_vals[2,]),tmin_vals$MONTH1[3])
   
   daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
   out_all$TMIN <- daily_tmin #put data into matrix
   
-  tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year-1),"_12.asc",sep=""),
-                      paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",year,"_",1:12,".asc",sep=""),
-                      paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year+1),"_1.asc",sep="")))
-  tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
+  #tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year-1),"_12.asc",sep=""),
+  #                    paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",year,"_",1:12,".asc",sep=""),
+  #                    paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year+1),"_1.asc",sep="")))
+  #tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
   
-  #if tmax data is NA then extract from nearest pixel
-  if (is.na(tmax_vals[1])) {
-    rs_t <- raster(tmax_stk)
-    rs_t[] <- 1:ncell(rs_t)
-    
-    rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
-    rs_d[which(is.na(tmax_stk[[1]][]))] <- NA
-    xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-    tmax_vals <- extract(tmax_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
-  }
+  tmax_vals <- read.csv(paste(tempDir,"/cru_tmx/cell-",cell,".csv",sep=""))
+  tmax_vals <- tmax_vals[which(tmax_vals$YEAR==year | tmax_vals$YEAR==(year-1) | tmax_vals$YEAR==(year+1)),]
+  tmax_vals$YEAR <- NULL
+  tmax_vals <- c(tmax_vals$MONTH12[1],as.numeric(tmax_vals[2,]),tmax_vals$MONTH1[3])
   
   daily_tmax <- linearise(tmax_vals)[16:(nd+15)] #interpolate to daily
   out_all$TMAX <- daily_tmax #put data into matrix
   
   #load monthly solar radiation data
-  cat("Extracting solar radiation data \n")
-  srad_stk <- stack(c(paste(sradDir,"/srad_1dd/srad_","12.asc",sep=""),
-                      paste(sradDir,"/srad_1dd/srad_",1:12,".asc",sep=""),
-                      paste(sradDir,"/srad_1dd/srad_","1.asc",sep="")))
-  srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
+  cat("Extracting solar radiation data : loading...\n")
+  #srad_stk <- stack(c(paste(sradDir,"/srad_1dd/srad_","12.asc",sep=""),
+  #                    paste(sradDir,"/srad_1dd/srad_",1:12,".asc",sep=""),
+  #                    paste(sradDir,"/srad_1dd/srad_","1.asc",sep="")))
+  #srad_vals <- extract(srad_stk,cbind(X=x,Y=y))
   
-  #if radiation data is NA then extract from nearest pixel
-  if (is.na(srad_vals[1])) {
-    rs_t <- raster(srad_stk)
-    rs_t[] <- 1:ncell(rs_t)
-    
-    rs_d <- distanceFromPoints(rs_t,xy=cbind(X=x,Y=y))
-    rs_d[which(is.na(srad_stk[[1]][]))] <- NA
-    xy_new <- xyFromCell(rs_d,which(rs_d[] == min(rs_d[],na.rm=T)))
-    srad_vals <- extract(srad_stk,cbind(X=xy_new[1,1],Y=xy_new[1,2]))
-  }
+  srad_vals <- read.csv(paste(sradDir,"/cell-",cell,".csv",sep=""))
+  srad_vals$YEAR <- NULL
+  srad_vals <- c(srad_vals$MONTH12,as.numeric(srad_vals),srad_vals$MONTH1)
   
   daily_srad <- linearise(srad_vals)[16:(nd+15)] #interpolate to daily
   out_all$SRAD_CL <- daily_srad*60*60*24/1000000 #put into matrix and convert from W/m^2 to MJ/m^2/day
@@ -344,7 +323,7 @@ processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir
   
   #calculate growing seasons
   cat("Find out growing seasons \n")
-  gs <- gsl_find(out_all$ERATIO,ea_thresh=0.5,n_start=5,n_end=12,sd_default=sd_default,ed_default=ed_default)
+  gs <- gsl_find(out_all$ERATIO,ea_thresh=thresh,n_start=5,n_end=12,sd_default=sd_default,ed_default=ed_default)
   gs$GSL <- gs$END-gs$START
   
   # plot(out_all$DAY,out_all$RAIN,ty="l")

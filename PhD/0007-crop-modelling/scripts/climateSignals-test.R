@@ -25,7 +25,7 @@ library(raster)
 #eljefe
 #bDir <- "~/PhD-work/crop-modelling"
 
-sradDir <- paste(bDir,"/climate-data/gridcell-data/IND/cru-srad",sep="")
+sradDir <- paste(bDir,"/climate-data/gridcell-data/IND/cru_srad",sep="")
 tempDir <- paste(bDir,"/climate-data/gridcell-data/IND",sep="")
 era40Dir <- paste(bDir,"/climate-data/gridcell-data/IND/srad_e40",sep="")
 
