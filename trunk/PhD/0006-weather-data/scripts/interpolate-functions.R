@@ -148,7 +148,8 @@ interpolateDay <- function(day,gData,intDir,yr,rg) {
   
   if (!file.exists("rain_waf.asc") & rg == "afr" | !file.exists("rain_igp.asc") & rg == "sas") {
     intMx <- gData[,c(1:4,4+day)] #get data for that day
-    names(intMx) <- c("ID","LON","LAT","ALT","RAIN") #rename matrix
+    intMx$SOURCE <- gData$SOURCE
+    names(intMx) <- c("ID","LON","LAT","ALT","RAIN","SOURCE") #rename data frame fields
     intMx <- intMx[which(!is.na(intMx$RAIN)),] #remove all rows with NAs in rainfall
     intMx$RAIN <- intMx$RAIN*10
     
@@ -157,10 +158,17 @@ interpolateDay <- function(day,gData,intDir,yr,rg) {
     intMx$cells <- cellFromXY(rs,cbind(intMx$LON,intMx$LAT))
     uCells <- unique(intMx$cells)
     
-    
     if (nrow(intMx)!= 0) {
       for (cell in uCells) {
         selCells <- intMx[which(intMx$cells==cell),]
+        #remove anything that is GSOD ONLY if there is either GHCN or CIAT data in that cell
+        uSrc <- unique(selCells$SOURCE)
+        if (length(uSrc)>1 & "GSOD" %in% uSrc) {
+          selCells <- selCells[which(selCells$SOURCE != "GSOD"),]
+        }
+        
+        selCells$SOURCE <- NULL
+        
         if (nrow(selCells)>1) { #if there are many stations in that cell then average the locations
           outLine <- data.frame(ID=paste("MNCELL",cell,sep=""),
                                 LON=mean(selCells$LON,na.rm=T),LAT=mean(selCells$LAT,na.rm=T),
