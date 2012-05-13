@@ -100,7 +100,7 @@ sd_default=165; ed_default=225; thresh=0.5
 tbase=10; topt=28; tmax=50
 tcrit=34; tlim=40
 
-oDir <- paste(oDir,"/ea_ep_ratio",sep="")
+oDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/signals/ea_ep_ratio",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #parallelisation
@@ -173,7 +173,7 @@ x <- plotSignals(techn="qua",oDir,pval=0.1)
 ###Parameters
 tbase=10; topt=28; tmax=50; tcrit=34; tlim=40
 
-oDir <- paste(oDir,"/sacks_pdate",sep="")
+oDir <- paste(bDir,"/GLAM/climate-signals-yield/GNUT/signals/sacks_pdate",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #parallelisation
