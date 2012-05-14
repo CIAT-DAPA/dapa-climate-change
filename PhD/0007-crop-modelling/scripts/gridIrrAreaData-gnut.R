@@ -61,11 +61,56 @@ if (fyr < iyr) {
 }
 
 
+##############################################################################
+######## IRRIGATED AREAS
+##############################################################################
+
 #parallelise the run
 method <- "raw"
 yldDir <- paste(cDir,"/irrigated_area/raster/yearly",sep="")
 
 outDir <- paste(cDir,"/irrigated_area/raster/gridded/",sep="")
+if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
+
+xy <- xyFromCell(dumm,which(!is.na(dumm[])))
+xy <- data.frame(CELL=which(!is.na(dumm[])),xy)
+
+#   2.4. parallelise years and grid the data
+#o
+library(snowfall)
+sfInit(parallel=T,cpus=12) #initiate cluster
+
+#export functions
+sfExport("weightValues")
+
+#export variables
+sfExport("cDir")
+sfExport("yldDir")
+sfExport("outDir")
+sfExport("method")
+sfExport("rs_dis")
+sfExport("rs_c")
+sfExport("rs_a")
+sfExport("dumm")
+sfExport("xy")
+
+#run the control function
+system.time(sfSapply(as.vector(tser), controlGridding))
+
+#stop the cluster
+sfStop()
+
+
+
+##############################################################################
+######## HARVESTED AREAS
+##############################################################################
+
+#parallelise the run
+method <- "raw"
+yldDir <- paste(cDir,"/harvested_area/raster/yearly",sep="")
+
+outDir <- paste(cDir,"/harvested_area/raster/gridded/",sep="")
 if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
 
 xy <- xyFromCell(dumm,which(!is.na(dumm[])))
