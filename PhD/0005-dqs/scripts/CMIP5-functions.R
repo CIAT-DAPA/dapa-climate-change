@@ -42,34 +42,36 @@ gcm_wrapper <- function(i) {
         oFile <- gsub("\\.nc",paste("_",year,".csv",sep=""),fName)
         oFile <- paste(outGCMDir,"/",oFile,sep="")
         
-        iyr <- thisEns$iYear[which(year > thisEns$iYear & year < thisEns$fYear)]
-        imt <- thisEns$iMonth[which(year > thisEns$iYear & year < thisEns$fYear)]
-        idy <- thisEns$iDay[which(year > thisEns$iYear & year < thisEns$fYear)]
-        wlp <- paste(thisEns$has_leap[which(year > thisEns$iYear & year < thisEns$fYear)])
-        
-        gFile <- paste(mdDir,"/",gcm,"/",ens,"/",fName,sep="")
-        
-        #get the indian extent
-        xt <- extent(raster(paste(compDir,"/0_input_data/mask.asc",sep="")))
-        
-        #create 2.5x2.5 dummy raster
-        nc <- (xt@xmax-xt@xmin)/2.5
-        nr <- (xt@ymax-xt@ymin)/2.5
-        xt@ymin <- xt@ymax - round(nr+0.5,0)*2.5
-        nr <- (xt@ymax-xt@ymin)/2.5
-        
-        dumm_rs <- raster(xt,ncol=nc,nrow=nr)
-        dumm_rs[] <- 1
-        
-        daily_data <- extractFromGCM(yr=year,gcmFile=gFile,iYear=iyr,iMth=imt,
-                                     iDay=idy,wLeap=wlp,varName=vn,msk=dumm_rs,
-                                     x=68.75,y=22.75,ccDir=compDir)
-        
-        dg <- createDateGridCMIP5(year=year,whatLeap=wlp)
-        dg$VALUES <- daily_data
-        names(dg)[7] <- vn
-        
-        write.csv(dg,oFile,row.names=F,quote=T)
+        if (!file.exists(oFile)) {
+          iyr <- thisEns$iYear[which(year > thisEns$iYear & year < thisEns$fYear)]
+          imt <- thisEns$iMonth[which(year > thisEns$iYear & year < thisEns$fYear)]
+          idy <- thisEns$iDay[which(year > thisEns$iYear & year < thisEns$fYear)]
+          wlp <- paste(thisEns$has_leap[which(year > thisEns$iYear & year < thisEns$fYear)])
+          
+          gFile <- paste(mdDir,"/",gcm,"/",ens,"/",fName,sep="")
+          
+          #get the indian extent
+          xt <- extent(raster(paste(compDir,"/0_input_data/mask.asc",sep="")))
+          
+          #create 2.5x2.5 dummy raster
+          nc <- (xt@xmax-xt@xmin)/2.5
+          nr <- (xt@ymax-xt@ymin)/2.5
+          xt@ymin <- xt@ymax - round(nr+0.5,0)*2.5
+          nr <- (xt@ymax-xt@ymin)/2.5
+          
+          dumm_rs <- raster(xt,ncol=nc,nrow=nr)
+          dumm_rs[] <- 1
+          
+          daily_data <- extractFromGCM(yr=year,gcmFile=gFile,iYear=iyr,iMth=imt,
+                                       iDay=idy,wLeap=wlp,varName=vn,msk=dumm_rs,
+                                       x=68.75,y=22.75,ccDir=compDir)
+          
+          dg <- createDateGridCMIP5(year=year,whatLeap=wlp)
+          dg$VALUES <- daily_data
+          names(dg)[7] <- vn
+          
+          write.csv(dg,oFile,row.names=F,quote=T)
+        }
       }
     }
   }
