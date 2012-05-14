@@ -92,12 +92,12 @@ tcrit=32; tlim=44
 
 #tlim and tcrit derived from Vara-Prasad et al. (2006) AFM
 
-oDir <- paste(bDir,"/GLAM/climate-signals-yield/RICE/signals/ea_ep_ratio",sep="")
+oDir <- paste(bDir,"/GLAM/climate-signals-yield/SORG-KHARIFF/signals/ea_ep_ratio",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=3) #initiate cluster
+sfInit(parallel=T,cpus=12) #initiate cluster
 
 #export functions and data
 sfExport("sd_default"); sfExport("ed_default"); sfExport("thresh")
@@ -222,10 +222,10 @@ if (fyr < iyr) {
 tser <- substr(tser,3,4)
 
 #for a given cell extract the yield data and make the correlation for each detrending technique
-x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir,tser)
 
 
 #plot all the rasters (correlations and p values)

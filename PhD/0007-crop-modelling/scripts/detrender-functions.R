@@ -14,7 +14,7 @@ controlYear <- function(year) {
   cat("Processing year",pyear,"\n")
   outName <- paste(outDataDir,"/",dataType,"-",year,".asc",sep="")
   if (!file.exists(outName)) {
-    yr_rs <- createYearRaster(inyData,rk,year,"Y","DISID")
+    yr_rs <- createYearRaster(inyData,rk,year,prefix=pfx,"DISID")
     yr_rs <- writeRaster(yr_rs,outName,format="ascii")
     rm(yr_rs); g=gc(); rm(g)
     cat("Done\n")
@@ -26,7 +26,7 @@ controlYear <- function(year) {
 
 ##############################################################################
 #Function to create a raster layer out from the district-level yield data for a given year
-createYearRaster <- function(xData,dis_rs,ye,prefix,IDField) {
+createYearRaster <- function(xData,dis_rs,ye,prefix="Y",IDField) {
   if (nchar(ye) == 4) {ye <- substr(ye,3,4)}
   yField <- paste(prefix,ye,sep="")
   out_rs <- raster(dis_rs)
