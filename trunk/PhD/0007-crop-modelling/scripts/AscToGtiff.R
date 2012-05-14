@@ -37,6 +37,12 @@ for (method in c("fou","lin","loe","qua","raw")) {
   AsctoGTiff(yyDir)
 }
 
+#irrigated and harvested areas
+cropDir <- paste(bDir,"/GLAM/model-runs/",toupper(cropName),sep="")
+iaDir <- paste(cropDir,"/irrigated_area/raster/yearly",sep="")
+haDir <- paste(cropDir,"/harvested_area/raster/yearly",sep="")
+AsctoGTiff(iaDir); AsctoGTiff(haDir)
+
 
 ###################################
 #### RICE
