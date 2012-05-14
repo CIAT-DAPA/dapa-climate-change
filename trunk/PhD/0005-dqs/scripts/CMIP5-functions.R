@@ -98,7 +98,7 @@ extractFromGCM <- function(yr,gcmFile,iYear,iMth,iDay,wLeap,varName,msk,x,y,ccDi
     #extract weather for the gridcell we want
     #LAT=23.000, LON=72.000 
     xy <- cbind(LON=x,LAT=y)
-    val <- extract(rs,xy)[1]
+    val <- mean(extract(rs,xy))
     
     # plot(rs,col=rev(rainbow(20)))
     # plot(wrld_simpl,add=T)
