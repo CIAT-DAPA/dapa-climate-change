@@ -6,7 +6,7 @@
 #gcm data extraction wrapper
 gcm_wrapper <- function(i) {
   #loading libraries
-  library(raster); library(ncdf)
+  library(raster); library(ncdf); library(rgdal)
   
   #sourcing functions
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
