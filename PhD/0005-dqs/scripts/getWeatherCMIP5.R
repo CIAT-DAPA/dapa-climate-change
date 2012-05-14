@@ -43,7 +43,6 @@ sfExport("ccChars")
 sfExport("yi")
 sfExport("yf")
 
-gcm_wrapper(13)
 system.time(sfSapply(as.vector(1:21), gcm_wrapper))
 
 sfStop()

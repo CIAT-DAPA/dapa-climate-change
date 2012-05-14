@@ -38,6 +38,10 @@ gcm_wrapper <- function(i) {
         cat("year:",year,"\n")
         fName <- paste(thisEns$naming[which(year > thisEns$iYear & year < thisEns$fYear)])
         fName <- gsub("%var%",vn,fName)
+        
+        oFile <- gsub("\\.nc",paste("_",year,".csv",sep=""),fName)
+        oFile <- paste(outGCMDir,"/",oFile,sep="")
+        
         iyr <- thisEns$iYear[which(year > thisEns$iYear & year < thisEns$fYear)]
         imt <- thisEns$iMonth[which(year > thisEns$iYear & year < thisEns$fYear)]
         idy <- thisEns$iDay[which(year > thisEns$iYear & year < thisEns$fYear)]
@@ -65,8 +69,6 @@ gcm_wrapper <- function(i) {
         dg$VALUES <- daily_data
         names(dg)[7] <- vn
         
-        oFile <- gsub("\\.nc",paste("_",year,".csv",sep=""),fName)
-        oFile <- paste(outGCMDir,"/",oFile,sep="")
         write.csv(dg,oFile,row.names=F,quote=T)
       }
     }
