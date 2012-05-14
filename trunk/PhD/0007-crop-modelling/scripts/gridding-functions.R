@@ -37,7 +37,7 @@ gridRaster <- function(inRs,outRs,naVal=-9999,rs_dis,rs_c,rs_a,xy) {
 controlGridding <- function(year) {
   library(raster)
   if (!file.exists(paste(outDir,"/",method,"-",year,".asc",sep=""))) {
-    yield_rs <- raster(paste(cDir,"/raster/yearly/",method,"/",method,"-",year,".asc",sep=""))
+    yield_rs <- raster(paste(yldDir,"/",method,"-",year,".asc",sep=""))
     yield_rs[which(yield_rs[]==-9999)] <- 0
     rs_dis <- readAll(rs_dis)
     rs_c <- readAll(rs_c)
