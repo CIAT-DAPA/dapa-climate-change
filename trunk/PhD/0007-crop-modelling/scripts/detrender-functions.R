@@ -12,10 +12,10 @@ controlYear <- function(year) {
   if (nchar(year) == 2) {pyear <- 1900+year} else {pyear <- year}
   
   cat("Processing year",pyear,"\n")
-  outName <- paste(outDataDir,"/",dataType,"-",year,".asc",sep="")
+  outName <- paste(outDataDir,"/",dataType,"-",year,".tif",sep="")
   if (!file.exists(outName)) {
     yr_rs <- createYearRaster(inyData,rk,year,prefix=pfx,"DISID")
-    yr_rs <- writeRaster(yr_rs,outName,format="ascii")
+    yr_rs <- writeRaster(yr_rs,outName,format="GTiff")
     rm(yr_rs); g=gc(); rm(g)
     cat("Done\n")
   } else {
