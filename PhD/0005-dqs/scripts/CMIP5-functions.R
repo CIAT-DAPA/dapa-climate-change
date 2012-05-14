@@ -5,6 +5,9 @@
 #Functions to get CMIP5 weather data
 #gcm data extraction wrapper
 gcm_wrapper <- function(i) {
+  #loading libraries
+  library(raster); library(ncdf)
+  
   #sourcing functions
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
   source(paste(src.dir2,"/CMIP5-functions.R",sep=""))
@@ -76,13 +79,14 @@ gcm_wrapper <- function(i) {
 ####Extract data from a given GCM
 extractFromGCM <- function(yr,gcmFile,iYear,iMth,iDay,wLeap,varName,msk,x,y,ccDir) {
   nd <- leap(yr)
-  if (wLeap=="all30") {
+  if (wLeap == "all30") {
     nd <- 360
   } else if (wLeap == "no") {
     nd <- 365
   }
-  
+  #cat("will do",nd,"days\n")
   for (d in 1:nd) {
+    #cat(d)
     #read the day's data
     pos <- findNCPosCMIP5(thisYear=yr,thisDay=d,iniYear=iYear,iniMonth=iMth,iniDay=iDay,whatLeap=wLeap)
     rs <- raster(gcmFile,varname=varName,band=pos)
@@ -98,7 +102,7 @@ extractFromGCM <- function(yr,gcmFile,iYear,iMth,iDay,wLeap,varName,msk,x,y,ccDi
     #extract weather for the gridcell we want
     #LAT=23.000, LON=72.000 
     xy <- cbind(LON=x,LAT=y)
-    val <- mean(extract(rs,xy))
+    val <- extract(rs,xy)
     
     # plot(rs,col=rev(rainbow(20)))
     # plot(wrld_simpl,add=T)
