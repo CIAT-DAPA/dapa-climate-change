@@ -358,7 +358,8 @@ processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir
 ####################################################################################
 ####################################################################################
 #Wrapper to extract the growing season data for irrigated crops
-processYear_irr <- function(cell,lon,lat,year,pDay,hDay,ncFile,mthRainAsc,tempDir,sradDir,era40Dir,tbase,topt,tmax,tcrit,tlim) {
+processYear_irr <- function(cell,lon,lat,year,pDay,hDay,ncFile,mthRainAsc,tempDir,sradDir,
+                            era40Dir,tbase,topt,tmax,tcrit,tlim) {
   #extract weather series
   cat("extract weather series\n")
   wthSeries <- getGSWeather(cell=cell,x=lon,y=lat,yr=year,thisPDay=pDay,thisHDay=hDay,

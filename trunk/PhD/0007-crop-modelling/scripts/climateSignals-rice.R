@@ -118,6 +118,10 @@ hdaym <- hday
 hdaym[which(hday[] < pday[])] <- hdaym[which(hday[] < pday[])] + 365
 gdur <- hdaym-pday
 
+pday[which(is.na(pday[]) & !is.na(yldFile[]))] <- 166
+hday[which(is.na(hday[]) & !is.na(yldFile[]))] <- 296
+
+
 ############################################################################
 ############################################################################
 ################### Using ea/ep ratio to estimate when the crop was planted
@@ -175,13 +179,13 @@ sfStop()
 
 ################### get the signals into a grid
 #important fields
-iyr <- 1966; fyr <- 2001
+iyr <- 66; fyr <- 01
 if (fyr < iyr) {
   tser <- (1900+iyr):(2000+fyr)
 } else {
   tser <- 1900+(iyr:fyr)
 }
-tser <- substr(tser,3,4)
+tser <- tser
 
 
 #for a given cell extract the yield data and make the correlation for each detrending technique
@@ -257,19 +261,18 @@ sfStop()
 
 ################### get the signals into a grid
 #important fields
-iyr <- 1966; fyr <- 2001
+iyr <- 66; fyr <- 01
 if (fyr < iyr) {
   tser <- (1900+iyr):(2000+fyr)
 } else {
   tser <- 1900+(iyr:fyr)
 }
-tser <- substr(tser,3,4)
 
 #for a given cell extract the yield data and make the correlation for each detrending technique
-x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir,tser)
 
 
 #plot all the rasters (correlations and p values)
@@ -341,19 +344,18 @@ sfStop()
 
 ################### get the signals into a grid
 #important fields
-iyr <- 1966; fyr <- 2001
+iyr <- 66; fyr <- 01
 if (fyr < iyr) {
   tser <- (1900+iyr):(2000+fyr)
 } else {
   tser <- 1900+(iyr:fyr)
 }
-tser <- substr(tser,3,4)
 
 #for a given cell extract the yield data and make the correlation for each detrending technique
-x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir)
-x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir)
+x <- calcSignals(techn="lin",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="loe",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="fou",ydDir=ydDir,oDir=oDir,tser)
+x <- calcSignals(techn="qua",ydDir=ydDir,oDir=oDir,tser)
 
 
 #plot all the rasters (correlations and p values)

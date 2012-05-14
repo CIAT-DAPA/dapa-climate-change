@@ -106,7 +106,7 @@ gdur <- hdaym-pday
 ###Parameters
 tbase=1; topt=22.1; tmax=35.4; tcrit=34; tlim=40
 
-oDir <- paste(oDir,"/sacks_pdate",sep="")
+oDir <- paste(bDir,"/GLAM/climate-signals-yield/WHEAT/signals/sacks_pdate",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #parallelisation
