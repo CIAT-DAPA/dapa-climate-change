@@ -4,20 +4,20 @@
 
 #Get CMIP5 weather data
 
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
-bDir <- "F:/PhD-work/data-quality-study"
-#bDir <- "~/PhD-work/data-quality-study"
+#bDir <- "F:/PhD-work/data-quality-study"
+bDir <- "~/PhD-work/data-quality-study"
 compDir <- paste(bDir,"/climate-comparison",sep="")
 oDir <- paste(compDir,"/experiments",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #shuffled experiments
 #read in the rainfall, calculate monthly total rainfall, number of rain days
-shDir <- paste(bDir,"/DSSAT-PNUT/GJ-weather/shuf-pert",sep="")
-#shDir <- "/dev/shm"
+#shDir <- paste(bDir,"/DSSAT-PNUT/GJ-weather/shuf-pert",sep="")
+shDir <- "/dev/shm"
 
 
 ##################################################
@@ -126,7 +126,8 @@ oDir <- paste(compDir,"/experiments",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #loop the different p values
-for (trial in trList) {
+#for (trial in trList) {
+doTrial <- function(trial) {
   cat("\nprocessing",trial,"\n")
   trialm <- gsub("\\.7z","",trial)
   vn <- strsplit(trialm,"_",fixed=T)[[1]][2] #"prec"
@@ -227,7 +228,7 @@ for (trial in trList) {
       
     }
     
-    write.csv(xp_all,paste(outxDir,"/climate_p_",vn,"_",sc,"_all.csv",sep=""),row.names=F,quote=F)
+    write.csv(out_ps,paste(outxDir,"/climate_p_",vn,"_",sc,"_all.csv",sep=""),row.names=F,quote=F)
     
     system(paste("rm -rf",trial))
     setwd(bDir)
