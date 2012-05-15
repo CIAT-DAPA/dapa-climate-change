@@ -27,7 +27,10 @@ cChars <- read.table(paste(compDir,"/0_input_data/CMIP5gcms.tab",sep=""),sep="\t
 #gcmList <- unique(cChars$GCM)
 
 oDir <- paste(compDir,"/CMIP5_GJ",sep="")
+#oDir <- "Z:/PhD-work/data-quality-study/climate-comparison/CMIP5_GJ"
 if (!file.exists(oDir)) {dir.create(oDir)}
+
+#gcm_wrapper(13)
 
 #Parallelise the GCMs
 library(snowfall)
@@ -39,7 +42,7 @@ sfExport("bDir")
 sfExport("oDir")
 sfExport("mdDir")
 sfExport("compDir")
-sfExport("ccChars")
+sfExport("cChars")
 sfExport("yi")
 sfExport("yf")
 
