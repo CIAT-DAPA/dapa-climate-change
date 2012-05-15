@@ -153,8 +153,12 @@ extractFromGCM <- function(yr,gcmFile,iYear,iMth,iDay,wLeap,varName,msk,x,y,ccDi
     rs <- crop(rs,msk)
     rs <- resample(rs,msk,method="bilinear")
     
-    #kg/m2/s to mm
-    rs <- rs*3600*24
+    #kg/m2/s to mm for prec
+    if (varName == "pr") {
+      rs <- rs*3600*24
+    } else {
+      rs <- rs - 273.15
+    }
     
     #extract weather for the gridcell we want
     #LAT=23.000, LON=72.000 
