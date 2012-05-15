@@ -465,8 +465,8 @@ shname <- "starea-countries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
-gs <- 1
-run.type <- "tmean"
+gs <- "MAX"
+run.type <- "tmin"
 
 #loop the GCMs
 gls <- list.files(fd)
