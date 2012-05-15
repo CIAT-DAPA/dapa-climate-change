@@ -87,6 +87,11 @@ gcm_wrapper <- function(i) {
             #merge both sets of daily data
             daily_data <- c(daily_data1[1:330],daily_data2[1:30])
             
+            dg <- createDateGridCMIP5(year=year,whatLeap=wlp)
+            dg$VALUES <- daily_data
+            names(dg)[7] <- vn
+            
+            write.csv(dg,oFile,row.names=F,quote=T)
           }
           
         } else {
@@ -118,12 +123,14 @@ gcm_wrapper <- function(i) {
             daily_data <- extractFromGCM(yr=year,gcmFile=gFile,iYear=iyr,iMth=imt,
                                          iDay=idy,wLeap=wlp,varName=vn,msk=dumm_rs,
                                          x=68.75,y=22.75,ccDir=compDir)
+            
+            dg <- createDateGridCMIP5(year=year,whatLeap=wlp)
+            dg$VALUES <- daily_data
+            names(dg)[7] <- vn
+            
+            write.csv(dg,oFile,row.names=F,quote=T)
+            
           }
-          dg <- createDateGridCMIP5(year=year,whatLeap=wlp)
-          dg$VALUES <- daily_data
-          names(dg)[7] <- vn
-          
-          write.csv(dg,oFile,row.names=F,quote=T)
         }
       }
     }
