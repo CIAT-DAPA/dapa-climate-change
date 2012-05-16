@@ -44,7 +44,7 @@ boxplot(perf$CORR~perf$LEGEND,
         pch=20,outwex=0.3,
         xlab="Optimal R (Pearson)",
         horizontal=T,boxwex=0.7)
-abline(v=0.8482,lwd=0.7,lty=1,col="red")
+abline(v=0.74,lwd=0.7,lty=1,col="red")
 abline(v=seq(-1,1,by=0.2),lwd=0.6,lty=2,col="grey50")
 dev.off()
 
