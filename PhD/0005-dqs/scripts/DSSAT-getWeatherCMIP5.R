@@ -11,7 +11,7 @@ source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
 src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0005-dqs/scripts"
-source(paste(src.dir2,"/CMIP5-functions.R",sep=""))
+source(paste(src.dir2,"/DSSAT-CMIP5-functions.R",sep=""))
 
 yi <- 1966
 yf <- 1989
