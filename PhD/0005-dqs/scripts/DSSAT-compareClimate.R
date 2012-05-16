@@ -5,12 +5,12 @@
 #Open the CMIP3 model data
 wd <- "Z:/PhD-work/data-quality-study"
 ccDir <- paste(wd,"/climate-comparison",sep="")
-oDir <- paste(ccDir,"/results",sep="")
+oDir <- paste(ccDir,"/results/EcoCrop",sep="")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #load cmip3 outputs
 if (!file.exists(paste(oDir,"/cmip3.csv",sep=""))) {
-  cmip3Dir <- paste(ccDir,"/CMIP3_GJ",sep="")
+  cmip3Dir <- paste(ccDir,"/CMIP3_IN",sep="")
   gcmList <- list.files(cmip3Dir,pattern="\\.csv")
   for (gcm in gcmList) {
     gcmData <- read.csv(paste(cmip3Dir,"/",gcm,sep=""))
@@ -27,71 +27,71 @@ if (!file.exists(paste(oDir,"/cmip3.csv",sep=""))) {
 }
 
 
-#load the cmip5 data
-cmip5Dir <- paste(ccDir,"/CMIP5_GJ",sep="")
-gcmList <- list.files(cmip5Dir)
-
-if (!file.exists(paste(oDir,"/cmip5.csv",sep=""))) {
-  for (gcm in gcmList) {
-    cat("processing",gcm,"\n")
-    gcmDir <- paste(cmip5Dir,"/",gcm,sep="")
-    for (yr in 1966:1989) {
-      wList <- list.files(gcmDir,pattern=paste("_",yr,".csv",sep=""))
-      for (fn in wList) {
-        gcmData <- read.csv(paste(gcmDir,"/",fn,sep=""))
-        vn <- names(gcmData)[7]
-        if (vn == "pr") {
-          ovn <- "prec"
-          m6 <- sum(gcmData$pr[which(gcmData$MONTH == "6")])
-          m7 <- sum(gcmData$pr[which(gcmData$MONTH == "7")])
-          m8 <- sum(gcmData$pr[which(gcmData$MONTH == "8")])
-          m9 <- sum(gcmData$pr[which(gcmData$MONTH == "9")])
-        } else if (vn == "tasmin") {
-          ovn <- "tmin"
-          m6 <- mean(gcmData$tasmin[which(gcmData$MONTH == "6")])
-          m7 <- mean(gcmData$tasmin[which(gcmData$MONTH == "7")])
-          m8 <- mean(gcmData$tasmin[which(gcmData$MONTH == "8")])
-          m9 <- mean(gcmData$tasmin[which(gcmData$MONTH == "9")])
-        } else if (vn == "tasmax") {
-          ovn <- "tmax"
-          m6 <- mean(gcmData$tasmax[which(gcmData$MONTH == "6")])
-          m7 <- mean(gcmData$tasmax[which(gcmData$MONTH == "7")])
-          m8 <- mean(gcmData$tasmax[which(gcmData$MONTH == "8")])
-          m9 <- mean(gcmData$tasmax[which(gcmData$MONTH == "9")])
-        }
-        
-        out_row <- data.frame(GCM=gcm,YEAR=yr,VAR=ovn,M6=m6,M7=m7,M8=m8,M9=m9)
-        
-        if (fn == wList[1]) {
-          out_all <- out_row
-        } else {
-          out_all <- rbind(out_all,out_row)
-        }
-        
-      }
-      
-      if (yr == 1966) {
-        yr_all <- out_all
-      } else {
-        yr_all <- rbind(yr_all,out_all)
-      }
-    }
-    
-    if (gcm == gcmList[1]) {
-      c5_all <- yr_all
-    } else {
-      c5_all <- rbind(c5_all,yr_all)
-    }
-  }
-  write.csv(c5_all,paste(oDir,"/cmip5.csv",sep=""),quote=T,row.names=F)
-} else {
-  c5_all <- read.csv(paste(oDir,"/cmip5.csv",sep=""))
-}
+#load the cmip5 data !there is none for the moment
+# cmip5Dir <- paste(ccDir,"/CMIP5_GJ",sep="")
+# gcmList <- list.files(cmip5Dir)
+# 
+# if (!file.exists(paste(oDir,"/cmip5.csv",sep=""))) {
+#   for (gcm in gcmList) {
+#     cat("processing",gcm,"\n")
+#     gcmDir <- paste(cmip5Dir,"/",gcm,sep="")
+#     for (yr in 1966:1989) {
+#       wList <- list.files(gcmDir,pattern=paste("_",yr,".csv",sep=""))
+#       for (fn in wList) {
+#         gcmData <- read.csv(paste(gcmDir,"/",fn,sep=""))
+#         vn <- names(gcmData)[7]
+#         if (vn == "pr") {
+#           ovn <- "prec"
+#           m6 <- sum(gcmData$pr[which(gcmData$MONTH == "6")])
+#           m7 <- sum(gcmData$pr[which(gcmData$MONTH == "7")])
+#           m8 <- sum(gcmData$pr[which(gcmData$MONTH == "8")])
+#           m9 <- sum(gcmData$pr[which(gcmData$MONTH == "9")])
+#         } else if (vn == "tasmin") {
+#           ovn <- "tmin"
+#           m6 <- mean(gcmData$tasmin[which(gcmData$MONTH == "6")])
+#           m7 <- mean(gcmData$tasmin[which(gcmData$MONTH == "7")])
+#           m8 <- mean(gcmData$tasmin[which(gcmData$MONTH == "8")])
+#           m9 <- mean(gcmData$tasmin[which(gcmData$MONTH == "9")])
+#         } else if (vn == "tasmax") {
+#           ovn <- "tmax"
+#           m6 <- mean(gcmData$tasmax[which(gcmData$MONTH == "6")])
+#           m7 <- mean(gcmData$tasmax[which(gcmData$MONTH == "7")])
+#           m8 <- mean(gcmData$tasmax[which(gcmData$MONTH == "8")])
+#           m9 <- mean(gcmData$tasmax[which(gcmData$MONTH == "9")])
+#         }
+#         
+#         out_row <- data.frame(GCM=gcm,YEAR=yr,VAR=ovn,M6=m6,M7=m7,M8=m8,M9=m9)
+#         
+#         if (fn == wList[1]) {
+#           out_all <- out_row
+#         } else {
+#           out_all <- rbind(out_all,out_row)
+#         }
+#         
+#       }
+#       
+#       if (yr == 1966) {
+#         yr_all <- out_all
+#       } else {
+#         yr_all <- rbind(yr_all,out_all)
+#       }
+#     }
+#     
+#     if (gcm == gcmList[1]) {
+#       c5_all <- yr_all
+#     } else {
+#       c5_all <- rbind(c5_all,yr_all)
+#     }
+#   }
+#   write.csv(c5_all,paste(oDir,"/cmip5.csv",sep=""),quote=T,row.names=F)
+# } else {
+#   c5_all <- read.csv(paste(oDir,"/cmip5.csv",sep=""))
+# }
 
 
 #load observed data
 if (!file.exists(paste(oDir,"/obs.csv",sep=""))) {
-  obs_prec <- read.csv(paste(ccDir,"/experiments/p_prec_climate/climate_p_prec_climate_0.csv",sep=""))
+  obs_prec <- raster(paste(ccDir,"/experiments/EcoCrop/prec_p_climate/climate_p_prec_climate_0.csv",sep=""))
   obs_prec <- obs_prec[which(obs_prec$EXP == "p-0_s-997"),]
   obs_prec$EXP <- NULL; obs_prec$SC <- NULL
   obs_prec$RD6 <- NULL; obs_prec$RD7 <- NULL; obs_prec$RD8 <- NULL; obs_prec$RD9 <- NULL
@@ -325,4 +325,5 @@ text(x=13,y=44,labels="AUG",cex=2,font=20,vfont=NULL)
 text(x=18,y=44,labels="SEP",cex=2,font=20,vfont=NULL)
 grid()
 dev.off()
+
 
