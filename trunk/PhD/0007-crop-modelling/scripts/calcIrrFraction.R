@@ -166,7 +166,7 @@ xyNo <- xyFromCell(mif,which(mif[] > 0.01 & mif[] <= 0.03))
 xyNo <- SpatialPoints(xyNo)
 pts3 <- list("sp.points", xyNo, pch = 20, col = "white", cex=0.25, lwd=0.6,first=F)
 
-
+mifp <- mif
 mif[which(mif[] > 1)] <- 1
 
 brks <- seq(0,max(mif[],na.rm=T),length.out=50)
@@ -179,6 +179,14 @@ spplot(mif,sp.layout=list(wld,pts3,pts2,pts1,grli),col.regions=cols,cuts=50,cex=
        at=brks,pretty=brks.lab)
 dev.off()
 
+
+# pCells <- data.frame(CELL=1:ncell(mif))
+# pCells$X <- xFromCell(mif,pCells$CELL); pCells$Y <- yFromCell(mif,pCells$CELL)
+# pCells$Z <- extract(mif,cbind(X=pCells$X,Y=pCells$Y))
+# pCells <- pCells[which(!is.na(pCells$Z)),]
+# windows()
+# plot(mif,col="grey 80")
+# text(x=pCells$X,y=pCells$Y,labels=round(pCells$Z,3),cex=0.4)
 
 
 ##########################################
