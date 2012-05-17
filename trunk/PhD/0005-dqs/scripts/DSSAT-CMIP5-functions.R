@@ -10,7 +10,7 @@ gcm_wrapper <- function(i) {
   
   #sourcing functions
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
-  source(paste(src.dir2,"/CMIP5-functions.R",sep=""))
+  source(paste(src.dir2,"/DSSAT-CMIP5-functions.R",sep=""))
   
   #get list of GCMs and selected GCMs
   gcmList <- unique(cChars$GCM)

@@ -461,7 +461,7 @@ fd <- paste(cDir, "/analyses/runs-future/", sep="")
 imd <- paste(cDir,"/analyses/impacts",sep=""); if (!file.exists(imd)) {dir.create(imd)}
 
 #define and read the shapefile
-shname <- "starea-countries.shp" #starea-countries selcountries
+shname <- "selcountries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
@@ -549,8 +549,8 @@ shname <- "starea-countries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
-gs <- 1
-run.type <- "tmean"
+gs <- "MAX"
+run.type <- "tmin"
 
 #load and run stuff for current (comment if already done)
 r1 <- raster(paste(cd, "/",gs,"-",crop,"-",run.type,"_suitability.asc", sep="")) #current
@@ -610,9 +610,9 @@ plot(rs,
      zlim=zlims,
      horizontal=T,
      legend.width=1,
-     legend.shrink=0.99,
+     legend.shrink=0.99)
      #nlevel=nb*100,
-     useRaster=T)
+     #useRaster=T)
 grid(col="black",lwd=0.8)
 plot(wrld_simpl,lwd=0.8,add=T)
 dev.off()
@@ -648,9 +648,9 @@ plot(a,
      zlim=c(mn,mx),
      horizontal=T,
      legend.width=1,
-     legend.shrink=0.99,
+     legend.shrink=0.99)
      #nlevel=nb*100,
-     useRaster=T)
+     #useRaster=T)
 grid(col="black",lwd=0.8)
 plot(wrld_simpl,lwd=0.8,add=T)
 dev.off()
@@ -669,9 +669,9 @@ plot(b,
      zlim=c(mn,mx),
      horizontal=T,
      legend.width=1,
-     legend.shrink=0.99,
+     legend.shrink=0.99)
      #nlevel=nb*100,
-     useRaster=T)
+     #useRaster=T)
 grid(col="black",lwd=0.8)
 plot(wrld_simpl,lwd=0.8,add=T)
 dev.off()
@@ -691,9 +691,9 @@ plot(c,
      zlim=c(mn,mx),
      horizontal=T,
      legend.width=1,
-     legend.shrink=0.99,
+     legend.shrink=0.99)
      #nlevel=nb*100,
-     useRaster=T)
+     #useRaster=T)
 grid(col="black",lwd=0.8)
 plot(wrld_simpl,lwd=0.8,add=T)
 dev.off()
@@ -715,9 +715,9 @@ plot(d,
      zlim=c(0,1),
      horizontal=T,
      legend.width=1,
-     legend.shrink=0.99,
+     legend.shrink=0.99)
      #nlevel=nb*100,
-     useRaster=T)
+     #useRaster=T)
 grid(col="black",lwd=0.8)
 plot(wrld_simpl,lwd=0.8,add=T)
 dev.off()

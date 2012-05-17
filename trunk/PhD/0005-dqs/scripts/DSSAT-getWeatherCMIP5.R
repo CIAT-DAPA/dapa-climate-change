@@ -26,8 +26,8 @@ mdDir <- "H:/CMIP5/baseline"
 cChars <- read.table(paste(compDir,"/0_input_data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
 #gcmList <- unique(cChars$GCM)
 
-oDir <- paste(compDir,"/CMIP5_GJ",sep="")
-#oDir <- "Z:/PhD-work/data-quality-study/climate-comparison/CMIP5_GJ"
+#oDir <- paste(compDir,"/CMIP5_GJ",sep="")
+oDir <- "Z:/PhD-work/data-quality-study/climate-comparison/CMIP5_GJ"
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 #gcm_wrapper(13)
