@@ -15,33 +15,57 @@ cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 parDir <- paste(cropDir,"/params",sep="")
 dumFile <- paste(parDir,"/glam-r2-param-",tolower(cropName),"-dum.txt",sep="")
 
-GLAM_get_par <- function(parFile,retain="all") {
-  ret_list <- list()
-  
-  if (retain=="all" | "ygp" %in% retain) glam_param.ygp <- get_ygp(parFile) #read ygp
-  if (retain=="all" | "simC" %in% retain) glam_param.simC <- get_sc(parFile) #simulation controls
-  glam_param.mmgtC <- get_mm(parFile) #model management
-  glam_param.spmC <- get_spm(parFile) #spatial management and LAI
-  glam_param.sspC <- get_ssp(parFile) #soil spatial parameters
-  glam_param.dupC <- get_du(parFile) #drainage and uptake
-  glam_param.etC <- get_et(parFile) #evaporation and transpiration
-  glam_param.bmC <- get_bm(parFile) #biomass
-  glam_param.pheC <- get_phe(parFile) #phenology
-  glam_param.fswsow <- get_line(parFile,l=82,float=T) #intelligent sowing
-  glam_param.addC <- get_add(parFile) #additional variables
-  glam_param.awhea <- get_awht(parFile) #additional wheat variables
-  glam_param.wwinC <- get_wwin(parFile) #additional winter wheat variables
-  glam_param.maiC <- get_mai(parFile) #additional maize variables
-  glam_param.ricC <- get_rice(parFile) #additional rice variables
-  glam_param.spiC <- get_spi(parFile) #spare integer and real variables
-  glam_param.sprC <- get_spr(parFile) #spare integer and real variables
-  
-  out_list <- list(get(ls(pattern="glam_param.")))
-  
-  return()
-  
+dumFile <- "D:/glam-r2-param-gnut-hyp.txt"
+
+#get the model parameters
+params <- GLAM_get_par(dumFile,retain=c("all"))
+
+#now what i need to do is build a function to write the parameter file
+#based on the object 'params'. This can easily be done if i have checks
+#in the function for each bit of the parameter file that needs to be written
+#(i.e. these need to be with proper names in the params list). If they're not
+#then they should be loaded from a dummy default file
+
+pf <- file("D:/glam-r2-param-gnut-test.txt",open="w")
+cat("******* GLAM-R2 parameter file.                          Comments                                       *********\n",file=pf)
+
+#yield gap parameter line
+if (!"glam_param.ygp" %in% names(params)) {
+  glam_param.ygp <- get_ygp(dumFile)
+} else {
+  glam_param.ygp <- params$glam_param.ygp
 }
 
+write_line(glam_param.ygp,con=pf,format="short")
 
+#general simulation controls
+if (!"glam_param.sim_ctr" %in% names(params)) {
+  glam_param.sim_ctr <- get_sc(dumFile)
+} else {
+  glam_param.sim_ctr <- params$glam_param.sim_ctr
+}
+
+cat(paste(sprintf("%-12s","YGP_METH"),
+          sprintf("%-11s",glam_param.sim_ctr$YGP_METH),
+          sprintf("%-7d",glam_param.sim_ctr$MMNO),
+          sprintf("%-9d",glam_param.sim_ctr$IMERF),
+          sprintf("%-9d",glam_param.sim_ctr$ISHF),
+          sprintf("%-9d",glam_param.sim_ctr$IUPT),"\n",
+          sprintf("%-12s","NDSLA"),
+          sprintf("%-11d",glam_param.sim_ctr$NDSLA),
+          sprintf("%-7d",glam_param.sim_ctr$SLA_INI),
+          sprintf("%-9d",glam_param.sim_ctr$ZSMAX),
+          sprintf("%-9.1f",glam_param.sim_ctr$SMLON),
+          sprintf("%-9s","x"),"\n",
+          sprintf("%-12s","TETRS"),
+          sprintf("%-11s",glam_param.sim_ctr$TETRS),
+          sprintf("%-16s",glam_param.sim_ctr$RunID),
+          sprintf("%-9d",glam_param.sim_ctr$IVMETH),
+          sprintf("%-9d",glam_param.sim_ctr$IC02),"\n\n",
+          sep=""),file=pf)
+cat("*MODEL MANAGEMENT\n",file=pf)
+cat("Name        Value      Meth   Min      Max      NVAL     Comments\n",file=pf)
+
+close(pf)
 
 

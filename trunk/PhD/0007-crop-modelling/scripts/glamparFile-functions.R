@@ -5,6 +5,71 @@
 #functions to read bits of the glam parameter file
 #see meaning of variables in GLAM parameter files
 
+
+#### this function would read a given set of outputs as specified by the argument `retain`,
+#### which can take the following values: "all" or a vector composed of any combination of
+#### the following strings, each of which corresponds to a section in the GLAM
+#### parameter file:
+
+#ygp: YIELD GAP PARAMETER (first row of parameter file)
+#sim_ctr: SIMULATION CONTROLS (lines 3-5 of parameter file)
+#mod_mgt: *MODEL MANAGEMENT
+#spt_mgt: *SPATIAL MANAGEMENT AND LAI
+#soils: *SOIL SPATIAL PARAMS
+#drn_upk: *DRAINAGE AND UPTAKE
+#evap: *EVAPORATION AND TRANSPIRATION
+#bmass: *BIOMASS
+#phenol: *PHENOLOGY
+#fswsow: *INTELLIGENT SOWING
+#hts_fut: *ADDITIONAL VARIABLES CURRENTLY ONLY USED FOR GROUNDNUT AND/OR SPRING WHEAT UNDER HEAT STRESS OR FUTURE CLIMATE
+#wheat: *ADDITIONAL WHEAT (SPRING AND WINTER) VARIABLES
+#wwin: *ADDITIONAL WINTER WHEAT VARIABLES
+#maize: *ADDITIONAL MAIZE VARIABLES
+#rice: *ADDITIONAL RICE VARIABLES
+#sparei: *SPARE INTEGER VARIABLES
+#sparer: *SPARE REAL VARIABLES
+
+GLAM_get_par <- function(parFile,retain="all") {
+  fullset <- c("all","ygp","sim_ctr","mod_mgt","spt_mgt","soils","drn_upk","evap",
+               "phenol","fswsow","hts_fut","wheat","wwin","maize","rice","sparei","sparer")
+  if (length(grep(retain[1],fullset)) == 0) {
+    cat("variables to be retained not specified, retrieving all\n")
+    retain <- "all"
+  }
+  
+  if ("all" %in% tolower(retain) | "ygp" %in% tolower(retain)) glam_param.ygp <- get_ygp(parFile) #read ygp
+  if ("all" %in% tolower(retain) | "sim_ctr" %in% tolower(retain)) glam_param.sim_ctr <- get_sc(parFile) #simulation controls
+  if ("all" %in% tolower(retain) | "mod_mgt" %in% tolower(retain)) glam_param.mod_mgt <- get_mm(parFile) #model management
+  if ("all" %in% tolower(retain) | "spt_mgt" %in% tolower(retain)) glam_param.spt_mgt <- get_spm(parFile) #spatial management and LAI
+  if ("all" %in% tolower(retain) | "soils" %in% tolower(retain)) glam_param.soils <- get_ssp(parFile) #soil spatial parameters
+  if ("all" %in% tolower(retain) | "drn_upk" %in% tolower(retain)) glam_param.drn_upk <- get_du(parFile) #drainage and uptake
+  if ("all" %in% tolower(retain) | "evap" %in% tolower(retain)) glam_param.evap <- get_et(parFile) #evaporation and transpiration
+  if ("all" %in% tolower(retain) | "bmass" %in% tolower(retain)) glam_param.bmass <- get_bm(parFile) #biomass
+  if ("all" %in% tolower(retain) | "phenol" %in% tolower(retain)) glam_param.phenol <- get_phe(parFile) #phenology
+  if ("all" %in% tolower(retain) | "fswsow" %in% tolower(retain)) glam_param.fswsow <- list(FSWSOW=get_line(parFile,l=82,float=T)) #intelligent sowing
+  if ("all" %in% tolower(retain) | "hts_fut" %in% tolower(retain)) glam_param.hts_fut <- get_add(parFile) #additional variables
+  if ("all" %in% tolower(retain) | "wheat" %in% tolower(retain)) glam_param.wheat <- get_awht(parFile) #additional wheat variables
+  if ("all" %in% tolower(retain) | "wwin" %in% tolower(retain)) glam_param.wwin <- get_wwin(parFile) #additional winter wheat variables
+  if ("all" %in% tolower(retain) | "maize" %in% tolower(retain)) glam_param.maize <- get_mai(parFile) #additional maize variables
+  if ("all" %in% tolower(retain) | "rice" %in% tolower(retain)) glam_param.rice <- get_rice(parFile) #additional rice variables
+  if ("all" %in% tolower(retain) | "sparei" %in% tolower(retain)) glam_param.sparei <- get_spi(parFile) #spare integer and real variables
+  if ("all" %in% tolower(retain) | "sparer" %in% tolower(retain)) glam_param.sparer <- get_spr(parFile) #spare integer and real variables
+  
+  #appending everything in the same object
+  out_list <- ls(pattern="glam_param.")
+  all_obj <- list()
+  ct <- 1
+  for (obj in out_list) {
+    ob <- get(obj)
+    all_obj[[ct]] <- c(ob)
+    ct <- ct+1
+  }
+  names(all_obj) <- out_list
+  return(all_obj)
+}
+
+
+
 #read an standard parameter line from the parameter file
 get_line <- function(pFile,l=31,float=F) {
   toskip <- l-1
@@ -27,7 +92,7 @@ get_line <- function(pFile,l=31,float=F) {
 
 #read ygp
 get_ygp <- function(pFile) {
-  ygp <- get_line(pFile,l=2,float=T)
+  ygp <- list(YGP=get_line(pFile,l=2,float=T))
   return(ygp)
 }
 
@@ -47,11 +112,12 @@ get_sc <- function(pFile) {
   simC2 <- as.list(simC2)
   simC2$Comments <- NULL
   
-  simC3 <- read.fortran(pFile,skip=4,n=1,format=c("A12","F11","A16","I9","I9","A110"))
+  simC3 <- read.fortran(pFile,skip=4,n=1,format=c("A12","A11","A16","I9","I9","A110"))
   simC3$V1 <- NULL
   names(simC3) <- c("TETRS","RunID","IVMETH","IC02","Comments")
   simC3 <- as.list(simC3)
   simC3$RunID <- gsub(" ","",simC3$RunID)
+  simC3$TETRS <- gsub(" ","",simC3$TETRS)
   simC3$Comments <- NULL
   
   simC <- c(simC1,simC2,simC3)
@@ -61,12 +127,13 @@ get_sc <- function(pFile) {
 
 #to read model management
 get_mm <- function(pFile) {
-  mm1 <- read.fortran(pFile,skip=8,n=1,format=c("A12","A11","A7","3I9","A110"))
+  mm1 <- read.fortran(pFile,skip=8,n=1,format=c("A12","A11","A7","2I9","A9","A110"))
   mm1$V1 <- NULL; mm1$V3 <- NULL
   names(mm1) <- c("SEASON","ISYR","IEYR","Output_type","Comments")
   mm1 <- as.list(mm1)
   mm1$Comments <- NULL
   mm1$SEASON <- gsub(" ","",mm1$SEASON)
+  mm1$Output_type <- gsub(" ","",mm1$Output_type)
   
   mm2 <- read.fortran(pFile,skip=9,n=1,format=c("A12","A11","A7","2I9","A9","A110"))
   mm2$V1 <- NULL; mm2$V3 <- NULL
@@ -341,4 +408,22 @@ get_spr <- function(pFile) {
 }
 
 
+#function to write an standard line in the parameter file
+#the line will be written in float, if not specified
+write_line <- function(parlist,con=pf,format="short") {
+  l_name <- names(parlist)
+  if (format == "short") {
+    cat(paste(sprintf("%-12s",l_name),sprintf("%-11.2f",parlist[[l_name]]$Value),
+              sprintf("%-7s",parlist[[l_name]]$Meth),
+              sprintf("%1$-9.2f%2$-9.2f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$NVAL),"\n",sep=""),file=pf)
+  } else if (format == "int") {
+    cat(paste(sprintf("%-12s",l_name),sprintf("%-11.f",parlist[[l_name]]$Value),
+              sprintf("%-7s",parlist[[l_name]]$Meth),
+              sprintf("%1$-9d%2$-9df%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$NVAL),"\n",sep=""),file=pf)
+  } else if (format == "long") {
+    cat(paste(sprintf("%-12s",l_name),sprintf("%-11.4f",parlist[[l_name]]$Value),
+              sprintf("%-7s",parlist[[l_name]]$Meth),
+              sprintf("%1$-9.4f%2$-9.4f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$NVAL),"\n",sep=""),file=pf)
+  }
+}
 
