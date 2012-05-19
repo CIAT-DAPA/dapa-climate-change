@@ -545,7 +545,7 @@ cd <- paste(bd, "/runs", sep="")
 fd <- paste(bd, "/runs-future", sep="")
 
 #shape to work with
-shname <- "starea-countries.shp" #starea-countries selcountries
+shname <- "selcountries.shp" #starea-countries selcountries
 sh <- readShapePoly(paste(bDir,"/analysis-mask/", shname, sep=""))
 
 #define other stuff
@@ -581,8 +581,8 @@ write.csv(res.im, paste(bd, "/impacts/future-area-", shname, ".csv", sep=""), qu
 library(maptools); data(wrld_simpl)
 
 #1. plot current
-gs <- 1
-run.type <- "tmean"
+gs <- "MAX"
+run.type <- "tmin"
 rs <- raster(paste(cDir,"/analyses/runs/",gs,"-",crop,"-",run.type,"_suitability.asc",sep=""))
 rs[which(rs[]==0)] <- NA
 
