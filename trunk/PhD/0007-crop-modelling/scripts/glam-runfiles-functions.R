@@ -68,6 +68,7 @@ write_soil_types <- function(x,outfile,fields=list(CELL="CELL",SAND="SAND",CLAY=
   cat("SOIL_CODE  RLL    RLL_L  RLL_U  DUL   DUL_L   DUL_U  SAT    SAT_L  SAT_U  ASW_L  ASW_U  SOIL_TYPE\n",file=sfil)
   
   #loop through cells
+  cnt <- 1
   for (cll in unique(x$CELL)) {
     cellData <- x[which(x$CELL==cll),]
     
@@ -94,12 +95,13 @@ write_soil_types <- function(x,outfile,fields=list(CELL="CELL",SAND="SAND",CLAY=
     asw_u <- asw_l*1.75
     
     #write the output line
-    out_line <- paste(sprintf("%-11s",cll),
+    out_line <- paste(sprintf("%-11s",cnt),
                       substr(rll_m,2,4),"    ",substr(rll_n,2,4),"    ",substr(rll_x,2,4),"    ",
                       substr(dul_m,2,4),"    ",substr(dul_n,2,4),"    ",substr(dul_x,2,4),"    ",
                       substr(sat_m,2,4),"    ",substr(sat_n,2,4),"    ",substr(sat_x,2,4),"    ",
                       substr(asw_l,2,4),"    ",substr(asw_u,2,4),"     ",paste("GridCell_",cll,sep=""),"\n",sep="")
     cat(out_line,file=sfil)
+    cnt <- cnt+1
   }
   
   #end of loop, close the file, and return the name of output file
@@ -128,19 +130,98 @@ write_soilcodes <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="C
   names(x)[which(toupper(names(x)) == toupper(fields$ROW))] <- "ROW"
   
   fsg <- file(outfile,"w")
+  cnt <- 1
   for (cll in cell) {
     col <- x$COL[which(x$CELL == cll)]
     row <- x$ROW[which(x$CELL == cll)]
     
-    cat(paste(sprintf("%1$4d%2$4d",row,col),
-              sprintf("%6d",cll),"\n",sep=""),file=fsg)
+    cat(paste(sprintf("%1$4d%2$4d",1,1),
+              sprintf("%6d",cnt),"\n",sep=""),file=fsg)
+    cnt <- cnt+1
   }
   close(fsg)
   return(outfile)
 }
 
 
+#### Write the file with sowing dates
+#### a similar
+write_sowdates <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE")) {
+  
+  if (length(which(toupper(names(fields)) %in% c("CELL","COL","ROW","SOW_DATE"))) != 4) {
+    stop("field list incomplete")
+  }
+  
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
+    stop("field list does not match with data.frame")
+  }
+  
+  if (class(x) != "data.frame") {
+    stop("x must be a data.frame")
+  }
+  
+  names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
+  names(x)[which(toupper(names(x)) == toupper(fields$COL))] <- "COL"
+  names(x)[which(toupper(names(x)) == toupper(fields$ROW))] <- "ROW"
+  names(x)[which(toupper(names(x)) == toupper(fields$SOW_DATE))] <- "SOW_DATE"
+  
+  fsg <- file(outfile,"w")
+  for (cll in cell) {
+    col <- x$COL[which(x$CELL == cll)]
+    row <- x$ROW[which(x$CELL == cll)]
+    dat <- round(x$SOW_DATE[which(x$CELL == cll)],0)
+    
+    cat(paste(sprintf("%1$4d%2$4d",1,1),
+              sprintf("%6d",dat),"\n",sep=""),file=fsg)
+  }
+  close(fsg)
+  return(outfile)
+}
 
 
-
+##############################
+## write yield file
+write_yield <- function(x,outfile,yld_stk,yri,yrf,cell=c(636),fields=list(CELL="CELL",X="X",Y="Y")) {
+  
+  if (length(which(toupper(names(fields)) %in% c("CELL","X","Y"))) != 3) {
+    stop("field list incomplete")
+  }
+  
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 3) {
+    stop("field list does not match with data.frame")
+  }
+  
+  if (class(x) != "data.frame") {
+    stop("x must be a data.frame")
+  }
+  
+  if (nlayers(yld_stk) != length(yri:yrf)) {
+    stop("number of yield layers in stack does not match with number of years")
+  }
+  
+  names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
+  names(x)[which(toupper(names(x)) == toupper(fields$X))] <- "X"
+  names(x)[which(toupper(names(x)) == toupper(fields$Y))] <- "Y"
+  
+  fsg <- file(outfile,"w")
+  for (cll in cell) {
+    col <- x$COL[which(x$CELL == cll)]
+    row <- x$ROW[which(x$CELL == cll)]
+    
+    lon <- x$X[which(x$CELL == cll)]
+    lat <- x$Y[which(x$CELL == cll)]
+    
+    yValues <- as.numeric(extract(yld_stk,cbind(X=lon,Y=lat)))
+    
+    for (i in 1:length(yValues)) {
+      dat <- yValues[i]
+      cat(paste(sprintf("%4d",(yri+i-1+1900)),
+                sprintf("%1$4d%2$4d",1,1),
+                sprintf("%8.1f",dat),"\n",sep=""),file=fsg)
+    }
+    
+  }
+  close(fsg)
+  return(outfile)
+}
 
