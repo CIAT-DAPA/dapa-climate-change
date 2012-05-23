@@ -36,6 +36,15 @@ pday <- writeRaster(pday,paste(bDir,"/plant_lr.asc",sep=""),format="ascii",overw
 hday <- createCalendar(rname="harvest.asc",rs=base_rs,wd=bDir)
 hday <- writeRaster(hday,paste(bDir,"/harvest_lr.asc",sep=""),format="ascii",overwrite=T)
 
+#start of pdate
+pday <- createCalendar(rname="plant.start.asc",rs=base_rs,wd=bDir)
+pday <- writeRaster(pday,paste(bDir,"/plant_start_lr.asc",sep=""),format="ascii",overwrite=T)
+
+#end of pdate
+pday2 <- createCalendar(rname="plant.end.asc",rs=base_rs,wd=bDir)
+pday2 <- writeRaster(pday2,paste(bDir,"/plant_end_lr.asc",sep=""),format="ascii",overwrite=T)
+
+
 
 #sorghum -khariff
 rm(list=ls()); g=gc(); rm(g)

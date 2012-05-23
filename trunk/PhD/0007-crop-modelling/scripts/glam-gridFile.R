@@ -13,8 +13,11 @@ library(raster)
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
 source(paste(src.dir,"/glam-soil-functions.R",sep=""))
+source(paste(src.dir,"/glam-make_wth.R",sep=""))
+source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
-bDir <- "F:/PhD-work/crop-modelling/GLAM"
+cmDir <- "F:/PhD-work/crop-modelling"
+bDir <- paste(cmDir,"/GLAM",sep="")
 cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
@@ -67,25 +70,34 @@ cell <- 636
 soilDir <- paste(bDir,"/soil-data/HWSD",sep="")
 solData <- read.csv(paste(soilDir,"/cellValues.csv",sep=""))
 oSolFile <- paste(gsoilDir,"/soiltypes_all.txt",sep="")
-oSolFile <- write_soil_types(x=solData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))
+if (!file.exists(oSolFile)) {
+  oSolFile <- write_soil_types(x=solData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))
+}
 
-oSolFile <- paste(gsoilDir,"/soiltypes_636.txt",sep="")
-selSolData <- solData[which(solData$CELL == cell),]
-oSolFile <- write_soil_types(x=selSolData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))
+
+oSolFile <- paste(gsoilDir,"/soiltypes_",cell,".txt",sep="")
+if (!file.exists(oSolFile)) {
+  selSolData <- solData[which(solData$CELL == cell),]
+  oSolFile <- write_soil_types(x=selSolData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))
+}
 
 #now need to create the soil codes file
-oSoilGrid <- paste(gsoilDir,"/soilcodes_636.txt",sep="")
-oSoilGrid <- write_soilcodes(x=cells,outfile=oSoilGrid,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW"))
+oSoilGrid <- paste(gsoilDir,"/soilcodes_",cell,".txt",sep="")
+if (!file.exists(oSoilGrid)) {
+  oSoilGrid <- write_soilcodes(x=cells,outfile=oSoilGrid,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW"))
+}
 
 
 ######################################################
 # planting dates file
 # get the planting date from Sacks et al. (2010)
-sow_rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_lr.tif",sep=""))
+sow_rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_start_lr.tif",sep=""))
 cells$SOW_DATE <- extract(sow_rs,cbind(X=cells$X,Y=cells$Y))
 
-osowFile <- paste(gsowDir,"/sowing_636.txt",sep="")
-osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
+osowFile <- paste(gsowDir,"/sowing_",cell,".txt",sep="")
+if (!file.exists(oSowFile)) {
+  osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
+}
 
 
 ######################################################
@@ -93,33 +105,17 @@ osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(636),fields=list(CELL
 method <- "lin"
 
 yields <- stack(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/raster/gridded/",tolower(method),"/",tolower(method),"-",66:94,".asc",sep=""))
-yFile <- paste(yieldDir,"/yield_636_",method,".txt",sep="")
-yFile <- write_yield(x=cells,outfile=yFile,yld_stk=yields,yri=66,yrf=94,cell=636,fields=list(CELL="CELL",X="X",Y="Y"))
+yFile <- paste(yieldDir,"/yield_",cell,"_",method,".txt",sep="")
+if (!file.exists(yFile)) {
+  yFile <- write_yield(x=cells,outfile=yFile,yld_stk=yields,yri=66,yrf=94,cell=cell,fields=list(CELL="CELL",X="X",Y="Y"))
+}
+
 
 
 ######################################################
 #write weather
-
-yr <- 1966
-wthfile <- paste(wthDir,"/ingc001001",yr,".wth",sep="")
-#make a base function that writes the wth-type output
-write_wth <- function(x,wthfile,insi="INGC") {
-  #x must be a matrix of all weather data SRAD, TMAX, TMIN, RAIN
-  wfil <- file(wthfile,"w")
-  cat(paste("*WEATHER : gridcell ",cell,"\n",sep=""),file=wfil)
-  cat("@ INSI      LAT     LONG  ELEV   TAV   AMP REFHT WNDHT\n",file=wfil)
-  
-  lon <- cells$X[which(cells$CELL == cell)]
-  lat <- cells$Y[which(cells$CELL == cell)]
-  cat()
-  
-  
-}
-
-
-#then according to the list of cells make it work for all gridcells
-#remember the file name is %prefix%%row%%col%%year%.wth
-
+wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
+wthDir <- make_wth(cells,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y"))
 
 
 
