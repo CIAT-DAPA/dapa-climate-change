@@ -238,7 +238,6 @@ processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir
   
   #extract daily weather from Indian TropMet grids
   cat("daily rainfall: loading...\n")
-  #out_all <- extractDaily(ncFile,x,y,year,nd,mthRainAsc)
   out_all <- read.csv(paste(mthRainAsc,"/cell-",cell,".csv",sep=""))
   out_all <- out_all[which(out_all$YEAR==year),]
   out_all$YEAR <- NULL
@@ -273,11 +272,6 @@ processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir
   #need to load monthly temperature data
   #read 14 months
   cat("extracting temperature data : loading...\n")
-  #tmin_stk <- stack(c(paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year-1),"_12.asc",sep=""),
-  #                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",year,"_",1:12,".asc",sep=""),
-  #                    paste(tempDir,"/monthly_grids/tmn_1dd/tmn_",(year+1),"_1.asc",sep="")))
-  #tmin_vals <- extract(tmin_stk,cbind(X=x,Y=y))*0.1
-  
   tmin_vals <- read.csv(paste(tempDir,"/cru_tmn/cell-",cell,".csv",sep=""))
   tmin_vals <- tmin_vals[which(tmin_vals$YEAR==year | tmin_vals$YEAR==(year-1) | tmin_vals$YEAR==(year+1)),]
   tmin_vals$YEAR <- NULL
@@ -285,11 +279,6 @@ processYear <- function(cell,ncFile,mthRainAsc,year,x,y,tempDir,sradDir,era40Dir
   
   daily_tmin <- linearise(tmin_vals)[16:(nd+15)] #interpolate to daily
   out_all$TMIN <- daily_tmin #put data into matrix
-  
-  #tmax_stk <- stack(c(paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year-1),"_12.asc",sep=""),
-  #                    paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",year,"_",1:12,".asc",sep=""),
-  #                    paste(tempDir,"/monthly_grids/tmx_1dd/tmx_",(year+1),"_1.asc",sep="")))
-  #tmax_vals <- extract(tmax_stk,cbind(X=x,Y=y))*0.1
   
   tmax_vals <- read.csv(paste(tempDir,"/cru_tmx/cell-",cell,".csv",sep=""))
   tmax_vals <- tmax_vals[which(tmax_vals$YEAR==year | tmax_vals$YEAR==(year-1) | tmax_vals$YEAR==(year+1)),]
