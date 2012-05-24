@@ -69,6 +69,27 @@ cell <- 853
 #see the script gridSoilData.R for details on how the data was obtained
 soilDir <- paste(bDir,"/soil-data/HWSD",sep="")
 solData <- read.csv(paste(soilDir,"/cellValues.csv",sep=""))
+
+#load mask to correct cellsize
+msk_sol <- raster(paste(soilDir,"/msk",sep=""))
+msk_sol[which(!is.na(msk_sol[]))] <- which(!is.na(msk_sol[]))
+allCells <- msk_sol[which(!is.na(msk_sol[]))]
+
+xys <- as.data.frame(xyFromCell(msk_sol,allCells))
+xys$CELLS_SOL <- allCells
+
+ncFile <- paste(cmDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
+ydDir <- paste(cmDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
+
+metFile <- raster(ncFile,band=0)
+yldFile <- raster(paste(ydDir,"/raw/raw-66.asc",sep=""))
+msk <- maskCreate(metFile,yldFile)
+
+xys$CELL <- cellFromXY(msk,cbind(x=xys$x,y=xys$y))
+solData$CELLS_SOL <- solData$CELL; solData$CELL <- NULL
+solData <- merge(solData,xys,by="CELLS_SOL",all=T)
+
+#note that the soil gridcode will be different
 oSolFile <- paste(gsoilDir,"/soiltypes_all.txt",sep="")
 if (!file.exists(oSolFile)) {
   oSolFile <- write_soil_types(x=solData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))

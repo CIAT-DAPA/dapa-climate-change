@@ -34,7 +34,7 @@ cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signa
 #files that were generated
 setup <- list()
 setup$BDIR <- bDir
-setup$CELL <- 641 #636 467 641
+setup$CELL <- 720 #636 467 641 720
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
@@ -45,7 +45,7 @@ setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
 setup$WTH_ROOT <- "ingc"
 setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
 setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
-setup$SIM_NAME <- "mp_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr #mp_rfd_irr
+setup$SIM_NAME <- "os_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr #mp_rfd_irr #os_rfd_irr
 setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
 
 
