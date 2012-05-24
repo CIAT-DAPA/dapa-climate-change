@@ -22,7 +22,7 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
   #determine operating system and bin folder
   machine <- as.data.frame(t(Sys.info()))
   machine <- paste(machine$sysname)
-  binDir <- paste(bDir,"/model-runs/bin/glam-",machine,sep="")
+  binDir <- paste(bDir,"/model-runs/bin/glam-",tolower(machine),sep="")
   
   if (tolower(machine) == "windows") {
     glam_cmd <- paste(paste(execName,".exe",sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
