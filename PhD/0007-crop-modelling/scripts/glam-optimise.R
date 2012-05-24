@@ -6,7 +6,9 @@
 
 #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
 #running and optimising GLAM
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+
 source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
 source(paste(src.dir,"/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
@@ -17,7 +19,9 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 
 #input directories and model
-bDir <- "F:/PhD-work/crop-modelling/GLAM"
+#bDir <- "F:/PhD-work/crop-modelling/GLAM"
+bDir <- "~/PhD-work/crop-modelling/GLAM"
+
 cropName <- "gnut"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 pDir <- paste(cDir,"/params",sep="") #parameter files
@@ -30,7 +34,7 @@ cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signa
 #files that were generated
 setup <- list()
 setup$BDIR <- bDir
-setup$CELL <- 467
+setup$CELL <- 641 #636 467 641
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
@@ -41,7 +45,7 @@ setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
 setup$WTH_ROOT <- "ingc"
 setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
 setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
-setup$SIM_NAME <- "up_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr
+setup$SIM_NAME <- "mp_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr #mp_rfd_irr
 setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
 
 
