@@ -88,6 +88,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
     if (run.type == "RFD") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
       
+      #check if the planting date is well configured
+      if (sowFile_rfd == "nofile") {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+          stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+        }
+      } else {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+          GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
+        }
+      }
+      
       #output folder
       run_dir <- create_dirs(paste(optDir,"/",run.type,"_run-",i,"_",vals[i],sep=""))
       
@@ -105,7 +119,12 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
         soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
         soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
-        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
+        
+        if (sowFile_rfd == "nofile") {
+          sow_row <- sowFile_rfd
+        } else {
+          sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
+        }
         yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
         ygp_row <- "nofile"
         
@@ -123,7 +142,11 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         #copy all inputs to run directory and write filenames
         x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
-        x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        
+        if (sowFile_rfd != "nofile") {
+          x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
+        
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- sapply(list.files(wthDir_rfd),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_rfd,paste(run_dir,"/inputs/ascii/wth",sep=""))
@@ -160,6 +183,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
     } else if (run.type == "IRR") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "IRR"
       
+      #check if the planting date is well configured
+      if (sowFile_irr == "nofile") {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+          stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+        }
+      } else {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+          GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
+        }
+      }
+      
       #output folder
       run_dir <- create_dirs(paste(optDir,"/",run.type,"_run-",i,"_",vals[i],sep=""))
       
@@ -176,7 +213,13 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
         soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
         soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
-        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
+        
+        if (sowFile_irr == "nofile") {
+          sow_row <- sowFile_irr
+        } else {
+          sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
+        }
+        
         yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
         ygp_row <- "nofile"
         
@@ -194,7 +237,9 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         #copy all inputs to run directory and write filenames
         x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
-        x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        if (sowFile_irr != "nofile") {
+          x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- sapply(list.files(wthDir_irr),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_irr,paste(run_dir,"/inputs/ascii/wth",sep=""))
@@ -231,6 +276,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
     } else if (run.type == "MIX") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
       
+      #check if the planting date is well configured
+      if (sowFile_rfd == "nofile") {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+          stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+        }
+      } else {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+          GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
+        }
+      }
+      
       #output folder
       run_dir <- create_dirs(paste(optDir,"/RFD_run-",i,"_",vals[i],sep=""))
       
@@ -247,7 +306,11 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
         soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
         soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
-        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
+        if (sowFile_rfd == "nofile") {
+          sow_row <- sowFile_rfd
+        } else {
+          sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
+        }
         yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
         ygp_row <- "nofile"
         
@@ -265,7 +328,9 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         #copy all inputs to run directory and write filenames
         x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
-        x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        if (sowFile_rfd != "nofile") {
+          x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- sapply(list.files(wthDir_rfd),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_rfd,paste(run_dir,"/inputs/ascii/wth",sep=""))
@@ -301,6 +366,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
       #Now the irrigated run
       GLAM_params$glam_param.mod_mgt$SEASON <- "IRR"
       
+      #check if the planting date is well configured
+      if (sowFile_irr == "nofile") {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+          stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+        }
+      } else {
+        if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+          GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
+          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
+        }
+      }
+      
       #output folder
       run_dir <- create_dirs(paste(optDir,"/IRR_run-",i,"_",vals[i],sep=""))
       
@@ -314,7 +393,12 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         ######################################################
         #write filenames file
         parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
-        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
+        
+        if (sowFile_irr == "nofile") {
+          sow_row <- sowFile_irr
+        } else {
+          sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
+        }
         
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
@@ -331,7 +415,9 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         #copy all inputs to run directory and write filenames
         x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
-        x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        if (sowFile_irr != "nofile") {
+          x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- sapply(list.files(wthDir_irr),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_irr,paste(run_dir,"/inputs/ascii/wth",sep=""))

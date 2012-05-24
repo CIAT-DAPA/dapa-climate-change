@@ -25,32 +25,35 @@ pDir <- paste(cDir,"/params",sep="") #parameter files
 #load cell details
 cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
 
-#get defaults (parameter set)
-params <- GLAM_get_default(x=cells,cell=636,parDir=pDir)
-params$glam_param.mod_mgt$ISYR <- 1966 #start year
-params$glam_param.mod_mgt$IEYR <- 1993 #end year
-
 
 #get run setup
 #files that were generated
 setup <- list()
 setup$BDIR <- bDir
-setup$CELL <- 636
+setup$CELL <- 467
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
 setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
 setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
-setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd",sep="")
-setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr",sep="")
+setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
+setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
 setup$WTH_ROOT <- "ingc"
 setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
 setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
-setup$SIM_NAME <- "gj_only_rfd" #gj_only_rfd #gj_rfd_irr
-setup$PRE_SEAS <- "RF" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+setup$SIM_NAME <- "up_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr
+setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+
+
+#get defaults (parameter set)
+params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
+params$glam_param.mod_mgt$ISYR <- 1966 #start year
+params$glam_param.mod_mgt$IEYR <- 1993 #end year
+
 
 #load list of parameters to optimise, ranges, and number of steps
 opt_rules <- read.table(paste(pDir,"/optimisation-rules.txt",sep=""),sep="\t",header=T)
+
 
 #extract irrigation rates
 irDir <- paste(cDir,"/irrigated_ratio",sep="")
@@ -161,6 +164,10 @@ for (rw in 1:nrow(optimal)) {
 #now optimise the planting date
 ######################################################
 # reset lists of output parameters
+#which and where is the param
+parname <- "IPDATE"
+where <- "glam_param.spt_mgt"
+
 if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
   optimal <- list(); optimised <- list()
   
@@ -185,9 +192,8 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   sow_seq <- seq(sow_i,sow_f,by=1)
   nstep <- length(sow_seq)
   
-  #which and where is the param
-  parname <- "IPDATE"
-  where <- "glam_param.spt_mgt"
+  #set the planting date file to NA, so to pass the configuration check
+  setup$SOW_FILE_RFD <- "nofile"
   
   #put these data in the parameter file
   params[[where]][[parname]][,"Value"] <- sow_i
@@ -196,7 +202,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   
   optimised[[parname]] <- GLAM_optimise(GLAM_params=params,RUN_setup=setup,sect=where,
                                         param=parname,n.steps=nstep,iter=tolower(parname),
-                                        iratio=data.frame(YEAR=1,IRATIO=0))
+                                        iratio=ir_vls)
   
   optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
   cat(parname,":",optimal[[parname]],"\n")
@@ -207,7 +213,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   
   #update the parameter set to -99 and replace the planting date file
   cells$SOW_DATE <- optimal$IPDATE
-  osowFile <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_opt.txt",sep="")
+  osowFile <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_opt2.txt",sep="")
   osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(setup$CELL),
                              fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
   
@@ -225,18 +231,17 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
 
 #################################################################################
 #run the optimiser for YGP, 20 steps
+parname <- "YGP"
+where <- "glam_param.ygp"
+nstep <- 20
 
 if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
   # reset lists of output parameters
   optimal <- list(); optimised <- list()
   
-  parname <- "YGP"
-  where <- "glam_param.ygp"
-  nstep <- 20
-  
   optimised[[parname]] <- GLAM_optimise(GLAM_params=params,RUN_setup=setup,sect=where,
                                         param=parname,n.steps=20,iter=tolower(parname),
-                                        iratio=data.frame(YEAR=1,IRATIO=0))
+                                        iratio=ir_vls)
   
   optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
   cat(parname,":",optimal[[parname]],"\n")
@@ -248,6 +253,8 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
 
 #################################################################################
 ##make plots of each parameter tuning
+cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
+optimal <- cal_data[which(cal_data$iter==10),]
 par_list <- c(paste(optimal$param),"IPDATE","YGP")
 iter <- c(rep(10,times=nrow(optimal)),"ipdate","ygp")
 pList <- data.frame(param=par_list,iter=iter)

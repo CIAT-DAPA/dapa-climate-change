@@ -57,7 +57,7 @@ if (!file.exists(ofil)) {
 ######################################################
 ############# SELECTED GRIDCELL(S) ###################
 ######################################################
-cell <- 636
+cell <- 853
 ######################################################
 ######################################################
 
@@ -115,13 +115,24 @@ if (!file.exists(yFile)) {
 ######################################################
 #write weather (irr and rainfed)
 wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
-owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd",sep=""),wthDataDir,
+owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_",cell,sep=""),wthDataDir,
                    fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
 
 #Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
-#between April and May
-icells <- cells; icells$SOW_DATE <- 32
-owthDir <- make_wth(x=icells,cell,wthDir=paste(wthDir,"/irr",sep=""),wthDataDir,
+#between April and May: sown in day 32 [zone 2]
+#in Uttar Pradesh it is 15th November (day 320) [zone 1]
+#in Andhra Pradesh it is 15th November (day 320) [zone 5]
+#in Karnataka and Tamil Nadu it is 15th January (day 15) [zone 5]
+#in Orissa it is 15h November (day 320) [zone 4]
+#in Madhya Pradesh it is 15th November (day 320) [zone 3]
+
+#This info was condensed into a raster file, which has the planting information per
+#Indian groundnut growing zone (that was done manually). Loading it...
+
+rabi_sow <- raster(paste(cropDir,"/",tolower(cropName),"-zones/plant_rabi.asc",sep=""))
+
+icells <- cells; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y))
+owthDir <- make_wth(x=icells,cell,wthDir=paste(wthDir,"/irr_",cell,sep=""),wthDataDir,
                    fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
 
 
