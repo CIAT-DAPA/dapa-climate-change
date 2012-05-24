@@ -2,53 +2,8 @@
 #UoL / CCAFS / CIAT
 #February 2012
 
-# 
-# for (ws in wstList) {
-#   xp <- mriData$ID[which(mriData$WSTID==ws)][1]
-#   
-#   cat(paste(ws),"of experiment",paste(xp),"\n")
-#   #get the data formatted
-#   siteData <- mriData[which(mriData$WSTID==ws),]
-#   siteData$DATE <- siteData$YRDOY
-#   siteData$YRDOY <- NULL
-#   
-#   yr <- siteData$YEAR[1]
-#   if (yr<10) {
-#     siteData$YEAR <- paste("0",siteData$YEAR,sep="")
-#     siteData$DATE <- paste(siteData$YEAR,substring(siteData$DATE,2,nchar(siteData$DATE[1])+1),sep="")
-#   }
-#   
-#   
-#   #get the site details and srad from original file
-#   wthFile <- paste("./DSSAT/",xp,"/",ws,"01.WTH",sep="")
-#   siteDetails <- read.fortran(file=wthFile,skip=3,nrows=1,format=c("A6","2F9","5F6"))
-#   names(siteDetails) <- c("SITE","LAT","LONG","ELEV","TAV","AMP","REFHT","WNDHT")
-#   
-#   #get the radiation data and put it into the other data
-#   input <- read.fortran(file=wthFile,skip=5,format=c("A5","4F6"))
-#   names(input) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-#   input$TMAX <- NULL; input$TMIN <- NULL; input$RAIN <- NULL
-#   siteData <- merge(siteData,input,by="DATE")
-#   #siteData$SRAD <- input$SRAD
-#   
-#   #Reading site name
-#   sitetitle <- data.frame(NAME=paste("MRI Data",ws))
-#   
-#   #output folder and name
-#   oName <- paste(ws,"01.WTH",sep="")
-#   oFolder <- paste("./DSSAT-MRI/",xp,sep="")
-#   if (!file.exists(oFolder)) {dir.create(oFolder)}
-#   
-#   #write dssat format
-#   writeDSSAT(siteData,oName,outFolder=oFolder,site.longName=sitetitle,site.details=siteDetails)
-# }
 
-
-#write dssat format
-#writeDSSAT(siteData,oName,outFolder=oFolder,site.longName=sitetitle,site.details=siteDetails)
-
-
-#function to write dssat data
+#function to write GLAM wth data (compatible with DSSAT)
 #inData should have fields named: DATE, SRAD, TMAX, TMIN, RAIN
 #site.details should have the AMP and related header-type data
 write_wth <- function(inData,outfile,site.details) {
@@ -90,13 +45,13 @@ write_wth <- function(inData,outfile,site.details) {
 #################################################################################
 #################################################################################
 
-make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y")) {
+make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE")) {
   #checks
-  if (length(which(toupper(names(fields)) %in% c("CELL","X","Y"))) != 3) {
+  if (length(which(toupper(names(fields)) %in% c("CELL","X","Y","SOW_DATE"))) != 4) {
     stop("field list incomplete")
   }
   
-  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 3) {
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
     stop("field list does not match with data.frame")
   }
   
@@ -107,12 +62,18 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
   names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
   names(x)[which(toupper(names(x)) == toupper(fields$X))] <- "X"
   names(x)[which(toupper(names(x)) == toupper(fields$Y))] <- "Y"
+  names(x)[which(toupper(names(x)) == toupper(fields$SOW_DATE))] <- "SOW_DATE"
   
+  #check if wthDir does exist
+  if (!file.exists(wthDir)) {dir.create(wthDir)}
   
   #loop cells
   for (cll in cell) {
     #site name and details
-    lon <- cells$X[which(cells$CELL == cll)]; lat <- cells$Y[which(cells$CELL == cll)]
+    lon <- x$X[which(cells$CELL == cll)]; lat <- x$Y[which(cells$CELL == cll)]
+    sdate <- x$SOW_DATE[which(cells$CELL == cll)]
+    hdate <- sdate+120
+    
     s_details <- data.frame(NAME=paste("gridcell ",cll,sep=""),INSI="INGC",LAT=lat,LONG=lon,ELEV=-99,TAV=-99,AMP=-99,REFHT=-99,WNDHT=-99)
     
     #loop through years and write weather files
@@ -122,27 +83,102 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
       wthfile <- paste(wthDir,"/ingc001001",yr,".wth",sep="")
       
       #get the weather data for that particular gridcell
-      tmin <- read.csv(paste(wthDataDir,"/cru_tmn/cell-",cll,".csv",sep=""))
-      tmin <- tmin[which(tmin$YEAR==yr | tmin$YEAR==(yr-1) | tmin$YEAR==(yr+1)),]
-      tmin$YEAR <- NULL
-      tmin <- c(tmin$MONTH12[1],as.numeric(tmin[2,]),tmin$MONTH1[3])
-      tmin <- linearise(tmin)[16:(365+15)] #interpolate to daily
-      
-      tmax <- read.csv(paste(wthDataDir,"/cru_tmx/cell-",cll,".csv",sep=""))
-      tmax <- tmax[which(tmax$YEAR==yr | tmax$YEAR==(yr-1) | tmax$YEAR==(yr+1)),]
-      tmax$YEAR <- NULL
-      tmax <- c(tmax$MONTH12[1],as.numeric(tmax[2,]),tmax$MONTH1[3])
-      tmax <- linearise(tmax)[16:(365+15)] #interpolate to daily
-      
-      prec <- read.csv(paste(wthDataDir,"/rain/cell-",cll,".csv",sep=""))
-      prec <- prec[which(prec$YEAR==yr),]
-      prec$YEAR <- NULL
-      prec <- as.numeric(prec)[1:365]
-      
-      srad <- read.csv(paste(wthDataDir,"/srad_e40/cell-",cll,".csv",sep=""))
-      srad <- srad[which(srad$YEAR==yr),]
-      srad$YEAR <- NULL
-      srad <- as.numeric(srad)[1:365]
+      if (hdate > 365) {
+        osdate <- 31 #output planting date
+        
+        #planted in prev. year, get that weather
+        pyr <- yr-1
+        tmin <- read.csv(paste(wthDataDir,"/cru_tmn/cell-",cll,".csv",sep=""))
+        tmin <- tmin[which(tmin$YEAR==pyr | tmin$YEAR==(pyr-1) | tmin$YEAR==(pyr+1)),]
+        tmin$YEAR <- NULL
+        tmin <- c(tmin$MONTH12[1],as.numeric(tmin[2,]),tmin$MONTH1[3])
+        tmin <- linearise(tmin)[16:(365+15)] #interpolate to daily
+        
+        #shorten planting year series (30 days before planting date) to day 365
+        tmin_1 <- tmin[(sdate-30):365]
+        
+        #get for harvest year
+        tmin <- read.csv(paste(wthDataDir,"/cru_tmn/cell-",cll,".csv",sep=""))
+        tmin <- tmin[which(tmin$YEAR==yr | tmin$YEAR==(yr-1) | tmin$YEAR==(yr+1)),]
+        tmin$YEAR <- NULL
+        tmin <- c(tmin$MONTH12[1],as.numeric(tmin[2,]),tmin$MONTH1[3])
+        tmin <- linearise(tmin)[16:(365+15)] #interpolate to daily
+        
+        #shorten this planting series so to complete series (from the first day)
+        #to the remainder of days
+        tmin_2 <- tmin[1:(365-length(tmin_1))]
+        tmin <- c(tmin_1,tmin_2)
+        
+        #previous year
+        tmax <- read.csv(paste(wthDataDir,"/cru_tmx/cell-",cll,".csv",sep=""))
+        tmax <- tmax[which(tmax$YEAR==pyr | tmax$YEAR==(pyr-1) | tmax$YEAR==(pyr+1)),]
+        tmax$YEAR <- NULL
+        tmax <- c(tmax$MONTH12[1],as.numeric(tmax[2,]),tmax$MONTH1[3])
+        tmax <- linearise(tmax)[16:(365+15)] #interpolate to daily
+        tmax_1 <- tmax[(sdate-30):365]
+        
+        #harvest year
+        tmax <- read.csv(paste(wthDataDir,"/cru_tmx/cell-",cll,".csv",sep=""))
+        tmax <- tmax[which(tmax$YEAR==yr | tmax$YEAR==(yr-1) | tmax$YEAR==(yr+1)),]
+        tmax$YEAR <- NULL
+        tmax <- c(tmax$MONTH12[1],as.numeric(tmax[2,]),tmax$MONTH1[3])
+        tmax <- linearise(tmax)[16:(365+15)] #interpolate to daily
+        tmax_2 <- tmax[1:(365-length(tmax_1))]
+        tmax <- c(tmax_1,tmax_2)
+        
+        #previous year
+        prec <- read.csv(paste(wthDataDir,"/rain/cell-",cll,".csv",sep=""))
+        prec <- prec[which(prec$YEAR==pyr),]
+        prec$YEAR <- NULL
+        prec <- as.numeric(prec)[1:365]
+        prec_1 <- prec[(sdate-30):365]
+        
+        #harv year
+        prec <- read.csv(paste(wthDataDir,"/rain/cell-",cll,".csv",sep=""))
+        prec <- prec[which(prec$YEAR==yr),]
+        prec$YEAR <- NULL
+        prec <- as.numeric(prec)[1:365]
+        prec_2 <- prec[1:(365-length(prec_1))]
+        prec <- c(prec_1,prec_2)
+        
+        srad <- read.csv(paste(wthDataDir,"/srad_e40/cell-",cll,".csv",sep=""))
+        srad <- srad[which(srad$YEAR==yr),]
+        srad$YEAR <- NULL
+        srad <- as.numeric(srad)[1:365]
+        srad_1 <- srad[(sdate-30):365]
+        
+        srad <- read.csv(paste(wthDataDir,"/srad_e40/cell-",cll,".csv",sep=""))
+        srad <- srad[which(srad$YEAR==yr),]
+        srad$YEAR <- NULL
+        srad <- as.numeric(srad)[1:365]
+        srad_2 <- srad[1:(365-length(srad_1))]
+        srad <- c(srad_1,srad_2)
+        
+      } else {
+        osdate <- sdate #output planting date
+        
+        tmin <- read.csv(paste(wthDataDir,"/cru_tmn/cell-",cll,".csv",sep=""))
+        tmin <- tmin[which(tmin$YEAR==yr | tmin$YEAR==(yr-1) | tmin$YEAR==(yr+1)),]
+        tmin$YEAR <- NULL
+        tmin <- c(tmin$MONTH12[1],as.numeric(tmin[2,]),tmin$MONTH1[3])
+        tmin <- linearise(tmin)[16:(365+15)] #interpolate to daily
+        
+        tmax <- read.csv(paste(wthDataDir,"/cru_tmx/cell-",cll,".csv",sep=""))
+        tmax <- tmax[which(tmax$YEAR==yr | tmax$YEAR==(yr-1) | tmax$YEAR==(yr+1)),]
+        tmax$YEAR <- NULL
+        tmax <- c(tmax$MONTH12[1],as.numeric(tmax[2,]),tmax$MONTH1[3])
+        tmax <- linearise(tmax)[16:(365+15)] #interpolate to daily
+        
+        prec <- read.csv(paste(wthDataDir,"/rain/cell-",cll,".csv",sep=""))
+        prec <- prec[which(prec$YEAR==yr),]
+        prec$YEAR <- NULL
+        prec <- as.numeric(prec)[1:365]
+        
+        srad <- read.csv(paste(wthDataDir,"/srad_e40/cell-",cll,".csv",sep=""))
+        srad <- srad[which(srad$YEAR==yr),]
+        srad$YEAR <- NULL
+        srad <- as.numeric(srad)[1:365]
+      }
       
       wx <- data.frame(DATE=NA,JDAY=1:365,SRAD=srad,TMAX=tmax,TMIN=tmin,RAIN=prec)
       wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
@@ -152,7 +188,7 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
       wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
     }
   }
-  return(wthDir)
+  return(list(WTH_DIR=wthDir,SOW_DATE=osdate))
 }
 
 

@@ -89,13 +89,13 @@ if (!file.exists(oSoilGrid)) {
 
 
 ######################################################
-# planting dates file
+# planting dates file (rainfed)
 # get the planting date from Sacks et al. (2010)
 sow_rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_start_lr.tif",sep=""))
 cells$SOW_DATE <- extract(sow_rs,cbind(X=cells$X,Y=cells$Y))
 
-osowFile <- paste(gsowDir,"/sowing_",cell,".txt",sep="")
-if (!file.exists(oSowFile)) {
+osowFile <- paste(gsowDir,"/sowing_",cell,"_start.txt",sep="")
+if (!file.exists(osowFile)) {
   osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
 }
 
@@ -113,11 +113,26 @@ if (!file.exists(yFile)) {
 
 
 ######################################################
-#write weather
+#write weather (irr and rainfed)
 wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
-wthDir <- make_wth(cells,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y"))
+owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd",sep=""),wthDataDir,
+                   fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+
+#Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
+#between April and May
+icells <- cells; icells$SOW_DATE <- 32
+owthDir <- make_wth(x=icells,cell,wthDir=paste(wthDir,"/irr",sep=""),wthDataDir,
+                   fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
 
 
+######################################################
+#write planting dates once weather figured out (irrigated)
+#bear in mind this is a modified weather
+icells$SOW_DATE <- owthDir$SOW_DATE
+osowFile <- paste(gsowDir,"/sowing_",cell,"_irr.txt",sep="")
+if (!file.exists(osowFile)) {
+  osowFile <- write_sowdates(x=icells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
+}
 
 
 
