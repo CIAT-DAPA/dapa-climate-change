@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Tiles_GCM.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A1B 30s downscaled"
+	print "   - ie: python Tiles_GCM_fix.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled"
 	print "   Syntax	: <Tiles_GCM.py>, <dirbase>, <dirtemp>, <scenario>, <dirout>, <scenario>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   dirtemp 	: Where is made calculations"
@@ -37,7 +37,7 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 #periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
 modellist = "cccma_cgcm3_1_t47", "cccma_cgcm3_1_t90" #sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
-periodDc = {"2050_2079": "2060s", "2060_2089": "2070s", "2070_2099": "2080s"}
+periodDc = {"2020_2049": "2030s", "2030_2059": "2040s", "2040_2069": "2050s", "2050_2079": "2060s"}
 latDc = {"A": 30, "B": -30, "C": -90}
 lonDc = {"1": -180, "2": -120, "3": -60, "4": 0, "5": 60, "6": 120}
 
