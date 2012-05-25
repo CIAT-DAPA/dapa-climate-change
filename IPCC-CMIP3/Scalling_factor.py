@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Scalling_factor.py E:\workspace\amkn\base-data\climate\current\_layers\_grids E:\workspace\amkn\base-data\climate\current\_layers\_grids_corected"
+	print "   - ie: python Scalling_factor.py E:\workspace\amkn\base-data\climate\future-models\_layers\_grids E:\workspace\amkn\base-data\climate\future-models\_layers\_grids_corrected"
 	sys.exit(1)
 
 #Set variables 
@@ -52,10 +52,14 @@ for sres in sreslist:
 					InExpression = raster + " * 0.1"
 					print raster
 					gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)    
-				elif os.path.basename(raster) == "bio_4" or :
+				elif os.path.basename(raster) == "bio_4":
 					print raster
+					InExpression = raster + " * 0.00001"
 					gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)  
+				elif os.path.basename(raster) == "bio_15":
+					print raster
 					InExpression = raster + " * 0.001"
+					gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)  
 				else:
 					print raster
 					gp.CopyRaster_management(raster, diroutraster + "\\" + raster)  
@@ -63,11 +67,12 @@ for sres in sreslist:
 # ####Current
 # modellist = sorted(os.listdir(dirbase))
 # for model in modellist:
+
 	# period = "2020_2049"
 	# # for period in sorted(periodDc):
 
 	# gp.workspace = dirbase + "\\" + model
-	# diroutraster = dirout + "\\" + model
+	# diroutraster = dirout + "\\" + model + "_c"
 	# if not os.path.exists(diroutraster):
 		# os.system('mkdir ' + diroutraster)
 	# print "\n---> Processing: " + model 
@@ -75,16 +80,20 @@ for sres in sreslist:
 	# #Get a list of raster into the workspace
 	# rasters = sorted(gp.ListRasters("", "GRID"))
 	# for raster in rasters:
-			# if os.path.basename(raster) == "bio_1" or os.path.basename(raster) == "bio_2" or os.path.basename(raster) == "bio_5" or os.path.basename(raster) == "bio_6" or os.path.basename(raster) == "bio_7" or os.path.basename(raster) == "bio_8" or os.path.basename(raster) == "bio_9" or os.path.basename(raster) == "bio_10" or os.path.basename(raster) == "bio_11" or os.path.basename(raster) == "tm*":
-				# InExpression = raster + " * 0.1"
-				# print raster
-				# gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)    
-			# elif os.path.basename(raster) == "bio_4":
-				# print raster
-				# gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)  
-				# InExpression = raster + " * 0.001"
-			# else:
-				# print raster
-				# gp.CopyRaster_management(raster, diroutraster + "\\" + raster)  
-					
-# print "Process done!"	
+		# if os.path.basename(raster) == "bio_1" or os.path.basename(raster) == "bio_2" or os.path.basename(raster) == "bio_5" or os.path.basename(raster) == "bio_6" or os.path.basename(raster) == "bio_7" or os.path.basename(raster) == "bio_8" or os.path.basename(raster) == "bio_9" or os.path.basename(raster) == "bio_10" or os.path.basename(raster) == "bio_11" or os.path.basename(raster).split("_")[0] == "tmax" or os.path.basename(raster).split("_")[0] == "tmin" or os.path.basename(raster).split("_")[0] == "tmean":
+			# InExpression = raster + " * 0.1"
+			# print raster
+			# gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)    
+		# elif os.path.basename(raster) == "bio_4":
+			# print raster
+			# InExpression = raster + " * 0.00001"
+			# gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)  
+		# elif os.path.basename(raster) == "bio_15":
+			# print raster
+			# InExpression = raster + " * 0.001"
+			# gp.SingleOutputMapAlgebra_sa(InExpression, diroutraster + "\\" + raster)  
+		# else:
+			# print raster
+			# gp.CopyRaster_management(raster, diroutraster + "\\" + raster)  
+						
+print "Process done!"	
