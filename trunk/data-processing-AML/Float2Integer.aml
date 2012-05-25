@@ -1,0 +1,61 @@
+&args inputdir outdir mask
+
+/* &r integer.aml D:\climate_change\IPCC_CMIP3\Ensemble\SRES_A1B\downscaled\Global_30s\Ensemble\2020_2049\tmp D:\climate_change\IPCC_CMIP3\Ensemble\SRES_A1B\downscaled\Global_30s\Ensemble\2020_2049 D:\climate_change\IPCC_CMIP3\_mask\mask
+
+&terminal 9999
+&sys cls
+&severity &warning &ignore
+&severity &error &ignore
+&messages &off
+
+&if [null %inputdir%] OR [null %outdir%] OR [null %mask%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax, please use
+		&ty MASK should be both name and path of to the mask
+		&ty INPUT_DIR should contain folders of models
+		
+		&ty
+		&return
+	&end
+
+	
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+&ty          /\/\/\/\GCM MODELS FLOAT TO INTEGER/\/\/\/\
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+&if [show program] NE GRID &then GRID
+&s gridlist [listfile %inputdir%\* -grid %outdir%\listgrids.list]
+&s openlist [OPEN %outdir%\listgrids.list OPENSTATUS -READ]
+  
+&if %OPENSTATUS% NE 0 &then
+	&do
+		&ty
+		&ty The file %outdir%\listgrids.list does not exist or cannot be opened
+		&return
+	&end
+&else
+	&do
+		&do i = 1 &to %gridlist%
+			&s gridname [READ %openlist% READSTATUS]
+			
+			setwindow %mask%
+			setmask %mask%
+			setcell %mask%
+			
+			&ty
+			&ty   -> .Processing %gridname%
+			
+			&if [exist %outdir%\%gridname% -grid] &then &ty Grid exists 
+			&else %outdir%\%gridname% = int(floor(%inputdir%\%gridname% + 0.5))
+			
+		&end
+	
+	&end
+
+&s closefile [close %openlist%]
+&if [show program] EQ GRID &then QUIT
+
+&if [exists %outdir%\listgrids.list -file] &then &sys del %outdir%\listgrids.list
+&ty
+&ty Process done!
