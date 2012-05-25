@@ -89,7 +89,7 @@ for scenario in scenariolist:
 							os.system('mkdir ' + diroutGraph)
 
 						graphOut =  diroutGraph + "\\" + raster + ".jpeg"
-						os.system("gdal_translate -of JPEG -outsize 10% 10% " + gp.workspace + "\\" + raster + " " + graphOut )
+						os.system("gdal_translate -of JPEG -outsize 2% 2% " + gp.workspace + "\\" + raster + " " + graphOut )
 
 			else:
 				print "\n---> Procesed: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
