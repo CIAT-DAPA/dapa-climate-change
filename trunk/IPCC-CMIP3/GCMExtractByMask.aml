@@ -1,0 +1,101 @@
+&args rootdir outputdir mask workdir resol 
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&sys cls
+
+/* &r GCMExtractByMask.aml D:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled D:\climate_change\IPCC_CMIP3\_extract\SRES_A1B\downscaled D:\climate_change\IPCC_CMIP3\_masks\mask D:\Workspace 2.5min
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&if %resol% EQ 30s &then &s inputdir %rootdir%\Global_30s
+&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\Global_2_5min
+&else &if %resol% EQ 5min &then &s inputdir %rootdir%\Global_5min
+&else &s inputdir %rootdir%\Global_10min
+
+&if %resol% EQ 30s &then &s outdir %outputdir%\Global_30s
+&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\Global_2_5min
+&else &if %resol% EQ 5min &then &s outdir %outputdir%\Global_5min
+&else &s outdir %outputdir%\Global_10min
+
+&s filename = %mask%.txt
+		
+		&s openfile [open %workdir%\%filename% openstatus -append]
+		&if %openstatus% NE 0 &then
+			&do
+				&ty The file %workdir%\%filename% couldnt be created or opened
+				&return
+			&end
+		&else
+			&do
+				&s writerec [write %openfile% MODEL'	'VARIABLE'	'MEAN'	'MAXIMUM'	'MINIMUM'	'STDEV]
+				&s closefile [close %openfile%]
+			&end
+
+			
+/* &s modellist [listfile %inputdir%\* -dir]
+/* &s nmodels [token %modellist% -count]			
+
+/* &do md = 1 &to %nmodels%
+	
+	/* &s modname [extract %md% %modellist%]
+	
+	/* &do year &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+			
+			/* &ty
+			/* &ty Model %modname% (%year%, %resol%)
+			
+			/* &if not [exists %outdir%\%modname%\%year%_Extract_mask_done.txt -file] &then
+			
+				/* &s inputfolder %inputdir%\%modname%\%year%
+				/* &s outfolder %outdir%\%modname%\%year%
+
+				/* &s gridlist [listfile %inputfolder%\* -grid %outfolder%\listgrids.list]
+				/* &s openlist [OPEN %outfolder%\listgrids.list OPENSTATUS -READ]
+					
+				/* &if %OPENSTATUS% NE 0 &then
+					/* &do
+						/* &ty
+						/* &ty The file %outfolder%\listgrids.list does not exist or cannot be opened
+						/* &return
+					/* &end
+				/* &else
+					/* &do
+						/* &do i = 1 &to %gridlist%
+							/* &s gridname [READ %openlist% READSTATUS]
+							
+							/* setmask %maskdir%\%mask%
+							/* setwindow %maskdir%\%mask% %maskdir%\%mask%
+							/* setcell %maskdir%\%mask%
+
+							/* &if [exists %outfolder%\%climname% -grid] &then kill %workdir%\%climname% all
+							
+							/* &ty Grid %climname% of the model %models% processed and statistics saved to %filename%
+							/* &ty
+							/* &ty
+							/* &ty   -> .Processing %gridname%
+							
+							/* &if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
+							/* &if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file] /* &ty Output grid exists
+							/* GRIDASCII %inputfolder%\%gridname% %outfolder%\%gridname%.asc
+							
+							/* &if [locase %switch%] EQ yes &then
+								/* &do
+									/* &sys 7za a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
+									/* &if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
+									/* &if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
+								/* &end
+					
+					
+					
+					
+					
+					
+					
+					/* &r grid2ascii_GCM_modified.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %outcopyfolder%\%modname%\%year% YES
+					/* &s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Extract_mask_done.txt]
+				/* &end
+				
+	/* &end
+		
+&end
