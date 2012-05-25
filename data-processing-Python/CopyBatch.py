@@ -4,6 +4,22 @@ import os, sys, glob, string, shutil
 dirbase = sys.argv[1]
 dirout = sys.argv[2]
 
+# dirbase = sys.argv[1]
+# dirout = sys.argv[2]
+# modellist = "ncar_ccsm3_0", "miroc3_2_hires", "mpi_echam5", "ukmo_hadgem1", "gfdl_cm2_0"
+# periodlist = "2010_2039", "2040_2069", "2070_2099"
+# sreslist = sorted(os.listdir(dirbase))
+# for sres in sreslist:
+	# # modellist = sorted(os.listdir(dirbase + "\\" + sres + "\\downscaled\\Global_10min"))
+	# for model in modellist:
+		# for period in periodlist:
+			# indir = dirbase + "\\" + sres + "\\downscaled\\Global_5min\\" + model + "\\" + period + "\\_asciis"
+			# outdir = dirout + "\\" + sres + "\\" + model + "\\" + period
+			# if not os.path.exists(outdir):
+				# os.system('mkdir ' + outdir)
+			# os.system("robocopy " + indir + " " + outdir + " /Z /E /XF *_asc.zip*")
+
+
 modellist = sorted(os.listdir(dirbase))
 
 for model in modellist:
