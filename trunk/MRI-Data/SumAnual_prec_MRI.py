@@ -10,7 +10,11 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
+<<<<<<< .mine
+	print "   - ie: python SumAnual_prec_MRI.py F:\MRI_grids\_extract_ColPlains\tmean_monthly\SP0A 1979 2003 F:\MRI_grids\_extract_ColPlains\tmean_annual tmean"
+=======
 	print "   - ie: python SumAnual_prec_MRI.py D:\CIAT\MRI_Analysis\MRI_grids\prec_monthly\SP0A 1979 2003 D:\CIAT\MRI_Analysis\MRI_grids\prec_annual prec"
+>>>>>>> .r1395
 	sys.exit(1)
 
 # Arguments
@@ -46,7 +50,8 @@ for month in range (1, 12 + 1, 1):
 			# dsList = gp.ListDatasets("prec_" + str(year) + "*", "all")
 			ds = gp.workspace + "\\" + variable + "_" + str(year) + "0" + str(month)
 			print "\t  " + str(year) + " " + os.path.basename(ds)
-			lista = lista + ';' + ds 
+			if gp.Exists(ds):
+				lista = lista + ';' + ds 
 		LISTA = "\"" + lista[1:] + "\""
 		OutRaster = dirout + "\\" + variable + "_" + str(month)
 		if not gp.Exists(OutRaster):
@@ -65,7 +70,8 @@ for month in range (1, 12 + 1, 1):
 			# dsList = gp.ListDatasets("prec_" + str(year) + "*", "all")
 			ds = gp.workspace + "\\" + variable + "_" + str(year) + str(month)
 			print "\t  " + str(year) + " " + os.path.basename(ds)
-			lista = lista + ';' + ds 
+			if gp.Exists(ds):
+				lista = lista + ';' + ds 
 		LISTA = "\"" + lista[1:] + "\""
 		OutRaster = dirout + "\\" + variable + "_" + str(month)
 		if not gp.Exists(OutRaster):

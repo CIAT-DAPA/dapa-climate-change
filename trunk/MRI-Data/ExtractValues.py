@@ -10,7 +10,11 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
+<<<<<<< .mine
+	print "   - ie: python ExtractValues.py K:\MRIData\MRI_grids\SP0A E:\Workspace\MRI\Palmira E:\Workspace\MRI\points\palmira.shp"
+=======
 	print "   - ie: python ExtractValues.py K:\MRIData\MRI_grids\SP0A D:\Workspace\MRI\Planaltina D:\Workspace\MRI\points\planaltina.shp 1984"
+>>>>>>> .r1395
 	sys.exit(1)
 	
 dirbase = sys.argv[1]

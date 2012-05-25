@@ -7,26 +7,21 @@
 import arcgisscripting, os, sys
 gp = arcgisscripting.create(9.3)
 
-if len(sys.argv) < 5:
+if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python MeanAnual_temp_MRI.py E:\MRI_grids\tmean_monthly\SP0A 1979 2003 E:\MRI_grids\tmean_anual\SP0A"
+	print "   - ie: python MeanAnual_temp_MRI.py M:\climate_change\IPCC_CMIP3\SRES_A2\disaggregated\Global_30s\miroc3_2_medres\2010_2039"
 	sys.exit(1)
 
 # Arguments
-dirbase =sys.argv[1]
-inityear = int(sys.argv[2])
-finalyear = int(sys.argv[3])
-dirout = sys.argv[4]
-if not os.path.exists(dirout):
-	os.system('mkdir ' + dirout)
+gp.workspace = sys.argv[1]
+
 
 # Check out Spatial Analyst extension license
 gp.CheckOutExtension("Spatial")
 
 os.system('cls')
 
-gp.workspace = dirbase
 
 print "\n"
 print "~~~~~~~~~~~~~~~"
@@ -34,21 +29,6 @@ print "  MEAN GRIDS   "
 print "~~~~~~~~~~~~~~~"
 print "\n"
 
-for year in range(inityear, finalyear + 1, 1):
-    
-    # Get a list of grids in the workspace 
-    print "\t ..listing grids"
-    dsList = gp.ListDatasets("tmean_" + str(year) + "*", "all")
-    lista = ""
-    for ds in dsList:
-        lista = lista + ';' + ds 
-    LISTA = "\"" + lista[1:] + "\""
-    print LISTA
-    OutRaster = dirout + "\\tmean_" + str(year)
-    
-    # Process: Cell Statistics...
-    print "\t ..summing"
-    gp.CellStatistics_sa(LISTA, OutRaster, "MEAN")
-    print "\t ..done!!"
+gp.CellStatistics_sa("tmin_7;tmax_7", "E:\\Workspace\\tmean_7", "MEAN")
 
 print "Done!!!!"
