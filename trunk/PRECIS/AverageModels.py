@@ -41,7 +41,7 @@ gp.toolbox = "management"
 periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
 
 gp.workspace = dirbase + "\\ECHAM5\\anomalies\\2010_2039"
-variablelist = gp.ListRasters("av_t*", "GRID")		
+variablelist = gp.ListRasters("*", "GRID")		
 for variable in variablelist:	
 	# periodlist = sorted(os.listdir(dirbase + "\\" + model + "\\30yrAverages\\"))
 	for period in periodlist:
