@@ -4,13 +4,13 @@
 # Actualizado: 25/08/10
 #--------------------------------------------------
 
-import arcgisscripting, os, sys
+import arcgisscripting, os, sys, glob
 gp = arcgisscripting.create(9.3)
 
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ExtractValues.py K:\MRIData\MRI_grids\SP0A\prec D:\Workspace\MRI\Palmira D:\Workspace\MRI\points\palmira.shp"
+	print "   - ie: python ExtractValues.py K:\MRIData\MRI_grids\SP0A D:\Workspace\MRI\Planaltina D:\Workspace\MRI\points\planaltina.shp 1984"
 	sys.exit(1)
 	
 dirbase = sys.argv[1]
@@ -18,10 +18,10 @@ dirout = sys.argv[2]
 if not os.path.exists(dirout):
 	os.system('mkdir ' + dirout)
 mask = sys.argv[3]
-# inityear = int(sys.argv[4])
+year = int(sys.argv[4])
 # finalyear = int(sys.argv[5])
 # variable = sys.argv[6]
-yearlist = "1986", "1990", "1997"
+# yearlist = "1986", "1990", "1997"
 variablelist = "tmin", "tmax", "prec" 
 os.system('cls')
 
@@ -34,52 +34,62 @@ print "\n"
 # Check out Spatial Analyst extension license
 gp.CheckOutExtension("Spatial")
 
+
+# for variable in variablelist:
+	# print variable
+	# dirbasevar = dirbase + "\\" + variable
+	# diroutgrid = dirout + "\\" + variable
+	# if not os.path.exists(diroutgrid):
+		# os.system('mkdir ' + diroutgrid)
+
+	# # for year in yearlist:
+	# for month in range (1, 12 + 1, 1):
+		# if month < 10:
+			# gp.workspace = dirbasevar + "\\OUT_" + str(year) + "0" + str(month) + "010000"
+			# dsList = gp.ListDatasets("*", "all")
+			# lista = ""
+			# # ds = variable + "_" + str(month
+			# for ds in dsList:
+				
+				# OutPointsFC = diroutgrid + "\\" + str(year) + "0" + str(month) + ds[-2:] + ".dbf"
+				# if not gp.Exists(OutPointsFC):
+				# # Set local variables
+					
+					# gp.Sample_sa(ds, mask, OutPointsFC, "")
+				
+		# else:
+			# gp.workspace = dirbasevar + "\\OUT_" + str(year) + str(month) + "010000"
+			# dsList = gp.ListDatasets("*", "all")
+			# lista = ""
+			# for ds in dsList:
+				# print ds
+				# OutPointsFC = diroutgrid + "\\" + str(year) + str(month) + ds[-2:] + ".dbf"
+				# # Set local variables
+				# if not gp.Exists(OutPointsFC):
+					# gp.Sample_sa(ds, mask, OutPointsFC, "")
+
 for variable in variablelist:
 	print variable
-	dirbasevar = dirbase + "\\" + variable
-	diroutgrid = dirout + "\\" + variable
-	if not os.path.exists(diroutgrid):
-		os.system('mkdir ' + diroutgrid)
+# variable = "prec"
+	dirbase = "D:\\Workspace\\MRI\\Planaltina\\" + variable
+	dbfList = sorted(glob.glob(dirbase + "\\1984*.dbf"))
+	for dbf in dbfList[0:250]:
+		print dbf
+		# print os.path.basename(dbf)
+		if not os.path.basename(dbf) == "19840101.dbf":
+			InData = dirbase + "\\19840101.dbf"
+			JoinData = dirbase + "\\" + os.path.basename(dbf)
+			# print os.path.basename(dbf)[-6:-4]
+			gp.joinfield (InData, "mask", JoinData, "mask", variable + "_" + str(os.path.basename(dbf)[-6:-4]))
+				
+	for dbf in dbfList[250:]:
+		print dbf
+		# print os.path.basename(dbf)
+		if not os.path.basename(dbf) == "19840908.dbf":
+			InData = dirbase + "\\19840908.dbf"
+			JoinData = dirbase + "\\" + os.path.basename(dbf)
+			# print os.path.basename(dbf)[-6:-4]
+			gp.joinfield (InData, "mask", JoinData, "mask", variable + "_" + str(os.path.basename(dbf)[-6:-4]))
+				
 
-	for year in yearlist:
-		for month in range (1, 12 + 1, 1):
-			if month < 10:
-				gp.workspace = dirbasevar + "\\OUT_" + str(year) + "0" + str(month) + "010000"
-				dsList = gp.ListDatasets("*", "all")
-				lista = ""
-				for ds in dsList:
-					print ds
-					OutPointsFC = diroutgrid + "\\" + str(year) + "0" + str(month) + ds[-2:]
-					if not gp.Exists(OutPointsFC):
-					# Set local variables
-						gp.ExtractValuesToPoints_sa(mask, ds, OutPointsFC, "NONE", "VALUE_ONLY")
-					
-			else:
-				gp.workspace = dirbasevar + "\\OUT_" + str(year) + str(month) + "010000"
-				dsList = gp.ListDatasets("*", "all")
-				lista = ""
-				for ds in dsList:
-					print ds
-					OutPointsFC = diroutgrid + "\\" + str(year) + str(month) + ds[-2:]
-					# Set local variables
-					if not gp.Exists(OutPointsFC):
-						gp.ExtractValuesToPoints_sa(mask, ds, OutPointsFC, "NONE", "VALUE_ONLY")
-
-	# for year in yearlist:
-
-	# for month in range (2, 12 + 1, 1):
-
-		# if month < 10:
-			# InFeature = variable + "_" + str(year) + "0" + str(month) + ".shp"
-			# InData = dirbase + "\\" + variable + "_" + str(year) + "01.shp"
-			# print "---> Joining " + variable + "_" + str(year)
-			# gp.joinfield (InData, "STATION_ID", InFeature, "STATION_ID", "RASTERVALU")
-			# print InFeature + " Joined!"
-
-		# else:
-			# InFeature = variable + "_" + str(year) + str(month) + ".shp"
-			# InData = dirbase + "\\" + variable + "_" + str(year) + "01.shp"
-			# print "---> Joining " + variable + "_" + str(year)
-			# gp.joinfield (InData, "STATION_ID", InFeature, "STATION_ID", "RASTERVALU")
-			# print InFeature + " Joined!"
 print "done"
