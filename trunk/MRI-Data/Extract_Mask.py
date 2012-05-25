@@ -34,13 +34,13 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "     EXTRACT BY MASK MRI" + str(variable)
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-describefile = dirdescribe + "\\" + str(os.path.basename(dirbase)) + "_" + str(variable) + "_" +  str(os.path.basename(mask)[:-4]) + ".txt"
-if os.path.isfile(describefile):
-    outFile = open(describefile, "a")
-else:
-    outFile = open(describefile, "w")
+# describefile = dirdescribe + "\\" + str(os.path.basename(dirbase)) + "_" + str(variable) + "_" +  str(os.path.basename(mask)[:-4]) + ".txt"
+# if os.path.isfile(describefile):
+    # outFile = open(describefile, "a")
+# else:
+    # outFile = open(describefile, "w")
 
-outFile.write("DATE" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
+# outFile.write("DATE" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
 for year in range(inityear, finalyear + 1, 1):
     for month in range (1, 12 + 1, 1):

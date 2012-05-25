@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python SumAnual_prec_MRI.py F:\MRI_grids\_extract_ColPlains\prec_monthly\SP0A 1979 2003 F:\MRI_grids\_extract_ColPlains\prec_annual prec"
+	print "   - ie: python SumAnual_prec_MRI.py D:\CIAT\MRI_Analysis\MRI_grids\prec_monthly\SP0A 1979 2003 D:\CIAT\MRI_Analysis\MRI_grids\prec_annual prec"
 	sys.exit(1)
 
 # Arguments
