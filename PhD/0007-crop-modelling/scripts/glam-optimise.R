@@ -4,6 +4,21 @@
 
 #optimise GLAM parameters using pre-selected inputs
 
+#local
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#bDir <- "F:/PhD-work/crop-modelling/GLAM"
+#maxiter <- 200
+#run <- 1
+
+
+#eljefe
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#bDir <- "~/PhD-work/crop-modelling/GLAM"
+#maxiter <- 200
+#run <- 1
+
+
+
 #check the existence of three parameters needed for sourcing this script
 if (class(try(get("src.dir"),silent=T)) == "try-error") {
   stop("src.dir needs to be set")
@@ -17,11 +32,15 @@ if (class(try(get("run"),silent=T)) == "try-error") {
   stop("run needs to be set")
 }
 
+if (class(try(get("maxiter"),silent=T)) == "try-error") {
+  stop("maxiter (max. num. iterations) needs to be set")
+}
+
+
 #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
 #running and optimising GLAM
-#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
+#source all needed functions
 source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
 source(paste(src.dir,"/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
@@ -30,10 +49,8 @@ source(paste(src.dir,"/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
-#input directories and model
-#bDir <- "F:/PhD-work/crop-modelling/GLAM"
-#bDir <- "~/PhD-work/crop-modelling/GLAM"
 
+#input directories and model
 cropName <- "gnut"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 pDir <- paste(cDir,"/params",sep="") #parameter files
@@ -43,7 +60,7 @@ cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signa
 
 #load runs to perform
 all_runs <- read.table(paste(cDir,"/calib/optim_gridcells.txt",sep=""),header=T,sep="\t")
-#run <- 1
+
 
 #get run setup
 #files that were generated
@@ -99,9 +116,10 @@ if (setup$PRE_SEAS == "OR") {
 }
 
 
+#now do the various iterations to look for the optimal parameter set
 if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
   #do various iterations to test for local minima
-  for (itr in 1:200) {
+  for (itr in 1:maxiter) {
     setwd(cDir)
     for (rw in 1:nrow(opt_rules)) {
       parname <- paste(opt_rules$param[rw])
@@ -162,7 +180,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
 ###############################################
 #load the calib.csv, last iteration
 cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
-optimal <- cal_data[which(cal_data$iter==10),]
+optimal <- cal_data[which(cal_data$iter==maxiter),]
 
 #update the parameter set
 for (rw in 1:nrow(optimal)) {
@@ -274,9 +292,9 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
 #################################################################################
 ##make plots of each parameter tuning
 cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
-optimal <- cal_data[which(cal_data$iter==10),]
+optimal <- cal_data[which(cal_data$iter==maxiter),]
 par_list <- c(paste(optimal$param),"IPDATE","YGP")
-iter <- c(rep(10,times=nrow(optimal)),"ipdate","ygp")
+iter <- c(rep(maxiter,times=nrow(optimal)),"ipdate","ygp")
 pList <- data.frame(param=par_list,iter=iter)
 
 plotsDir <- paste(cDir,"/calib/",setup$SIM_NAME,"/plots",sep="")
