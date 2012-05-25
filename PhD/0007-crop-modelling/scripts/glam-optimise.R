@@ -4,10 +4,23 @@
 
 #optimise GLAM parameters using pre-selected inputs
 
+#check the existence of three parameters needed for sourcing this script
+if (class(try(get("src.dir"),silent=T)) == "try-error") {
+  stop("src.dir needs to be set")
+}
+
+if (class(try(get("bDir"),silent=T)) == "try-error") {
+  stop("bDir needs to be set")
+}
+
+if (class(try(get("run"),silent=T)) == "try-error") {
+  stop("run needs to be set")
+}
+
 #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
 #running and optimising GLAM
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
 source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
 source(paste(src.dir,"/glam-soil-functions.R",sep=""))
@@ -17,10 +30,9 @@ source(paste(src.dir,"/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
-
 #input directories and model
 #bDir <- "F:/PhD-work/crop-modelling/GLAM"
-bDir <- "~/PhD-work/crop-modelling/GLAM"
+#bDir <- "~/PhD-work/crop-modelling/GLAM"
 
 cropName <- "gnut"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
@@ -29,12 +41,15 @@ pDir <- paste(cDir,"/params",sep="") #parameter files
 #load cell details
 cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
 
+#load runs to perform
+all_runs <- read.table(paste(cDir,"/calib/optim_gridcells.txt",sep=""),header=T,sep="\t")
+#run <- 1
 
 #get run setup
 #files that were generated
 setup <- list()
 setup$BDIR <- bDir
-setup$CELL <- 720 #636 467 641 720
+setup$CELL <- all_runs$gridcell[run] #467 #636 #467 #641 #720 #853
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
@@ -45,14 +60,15 @@ setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
 setup$WTH_ROOT <- "ingc"
 setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
 setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
-setup$SIM_NAME <- "os_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr #mp_rfd_irr #os_rfd_irr
-setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+setup$SIM_NAME <- paste(all_runs$run_name[run])  #"up_rfd_irr" #gj_only_rfd #gj_rfd_irr #up_rfd_irr #mp_rfd_irr #os_rfd_irr
+setup$PRE_SEAS <- paste(all_runs$irri[run]) #OR: original input data, RF: rainfed by default, IR: irrigated by default
 
 
 #get defaults (parameter set)
 params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
 params$glam_param.mod_mgt$ISYR <- 1966 #start year
 params$glam_param.mod_mgt$IEYR <- 1993 #end year
+params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
 
 
 #load list of parameters to optimise, ranges, and number of steps
@@ -85,7 +101,7 @@ if (setup$PRE_SEAS == "OR") {
 
 if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
   #do various iterations to test for local minima
-  for (itr in 1:10) {
+  for (itr in 1:200) {
     setwd(cDir)
     for (rw in 1:nrow(opt_rules)) {
       parname <- paste(opt_rules$param[rw])
@@ -217,7 +233,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   
   #update the parameter set to -99 and replace the planting date file
   cells$SOW_DATE <- optimal$IPDATE
-  osowFile <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_opt2.txt",sep="")
+  osowFile <- paste(cDir,"/inputs/ascii/sow/opt_",setup$CELL,"_",setup$SIM_NAME,".txt",sep="")
   osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(setup$CELL),
                              fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
   

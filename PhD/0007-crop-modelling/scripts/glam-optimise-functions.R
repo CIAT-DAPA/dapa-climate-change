@@ -157,10 +157,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         
         #delete the exec file and compress the daily files
         x <- file.remove(execName)
-        setwd("./output/daily")
-        system(paste("7z a daily.7z -tzip *.out"))
-        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        
+        #compress and remove wth files
+        setwd("./inputs/ascii/wth")
+        system(paste("7z a daily.7z -tzip *.wth"))
+        x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
+        
+        #if daily files were produced then compress and remove
+        if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+          setwd("./output/daily")
+          system(paste("7z a daily.7z -tzip *.out"))
+          x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+          setwd(run_dir)
+        }
       } else {
         setwd(run_dir)
       }
@@ -250,10 +260,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         
         #delete the exec file
         x <- file.remove(execName)
-        setwd("./output/daily")
-        system(paste("7z a daily.7z -tzip *.out"))
-        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        
+        #compress and remove wth files
+        setwd("./inputs/ascii/wth")
+        system(paste("7z a daily.7z -tzip *.wth"))
+        x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
+        
+        #compress & remove daily files should they exist
+        if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+          setwd("./output/daily")
+          system(paste("7z a daily.7z -tzip *.out"))
+          x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+          setwd(run_dir)
+        }
       } else {
         setwd(run_dir)
       }
@@ -341,10 +361,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         
         #delete the exec file
         x <- file.remove(execName)
-        setwd("./output/daily")
-        system(paste("7z a daily.7z -tzip *.out"))
-        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        
+        #compress and remove wth files
+        setwd("./inputs/ascii/wth")
+        system(paste("7z a daily.7z -tzip *.wth"))
+        x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
+        
+        #compress & remove daily files
+        if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+          setwd("./output/daily")
+          system(paste("7z a daily.7z -tzip *.out"))
+          x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+          setwd(run_dir)
+        }
       } else {
         setwd(run_dir)
       }
@@ -428,10 +458,20 @@ GLAM_optimise <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param="YGP
         
         #delete the exec file
         x <- file.remove(execName)
-        setwd("./output/daily")
-        system(paste("7z a daily.7z -tzip *.out"))
-        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        
+        #compress and remove wth files
+        setwd("./inputs/ascii/wth")
+        system(paste("7z a daily.7z -tzip *.wth"))
+        x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
+        
+        #compress & remove daily files, should they exist (IASCII = 2 or 3)
+        if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+          setwd("./output/daily")
+          system(paste("7z a daily.7z -tzip *.out"))
+          x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+          setwd(run_dir)
+        }
       } else {
         setwd(run_dir)
       }
