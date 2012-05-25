@@ -16,7 +16,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0 1951 2099 daily G:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0"
+	print "   - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A2\ECHAM4 1999 2069 monthly E:\climate_change\RCM_Data\SRES_A2\ECHAM4"
 	sys.exit(1)
 
 # Arguments
@@ -216,76 +216,77 @@ if type == "monthly":
 			print "         > Processing " + str(year) + "\n"
 			
 			try:
-				print "         Copying " + str(year) + " inputs asciis... \n"
-				if not os.path.exists(dirout + "\\" + type + "_asciis"):
-					os.system('mkdir ' + dirout + "\\" + type + "_asciis")
-				shutil.copytree(dirbase + "\\" + type + "_asciis\\" + str(year), dirout + "\\" + type + "_asciis\\" + str(year))
+				if not os.path.exists(dirout + "\\" + type + "_asciis" + "\\" + str(year)):
+					print "         Copying " + str(year) + " inputs asciis... \n"
+					if not os.path.exists(dirout + "\\" + type + "_asciis"):
+						os.system('mkdir ' + dirout + "\\" + type + "_asciis")
+					shutil.copytree(dirbase + "\\" + type + "_asciis\\" + str(year), dirout + "\\" + type + "_asciis\\" + str(year))
 			except: 
 				print "An error ocurrs while copied input ascii folder of " + str(year)
 				sys.exit(2)
 			
 			# Set workspace
 			gp.workspace = dirout + "\\" + type + "_asciis\\" + str(year)
-			
-			
-			
-			# 1. Editing input ascii text plane files
-			print "  > Editing " + str(year) + " ascii files to convert to ESRI-Asciis... \n"
-			
-			# Get a list of asciis in workspace
-			ascList = glob.glob(gp.workspace + "\\*.asc")
-			for asc in ascList:
-				# Extact variable of the file name
-				variable = os.path.basename(asc).split("_")[0:1][0]
-				month = os.path.basename(asc).split("_")[-1][0:2]
+			if not os.path.exists(dirout + "\\" + type + "_grids\\" + str(year)):
 				
-				if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
+				
+				# 1. Editing input ascii text plane files
+				print "  > Editing " + str(year) + " ascii files to convert to ESRI-Asciis... \n"
+				
+				# Get a list of asciis in workspace
+				ascList = glob.glob(gp.workspace + "\\*.asc")
+				for asc in ascList:
+					# Extact variable of the file name
+					variable = os.path.basename(asc).split("_")[0:1][0]
+					month = os.path.basename(asc).split("_")[-1][0:2]
 					
-					if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
-						splitLen = 127
-					else:
-						splitLen = 128 
-					
-					input = open(asc, "r").read().split("\n")
-
-					for lines in range(0, splitLen, splitLen):
-
-						# Get the list slice
-						outputData = input[lines:lines+splitLen]
-
-						# Now open a temporal text file, join the new slice with newlines and write it out. Then close the file.
+					if not gp.Exists(dirout + "\\" + type + "_grids\\" + str(year) + "\\Ascii2Grid_" + str(decVar [variable]) + "_done.txt") and not str(variable) == "08223" and not str(variable) == "08225" and not str(variable) == "16204":
 						
-						baseName = str(decVar [variable]) + "_" + str(month)
+						if str(variable) == "03249" or str(variable) == "03249.max" or str(variable) == "03249.mmax":
+							splitLen = 127
+						else:
+							splitLen = 128 
 						
-						tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "w")
-						tmpTXT.write("\n".join(outputData))
-						tmpTXT.close()
-						
-						outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")					
-						outASC.write("NCOLS 140\nNROWS " + str(int(splitLen)-2) + "\nXLLCORNER -95.48999786377\nYLLCORNER -34.0599986314773\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n")
-						outASC.close()
-						
-						tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "r")
-						tmpTXT.readline()
-						tmpTXT.readline()
+						input = open(asc, "r").read().split("\n")
 
-						outASC = open(gp.workspace + "\\" + baseName + ".asc", "a")
+						for lines in range(0, splitLen, splitLen):
 
-						for line in tmpTXT.readlines():
-							outASC.write(line)
+							# Get the list slice
+							outputData = input[lines:lines+splitLen]
 
-						tmpTXT.close()
-						outASC.close()
+							# Now open a temporal text file, join the new slice with newlines and write it out. Then close the file.
+							
+							baseName = str(decVar [variable]) + "_" + str(month)
+							
+							tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "w")
+							tmpTXT.write("\n".join(outputData))
+							tmpTXT.close()
+							
+							outASC = open(gp.workspace + "\\" + baseName + ".asc", "w")					
+							outASC.write("NCOLS 140\nNROWS " + str(int(splitLen)-2) + "\nXLLCORNER -95.48999786377\nYLLCORNER -34.0599986314773\nCELLSIZE 0.439999997615814\nNODATA_VALUE -1073741824\n")
+							outASC.close()
+							
+							tmpTXT = open(gp.workspace + "\\" + baseName + ".txt", "r")
+							tmpTXT.readline()
+							tmpTXT.readline()
+
+							outASC = open(gp.workspace + "\\" + baseName + ".asc", "a")
+
+							for line in tmpTXT.readlines():
+								outASC.write(line)
+
+							tmpTXT.close()
+							outASC.close()
+							
+							os.system("del " + gp.workspace + "\\" + baseName + ".txt")
 						
-						os.system("del " + gp.workspace + "\\" + baseName + ".txt")
-					
-					print "          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " edited"
-					
-			for asc in ascList:
-				# Compress input files
-				InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
-				os.system("7za a " + InZipCom + " " + asc)
-				os.system("del " + asc)
+						print "          " + str(decVar[variable]) + "\t" + str(year) + "\t" + str(month) + " edited"
+						
+				for asc in ascList:
+					# Compress input files
+					InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
+					os.system("7za a " + InZipCom + " " + asc)
+					os.system("del " + asc)
 
 			# 2. Convert ASCII to Raster
 			print "\n         > Converting " + str(year) + " Monthly asciis to grids \n"
