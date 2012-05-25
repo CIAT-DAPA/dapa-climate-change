@@ -43,7 +43,7 @@ lonDc = {"1": -180, "2": -120, "3": -60, "4": 0, "5": 60, "6": 120}
 
 print "Available models: " + str(modellist)
 
-for model in sorted(modellist):
+for model in sorted(modellist)[10:]:
 
     # diroutmodel = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model
     # if not os.path.exists(diroutmodel):
