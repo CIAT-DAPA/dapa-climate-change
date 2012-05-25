@@ -7,10 +7,10 @@
 import arcgisscripting, os, sys
 gp = arcgisscripting.create(9.3)
 
-if len(sys.argv) < 5:
+if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Sum_prec_MRI.py D:\MRI_grids\prec\SP0A 1979 2003 D:\MRI_grids\prec_monthly\SP0A"
+	print "   - ie: python Sum_prec_MRI.py K:\MRIData\MRI_grids\SP0A\tmean 1979 2003 F:\MRI_grids\_extract_ColPlains\tmean_monthly\SP0A tmean"
 	sys.exit(1)
 
 # Arguments
@@ -20,6 +20,7 @@ finalyear = int(sys.argv[3])
 dirout = sys.argv[4]
 if not os.path.exists(dirout):
 	os.system('mkdir ' + dirout)
+variable = sys.argv[5]
 
 # Check out Spatial Analyst extension license
 gp.CheckOutExtension("Spatial")
@@ -34,6 +35,7 @@ print "   SUM GRIDS   "
 print "~~~~~~~~~~~~~~~"
 print "\n"
 
+
 for year in range(inityear, finalyear + 1, 1):
 
 	for month in range (1, 12 + 1, 1):
@@ -42,38 +44,51 @@ for year in range(inityear, finalyear + 1, 1):
 			gp.workspace = dirbase + "\\OUT_" + str(year) + "0" + str(month) + "010000"
 			print "--->...processing : " + dirbase + "\\OUT_"+ str(year) + "0" + str(month)
 
-			# Get a list of grids in the workspace of each folder
-			print "\t ..listing grids"
-			dsList = gp.ListDatasets("prec*", "all")
-			lista = ""
-			for ds in dsList:
-				lista = lista + ';' + ds 
-			LISTA = "\"" + lista[1:] + "\""
-			print LISTA
-			OutRaster = dirout + "\\prec_" + str(year) + "0" + str(month)
-			
-			# Process: Cell Statistics...
-			print "\t ..summing"
-			gp.CellStatistics_sa(LISTA, OutRaster, "SUM")
-			print "\t ..done!!"
+			OutRaster = dirout + "\\" + variable + "_" + str(year) + "0" + str(month)
+			if not gp.Exists(OutRaster):
+				# Get a list of grids in the workspace of each folder
+				print "\t ..listing grids"
+				dsList = gp.ListDatasets("*", "all")
+				lista = ""
+				for ds in dsList:
+					lista = lista + ';' + ds 
+				LISTA = "\"" + lista[1:] + "\""
+				print LISTA
+				
+				
+				# Process: Cell Statistics...
+				if variable == "prec":
+					print "\t ..summing prec"
+					gp.CellStatistics_sa(LISTA, OutRaster, "SUM")
+				else: 
+					print "\t ..meaning " + variable
+					gp.CellStatistics_sa(LISTA, OutRaster, "MEAN")
+				print "\t ..done!!"
 
 		if month > 9 and gp.Exists(dirbase + "\\OUT_" + str(year) + str(month) + "010000"):
 			gp.workspace = dirbase + "\\OUT_" + str(year) + str(month) + "010000"
 			print "--->... processing:" + dirbase + "\\OUT_" + str(year) + str(month) 
 
-			# Get a list of grids in the workspace of each folder
-			print "\t ..listing grids"
-			dsList = gp.ListDatasets("prec*", "all")
-			lista = ""
-			for ds in dsList:
-				lista = lista + ';' + ds 
-			LISTA = "\"" + lista[1:] + "\""
-			print LISTA
-			OutRaster = dirout + "\\prec_" + str(year) + str(month)
+			OutRaster = dirout + "\\" + variable + "_" + str(year) + str(month)
+			if not gp.Exists(OutRaster):
+				# Get a list of grids in the workspace of each folder
+				print "\t ..listing grids"
+				dsList = gp.ListDatasets("*", "all")
+				lista = ""
+				for ds in dsList:
+					lista = lista + ';' + ds 
+				LISTA = "\"" + lista[1:] + "\""
+				print LISTA
+				
 
-			# Process: Cell Statistics...
-			print "\t ..summing"
-			gp.CellStatistics_sa(LISTA, OutRaster, "SUM")
-			print "\t ..done!!"
+				# Process: Cell Statistics...
+				
+				if variable == "prec":
+					print "\t ..summing prec"
+					gp.CellStatistics_sa(LISTA, OutRaster, "SUM")
+				else: 
+					print "\t ..meaning " + variable
+					gp.CellStatistics_sa(LISTA, OutRaster, "MEAN")
+				print "\t ..done!!"
 
 print "Done!!!!"

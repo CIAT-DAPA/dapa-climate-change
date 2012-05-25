@@ -12,7 +12,11 @@ if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python Mean_Raster_Prec.py <dirbase> <inityear> <finalyear> <outdir> <variable>"
+<<<<<<< .mine
+	print "   - ie: python Correction_Asciis.py E:\MRI_grids\prmax\SP0A 1979 2003 prmax E:\MRI_grids\temp K:\MRIData\MRIAAIGrid\SP0A"
+=======
 	print "   - ie: python Correction_Asciis.py Z:\prmax\SP0A 1979 2003 prmax D:\MRI_grids\temp W:\MRIData\MRIAAIGrid\SP0A"
+>>>>>>> .r1395
 	sys.exit(1)
 
 dirbase =sys.argv[1]
@@ -25,7 +29,9 @@ if not os.path.exists(dirtemp):
 dirout = sys.argv[6]
 if not os.path.exists(dirtemp):
 	os.system('mkdir ' + dirtemp)
-	
+
+gp.CheckOutExtension("Spatial")
+gp.toolbox = "management"
 os.system('cls')
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~"

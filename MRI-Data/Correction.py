@@ -42,7 +42,8 @@ else:
 outFile.write("DATE" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
 
-yrList = ["198611", "198603", "199012", "199503", "199504", "199712", "198012", "198603", "199002", "199712", "200007", "200304"]
+#yrList = ["198603", "198611", "199012", "199503", "199504", "199712"]
+yrList = ["198012", "198603", "199002", "199712", "200007", "200304"]
 
 for yr in yrList:
 
@@ -71,8 +72,8 @@ for yr in yrList:
 		InRaster = gp.workspace + "\\" + raster
 		OutRaster = dirtemp2 + "\\" + raster
 		InExpression = InRaster + " / 86400"
-		gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
-		##gp.Times_sa(InRaster, "86400", OutRaster)
+		##gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
+		gp.Times_sa(InRaster, "86400", OutRaster)
 		gp.delete_management(InRaster)
 		
 		MIN = gp.GetRasterProperties_management(OutRaster, "MINIMUM")
@@ -88,7 +89,7 @@ for yr in yrList:
 		InZip = dirtemp2 + "\\" + raster + ".asc.gz"
 		os.system('7za a ' + InZip + " " + OutAscii)
 		gp.delete_management(OutRaster)
-
+		gp.delete_management(OutAscii)
 		# OutZip = dirbase + "\\OUT_" + str(yr) + "010000" + "\\" + raster + ".asc.gz"
 		# if os.path.isfile(OutZip):
 			# os.remove(OutZip)
@@ -96,113 +97,6 @@ for yr in yrList:
 		# os.remove(OutAscii)
 		# os.remove(InZip)
 
-# for mn in mnList:
-
-	# gp.workspace = dirbase + "\\OUT_" + str(mn) + "010000"
-	# print "\n---> Processing: " + dirbase + "\\OUT_" + str(mn) + "010000"
-
-	# dsList1 = glob.glob(gp.workspace + "\\" + variable + "_1*")
-	# for ds in dsList1:
-		# os.system('7za e -yo' + gp.workspace + " " + ds)
-	
-	# rsList1 = glob.glob(gp.workspace + "\\" + variable + "_1*.asc")
-	# for rs in rsList1:
-		# print os.path.basename(rs)
-		# gp.RasterToOtherFormat_conversion(os.path.basename(rs), dirtemp, "GRID")
-		# gp.delete_management(rs)
-
-	# dsList2 = glob.glob(gp.workspace + "\\" + variable + "_2*")
-	# for ds in dsList2:
-		# os.system('7za e -yo' + gp.workspace + " " + ds)
-	
-	# rsList2 = glob.glob(gp.workspace + "\\" + variable + "_2*.asc")
-	# for rs in rsList2:
-		# print os.path.basename(rs)
-		# gp.RasterToOtherFormat_conversion(os.path.basename(rs), dirtemp, "GRID")
-		# gp.delete_management(rs)
-
-	# dsList3 = glob.glob(gp.workspace + "\\" + variable + "_3*")
-	# for ds in dsList3:
-		# os.system('7za e -yo' + gp.workspace + " " + ds)
-	
-	# rsList3 = glob.glob(gp.workspace + "\\" + variable + "_3*.asc")
-	# for rs in rsList3:
-		# print os.path.basename(rs)
-		# gp.RasterToOtherFormat_conversion(os.path.basename(rs), dirtemp, "GRID")
-		# gp.delete_management(rs)
-		
-	# gp.workspace = dirtemp 
-	# rasters1 = gp.ListRasters(variable + "_1*", "GRID")
-	# for raster in rasters1:
-		# print raster
-		# InRaster = gp.workspace + "\\" + raster
-		# OutRaster = dirtemp2 + "\\" + raster
-		# InExpression = InRaster + " / 86400"
-		# gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
-		# ##gp.Times_sa(InRaster, "86400", OutRaster)
-		# gp.delete_management(InRaster)
-		
-		# OutAscii = dirtemp2 + "\\" + raster + ".asc"
-		# gp.RasterToASCII_conversion(OutRaster, OutAscii)
-		# InZip = dirtemp2 + "\\" + raster + ".asc.gz"
-		# os.system('7za a ' + InZip + " " + OutAscii)
-		# gp.delete_management(OutRaster)
-
-		# OutZip = dirbase + "\\OUT_" + str(mn) + "010000" + "\\" + raster + ".asc.gz"
-		# if os.path.isfile(OutZip):
-			# os.remove(OutZip)
-		# shutil.copyfile(InZip, OutZip)
-		# os.remove(OutAscii)
-		# os.remove(InZip)
-
-	# gp.workspace = dirtemp 
-	# rasters2 = gp.ListRasters(variable + "_2*", "GRID")
-	# for raster in rasters2:
-		# print raster
-		# InRaster = gp.workspace + "\\" + raster
-		# OutRaster = dirtemp2 + "\\" + raster
-		# InExpression = InRaster + " / 86400"
-		# gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
-		# ##gp.Times_sa(InRaster, "86400", OutRaster)
-		# gp.delete_management(InRaster)
-		
-		# OutAscii = dirtemp2 + "\\" + raster + ".asc"
-		# gp.RasterToASCII_conversion(OutRaster, OutAscii)
-		# InZip = dirtemp2 + "\\" + raster + ".asc.gz"
-		# os.system('7za a ' + InZip + " " + OutAscii)
-		# gp.delete_management(OutRaster)
-
-		# OutZip = dirbase + "\\OUT_" + str(mn) + "010000" + "\\" + raster + ".asc.gz"
-		# if os.path.isfile(OutZip):
-			# os.remove(OutZip)
-		# shutil.copyfile(InZip, OutZip)
-		# os.remove(OutAscii)
-		# os.remove(InZip)
-
-	# gp.workspace = dirtemp 
-	# rasters3 = gp.ListRasters(variable + "_3*", "GRID")
-	# for raster in rasters3:
-		# print raster
-		# InRaster = gp.workspace + "\\" + raster
-		# OutRaster = dirtemp2 + "\\" + raster
-		# InExpression = InRaster + " / 86400"
-		# if gp.exists(raster):
-			# gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
-			# ##gp.Times_sa(InRaster, "86400", OutRaster)
-			# gp.delete_management(InRaster)
-			
-			# OutAscii = dirtemp2 + "\\" + raster + ".asc"
-			# gp.RasterToASCII_conversion(OutRaster, OutAscii)
-			# InZip = dirtemp2 + "\\" + raster + ".asc.gz"
-			# os.system('7za a ' + InZip + " " + OutAscii)
-			# gp.delete_management(OutRaster)
-
-			# OutZip = dirbase + "\\OUT_" + str(mn) + "010000" + "\\" + raster + ".asc.gz"
-			# if os.path.isfile(OutZip):
-				# os.remove(OutZip)
-			# shutil.copyfile(InZip, OutZip)
-			# os.remove(OutAscii)
-			# os.remove(InZip)
 
 print "Done!!!!"
 

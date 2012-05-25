@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_grids.py E:\MRI_grids\tmean1\SP0A 1979 2003 tmean E:\MRI_grids\_describes"
+	print "   - ie: python Describe_grids.py E:\MRI_grids\prec\SP0A 1979 2003 prec E:\MRI_grids\_describes"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -28,10 +28,10 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "     DESCRIBE GRIDS      "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-if os.path.isfile(dirout + "\\desc_" + variable + ".txt"):
-    outFile = open(dirout + "\\desc_" + variable + ".txt", "a")
+if os.path.isfile(dirout + "\\redesc_SN0A_" + variable + ".txt"):
+    outFile = open(dirout + "\\redesc_SN0A_" + variable + ".txt", "a")
 else:
-    outFile = open(dirout + "\\desc_" + variable + ".txt", "w")
+    outFile = open(dirout + "\\redesc_SN0A_" + variable + ".txt", "w")
 
 outFile.write("DATE" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
@@ -49,7 +49,7 @@ for year in range(inityear, finalyear + 1, 1):
                 MEA = gp.GetRasterProperties_management(raster, "MEAN")
                 STD = gp.GetRasterProperties_management(raster, "STD")
                 CEX = gp.GetRasterProperties_management(raster, "CELLSIZEX")
-                outFile = open(dirout + "\\desc_" + variable + ".txt", "a")
+                outFile = open(dirout + "\\redesc_SN0A_" + variable + ".txt", "a")
                 outFile.write(str(year) + "0" + str(month) + "\t" + raster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
 
         else:
@@ -65,7 +65,7 @@ for year in range(inityear, finalyear + 1, 1):
                 STD = gp.GetRasterProperties_management(raster, "STD")
                 CEX = gp.GetRasterProperties_management(raster, "CELLSIZEX")
                 CEY = gp.GetRasterProperties_management(raster, "CELLSIZEY")
-                outFile = open(dirout + "\\desc_" + variable + ".txt", "a")
+                outFile = open(dirout + "\\redesc_SN0A_" + variable + ".txt", "a")
                 outFile.write(str(year) + str(month) + "\t" + raster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
 
 outFile.close()
