@@ -1,0 +1,5 @@
+1. Copiar y organizar datos al nuevo sistema de almacenamiento, desde los discos. 
+2. Copiar y organizar datos al nuevo sistema de almacenamiento, desde la info almacenada en servers. 
+3. Limpiar servers. 
+4. Calcular espacios y orden de procesamiento en server. 
+
