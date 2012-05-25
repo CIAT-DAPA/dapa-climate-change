@@ -1,0 +1,73 @@
+id <- read.csv("metrics_rain.csv")
+
+tiff('R2_prec_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+boxplot(id$R2.FIT ~ id$MONTH,xlab='Mes del anho',ylab='R2',pch=20,cex=0.9,ylim=c(0,1))
+lines(c(0,13),c(.5,.5),col='red')
+lines(c(0,13),c(.75,.75),col='red',lty=2)
+dev.off()
+
+limit <- max(id$RMSE.FIT)*.5
+
+tiff('RMSE_prec_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+boxplot(id$RMSE.FIT ~ id$MONTH,xlab='Mes del ano',ylab='Error medio cuadratico (mm)',pch=20,cex=0.9,ylim=c(0,max(id$RMSE.FIT)))
+lines(c(0,13),c(limit,limit),col='red')
+lines(c(0,13),c(limit*.5,limit*.5),col='red',lty=2)
+dev.off()
+
+tiff('HistR2_prec_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+hist(id$R2.FIT,breaks=15,xlim=c(0,1),xlab="R2",ylab="Numero de observaciones",main=NA)
+dev.off()
+
+tiff('HistRMSE_prec_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+hist(id$RMSE.FIT,breaks=15,xlim=c(0,max(id$RMSE.FIT)),xlab="RMSE",ylab="Numero de observaciones",main=NA)
+dev.off()
+
+
+id <- read.csv("metrics_tmax.csv")
+
+tiff('R2_tmax_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+boxplot(id$R2.FIT ~ id$MONTH,xlab='Mes del anho',ylab='R2',pch=20,cex=0.9,ylim=c(0,1))
+lines(c(0,13),c(.5,.5),col='red')
+lines(c(0,13),c(.75,.75),col='red',lty=2)
+dev.off()
+
+limit <- max(id$RMSE.FIT)*.5
+
+tiff('RMSE_tmax_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+boxplot(id$RMSE.FIT ~ id$MONTH,xlab='Mes del ano',ylab='Error medio cuadratico (mm)',pch=20,cex=0.9,ylim=c(0,max(id$RMSE.FIT)))
+lines(c(0,13),c(limit,limit),col='red')
+lines(c(0,13),c(limit*.5,limit*.5),col='red',lty=2)
+dev.off()
+
+tiff('HistR2_tmax_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+hist(id$R2.FIT,breaks=15,xlim=c(0,1),xlab="R2",ylab="Numero de observaciones",main=NA)
+dev.off()
+
+tiff('HistRMSE_tmax_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+hist(id$RMSE.FIT,breaks=15,xlim=c(0,max(id$RMSE.FIT)),xlab="RMSE",ylab="Numero de observaciones",main=NA)
+dev.off()
+
+
+id <- read.csv("metrics_tmin.csv")
+
+tiff('R2_tmin_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+boxplot(id$R2.FIT ~ id$MONTH,xlab='Mes del anho',ylab='R2',pch=20,cex=0.9,ylim=c(0,1))
+lines(c(0,13),c(.5,.5),col='red')
+lines(c(0,13),c(.75,.75),col='red',lty=2)
+dev.off()
+
+limit <- max(id$RMSE.FIT)*.5
+
+tiff('RMSE_tmin_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+boxplot(id$RMSE.FIT ~ id$MONTH,xlab='Mes del ano',ylab='Error medio cuadratico (mm)',pch=20,cex=0.9,ylim=c(0,max(id$RMSE.FIT)))
+lines(c(0,13),c(limit,limit),col='red')
+lines(c(0,13),c(limit*.5,limit*.5),col='red',lty=2)
+dev.off()
+
+tiff('HistR2_tmin_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+hist(id$R2.FIT,breaks=15,xlim=c(0,1),xlab="R2",ylab="Numero de observaciones",main=NA)
+dev.off()
+
+tiff('HistRMSE_tmin_fit.tif',width=600, height=600,pointsize=8,compression='lzw',res=150)
+hist(id$RMSE.FIT,breaks=15,xlim=c(0,max(id$RMSE.FIT)),xlab="RMSE",ylab="Numero de observaciones",main=NA)
+dev.off()
