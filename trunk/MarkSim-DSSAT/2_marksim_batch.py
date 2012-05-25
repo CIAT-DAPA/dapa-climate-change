@@ -6,7 +6,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python 2_marksim_batch.py D:\Workspace\MS_llanos\MS2_5min D:\Workspace\MS_llanos\MS2_5min D:\Workspace\tmp"
+	print "   - python 2_marksim_batch.py D:\Workspace\Mexico\MS D:\Workspace\Mexico\MS D:\Workspace\tmp"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
