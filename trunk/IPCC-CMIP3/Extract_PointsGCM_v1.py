@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_PointsGCM_v1.py M:\climate_change\IPCC_CMIP3 A1B E:\Workspace\Osana\point_usa.shp E:\Workspace\Osana 30s downscaled"
+	print "   - ie: python Extract_PointsGCM_v1.py M:\climate_change\IPCC_CMIP3 A1B D:\Workspace\request_miguel\mask\sites.shp D:\Workspace\request_miguel\points_extract 30s downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -27,7 +27,6 @@ dirbase = sys.argv[1]
 scenario = sys.argv[2]
 mask = sys.argv[3]
 dirout = sys.argv[4]
-
 resolution = sys.argv[5]
 type = sys.argv[6]
 
@@ -42,11 +41,12 @@ print "~~~~~~~~~~~~~~~~~~~~~~"
 modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 # variablelist = "prec", "tmax", "tmean", "tmin"
 # variable = "bio"
+
 print "Available models: " + str(modellist)
 
-for model in modellist[6:]:
+for model in modellist:
 	# for period in periodlist:
-	period = "2020_2049"
+	period = "2010_2039"
 	print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
 	diroutpoints = dirout + "\\_extract_SRES_" + scenario 
 	if not os.path.exists(diroutpoints):

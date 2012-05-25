@@ -12,7 +12,8 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Extract_PointsGCM.py O:\climate_change\IPCC_CMIP3 A2 D:\Masks\Centroamerica\ca_points.shp D:\Workspace\Beatriz 2_5min downscaled"
+	print "   - ie: python Extract_PointsGCM.py O:\climate_change\IPCC_CMIP3 A2 D:\Workspace\Osana\points.shp.shp D:\Workspace\Osana 10min downscaled"
+	print 										"O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_2_5min\bccr_bcm2_0\2010_2039"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -38,7 +39,8 @@ print " EXTRACT BY MASK GCM  "
 print "~~~~~~~~~~~~~~~~~~~~~~"
 
 #Get lists 
-periodlist = "2010_2039" , "2040_2069", # "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
+periodlist = "2020_2049" , "2040_2069", # "2010_2039", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
+# modellist = "bccr_bcm2_0", "cccma_cgcm3_1_t47", "gfdl_cm2_0", "gfdl_cm2_1", "giss_model_er", "ingv_echam4", "inm_cm3_0", "miroc3_2_medres", "miub_echo_g", "mpi_echam5", "mri_cgcm2_3_2a", "ncar_ccsm3_0", "ncar_pcm1", "ukmo_hadcm3"
 modellist = sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 variablelist = "tmin", "tmax", "prec"
 print "Available models: " + str(modellist)
