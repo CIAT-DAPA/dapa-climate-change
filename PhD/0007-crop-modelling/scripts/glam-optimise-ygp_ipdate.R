@@ -11,8 +11,8 @@
 
 
 #eljefe
-#src.dir <- "/nfs/a17/eejarv/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#bDir <- "~/PhD-work/crop-modelling/GLAM"
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 #maxiter <- 20
 
 #source(paste(src.dir,"/glam-optimise-ygp_ipdate.R",sep=""))

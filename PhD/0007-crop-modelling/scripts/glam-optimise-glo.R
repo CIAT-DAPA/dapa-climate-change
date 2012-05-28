@@ -13,7 +13,7 @@
 
 #eljefe
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#bDir <- "~/PhD-work/crop-modelling/GLAM"
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 #maxiter <- 20
 #run <- 1 2 3 4 
 
