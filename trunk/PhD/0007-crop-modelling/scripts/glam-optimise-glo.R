@@ -56,7 +56,6 @@ cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 pDir <- paste(cDir,"/params",sep="") #parameter files
 
 #load cell details
-#cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
 cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection.csv",sep=""))
 
 #load runs to perform
