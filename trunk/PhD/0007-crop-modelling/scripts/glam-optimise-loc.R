@@ -17,7 +17,7 @@
 #maxiter <- 20
 #run <- 1 2 3 4 
 
-#source(paste(src.dir,"/glam-optimise.R",sep=""))
+#source(paste(src.dir,"/glam-optimise-loc.R",sep=""))
 
 #check the existence of three parameters needed for sourcing this script
 if (class(try(get("src.dir"),silent=T)) == "try-error") {
