@@ -51,6 +51,14 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   solFile <- RUN_setup$SOL_FILE
   solGrid <- RUN_setup$SOL_GRID
   
+  #check consistency of yield file
+  ydum <- read.fortran(yFile,format=c("A12","F8"),n=28)
+  if (length(which(ydum$V2 < -90)) > 0) {
+    y_has_na <- T
+  } else {
+    y_has_na <- F
+  }
+  
   #create optimisation folder if it does not exist
   optDir <- paste(cal_dir,"/",tolower(param),sep="")
   if (!file.exists(optDir)) {dir.create(optDir)}
@@ -96,9 +104,6 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       } else {
         if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
           GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
         }
       }
       
@@ -125,7 +130,11 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         } else {
           sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
         }
-        yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+        if (y_has_na) {
+          yield_row <- "nofile"
+        } else {
+          yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+        }
         ygp_row <- "nofile"
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
@@ -189,7 +198,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       #calc rmse
       odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
                         OBS=y_o,PRED=y_p)
-      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2) / nrow(odf))
+      odf$OBS[which(odf$OBS < -90)] <- NA
+      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
     } else if (run.type == "IRR") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "IRR"
       
@@ -201,9 +211,6 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       } else {
         if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
           GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
         }
       }
       
@@ -229,8 +236,11 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         } else {
           sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
         }
-        
-        yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+        if (y_has_na) {
+          yield_row <- "nofile"
+        } else {
+          yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+        }
         ygp_row <- "nofile"
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
@@ -292,7 +302,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       #calc rmse
       odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
                         OBS=y_o,PRED=y_p)
-      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2) / nrow(odf))
+      odf$OBS[which(odf$OBS < -90)] <- NA
+      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
     } else if (run.type == "MIX") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
       
@@ -304,9 +315,6 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       } else {
         if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
           GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
         }
       }
       
@@ -331,7 +339,11 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         } else {
           sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
         }
-        yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+        if (y_has_na) {
+          yield_row <- "nofile"
+        } else {
+          yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+        }
         ygp_row <- "nofile"
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
@@ -391,6 +403,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       y_o <- y_o$V2
       odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
                         OBS=y_o,RFD=y_p)
+      odf$OBS[which(odf$OBS < -90)] <- NA
       
       ##!
       #Now the irrigated run
@@ -404,9 +417,6 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       } else {
         if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
           GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Min <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$Max <- -99
-          #GLAM_params$glam_param.spt_mgt$IPDATE$NVAL <- 1
         }
       }
       
@@ -489,7 +499,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       odf$PRED <- (1-odf$IRATIO)*odf$RFD + (odf$IRATIO)*odf$IRR
       
       #calc rmse
-      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2) / nrow(odf))
+      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
     }
     
     out_row <- data.frame(VALUE=vals[i],RMSE=rmse)
