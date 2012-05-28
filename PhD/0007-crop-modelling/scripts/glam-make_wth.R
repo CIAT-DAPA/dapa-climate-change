@@ -68,9 +68,28 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
   if (!file.exists(wthDir)) {dir.create(wthDir)}
   
   #loop cells
+  col <- 0; row <- 1
   for (cll in cell) {
     #site name and details
     lon <- x$X[which(cells$CELL == cll)]; lat <- x$Y[which(cells$CELL == cll)]
+    
+    if (col == 10) {
+      col <- 1
+      row <- row+1
+    } else {
+      col <- col+1
+    }
+    
+    if (col < 10) {col_t <- paste("00",col,sep="")}
+    if (col >= 10 & col < 100) {col_t <- paste("0",col,sep="")}
+    if (col >= 100) {col_t <- paste(col)}
+    
+    if (row < 10) {row_t <- paste("00",row,sep="")}
+    if (row >= 10 & row < 100) {row_t <- paste("0",row,sep="")}
+    if (row >= 100) {row_t <- paste(row)}
+    
+    
+    ###sowing date
     sdate <- x$SOW_DATE[which(cells$CELL == cll)]
     hdate <- sdate+120
     
@@ -80,7 +99,7 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
     for (yr in 1966:1994) {
       #yr <- 1966
       #the below needs to be changed if you wanna write more than 1 cell
-      wthfile <- paste(wthDir,"/ingc001001",yr,".wth",sep="")
+      wthfile <- paste(wthDir,"/ingc",row_t,col_t,yr,".wth",sep="")
       
       #get the weather data for that particular gridcell
       if (hdate > 365) {

@@ -130,12 +130,18 @@ write_soilcodes <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="C
   names(x)[which(toupper(names(x)) == toupper(fields$ROW))] <- "ROW"
   
   fsg <- file(outfile,"w")
-  cnt <- 1
+  cnt <- 1; col <- 0; row <- 1
   for (cll in cell) {
-    col <- x$COL[which(x$CELL == cll)]
-    row <- x$ROW[which(x$CELL == cll)]
+    if (col == 10) {
+      col <- 1
+      row <- row+1
+    } else {
+      col <- col+1
+    }
+    #col <-  #x$COL[which(x$CELL == cll)]
+    #row <-  #x$ROW[which(x$CELL == cll)]
     
-    cat(paste(sprintf("%1$4d%2$4d",1,1),
+    cat(paste(sprintf("%1$4d%2$4d",row,col),
               sprintf("%6d",cnt),"\n",sep=""),file=fsg)
     cnt <- cnt+1
   }
@@ -166,12 +172,20 @@ write_sowdates <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="CO
   names(x)[which(toupper(names(x)) == toupper(fields$SOW_DATE))] <- "SOW_DATE"
   
   fsg <- file(outfile,"w")
+  col <- 0; row <- 1
   for (cll in cell) {
-    col <- x$COL[which(x$CELL == cll)]
-    row <- x$ROW[which(x$CELL == cll)]
+    if (col == 10) {
+      col <- 1
+      row <- row+1
+    } else {
+      col <- col+1
+    }
+    
+    #col <- x$COL[which(x$CELL == cll)]
+    #row <- x$ROW[which(x$CELL == cll)]
     dat <- round(x$SOW_DATE[which(x$CELL == cll)],0)
     
-    cat(paste(sprintf("%1$4d%2$4d",1,1),
+    cat(paste(sprintf("%1$4d%2$4d",row,col),
               sprintf("%6d",dat),"\n",sep=""),file=fsg)
   }
   close(fsg)
@@ -204,9 +218,17 @@ write_yield <- function(x,outfile,yld_stk,yri,yrf,cell=c(636),fields=list(CELL="
   names(x)[which(toupper(names(x)) == toupper(fields$Y))] <- "Y"
   
   fsg <- file(outfile,"w")
+  
+  col <- 0; row <- 1
   for (cll in cell) {
-    col <- x$COL[which(x$CELL == cll)]
-    row <- x$ROW[which(x$CELL == cll)]
+    if (col == 10) {
+      col <- 1
+      row <- row+1
+    } else {
+      col <- col+1
+    }
+    #col <- x$COL[which(x$CELL == cll)]
+    #row <- x$ROW[which(x$CELL == cll)]
     
     lon <- x$X[which(x$CELL == cll)]
     lat <- x$Y[which(x$CELL == cll)]
@@ -216,7 +238,7 @@ write_yield <- function(x,outfile,yld_stk,yri,yrf,cell=c(636),fields=list(CELL="
     for (i in 1:length(yValues)) {
       dat <- yValues[i]
       cat(paste(sprintf("%4d",(yri+i-1+1900)),
-                sprintf("%1$4d%2$4d",1,1),
+                sprintf("%1$4d%2$4d",row,col),
                 sprintf("%8.1f",dat),"\n",sep=""),file=fsg)
     }
     
