@@ -7,6 +7,7 @@
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #bDir <- "F:/PhD-work/crop-modelling/GLAM"
+#maxiter <- 20
 
 
 #eljefe
