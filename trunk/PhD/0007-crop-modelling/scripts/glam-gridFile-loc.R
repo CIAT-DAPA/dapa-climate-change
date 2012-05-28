@@ -102,6 +102,7 @@ if (!file.exists(oSolFile)) {
   oSolFile <- write_soil_types(x=selSolData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))
 }
 
+
 #now need to create the soil codes file
 oSoilGrid <- paste(gsoilDir,"/soilcodes_",cell,".txt",sep="")
 if (!file.exists(oSoilGrid)) {
@@ -132,12 +133,12 @@ if (!file.exists(yFile)) {
 }
 
 
-
 ######################################################
 #write weather (irr and rainfed)
 wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
 owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_",cell,sep=""),wthDataDir,
                    fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+
 
 #Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
 #between April and May: sown in day 32 [zone 2]
@@ -165,7 +166,6 @@ osowFile <- paste(gsowDir,"/sowing_",cell,"_irr.txt",sep="")
 if (!file.exists(osowFile)) {
   osowFile <- write_sowdates(x=icells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
 }
-
 
 
 

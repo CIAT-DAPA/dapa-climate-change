@@ -907,7 +907,11 @@ GLAM_get_default <- function(x,cell,parDir) {
   #get the longitude of the selected gridcell
   #cell <- 636
   #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
-  GLAM_params$glam_param.sim_ctr$SMLON <- round(cells$X[which(cells$CELL==cell)],1)
+  if (is.na(cell)) {
+    GLAM_params$glam_param.sim_ctr$SMLON <- -99
+  } else {
+    GLAM_params$glam_param.sim_ctr$SMLON <- round(cells$X[which(cells$CELL==cell)],1)
+  }
   # windows()
   # plot(cells$X,cells$Y,pch=20,cex=0.001)
   # text(x=cells$X,y=cells$Y,labels=cells$CELL,cex=0.5)

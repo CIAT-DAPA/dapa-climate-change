@@ -7,14 +7,14 @@
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #bDir <- "F:/PhD-work/crop-modelling/GLAM"
-#maxiter <- 200
+#maxiter <- 20
 #run <- 1
 
 
 #eljefe
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #bDir <- "~/PhD-work/crop-modelling/GLAM"
-#maxiter <- 200
+#maxiter <- 20
 #run <- 1 2 3 4 
 
 #source(paste(src.dir,"/glam-optimise.R",sep=""))
@@ -129,7 +129,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
       cat("\ncalibrating",parname,"using",nstep,"steps\n")
       
       #run the optimisation routine for any system system
-      optimised[[parname]] <- GLAM_optimise(GLAM_params=params,RUN_setup=setup,sect=where,
+      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
                                             param=parname,n.steps=nstep,iter=itr,iratio=ir_vls)
       
       
@@ -318,13 +318,4 @@ for (rw in 1:nrow(pList)) {
   abline(v=optimal[[pname]],col="red",lty=2,lwd=0.8)
   dev.off()
 }
-
-
-
-
-
-
-
-
-
 
