@@ -237,6 +237,8 @@ write_yield <- function(x,outfile,yld_stk,yri,yrf,cell=c(636),fields=list(CELL="
     
     for (i in 1:length(yValues)) {
       dat <- yValues[i]
+      if (is.na(dat)) {dat <- -99}
+      if (dat == 0) {dat <- -99}
       cat(paste(sprintf("%4d",(yri+i-1+1900)),
                 sprintf("%1$4d%2$4d",row,col),
                 sprintf("%8.1f",dat),"\n",sep=""),file=fsg)
