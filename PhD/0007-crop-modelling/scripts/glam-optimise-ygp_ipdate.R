@@ -36,7 +36,7 @@ if (class(try(get("zone"),silent=T)) == "try-error") {
   stop("zone to be calibrated needs to be set")
 }
 
-source(paste(src.dir,"/glam-optimise-ygp_ipdate.R",sep=""))
+#source(paste(src.dir,"/glam-optimise-ygp_ipdate.R",sep=""))
 
 #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
 #running and optimising GLAM
