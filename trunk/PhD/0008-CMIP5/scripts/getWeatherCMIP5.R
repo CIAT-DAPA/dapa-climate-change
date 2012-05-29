@@ -23,7 +23,7 @@ oDir <- paste(bDir,"/CMIP5/baseline",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 #initial and final years
-yi <- 1960
+yi <- 1961
 yf <- 2005
 
 #load GCM characteristics
