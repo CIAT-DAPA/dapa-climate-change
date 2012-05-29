@@ -10,6 +10,8 @@ library(raster)
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #bDir <- "/nfs/a102/eejarv"
 #mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
+#yi <- 1961
+#yf <- 2005
 #i <- 1 #gcm to process
 
 #source(paste(src.dir2,"/scripts/getWeatherCMIP5.R",sep=""))
@@ -23,8 +25,8 @@ oDir <- paste(bDir,"/CMIP5/baseline",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 #initial and final years
-yi <- 1961
-yf <- 2005
+#yi <- 1961
+#yf <- 2005
 
 #load GCM characteristics
 cChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
