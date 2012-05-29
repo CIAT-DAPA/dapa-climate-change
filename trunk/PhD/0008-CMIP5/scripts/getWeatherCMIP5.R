@@ -209,9 +209,16 @@ for (ens in ensList) {
     }
   }
   
-  #removing ensemble original big files
+  #removing ensemble original big files only if the number of control files equals
+  #the number of original nc files, else stop
   setwd(outEnsDir)
-  system("rm -f *.nc")
+  cnc <- list.files(".",pattern="\\.nc")
+  cct <- list.files(".",pattern="\\.control")
+  if (cnc == cct) {
+    system("rm -f *.nc")
+  } else {
+    stop("something weird happened, need to check before removing original files")
+  }
   
 }
 
