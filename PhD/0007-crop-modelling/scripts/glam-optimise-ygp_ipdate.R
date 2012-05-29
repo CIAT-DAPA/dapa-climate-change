@@ -96,11 +96,6 @@ ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
 ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
 
 
-#now the optimisation routine
-optimised <- list()
-optimal <- list()
-
-
 ###############################################
 # final calibration of IPDATE and YGP
 ###############################################
@@ -179,7 +174,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   
   #update the parameter set to -99 and replace the planting date file
   cells$SOW_DATE <- optimal$IPDATE
-  osowFile <- paste(cDir,"/inputs/ascii/sow/opt_",setup$CELL,"_",setup$SIM_NAME,".txt",sep="")
+  osowFile <- paste(cDir,"/inputs/ascii/sow/opt_",setup$SIM_NAME,".txt",sep="")
   osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(setup$CELL),
                              fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
   
@@ -205,7 +200,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   # reset lists of output parameters
   optimal <- list(); optimised <- list()
   
-  optimised[[parname]] <- GLAM_optimise(GLAM_params=params,RUN_setup=setup,sect=where,
+  optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
                                         param=parname,n.steps=20,iter=tolower(parname),
                                         iratio=ir_vls)
   
