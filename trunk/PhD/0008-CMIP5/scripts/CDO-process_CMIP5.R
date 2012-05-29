@@ -50,7 +50,8 @@ for (ens in ensList) {
   if (!file.exists(outEnsDir)) {dir.create(outEnsDir)}
   
   #list of variables depends on number of nc files (i.e. tas is not always available)
-  ncf <- list.files(outEnsDir,pattern="\\.nc")
+  patn <- gsub("%var%","",thisEns$naming[1])
+  ncf <- list.files(outEnsDir,pattern=patn)
   if (length(ncf) == 4) {
     vnList <- c("pr","tasmin","tasmax","tas")
   } else if (length(ncf) == 3) {
