@@ -82,6 +82,7 @@ for (ci in ciList) {
   setup$SIM_NAME <- paste("fcal_",setup$CELL,sep="")
   setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
   
+  cat("\nprocessing cell",setup$CELL,"\n")
   
   #get defaults (parameter set)
   params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
