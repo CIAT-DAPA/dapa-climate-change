@@ -14,19 +14,23 @@ library(raster)
 #yf <- 2005
 #i <- 1 #gcm to process
 
-#source(paste(src.dir2,"/scripts/getWeatherCMIP5.R",sep=""))
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling"
+#mdDir <- "V:/eejarv/CMIP5/baseline"
+#yi <- 1961
+#yf <- 2002
+#i <- 1 #gcm to process
+
 
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 
-#GCM data dir
-oDir <- paste(bDir,"/CMIP5/baseline",sep="")
-if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
-
-#initial and final years
-#yi <- 1961
-#yf <- 2005
+#output gridcell data dir
+cDataDir <- paste(bDir,"/climate-data/gridcell-data",sep="")
+oDir <- paste(cDataDir,"/IND_CMIP5",sep="")
+if (!file.exists(oDir)) {dir.create(oDir)}
 
 #load GCM characteristics
 cChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
@@ -49,15 +53,9 @@ for (ens in ensList) {
   outEnsDir <- paste(outGCMDir,"/",ens,sep="")
   if (!file.exists(outEnsDir)) {dir.create(outEnsDir)}
   
-  #list of variables depends on number of nc files (i.e. tas is not always available)
-  ncf <- list.files(outEnsDir,pattern="\\.nc")
-  if (length(ncf) == 4) {
-    vnList <- c("pr","tasmin","tasmax","tas")
-  } else if (length(ncf) == 3) {
-    vnList <- c("pr","tasmin","tasmax")
-  } else {
-    stop("number of files not 3 or 4, check!")
-  }
+  #list variables
+  vnList <- list.files
+  
   
   #loop through variables
   for (vn in vnList) {
@@ -74,7 +72,7 @@ for (ens in ensList) {
     
     #if the control file does not exist
     if (!file.exists(conFile)) {
-    #loop through years
+      #loop through years
       for (year in yi:yf) {
         #year <- 1960
         cat("year:",year,"\n")
@@ -213,11 +211,11 @@ for (ens in ensList) {
         }
         
       }
-    #write control file
-    cfo <- file(conFile,"w")
-    cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
-        paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cfo)
-    close(cfo)
+      #write control file
+      cfo <- file(conFile,"w")
+      cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
+          paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cfo)
+      close(cfo)
     } else {
       cat("this job was already done!\n")
     }
@@ -235,7 +233,6 @@ for (ens in ensList) {
   }
   
 }
-
 
 
 

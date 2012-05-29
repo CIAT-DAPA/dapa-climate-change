@@ -187,6 +187,35 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
 
 
 
+#################################################################################
+##make plots of each parameter tuning
+cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
+optimal <- cal_data[which(cal_data$iter==maxiter),]
+par_list <- c(paste(optimal$param))
+iter <- c(rep(maxiter,times=nrow(optimal)))
+pList <- data.frame(param=par_list,iter=iter)
+
+plotsDir <- paste(cDir,"/calib/",setup$SIM_NAME,"/plots",sep="")
+if (!file.exists(plotsDir)) {dir.create(plotsDir)}
+
+for (rw in 1:nrow(pList)) {
+  pname <- paste(pList$param[rw])
+  iter <- paste(pList$iter[rw])
+  
+  #load the workspace
+  load(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",iter,"/output.RData",sep=""))
+  
+  #now make the plot
+  tiff(paste(plotsDir,"/",tolower(pname),".tif",sep=""),res=300,compression="lzw",height=1000,
+       width=1250,pointsize=8)
+  par(mar=c(3,3,2,1))
+  plot(optimised[[pname]]$VALUE,optimised[[pname]]$RMSE,ty="l",
+       main=paste(pname," :: ",optimal[[pname]],sep=""),
+       xlab="Parameter value",ylab="RMSE (kg/ha)")
+  grid(nx=10,ny=10)
+  abline(v=optimal[[pname]],col="red",lty=2,lwd=0.8)
+  dev.off()
+}
 
 
 
