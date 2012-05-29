@@ -47,8 +47,18 @@ for (ens in ensList) {
   outEnsDir <- paste(outGCMDir,"/",ens,sep="")
   if (!file.exists(outEnsDir)) {dir.create(outEnsDir)}
   
+  #list of variables depends on number of nc files (i.e. tas is not always available)
+  ncf <- list.files(outEnsDir,pattern="\\.nc")
+  if (length(ncf) == 4) {
+    vnList <- c("pr","tasmin","tasmax","tas")
+  } else if (length(ncf) == 3) {
+    vnList <- c("pr","tasmin","tasmax")
+  } else {
+    stop("number of files not 3 or 4, check!")
+  }
+  
   #loop through variables
-  for (vn in c("pr","tasmin","tasmax","tas")) {
+  for (vn in vnList) {
     #vn <- "pr" #tasmin, tasmax
     cat("variable:",vn,"\n")
     
