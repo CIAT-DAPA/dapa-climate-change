@@ -15,7 +15,7 @@
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 #maxiter <- 20
-#run <- 1 2 3 4 
+#run <- 1 2 3 4 5
 
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
