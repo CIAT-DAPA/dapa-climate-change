@@ -53,7 +53,7 @@ pDir <- paste(cDir,"/params",sep="") #parameter files
 #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
 cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection.csv",sep=""))
 
-ci <- 1
+#ci <- 1
 
 #get run setup
 #files that were generated
