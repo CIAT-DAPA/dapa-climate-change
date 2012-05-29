@@ -12,6 +12,8 @@ library(raster)
 #mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
 #i <- 1 #gcm to process
 
+#source(paste(src.dir2,"/scripts/getWeatherCMIP5.R",sep=""))
+
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
