@@ -1,180 +1,328 @@
-ID	Fileset	GCM	Ensemble	iYear	iMonth	iDay	fYear	fMonth	fDay	ncol	res_x	nrow	res_y	has_leap	pr_unit	tas_unit	naming	Notes
-1	1	bcc_csm1_1	r1i1p1	1850	1	1	2012	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_bcc-csm1-1_historical_r1i1p1_18500101-20121230.nc	NA
-2	1	cccma_cancm4	r1i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r1i1p1_19610101-20051231.nc	NA
-3	2	cccma_cancm4	r2i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r2i1p1_19610101-20051231.nc	NA
-4	3	cccma_cancm4	r3i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r3i1p1_19610101-20051231.nc	NA
-5	4	cccma_cancm4	r4i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r4i1p1_19610101-20051231.nc	NA
-6	5	cccma_cancm4	r5i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r5i1p1_19610101-20051231.nc	NA
-7	6	cccma_cancm4	r6i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r6i1p1_19610101-20051231.nc	NA
-8	7	cccma_cancm4	r7i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r7i1p1_19610101-20051231.nc	NA
-9	8	cccma_cancm4	r8i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r8i1p1_19610101-20051231.nc	NA
-10	9	cccma_cancm4	r9i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r9i1p1_19610101-20051231.nc	NA
-11	10	cccma_cancm4	r10i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r10i1p1_19610101-20051231.nc	NA
-12	1	cccma_canesm2	r1i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r1i1p1_18500101-20051231.nc	NA
-13	2	cccma_canesm2	r2i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r2i1p1_18500101-20051231.nc	NA
-14	3	cccma_canesm2	r3i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r3i1p1_18500101-20051231.nc	NA
-15	4	cccma_canesm2	r4i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r4i1p1_18500101-20051231.nc	NA
-16	5	cccma_canesm2	r5i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r5i1p1_18500101-20051231.nc	NA
-17	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1960	1	1	1964	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19600101-19641231.nc	NA
-18	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1965	1	1	1969	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19650101-19691231.nc	NA
-19	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1970	1	1	1974	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19700101-19741231.nc	NA
-20	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1975	1	1	1979	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19750101-19791231.nc	NA
-21	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1980	1	1	1984	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19800101-19841231.nc	NA
-22	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1985	1	1	1989	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19850101-19891231.nc	NA
-23	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1990	1	1	1994	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19900101-19941231.nc	NA
-24	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1995	1	1	1999	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19950101-19991231.nc	NA
-25	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2000	1	1	2004	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_20000101-20041231.nc	NA
-26	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2005	1	1	2005	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_20050101-20051231.nc	NA
-27	1	csiro_mk3_6_0	r1i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r1i1p1_19500101-19691231.nc	NA
-28	1	csiro_mk3_6_0	r1i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r1i1p1_19700101-19891231.nc	NA
-29	1	csiro_mk3_6_0	r1i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r1i1p1_19900101-20051231.nc	NA
-30	2	csiro_mk3_6_0	r2i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r2i1p1_19500101-19691231.nc	NA
-31	2	csiro_mk3_6_0	r2i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r2i1p1_19700101-19891231.nc	NA
-32	2	csiro_mk3_6_0	r2i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r2i1p1_19900101-20051231.nc	NA
-33	3	csiro_mk3_6_0	r3i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r3i1p1_19500101-19691231.nc	NA
-34	3	csiro_mk3_6_0	r3i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r3i1p1_19700101-19891231.nc	NA
-35	3	csiro_mk3_6_0	r3i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r3i1p1_19900101-20051231.nc	NA
-36	4	csiro_mk3_6_0	r4i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r4i1p1_19500101-19691231.nc	NA
-37	4	csiro_mk3_6_0	r4i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r4i1p1_19700101-19891231.nc	NA
-38	4	csiro_mk3_6_0	r4i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r4i1p1_19900101-20051231.nc	NA
-39	5	csiro_mk3_6_0	r5i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r5i1p1_19500101-19691231.nc	NA
-40	5	csiro_mk3_6_0	r5i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r5i1p1_19700101-19891231.nc	NA
-41	5	csiro_mk3_6_0	r5i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r5i1p1_19900101-20051231.nc	NA
-42	6	csiro_mk3_6_0	r6i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r6i1p1_19500101-19691231.nc	NA
-43	6	csiro_mk3_6_0	r6i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r6i1p1_19700101-19891231.nc	NA
-44	6	csiro_mk3_6_0	r6i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r6i1p1_19900101-20051231.nc	NA
-45	7	csiro_mk3_6_0	r7i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r7i1p1_19500101-19691231.nc	NA
-46	7	csiro_mk3_6_0	r7i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r7i1p1_19700101-19891231.nc	NA
-47	7	csiro_mk3_6_0	r7i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r7i1p1_19900101-20051231.nc	NA
-48	8	csiro_mk3_6_0	r8i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r8i1p1_19500101-19691231.nc	NA
-49	8	csiro_mk3_6_0	r8i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r8i1p1_19700101-19891231.nc	NA
-50	8	csiro_mk3_6_0	r8i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r8i1p1_19900101-20051231.nc	NA
-51	9	csiro_mk3_6_0	r9i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r9i1p1_19500101-19691231.nc	NA
-52	9	csiro_mk3_6_0	r9i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r9i1p1_19700101-19891231.nc	NA
-53	9	csiro_mk3_6_0	r9i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r9i1p1_19900101-20051231.nc	NA
-54	10	csiro_mk3_6_0	r10i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r10i1p1_19500101-19691231.nc	NA
-55	10	csiro_mk3_6_0	r10i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r10i1p1_19700101-19891231.nc	NA
-56	10	csiro_mk3_6_0	r10i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r10i1p1_19900101-20051231.nc	NA
-57	1	ichec_ec_earth	r6i1p1	1950	1	1	1974	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r6i1p1_19500101-19741231.nc	NA
-58	1	ichec_ec_earth	r6i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r6i1p1_19750101-20051231.nc	NA
-59	2	ichec_ec_earth	r8i1p1	1950	1	1	1974	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19500101-19741231.nc	NA
-60	2	ichec_ec_earth	r8i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19750101-20051231.nc	NA
-61	1	inm_inmcm4	r1i1p1	1960	1	1	1969	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19600101-19691231.nc	NA
-62	1	inm_inmcm4	r1i1p1	1970	1	1	1979	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19700101-19791231.nc	NA
-63	1	inm_inmcm4	r1i1p1	1980	1	1	1989	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19800101-19891231.nc	NA
-64	1	inm_inmcm4	r1i1p1	1990	1	1	1999	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19900101-19991231.nc	NA
-65	1	inm_inmcm4	r1i1p1	2000	1	1	2005	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_20000101-20051231.nc	NA
-66	1	ipsl_ipsl_cm5a_lr	r1i1p1	1950	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r1i1p1_19500101-20051231.nc	NA
-67	2	ipsl_ipsl_cm5a_lr	r2i1p1	1950	1	1	1999	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r2i1p1_19500101-19991231.nc	NA
-68	2	ipsl_ipsl_cm5a_lr	r2i1p1	2000	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r2i1p1_20000101-20051231.nc	NA
-69	3	ipsl_ipsl_cm5a_lr	r3i1p1	1950	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r3i1p1_19500101-20051231.nc	NA
-70	4	ipsl_ipsl_cm5a_lr	r4i1p1	1950	1	1	1999	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r4i1p1_19500101-19991231.nc	NA
-71	4	ipsl_ipsl_cm5a_lr	r4i1p1	2000	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r4i1p1_20000101-20051231.nc	NA
-72	1	ipsl_ipsl_cm5a_mr	r1i1p1	1950	1	1	1999	12	31	144	2.5	143	1.258741259	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-MR_historical_r1i1p1_19500101-19991231.nc	NA
-73	1	ipsl_ipsl_cm5a_mr	r1i1p1	2000	1	1	2005	12	31	144	2.5	143	1.258741259	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-MR_historical_r1i1p1_20000101-20051231.nc	NA
-74	1	miroc_miroc_esm	r1i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	yes	kg m-2 s-1	K	%var%_day_MIROC-ESM_historical_r1i1p1_18500101-20051231.nc	NA
-75	1	miroc_miroc_esm_chem	r1i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	yes	kg m-2 s-1	K	%var%_day_MIROC-ESM-CHEM_historical_r1i1p1_18500101-20051231.nc	NA
-214	1	miroc_miroc5	r1i1p1	1960	1	1	1969	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19600101-19691231.nc	NA
-215	1	miroc_miroc5	r1i1p1	1970	1	1	1979	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19700101-19791231.nc	NA
-216	1	miroc_miroc5	r1i1p1	1980	1	1	1989	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19800101-19891231.nc	NA
-217	1	miroc_miroc5	r1i1p1	1990	1	1	1999	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19900101-19991231.nc	NA
-218	1	miroc_miroc5	r1i1p1	2000	1	1	2009	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_20000101-20091231.nc	NA
-219	1	mohc_hadcm3	r1i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r1i1p1_19591201-19841130.nc	*all februaries have 30 days
-220	1	mohc_hadcm3	r1i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r1i1p1_19841201-20051230.nc	*all februaries have 30 days
-221	2	mohc_hadcm3	r2i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r2i1p1_19591201-19841130.nc	*all februaries have 30 days
-222	2	mohc_hadcm3	r2i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r2i1p1_19841201-20051230.nc	*all februaries have 30 days
-223	3	mohc_hadcm3	r3i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r3i1p1_19591201-19841130.nc	*all februaries have 30 days
-224	3	mohc_hadcm3	r3i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r3i1p1_19841201-20051230.nc	*all februaries have 30 days
-225	4	mohc_hadcm3	r4i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r4i1p1_19591201-19841130.nc	*all februaries have 30 days
-226	4	mohc_hadcm3	r4i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r4i1p1_19841201-20051230.nc	*all februaries have 30 days
-227	5	mohc_hadcm3	r5i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r5i1p1_19591201-19841130.nc	*all februaries have 30 days
-228	5	mohc_hadcm3	r5i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r5i1p1_19841201-20051230.nc	*all februaries have 30 days
-229	6	mohc_hadcm3	r6i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r6i1p1_19591201-19841130.nc	*all februaries have 30 days
-230	6	mohc_hadcm3	r6i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r6i1p1_19841201-20051230.nc	*all februaries have 30 days
-231	7	mohc_hadcm3	r7i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r7i1p1_19591201-19841130.nc	*all februaries have 30 days
-232	7	mohc_hadcm3	r7i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r7i1p1_19841201-20051230.nc	*all februaries have 30 days
-233	8	mohc_hadcm3	r8i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r8i1p1_19591201-19841130.nc	*all februaries have 30 days
-234	8	mohc_hadcm3	r8i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r8i1p1_19841201-20051230.nc	*all februaries have 30 days
-235	9	mohc_hadcm3	r9i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r9i1p1_19591201-19841130.nc	*all februaries have 30 days
-236	9	mohc_hadcm3	r9i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r9i1p1_19841201-20051230.nc	*all februaries have 30 days
-237	10	mohc_hadcm3	r10i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r10i1p1_19591201-19841130.nc	*all februaries have 30 days
-238	10	mohc_hadcm3	r10i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r10i1p1_19841201-20051230.nc	*all februaries have 30 days
-239	1	mohc_hadgem2_cc	r1i1p1	1959	12	1	1964	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19591201-19641130.nc	*all februaries have 30 days
-240	1	mohc_hadgem2_cc	r1i1p1	1964	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19641201-19691130.nc	*all februaries have 30 days
-241	1	mohc_hadgem2_cc	r1i1p1	1969	12	1	1974	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19691201-19741130.nc	*all februaries have 30 days
-242	1	mohc_hadgem2_cc	r1i1p1	1974	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19741201-19791130.nc	*all februaries have 30 days
-243	1	mohc_hadgem2_cc	r1i1p1	1979	12	1	1984	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19791201-19841130.nc	*all februaries have 30 days
-244	1	mohc_hadgem2_cc	r1i1p1	1984	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19841201-19891130.nc	*all februaries have 30 days
-245	1	mohc_hadgem2_cc	r1i1p1	1989	12	1	1994	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19891201-19941130.nc	*all februaries have 30 days
-246	1	mohc_hadgem2_cc	r1i1p1	1994	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19941201-19991130.nc	*all februaries have 30 days
-247	1	mohc_hadgem2_cc	r1i1p1	1999	12	1	2004	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19991201-20041130.nc	*all februaries have 30 days
-248	1	mohc_hadgem2_cc	r1i1p1	2004	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_20041201-20051130.nc	*all februaries have 30 days
-249	1	mohc_hadgem2_es	r1i1p1	1959	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19591201-19691130.nc	*all februaries have 30 days
-250	1	mohc_hadgem2_es	r1i1p1	1969	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19691201-19791130.nc	*all februaries have 30 days
-251	1	mohc_hadgem2_es	r1i1p1	1979	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19791201-19891130.nc	*all februaries have 30 days
-252	1	mohc_hadgem2_es	r1i1p1	1989	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19891201-19991130.nc	*all februaries have 30 days
-253	1	mohc_hadgem2_es	r1i1p1	1999	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19991201-20051130.nc	*all februaries have 30 days
-254	2	mohc_hadgem2_es	r2i1p1	1960	1	1	1969	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19600101-19691230.nc	*all februaries have 30 days
-255	2	mohc_hadgem2_es	r2i1p1	1970	1	1	1979	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19700101-19791230.nc	*all februaries have 30 days
-256	2	mohc_hadgem2_es	r2i1p1	1980	1	1	1989	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19800101-19891230.nc	*all februaries have 30 days
-257	2	mohc_hadgem2_es	r2i1p1	1990	1	1	1999	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19900101-19991230.nc	*all februaries have 30 days
-258	2	mohc_hadgem2_es	r2i1p1	2000	1	1	2005	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_20000101-20051230.nc	*all februaries have 30 days
-259	3	mohc_hadgem2_es	r3i1p1	1959	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19591201-19691130.nc	*all februaries have 30 days
-260	3	mohc_hadgem2_es	r3i1p1	1969	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19691201-19791130.nc	*all februaries have 30 days
-261	3	mohc_hadgem2_es	r3i1p1	1979	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19791201-19891130.nc	*all februaries have 30 days
-262	3	mohc_hadgem2_es	r3i1p1	1989	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19891201-19991130.nc	*all februaries have 30 days
-263	3	mohc_hadgem2_es	r3i1p1	1999	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19991201-20051130.nc	*all februaries have 30 days
-264	4	mohc_hadgem2_es	r4i1p1	1959	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19591201-19691130.nc	*all februaries have 30 days
-265	4	mohc_hadgem2_es	r4i1p1	1969	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19691201-19791130.nc	*all februaries have 30 days
-266	4	mohc_hadgem2_es	r4i1p1	1979	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19791201-19891130.nc	*all februaries have 30 days
-267	4	mohc_hadgem2_es	r4i1p1	1989	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19891201-19991130.nc	*all februaries have 30 days
-268	4	mohc_hadgem2_es	r4i1p1	1999	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19991201-20051130.nc	*all februaries have 30 days
-269	1	mpi_m_mpi_esm_lr	r1i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19600101-19691231.nc	NA
-270	1	mpi_m_mpi_esm_lr	r1i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19700101-19791231.nc	NA
-271	1	mpi_m_mpi_esm_lr	r1i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19800101-19891231.nc	NA
-272	1	mpi_m_mpi_esm_lr	r1i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19900101-19991231.nc	NA
-273	1	mpi_m_mpi_esm_lr	r1i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc	NA
-274	2	mpi_m_mpi_esm_lr	r2i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19600101-19691231.nc	NA
-275	2	mpi_m_mpi_esm_lr	r2i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19700101-19791231.nc	NA
-276	2	mpi_m_mpi_esm_lr	r2i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19800101-19891231.nc	NA
-277	2	mpi_m_mpi_esm_lr	r2i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19900101-19991231.nc	NA
-278	2	mpi_m_mpi_esm_lr	r2i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_20000101-20051231.nc	NA
-279	3	mpi_m_mpi_esm_lr	r3i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19600101-19691231.nc	NA
-280	3	mpi_m_mpi_esm_lr	r3i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19700101-19791231.nc	NA
-281	3	mpi_m_mpi_esm_lr	r3i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19800101-19891231.nc	NA
-282	3	mpi_m_mpi_esm_lr	r3i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19900101-19991231.nc	NA
-283	3	mpi_m_mpi_esm_lr	r3i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_20000101-20051231.nc	NA
-284	1	mri_mri_cgcm3	r1i1p1	1960	1	1	1969	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19600101-19691231.nc	NA
-285	1	mri_mri_cgcm3	r1i1p1	1970	1	1	1979	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19700101-19791231.nc	NA
-286	1	mri_mri_cgcm3	r1i1p1	1980	1	1	1989	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19800101-19891231.nc	NA
-287	1	mri_mri_cgcm3	r1i1p1	1990	1	1	1999	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19900101-19991231.nc	NA
-288	1	mri_mri_cgcm3	r1i1p1	2000	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_20000101-20051231.nc	NA
-289	2	mri_mri_cgcm3	r5i1p2	1960	1	1	1969	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19600101-19691231.nc	NA
-290	2	mri_mri_cgcm3	r5i1p2	1970	1	1	1979	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19700101-19791231.nc	NA
-291	2	mri_mri_cgcm3	r5i1p2	1980	1	1	1989	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19800101-19891231.nc	NA
-292	2	mri_mri_cgcm3	r5i1p2	1990	1	1	1999	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19900101-19991231.nc	NA
-293	2	mri_mri_cgcm3	r5i1p2	2000	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_20000101-20051231.nc	NA
-294	1	ncar_ccsm4	r1i1p1	1955	1	1	1989	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r1i1p1_19550101-19891231.nc	NA
-295	1	ncar_ccsm4	r1i1p1	1990	1	1	2005	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r1i1p1_19900101-20051231.nc	NA
-296	2	ncar_ccsm4	r2i1p1	1955	1	1	1989	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r2i1p1_19550101-19891231.nc	NA
-297	2	ncar_ccsm4	r2i1p1	1990	1	1	2005	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r2i1p1_19900101-20051231.nc	NA
-298	1	ncc_noresm1_m	r1i1p1	1950	1	1	1999	12	31	144	2.5	96	1.875	no	kg m-2 s-1	K	%var%_day_NorESM1-M_historical_r1i1p1_19500101-19991231.nc	NA
-299	1	ncc_noresm1_m	r1i1p1	2000	1	1	2005	12	31	144	2.5	96	1.875	no	kg m-2 s-1	K	%var%_day_NorESM1-M_historical_r1i1p1_20000101-20051231.nc	NA
-300	1	noaa_gfdl_esm2g	r1i1p1	1956	1	1	1960	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19560101-19601231.nc	NA
-301	1	noaa_gfdl_esm2g	r1i1p1	1961	1	1	1965	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19610101-19651231.nc	NA
-302	1	noaa_gfdl_esm2g	r1i1p1	1966	1	1	1970	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19660101-19701231.nc	NA
-303	1	noaa_gfdl_esm2g	r1i1p1	1971	1	1	1975	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19710101-19751231.nc	NA
-304	1	noaa_gfdl_esm2g	r1i1p1	1976	1	1	1980	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19760101-19801231.nc	NA
-305	1	noaa_gfdl_esm2g	r1i1p1	1981	1	1	1985	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19810101-19851231.nc	NA
-306	1	noaa_gfdl_esm2g	r1i1p1	1986	1	1	1990	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19860101-19901231.nc	NA
-307	1	noaa_gfdl_esm2g	r1i1p1	1991	1	1	1995	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19910101-19951231.nc	NA
-308	1	noaa_gfdl_esm2g	r1i1p1	1996	1	1	2000	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19960101-20001231.nc	NA
-309	1	noaa_gfdl_esm2m	r1i1p1	1956	1	1	1960	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19560101-19601231.nc	NA
-310	1	noaa_gfdl_esm2m	r1i1p1	1961	1	1	1965	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19610101-19651231.nc	NA
-311	1	noaa_gfdl_esm2m	r1i1p1	1966	1	1	1970	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19660101-19701231.nc	NA
-312	1	noaa_gfdl_esm2m	r1i1p1	1971	1	1	1975	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19710101-19751231.nc	NA
-313	1	noaa_gfdl_esm2m	r1i1p1	1976	1	1	1980	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19760101-19801231.nc	NA
-314	1	noaa_gfdl_esm2m	r1i1p1	1981	1	1	1985	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19810101-19851231.nc	NA
-315	1	noaa_gfdl_esm2m	r1i1p1	1986	1	1	1990	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19860101-19901231.nc	NA
-316	1	noaa_gfdl_esm2m	r1i1p1	1991	1	1	1995	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19910101-19951231.nc	NA
-317	1	noaa_gfdl_esm2m	r1i1p1	1996	1	1	2000	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19960101-20001231.nc	NA
+ID	Fileset	GCM	Ensemble	iYear	iMonth	iDay	fYear	fMonth	fDay	ncol	res_x	nrow	res_y	has_leap	pr_unit	tas_unit	naming	srad_naming	Notes
+1	1	bcc_csm1_1	r1i1p1	1850	1	1	2012	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_bcc-csm1-1_historical_r1i1p1_18500101-20121230.nc	rsds_day_bcc-csm1-1_historical_r1i1p1_19500101-20121230	NA
+2	1	cccma_cancm4	r1i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r1i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r1i1p1_196101-200512.nc	NA
+3	2	cccma_cancm4	r2i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r2i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r2i1p1_196101-200512.nc	NA
+4	3	cccma_cancm4	r3i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r3i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r3i1p1_196101-200512.nc	NA
+5	4	cccma_cancm4	r4i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r4i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r4i1p1_196101-200512.nc	NA
+6	5	cccma_cancm4	r5i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r5i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r5i1p1_196101-200512.nc	NA
+7	6	cccma_cancm4	r6i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r6i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r6i1p1_196101-200512.nc	NA
+8	7	cccma_cancm4	r7i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r7i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r7i1p1_196101-200512.nc	NA
+9	8	cccma_cancm4	r8i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r8i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r8i1p1_196101-200512.nc	NA
+10	9	cccma_cancm4	r9i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r9i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r9i1p1_196101-200512.nc	NA
+11	10	cccma_cancm4	r10i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r10i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r10i1p1_196101-200512.nc	NA
+12	1	cccma_canesm2	r1i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r1i1p1_18500101-20051231.nc	rsds_day_CanESM2_historical_r1i1p1_18500101-20051231.nc	NA
+13	2	cccma_canesm2	r2i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r2i1p1_18500101-20051231.nc	rsds_day_CanESM2_historical_r2i1p1_18500101-20051231.nc	NA
+14	3	cccma_canesm2	r3i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r3i1p1_18500101-20051231.nc	rsds_day_CanESM2_historical_r3i1p1_18500101-20051231.nc	NA
+15	4	cccma_canesm2	r4i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r4i1p1_18500101-20051231.nc	rsds_day_CanESM2_historical_r4i1p1_18500101-20051231.nc	NA
+16	5	cccma_canesm2	r5i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_historical_r5i1p1_18500101-20051231.nc	rsds_day_CanESM2_historical_r5i1p1_18500101-20051231.nc	NA
+17	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1960	1	1	1964	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19600101-19641231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19600101-19641231.nc	NA
+18	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1965	1	1	1969	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19650101-19691231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19650101-19691231.nc	NA
+19	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1970	1	1	1974	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19700101-19741231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19700101-19741231.nc	NA
+20	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1975	1	1	1979	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19750101-19791231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19750101-19791231.nc	NA
+21	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1980	1	1	1984	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19800101-19841231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19800101-19841231.nc	NA
+22	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1985	1	1	1989	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19850101-19891231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19850101-19891231.nc	NA
+23	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1990	1	1	1994	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19900101-19941231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19900101-19941231.nc	NA
+24	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	1995	1	1	1999	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_19950101-19991231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_19950101-19991231.nc	NA
+25	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2000	1	1	2004	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_20000101-20041231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_20000101-20041231.nc	NA
+26	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2005	1	1	2005	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_historical_r1i1p1_20050101-20051231.nc	rsds_day_CNRM-CM5_historical_r1i1p1_20050101-20051231.nc	NA
+27	1	csiro_mk3_6_0	r1i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r1i1p1_19500101-19691231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r1i1p1_19500101-19691231.nc	NA
+28	1	csiro_mk3_6_0	r1i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r1i1p1_19700101-19891231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r1i1p1_19700101-19891231.nc	NA
+29	1	csiro_mk3_6_0	r1i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r1i1p1_19900101-20051231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r1i1p1_19900101-20051231.nc	NA
+30	2	csiro_mk3_6_0	r2i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r2i1p1_19500101-19691231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r2i1p1_185001-200512.nc	NA
+31	2	csiro_mk3_6_0	r2i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r2i1p1_19700101-19891231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r2i1p1_185001-200512.nc	NA
+32	2	csiro_mk3_6_0	r2i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r2i1p1_19900101-20051231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r2i1p1_185001-200512.nc	NA
+33	3	csiro_mk3_6_0	r3i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r3i1p1_19500101-19691231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r3i1p1_185001-200512.nc	NA
+34	3	csiro_mk3_6_0	r3i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r3i1p1_19700101-19891231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r3i1p1_185001-200512.nc	NA
+35	3	csiro_mk3_6_0	r3i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r3i1p1_19900101-20051231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r3i1p1_185001-200512.nc	NA
+36	4	csiro_mk3_6_0	r4i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r4i1p1_19500101-19691231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r4i1p1_185001-200512.nc	NA
+37	4	csiro_mk3_6_0	r4i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r4i1p1_19700101-19891231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r4i1p1_185001-200512.nc	NA
+38	4	csiro_mk3_6_0	r4i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r4i1p1_19900101-20051231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r4i1p1_185001-200512.nc	NA
+39	5	csiro_mk3_6_0	r5i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r5i1p1_19500101-19691231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r5i1p1_185001-200512.nc	NA
+40	5	csiro_mk3_6_0	r5i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r5i1p1_19700101-19891231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r5i1p1_185001-200512.nc	NA
+41	5	csiro_mk3_6_0	r5i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r5i1p1_19900101-20051231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r5i1p1_185001-200512.nc	NA
+42	6	csiro_mk3_6_0	r6i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r6i1p1_19500101-19691231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r6i1p1_185001-200512.nc	NA
+43	6	csiro_mk3_6_0	r6i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r6i1p1_19700101-19891231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r6i1p1_185001-200512.nc	NA
+44	6	csiro_mk3_6_0	r6i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r6i1p1_19900101-20051231.nc	rsds_Amon_CSIRO-Mk3-6-0_historical_r6i1p1_185001-200512.nc	NA
+45	7	csiro_mk3_6_0	r7i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r7i1p1_19500101-19691231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r7i1p1_19500101-19691231.nc	NA
+46	7	csiro_mk3_6_0	r7i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r7i1p1_19700101-19891231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r7i1p1_19700101-19891231.nc	NA
+47	7	csiro_mk3_6_0	r7i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r7i1p1_19900101-20051231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r7i1p1_19900101-20051231.nc	NA
+48	8	csiro_mk3_6_0	r8i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r8i1p1_19500101-19691231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r8i1p1_19500101-19691231.nc	NA
+49	8	csiro_mk3_6_0	r8i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r8i1p1_19700101-19891231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r8i1p1_19700101-19891231.nc	NA
+50	8	csiro_mk3_6_0	r8i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r8i1p1_19900101-20051231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r8i1p1_19900101-20051231.nc	NA
+51	9	csiro_mk3_6_0	r9i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r9i1p1_19500101-19691231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r9i1p1_19500101-19691231.nc	NA
+52	9	csiro_mk3_6_0	r9i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r9i1p1_19700101-19891231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r9i1p1_19700101-19891231.nc	NA
+53	9	csiro_mk3_6_0	r9i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r9i1p1_19900101-20051231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r9i1p1_19900101-20051231.nc	NA
+54	10	csiro_mk3_6_0	r10i1p1	1950	1	1	1969	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r10i1p1_19500101-19691231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r10i1p1_19500101-19691231.nc	NA
+55	10	csiro_mk3_6_0	r10i1p1	1970	1	1	1989	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r10i1p1_19700101-19891231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r10i1p1_19700101-19891231.nc	NA
+56	10	csiro_mk3_6_0	r10i1p1	1990	1	1	2005	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_historical_r10i1p1_19900101-20051231.nc	rsds_day_CSIRO-Mk3-6-0_historical_r10i1p1_19900101-20051231.nc	NA
+57	1	ichec_ec_earth	r6i1p1	1950	1	1	1974	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r6i1p1_19500101-19741231.nc	NA	NA
+58	1	ichec_ec_earth	r6i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r6i1p1_19750101-20051231.nc	NA	NA
+59	2	ichec_ec_earth	r8i1p1	1950	1	1	1974	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19500101-19741231.nc	NA	NA
+60	2	ichec_ec_earth	r8i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19750101-20051231.nc	NA	NA
+61	1	inm_inmcm4	r1i1p1	1960	1	1	1969	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19600101-19691231.nc	rsds_day_inmcm4_historical_r1i1p1_19600101-19691231.nc	NA
+62	1	inm_inmcm4	r1i1p1	1970	1	1	1979	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19700101-19791231.nc	rsds_day_inmcm4_historical_r1i1p1_19700101-19791231.nc	NA
+63	1	inm_inmcm4	r1i1p1	1980	1	1	1989	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19800101-19891231.nc	rsds_day_inmcm4_historical_r1i1p1_19800101-19891231.nc	NA
+64	1	inm_inmcm4	r1i1p1	1990	1	1	1999	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19900101-19991231.nc	rsds_day_inmcm4_historical_r1i1p1_19900101-19991231.nc	NA
+65	1	inm_inmcm4	r1i1p1	2000	1	1	2005	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_20000101-20051231.nc	rsds_day_inmcm4_historical_r1i1p1_20000101-20051231.nc	NA
+66	1	ipsl_ipsl_cm5a_lr	r1i1p1	1950	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r1i1p1_19500101-20051231.nc	rsds_cfDay_IPSL-CM5A-LR_historical_r1i1p1_19500101-20051231.nc	NA
+67	2	ipsl_ipsl_cm5a_lr	r2i1p1	1950	1	1	1999	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r2i1p1_19500101-19991231.nc	rsds_cfDay_IPSL-CM5A-LR_historical_r2i1p1_19500101-19991231.nc	NA
+68	2	ipsl_ipsl_cm5a_lr	r2i1p1	2000	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r2i1p1_20000101-20051231.nc	rsds_cfDay_IPSL-CM5A-LR_historical_r2i1p1_20000101-20051231.nc	NA
+69	3	ipsl_ipsl_cm5a_lr	r3i1p1	1950	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r3i1p1_19500101-20051231.nc	rsds_cfDay_IPSL-CM5A-LR_historical_r3i1p1_19500101-20051231.nc	NA
+70	4	ipsl_ipsl_cm5a_lr	r4i1p1	1950	1	1	1999	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r4i1p1_19500101-19991231.nc	rsds_cfDay_IPSL-CM5A-LR_historical_r4i1p1_19500101-19991231.nc	NA
+71	4	ipsl_ipsl_cm5a_lr	r4i1p1	2000	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_historical_r4i1p1_20000101-20051231.nc	rsds_cfDay_IPSL-CM5A-LR_historical_r4i1p1_20000101-20051231.nc	NA
+72	1	ipsl_ipsl_cm5a_mr	r1i1p1	1950	1	1	1999	12	31	144	2.5	143	1.258741259	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-MR_historical_r1i1p1_19500101-19991231.nc	rsds_day_IPSL-CM5A-MR_historical_r1i1p1_19500101-19991231.nc	NA
+73	1	ipsl_ipsl_cm5a_mr	r1i1p1	2000	1	1	2005	12	31	144	2.5	143	1.258741259	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-MR_historical_r1i1p1_20000101-20051231.nc	rsds_day_IPSL-CM5A-MR_historical_r1i1p1_20000101-20051231.nc	NA
+74	1	miroc_miroc_esm	r1i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	yes	kg m-2 s-1	K	%var%_day_MIROC-ESM_historical_r1i1p1_18500101-20051231.nc	rsds_day_MIROC-ESM_historical_r1i1p1_19500101-20051231.nc	NA
+75	1	miroc_miroc_esm_chem	r1i1p1	1850	1	1	2005	12	31	128	2.8125	64	2.8125	yes	kg m-2 s-1	K	%var%_day_MIROC-ESM-CHEM_historical_r1i1p1_18500101-20051231.nc	rsds_day_MIROC-ESM-CHEM_historical_r1i1p1_19500101-20051231.nc	NA
+76	1	miroc_miroc4h	r1i1p1	1960	1	1	1960	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19600101-19601231.nc	rsds_day_MIROC4h_historical_1960_10101-11231.nc	NA
+77	1	miroc_miroc4h	r1i1p1	1961	1	1	1961	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19610101-19611231.nc	rsds_day_MIROC4h_historical_1961_10101-11231.nc	NA
+78	1	miroc_miroc4h	r1i1p1	1962	1	1	1962	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19620101-19621231.nc	rsds_day_MIROC4h_historical_1962_10101-11231.nc	NA
+79	1	miroc_miroc4h	r1i1p1	1963	1	1	1963	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19630101-19631231.nc	rsds_day_MIROC4h_historical_1963_10101-11231.nc	NA
+80	1	miroc_miroc4h	r1i1p1	1964	1	1	1964	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19640101-19641231.nc	rsds_day_MIROC4h_historical_1964_10101-11231.nc	NA
+81	1	miroc_miroc4h	r1i1p1	1965	1	1	1965	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19650101-19651231.nc	rsds_day_MIROC4h_historical_1965_10101-11231.nc	NA
+82	1	miroc_miroc4h	r1i1p1	1966	1	1	1966	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19660101-19661231.nc	rsds_day_MIROC4h_historical_1966_10101-11231.nc	NA
+83	1	miroc_miroc4h	r1i1p1	1967	1	1	1967	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19670101-19671231.nc	rsds_day_MIROC4h_historical_1967_10101-11231.nc	NA
+84	1	miroc_miroc4h	r1i1p1	1968	1	1	1968	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19680101-19681231.nc	rsds_day_MIROC4h_historical_1968_10101-11231.nc	NA
+85	1	miroc_miroc4h	r1i1p1	1969	1	1	1969	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19690101-19691231.nc	rsds_day_MIROC4h_historical_1969_10101-11231.nc	NA
+86	1	miroc_miroc4h	r1i1p1	1970	1	1	1970	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19700101-19701231.nc	rsds_day_MIROC4h_historical_1970_10101-11231.nc	NA
+87	1	miroc_miroc4h	r1i1p1	1971	1	1	1971	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19710101-19711231.nc	rsds_day_MIROC4h_historical_1971_10101-11231.nc	NA
+88	1	miroc_miroc4h	r1i1p1	1972	1	1	1972	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19720101-19721231.nc	rsds_day_MIROC4h_historical_1972_10101-11231.nc	NA
+89	1	miroc_miroc4h	r1i1p1	1973	1	1	1973	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19730101-19731231.nc	rsds_day_MIROC4h_historical_1973_10101-11231.nc	NA
+90	1	miroc_miroc4h	r1i1p1	1974	1	1	1974	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19740101-19741231.nc	rsds_day_MIROC4h_historical_1974_10101-11231.nc	NA
+91	1	miroc_miroc4h	r1i1p1	1975	1	1	1975	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19750101-19751231.nc	rsds_day_MIROC4h_historical_1975_10101-11231.nc	NA
+92	1	miroc_miroc4h	r1i1p1	1976	1	1	1976	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19760101-19761231.nc	rsds_day_MIROC4h_historical_1976_10101-11231.nc	NA
+93	1	miroc_miroc4h	r1i1p1	1977	1	1	1977	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19770101-19771231.nc	rsds_day_MIROC4h_historical_1977_10101-11231.nc	NA
+94	1	miroc_miroc4h	r1i1p1	1978	1	1	1978	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19780101-19781231.nc	rsds_day_MIROC4h_historical_1978_10101-11231.nc	NA
+95	1	miroc_miroc4h	r1i1p1	1979	1	1	1979	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19790101-19791231.nc	rsds_day_MIROC4h_historical_1979_10101-11231.nc	NA
+96	1	miroc_miroc4h	r1i1p1	1980	1	1	1980	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19800101-19801231.nc	rsds_day_MIROC4h_historical_1980_10101-11231.nc	NA
+97	1	miroc_miroc4h	r1i1p1	1981	1	1	1981	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19810101-19811231.nc	rsds_day_MIROC4h_historical_1981_10101-11231.nc	NA
+98	1	miroc_miroc4h	r1i1p1	1982	1	1	1982	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19820101-19821231.nc	rsds_day_MIROC4h_historical_1982_10101-11231.nc	NA
+99	1	miroc_miroc4h	r1i1p1	1983	1	1	1983	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19830101-19831231.nc	rsds_day_MIROC4h_historical_1983_10101-11231.nc	NA
+100	1	miroc_miroc4h	r1i1p1	1984	1	1	1984	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19840101-19841231.nc	rsds_day_MIROC4h_historical_1984_10101-11231.nc	NA
+101	1	miroc_miroc4h	r1i1p1	1985	1	1	1985	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19850101-19851231.nc	rsds_day_MIROC4h_historical_1985_10101-11231.nc	NA
+102	1	miroc_miroc4h	r1i1p1	1986	1	1	1986	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19860101-19861231.nc	rsds_day_MIROC4h_historical_1986_10101-11231.nc	NA
+103	1	miroc_miroc4h	r1i1p1	1987	1	1	1987	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19870101-19871231.nc	rsds_day_MIROC4h_historical_1987_10101-11231.nc	NA
+104	1	miroc_miroc4h	r1i1p1	1988	1	1	1988	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19880101-19881231.nc	rsds_day_MIROC4h_historical_1988_10101-11231.nc	NA
+105	1	miroc_miroc4h	r1i1p1	1989	1	1	1989	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19890101-19891231.nc	rsds_day_MIROC4h_historical_1989_10101-11231.nc	NA
+106	1	miroc_miroc4h	r1i1p1	1990	1	1	1990	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19900101-19901231.nc	rsds_day_MIROC4h_historical_1990_10101-11231.nc	NA
+107	1	miroc_miroc4h	r1i1p1	1991	1	1	1991	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19910101-19911231.nc	rsds_day_MIROC4h_historical_1991_10101-11231.nc	NA
+108	1	miroc_miroc4h	r1i1p1	1992	1	1	1992	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19920101-19921231.nc	rsds_day_MIROC4h_historical_1992_10101-11231.nc	NA
+109	1	miroc_miroc4h	r1i1p1	1993	1	1	1993	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19930101-19931231.nc	rsds_day_MIROC4h_historical_1993_10101-11231.nc	NA
+110	1	miroc_miroc4h	r1i1p1	1994	1	1	1994	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19940101-19941231.nc	rsds_day_MIROC4h_historical_1994_10101-11231.nc	NA
+111	1	miroc_miroc4h	r1i1p1	1995	1	1	1995	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19950101-19951231.nc	rsds_day_MIROC4h_historical_1995_10101-11231.nc	NA
+112	1	miroc_miroc4h	r1i1p1	1996	1	1	1996	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19960101-19961231.nc	rsds_day_MIROC4h_historical_1996_10101-11231.nc	NA
+113	1	miroc_miroc4h	r1i1p1	1997	1	1	1997	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19970101-19971231.nc	rsds_day_MIROC4h_historical_1997_10101-11231.nc	NA
+114	1	miroc_miroc4h	r1i1p1	1998	1	1	1998	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19980101-19981231.nc	rsds_day_MIROC4h_historical_1998_10101-11231.nc	NA
+115	1	miroc_miroc4h	r1i1p1	1999	1	1	1999	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_19990101-19991231.nc	rsds_day_MIROC4h_historical_1999_10101-11231.nc	NA
+116	1	miroc_miroc4h	r1i1p1	2000	1	1	2000	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_20000101-20001231.nc	rsds_day_MIROC4h_historical_2000_10101-11231.nc	NA
+117	1	miroc_miroc4h	r1i1p1	2001	1	1	2001	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_20010101-20011231.nc	rsds_day_MIROC4h_historical_2001_10101-11231.nc	NA
+118	1	miroc_miroc4h	r1i1p1	2002	1	1	2002	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_20020101-20021231.nc	rsds_day_MIROC4h_historical_2002_10101-11231.nc	NA
+119	1	miroc_miroc4h	r1i1p1	2003	1	1	2003	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_20030101-20031231.nc	rsds_day_MIROC4h_historical_2003_10101-11231.nc	NA
+120	1	miroc_miroc4h	r1i1p1	2004	1	1	2004	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_20040101-20041231.nc	rsds_day_MIROC4h_historical_2004_10101-11231.nc	NA
+121	1	miroc_miroc4h	r1i1p1	2005	1	1	2005	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r1i1p1_20050101-20051231.nc	rsds_day_MIROC4h_historical_2005_10101-11231.nc	NA
+122	2	miroc_miroc4h	r2i1p1	1960	1	1	1960	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19600101-19601231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_195101-196012.nc	NA
+123	2	miroc_miroc4h	r2i1p1	1961	1	1	1961	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19610101-19611231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+124	2	miroc_miroc4h	r2i1p1	1962	1	1	1962	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19620101-19621231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+125	2	miroc_miroc4h	r2i1p1	1963	1	1	1963	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19630101-19631231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+126	2	miroc_miroc4h	r2i1p1	1964	1	1	1964	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19640101-19641231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+127	2	miroc_miroc4h	r2i1p1	1965	1	1	1965	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19650101-19651231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+128	2	miroc_miroc4h	r2i1p1	1966	1	1	1966	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19660101-19661231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+129	2	miroc_miroc4h	r2i1p1	1967	1	1	1967	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19670101-19671231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+130	2	miroc_miroc4h	r2i1p1	1968	1	1	1968	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19680101-19681231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+131	2	miroc_miroc4h	r2i1p1	1969	1	1	1969	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19690101-19691231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+132	2	miroc_miroc4h	r2i1p1	1970	1	1	1970	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19700101-19701231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_196101-197012.nc	NA
+133	2	miroc_miroc4h	r2i1p1	1971	1	1	1971	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19710101-19711231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+134	2	miroc_miroc4h	r2i1p1	1972	1	1	1972	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19720101-19721231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+135	2	miroc_miroc4h	r2i1p1	1973	1	1	1973	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19730101-19731231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+136	2	miroc_miroc4h	r2i1p1	1974	1	1	1974	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19740101-19741231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+137	2	miroc_miroc4h	r2i1p1	1975	1	1	1975	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19750101-19751231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+138	2	miroc_miroc4h	r2i1p1	1976	1	1	1976	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19760101-19761231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+139	2	miroc_miroc4h	r2i1p1	1977	1	1	1977	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19770101-19771231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+140	2	miroc_miroc4h	r2i1p1	1978	1	1	1978	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19780101-19781231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+141	2	miroc_miroc4h	r2i1p1	1979	1	1	1979	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19790101-19791231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+142	2	miroc_miroc4h	r2i1p1	1980	1	1	1980	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19800101-19801231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_197101-198012.nc	NA
+143	2	miroc_miroc4h	r2i1p1	1981	1	1	1981	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19810101-19811231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+144	2	miroc_miroc4h	r2i1p1	1982	1	1	1982	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19820101-19821231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+145	2	miroc_miroc4h	r2i1p1	1983	1	1	1983	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19830101-19831231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+146	2	miroc_miroc4h	r2i1p1	1984	1	1	1984	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19840101-19841231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+147	2	miroc_miroc4h	r2i1p1	1985	1	1	1985	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19850101-19851231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+148	2	miroc_miroc4h	r2i1p1	1986	1	1	1986	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19860101-19861231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+149	2	miroc_miroc4h	r2i1p1	1987	1	1	1987	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19870101-19871231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+150	2	miroc_miroc4h	r2i1p1	1988	1	1	1988	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19880101-19881231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+151	2	miroc_miroc4h	r2i1p1	1989	1	1	1989	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19890101-19891231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+152	2	miroc_miroc4h	r2i1p1	1990	1	1	1990	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19900101-19901231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_198101-199012.nc	NA
+153	2	miroc_miroc4h	r2i1p1	1991	1	1	1991	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19910101-19911231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+154	2	miroc_miroc4h	r2i1p1	1992	1	1	1992	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19920101-19921231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+155	2	miroc_miroc4h	r2i1p1	1993	1	1	1993	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19930101-19931231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+156	2	miroc_miroc4h	r2i1p1	1994	1	1	1994	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19940101-19941231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+157	2	miroc_miroc4h	r2i1p1	1995	1	1	1995	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19950101-19951231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+158	2	miroc_miroc4h	r2i1p1	1996	1	1	1996	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19960101-19961231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+159	2	miroc_miroc4h	r2i1p1	1997	1	1	1997	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19970101-19971231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+160	2	miroc_miroc4h	r2i1p1	1998	1	1	1998	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19980101-19981231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+161	2	miroc_miroc4h	r2i1p1	1999	1	1	1999	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_19990101-19991231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+162	2	miroc_miroc4h	r2i1p1	2000	1	1	2000	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_20000101-20001231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_199101-200012.nc	NA
+163	2	miroc_miroc4h	r2i1p1	2001	1	1	2001	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_20010101-20011231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_200101-200512.nc	NA
+164	2	miroc_miroc4h	r2i1p1	2002	1	1	2002	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_20020101-20021231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_200101-200512.nc	NA
+165	2	miroc_miroc4h	r2i1p1	2003	1	1	2003	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_20030101-20031231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_200101-200512.nc	NA
+166	2	miroc_miroc4h	r2i1p1	2004	1	1	2004	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_20040101-20041231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_200101-200512.nc	NA
+167	2	miroc_miroc4h	r2i1p1	2005	1	1	2005	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r2i1p1_20050101-20051231.nc	rsds_Amon_MIROC4h_historical_r2i1p1_200101-200512.nc	NA
+168	3	miroc_miroc4h	r3i1p1	1960	1	1	1960	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19600101-19601231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_195101-196012.nc	NA
+169	3	miroc_miroc4h	r3i1p1	1961	1	1	1961	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19610101-19611231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+170	3	miroc_miroc4h	r3i1p1	1962	1	1	1962	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19620101-19621231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+171	3	miroc_miroc4h	r3i1p1	1963	1	1	1963	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19630101-19631231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+172	3	miroc_miroc4h	r3i1p1	1964	1	1	1964	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19640101-19641231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+173	3	miroc_miroc4h	r3i1p1	1965	1	1	1965	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19650101-19651231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+174	3	miroc_miroc4h	r3i1p1	1966	1	1	1966	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19660101-19661231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+175	3	miroc_miroc4h	r3i1p1	1967	1	1	1967	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19670101-19671231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+176	3	miroc_miroc4h	r3i1p1	1968	1	1	1968	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19680101-19681231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+177	3	miroc_miroc4h	r3i1p1	1969	1	1	1969	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19690101-19691231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+178	3	miroc_miroc4h	r3i1p1	1970	1	1	1970	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19700101-19701231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_196101-197012.nc	NA
+179	3	miroc_miroc4h	r3i1p1	1971	1	1	1971	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19710101-19711231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+180	3	miroc_miroc4h	r3i1p1	1972	1	1	1972	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19720101-19721231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+181	3	miroc_miroc4h	r3i1p1	1973	1	1	1973	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19730101-19731231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+182	3	miroc_miroc4h	r3i1p1	1974	1	1	1974	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19740101-19741231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+183	3	miroc_miroc4h	r3i1p1	1975	1	1	1975	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19750101-19751231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+184	3	miroc_miroc4h	r3i1p1	1976	1	1	1976	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19760101-19761231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+185	3	miroc_miroc4h	r3i1p1	1977	1	1	1977	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19770101-19771231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+186	3	miroc_miroc4h	r3i1p1	1978	1	1	1978	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19780101-19781231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+187	3	miroc_miroc4h	r3i1p1	1979	1	1	1979	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19790101-19791231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+188	3	miroc_miroc4h	r3i1p1	1980	1	1	1980	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19800101-19801231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_197101-198012.nc	NA
+189	3	miroc_miroc4h	r3i1p1	1981	1	1	1981	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19810101-19811231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+190	3	miroc_miroc4h	r3i1p1	1982	1	1	1982	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19820101-19821231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+191	3	miroc_miroc4h	r3i1p1	1983	1	1	1983	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19830101-19831231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+192	3	miroc_miroc4h	r3i1p1	1984	1	1	1984	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19840101-19841231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+193	3	miroc_miroc4h	r3i1p1	1985	1	1	1985	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19850101-19851231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+194	3	miroc_miroc4h	r3i1p1	1986	1	1	1986	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19860101-19861231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+195	3	miroc_miroc4h	r3i1p1	1987	1	1	1987	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19870101-19871231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+196	3	miroc_miroc4h	r3i1p1	1988	1	1	1988	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19880101-19881231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+197	3	miroc_miroc4h	r3i1p1	1989	1	1	1989	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19890101-19891231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+198	3	miroc_miroc4h	r3i1p1	1990	1	1	1990	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19900101-19901231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_198101-199012.nc	NA
+199	3	miroc_miroc4h	r3i1p1	1991	1	1	1991	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19910101-19911231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+200	3	miroc_miroc4h	r3i1p1	1992	1	1	1992	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19920101-19921231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+201	3	miroc_miroc4h	r3i1p1	1993	1	1	1993	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19930101-19931231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+202	3	miroc_miroc4h	r3i1p1	1994	1	1	1994	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19940101-19941231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+203	3	miroc_miroc4h	r3i1p1	1995	1	1	1995	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19950101-19951231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+204	3	miroc_miroc4h	r3i1p1	1996	1	1	1996	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19960101-19961231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+205	3	miroc_miroc4h	r3i1p1	1997	1	1	1997	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19970101-19971231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+206	3	miroc_miroc4h	r3i1p1	1998	1	1	1998	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19980101-19981231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+207	3	miroc_miroc4h	r3i1p1	1999	1	1	1999	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_19990101-19991231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+208	3	miroc_miroc4h	r3i1p1	2000	1	1	2000	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_20000101-20001231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_199101-200012.nc	NA
+209	3	miroc_miroc4h	r3i1p1	2001	1	1	2001	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_20010101-20011231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_200101-200512.nc	NA
+210	3	miroc_miroc4h	r3i1p1	2002	1	1	2002	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_20020101-20021231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_200101-200512.nc	NA
+211	3	miroc_miroc4h	r3i1p1	2003	1	1	2003	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_20030101-20031231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_200101-200512.nc	NA
+212	3	miroc_miroc4h	r3i1p1	2004	1	1	2004	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_20040101-20041231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_200101-200512.nc	NA
+213	3	miroc_miroc4h	r3i1p1	2005	1	1	2005	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_historical_r3i1p1_20050101-20051231.nc	rsds_Amon_MIROC4h_historical_r3i1p1_200101-200512.nc	NA
+214	1	miroc_miroc5	r1i1p1	1960	1	1	1969	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19600101-19691231.nc	rsds_day_MIROC5_historical_r1i1p1_19600101-19691231.nc	NA
+215	1	miroc_miroc5	r1i1p1	1970	1	1	1979	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19700101-19791231.nc	rsds_day_MIROC5_historical_r1i1p1_19700101-19791231.nc	NA
+216	1	miroc_miroc5	r1i1p1	1980	1	1	1989	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19800101-19891231.nc	rsds_day_MIROC5_historical_r1i1p1_19800101-19891231.nc	NA
+217	1	miroc_miroc5	r1i1p1	1990	1	1	1999	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_19900101-19991231.nc	rsds_day_MIROC5_historical_r1i1p1_19900101-19991231.nc	NA
+218	1	miroc_miroc5	r1i1p1	2000	1	1	2009	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_historical_r1i1p1_20000101-20091231.nc	rsds_day_MIROC5_historical_r1i1p1_20000101-20091231.nc	NA
+219	1	mohc_hadcm3	r1i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r1i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r1i1p1_195912-198411.nc	*all februaries have 30 days
+220	1	mohc_hadcm3	r1i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r1i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r1i1p1_198412-200512.nc	*all februaries have 30 days
+221	2	mohc_hadcm3	r2i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r2i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r2i1p1_195912-198411.nc	*all februaries have 30 days
+222	2	mohc_hadcm3	r2i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r2i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r2i1p1_198412-200512.nc	*all februaries have 30 days
+223	3	mohc_hadcm3	r3i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r3i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r3i1p1_195912-198411.nc	*all februaries have 30 days
+224	3	mohc_hadcm3	r3i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r3i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r3i1p1_198412-200512.nc	*all februaries have 30 days
+225	4	mohc_hadcm3	r4i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r4i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r4i1p1_195912-198411.nc	*all februaries have 30 days
+226	4	mohc_hadcm3	r4i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r4i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r4i1p1_198412-200512.nc	*all februaries have 30 days
+227	5	mohc_hadcm3	r5i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r5i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r5i1p1_195912-198411.nc	*all februaries have 30 days
+228	5	mohc_hadcm3	r5i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r5i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r5i1p1_198412-200512.nc	*all februaries have 30 days
+229	6	mohc_hadcm3	r6i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r6i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r6i1p1_195912-198411.nc	*all februaries have 30 days
+230	6	mohc_hadcm3	r6i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r6i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r6i1p1_198412-200512.nc	*all februaries have 30 days
+231	7	mohc_hadcm3	r7i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r7i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r7i1p1_195912-198411.nc	*all februaries have 30 days
+232	7	mohc_hadcm3	r7i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r7i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r7i1p1_198412-200512.nc	*all februaries have 30 days
+233	8	mohc_hadcm3	r8i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r8i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r8i1p1_195912-198411.nc	*all februaries have 30 days
+234	8	mohc_hadcm3	r8i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r8i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r8i1p1_198412-200512.nc	*all februaries have 30 days
+235	9	mohc_hadcm3	r9i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r9i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r9i1p1_195912-198411.nc	*all februaries have 30 days
+236	9	mohc_hadcm3	r9i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r9i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r9i1p1_198412-200512.nc	*all februaries have 30 days
+237	10	mohc_hadcm3	r10i1p1	1959	12	1	1984	11	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r10i1p1_19591201-19841130.nc	rsds_Amon_HadCM3_historical_r10i1p1_195912-198411.nc	*all februaries have 30 days
+238	10	mohc_hadcm3	r10i1p1	1984	12	1	2005	12	30	96	3.75	73	2.465753425	all30	kg m-2 s-1	K	%var%_day_HadCM3_historical_r10i1p1_19841201-20051230.nc	rsds_Amon_HadCM3_historical_r10i1p1_198412-200512.nc	*all februaries have 30 days
+239	1	mohc_hadgem2_cc	r1i1p1	1959	12	1	1964	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19591201-19641130.nc	missing	*all februaries have 30 days
+240	1	mohc_hadgem2_cc	r1i1p1	1964	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19641201-19691130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19641201-19691130.nc	*all februaries have 30 days
+241	1	mohc_hadgem2_cc	r1i1p1	1969	12	1	1974	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19691201-19741130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19691201-19741130.nc	*all februaries have 30 days
+242	1	mohc_hadgem2_cc	r1i1p1	1974	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19741201-19791130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19741201-19791130.nc	*all februaries have 30 days
+243	1	mohc_hadgem2_cc	r1i1p1	1979	12	1	1984	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19791201-19841130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19791201-19841130.nc	*all februaries have 30 days
+244	1	mohc_hadgem2_cc	r1i1p1	1984	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19841201-19891130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19841201-19891130.nc	*all februaries have 30 days
+245	1	mohc_hadgem2_cc	r1i1p1	1989	12	1	1994	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19891201-19941130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19891201-19941130.nc	*all februaries have 30 days
+246	1	mohc_hadgem2_cc	r1i1p1	1994	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19941201-19991130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19941201-19991130.nc	*all februaries have 30 days
+247	1	mohc_hadgem2_cc	r1i1p1	1999	12	1	2004	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_19991201-20041130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_19991201-20041130.nc	*all februaries have 30 days
+248	1	mohc_hadgem2_cc	r1i1p1	2004	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_historical_r1i1p1_20041201-20051130.nc	rsds_day_HadGEM2-CC_historical_r1i1p1_20041201-20051130.nc	*all februaries have 30 days
+249	1	mohc_hadgem2_es	r1i1p1	1959	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19591201-19691130.nc	rsds_day_HadGEM2-ES_historical_r1i1p1_19591201-19691130.nc	*all februaries have 30 days
+250	1	mohc_hadgem2_es	r1i1p1	1969	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19691201-19791130.nc	rsds_day_HadGEM2-ES_historical_r1i1p1_19691201-19791130.nc	*all februaries have 30 days
+251	1	mohc_hadgem2_es	r1i1p1	1979	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19791201-19891130.nc	rsds_day_HadGEM2-ES_historical_r1i1p1_19791201-19891130.nc	*all februaries have 30 days
+252	1	mohc_hadgem2_es	r1i1p1	1989	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19891201-19991130.nc	rsds_day_HadGEM2-ES_historical_r1i1p1_19891201-19991130.nc	*all februaries have 30 days
+253	1	mohc_hadgem2_es	r1i1p1	1999	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r1i1p1_19991201-20051130.nc	rsds_day_HadGEM2-ES_historical_r1i1p1_19991201-20051130.nc	*all februaries have 30 days
+254	2	mohc_hadgem2_es	r2i1p1	1960	1	1	1969	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19600101-19691230.nc	rsds_Amon_HadGEM2-ES_historical_r2i1p1_195912-198411.nc	*all februaries have 30 days
+255	2	mohc_hadgem2_es	r2i1p1	1970	1	1	1979	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19700101-19791230.nc	rsds_Amon_HadGEM2-ES_historical_r2i1p1_195912-198411.nc	*all februaries have 30 days
+256	2	mohc_hadgem2_es	r2i1p1	1980	1	1	1989	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19800101-19891230.nc	rsds_Amon_HadGEM2-ES_historical_r2i1p1_198412-200512.nc	*all februaries have 30 days
+257	2	mohc_hadgem2_es	r2i1p1	1990	1	1	1999	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_19900101-19991230.nc	rsds_Amon_HadGEM2-ES_historical_r2i1p1_198412-200512.nc	*all februaries have 30 days
+258	2	mohc_hadgem2_es	r2i1p1	2000	1	1	2005	12	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r2i1p1_20000101-20051230.nc	rsds_Amon_HadGEM2-ES_historical_r2i1p1_198412-200512.nc	*all februaries have 30 days
+259	3	mohc_hadgem2_es	r3i1p1	1959	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19591201-19691130.nc	rsds_Amon_HadGEM2-ES_historical_r3i1p1_195912-198411.nc	*all februaries have 30 days
+260	3	mohc_hadgem2_es	r3i1p1	1969	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19691201-19791130.nc	rsds_Amon_HadGEM2-ES_historical_r3i1p1_195912-198411.nc	*all februaries have 30 days
+261	3	mohc_hadgem2_es	r3i1p1	1979	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19791201-19891130.nc	rsds_Amon_HadGEM2-ES_historical_r3i1p1_198412-200512.nc	*all februaries have 30 days
+262	3	mohc_hadgem2_es	r3i1p1	1989	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19891201-19991130.nc	rsds_Amon_HadGEM2-ES_historical_r3i1p1_198412-200512.nc	*all februaries have 30 days
+263	3	mohc_hadgem2_es	r3i1p1	1999	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r3i1p1_19991201-20051130.nc	rsds_Amon_HadGEM2-ES_historical_r3i1p1_198412-200512.nc	*all februaries have 30 days
+264	4	mohc_hadgem2_es	r4i1p1	1959	12	1	1969	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19591201-19691130.nc	rsds_Amon_HadGEM2-ES_historical_r4i1p1_195912-198411.nc	*all februaries have 30 days
+265	4	mohc_hadgem2_es	r4i1p1	1969	12	1	1979	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19691201-19791130.nc	rsds_Amon_HadGEM2-ES_historical_r4i1p1_195912-198411.nc	*all februaries have 30 days
+266	4	mohc_hadgem2_es	r4i1p1	1979	12	1	1989	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19791201-19891130.nc	rsds_Amon_HadGEM2-ES_historical_r4i1p1_198412-200511.nc	*all februaries have 30 days
+267	4	mohc_hadgem2_es	r4i1p1	1989	12	1	1999	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19891201-19991130.nc	rsds_Amon_HadGEM2-ES_historical_r4i1p1_198412-200511.nc	*all februaries have 30 days
+268	4	mohc_hadgem2_es	r4i1p1	1999	12	1	2005	11	30	192	1.875	145	1.24137931	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_historical_r4i1p1_19991201-20051130.nc	rsds_Amon_HadGEM2-ES_historical_r4i1p1_198412-200511.nc	*all februaries have 30 days
+269	1	mpi_m_mpi_esm_lr	r1i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19600101-19691231.nc	rsds_day_MPI-ESM-LR_historical_r1i1p1_19600101-19691231.nc	NA
+270	1	mpi_m_mpi_esm_lr	r1i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19700101-19791231.nc	rsds_day_MPI-ESM-LR_historical_r1i1p1_19700101-19791231.nc	NA
+271	1	mpi_m_mpi_esm_lr	r1i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19800101-19891231.nc	rsds_day_MPI-ESM-LR_historical_r1i1p1_19800101-19891231.nc	NA
+272	1	mpi_m_mpi_esm_lr	r1i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_19900101-19991231.nc	rsds_day_MPI-ESM-LR_historical_r1i1p1_19900101-19991231.nc	NA
+273	1	mpi_m_mpi_esm_lr	r1i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc	rsds_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc	NA
+274	2	mpi_m_mpi_esm_lr	r2i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19600101-19691231.nc	rsds_day_MPI-ESM-LR_historical_r2i1p1_19600101-19691231.nc	NA
+275	2	mpi_m_mpi_esm_lr	r2i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19700101-19791231.nc	rsds_day_MPI-ESM-LR_historical_r2i1p1_19700101-19791231.nc	NA
+276	2	mpi_m_mpi_esm_lr	r2i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19800101-19891231.nc	rsds_day_MPI-ESM-LR_historical_r2i1p1_19800101-19891231.nc	NA
+277	2	mpi_m_mpi_esm_lr	r2i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_19900101-19991231.nc	rsds_day_MPI-ESM-LR_historical_r2i1p1_19900101-19991231.nc	NA
+278	2	mpi_m_mpi_esm_lr	r2i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r2i1p1_20000101-20051231.nc	rsds_day_MPI-ESM-LR_historical_r2i1p1_20000101-20051231.nc	NA
+279	3	mpi_m_mpi_esm_lr	r3i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19600101-19691231.nc	rsds_day_MPI-ESM-LR_historical_r3i1p1_19600101-19691231.nc	NA
+280	3	mpi_m_mpi_esm_lr	r3i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19700101-19791231.nc	rsds_day_MPI-ESM-LR_historical_r3i1p1_19700101-19791231.nc	NA
+281	3	mpi_m_mpi_esm_lr	r3i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19800101-19891231.nc	rsds_day_MPI-ESM-LR_historical_r3i1p1_19800101-19891231.nc	NA
+282	3	mpi_m_mpi_esm_lr	r3i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_19900101-19991231.nc	rsds_day_MPI-ESM-LR_historical_r3i1p1_19900101-19991231.nc	NA
+283	3	mpi_m_mpi_esm_lr	r3i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_historical_r3i1p1_20000101-20051231.nc	rsds_day_MPI-ESM-LR_historical_r3i1p1_20000101-20051231.nc	NA
+284	1	mri_mri_cgcm3	r1i1p1	1960	1	1	1969	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19600101-19691231.nc	rsds_day_MRI-CGCM3_historical_r1i1p1_19600101-19691231.nc	NA
+285	1	mri_mri_cgcm3	r1i1p1	1970	1	1	1979	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19700101-19791231.nc	rsds_day_MRI-CGCM3_historical_r1i1p1_19700101-19791231.nc	NA
+286	1	mri_mri_cgcm3	r1i1p1	1980	1	1	1989	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19800101-19891231.nc	rsds_day_MRI-CGCM3_historical_r1i1p1_19800101-19891231.nc	NA
+287	1	mri_mri_cgcm3	r1i1p1	1990	1	1	1999	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_19900101-19991231.nc	rsds_day_MRI-CGCM3_historical_r1i1p1_19900101-19991231.nc	NA
+288	1	mri_mri_cgcm3	r1i1p1	2000	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r1i1p1_20000101-20051231.nc	rsds_day_MRI-CGCM3_historical_r1i1p1_20000101-20051231.nc	NA
+289	2	mri_mri_cgcm3	r5i1p2	1960	1	1	1969	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19600101-19691231.nc	NA	NA
+290	2	mri_mri_cgcm3	r5i1p2	1970	1	1	1979	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19700101-19791231.nc	NA	NA
+291	2	mri_mri_cgcm3	r5i1p2	1980	1	1	1989	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19800101-19891231.nc	NA	NA
+292	2	mri_mri_cgcm3	r5i1p2	1990	1	1	1999	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_19900101-19991231.nc	NA	NA
+293	2	mri_mri_cgcm3	r5i1p2	2000	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_historical_r5i1p2_20000101-20051231.nc	NA	NA
+294	1	ncar_ccsm4	r1i1p1	1955	1	1	1989	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r1i1p1_19550101-19891231.nc	rsds_Amon_CCSM4_historical_r1i1p1_185001-200512.nc	NA
+295	1	ncar_ccsm4	r1i1p1	1990	1	1	2005	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r1i1p1_19900101-20051231.nc	rsds_Amon_CCSM4_historical_r1i1p1_185001-200512.nc	NA
+296	2	ncar_ccsm4	r2i1p1	1955	1	1	1989	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r2i1p1_19550101-19891231.nc	rsds_Amon_CCSM4_historical_r2i1p1_185001-200512.nc	NA
+297	2	ncar_ccsm4	r2i1p1	1990	1	1	2005	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_historical_r2i1p1_19900101-20051231.nc	rsds_Amon_CCSM4_historical_r2i1p1_185001-200512.nc	NA
+298	1	ncc_noresm1_m	r1i1p1	1950	1	1	1999	12	31	144	2.5	96	1.875	no	kg m-2 s-1	K	%var%_day_NorESM1-M_historical_r1i1p1_19500101-19991231.nc	rsds_day_NorESM1-M_historical_r1i1p1_19500101-19991231.nc	NA
+299	1	ncc_noresm1_m	r1i1p1	2000	1	1	2005	12	31	144	2.5	96	1.875	no	kg m-2 s-1	K	%var%_day_NorESM1-M_historical_r1i1p1_20000101-20051231.nc	rsds_day_NorESM1-M_historical_r1i1p1_20000101-20051231.nc	NA
+300	1	noaa_gfdl_esm2g	r1i1p1	1956	1	1	1960	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19560101-19601231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19560101-19601231.nc	NA
+301	1	noaa_gfdl_esm2g	r1i1p1	1961	1	1	1965	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19610101-19651231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19610101-19651231.nc	NA
+302	1	noaa_gfdl_esm2g	r1i1p1	1966	1	1	1970	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19660101-19701231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19660101-19701231.nc	NA
+303	1	noaa_gfdl_esm2g	r1i1p1	1971	1	1	1975	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19710101-19751231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19710101-19751231.nc	NA
+304	1	noaa_gfdl_esm2g	r1i1p1	1976	1	1	1980	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19760101-19801231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19760101-19801231.nc	NA
+305	1	noaa_gfdl_esm2g	r1i1p1	1981	1	1	1985	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19810101-19851231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19810101-19851231.nc	NA
+306	1	noaa_gfdl_esm2g	r1i1p1	1986	1	1	1990	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19860101-19901231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19860101-19901231.nc	NA
+307	1	noaa_gfdl_esm2g	r1i1p1	1991	1	1	1995	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19910101-19951231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19910101-19951231.nc	NA
+308	1	noaa_gfdl_esm2g	r1i1p1	1996	1	1	2000	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_historical_r1i1p1_19960101-20001231.nc	rsds_day_GFDL-ESM2G_historical_r1i1p1_19960101-20001231.nc	NA
+309	1	noaa_gfdl_esm2m	r1i1p1	1956	1	1	1960	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19560101-19601231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19560101-19601231.nc	NA
+310	1	noaa_gfdl_esm2m	r1i1p1	1961	1	1	1965	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19610101-19651231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19610101-19651231.nc	NA
+311	1	noaa_gfdl_esm2m	r1i1p1	1966	1	1	1970	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19660101-19701231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19660101-19701231.nc	NA
+312	1	noaa_gfdl_esm2m	r1i1p1	1971	1	1	1975	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19710101-19751231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19710101-19751231.nc	NA
+313	1	noaa_gfdl_esm2m	r1i1p1	1976	1	1	1980	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19760101-19801231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19760101-19801231.nc	NA
+314	1	noaa_gfdl_esm2m	r1i1p1	1981	1	1	1985	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19810101-19851231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19810101-19851231.nc	NA
+315	1	noaa_gfdl_esm2m	r1i1p1	1986	1	1	1990	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19860101-19901231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19860101-19901231.nc	NA
+316	1	noaa_gfdl_esm2m	r1i1p1	1991	1	1	1995	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19910101-19951231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19910101-19951231.nc	NA
+317	1	noaa_gfdl_esm2m	r1i1p1	1996	1	1	2000	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_historical_r1i1p1_19960101-20001231.nc	rsds_day_GFDL-ESM2M_historical_r1i1p1_19960101-20001231.nc	NA
+318	1	bnu_esm	r1i1p1	1950	1	1	2005	12	31	128	2.8125	44	4.090909091	no	kg m-2 s-1	K	%var%_day_BNU-ESM_historical_r1i1p1_19500101-20051231.nc	rsds_day_BNU-ESM_historical_r1i1p1_19500101-20051231.nc	NA
+319	1	csiro_access1_0	r1i1p1	1950	1	1	1974	12	31	192	1.875	145	1.24137931	yes	kg m-2 s-1	K	%var%_day_ACCESS1-0_historical_r1i1p1_19500101-19741231.nc	rsds_Amon_ACCESS1-0_historical_r1i1p1_185001-200512.nc	NA
+320	1	csiro_access1_0	r1i1p1	1975	1	1	1999	12	31	192	1.875	145	1.24137931	yes	kg m-2 s-1	K	%var%_day_ACCESS1-0_historical_r1i1p1_19750101-19991231.nc	rsds_Amon_ACCESS1-0_historical_r1i1p1_185001-200512.nc	NA
+321	1	csiro_access1_0	r1i1p1	2000	1	1	2005	12	31	192	1.875	145	1.24137931	yes	kg m-2 s-1	K	%var%_day_ACCESS1-0_historical_r1i1p1_20000101-20051231.nc	rsds_Amon_ACCESS1-0_historical_r1i1p1_185001-200512.nc	NA
+322	1	ipsl_ipsl_cm5b_lr	r1i1p1	1850	1	1	2005	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5B-LR_historical_r1i1p1_18500101-20051231.nc	rsds_cfDay_IPSL-CM5B-LR_historical_r1i1p1_18500101-20051231.nc	NA
+323	1	mpi_m_mpi_esm_lr	r1i1p1	1960	1	1	1969	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_historical_r1i1p1_19600101-19691231.nc	rsds_day_MPI-ESM-MR_historical_r1i1p1_19600101-19691231.nc	NA
+324	1	mpi_m_mpi_esm_lr	r1i1p1	1970	1	1	1979	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_historical_r1i1p1_19700101-19791231.nc	rsds_day_MPI-ESM-MR_historical_r1i1p1_19700101-19791231.nc	NA
+325	1	mpi_m_mpi_esm_lr	r1i1p1	1980	1	1	1989	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_historical_r1i1p1_19800101-19891231.nc	rsds_day_MPI-ESM-MR_historical_r1i1p1_19800101-19891231.nc	NA
+326	1	mpi_m_mpi_esm_lr	r1i1p1	1990	1	1	1999	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_historical_r1i1p1_19900101-19991231.nc	rsds_day_MPI-ESM-MR_historical_r1i1p1_19900101-19991231.nc	NA
+327	1	mpi_m_mpi_esm_lr	r1i1p1	2000	1	1	2005	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_historical_r1i1p1_20000101-20051231.nc	rsds_day_MPI-ESM-MR_historical_r1i1p1_20000101-20051231.nc	NA
