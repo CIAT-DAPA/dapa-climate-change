@@ -161,13 +161,34 @@ for (ci in ciList) {
     sow_f <- cells$SOW_END[which(cells$CELL == setup$CELL)]
     
     #if either the final sowing date would result in an incomplete weather series
-    #then need to fix that by (i used only final as this is an extreme case)
-    #the resulting weather info is useless, of course, but GLAM would work nicely:
+    #just reduce the day of harvest so that the maximum
+    if ((sow_i+120) < 365) {
+      if (sow_f < sow_i) {sow_f <- 365-120}
+    }
+    
+    #if the initial sowing date + 120 is greater than 365 then i need to generate a new
+    #weather series, this should be done as follows
       #1. create an alternate weather series
       #2. change the wthdir in the SETUP list
-      #3. 
-    if ((sow_f+120) > 365) {
+      #3. write a new sowing file (rainfed)
+      #4. change the sowing file thing in the SETUP list
+      #5. update sow_i and sow_f
+    if ((sow_i+120) > 365) {
+      #create an alternative weather series so that it still catches the planting date,
+      #yet solving the issue with the final harvest date
+      icells <- cells; icells$SOW_DATE <- sow_i
+      altWthDir <- paste(cDir,"/inputs/ascii/wth/rfd_a",setup$CELL,sep="")
+      wthDataDir <- paste(bDir,"/../climate-data/gridcell-data/IND",sep="") #folder with gridded data
+      owthDir <- make_wth(x=icells,cell=setup$CELL,wthDir=altWthDir,wthDataDir,
+                          fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
       
+      #update setup
+      setup$WTH_DIR_RFD <- owthDir$WTH_DIR
+      
+      #update values
+      rng <- 365-sow_i+sow_f
+      sow_i <- owthDir$SOW_DATE
+      sow_f <- sow_i+rng
     }
     
     sow_seq <- seq(sow_i,sow_f,by=1)
