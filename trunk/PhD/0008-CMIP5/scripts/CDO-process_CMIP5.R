@@ -52,12 +52,16 @@ for (ens in ensList) {
   #list of variables depends on number of nc files (i.e. tas is not always available)
   patn <- gsub("%var%","",thisEns$naming[1])
   ncf <- list.files(outEnsDir,pattern=patn)
-  if (length(ncf) == 4) {
-    vnList <- c("pr","tasmin","tasmax","tas")
-  } else if (length(ncf) == 3) {
-    vnList <- c("pr","tasmin","tasmax")
-  } else {
-    stop("number of files not 3 or 4, check!")
+  if (length(list.files(outEnsDir,pattern="\\.control")) != 4) {
+    if (length(list.files(outEnsDir,pattern="\\.control")) != 3) {
+      if (length(ncf) == 4) {
+        vnList <- c("pr","tasmin","tasmax","tas")
+      } else if (length(ncf) == 3) {
+        vnList <- c("pr","tasmin","tasmax")
+      } else {
+        stop("number of files not 3 or 4, check!")
+      }
+    }
   }
   
   #loop through variables
