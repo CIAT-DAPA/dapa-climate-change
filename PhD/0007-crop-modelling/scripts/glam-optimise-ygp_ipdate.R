@@ -159,6 +159,17 @@ for (ci in ciList) {
     #get the initial and final reported sowing dates
     sow_i <- cells$SOW_START[which(cells$CELL == setup$CELL)]
     sow_f <- cells$SOW_END[which(cells$CELL == setup$CELL)]
+    
+    #if either the final sowing date would result in an incomplete weather series
+    #then need to fix that by (i used only final as this is an extreme case)
+    #the resulting weather info is useless, of course, but GLAM would work nicely:
+      #1. create an alternate weather series
+      #2. change the wthdir in the SETUP list
+      #3. 
+    if ((sow_f+120) > 365) {
+      
+    }
+    
     sow_seq <- seq(sow_i,sow_f,by=1)
     nstep <- length(sow_seq)
     
