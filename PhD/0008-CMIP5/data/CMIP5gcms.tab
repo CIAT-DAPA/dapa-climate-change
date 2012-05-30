@@ -1,5 +1,5 @@
 ID	Fileset	GCM	Ensemble	iYear	iMonth	iDay	fYear	fMonth	fDay	ncol	res_x	nrow	res_y	has_leap	pr_unit	tas_unit	naming	srad_naming	Notes
-1	1	bcc_csm1_1	r1i1p1	1850	1	1	2012	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_bcc-csm1-1_historical_r1i1p1_18500101-20121230.nc	rsds_day_bcc-csm1-1_historical_r1i1p1_19500101-20121230	NA
+1	1	bcc_csm1_1	r1i1p1	1850	1	1	2012	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_bcc-csm1-1_historical_r1i1p1_18500101-20121230.nc	rsds_day_bcc-csm1-1_historical_r1i1p1_19500101-20121230.nc	NA
 2	1	cccma_cancm4	r1i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r1i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r1i1p1_196101-200512.nc	NA
 3	2	cccma_cancm4	r2i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r2i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r2i1p1_196101-200512.nc	NA
 4	3	cccma_cancm4	r3i1p1	1961	1	1	2005	12	30	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanCM4_historical_r3i1p1_19610101-20051231.nc	rsds_Amon_CanCM4_historical_r3i1p1_196101-200512.nc	NA
