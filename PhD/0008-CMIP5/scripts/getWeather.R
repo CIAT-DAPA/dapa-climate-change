@@ -48,7 +48,8 @@ cll <- all_cells$CELL[1]
 #extract the data for a given GCM
 od <- CMIP5_extract_wrapper(cells=all_cells,cell=cll,dum_rs=drs,cChars=gcmChars,i=1,oDir=outDir)
 
-#here now what i need to do is make the extractionas efficient as possible efficient
+#here now what i need to do is make the extraction as efficient as possible
+#that probably means loading all rasters in a rasterstack 
 
 
 
