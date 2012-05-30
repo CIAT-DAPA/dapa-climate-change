@@ -241,7 +241,9 @@ for (ens in ensList) {
   if (cnc != 0) {
     if (cnc == cct) {
       #system("rm -f *.nc")
-      x <- sapply(nnc,FUN= function(x) {s <- file.remove(x)})
+      anc <- list.files(".",pattern="\\.nc")
+      anc <- anc[which(!anc %in% paste(srn))]
+      x <- sapply(anc,FUN= function(x) {s <- file.remove(x)})
     } else {
       stop("something weird happened, need to check before removing original files")
     }
