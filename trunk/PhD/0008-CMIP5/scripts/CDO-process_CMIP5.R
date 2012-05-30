@@ -233,10 +233,13 @@ for (ens in ensList) {
   setwd(outEnsDir)
   cnc <- length(list.files(".",pattern=patn))
   cct <- length(list.files(".",pattern="\\.control"))
-  if (cnc == cct) {
-    system("rm -f *.nc")
-  } else {
-    stop("something weird happened, need to check before removing original files")
+  
+  if (cnc != 0) {
+    if (cnc == cct) {
+      system("rm -f *.nc")
+    } else {
+      stop("something weird happened, need to check before removing original files")
+    }
   }
   
 }
