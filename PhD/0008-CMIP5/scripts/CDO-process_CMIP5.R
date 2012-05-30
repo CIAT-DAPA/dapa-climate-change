@@ -14,7 +14,7 @@ library(raster)
 #yf <- 2005
 #i <- 1 #gcm to process
 
-#source(paste(src.dir2,"/scripts/CDO-process_CMIP5",sep=""))
+#source(paste(src.dir2,"/scripts/CDO-process_CMIP5.R",sep=""))
 
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
@@ -233,14 +233,15 @@ for (ens in ensList) {
   #removing ensemble original big files only if the number of control files equals
   #the number of original nc files, else stop
   setwd(outEnsDir)
-  cnc <- list.files(".",pattern=patn)
-  cnc <- cnc[which(!cnc %in% paste(srn))]
-  cnc <- length(cnc)
+  nnc <- list.files(".",pattern=patn)
+  nnc <- nnc[which(!nnc %in% paste(srn))]
+  cnc <- length(nnc)
   cct <- length(list.files(".",pattern="\\.control"))
   
   if (cnc != 0) {
     if (cnc == cct) {
-      system("rm -f *.nc")
+      #system("rm -f *.nc")
+      x <- sapply(nnc,FUN= function(x) {s <- file.remove(x)})
     } else {
       stop("something weird happened, need to check before removing original files")
     }
