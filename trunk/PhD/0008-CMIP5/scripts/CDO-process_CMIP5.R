@@ -52,7 +52,7 @@ for (ens in ensList) {
   #list of variables depends on number of nc files (i.e. tas is not always available)
   patn <- gsub("%var%","",thisEns$naming[1])
   ncf <- list.files(outEnsDir,pattern=patn)
-  srn <- unique(thisEns$srad_naming)
+  srn <- unique(thisEns$srad_naming)[1]
   ncf <- ncf[which(!ncf %in% paste(srn))]
   if (length(list.files(outEnsDir,pattern="\\.control")) != 4) {
     if (length(list.files(outEnsDir,pattern="\\.control")) != 3) {

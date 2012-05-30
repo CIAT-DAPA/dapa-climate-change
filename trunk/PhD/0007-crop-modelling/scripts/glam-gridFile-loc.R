@@ -144,7 +144,7 @@ for (cell in cells$CELL) {
   #write weather (irr and rainfed)
   cat("extracting weather for rainfed system\n")
   wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
-  owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_",cell,sep=""),wthDataDir,
+  owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_x",cell,sep=""),wthDataDir,
                      fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
   
   
