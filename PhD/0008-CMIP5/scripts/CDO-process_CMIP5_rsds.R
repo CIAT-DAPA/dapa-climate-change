@@ -10,9 +10,9 @@ library(raster)
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #bDir <- "/nfs/a102/eejarv"
 #mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
-#yi <- 1961
+#yi <- 1960
 #yf <- 2005
-#i <- 1 #gcm to process
+#i <- 1 #file to process
 
 #source(paste(src.dir2,"/scripts/CDO-process_CMIP5",sep=""))
 
@@ -23,10 +23,6 @@ source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 #GCM data dir
 oDir <- paste(bDir,"/CMIP5/baseline",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
-
-#initial and final years
-#yi <- 1961
-#yf <- 2005
 
 #load GCM characteristics
 cChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
@@ -52,8 +48,6 @@ for (ens in ensList) {
   #list of variables depends on number of nc files (i.e. tas is not always available)
   patn <- gsub("%var%","",thisEns$naming[1])
   ncf <- list.files(outEnsDir,pattern=patn)
-  srn <- unique(thisEns$srad_naming)
-  ncf <- ncf[which(!ncf %in% paste(srn))]
   if (length(list.files(outEnsDir,pattern="\\.control")) != 4) {
     if (length(list.files(outEnsDir,pattern="\\.control")) != 3) {
       if (length(ncf) == 4) {
@@ -81,7 +75,7 @@ for (ens in ensList) {
     
     #if the control file does not exist
     if (!file.exists(conFile)) {
-    #loop through years
+      #loop through years
       for (year in yi:yf) {
         #year <- 1960
         cat("year:",year,"\n")
@@ -220,11 +214,11 @@ for (ens in ensList) {
         }
         
       }
-    #write control file
-    cfo <- file(conFile,"w")
-    cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
-        paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cfo)
-    close(cfo)
+      #write control file
+      cfo <- file(conFile,"w")
+      cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
+          paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cfo)
+      close(cfo)
     } else {
       cat("this job was already done!\n")
     }
@@ -233,9 +227,7 @@ for (ens in ensList) {
   #removing ensemble original big files only if the number of control files equals
   #the number of original nc files, else stop
   setwd(outEnsDir)
-  cnc <- list.files(".",pattern=patn)
-  cnc <- cnc[which(!cnc %in% paste(srn))]
-  cnc <- length(cnc)
+  cnc <- length(list.files(".",pattern=patn))
   cct <- length(list.files(".",pattern="\\.control"))
   
   if (cnc != 0) {
@@ -247,7 +239,6 @@ for (ens in ensList) {
   }
   
 }
-
 
 
 
