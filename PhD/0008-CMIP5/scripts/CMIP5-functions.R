@@ -2,6 +2,122 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+########################################################
+#wrapper function to extract daily data from CMIP5 GCMs
+########################################################
+CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
+  #list of gcms and selected gcm
+  gcmList <- unique(cChars$GCM)
+  gcm <- gcmList[i]
+  
+  outGCMDir <- paste(oDir,"/",gcm,sep="")
+  if (!file.exists(outGCMDir)) {dir.create(outGCMDir)}
+  
+  #reduce characteristics list for this GCM
+  thisGCM <- cChars[which(cChars$GCM == gcm),]
+  ensList <- unique(thisGCM$Ensemble)
+  
+  
+  #coordinates of gridcell
+  x <- cells$X[which(cells$CELL == cell)]; y <- cells$Y[which(cells$CELL == cell)];
+  
+  #loop through ensembles
+  for (ens in ensList) {
+    #ens <- ensList[1]
+    cat("Processing ensemble",paste(ens),"\n")
+    thisEns <- thisGCM[which(thisGCM$Ensemble == ens),]
+    
+    #create directory of ensemble
+    outEnsDir <- paste(outGCMDir,"/",ens,sep="")
+    if (!file.exists(outEnsDir)) {dir.create(outEnsDir)}
+    
+    #list variables
+    #vnList <- list.files(paste(mdDir,"/",gcm,"/",ens,sep=""),pattern="_1965")
+    #vnList <- gsub("_1965","",vnList)
+    vnList <- c("pr","tasmin","tasmax")
+    
+    #loop through variables
+    for (vn in vnList) {
+      #vn <- vnList[1]
+      cat("variable:",vn,"\n")
+      
+      #create a matrix where to put all data, with the form that i need
+      out_df <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=367))
+      names(out_df) <- c("YEAR",paste(1:366))
+      
+      #output variable directory
+      outVarDir <- paste(outEnsDir,"/",vn,sep="")
+      if (!file.exists(outVarDir)) {dir.create(outVarDir)}
+      
+      if (!file.exists(paste(outVarDir,"/cell-",cell,".csv",sep=""))) {
+        #loop through years
+        yrc <- 1
+        for (year in yi:yf) {
+          cat("\nprocessing year",year,"\n")
+          #year <- 1961
+          cat("year:",year,"\n")
+          
+          yrDir <- paste(mdDir,"/",gcm,"/",ens,"/",vn,"_",year,sep="")
+          #list of daily nc files in the year folder
+          dayList <- list.files(yrDir,pattern="\\.nc")
+          
+          #check which calendar is used
+          wlp <- thisEns$has_leap[1]
+          
+          #calendar to fit data into
+          dg <- createDateGridCMIP5(year,whatLeap=wlp)
+          dg$YRDATA <- NA
+          names(dg)[length(names(dg))] <- paste(vn)
+          
+          for (dayFile in dayList) {
+            mth <- gsub(gcm,"",dayFile)
+            mth <- gsub(paste("_",ens,"_",sep=""),"",mth)
+            mth <- gsub(paste(year,"_",sep=""),"",mth)
+            mth <- gsub("\\.nc","",mth)
+            day <- unlist(strsplit(mth,"_",fixed=T))[4]
+            mth <- unlist(strsplit(mth,"_",fixed=T))[2]
+            
+            cat("processing day",day,"of month",mth,"\n")
+            
+            #read raster file
+            rs <- raster(paste(yrDir,"/",dayFile,sep=""),varname=vn)
+            rs <- rotate(rs) #rotate raster file to a -180 to 180 grid
+            
+            #flux to mm or K to C
+            if (vn == "pr") {
+              rs <- rs*3600*24
+            } else {
+              rs <- rs - 273.15
+            }
+            
+            #extract value of cell
+            cval <- extract(rs,cbind(X=x,Y=y))
+            
+            #put this into the year's matrix
+            dg[which(dg$MTH.STR == mth & dg$DAY.STR == day),paste(vn)] <- cval
+          }
+          
+          out_row <- c(year,dg[,paste(vn)])
+          if (length(out_row) < 367) {
+            out_row <- c(out_row,rep(NA,times=(367-length(out_row))))
+          }
+          
+          out_df[yrc,] <- out_row
+          
+          yrc <- yrc+1
+        }
+        
+        write.csv(out_df,paste(outVarDir,"/cell-",cell,".csv",sep=""),row.names=F,quote=F)
+      } else {
+        cat("variable",vn,"was already processed\n")
+      }
+    }
+    
+  }
+  return(outGCMDir)
+}
+
+
 
 ############################ function to find the position of a day in
 ############################ a netCDF file
