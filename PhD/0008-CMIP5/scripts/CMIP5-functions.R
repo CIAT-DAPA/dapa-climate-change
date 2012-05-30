@@ -83,6 +83,13 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
             rs <- raster(paste(yrDir,"/",dayFile,sep=""),varname=vn)
             rs <- rotate(rs) #rotate raster file to a -180 to 180 grid
             
+            #here i need to resample this raster file to 1x1d resolution 
+            #so that the data can be nicely extracted
+            
+            rs <- crop(rs,msk)
+            rs <- resample(rs,msk,method="bilinear")
+            
+            
             #flux to mm or K to C
             if (vn == "pr") {
               rs <- rs*3600*24

@@ -8,10 +8,10 @@ library(raster)
 #variables to be set
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#bDir <- "/nfs/a102/eejarv"
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 #mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
 #yi <- 1961
-#yf <- 2005
+#yf <- 2002
 #i <- 1 #gcm to process
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
@@ -38,6 +38,20 @@ gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",hea
 #load cell details
 cropName <- "gnut"
 all_cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
+
+#get the indian extent
+xt <- extent(raster(paste(bDir,"/GLAM/climate-signals-yield/0_input_data/mask.asc",sep="")))
+
+#create 2.5x2.5 dummy raster
+nc <- (xt@xmax-xt@xmin)/2.5
+nr <- (xt@ymax-xt@ymin)/2.5
+xt@ymin <- xt@ymax - round(nr+0.5,0)*2.5
+nr <- (xt@ymax-xt@ymin)/2.5
+
+dumm_rs <- raster(xt,ncol=nc,nrow=nr)
+dumm_rs[] <- 1
+
+
 cll <- all_cells$CELL[1]
 
 #extract the data for a given GCM
