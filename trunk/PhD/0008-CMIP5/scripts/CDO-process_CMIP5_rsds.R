@@ -14,7 +14,7 @@ library(raster)
 #yf <- 2005
 #i <- 1 #file to process
 
-#source(paste(src.dir2,"/scripts/CDO-process_CMIP5",sep=""))
+#source(paste(src.dir2,"/scripts/CDO-process_CMIP5_rsds.R",sep=""))
 
 #sourcing needed functions
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
@@ -26,8 +26,8 @@ if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 #load GCM characteristics
 cChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
-gcmList <- unique(cChars$GCM)
-gcm <- gcmList[i]
+srFileList <- unique(cChars$srad_naming)
+srFile <- srFileList[i]
 
 outGCMDir <- paste(oDir,"/",gcm,sep="")
 if (!file.exists(outGCMDir)) {dir.create(outGCMDir)}
