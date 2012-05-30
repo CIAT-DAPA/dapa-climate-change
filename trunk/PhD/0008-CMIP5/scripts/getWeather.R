@@ -40,22 +40,13 @@ cropName <- "gnut"
 all_cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
 
 #get the indian extent
-xt <- extent(raster(paste(bDir,"/GLAM/climate-signals-yield/0_input_data/mask.asc",sep="")))
-
-#create 2.5x2.5 dummy raster
-nc <- (xt@xmax-xt@xmin)/2.5
-nr <- (xt@ymax-xt@ymin)/2.5
-xt@ymin <- xt@ymax - round(nr+0.5,0)*2.5
-nr <- (xt@ymax-xt@ymin)/2.5
-
-dumm_rs <- raster(xt,ncol=nc,nrow=nr)
-dumm_rs[] <- 1
-
+drs <- raster(paste(src.dir2,"/data/mask.tif",sep=""))
+drs[which(!is.na(drs[]))] <- 1
 
 cll <- all_cells$CELL[1]
 
 #extract the data for a given GCM
-od <- CMIP5_extract_wrapper(cells=all_cells,cell=cll,cChars=gcmChars,i=1,oDir=outDir)
+od <- CMIP5_extract_wrapper(cells=all_cells,cell=cll,dum_rs=drs,cChars=gcmChars,i=1,oDir=outDir)
 
 
 
