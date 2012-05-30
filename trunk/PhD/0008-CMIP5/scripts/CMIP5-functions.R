@@ -17,7 +17,6 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
   thisGCM <- cChars[which(cChars$GCM == gcm),]
   ensList <- unique(thisGCM$Ensemble)
   
-  
   #coordinates of gridcell
   x <- cells$X[which(cells$CELL == cell)]; y <- cells$Y[which(cells$CELL == cell)];
   
@@ -34,7 +33,7 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
     #list variables
     #vnList <- list.files(paste(mdDir,"/",gcm,"/",ens,sep=""),pattern="_1965")
     #vnList <- gsub("_1965","",vnList)
-    vnList <- c("pr","tasmin","tasmax")
+    vnList <- c("pr","tasmin","tasmax","rsds")
     
     #loop through variables
     for (vn in vnList) {
@@ -68,6 +67,11 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
           dg <- createDateGridCMIP5(year,whatLeap=wlp)
           dg$YRDATA <- NA
           names(dg)[length(names(dg))] <- paste(vn)
+          
+          ####!!!!!
+          #here I was checking for feasibility of doing it via a rasterstack
+          ###
+          rstk <- stack(paste(yrDir,"/",dayList,sep=""),varname=vn)
           
           for (dayFile in dayList) {
             mth <- gsub(gcm,"",dayFile)
