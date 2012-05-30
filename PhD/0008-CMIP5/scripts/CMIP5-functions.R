@@ -85,10 +85,11 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
             
             #here i need to resample this raster file to 1x1d resolution 
             #so that the data can be nicely extracted
-            
-            rs <- crop(rs,msk)
-            rs <- resample(rs,msk,method="bilinear")
-            
+            rs <- crop(rs,dum_rs)
+            #i use nearest neighbour in order to maintain the original GCM spatial
+            #variation (i.e. coarse cells), but still make it comparable to my original
+            #GLAM runs
+            rs <- resample(rs,dum_rs,method="ngb")
             
             #flux to mm or K to C
             if (vn == "pr") {
