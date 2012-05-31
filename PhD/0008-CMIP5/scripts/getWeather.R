@@ -18,6 +18,8 @@ library(raster)
 #mdDir <- "V:/eejarv/CMIP5/baseline"
 #i <- 1 #gcm to process
 
+source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+
 ys <- 1961
 ye <- 2002
 
