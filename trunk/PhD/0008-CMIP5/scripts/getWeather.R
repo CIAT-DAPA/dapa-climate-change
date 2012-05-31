@@ -18,34 +18,29 @@ library(raster)
 #mdDir <- "V:/eejarv/CMIP5/baseline"
 #i <- 1 #gcm to process
 
+ys <- 1961
+ye <- 2002
 
-#sourcing needed functions
-source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
-source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+#od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=1,yi=1961,yf=2002,oDir=outDir)
 
-#output gridcell data dir
-cDataDir <- paste(bDir,"/climate-data/gridcell-data",sep="")
-outDir <- paste(cDataDir,"/IND_CMIP5",sep="")
-if (!file.exists(outDir)) {dir.create(outDir)}
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=12)
 
-#load GCM characteristics
-gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
+#export functions
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("bDir")
+sfExport("mdDir")
+sfExport("ys")
+sfExport("ye")
 
-#load cell details
-cropName <- "gnut"
-all_cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
+#run the function in parallel
+system.time(sfSapply(as.vector(1:26),wrapper_CMIP_extract))
 
-#get the indian extent
-drs <- raster(paste(src.dir2,"/data/mask.tif",sep=""))
-drs[which(!is.na(drs[]))] <- 1
-
-#extract the data for a given GCM
-od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=i,yi=1961,yf=2002,oDir=outDir)
-
-
-
-
-
+#stop the cluster
+sfStop()
 
 
 

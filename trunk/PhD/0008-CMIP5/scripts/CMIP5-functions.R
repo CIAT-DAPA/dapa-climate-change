@@ -2,6 +2,40 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+
+########################################################
+#wrapper function for parallel processing
+########################################################
+wrapper_CMIP_extract <- function(i) {
+  #libraries
+  library(raster); library(ncdf)
+  
+  #sourcing needed functions
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+  
+  #output gridcell data dir
+  cDataDir <- paste(bDir,"/climate-data/gridcell-data",sep="")
+  outDir <- paste(cDataDir,"/IND_CMIP5",sep="")
+  if (!file.exists(outDir)) {dir.create(outDir)}
+  
+  #load GCM characteristics
+  gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
+  
+  #load cell details
+  cropName <- "gnut"
+  all_cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
+  
+  #get the indian extent
+  drs <- raster(paste(src.dir2,"/data/mask.tif",sep=""))
+  drs[which(!is.na(drs[]))] <- 1
+  
+  #extract the data for a given GCM
+  od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=i,yi=ys,yf=ye,oDir=outDir)
+}
+
+
+
 ########################################################
 #function to extract daily data from CMIP5 GCMs
 ########################################################
