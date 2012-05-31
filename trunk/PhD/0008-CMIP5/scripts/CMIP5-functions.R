@@ -28,7 +28,7 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
   #loop through ensembles
   for (ens in ensList) {
     #ens <- ensList[1]
-    cat("\nprocessing ensemble",paste(ens),"of model",gcm,"\n")
+    cat("\nprocessing ensemble",paste(ens),"of model",paste(gcm),"\n")
     thisEns <- thisGCM[which(thisGCM$Ensemble == ens),]
     
     #create directory of ensemble
