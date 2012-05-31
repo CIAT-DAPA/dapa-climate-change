@@ -17,14 +17,6 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
   thisGCM <- cChars[which(cChars$GCM == gcm),]
   ensList <- unique(thisGCM$Ensemble)
   
-  #loop cells in here and create bits of a list for each
-  odf_all <- list()
-  for (cell in cells$CELL) {
-    #create a matrix where to put all data, in the form that i need
-    odf_all[[paste("c",cell,sep="")]] <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=367))
-    names(odf_all[[paste("c",cell,sep="")]]) <- c("YEAR",paste(1:366))
-  }
-  
   #loop through ensembles
   for (ens in ensList) {
     #ens <- ensList[1]
@@ -55,83 +47,157 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
         #loop through years
         yrc <- 1
         for (year in yi:yf) {
-          cat("\nprocessing year",year,"\n")
           #year <- 1961
           cat("year:",year,"\n")
           
           yrDir <- paste(mdDir,"/",gcm,"/",ens,"/",vn,"_",year,sep="")
-          #list of daily nc files in the year folder
-          dayList <- list.files(yrDir,pattern="\\.nc")
+          #list of nc files in the year folder (could be monthly e.g. srad, or daily)
+          ncList <- list.files(yrDir,pattern="\\.nc")
           
-          #check which calendar is used
-          wlp <- thisEns$has_leap[1]
-          
-          #calendar to fit data into
-          dg <- createDateGridCMIP5(year,whatLeap=wlp)
-          dg$YRDATA <- NA
-          dg$VARDATA <- NA
-          names(dg)[length(names(dg))] <- paste(vn)
-          
-          #organise the file list just to make sure that it will load in the
-          #proper order
-          cat("sorting file list\n")
-          for (dayFile in dayList) {
-            mth <- gsub(gcm,"",dayFile)
-            mth <- gsub(paste("_",ens,"_",sep=""),"",mth)
-            mth <- gsub(paste(year,"_",sep=""),"",mth)
-            mth <- gsub("\\.nc","",mth)
-            day <- unlist(strsplit(mth,"_",fixed=T))[4]
-            mth <- unlist(strsplit(mth,"_",fixed=T))[2]
-            dg$YRDATA[which(dg$MTH.STR == mth & dg$DAY.STR == day)] <- dayFile
-          }
-          
-          cat("loading and sorting out data\n")
-          #load whole year as a raster stack
-          odayList <- dg$YRDATA
-          rstk <- stack(paste(yrDir,"/",odayList,sep=""),varname=vn)
-          
-          #rotate and crop whole raster stack
-          rstk <- rotate(rstk)
-          rstk <- crop(rstk,dum_rs)
-          
-          #here i need to resample this raster file to 1x1d resolution 
-          #so that the data can be nicely extracted
-          
-          #i use nearest neighbour in order to maintain the original GCM spatial
-          #variation (i.e. coarse cells), but still make it comparable to my original
-          #GLAM runs
-          rstk <- resample(rstk,dum_rs,method="ngb")
-          
-          #flux to mm or K to C
-          if (vn == "pr") {
-            rstk <- rstk*3600*24
-          } else if (vn == "tasmin") {
-            rstk <- rstk - 273.15
-          } else if (vn == "tasmax") {
-            rstk <- rstk - 273.15
-          } else if (vn == "rsds") {
-            #w/m2/day = J/m2 / 1000000 = MJ/m2/day
-            rstk <- rstk / 1000000
-          }
-          
-          cat("extracting data for gridcells\n")
-          #extract value of all cells
-          all_vals <- extract(rstk,cbind(X=cells$X,Y=cells$Y))
-          
-          cat("formatting output data.frame\n")
-          ccnt <- 1
-          for (cell in cells$CELL) {
-            #put this into the year's matrix
-            dg[,paste(vn)] <- as.numeric(all_vals[ccnt,])
+          #check if there is data for that year
+          if (!file.exists(yrDir) | length(ncList) == 0) {
+            #there is either no data or no folder for that year and variable, so need to generate
+            #dummy monthly files with all values being NA
             
-            out_row <- c(year,dg[,paste(vn)])
-            if (length(out_row) < 367) {
-              out_row <- c(out_row,rep(NA,times=(367-length(out_row))))
+            #this would be done only if the object does not exist (i.e. if it was not)
+            #created by a previous year)
+            if (!exists("odf_all")) {
+              odf_all <- list()
+              for (cell in cells$CELL) {
+                #create a matrix where to put all data, in the form that i need
+                odf_all[[paste("c",cell,sep="")]] <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=13))
+                names(odf_all[[paste("c",cell,sep="")]]) <- c("YEAR",paste("MONTH",1:12,sep=""))
+              }
             }
             
-            odf_all[[paste("c",cell,sep="")]][yrc,] <- out_row
-            #out_df[yrc,] <- out_row
-            ccnt <- ccnt+1
+            #put the year to a value to the cell values
+            for (cell in cells$CELL) {
+              odf_all[[paste("c",cell,sep="")]][yrc,"YEAR"] <- year
+            }
+            
+          } else {
+            #there is data, either monthly or daily, so it will be extracted
+            if (length(ncList) == 12) {
+              #loop cells in here and create bits of a list for each if this object did not exist
+              if (!exists("odf_all")) {
+                odf_all <- list()
+                for (cell in cells$CELL) {
+                  #create a matrix where to put all data, in the form that i need
+                  odf_all[[paste("c",cell,sep="")]] <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=13))
+                  names(odf_all[[paste("c",cell,sep="")]]) <- c("YEAR",paste("MONTH",1:12,sep=""))
+                }
+              }
+              
+              #we're dealing with monthly files, hence the daily date.grid seems not necessary
+              dg <- data.frame(MONTH=1:12)
+              dg$MTH.STR <- 1:12
+              dg$MTH.STR[which(dg$MONTH < 10)] <- paste("0",dg$MONTH[which(dg$MONTH < 10)],sep="")
+              dg$YRDATA <- NA
+              dg$VARDATA <- NA
+              names(dg)[length(names(dg))] <- paste(vn)
+              
+              #organise the file list just to make sure that it will load in the
+              #proper order
+              cat("sorting file list\n")
+              for (mFile in ncList) {
+                mth <- gsub(gcm,"",mFile)
+                mth <- gsub(paste("_",ens,"_",sep=""),"",mth)
+                mth <- gsub(paste(year,"_",sep=""),"",mth)
+                mth <- gsub("\\.nc","",mth)
+                mth <- unlist(strsplit(mth,"_",fixed=T))[2]
+                dg$YRDATA[which(dg$MTH.STR == mth)] <- mFile
+              }
+            } else {
+              #we're dealing with daily data
+              #loop cells in here and create bits of a list for each
+              if (!exists("odf_all")) {
+                odf_all <- list()
+                for (cell in cells$CELL) {
+                  #create a matrix where to put all data, in the form that i need
+                  odf_all[[paste("c",cell,sep="")]] <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=367))
+                  names(odf_all[[paste("c",cell,sep="")]]) <- c("YEAR",paste(1:366))
+                }
+              }
+              
+              #list of daily nc files in the year folder
+              dayList <- list.files(yrDir,pattern="\\.nc")
+              
+              #check which calendar is used
+              wlp <- thisEns$has_leap[1]
+              
+              #calendar to fit data into
+              dg <- createDateGridCMIP5(year,whatLeap=wlp)
+              dg$YRDATA <- NA
+              dg$VARDATA <- NA
+              names(dg)[length(names(dg))] <- paste(vn)
+              
+              #organise the file list just to make sure that it will load in the
+              #proper order
+              cat("sorting file list\n")
+              for (dayFile in dayList) {
+                mth <- gsub(gcm,"",dayFile)
+                mth <- gsub(paste("_",ens,"_",sep=""),"",mth)
+                mth <- gsub(paste(year,"_",sep=""),"",mth)
+                mth <- gsub("\\.nc","",mth)
+                day <- unlist(strsplit(mth,"_",fixed=T))[4]
+                mth <- unlist(strsplit(mth,"_",fixed=T))[2]
+                dg$YRDATA[which(dg$MTH.STR == mth & dg$DAY.STR == day)] <- dayFile
+              }
+            }
+            
+            cat("loading and sorting out data\n")
+            #load whole year as a raster stack
+            odayList <- dg$YRDATA
+            rstk <- stack(paste(yrDir,"/",odayList,sep=""),varname=vn)
+            
+            #rotate and crop whole raster stack
+            rstk <- rotate(rstk)
+            rstk <- crop(rstk,dum_rs)
+            
+            #here i need to resample this raster file to 1x1d resolution 
+            #so that the data can be nicely extracted
+            
+            #i use nearest neighbour in order to maintain the original GCM spatial
+            #variation (i.e. coarse cells), but still make it comparable to my original
+            #GLAM runs
+            rstk <- resample(rstk,dum_rs,method="ngb")
+            
+            #flux to mm | K to C | w/m2 to MJ/m2
+            if (vn == "pr") {
+              rstk <- rstk*3600*24
+            } else if (vn == "tasmin") {
+              rstk <- rstk - 273.15
+            } else if (vn == "tasmax") {
+              rstk <- rstk - 273.15
+            } else if (vn == "rsds") {
+              #w/m2/s = J/m2/s / 1000000 * 86400 = MJ/m2/day
+              rstk <- rstk * 24 * 3600 / 1000000
+            }
+            
+            cat("extracting data for gridcells\n")
+            #extract value of all cells
+            all_vals <- extract(rstk,cbind(X=cells$X,Y=cells$Y))
+            
+            cat("formatting output data.frame\n")
+            ccnt <- 1
+            for (cell in cells$CELL) {
+              #put this into the year's matrix
+              dg[,paste(vn)] <- as.numeric(all_vals[ccnt,])
+              
+              out_row <- c(year,dg[,paste(vn)])
+              if (length(ncList) == 12) {
+                out_row <- c(out_row)
+              } else {
+                if (length(out_row) < 367) {
+                  out_row <- c(out_row,rep(NA,times=(367-length(out_row))))
+                }
+              }
+              
+              odf_all[[paste("c",cell,sep="")]][yrc,] <- out_row
+              #out_df[yrc,] <- out_row
+              ccnt <- ccnt+1
+            }
+            
           }
           yrc <- yrc+1
         }
@@ -145,6 +211,7 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
       } else {
         cat("variable",vn,"was already processed\n")
       }
+      if (exists("odf_all")) {rm(odf_all); g=gc(); rm(g)}
     }
   }
   return(outGCMDir)
