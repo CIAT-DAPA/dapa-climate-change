@@ -56,7 +56,8 @@ system(paste("rm -f *"))
 setwd(bDir)
 
 #which is the control file
-conFile <- paste(outEnsDir,"/",vn,"_",gcm,"_",ens,".control",sep="")
+conFile <- paste(outEnsDir,"/",gsub("\\.nc","\\.control",srFile),sep="")
+#conFile <- paste(outEnsDir,"/",vn,"_",gcm,"_",ens,".control",sep="")
 
 #if the control file does not exist
 if (!file.exists(conFile)) {
@@ -136,12 +137,13 @@ if (!file.exists(conFile)) {
   cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
       paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cfo)
   close(cfo)
+  
 } else {
   ("this job was already done!\n")
 }
 
 
-if (file.exists(conFile)) {
+if (file.exists(conFile) & file.exists(paste(outEnsDir,"/",srFile,sep=""))) {
   setwd(outEnsDir)
   x <- file.remove(srFile)
 }

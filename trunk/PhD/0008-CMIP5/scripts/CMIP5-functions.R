@@ -68,11 +68,8 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
           dg$YRDATA <- NA
           names(dg)[length(names(dg))] <- paste(vn)
           
-          ####!!!!!
-          #here I was checking for feasibility of doing it via a rasterstack
-          ###
-          rstk <- stack(paste(yrDir,"/",dayList,sep=""),varname=vn)
-          
+          #organise the file list just to make sure that it will load in the
+          #proper order
           for (dayFile in dayList) {
             mth <- gsub(gcm,"",dayFile)
             mth <- gsub(paste("_",ens,"_",sep=""),"",mth)
@@ -83,31 +80,36 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
             
             cat("processing day",day,"of month",mth,"\n")
             
-            #read raster file
-            rs <- raster(paste(yrDir,"/",dayFile,sep=""),varname=vn)
-            rs <- rotate(rs) #rotate raster file to a -180 to 180 grid
-            
-            #here i need to resample this raster file to 1x1d resolution 
-            #so that the data can be nicely extracted
-            rs <- crop(rs,dum_rs)
-            #i use nearest neighbour in order to maintain the original GCM spatial
-            #variation (i.e. coarse cells), but still make it comparable to my original
-            #GLAM runs
-            rs <- resample(rs,dum_rs,method="ngb")
-            
-            #flux to mm or K to C
-            if (vn == "pr") {
-              rs <- rs*3600*24
-            } else {
-              rs <- rs - 273.15
-            }
-            
-            #extract value of cell
-            cval <- extract(rs,cbind(X=x,Y=y))
-            
-            #put this into the year's matrix
-            dg[which(dg$MTH.STR == mth & dg$DAY.STR == day),paste(vn)] <- cval
+            dg$YRDATA[which(dg$MTH.STR == mth & dg$DAY.STR == day)] <- dayFile
           }
+          
+          #load whole year as a raster stack
+          rstk <- stack(paste(yrDir,"/",dayList,sep=""),varname=vn)
+          
+          #read raster file
+          rs <- raster(paste(yrDir,"/",dayFile,sep=""),varname=vn)
+          rs <- rotate(rs) #rotate raster file to a -180 to 180 grid
+          
+          #here i need to resample this raster file to 1x1d resolution 
+          #so that the data can be nicely extracted
+          rs <- crop(rs,dum_rs)
+          #i use nearest neighbour in order to maintain the original GCM spatial
+          #variation (i.e. coarse cells), but still make it comparable to my original
+          #GLAM runs
+          rs <- resample(rs,dum_rs,method="ngb")
+          
+          #flux to mm or K to C
+          if (vn == "pr") {
+            rs <- rs*3600*24
+          } else {
+            rs <- rs - 273.15
+          }
+          
+          #extract value of cell
+          cval <- extract(rs,cbind(X=x,Y=y))
+          
+          #put this into the year's matrix
+          dg[which(dg$MTH.STR == mth & dg$DAY.STR == day),paste(vn)] <- cval
           
           out_row <- c(year,dg[,paste(vn)])
           if (length(out_row) < 367) {
