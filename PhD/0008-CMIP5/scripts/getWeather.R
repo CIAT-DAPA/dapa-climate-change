@@ -10,16 +10,12 @@ library(raster)
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 #mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
-#yi <- 1961
-#yf <- 2002
 #i <- 1 #gcm to process
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #bDir <- "W:/eejarv/PhD-work/crop-modelling"
 #mdDir <- "V:/eejarv/CMIP5/baseline"
-#yi <- 1961
-#yf <- 2002
 #i <- 1 #gcm to process
 
 
@@ -43,13 +39,9 @@ all_cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName
 drs <- raster(paste(src.dir2,"/data/mask.tif",sep=""))
 drs[which(!is.na(drs[]))] <- 1
 
-cll <- all_cells$CELL[1]
-
 #extract the data for a given GCM
-od <- CMIP5_extract_wrapper(cells=all_cells,cell=cll,dum_rs=drs,cChars=gcmChars,i=1,oDir=outDir)
+od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=i,yi=1961,yf=2002,oDir=outDir)
 
-#here now what i need to do is make the extraction as efficient as possible
-#that probably means loading all rasters in a rasterstack 
 
 
 

@@ -79,7 +79,7 @@ year_wrapper_tasm <- function(year) {
       rs <- rotate(rs)
       
       #Tc = Tk - 272.15
-      rs <- rs - 272.15
+      rs <- rs - 273.15
       
       rs <- writeRaster(rs,paste(oYrDir,"/tasm_",day,".asc",sep=""),format='ascii')
       rm(rs); g=gc(); rm(g)
