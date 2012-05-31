@@ -3,9 +3,9 @@
 #UoL / CCAFS / CIAT
 
 ########################################################
-#wrapper function to extract daily data from CMIP5 GCMs
+#function to extract daily data from CMIP5 GCMs
 ########################################################
-CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
+CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
   #list of gcms and selected gcm
   gcmList <- unique(cChars$GCM)
   gcm <- gcmList[i]
@@ -17,13 +17,18 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
   thisGCM <- cChars[which(cChars$GCM == gcm),]
   ensList <- unique(thisGCM$Ensemble)
   
-  #coordinates of gridcell
-  x <- cells$X[which(cells$CELL == cell)]; y <- cells$Y[which(cells$CELL == cell)];
+  #loop cells in here and create bits of a list for each
+  odf_all <- list()
+  for (cell in cells$CELL) {
+    #create a matrix where to put all data, in the form that i need
+    odf_all[[paste("c",cell,sep="")]] <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=367))
+    names(odf_all[[paste("c",cell,sep="")]]) <- c("YEAR",paste(1:366))
+  }
   
   #loop through ensembles
   for (ens in ensList) {
     #ens <- ensList[1]
-    cat("Processing ensemble",paste(ens),"\n")
+    cat("\nprocessing ensemble",paste(ens),"of model",gcm,"\n")
     thisEns <- thisGCM[which(thisGCM$Ensemble == ens),]
     
     #create directory of ensemble
@@ -40,15 +45,13 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
       #vn <- vnList[1]
       cat("variable:",vn,"\n")
       
-      #create a matrix where to put all data, with the form that i need
-      out_df <- as.data.frame(matrix(NA,nrow=length(yi:yf),ncol=367))
-      names(out_df) <- c("YEAR",paste(1:366))
-      
       #output variable directory
       outVarDir <- paste(outEnsDir,"/",vn,sep="")
       if (!file.exists(outVarDir)) {dir.create(outVarDir)}
       
-      if (!file.exists(paste(outVarDir,"/cell-",cell,".csv",sep=""))) {
+      flist <- list.files(outVarDir,pattern="\\.csv")
+      
+      if (length(flist) != nrow(cells)) {
         #loop through years
         yrc <- 1
         for (year in yi:yf) {
@@ -66,10 +69,12 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
           #calendar to fit data into
           dg <- createDateGridCMIP5(year,whatLeap=wlp)
           dg$YRDATA <- NA
+          dg$VARDATA <- NA
           names(dg)[length(names(dg))] <- paste(vn)
           
           #organise the file list just to make sure that it will load in the
           #proper order
+          cat("sorting file list\n")
           for (dayFile in dayList) {
             mth <- gsub(gcm,"",dayFile)
             mth <- gsub(paste("_",ens,"_",sep=""),"",mth)
@@ -77,56 +82,70 @@ CMIP5_extract_wrapper <- function(cells,cell,cChars,i=1,oDir) {
             mth <- gsub("\\.nc","",mth)
             day <- unlist(strsplit(mth,"_",fixed=T))[4]
             mth <- unlist(strsplit(mth,"_",fixed=T))[2]
-            
-            cat("processing day",day,"of month",mth,"\n")
-            
             dg$YRDATA[which(dg$MTH.STR == mth & dg$DAY.STR == day)] <- dayFile
           }
           
+          cat("loading and sorting out data\n")
           #load whole year as a raster stack
-          rstk <- stack(paste(yrDir,"/",dayList,sep=""),varname=vn)
+          odayList <- dg$YRDATA
+          rstk <- stack(paste(yrDir,"/",odayList,sep=""),varname=vn)
           
-          #read raster file
-          rs <- raster(paste(yrDir,"/",dayFile,sep=""),varname=vn)
-          rs <- rotate(rs) #rotate raster file to a -180 to 180 grid
+          #rotate and crop whole raster stack
+          rstk <- rotate(rstk)
+          rstk <- crop(rstk,dum_rs)
           
           #here i need to resample this raster file to 1x1d resolution 
           #so that the data can be nicely extracted
-          rs <- crop(rs,dum_rs)
+          
           #i use nearest neighbour in order to maintain the original GCM spatial
           #variation (i.e. coarse cells), but still make it comparable to my original
           #GLAM runs
-          rs <- resample(rs,dum_rs,method="ngb")
+          rstk <- resample(rstk,dum_rs,method="ngb")
           
           #flux to mm or K to C
           if (vn == "pr") {
-            rs <- rs*3600*24
-          } else {
-            rs <- rs - 273.15
+            rstk <- rstk*3600*24
+          } else if (vn == "tasmin") {
+            rstk <- rstk - 273.15
+          } else if (vn == "tasmax") {
+            rstk <- rstk - 273.15
+          } else if (vn == "rsds") {
+            #w/m2/day = J/m2 / 1000000 = MJ/m2/day
+            rstk <- rstk / 1000000
           }
           
-          #extract value of cell
-          cval <- extract(rs,cbind(X=x,Y=y))
+          cat("extracting data for gridcells\n")
+          #extract value of all cells
+          all_vals <- extract(rstk,cbind(X=cells$X,Y=cells$Y))
           
-          #put this into the year's matrix
-          dg[which(dg$MTH.STR == mth & dg$DAY.STR == day),paste(vn)] <- cval
-          
-          out_row <- c(year,dg[,paste(vn)])
-          if (length(out_row) < 367) {
-            out_row <- c(out_row,rep(NA,times=(367-length(out_row))))
+          cat("formatting output data.frame\n")
+          ccnt <- 1
+          for (cell in cells$CELL) {
+            #put this into the year's matrix
+            dg[,paste(vn)] <- as.numeric(all_vals[ccnt,])
+            
+            out_row <- c(year,dg[,paste(vn)])
+            if (length(out_row) < 367) {
+              out_row <- c(out_row,rep(NA,times=(367-length(out_row))))
+            }
+            
+            odf_all[[paste("c",cell,sep="")]][yrc,] <- out_row
+            #out_df[yrc,] <- out_row
+            ccnt <- ccnt+1
           }
-          
-          out_df[yrc,] <- out_row
-          
           yrc <- yrc+1
         }
         
-        write.csv(out_df,paste(outVarDir,"/cell-",cell,".csv",sep=""),row.names=F,quote=F)
+        #here loop again to write the output
+        cat("writing output files\n")
+        for (cell in cells$CELL) {
+          write.csv(odf_all[[paste("c",cell,sep="")]],paste(outVarDir,"/cell-",cell,".csv",sep=""),row.names=F,quote=F)
+        }
+        
       } else {
         cat("variable",vn,"was already processed\n")
       }
     }
-    
   }
   return(outGCMDir)
 }
