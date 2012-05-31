@@ -48,7 +48,7 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
         yrc <- 1
         for (year in yi:yf) {
           #year <- 1961
-          cat("year:",year,"\n")
+          cat("\nyear:",year,"\n")
           
           yrDir <- paste(mdDir,"/",gcm,"/",ens,"/",vn,"_",year,sep="")
           #list of nc files in the year folder (could be monthly e.g. srad, or daily)
