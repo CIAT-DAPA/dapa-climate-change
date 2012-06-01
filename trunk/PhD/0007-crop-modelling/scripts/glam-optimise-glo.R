@@ -130,7 +130,7 @@ optimal <- list()
 
 
 #now do the various iterations to look for the optimal parameter set
-if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
+if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""))) {
   #do various iterations to test for local minima
   for (itr in 1:maxiter) {
     setwd(cDir)
@@ -173,7 +173,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
       }
     }
     
-    save(list=c("optimised","optimal"),file=paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",itr,"/output.RData",sep=""))
+    save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",itr,"/output.RData",sep=""))
     
     #store all iterations in one matrix
     if (itr == 1) {
@@ -183,20 +183,20 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
     }
     
   }
-  write.csv(out_itr,paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""),quote=T,row.names=F)
+  write.csv(out_itr,paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""),quote=T,row.names=F)
 }
 
 
 
 #################################################################################
 ##make plots of each parameter tuning
-cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
+cal_data <- read.csv(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""))
 optimal <- cal_data[which(cal_data$iter==maxiter),]
 par_list <- c(paste(optimal$param))
 iter <- c(rep(maxiter,times=nrow(optimal)))
 pList <- data.frame(param=par_list,iter=iter)
 
-plotsDir <- paste(cDir,"/calib/",setup$SIM_NAME,"/plots",sep="")
+plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
 if (!file.exists(plotsDir)) {dir.create(plotsDir)}
 
 for (rw in 1:nrow(pList)) {
@@ -204,7 +204,7 @@ for (rw in 1:nrow(pList)) {
   iter <- paste(pList$iter[rw])
   
   #load the workspace
-  load(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",iter,"/output.RData",sep=""))
+  load(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",iter,"/output.RData",sep=""))
   
   #now make the plot
   tiff(paste(plotsDir,"/",tolower(pname),".tif",sep=""),res=300,compression="lzw",height=1000,

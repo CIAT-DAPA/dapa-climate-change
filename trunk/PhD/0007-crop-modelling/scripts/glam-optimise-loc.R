@@ -118,7 +118,7 @@ if (setup$PRE_SEAS == "OR") {
 
 
 #now do the various iterations to look for the optimal parameter set
-if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
+if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""))) {
   #do various iterations to test for local minima
   for (itr in 1:maxiter) {
     setwd(cDir)
@@ -161,7 +161,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
       }
     }
     
-    save(list=c("optimised","optimal"),file=paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",itr,"/output.RData",sep=""))
+    save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",itr,"/output.RData",sep=""))
     
     #store all iterations in one matrix
     if (itr == 1) {
@@ -171,7 +171,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
     }
     
   }
-  write.csv(out_itr,paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""),quote=T,row.names=F)
+  write.csv(out_itr,paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""),quote=T,row.names=F)
 }
 
 ###############################################
@@ -180,7 +180,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))) {
 
 ###############################################
 #load the calib.csv, last iteration
-cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
+cal_data <- read.csv(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""))
 optimal <- cal_data[which(cal_data$iter==maxiter),]
 
 #update the parameter set
@@ -207,7 +207,7 @@ for (rw in 1:nrow(optimal)) {
 parname <- "IPDATE"
 where <- "glam_param.spt_mgt"
 
-if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
+if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
   optimal <- list(); optimised <- list()
   
   # get the planting date from Sacks et al. (2010)
@@ -248,7 +248,7 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
   
   #save the two outputs
-  save(list=c("optimised","optimal"),file=paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
+  save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
   
   #update the parameter set to -99 and replace the planting date file
   cells$SOW_DATE <- optimal$IPDATE
@@ -274,7 +274,7 @@ parname <- "YGP"
 where <- "glam_param.ygp"
 nstep <- 20
 
-if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
+if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
   # reset lists of output parameters
   optimal <- list(); optimised <- list()
   
@@ -286,19 +286,19 @@ if (!file.exists(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"
   cat(parname,":",optimal[[parname]],"\n")
   if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
   
-  save(list=c("optimised","optimal"),file=paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
+  save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
 }
 
 
 #################################################################################
 ##make plots of each parameter tuning
-cal_data <- read.csv(paste(cDir,"/calib/",setup$SIM_NAME,"/calib.csv",sep=""))
+cal_data <- read.csv(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/calib.csv",sep=""))
 optimal <- cal_data[which(cal_data$iter==maxiter),]
 par_list <- c(paste(optimal$param),"IPDATE","YGP")
 iter <- c(rep(maxiter,times=nrow(optimal)),"ipdate","ygp")
 pList <- data.frame(param=par_list,iter=iter)
 
-plotsDir <- paste(cDir,"/calib/",setup$SIM_NAME,"/plots",sep="")
+plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
 if (!file.exists(plotsDir)) {dir.create(plotsDir)}
 
 for (rw in 1:nrow(pList)) {
@@ -306,7 +306,7 @@ for (rw in 1:nrow(pList)) {
   iter <- paste(pList$iter[rw])
   
   #load the workspace
-  load(paste(cDir,"/calib/",setup$SIM_NAME,"/iter-",iter,"/output.RData",sep=""))
+  load(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",iter,"/output.RData",sep=""))
   
   #now make the plot
   tiff(paste(plotsDir,"/",tolower(pname),".tif",sep=""),res=300,compression="lzw",height=1000,
