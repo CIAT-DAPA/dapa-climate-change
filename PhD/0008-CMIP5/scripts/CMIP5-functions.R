@@ -161,7 +161,7 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
               #hence a file for month 01 would be named as *_mth_012_day_*.nc2, for
               #some unknown reason
               dayList2 <- list.files(yrDir,pattern="\\.nc2")
-              if (length(dayList) != 0) {
+              if (length(dayList2) != 0) {
                 setwd(yrDir)
                 system("rename .nc2 .nc *.nc2")
                 setwd(outGCMDir)

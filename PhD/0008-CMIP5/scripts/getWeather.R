@@ -23,21 +23,6 @@ source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 ys <- 1961
 ye <- 2002
 
-#od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=1,yi=1961,yf=2002,oDir=outDir)
-
-#here do the parallelisation
-#load library and create cluster
-library(snowfall)
-sfInit(parallel=T,cpus=12)
-
-#export functions
-sfExport("src.dir")
-sfExport("src.dir2")
-sfExport("bDir")
-sfExport("mdDir")
-sfExport("ys")
-sfExport("ye")
-
 #get the list of unprocessed GCMs
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
 cDataDir <- paste(bDir,"/climate-data/gridcell-data",sep="")
@@ -66,6 +51,24 @@ for (i in 1:length(gcmList)) {
   }
 }
 mList <- unique(mList)
+
+ncpus <- length(mList)
+if (ncpus>12) {ncpus <- 12}
+
+#od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=1,yi=1961,yf=2002,oDir=outDir)
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export functions
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("bDir")
+sfExport("mdDir")
+sfExport("ys")
+sfExport("ye")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(mList),wrapper_CMIP_extract))
