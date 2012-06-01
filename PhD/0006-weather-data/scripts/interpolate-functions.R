@@ -9,7 +9,7 @@ library(raster)
 #Extract the data from CRU and daily interpolated surfaces
 extractIntCRU <- function(lon,lat,bDir,year,re,ndaysMth) {
   #folders and other stuff
-  intDir <- paste(bDir,"/daily-interpolations",sep="")
+  intDir <- paste(bDir,"/daily-interpolations-v3",sep="")
   cruDir <- paste(bDir,"/CRU_TS_v3-1_data/monthly_grids",sep="")
   
   #region details

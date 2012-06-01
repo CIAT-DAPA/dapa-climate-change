@@ -4,14 +4,16 @@
 stop("Error: do not run whole thing \n")
 
 library(raster)
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
 #src.dir <- "/home/jramirez/dapa-climate-change/PhD/0006-weather-data/scripts"
+#src.dir <- "~/PhD-work/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 source(paste(src.dir,"/interpolate-functions.R",sep=""))
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
 #folders and locations
-bd <- "F:/PhD-work/crop-modelling/climate-data"
+#bd <- "F:/PhD-work/crop-modelling/climate-data"
 #bd <- "/andromeda_data1/jramirez/crop-modelling/climate-data"
+#bd <- "/nfs/a17/eejarv/PhD-work/crop-modelling/climate-data"
 
 #Determine if leap year or not (calculate number of days)
 ndm <- ts(diff(seq(as.Date("1960-01-01"), as.Date("2010-01-01"), by = "month")), 
@@ -25,12 +27,12 @@ region <- "eaf"
 if (region=="eaf" | region=="waf") {rgn <- "afr"} else {rgn <- "sas"}
 
 #load altitude raster to get the xy coordinates of the points to validate
-alt_rs <- raster(paste(bd,"/daily-interpolations/0_files/alt-prj-",region,".asc",sep=""))
+alt_rs <- raster(paste(bd,"/daily-interpolations-v3/0_files/alt-prj-",region,".asc",sep=""))
 xy <- xyFromCell(alt_rs,which(!is.na(alt_rs[])))
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=15) #initiate cluster
+sfInit(parallel=T,cpus=12) #initiate cluster
 
 #export functions
 sfExport("leap")

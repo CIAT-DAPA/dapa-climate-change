@@ -38,8 +38,37 @@ sfExport("mdDir")
 sfExport("ys")
 sfExport("ye")
 
+#get the list of unprocessed GCMs
+gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
+cDataDir <- paste(bDir,"/climate-data/gridcell-data",sep="")
+outDir <- paste(cDataDir,"/IND_CMIP5",sep="")
+cropName <- "gnut"
+cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
+gcmList <- unique(gcmChars$GCM)
+mList <- c()
+for (i in 1:length(gcmList)) {
+  gcm <- gcmList[i]
+  outGCMDir <- paste(outDir,"/",gcm,sep="")
+  thisGCM <- gcmChars[which(gcmChars$GCM == gcm),]
+  ensList <- unique(thisGCM$Ensemble)
+  for (ens in ensList) {
+    outEnsDir <- paste(outGCMDir,"/",ens,sep="")
+    thisEns <- thisGCM[which(thisGCM$Ensemble == ens),]
+    vnList <- c("pr","tasmin","tasmax","rsds")
+    for (vn in vnList) {
+      outVarDir <- paste(outEnsDir,"/",vn,sep="")
+      flist <- list.files(outVarDir,pattern="\\.csv")
+      if (length(flist) != nrow(cells)) {
+        mList <- c(mList,i)
+      }
+    }
+    
+  }
+}
+mList <- unique(mList)
+
 #run the function in parallel
-system.time(sfSapply(as.vector(1:26),wrapper_CMIP_extract))
+system.time(sfSapply(as.vector(mList),wrapper_CMIP_extract))
 
 #stop the cluster
 sfStop()
