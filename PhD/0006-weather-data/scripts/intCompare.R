@@ -6,7 +6,7 @@ stop("Error: do not run whole thing \n")
 library(raster)
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts/"
 #src.dir <- "/home/jramirez/dapa-climate-change/PhD/0006-weather-data/scripts"
-#src.dir <- "~/PhD-work/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 source(paste(src.dir,"/interpolate-functions.R",sep=""))
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
@@ -23,7 +23,7 @@ row.names(ndm) <- c(1960:2009)
 names(ndm) <- month.abb
 
 #set up region and output folder
-region <- "eaf"
+region <- "waf"
 if (region=="eaf" | region=="waf") {rgn <- "afr"} else {rgn <- "sas"}
 
 #load altitude raster to get the xy coordinates of the points to validate
