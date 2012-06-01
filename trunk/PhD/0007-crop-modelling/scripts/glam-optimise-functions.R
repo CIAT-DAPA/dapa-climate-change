@@ -33,7 +33,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   
   #output directories
   parDir <- paste(cropDir,"/params",sep="") #parameter files
-  cal_dir <- paste(cropDir,"/calib",sep="") #calibration directory
+  #cal_dir <- paste(cropDir,"/calib",sep="") #calibration directory
+  cal_dir <- RUN_setup$CAL_DIR #calibration directory
   if (!file.exists(cal_dir)) {dir.create(cal_dir)}
   
   cal_dir <- paste(cal_dir,"/",simset,sep="") #calibration directory
@@ -576,7 +577,8 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   
   #output directories
   parDir <- paste(cropDir,"/params",sep="") #parameter files
-  cal_dir <- paste(cropDir,"/calib",sep="") #calibration directory
+  #cal_dir <- paste(cropDir,"/calib",sep="") #calibration directory
+  cal_dir <- RUN_setup$CAL_DIR #calibration directory  
   if (!file.exists(cal_dir)) {dir.create(cal_dir)}
   
   cal_dir <- paste(cal_dir,"/",simset,sep="") #calibration directory
