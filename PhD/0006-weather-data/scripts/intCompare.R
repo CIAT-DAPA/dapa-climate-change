@@ -51,7 +51,7 @@ controlCompare <- function(ye) {
   library(raster)
   
   #output folder
-  oDir <- paste(bd,"/daily-interpolations/",ye,"-",rgn,"-eval",sep="")
+  oDir <- paste(bd,"/daily-interpolations-v3/",ye,"-",rgn,"-eval",sep="")
   if (!file.exists(oDir)) {dir.create(oDir)}
   oRawDir <- paste(oDir,"/raw_eval_data",sep="")
   if (!file.exists(oRawDir)) {dir.create(oRawDir)}
