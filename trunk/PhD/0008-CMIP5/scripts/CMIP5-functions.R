@@ -156,6 +156,18 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
               #list of daily nc files in the year folder
               dayList <- list.files(yrDir,pattern="\\.nc")
               
+              #this bit is to fix something weird going on with the GFDL datasets
+              #those were adding an additional 2 to the month name and the extension
+              #hence a file for month 01 would be named as *_mth_012_day_*.nc2, for
+              #some unknown reason
+              dayList2 <- list.files(yrDir,pattern="\\.nc2")
+              if (length(dayList) != 0) {
+                setwd(yrDir)
+                system("rename .nc2 .nc *.nc2")
+                setwd(outGCMDir)
+                dayList <- list.files(yrDir,pattern="\\.nc")
+              }
+              
               #check which calendar is used
               wlp <- thisEns$has_leap[1]
               
@@ -175,42 +187,80 @@ CMIP5_extract <- function(cells,cChars,dum_rs,i=1,yi=1961,yf=2002,oDir) {
                 mth <- gsub("\\.nc","",mth)
                 day <- unlist(strsplit(mth,"_",fixed=T))[4]
                 mth <- unlist(strsplit(mth,"_",fixed=T))[2]
+                if (nchar(mth) == 3) {mth <- substr(mth,1,2)}
                 dg$YRDATA[which(dg$MTH.STR == mth & dg$DAY.STR == day)] <- dayFile
               }
             }
             
             cat("loading and sorting out data\n")
-            #load whole year as a raster stack
+            
             odayList <- dg$YRDATA
-            rstk <- stack(paste(yrDir,"/",odayList,sep=""),varname=vn)
             
-            #rotate and crop whole raster stack
-            rstk <- rotate(rstk)
-            rstk <- crop(rstk,dum_rs)
-            
-            #here i need to resample this raster file to 1x1d resolution 
-            #so that the data can be nicely extracted
-            
-            #i use nearest neighbour in order to maintain the original GCM spatial
-            #variation (i.e. coarse cells), but still make it comparable to my original
-            #GLAM runs
-            rstk <- resample(rstk,dum_rs,method="ngb")
-            
-            #flux to mm | K to C | w/m2 to MJ/m2
-            if (vn == "pr") {
-              rstk <- rstk*3600*24
-            } else if (vn == "tasmin") {
-              rstk <- rstk - 273.15
-            } else if (vn == "tasmax") {
-              rstk <- rstk - 273.15
-            } else if (vn == "rsds") {
-              #w/m2/s = J/m2/s / 1000000 * 86400 = MJ/m2/day
-              rstk <- rstk * 24 * 3600 / 1000000
+            #count if there are NAs in the list of files
+            wna <- which(is.na(odayList))
+            if (length(wna) > 0) {
+              #there are some NAs, so the days need to be looped, so to ensure a proper extraction
+              #this needs to produce a data frame that is similar to the output of the extract
+              #command in raster
+              
+              all_vals <- matrix(nrow=nrow(cells),ncol=nrow(dg))
+              for (day in 1:nrow(dg)) {
+                dfil <- dg$YRDATA[day]
+                #if the file for that day is not NA then load the raster
+                if (!is.na(dfil)) {
+                  rsd <- raster(paste(yrDir,"/",dfil,sep=""),varname=vn)
+                  rsd <- rotate(rsd)
+                  rsd <- crop(rsd,dum_rs)
+                  rsd <- resample(rsd,dum_rs,method="ngb")
+                  
+                  #flux to mm | K to C | w/m2 to MJ/m2
+                  if (vn == "pr") {
+                    rsd <- rsd*3600*24
+                  } else if (vn == "tasmin") {
+                    rsd <- rsd - 273.15
+                  } else if (vn == "tasmax") {
+                    rsd <- rsd - 273.15
+                  } else if (vn == "rsds") {
+                    #w/m2/s = J/m2/s / 1000000 * 86400 = MJ/m2/day
+                    rsd <- rsd * 24 * 3600 / 1000000
+                  }
+                  dvals <- extract(rsd,cbind(X=cells$X,Y=cells$Y))
+                  all_vals[,day] <- as.numeric(dvals)
+                }
+              }
+              
+            } else {
+              #load whole year as a raster stack
+              rstk <- stack(paste(yrDir,"/",odayList,sep=""),varname=vn)
+              
+              #rotate and crop whole raster stack
+              rstk <- rotate(rstk)
+              rstk <- crop(rstk,dum_rs)
+              
+              #here i need to resample this raster file to 1x1d resolution 
+              #so that the data can be nicely extracted
+              
+              #i use nearest neighbour in order to maintain the original GCM spatial
+              #variation (i.e. coarse cells), but still make it comparable to my original
+              #GLAM runs
+              rstk <- resample(rstk,dum_rs,method="ngb")
+              
+              #flux to mm | K to C | w/m2 to MJ/m2
+              if (vn == "pr") {
+                rstk <- rstk*3600*24
+              } else if (vn == "tasmin") {
+                rstk <- rstk - 273.15
+              } else if (vn == "tasmax") {
+                rstk <- rstk - 273.15
+              } else if (vn == "rsds") {
+                #w/m2/s = J/m2/s / 1000000 * 86400 = MJ/m2/day
+                rstk <- rstk * 24 * 3600 / 1000000
+              }
+              
+              cat("extracting data for gridcells\n")
+              #extract value of all cells
+              all_vals <- extract(rstk,cbind(X=cells$X,Y=cells$Y))
             }
-            
-            cat("extracting data for gridcells\n")
-            #extract value of all cells
-            all_vals <- extract(rstk,cbind(X=cells$X,Y=cells$Y))
             
             cat("formatting output data.frame\n")
             ccnt <- 1

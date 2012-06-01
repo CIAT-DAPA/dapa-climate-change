@@ -32,7 +32,7 @@ xy <- xyFromCell(alt_rs,which(!is.na(alt_rs[])))
 
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=12) #initiate cluster
+sfInit(parallel=T,cpus=8) #initiate cluster
 
 #export functions
 sfExport("leap")
