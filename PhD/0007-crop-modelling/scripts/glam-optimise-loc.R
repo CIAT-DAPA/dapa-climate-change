@@ -69,6 +69,7 @@ setup$BDIR <- bDir
 setup$CELL <- all_runs$gridcell[run] #467 #636 #467 #641 #720 #853
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
+setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/sing_gridcell_kh_ra",sep="")
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
 setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
 setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
