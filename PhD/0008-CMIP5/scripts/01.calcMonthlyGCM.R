@@ -11,13 +11,11 @@ library(raster)
 #variables to be set
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 #mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
 #i <- 1 #gcm to process
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#bDir <- "W:/eejarv/PhD-work/crop-modelling"
 #mdDir <- "V:/eejarv/CMIP5/baseline"
 #i <- 1 #gcm to process
 
@@ -43,13 +41,12 @@ sfInit(parallel=T,cpus=ncpus)
 #export functions
 sfExport("src.dir")
 sfExport("src.dir2")
-sfExport("bDir")
 sfExport("mdDir")
 sfExport("yi")
 sfExport("yf")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(mList),wrapper_CMIP_extract))
+system.time(sfSapply(as.vector(mList),wrapper_monthly_TS))
 
 #stop the cluster
 sfStop()
