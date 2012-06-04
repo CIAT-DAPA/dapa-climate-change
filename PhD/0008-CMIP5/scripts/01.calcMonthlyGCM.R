@@ -143,6 +143,7 @@ for (ens in ensList) {
                   rstk <- rstk * 3600 * 24
                   rs <- sum(rstk)
                   rd <- calc(rstk,fun = function(x) {return(length(which(x>0.01)))})
+                  rd <- writeRaster(rd,paste(yroDir,"/rd_",mthstr,".tif",sep=""),format="GTiff")
                 } else if (vn == "tas") {
                   rstk <- rstk - 273.15
                   rs <- mean(rstk)
