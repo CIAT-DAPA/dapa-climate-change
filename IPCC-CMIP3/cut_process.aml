@@ -16,10 +16,10 @@
 &else &if %resol% EQ 5min &then &s outdir %outputdir%\Global_5min
 &else &s outdir %outputdir%\Global_10min
 
-&if %resol% EQ 30s &then &s outcopyfolder %copyfolder%\Global_30s
-&else &if %resol% EQ 2.5min &then &s outcopyfolder %copyfolder%\Global_2_5min
-&else &if %resol% EQ 5min &then &s outcopyfolder %copyfolder%\Global_5min
-&else &s outcopyfolder %copyfolder%\Global_10min
+/* &if %resol% EQ 30s &then &s outcopyfolder %copyfolder%\Global_30s
+/* &else &if %resol% EQ 2.5min &then &s outcopyfolder %copyfolder%\Global_2_5min
+/* &else &if %resol% EQ 5min &then &s outcopyfolder %copyfolder%\Global_5min
+/* &else &s outcopyfolder %copyfolder%\Global_10min
 
 &s modellist [listfile %inputdir%\* -dir]
 &s nmodels [token %modellist% -count]
@@ -28,7 +28,7 @@
 	
 	&s modname [extract %md% %modellist%]
 	
-	&do year &list 2040_2069 /* 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+	&do year &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
 			
 			&ty
 			&ty Model %modname% (%year%, %resol%)
@@ -36,8 +36,9 @@
 			&if not [exists %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt -file] &then
 				&do
 					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*.zip
-					&r cut_GCM.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %outdir%\%modname%\%year% %mask% %switch%
-					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt]
+					&if not [exists %outdir%\%modname%\%year% -dir] &then &sys md %outdir%\%modname%\%year%
+					&r cut_GCM.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %mask% %switch%
+					/* &s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt]
 				&end
 				
 	&end
