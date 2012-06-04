@@ -29,8 +29,6 @@ yf <- 2005
 #get the list of unprocessed GCMs
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
 gcmList <- unique(gcmChars$GCM)
-
-i <- 9
 gcm <- gcmList[i]
 
 thisGCM <- gcmChars[which(gcmChars$GCM == gcm),]

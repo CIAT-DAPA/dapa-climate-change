@@ -58,7 +58,7 @@ ID	Fileset	GCM	Ensemble	iYear	iMonth	iDay	fYear	fMonth	fDay	ncol	res_x	nrow	res_
 57	1	ichec_ec_earth	r6i1p1	1950	1	1	1974	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r6i1p1_19500101-19741231.nc	NA	NA
 58	1	ichec_ec_earth	r6i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r6i1p1_19750101-20051231.nc	NA	NA
 59	2	ichec_ec_earth	r8i1p1	1950	1	1	1974	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19500101-19741231.nc	NA	NA
-60	2	ichec_ec_earth	r8i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19750101-20051231.nc	NA	NA
+60	2	ichec_ec_earth	r8i1p1	1975	1	1	2005	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_historical_r8i1p1_19750101-20121231.nc	NA	NA
 61	1	inm_inmcm4	r1i1p1	1960	1	1	1969	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19600101-19691231.nc	rsds_day_inmcm4_historical_r1i1p1_19600101-19691231.nc	NA
 62	1	inm_inmcm4	r1i1p1	1970	1	1	1979	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19700101-19791231.nc	rsds_day_inmcm4_historical_r1i1p1_19700101-19791231.nc	NA
 63	1	inm_inmcm4	r1i1p1	1980	1	1	1989	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_historical_r1i1p1_19800101-19891231.nc	rsds_day_inmcm4_historical_r1i1p1_19800101-19891231.nc	NA
