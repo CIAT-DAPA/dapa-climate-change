@@ -17,8 +17,9 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
+runs_set <- "mult_gridcell_kh_two_new_sel"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
-cal_dir <- paste(cDir,"/calib",sep="")
+cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
 #load cell details
 #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
@@ -295,8 +296,11 @@ ht <- 1000
 fct <- (yo_yp@extent@xmin-yo_yp@extent@xmax)/(yo_yp@extent@ymin-yo_yp@extent@ymax)
 wt <- ht*(fct+.1)
 
-brks <- seq(0,5,by=.25)
+brks <- seq(0,2,by=.2)
 brks.lab <- round(brks,2)
+rs <- yo_yp
+rs[which(rs[] > 2)] <- 2
+
 cols <- c(colorRampPalette(c("dark green","green","yellow","orange","red"))(length(brks)))
 wld <- list("sp.polygons",wrld_simpl,lwd=0.8,first=F)
 grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=5), norths=seq(-90,90,by=5))
@@ -304,7 +308,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/yobs_by_ypred.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(yo_yp,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -315,7 +319,10 @@ ht <- 1000
 fct <- (sdo_sdp@extent@xmin-sdo_sdp@extent@xmax)/(sdo_sdp@extent@ymin-sdo_sdp@extent@ymax)
 wt <- ht*(fct+.1)
 
-brks <- c(seq(0,5,by=.25),10,15,20)
+rs <- sdo_sdp
+rs[which(rs[] > 2)] <- 2
+
+brks <- seq(0,2,by=.2)
 brks.lab <- round(brks,2)
 cols <- c(colorRampPalette(c("dark green","green","yellow","orange","red"))(length(brks)))
 wld <- list("sp.polygons",wrld_simpl,lwd=0.8,first=F)
@@ -324,7 +331,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/sdobs_by_sdpred.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(sdo_sdp,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()

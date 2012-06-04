@@ -9,7 +9,8 @@
 library(raster)
 
 #base working directory and other details
-bDir <- "F:/PhD-work/crop-modelling/GLAM"
+#bDir <- "F:/PhD-work/crop-modelling/GLAM"
+bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
 cropName <- "gnut"
 method <- "lin"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
@@ -32,7 +33,7 @@ ahr <- mha*1000/car; ahr <- ahr*100
 
 #load irrigation ratio
 ir <- stack(paste(cDir,"/irrigated_ratio/raw-",1966:1993,".asc",sep=""))
-mir <- calc(ir,fun = function(x) {mean(x,na.rm=T)})
+mir <- calc(ir,fun = function(x) {mean(x,na.rm=T)}) #mean irrigation ratio
 
 #load zones raster
 zrs <- raster(paste(cDir,"/gnut-zones/zones_lr.asc",sep=""))
@@ -52,8 +53,8 @@ ocells$IRATIO <- extract(mir,cbind(x=cells$X,y=cells$Y))
 #selecting the gridcells i will work with in the multi cell calib
 ocells <- ocells[which(!is.na(ocells$YIELD_CV)),]
 ocells$ISSEL <- 0
-ocells$ISSEL[which(ocells$YIELD_CV>15 & ocells$AHRATIO > 0.1 & ocells$IRATIO < .25)] <- 1
-
+#ocells$ISSEL[which(ocells$YIELD_CV>15 & ocells$AHRATIO > 0.1 & ocells$IRATIO < .25)] <- 1 #v1
+ocells$ISSEL[which(ocells$YIELD_CV>30 & ocells$AHRATIO > 0.2)] <- 1 #v2
 
 #now select the gridcells that you would optimise based on the following rules
 #get how many gridcells are ISSEL == 1
@@ -73,6 +74,12 @@ for (z in unique(ocells$ZONE)) {
     scells$ISSEL_F[sample(1:nrow(scells),size=nsel)] <- 1
     fcells <- scells$CELL[which(scells$ISSEL_F == 1)]
     zcells$ISSEL_F[which(zcells$CELL %in% fcells)] <- 1
+  } else {
+    if (nrow(scells) > 0) {
+      scells$ISSEL_F <- 1
+      fcells <- scells$CELL[which(scells$ISSEL_F == 1)]
+      zcells$ISSEL_F[which(zcells$CELL %in% fcells)] <- 1
+    }
   }
   
   if (z == unique(ocells$ZONE)[1]) {
@@ -84,11 +91,11 @@ for (z in unique(ocells$ZONE)) {
 }
 
 #write output data.frame
-write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection.csv",sep=""),row.names=F,quote=T)
+write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""),row.names=F,quote=T)
 
 
 #plot points in the selected cells
-windows()
+#windows()
 plot(zrs,col=rev(terrain.colors(5)))
 points(out_cells$X[which(out_cells$ISSEL_F == 1)],out_cells$Y[which(out_cells$ISSEL_F == 1)],pch=20,cex=0.75)
 

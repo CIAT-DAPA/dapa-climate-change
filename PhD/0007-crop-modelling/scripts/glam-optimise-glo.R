@@ -56,7 +56,7 @@ cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 pDir <- paste(cDir,"/params",sep="") #parameter files
 
 #load cell details
-cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection.csv",sep=""))
+cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
 
 #load runs to perform
 all_runs <- read.table(paste(cDir,"/calib/optim_zones.txt",sep=""),header=T,sep="\t")
@@ -69,7 +69,7 @@ setup$BDIR <- bDir
 setup$ZONE <- all_runs$zone[run]
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
-setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_two",sep="")
+setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_two_new_sel",sep="")
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,"_",setup$METHOD,".txt",sep="")
 setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,"_start.txt",sep="")
 setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,"_start.txt",sep="")
