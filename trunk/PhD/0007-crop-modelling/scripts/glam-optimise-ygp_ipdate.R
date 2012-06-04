@@ -74,9 +74,9 @@ for (ci in ciList) {
   setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_two",sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
-  setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
+  setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
   setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
-  setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
+  setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
   setup$WTH_ROOT <- "ingc"
   setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
   setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
@@ -185,6 +185,7 @@ for (ci in ciList) {
       
       #update setup
       setup$WTH_DIR_RFD <- owthDir$WTH_DIR
+      setup$WTH_DIR_IRR <- owthDir$WTH_DIR
       
       #update values
       rng <- 365-sow_i+sow_f
