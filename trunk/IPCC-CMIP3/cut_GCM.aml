@@ -1,4 +1,4 @@
-&args inputfolder outputfolder outcopyfolder mask switch 
+&args inputfolder outputfolder mask switch 
 &terminal 9999
 /*&sys cls
 &messages &off
@@ -67,8 +67,6 @@
 					setmask %mask%
 					setcell %mask%	
 					
-					&ty %outputfolder%\%gridname%
-					&ty %inputfolder%\%gridname%
 					%outputfolder%\%gridname% = %inputfolder%\%gridname%
 					
 					&if [locase %switch%] EQ yes &then
@@ -79,6 +77,7 @@
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file] /* &ty Output grid exists
 							%outfolder%\%gridname%.asc = gridascii(%outputfolder%\%gridname%)
+							&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname%
 							
 							&sys 7za a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
