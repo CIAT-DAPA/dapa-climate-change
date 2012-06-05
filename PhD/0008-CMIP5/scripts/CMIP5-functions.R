@@ -74,7 +74,7 @@ wrapper_monthly_TS <- function(i) {
                 #if the number of missing days is above the maximum allowed (>50%)
                 #for minimum temperature
                 if (dif_nf1 > max_allow) {
-                  rs <- raster(paste(yrDir,"/",dfList1[1],sep=""),varname="tasmin")
+                  rs <- raster(paste(yrDir,"/",flist1[1],sep=""),varname="tasmin")
                   rs[] <- NA
                   rs1 <- rs
                 } else {
@@ -87,7 +87,7 @@ wrapper_monthly_TS <- function(i) {
                 #if the number of missing days is above the maximum allowed (>50%)
                 #for maximum temperature
                 if (dif_nf2 > max_allow) {
-                  rs <- raster(paste(yrDir,"/",dfList2[1],sep=""),varname="tasmax")
+                  rs <- raster(paste(yrDir,"/",flist2[1],sep=""),varname="tasmax")
                   rs[] <- NA
                   rs2 <- rs
                 } else {
@@ -113,14 +113,15 @@ wrapper_monthly_TS <- function(i) {
                 #if the difference is greater than 0 for precip and greater than 50% of days
                 #then this cannot be processed so the 
                 if (vn == "pr" & dif_nf != 0) {
-                  rs <- raster(paste(yrDir,"/",dfList[1],sep=""),varname=vn)
+                  rs <- raster(paste(yrDir,"/",flist1[1],sep=""),varname=vn)
                   rs[] <- NA
                 } else if (vn == "tas" & dif_nf > max_allow) {
                   #create a raster with all pixels set to NA
                   #if the length of the daily file list (dfList) is >0 then use the first file
-                  rs <- raster(paste(yrDir,"/",dfList[1],sep=""),varname=vn)
+                  rs <- raster(paste(yrDir,"/",flist1[1],sep=""),varname=vn)
                   rs[] <- NA
                 } else {
+                  #everything is fine, so then
                   #read these files into a raster stack
                   rstk <- stack(paste(yrDir,"/",dfList,sep=""),varname=vn)
                   if (vn == "pr") {
