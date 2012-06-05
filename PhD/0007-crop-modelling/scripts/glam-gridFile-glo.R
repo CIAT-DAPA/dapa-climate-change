@@ -11,18 +11,20 @@ library(raster)
 
 #load functions
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
 source(paste(src.dir,"/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 cmDir <- "F:/PhD-work/crop-modelling"
+#cmDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 bDir <- paste(cmDir,"/GLAM",sep="")
 cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
 #these are the cells that have both yield and rainfall data, and that can be selected
-cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection.csv",sep=""))
+cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
 
 #get longitude and latitude (row and column)
 rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/0_base_grids/igp_dummy.tif",sep=""))
@@ -58,6 +60,7 @@ if (!file.exists(ofil)) {
 ############ SELECTED ZONE AND GRIDCELLS #############
 ######################################################
 z <- 5
+version <- "b"
 cell <- cells$CELL[which(cells$ZONE == z & cells$ISSEL_F == 1)]
 ######################################################
 ######################################################
@@ -90,14 +93,14 @@ xys$CELL <- cellFromXY(msk,cbind(x=xys$x,y=xys$y))
 solData$CELLS_SOL <- solData$CELL; solData$CELL <- NULL
 solData <- merge(solData,xys,by="CELLS_SOL",all=T)
 
-oSolFile <- paste(gsoilDir,"/soiltypes_calz",z,".txt",sep="")
+oSolFile <- paste(gsoilDir,"/soiltypes_calz",z,version,".txt",sep="")
 if (!file.exists(oSolFile)) {
   selSolData <- solData[which(solData$CELL %in% cell),]
   oSolFile <- write_soil_types(x=selSolData,outfile=oSolFile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC"))
 }
 
 #now need to create the soil codes file
-oSoilGrid <- paste(gsoilDir,"/soilcodes_calz",z,".txt",sep="")
+oSoilGrid <- paste(gsoilDir,"/soilcodes_calz",z,version,".txt",sep="")
 if (!file.exists(oSoilGrid)) {
   oSoilGrid <- write_soilcodes(x=cells,outfile=oSoilGrid,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW"))
 }
@@ -109,7 +112,7 @@ if (!file.exists(oSoilGrid)) {
 sow_rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_start_lr.tif",sep=""))
 cells$SOW_DATE <- extract(sow_rs,cbind(X=cells$X,Y=cells$Y))
 
-osowFile <- paste(gsowDir,"/sowing_calz",z,"_start.txt",sep="")
+osowFile <- paste(gsowDir,"/sowing_calz",z,version,"_start.txt",sep="")
 if (!file.exists(osowFile)) {
   osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
 }
@@ -120,7 +123,7 @@ if (!file.exists(osowFile)) {
 method <- "lin"
 
 yields <- stack(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/raster/gridded/",tolower(method),"/",tolower(method),"-",66:94,".asc",sep=""))
-yFile <- paste(yieldDir,"/yield_calz",z,"_",method,".txt",sep="")
+yFile <- paste(yieldDir,"/yield_calz",z,version,"_",method,".txt",sep="")
 if (!file.exists(yFile)) {
   yFile <- write_yield(x=cells,outfile=yFile,yld_stk=yields,yri=66,yrf=94,cell=cell,fields=list(CELL="CELL",X="X",Y="Y"))
 }
@@ -130,7 +133,7 @@ if (!file.exists(yFile)) {
 ######################################################
 #write weather (irr and rainfed)
 wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
-owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_calz",z,sep=""),wthDataDir,
+owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_calz",z,version,sep=""),wthDataDir,
                     fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
 
 
@@ -148,7 +151,7 @@ owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_calz",z,sep=""),wthDa
 rabi_sow <- raster(paste(cropDir,"/",tolower(cropName),"-zones/plant_rabi.asc",sep=""))
 
 icells <- cells; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y))
-owthDir <- make_wth(x=icells,cell,wthDir=paste(wthDir,"/irr_calz",z,sep=""),wthDataDir,
+owthDir <- make_wth(x=icells,cell,wthDir=paste(wthDir,"/irr_calz",z,version,sep=""),wthDataDir,
                     fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
 
 
@@ -159,7 +162,7 @@ icells <- cells; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y
 icells$SOW_DATE2 <- icells$SOW_DATE+120
 icells$SOW_DATE[which(icells$SOW_DATE2 > 365)] <- 31
 
-osowFile <- paste(gsowDir,"/sowing_calz",z,"_irr.txt",sep="")
+osowFile <- paste(gsowDir,"/sowing_calz",z,version,"_irr.txt",sep="")
 if (!file.exists(osowFile)) {
   osowFile <- write_sowdates(x=icells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
 }
