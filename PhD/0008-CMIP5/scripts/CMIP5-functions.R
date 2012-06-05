@@ -29,7 +29,7 @@ wrapper_monthly_TS <- function(i) {
     vnList <- c("pr","tas","dtr")
     for (vn in vnList) {
       #vn <- vnList[1]
-      cat("variable:",vn,"\n")
+      cat("\nvariable:",vn,"\n")
       
       yrc <- 1
       for (year in yi:yf) {
