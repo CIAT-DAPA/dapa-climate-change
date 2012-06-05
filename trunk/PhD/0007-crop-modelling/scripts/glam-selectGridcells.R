@@ -23,6 +23,7 @@ yields <- stack(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/raster/
 ymn <- calc(yields,fun = function(x) {mean(x,na.rm=T)})
 ysd <- calc(yields,fun = function(x) {sd(x,na.rm=T)})
 ycv <- ysd/ymn*100
+yna <- calc(yields,fun = function(x) {length(which(x==0))})
 
 #load area harvested and calculate mean, std, etc
 aha <- stack(paste(cDir,"/harvested_area/raster/gridded/raw-",1966:1993,".asc",sep=""))
@@ -45,6 +46,7 @@ ocells$ZONE <- extract(zrs,cbind(x=cells$X,y=cells$Y))
 ocells$YIELD_MN <- extract(ymn,cbind(x=cells$X,y=cells$Y))
 ocells$YIELD_SD <- extract(ysd,cbind(x=cells$X,y=cells$Y))
 ocells$YIELD_CV <- extract(ycv,cbind(x=cells$X,y=cells$Y))
+ocells$YIELD_NA <- extract(yna,cbind(x=cells$X,y=cells$Y))
 ocells$AHARV <- extract(mha,cbind(x=cells$X,y=cells$Y))
 ocells$AHRATIO <- extract(ahr,cbind(x=cells$X,y=cells$Y))
 ocells$IRATIO <- extract(mir,cbind(x=cells$X,y=cells$Y))
@@ -54,7 +56,10 @@ ocells$IRATIO <- extract(mir,cbind(x=cells$X,y=cells$Y))
 ocells <- ocells[which(!is.na(ocells$YIELD_CV)),]
 ocells$ISSEL <- 0
 #ocells$ISSEL[which(ocells$YIELD_CV>15 & ocells$AHRATIO > 0.1 & ocells$IRATIO < .25)] <- 1 #v1
-ocells$ISSEL[which(ocells$YIELD_CV>30 & ocells$AHRATIO > 0.2)] <- 1 #v2
+ocells$ISSEL[which(ocells$YIELD_CV>25 & ocells$YIELD_MN>300 & ocells$AHRATIO>0.2 & ocells$YIELD_NA == 0)] <- 1 #v2
+ocells$ISSEL[which(ocells$ZONE == 4 & ocells$YIELD_NA == 0 & ocells$YIELD_CV>20 & ocells$YIELD_MN>300 & ocells$AHRATIO>0.2 )] <- 1 #v2
+ocells$ISSEL[which(ocells$CELL == 636)] <- 1 #v2
+
 
 #now select the gridcells that you would optimise based on the following rules
 #get how many gridcells are ISSEL == 1
@@ -66,6 +71,7 @@ for (z in unique(ocells$ZONE)) {
   nsel <- 10 #round(nrow(zcells)*0.3+0.5,0)
   
   scells <- zcells[which(zcells$ISSEL == 1),]
+  if (nrow(scells) < 10) {stop(z,": less than 10 gridcells")}
   row.names(scells) <- 1:nrow(scells)
   
   zcells$ISSEL_F <- 0
@@ -98,7 +104,9 @@ write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""),ro
 #windows()
 plot(zrs,col=rev(terrain.colors(5)))
 points(out_cells$X[which(out_cells$ISSEL_F == 1)],out_cells$Y[which(out_cells$ISSEL_F == 1)],pch=20,cex=0.75)
-
+#points(ocells$X[which(ocells$ISSEL == 1)],ocells$Y[which(ocells$ISSEL == 1)],pch=20,cex=0.75)
+#points(out_cells$X[which(out_cells$CELL == 636)],out_cells$Y[which(out_cells$CELL == 636)],pch="+",cex=0.75)
+#plot(wrld_simpl,add=T)
 
 
 
