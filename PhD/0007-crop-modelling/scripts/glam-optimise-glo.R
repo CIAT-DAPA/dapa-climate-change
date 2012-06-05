@@ -12,10 +12,11 @@
 
 
 #eljefe
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
-#maxiter <- 20
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+maxiter <- 20
 #run <- 1 2 3 4 5
+version <- "b"
 
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
@@ -30,6 +31,10 @@ if (class(try(get("bDir"),silent=T)) == "try-error") {
 
 if (class(try(get("run"),silent=T)) == "try-error") {
   stop("run needs to be set")
+}
+
+if (class(try(get("version"),silent=T)) == "try-error") {
+  stop("version of gridcell selection needs to be provided: a, b...")
 }
 
 if (class(try(get("maxiter"),silent=T)) == "try-error") {
@@ -70,14 +75,14 @@ setup$ZONE <- all_runs$zone[run]
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_two_new_sel",sep="")
-setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,"_",setup$METHOD,".txt",sep="")
-setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,"_start.txt",sep="")
-setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,"_start.txt",sep="")
-setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,sep="")
-setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,sep="")
+setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,"_",setup$METHOD,version,".txt",sep="")
+setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
+setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
+setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,version,sep="")
+setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,version,sep="")
 setup$WTH_ROOT <- "ingc"
-setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_calz",setup$ZONE,".txt",sep="")
-setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_calz",setup$ZONE,".txt",sep="")
+setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_calz",setup$ZONE,version,".txt",sep="")
+setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_calz",setup$ZONE,version,".txt",sep="")
 setup$SIM_NAME <- paste(all_runs$run_name[run]) 
 
 
