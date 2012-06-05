@@ -48,6 +48,19 @@ wrapper_monthly_TS <- function(i) {
           yrDir <- paste(mdDir,"/",gcm,"/",ens,"/",vn,"_",year,sep="")
           flist1 <- list.files(yrDir,pattern="\\.nc")
           flist2 <- flist1
+          
+          #this bit is to fix something weird going on with the GFDL datasets
+          #those were adding an additional 2 to the month name and the extension
+          #hence a file for month 01 would be named as *_mth_012_day_*.nc2, for
+          #some unknown reason. Only necessary for "tas"
+          dayList2 <- list.files(yrDir,pattern="\\.nc2")
+          if (length(dayList2) != 0) {
+            setwd(yrDir)
+            system("rename .nc2 .nc *.nc2")
+            setwd(mdDir)
+            flist1 <- list.files(yrDir,pattern="\\.nc")
+            flist2 <- flist1
+          }
         }
         
         #process only if there are files in the folder
