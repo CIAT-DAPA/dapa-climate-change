@@ -2,6 +2,33 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+
+##############################################################################
+##############################################################################
+#calculate the monthly total rainfall for CIAT data. Total would be calculated
+#only if there are no missing days
+calc_mth_total <- function(x,dg) {
+  if (length(x) > nrow(dg)) {
+    x <- x[1:365]
+  }
+  dg$VALUE <- x
+  
+  ov <- c()
+  for (m in 1:12) {
+    mv <- dg$VALUE[which(dg$MTH==m)]
+    wna <- which(is.na(mv))
+    if (length(wna) == 0) {
+      rv <- sum(mv)
+    } else {
+      rv <- NA
+    }
+    ov <- c(ov,rv)
+  }
+  return(ov)
+}
+
+
+
 ##############################################################################
 ##############################################################################
 #Format properly the CIAT daily rainfall data
