@@ -180,6 +180,9 @@ for (year in yi:yf) {
 write.csv(allStNAs,paste(outDir,"/NA-count.csv",sep=""),row.names=F,quote=F)
 
 ###
+#per year now read the CIAT data and calculate total rainfall per month only if
+#all days are present per months
+
 
 #d. merge them both in one single dataset
 
