@@ -134,6 +134,8 @@ for (vn in c("rain","tmean","tmax","tmin","dtr")) {
 }
 
 
+################################################################################
+################################################################################
 #c. get the CIAT monthly series between 1961 and 2000. Only rainfall
 #first need to copy the CIAT time series
 
@@ -159,7 +161,7 @@ ciData <- paste(ouInData,"/ciat-weather-stations",sep="")
 metaFolder <- paste(ciData,"/stations_details",sep="")
 csvDir <- paste(ciData,"/rnf_organised",sep="")
 orgDir <- paste(ciData,"/yearly_files",sep="")
-outDir <- paste(orgDir,"/grouped_output-global",sep="")
+outDir <- paste(orgDir,"/grouped_daily-global",sep="")
 if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
 
 ### organise the daily data into a proper format
@@ -179,13 +181,150 @@ for (year in yi:yf) {
 
 write.csv(allStNAs,paste(outDir,"/NA-count.csv",sep=""),row.names=F,quote=F)
 
-###
+
+################################################################################
+################################################################################
 #per year now read the CIAT data and calculate total rainfall per month only if
 #all days are present per months
 
+omDir <- paste(orgDir,"/grouped_monthly-global",sep="")
+if (!file.exists(omDir)) {dir.create(omDir,recursive=T)}
 
-#d. merge them both in one single dataset
+out_all <- data.frame()
+for (year in yi:yf) {
+  #year <- 1961
+  cat("processing year",year,"\n")
+  
+  if (!file.exists(paste(omDir,"/",year,".csv",sep=""))) {
+    #read in the data
+    sData <- read.csv(paste(outDir,"/",year,".csv",sep=""))
+    
+    #get the calendar
+    dg <- createDateGrid(year)
+    dg$MTH <- as.numeric(substr(dg$MTH.DAY,2,3))
+    dg$DAY <- as.numeric(substr(dg$MTH.DAY,5,6))
+    
+    #calculate the totals for each wst using *apply
+    only_data <- sData[,5:ncol(sData)]
+    m_totals <- t(apply(only_data,1,calc_mth_total,dg))
+    
+    #put together the data frame
+    out_data <- cbind(sData[,1:4],YEAR=year,m_totals)
+    names(out_data)[6:ncol(out_data)] <- toupper(month.abb)
+    
+    #removing duplicates
+    dups <- which(duplicated(out_data))
+    if (length(dups) > 0) {
+      out_data <- out_data[-dups,]
+    }
+    
+    write.csv(out_data,paste(omDir,"/",year,".csv",sep=""),row.names=F,quote=T)
+  } else {
+    out_data <- read.csv(paste(omDir,"/",year,".csv",sep=""))
+  }
+  out_all <- rbind(out_all,out_data)
+}
+
+write.csv(out_all,paste(omDir,"/ciat_rain_data_ts_",yi,"-",yf,"_xy.csv",sep=""),row.names=F,quote=F)
 
 
+################################################################################
+################################################################################
+#d. merge them both in one single dataset. only applies for rainfall.
+#read the ghcn dataset
+
+#output directory with all wst-ts, ghcn for tmin, tmax, tmean, and both merged for the other
+owthDir <- paste(ouInData,"/all-weather-stations",sep="")
+if (!file.exists(owthDir)) {dir.create(owthDir)}
 
 
+#### if final rainfall file does not exist then create it
+if (!file.exists(paste(owthDir,"/all_pr_data_ts_",yi,"-",yf,"_xy.csv",sep=""))) {
+  cat("loading ghcn and ciat data\n")
+  gh_rain <- read.csv(paste(ghData,"/ghcn_rain_data_ts_",yi,"-",yf,"_xy.csv",sep=""))
+  ci_rain <- read.csv(paste(omDir,"/ciat_rain_data_ts_",yi,"-",yf,"_xy.csv",sep=""))
+  
+  #fields in proper order
+  cat("fixing small issues\n")
+  gh_rain$REPLICATED <- NULL
+  ci_rain <- ci_rain[,c(1,5,3,2,4,6:ncol(ci_rain))] #cbind(ci_rain[,1],ci_rain[])
+  names(ci_rain)[4] <- "LONG"
+  
+  #adding source and fixing scale in GHCN
+  gh_rain <- cbind(SOURCE="GHCN",gh_rain)
+  gh_rain[,toupper(month.abb)] <- gh_rain[,toupper(month.abb)]*0.1
+  ci_rain <- cbind(SOURCE="CIAT",ci_rain)
+  
+  #binding them
+  cat("binding both datasets\n")
+  me_rain <- rbind(gh_rain,ci_rain)
+  
+  #trying to deal with duplicates
+  cat("dealing with duplicates\n")
+  dups <- which(duplicated(me_rain[,c("YEAR","LAT","LONG","ALT")]))
+  cat("there were",length(dups),"duplicates\n")
+  
+  #check duplicates, average them (differences are small normally, if any)
+  st <- 1 #4500
+  dup_pairs <- c()
+  isdup <- c()
+  odf <- data.frame()
+  for (i in st:length(dups)) {
+    if (i %% 1000 == 0) {cat(i,"\n")}
+    xx <- me_rain[which(me_rain$YEAR == me_rain$YEAR[dups[i]]
+                  & me_rain$LAT == me_rain$LAT[dups[i]]
+                  & me_rain$LONG == me_rain$LONG[dups[i]]
+                  & me_rain$ALT == me_rain$ALT[dups[i]]),]
+    
+    wrows <- which(me_rain$YEAR == me_rain$YEAR[dups[i]]
+                    & me_rain$LAT == me_rain$LAT[dups[i]]
+                    & me_rain$LONG == me_rain$LONG[dups[i]]
+                    & me_rain$ALT == me_rain$ALT[dups[i]])
+    
+    #if the source is different (i.e. station in GHCN is duplicated in CIAT)
+    if (length(unique(xx$SOURCE)) == 2 ) {
+      mmd <- xx[,toupper(month.abb)]
+      
+      ff <- function(x) {
+        x <- x[!is.na(x)]
+        if (length(x) > 0) {
+          x <- mean(x)
+        } else {
+          x <- NA
+        }
+        return(x)
+      }
+      mmdo <- apply(mmd,2,ff)
+      
+      out_row <- data.frame(SOURCE="GHCN_CIAT",ID=paste(xx$ID,collapse="_"),
+                            YEAR=xx$YEAR[1],LAT=xx$LAT[1],LONG=xx$LONG[1],ALT=xx$ALT[1])
+      out_row <- cbind(out_row,t(mmdo))
+      
+      cat(i,"\n")
+      isdup <- c(isdup,i)
+      dup_pairs <- c(dup_pairs,wrows)
+      odf <- rbind(odf,out_row)
+    }
+  }
+  
+  #merged data without duplicates
+  me_rain_nodup <- me_rain[-dup_pairs,]
+  me_rain_app <- rbind(me_rain_nodup,odf)
+  
+  #writing final dataset
+  cat("writing final dataset\n")
+  write.csv(me_rain_app,paste(owthDir,"/all_pr_data_ts_",yi,"-",yf,"_xy.csv",sep=""),row.names=F,quote=T)
+}
+
+
+### copying the other two variables
+cat("copying tas and dtr datasets\n")
+if (!file.exists(paste(owthDir,"/all_dtr_data_ts_",yi,"-",yf,"_xy.csv",sep=""))) {
+  x <- file.copy(from=paste(ghData,"/ghcn_dtr_data_ts_",yi,"-",yf,"_xy.csv",sep=""),
+                 to=paste(owthDir,"/all_dtr_data_ts_",yi,"-",yf,"_xy.csv",sep=""))
+}
+
+if (!file.exists(paste(owthDir,"/all_tas_data_ts_",yi,"-",yf,"_xy.csv",sep=""))) {
+  x <- file.copy(from=paste(ghData,"/ghcn_tmean_data_ts_",yi,"-",yf,"_xy.csv",sep=""),
+                 to=paste(owthDir,"/all_tas_data_ts_",yi,"-",yf,"_xy.csv",sep=""))
+}
