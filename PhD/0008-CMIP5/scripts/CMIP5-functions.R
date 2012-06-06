@@ -2,6 +2,151 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+##############################################################################
+##############################################################################
+#Function to process everything into a folder
+AsctoGTiff <- function(this_dir) {
+  ascList <- list.files(this_dir,pattern="\\.asc")
+  if (length(grep("\\.gz",ascList)) > 0) {
+    ascList <- ascList[-grep("\\.gz",ascList)]
+  }
+  
+  if (length(ascList) == 0) {
+    cat("This folder does not contain any raw ascii grid \n")
+  } else {
+    for (asc in ascList) {
+      cat(asc,"\n")
+      rs <- raster(paste(this_dir,"/",asc,sep=""))
+      tifName <- gsub(".asc",".tif",asc)
+      
+      if (!file.exists(paste(this_dir,"/",tifName,sep=""))) {
+        rs <- writeRaster(rs,paste(this_dir,"/",tifName,sep=""),format="GTiff")
+      }
+      
+      if (!file.exists(paste(this_dir,"/",asc,".gz",sep=""))) {
+        setwd(this_dir)
+        system(paste("7z a -tgzip",paste(asc,".gz",sep=""),asc))
+      }
+      
+      if (file.exists(paste(this_dir,"/",asc,sep=""))) {
+        if (file.exists(paste(this_dir,"/",tifName,sep=""))) {
+          if (file.exists(paste(this_dir,"/",asc,".gz",sep=""))) {
+            x <- file.remove(paste(this_dir,"/",asc,sep=""))
+          }
+        }
+      }
+    }
+  }
+  return("Done!")
+}
+
+
+
+########################################################
+#wrapper function for parallel processing of the climatology calculation
+########################################################
+wrapper_climatology <- function(i) {
+  #libraries
+  library(raster); library(rgdal)
+  
+  #sourcing needed functions
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+  
+  #get list of GCMs, and GCM name given i
+  gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
+  gcmList <- unique(gcmChars$GCM)
+  gcm <- gcmList[i]
+  
+  #i/o directory with GCM data
+  gcmDir <- paste(mdDir,"/",gcm,sep="")
+  
+  #list and loop through ensembles
+  ensList <- list.files(gcmDir,pattern="_monthly")
+  for (ens in ensList) {
+    cat("\nensemble",paste(ens),"\n")
+    #ens <- ensList[1]
+    #output dir
+    oClim <- paste(gcmDir,"/",gsub("_monthly","",ens),"_climatology",sep="")
+    if (!file.exists(oClim)) {dir.create(oClim)}
+    
+    #list of variables
+    vnList <- c("pr","rd","tas","dtr","tasmax","tasmin")
+    #loop through variables
+    for (vn in vnList) {
+      #vn <- vnList[1]
+      cat("\nvariable:",vn,"\n")
+      
+      #input folder (ensemble level)
+      ensDir <- paste(gcmDir, "/", ens, sep="")
+      m_seq <- 1:12; m_seq[which(m_seq < 10)] <- paste("0",m_seq[which(m_seq < 10)],sep="")
+      for (mth in m_seq) {
+        #mth <- m_seq[1]
+        cat(mth,". ",sep="")
+        
+        #if the resulting file does not exist then process else do nothing
+        if (!file.exists(paste(oClim,"/",vn,"_",mth,".tif",sep=""))) {
+          #make, check list of files, and remove any NAs
+          mfList <- paste(ensDir,"/",yi:yf,"/",vn,"_",mth,".tif",sep="")
+          mfList <- as.character(sapply(mfList,checkExists)) #check existence of files
+          mfList <- mfList[which(!is.na(mfList))]
+          
+          #if all files are NA, meaning there is nothing, don't calculate anything
+          if (length(mfList) > 0) {
+            #load stack of files
+            #rstk <- stack(mfList)
+            
+            #here need to check the mean of these rasters and then load the raster stack
+            rstk <- sapply(mfList,checkMaxMin,vn=vn)
+            rstk <- stack(rstk)
+            
+            #calculate mean
+            rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
+            #write resulting raster
+            rs <- writeRaster(rs,paste(oClim,"/",vn,"_",mth,".tif",sep=""),format="GTiff")
+          }
+        }
+      }
+    }
+  }
+}
+
+
+########################################################
+#check if a file exists, to be used in an "*apply" command
+checkMaxMin <- function(x,vn) {
+  x <- raster(x)
+  if (vn == "pr") {
+    x[which(x[] > 10000)] <- NA
+    x[which(x[] < 0)] <- NA
+  } else if (vn == "tas") {
+    x[which(x[] > 100)] <- NA
+    x[which(x[] < -100)] <- NA
+  } else if (vn == "tasmax") {
+    x[which(x[] > 100)] <- NA
+    x[which(x[] < -100)] <- NA
+  } else if (vn == "tasmin") {
+    x[which(x[] > 100)] <- NA
+    x[which(x[] < -100)] <- NA
+  } else if (vn == "dtr") {
+    x[which(x[] > 100)] <- NA
+    x[which(x[] < 0)] <- NA
+  } else if (vn == "rd") {
+    x[which(x[] > 32)] <- NA
+    x[which(x[] < 0)] <- NA
+  }
+  return(x)
+}
+
+
+
+########################################################
+#check if a file exists, to be used in an "*apply" command
+checkExists <- function(x) {
+  if (file.exists(x)) {y <- x} else {y <- NA}
+  return(y)
+}
+
+
 ########################################################
 #wrapper function for parallel processing of the monthly time series calculation
 ########################################################
