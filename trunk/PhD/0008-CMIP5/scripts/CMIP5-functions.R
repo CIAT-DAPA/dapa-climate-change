@@ -87,7 +87,6 @@ wrapper_monthly_TS <- function(i) {
                 #if the number of missing days is above the maximum allowed (>50%)
                 #for minimum temperature
                 if (dif_nf1 > max_allow) {
-                  cat(paste(flist1[1]),"\n")
                   rs <- raster(paste(yrDir1,"/",flist1[1],sep=""),varname="tasmin")
                   rs[] <- NA
                   rs1 <- rs
@@ -101,7 +100,6 @@ wrapper_monthly_TS <- function(i) {
                 #if the number of missing days is above the maximum allowed (>50%)
                 #for maximum temperature
                 if (dif_nf2 > max_allow) {
-                  cat(paste(flist2[1]),"\n")
                   rs <- raster(paste(yrDir2,"/",flist2[1],sep=""),varname="tasmax")
                   rs[] <- NA
                   rs2 <- rs
