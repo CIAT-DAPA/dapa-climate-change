@@ -11,12 +11,10 @@ library(raster)
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #mdDir <- "/nfs/a102/eejarv/CMIP5"
-#i <- 1 #gcm to process
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #mdDir <- "V:/eejarv/CMIP5"
-#i <- 1 #gcm to process
 
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
@@ -164,15 +162,15 @@ orgDir <- paste(ciData,"/yearly_files",sep="")
 outDir <- paste(orgDir,"/grouped_output-global",sep="")
 if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
 
-###
+### organise the daily data into a proper format
 wst <- read.csv(paste(metaFolder,"/stations_rv5.csv",sep=""))
-for (year in 1961:2000) {
+for (year in yi:yf) {
   omx <- loadWriteYear(year,wst,csvDir,outDir)
   #count NAs for each of the days
   allNAs <- apply(omx,2,countNADays); allNAs <- c(year,allNAs[5:370])
   
   #rbind all the stations
-  if (year==1960) {
+  if (year==yi) {
     allStNAs <- allNAs
   } else {
     allStNAs <- rbind(allStNAs,allNAs)
@@ -181,6 +179,7 @@ for (year in 1961:2000) {
 
 write.csv(allStNAs,paste(outDir,"/NA-count.csv",sep=""),row.names=F,quote=F)
 
+###
 
 #d. merge them both in one single dataset
 
