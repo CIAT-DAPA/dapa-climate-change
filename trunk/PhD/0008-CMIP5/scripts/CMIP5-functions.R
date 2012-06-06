@@ -4,6 +4,72 @@
 
 ##############################################################################
 ##############################################################################
+#Format properly the CIAT daily rainfall data
+loadWriteYear <- function(yr,wstSel,csvDir,outDir) {
+  if (!file.exists(paste(outDir,"/",yr,".csv",sep=""))) {
+    
+    cat("\nprocessing year",yr,"\n")
+    for (i in 1:nrow(wstSel)) {
+      wsID <- wstSel$FILE[i]
+      wsLon <- wstSel$FF_LON[i]
+      wsLat <- wstSel$FF_LAT[i]
+      wsAlt <- wstSel$ALT[i]
+      
+      if (i == 1) cat("started",i,"-",paste(wsID),"\n")
+      if (i %% 100 == 0) cat("station",i,"-",paste(wsID),"\n")
+      
+      csvFile <- gsub("\\.rnf.gz","\\.csv",wsID)
+      
+      #reading csv file
+      rData <- read.csv(paste(csvDir,"/",csvFile,sep=""))
+      
+      #get the data
+      yrData <- rData[which(rData$YEAR == yr),]
+      
+      #divide by 10 to get data in mm
+      yrData[,paste("X",1:366,sep="")] <- yrData[,paste("X",1:366,sep="")]*0.1
+      
+      if (nrow(yrData) == 0) {
+        out_row <- data.frame(ID=paste(wsID),LON=wsLon,LAT=wsLat,ALT=wsAlt,t(rep(NA,times=366)))
+      } else {
+        out_row <- yrData
+        out_row$FILE <- NULL; out_row$NAME <- NULL; out_row$ISO <- NULL; out_row$YEAR <- NULL
+        out_row <- cbind(ID=paste(wsID),out_row)
+      }
+      
+      #append the data
+      if (i==1) {
+        out_all <- out_row
+      } else {
+        out_all <- rbind(out_all,out_row)
+      }
+      
+    }
+    
+    names(out_all) <- c("ID","LON","LAT","ALT",1:366)
+    write.csv(out_all,paste(outDir,"/",yr,".csv",sep=""),quote=F,row.names=F)
+  } else {
+    cat("that year was already processed\n")
+    out_all <- read.csv(paste(outDir,"/",yr,".csv",sep=""))
+  }
+  return(out_all)
+}
+
+
+##############################################################################
+##############################################################################
+#Calculate diurnal temperature range for a series of 24 values where the first 12
+#correspond to tmax, and the second 12 correspond to tmin. To be used with *apply
+calc_dtr <- function(x) {
+  tmax <- x[1:12]
+  tmin <- x[13:24]
+  dtr <- tmax-tmin
+  return(dtr)
+}
+
+
+##############################################################################
+##############################################################################
 #Function to process everything into a folder
 AsctoGTiff <- function(this_dir) {
   ascList <- list.files(this_dir,pattern="\\.asc")
