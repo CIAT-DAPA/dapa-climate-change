@@ -74,12 +74,12 @@ setup$BDIR <- bDir
 setup$ZONE <- all_runs$zone[run]
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
-setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_two_new_sel",sep="")
+setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel",sep="")
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,version,"_",setup$METHOD,".txt",sep="")
 setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
-setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
+setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_irr.txt",sep="")
 setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,version,sep="")
-setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,version,sep="")
+setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_calz",setup$ZONE,version,sep="")
 setup$WTH_ROOT <- "ingc"
 setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_calz",setup$ZONE,version,".txt",sep="")
 setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_calz",setup$ZONE,version,".txt",sep="")

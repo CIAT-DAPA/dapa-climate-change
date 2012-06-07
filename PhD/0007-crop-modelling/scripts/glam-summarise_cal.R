@@ -17,13 +17,13 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
-runs_set <- "mult_gridcell_kh_two_new_sel"
+runs_set <- "mult_gridcell_kh_ra"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
 #load cell details
 #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
-cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection.csv",sep=""))
+cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v1.csv",sep=""))
 
 #get the mask needed (to which data will be appended)
 ncFile <- paste(bDir,"/../climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
@@ -204,9 +204,16 @@ if (!file.exists(paste(out_rs_dir,"/sdobs_by_sdpred.asc",sep=""))) {
   sdo_sdp <- raster(paste(out_rs_dir,"/sdobs_by_sdpred.asc",sep=""))
 }
 
+#check which cells do actually have less than .2 in AHRATIO
+cellNo <- cells$CELL[which(cells$AHRATIO<.2)]
+
 
 #plot ygp, scale 0 to 1
 rs <- raster(paste(out_rs_dir,"/ygp.asc",sep=""))
+rs[cellNo] <- NA
+xyNo <- xyFromCell(rs,cellNo)
+xyNo <- SpatialPoints(xyNo)
+
 ht <- 1000
 fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
 wt <- ht*(fct+.1)
@@ -215,17 +222,18 @@ brks <- seq(0,1,length.out=21)
 brks.lab <- round(brks,2)
 cols <- c(colorRampPalette(c("red","orange","yellow","green","dark green"))(length(brks)))
 wld <- list("sp.polygons",wrld_simpl,lwd=0.8,first=F)
+pts1 <- list("sp.points", xyNo, pch = 4, col = "black", cex=0.75, lwd=0.75,first=F)
 grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=5), norths=seq(-90,90,by=5))
 grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 #plot calibration points on top
 xycal <- cbind(x=cells$X[which(cells$ISSEL_F==1)],y=cells$Y[which(cells$ISSEL_F==1)])
 xycal <- SpatialPoints(xycal)
-pts <- list("sp.points", xycal, pch = 4, col = "black", cex=0.6, lwd=0.6,first=F)
+pts2 <- list("sp.points", xycal, pch = 20, col = "black", cex=0.7, lwd=0.6,first=F)
 
 tiffName <- paste(out_rs_dir,"/ygp.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(pts,wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts1,pts2,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -234,7 +242,9 @@ dev.off()
 
 #plot y_obs and y_pred, scale should be set by both
 rso <- raster(paste(out_rs_dir,"/y_obs.asc",sep=""))
+rso[cellNo] <- NA
 rsp <- raster(paste(out_rs_dir,"/y_pred.asc",sep=""))
+rsp[cellNo] <- NA
 ht <- 1000
 fct <- (rso@extent@xmin-rso@extent@xmax)/(rso@extent@ymin-rso@extent@ymax)
 wt <- ht*(fct+.1)
@@ -248,14 +258,14 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/y_obs.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rso,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rso,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
 
 tiffName <- paste(out_rs_dir,"/y_pred.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rsp,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rsp,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -264,7 +274,9 @@ dev.off()
 
 #plot ysd_obs and ysd_pred, scale should be set by both
 rso <- raster(paste(out_rs_dir,"/ysd_obs.asc",sep=""))
+rso[cellNo] <- NA
 rsp <- raster(paste(out_rs_dir,"/ysd_pred.asc",sep=""))
+rsp[cellNo] <- NA
 ht <- 1000
 fct <- (rso@extent@xmin-rso@extent@xmax)/(rso@extent@ymin-rso@extent@ymax)
 wt <- ht*(fct+.1)
@@ -278,14 +290,14 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/ysd_obs.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rso,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rso,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
 
 tiffName <- paste(out_rs_dir,"/ysd_pred.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rsp,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rsp,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -299,6 +311,7 @@ wt <- ht*(fct+.1)
 brks <- seq(0,2,by=.2)
 brks.lab <- round(brks,2)
 rs <- yo_yp
+rs[cellNo] <- NA
 rs[which(rs[] > 2)] <- 2
 
 cols <- c(colorRampPalette(c("dark green","green","yellow","orange","red"))(length(brks)))
@@ -308,7 +321,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/yobs_by_ypred.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -320,6 +333,7 @@ fct <- (sdo_sdp@extent@xmin-sdo_sdp@extent@xmax)/(sdo_sdp@extent@ymin-sdo_sdp@ex
 wt <- ht*(fct+.1)
 
 rs <- sdo_sdp
+rs[cellNo] <- NA
 rs[which(rs[] > 2)] <- 2
 
 brks <- seq(0,2,by=.2)
@@ -331,7 +345,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/sdobs_by_sdpred.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -339,6 +353,7 @@ dev.off()
 
 #correlation coefficient and those gridcells with positive and strong (p<0.05) plotted on top
 rs <- raster(paste(out_rs_dir,"/ccoef.asc",sep=""))
+rs[cellNo] <- NA
 ht <- 1000
 fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
 wt <- ht*(fct+.1)
@@ -351,14 +366,14 @@ grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=5), norths=seq(-90,90,by=5))
 grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 #plot significant and positive correlations on top
-xysig <- cbind(x=out_all$X[which(out_all$CCOEF > 0 & out_all$PVAL <= 0.05)],
-               y=out_all$Y[which(out_all$CCOEF > 0 & out_all$PVAL <= 0.05)])
+xysig <- cbind(x=out_all$X[which(out_all$CCOEF > 0 & out_all$PVAL <= 0.05 & cells$AHRATIO >= 0.2)],
+               y=out_all$Y[which(out_all$CCOEF > 0 & out_all$PVAL <= 0.05 & cells$AHRATIO >= 0.2)])
 xysig <- SpatialPoints(xysig)
-pts <- list("sp.points", xysig, pch = 20, col = "black", cex=0.75, lwd=0.6,first=F)
+pts2 <- list("sp.points", xysig, pch = 20, col = "black", cex=0.75, lwd=0.6,first=F)
 
 tiffName <- paste(out_rs_dir,"/ccoef.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(pts,wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts2,pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -367,6 +382,7 @@ dev.off()
 
 #rmse
 rs <- raster(paste(out_rs_dir,"/rmse.asc",sep=""))
+rs[cellNo] <- NA
 ht <- 1000
 fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
 wt <- ht*(fct+.1)
@@ -380,7 +396,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/rmse.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
@@ -388,6 +404,7 @@ dev.off()
 
 #percent rmse
 rs <- raster(paste(out_rs_dir,"/p_rmse.asc",sep=""))
+rs[cellNo] <- NA
 rs[which(rs[] > 100)] <- 101
 ht <- 1000
 fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
@@ -402,7 +419,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/p_rmse.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks.lab)
 dev.off()
@@ -410,6 +427,7 @@ dev.off()
 
 #optimal start of sowing window
 rs <- raster(paste(out_rs_dir,"/sow_date.asc",sep=""))
+rs[cellNo] <- NA
 ht <- 1000
 fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
 wt <- ht*(fct+.1)
@@ -423,7 +441,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 
 tiffName <- paste(out_rs_dir,"/sow_date.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
-spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+spplot(rs,sp.layout=list(pts1,wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks.lab)
 dev.off()
@@ -439,6 +457,37 @@ par(mar=c(3,3,1,1))
 plot(rs,legend=F)
 text(x=out_all$X,y=out_all$Y,labels=out_all$CELL,cex=0.55)
 plot(wrld_simpl,add=T,lwd=0.25)
+grid()
+dev.off()
+
+
+##scatter gram of spatial consistency
+out_all$AHRATIO <- cells$AHRATIO
+out_sct <- out_all[which(out_all$AHRATIO >= 0.2),]
+
+lims <- c(0,max(out_sct$Y_PRED,out_sct$Y_OBS))
+
+tiffName <- paste(out_rs_dir,"/yobs_ypred_xy.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(5,5,1,1))
+plot(out_sct$Y_PRED,out_sct$Y_OBS,pch=20,cex=0.75,xlim=lims,ylim=lims,
+     xlab="Predicted yield (kg/ha)",
+     ylab="Observed yield (kg/ha)")
+abline(0,1)
+grid()
+dev.off()
+
+
+lims <- c(0,max(out_sct$YSD_PRED,out_sct$YSD_OBS))
+
+
+tiffName <- paste(out_rs_dir,"/sdobs_sdpred_xy.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(5,5,1,1))
+plot(out_sct$YSD_PRED,out_sct$YSD_OBS,pch=20,cex=0.75,xlim=lims,ylim=lims,
+     xlab="Predicted yield s.d. (kg/ha)",
+     ylab="Observed yield s.d. (kg/ha)")
+abline(0,1)
 grid()
 dev.off()
 
