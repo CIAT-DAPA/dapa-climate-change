@@ -7,6 +7,13 @@
 #calculation, for ERA-40 data
 ########################################################
 wrapper_climatology_E40 <- function(m) {
+  #load packages
+  library(raster); library(rgdal)
+  
+  #source functions
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+  
   vnList <- c("prec","tasm")
   for (vn in vnList) {
     #vn <- vnList[1]
