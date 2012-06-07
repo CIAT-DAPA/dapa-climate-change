@@ -18,9 +18,9 @@ wrapper_climatology_E40 <- function(m) {
   for (vn in vnList) {
     #vn <- vnList[1]
     cat("processing variable",vn,"\n")
+    minDir <- paste(e40Dir,"/monthly_data_",vn,sep="")
+    oclDir <- paste(e40Dir,"/climatology_data_",vn,sep="") #output folder
     if (!file.exists(paste(oclDir,"/",vn,"_",m,".tif",sep=""))) {
-      minDir <- paste(e40Dir,"/monthly_data_",vn,sep="")
-      oclDir <- paste(e40Dir,"/climatology_data_",vn,sep="") #output folder
       if (!file.exists(oclDir)) {dir.create(oclDir)}
       rstk <- stack(paste(minDir,"/",yi:yf,"/",vn,"_",m,".tif",sep="")) #loading stack
       rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
