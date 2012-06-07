@@ -3,6 +3,58 @@
 #UoL / CCAFS / CIAT
 
 
+########################################################
+#wrapper function for parallel processing of the monthly 
+#time series calculation, for ERA40 daily data
+########################################################
+wrapper_monthly_E40 <- function(year) {
+  #load packages
+  library(raster); library(rgdal)
+  
+  #source functions
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+  
+  #loop the variables
+  vnList <- c("prec","tasm")
+  for (vn in vnList) {
+    cat("processing variable",vn,"\n")
+    vnDir <- paste(e40Dir,"/daily_data_",vn,sep="")
+    #vn <- vnList[1]
+    #year <- 1961
+    cat("\nprocessing year",year,"\n")
+    yrDir <- paste(vnDir,"/",year,sep="")
+    oyrDir <- paste(e40Dir,"/monthly_data_",vn,"/",year,sep="")
+    if (!file.exists(oyrDir)) {dir.create(oyrDir,recursive=T)}
+    
+    #create date grid
+    dg <- createDateGrid(year)
+    dg$MTH <- as.numeric(substr(dg$MTH.DAY,2,3))
+    dg$DAY <- as.numeric(substr(dg$MTH.DAY,5,6))
+    
+    for (m in 1:12) {
+      cat(m,".",sep="")
+      wdays <- dg$JD[which(dg$MTH==m)] #which days belong to this month
+      
+      #load stack and calculate total
+      rstk <- stack(paste(yrDir,"/",vn,"_",wdays,".asc",sep=""))
+      if (vn == "prec") {
+        rs <- calc(rstk,fun = function(x) {sum(x,na.rm=T)})
+      } else if (vn == "tasm") {
+        rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
+      }
+      
+      #write output raster
+      rs <- writeRaster(rs,paste(oyrDir,"/",vn,"_",m,".tif",sep=""),format="GTiff")
+      rm(rs); g=gc(); rm(g)
+      
+    }
+    cat("\n")
+    
+  }
+}
+
+
 ##############################################################################
 ##############################################################################
 #calculate the monthly total rainfall for CIAT data. Total would be calculated
