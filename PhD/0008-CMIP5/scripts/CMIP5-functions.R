@@ -2,6 +2,27 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+########################################################
+#wrapper function for parallel processing of the climatology 
+#calculation, for ERA-40 data
+########################################################
+wrapper_climatology_E40 <- function(m) {
+  vnList <- c("prec","tasm")
+  for (vn in vnList) {
+    #vn <- vnList[1]
+    cat("processing variable",vn,"\n")
+    if (!file.exists(paste(oclDir,"/",vn,"_",m,".tif",sep=""))) {
+      minDir <- paste(e40Dir,"/monthly_data_",vn,sep="")
+      oclDir <- paste(e40Dir,"/climatology_data_",vn,sep="") #output folder
+      if (!file.exists(oclDir)) {dir.create(oclDir)}
+      rstk <- stack(paste(minDir,"/",yi:yf,"/",vn,"_",m,".tif",sep="")) #loading stack
+      rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
+      rs <- writeRaster(rs,paste(oclDir,"/",vn,"_",m,".tif",sep=""),format="GTiff")
+      rm(rs); g=gc(); rm(g)
+    }
+  }
+}
+
 
 ########################################################
 #wrapper function for parallel processing of the monthly 
@@ -34,20 +55,22 @@ wrapper_monthly_E40 <- function(year) {
     
     for (m in 1:12) {
       cat(m,".",sep="")
-      wdays <- dg$JD[which(dg$MTH==m)] #which days belong to this month
       
-      #load stack and calculate total
-      rstk <- stack(paste(yrDir,"/",vn,"_",wdays,".asc",sep=""))
-      if (vn == "prec") {
-        rs <- calc(rstk,fun = function(x) {sum(x,na.rm=T)})
-      } else if (vn == "tasm") {
-        rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
+      if (!file.exists(paste(oyrDir,"/",vn,"_",m,".tif",sep=""))) {
+        wdays <- dg$JD[which(dg$MTH==m)] #which days belong to this month
+        
+        #load stack and calculate total
+        rstk <- stack(paste(yrDir,"/",vn,"_",wdays,".asc",sep=""))
+        if (vn == "prec") {
+          rs <- calc(rstk,fun = function(x) {sum(x,na.rm=T)})
+        } else if (vn == "tasm") {
+          rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
+        }
+        
+        #write output raster
+        rs <- writeRaster(rs,paste(oyrDir,"/",vn,"_",m,".tif",sep=""),format="GTiff")
+        rm(rs); g=gc(); rm(g)
       }
-      
-      #write output raster
-      rs <- writeRaster(rs,paste(oyrDir,"/",vn,"_",m,".tif",sep=""),format="GTiff")
-      rm(rs); g=gc(); rm(g)
-      
     }
     cat("\n")
     
