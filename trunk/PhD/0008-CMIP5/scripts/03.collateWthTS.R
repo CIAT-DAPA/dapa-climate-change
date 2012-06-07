@@ -185,7 +185,7 @@ write.csv(allStNAs,paste(outDir,"/NA-count.csv",sep=""),row.names=F,quote=F)
 ################################################################################
 ################################################################################
 #per year now read the CIAT data and calculate total rainfall per month only if
-#all days are present per months
+#all days are present in the month
 
 omDir <- paste(orgDir,"/grouped_monthly-global",sep="")
 if (!file.exists(omDir)) {dir.create(omDir,recursive=T)}

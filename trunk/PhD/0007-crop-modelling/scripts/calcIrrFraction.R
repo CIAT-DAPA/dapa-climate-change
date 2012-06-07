@@ -133,7 +133,7 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 ##########################################
 #harvested area!!!
 cat("HA: Now the plot \n")
-tiffName <- paste(imgOutDir,"/mean_area_harvested.tif",sep="")
+tiffName <- paste(imgOutDir,"/mean_area_harvested2.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
 #par(mar=c(3,3,1,3.5))
 spplot(mha,sp.layout=list(pts,wld,grli),col.regions=cols,cuts=50,cex=0.5,
