@@ -180,7 +180,7 @@ calc_dtr <- function(x) {
 ##############################################################################
 ##############################################################################
 #Function to process everything into a folder
-AsctoGTiff <- function(this_dir) {
+AsctoGTiff <- function(this_dir,keepASC=F) {
   ascList <- list.files(this_dir,pattern="\\.asc")
   if (length(grep("\\.gz",ascList)) > 0) {
     ascList <- ascList[-grep("\\.gz",ascList)]
@@ -198,14 +198,20 @@ AsctoGTiff <- function(this_dir) {
         rs <- writeRaster(rs,paste(this_dir,"/",tifName,sep=""),format="GTiff")
       }
       
-      if (!file.exists(paste(this_dir,"/",asc,".gz",sep=""))) {
-        setwd(this_dir)
-        system(paste("7z a -tgzip",paste(asc,".gz",sep=""),asc))
+      if (keepASC) {
+        if (!file.exists(paste(this_dir,"/",asc,".gz",sep=""))) {
+          setwd(this_dir)
+          system(paste("7z a -tgzip",paste(asc,".gz",sep=""),asc))
+        }
       }
       
       if (file.exists(paste(this_dir,"/",asc,sep=""))) {
         if (file.exists(paste(this_dir,"/",tifName,sep=""))) {
-          if (file.exists(paste(this_dir,"/",asc,".gz",sep=""))) {
+          if (keepASC) {
+            if (file.exists(paste(this_dir,"/",asc,".gz",sep=""))) {
+              x <- file.remove(paste(this_dir,"/",asc,sep=""))
+            }
+          } else {
             x <- file.remove(paste(this_dir,"/",asc,sep=""))
           }
         }

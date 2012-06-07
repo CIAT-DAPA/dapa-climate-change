@@ -61,6 +61,17 @@ if (!file.exists(paste(ouInData,"/cru-data/_ready.ctr",sep=""))) {
   close(cf)
 }
 
+
+#re-format the CRU time series
+if (!file.exists(paste(ouInData,"/cru-ts-data/_ready.ctr",sep=""))) {
+  x <- AsctoGTiff(paste(ouInData,"/cru-data",sep=""),keepASC=F)
+  cat("cru timeseries data were copied, tiff converted and gzipped on",date(),"by",
+      paste(as.data.frame(t(Sys.info()))$login),"@",
+      paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cf)
+  close(cf)
+}
+
+
 #now copy worldclim weather stations
 if (!file.exists(paste(ouInData,"/wcl-weather-stations/_ready.ctr",sep=""))) {
   x <- file.copy(from=paste(inLocal,"/wcl-weather-stations",sep=""),to=ouInData,recursive=T)
