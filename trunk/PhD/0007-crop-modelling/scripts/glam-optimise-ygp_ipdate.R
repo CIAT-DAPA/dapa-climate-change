@@ -36,8 +36,6 @@ if (class(try(get("zone"),silent=T)) == "try-error") {
   stop("zone to be calibrated needs to be set")
 }
 
-#source(paste(src.dir,"/glam-optimise-ygp_ipdate.R",sep=""))
-
 #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
 #running and optimising GLAM
 
@@ -71,12 +69,12 @@ for (ci in ciList) {
   setup$ZONE <- cells$ZONE[ci]
   setup$METHOD <- "lin"
   setup$CROPNAME <- "gnut"
-  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_two_new_sel",sep="")
+  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel",sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
-  setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
+  setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
   setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
-  setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
+  setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
   setup$WTH_ROOT <- "ingc"
   setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
   setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
