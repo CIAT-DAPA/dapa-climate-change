@@ -73,8 +73,7 @@ mean_climate_skill <- function(this_proc) {
         fPres <- as.character(sapply(paste(clGCM,"/",fList,sep=""),checkExists))
       }
       
-      #if the monthly files in fact exist
-      if (length(which(is.na(fPres))) == 0) {
+      if (length(fPres) != 0) {
         #gcm data loading
         gcm_data <- stack(fPres) #load all GCM data
         gcm_data <- rotate(gcm_data) #rotate the GCM data so that it matches the -180 to 180 system
