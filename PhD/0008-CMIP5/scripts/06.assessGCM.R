@@ -70,27 +70,8 @@ procList <- expand.grid(GCM=gcmList,ISO=isoList)
 #   - slope (origin-forced)
 #   - rmse
 
-#checking those that are already processed
-ndList <- c()
-for (i in 1:nrow(procList)) {
-  iso <- paste(procList$ISO[i])
-  reg <- paste(regions$REGION[which(regions$ISO == iso)])
-  gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
-  ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
-  
-  oDir <- paste(outputDD,"/",reg,"/",iso,sep="")
-  procDir <- paste(oDir,"/x.proc",sep="")
-  for (vid in 1:3) {
-    vn_gcm <- paste(vnList$GCM[vid]) #variable name
-    procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
-    if (!file.exists(procFil)) {
-      ndList <- c(ndList,i)
-    }
-  }
-}
-ndList <- unique(ndList)
-procList <- procList[ndList,]
-row.names(procList) <- 1:nrow(procList)
+#check those that are done already
+procList <- check_done(procList)
 
 #determine number of CPUs
 ncpus <- nrow(procList)
@@ -168,10 +149,12 @@ for (vid in 1:3) {
   procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
   if (!file.exists(procFil)) {
     sc_gcm <- scList$GCM[vid]
-    clGCM <- paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly",sep="")
-    fList <- list.files(clGCM,pattern=paste(vn_gcm,"_",sep=""))
-    fPres <- as.character(sapply(paste(clGCM,"/",fList,sep=""),checkExists))
+    tsGCM <- paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly",sep="")
     
+    m <- 1; if (m < 10) {mth <- paste("0",m,sep="")} else {mth <- paste(m)}
+    fList <- paste(tsGCM,"/",yi:yf,"/",vn_gcm,"_",mth,".tif",sep="")
+    fPres <- as.character(sapply(fList,checkExists))
+    fList <- data.frame(PRESENT=NA,FILE=fPres)
     
     
     
