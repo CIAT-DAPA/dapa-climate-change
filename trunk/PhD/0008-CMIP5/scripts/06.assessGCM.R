@@ -120,7 +120,7 @@ sfStop()
 yi <- 1961
 yf <- 2000
 
-this_proc <- 1
+this_proc <- 65
 
 #here the process starts for a given country-gcm_ens combination
 iso <- paste(procList$ISO[this_proc])
@@ -151,11 +151,35 @@ for (vid in 1:3) {
     sc_gcm <- scList$GCM[vid]
     tsGCM <- paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly",sep="")
     
-    m <- 1; if (m < 10) {mth <- paste("0",m,sep="")} else {mth <- paste(m)}
-    fList <- paste(tsGCM,"/",yi:yf,"/",vn_gcm,"_",mth,".tif",sep="")
-    fPres <- as.character(sapply(fList,checkExists))
-    fList <- data.frame(PRESENT=NA,FILE=fPres)
-    
+    #here loop through months
+    for (m in 1:12) {
+      m <- 1; if (m < 10) {mth <- paste("0",m,sep="")} else {mth <- paste(m)}
+      fList <- paste(tsGCM,"/",yi:yf,"/",vn_gcm,"_",mth,".tif",sep="")
+      fPres <- as.character(sapply(fList,checkExists))
+      fList <- data.frame(YEAR=yi:yf,PRESENT=F,FILE=fPres)
+      fList$PRESENT[which(!is.na(fList$FILE))] <- T
+      fList$FILE <- paste(fList$FILE)
+      fList$FILE[which(!fList$PRESENT)] <- paste(mdDir,"/baseline/",gcm,"/",ens,"_climatology/pr_01.tif",sep="")
+      
+      fPres <- fList$FILE
+      gcm_data <- stack(fPres) #load all GCM data
+      gcm_data <- rotate(gcm_data) #rotate the GCM data so that it matches the -180 to 180 system
+      msk <- createMask(shp,gcm_data[[1]]) #create a mask with the shapefile with resolution of gcm
+      gcm_data <- crop(gcm_data,msk) #cut gcm data to extent of country mask
+      xxx_data <- gcm_data
+      xxx_data[[1]][] <- NA
+      #those that are NA for files need to be turned into NAs in whole file general
+      
+      xyNA <- xyFromCell(msk,which(is.na(msk[]))) #get the locations that are NA in the mask
+      xy <- as.data.frame(xyFromCell(msk,which(!is.na(msk[])))) #which gridcells are to be calculated
+      gcm_data[cellFromXY(gcm_data,xyNA)] <- NA #set anything outside the actual country mask to NA
+      gcm_vals <- extract(gcm_data,xy) #extract GCM data
+      gcm_vals <- gcm_vals[,c(12,1:11)] * sc_gcm #re-order and scale
+      
+      
+      
+      
+    }
     
     
   }
