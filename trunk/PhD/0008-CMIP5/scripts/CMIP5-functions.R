@@ -2,6 +2,33 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+##############################################################################
+#checking comparisons that are already processed
+##############################################################################
+check_done <- function(procList) {
+  ndList <- c()
+  for (i in 1:nrow(procList)) {
+    iso <- paste(procList$ISO[i])
+    reg <- paste(regions$REGION[which(regions$ISO == iso)])
+    gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
+    ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
+    
+    oDir <- paste(outputDD,"/",reg,"/",iso,sep="")
+    procDir <- paste(oDir,"/x.proc",sep="")
+    for (vid in 1:3) {
+      vn_gcm <- paste(vnList$GCM[vid]) #variable name
+      procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
+      if (!file.exists(procFil)) {
+        ndList <- c(ndList,i)
+      }
+    }
+  }
+  ndList <- unique(ndList)
+  procList <- procList[ndList,]
+  row.names(procList) <- 1:nrow(procList)
+  return(procList)
+}
+
 
 ##############################################################################
 #### function to assess mean climate of a gcm against four obs. datasets######
