@@ -18,6 +18,10 @@ library(raster); library(rgdal); library(maptools)
 #mdDir <- "V:/eejarv/CMIP5"
 #e40Dir <- "W:/eejarv/PhD-work/crop-modelling/climate-data/ERA-40"
 
+#source functions
+source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+
 #input directories and configurations
 inputDD <- paste(mdDir,"/assessment/input-data",sep="")
 outputDD <- paste(mdDir,"/assessment/output-data",sep="")
@@ -27,13 +31,37 @@ clWCL <- paste(inputDD,"/wcl-data",sep="")
 clCRU <- paste(inputDD,"/cru-data",sep="")
 clE40 <- e40Dir
 clWST <- paste(inputDD,"/wcl-weather-stations",sep="")
-clGCM <- paste(mdDir,"/baseline",sep="")
 
 #time series data
 tsWST <- paste(inputDD,"/all-weather-stations",sep="")
 tsE40 <- e40Dir
-tsCRU <- 
+tsCRU <- paste(inputDD,"/cru-ts-data",sep="")
+tsGCM <- paste(mdDir,"/baseline",sep="")
 
+#administrative areas data
+admDir <- paste(inputDD,"/adm-data",sep="")
+
+#list of gcms and countries/regions
+gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
+regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
+
+#variables to analyse
+vnList <- data.frame(VID=1:3,GCM=c("pr","tas","dtr"),WCL=c("prec","tmean","dtr"),
+                     CL_CRU=c("prec","tmean","dtr"),TS_CRU=c("pre","tmp","dtr"),
+                     E40=c("prec","tasm",NA),CL_WST=c("rain","tean","dtr"),
+                     TS_WST=c("pr","tas","dtr"))
+
+#scaling factors to datasets per variable
+scList <- data.frame(VID=1:3,GCM=c(1,1,1),WCL=c(1,1,1),
+                     CL_CRU=c(1,1,1),TS_CRU=c(0.1,0.1,0.1),
+                     E40=c(1,1,NA),CL_WST=c(1,1,1),
+                     TS_WST=c(1,0.1,0.1))
+
+
+#processes to complete
+gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
+isoList <- regions$ISO
+procList <- expand.grid(GCM=gcmList,ISO=isoList)
 
 
 #a. mean climates: for each area using the values of GCM gridcells and the mean
@@ -41,6 +69,86 @@ tsCRU <-
 #   - pearson & p-value (origin-forced)
 #   - slope (origin-forced)
 #   - rmse
+
+#checking those that are already processed
+ndList <- c()
+for (i in 1:nrow(procList)) {
+  iso <- paste(procList$ISO[i])
+  reg <- paste(regions$REGION[which(regions$ISO == iso)])
+  gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
+  
+  oDir <- paste(outputDD,"/",reg,"/",iso,sep="")
+  procDir <- paste(oDir,"/x.proc",sep="")
+  for (vid in 1:3) {
+    vn_gcm <- paste(vnList$GCM[vid]) #variable name
+    procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
+    if (!file.exists(procFil)) {
+      ndList <- c(ndList,i)
+    }
+  }
+}
+ndList <- unique(ndList)
+procList <- procList[ndList,]
+row.names(procList) <- 1:nrow(procList)
+
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("e40Dir")
+sfExport("inputDD")
+sfExport("outputDD")
+sfExport("clWCL")
+sfExport("clCRU")
+sfExport("clE40")
+sfExport("clWST")
+sfExport("admDir")
+sfExport("vnList")
+sfExport("scList")
+sfExport("procList")
+
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),mean_climate_skill))
+
+#stop the cluster
+sfStop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for (i in 1:10) {
+  x <- mean_climate_skill(this_proc=i)
+}
+
+
+
+
+
+
+
 
 
 
@@ -52,4 +160,10 @@ tsCRU <-
 #   - pearson & p-value (origin-forced)
 #   - slope (origin-forced)
 #   - rmse
+
+
+
+
+
+
 

@@ -2,6 +2,308 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+
+##############################################################################
+#### function to assess mean climate of a gcm against four obs. datasets######
+##############################################################################
+mean_climate_skill <- function(this_proc) {
+  library(raster); library(rgdal); library(maptools) #package loading
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep="")) #source functions
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep="")) #source functions
+  
+  #here the process starts for a given country-gcm_ens combination
+  iso <- paste(procList$ISO[this_proc])
+  reg <- paste(regions$REGION[which(regions$ISO == iso)])
+  gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("process started for",iso,"-",gcm,"-",ens,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  oDir <- paste(outputDD,"/",reg,"/",iso,sep="") #create output directory
+  if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
+  procDir <- paste(oDir,"/x.proc",sep="") #output directory for .proc files
+  if (!file.exists(procDir)) {dir.create(procDir)}
+  
+  #load shapefile
+  shp <- readShapePoly(paste(admDir,"/",reg,"/",iso,"_adm/",iso,"0.shp",sep=""))
+  
+  #load GCM climatology data
+  for (vid in 1:3) {
+    if (vid == 1) {calc_mean <- T} else {calc_mean <- F}
+    vn_gcm <- paste(vnList$GCM[vid]) #variable name
+    cat("processing variable",vid,":",vn_gcm,"\n")
+    
+    procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
+    if (!file.exists(procFil)) {
+      sc_gcm <- scList$GCM[vid]
+      clGCM <- paste(mdDir,"/baseline/",gcm,"/",ens,"_climatology",sep="")
+      fList <- list.files(clGCM,pattern=paste(vn_gcm,"_",sep=""))
+      fPres <- as.character(sapply(paste(clGCM,"/",fList,sep=""),checkExists))
+      
+      #if the monthly files in fact exist
+      if (length(which(is.na(fPres))) == 0) {
+        #gcm data loading
+        gcm_data <- stack(fPres) #load all GCM data
+        gcm_data <- rotate(gcm_data) #rotate the GCM data so that it matches the -180 to 180 system
+        msk <- createMask(shp,gcm_data[[1]]) #create a mask with the shapefile with resolution of gcm
+        gcm_data <- crop(gcm_data,msk) #cut gcm data to extent of country mask
+        xyNA <- xyFromCell(msk,which(is.na(msk[]))) #get the locations that are NA in the mask
+        xy <- as.data.frame(xyFromCell(msk,which(!is.na(msk[])))) #which gridcells are to be calculated
+        gcm_data[cellFromXY(gcm_data,xyNA)] <- NA #set anything outside the actual country mask to NA
+        gcm_vals <- extract(gcm_data,xy) #extract GCM data
+        gcm_vals <- gcm_vals[,c(12,1:11)] * sc_gcm #re-order and scale
+        
+        #### worldclim data
+        vn_wcl <- paste(vnList$WCL[vid]) #variable name
+        sc_wcl <- scList$WCL[vid]
+        oclWCL <- paste(oDir,"/cl-WCL",sep="") #create output folder
+        if (!file.exists(oclWCL)) {dir.create(oclWCL)} #create output folder
+        if (!file.exists(paste(oclWCL,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          wcl_data <- stack(paste(clWCL,"/",vn_wcl,"_",1:12,".tif",sep="")) #load all worldclim data
+          wcl_data <- crop(wcl_data,msk) #cut worldclim data to extent of country mask
+          wcl_vals <- sapply(1:12,mean_high_res_stk,xy,wcl_data) #average of worldclim onto model grid
+          wcl_vals <- wcl_vals[,c(12,1:11)] * sc_wcl #re-order and scale
+          s_skill <- seasonal_skill(wcl_vals,gcm_vals,calc_mean) #assess seasonal skill using the two matrices
+          write.csv(s_skill,paste(oclWCL,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+          rm(wcl_data); g=gc()
+        }
+        
+        #### cru data 
+        vn_cru <- paste(vnList$CL_CRU[vid]) #variable name
+        sc_cru <- scList$CL_CRU[vid]
+        oclCRU <- paste(oDir,"/cl-CRU",sep="") #create output folder
+        if (!file.exists(oclCRU)) {dir.create(oclCRU)} #create output folder
+        if (!file.exists(paste(oclCRU,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          cru_data <- stack(paste(clCRU,"/",vn_cru,"_",1:12,".tif",sep="")) #load all cru data
+          cru_data <- crop(cru_data,msk) #cut cru data to extent of country mask
+          cru_vals <- sapply(1:12,mean_high_res_stk,xy,cru_data) #average of cru onto model grid
+          cru_vals <- cru_vals[,c(12,1:11)] * sc_cru #re-order and scale
+          s_skill <- seasonal_skill(cru_vals,gcm_vals,calc_mean) #assess seasonal skill using the two matrices
+          write.csv(s_skill,paste(oclCRU,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+          rm(cru_data); g=gc()
+        }
+        
+        #### era-40 data
+        vn_e40 <- paste(vnList$E40[vid])
+        sc_e40 <- scList$E40[vid]
+        if (vn_e40 != "NA") {
+          oclE40 <- paste(oDir,"/cl-E40",sep="") #create output folder
+          if (!file.exists(oclE40)) {dir.create(oclE40)} #create output folder
+          if (!file.exists(paste(oclE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+            e40_data <- stack(paste(clE40,"/climatology_data_",vn_e40,"/",vn_e40,"_",1:12,".tif",sep="")) #load all era40 data
+            e40_data <- crop(e40_data,msk) #cut era40 data to extent of country mask
+            e40_data <- resample(e40_data,msk,method="ngb")
+            e40_data[cellFromXY(e40_data,xyNA)] <- NA #set anything outside the actual country mask to NA
+            e40_vals <- extract(e40_data,xy) #extract era40 data
+            e40_vals <- e40_vals[,c(12,1:11)] * sc_e40 #re-order and scale
+            s_skill <- seasonal_skill(e40_vals,gcm_vals,calc_mean) #assess seasonal skill using the two matrices
+            write.csv(s_skill,paste(oclE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+            rm(e40_data); g=gc()
+          }
+        }
+        
+        #### clWST
+        vn_wst <- paste(vnList$CL_WST[vid])
+        sc_wst <- scList$CL_WST[vid]
+        oclWST <- paste(oDir,"/cl-WST",sep="") #create output folder
+        if (!file.exists(oclWST)) {dir.create(oclWST)} #create output folder
+        
+        if (!file.exists(paste(oclWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          wst_raw <- read.dbf(paste(clWST,"/wc_",vn_wst,"_stations.dbf",sep=""))
+          wst_raw <- wst_raw[which(!is.na(wst_raw$NYEARS)),]
+          wst_raw <- wst_raw[which(wst_raw$NYEARS >= 10),]
+          wst_raw$ISIN <- extract(msk,cbind(x=wst_raw$LONG,y=wst_raw$LAT))
+          wst_raw <- wst_raw[which(!is.na(wst_raw$ISIN)),]
+          wst_raw$ISIN <- NULL
+          wst_raw$CELL <- cellFromXY(msk,cbind(x=wst_raw$LONG,y=wst_raw$LAT))
+          wst_data <- cbind(wst_raw[,c("LONG","LAT",toupper(month.abb),"CELL")])
+          wst_data <- as.data.frame(t(sapply(unique(wst_data$CELL),getMean_points,wst_data)))
+          names(wst_data) <- c("CELL",toupper(month.abb))
+          xyMatch <- xy; xyMatch$CELL <- cellFromXY(msk,cbind(x=xy$x,y=xy$y))
+          wst_data <- merge(xyMatch,wst_data,by="CELL",all=T)
+          wst_vals <- as.matrix(wst_data[,toupper(month.abb)])
+          wst_vals <- wst_vals[,c(12,1:11)] * sc_wst #reorder and scale
+          s_skill <- seasonal_skill(wst_vals,gcm_vals,calc_mean) #assess seasonal skill using the two matrices
+          write.csv(s_skill,paste(oclWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+          rm(wst_raw); g=gc()
+        }
+        
+        
+      } else {
+        dum_vals <- matrix(data=NA,nrow=20,ncol=12)
+        s_skill <- seasonal_skill(dum_vals,dum_vals)
+        
+        oclWCL <- paste(oDir,"/cl-WCL",sep="") #create output folder
+        if (!file.exists(oclWCL)) {dir.create(oclWCL)} #create output folder
+        if (!file.exists(paste(oclWCL,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          write.csv(s_skill,paste(oclWCL,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+        }
+        
+        oclCRU <- paste(oDir,"/cl-CRU",sep="") #create output folder
+        if (!file.exists(oclCRU)) {dir.create(oclCRU)} #create output folder
+        if (!file.exists(paste(oclCRU,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          write.csv(s_skill,paste(oclCRU,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+        }
+        
+        oclWST <- paste(oDir,"/cl-WST",sep="") #create output folder
+        if (!file.exists(oclWST)) {dir.create(oclWST)} #create output folder
+        if (!file.exists(paste(oclWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          write.csv(s_skill,paste(oclWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+        }
+        
+        oclE40 <- paste(oDir,"/cl-E40",sep="") #create output folder
+        if (!file.exists(oclE40)) {dir.create(oclE40)} #create output folder
+        if (!file.exists(paste(oclE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          write.csv(s_skill,paste(oclE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""),row.names=F,quote=T) #write output
+        }
+      }
+      
+      pfx <- file(procFil,"w")
+      cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
+          paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=pfx)
+      close(pfx)
+      
+    }
+  }
+  return(oDir)
+}
+
+
+
+#### calculate seasonal skill for two matrices of data, either being pixels
+#### of a given domain, or being months of a given time series
+#### note that col 1 in matrix is december, and last is november
+###########################################################################
+###########################################################################
+seasonal_skill <- function(obs_vals,gcm_vals,calc_mean=T) {
+  #now calculate the metrics for the seasons and whole year
+  djf <- data.frame(OBS=(obs_vals[,1]+obs_vals[,2]+obs_vals[,3]),
+                    GCM=(gcm_vals[,1]+gcm_vals[,2]+gcm_vals[,3]))
+  mam <- data.frame(OBS=(obs_vals[,4]+obs_vals[,5]+obs_vals[,6]),
+                    GCM=(gcm_vals[,4]+gcm_vals[,5]+gcm_vals[,6]))
+  jja <- data.frame(OBS=(obs_vals[,7]+obs_vals[,8]+obs_vals[,9]),
+                    GCM=(gcm_vals[,7]+gcm_vals[,8]+gcm_vals[,9]))
+  son <- data.frame(OBS=(obs_vals[,10]+obs_vals[,11]+obs_vals[,12]),
+                    GCM=(gcm_vals[,10]+gcm_vals[,11]+gcm_vals[,12]))
+  ann <- data.frame(OBS=rowSums(obs_vals),GCM=rowSums(gcm_vals))
+  
+  if (calc_mean) {
+    djf <- djf / 3; mam <- mam / 3; jja <- jja / 3; son <- son / 3
+    ann <- ann / 12
+  }
+  
+  #calculate individual season skill metrics
+  djf_mx <- calc_metrics(djf)
+  mam_mx <- calc_metrics(mam)
+  jja_mx <- calc_metrics(jja)
+  son_mx <- calc_metrics(son)
+  ann_mx <- calc_metrics(ann)
+  
+  #final output matrix
+  all_mx <- rbind(djf_mx,mam_mx,jja_mx,son_mx,ann_mx)
+  row.names(all_mx) <- 1:5
+  all_mx <- cbind(SEASON=c("DJF","MAM","JJA","SON","ANN"),all_mx)
+  return(all_mx)
+}
+
+
+###########################################################################
+###########################################################################
+###calculate metrics for a given matrix of two columns
+calc_metrics <- function(vals) {
+  #remove any column with NA
+  vals <- vals[which(!is.na(vals$GCM)),]
+  vals <- vals[which(!is.na(vals$OBS)),]
+  
+  #Check if vals has any of its columns with full zeros
+  nz.GCM <- length(which(vals$GCM == 0))
+  nz.OBS <- length(which(vals$OBS == 0))
+  
+  #Check unique values in vals columns
+  uv.GCM <- length(unique(vals$GCM))
+  uv.OBS <- length(unique(vals$OBS))
+  
+  if (nrow(vals) > 0) {
+    if (nz.GCM == nrow(vals) | nz.OBS == nrow(vals) | uv.GCM == 1 | uv.OBS == 1) {
+      lfit <- lm(vals$OBS ~ vals$GCM - 1) #Fit forced to origin
+      pval <- NA
+    } else {
+      lfit <- lm(vals$OBS~vals$GCM-1)
+      pval <- pf(summary(lfit)$fstatistic[1],summary(lfit)$fstatistic[2],summary(lfit)$fstatistic[3],lower.tail=F)
+    }
+    ccoef <- lfit$coefficients * sqrt(vals$GCM %*% vals$GCM) / sqrt(vals$OBS %*% vals$OBS)
+    rsq <- summary(lfit)$r.squared
+    mbr <- as.numeric(lfit$coefficients)
+    rmse <- sqrt(sum((vals$OBS-vals$GCM)^2)/nrow(vals))
+  } else {
+    pval <- NA; ccoef <- NA; rsq <- NA; mbr <- NA; rmse <- NA
+  }
+  npts <- nrow(vals)
+  
+  out_df <- data.frame(CCOEF=ccoef,PVAL=pval,RSQ=rsq,MBR=mbr,RMSE=rmse,N=npts)
+  return(out_df)
+}
+
+
+####function to calculate the means of points for a given gridcell
+####to be used with *apply
+getMean_points <- function(i,vals) {
+  cellVals <- vals[which(vals$CELL==i),c(toupper(month.abb))]
+  mv <- cbind(CELL=i,t(colMeans(cellVals,na.rm=T)))
+  return(mv)
+}
+
+
+###function to calculate the means of high resolution cells for
+###a number of rasters in a rasterstack
+mean_high_res_stk <- function(m,xy,wcl_data) {
+  rs <- wcl_data[[m]]
+  new_vals <- sapply(1:nrow(xy),getMean_cells,xy,rs)
+  return(new_vals)
+}
+
+###function to calculate the mean of a number of gridcells that are
+###inside a coarse gridcell
+getMean_cells <- function(i,xy,rs) {
+  xrs <- xres(rs); yrs <- yres(rs)
+  xt <- extent(xy$x[i]-xrs/2,xy$x[i]+xrs/2,xy$y[i]-yrs/2,xy$y[i]+yrs/2)
+  rs_cell <- crop(rs,xt)
+  mv <- mean(rs_cell[],na.rm=T)
+  return(mv)
+}
+
+#Function to create a raster with a desired resolution from a shapefile
+createMask <- function(shp, rs) { #Function to create a mask
+  #Original bounding box
+  xres <- xres(rs)
+  yres <- yres(rs)
+  xn <- shp@bbox[1,1] - 2*xres
+  xx <- shp@bbox[1,2] + 2*xres
+  yn <- shp@bbox[2,1] - 2*yres
+  yx <- shp@bbox[2,2] + 2*yres
+  
+  #Modified bounding box to match resolution
+  disx <- round(xx - xn)
+  nc <- round(disx/xres)
+  disx <- nc*xres
+  xx <- xn + disx
+  
+  disy <- round(yx-yn)
+  nr <- round(disy/yres)
+  disy <- nr*yres
+  yx <- yn + disy
+  
+  #Create and rasterize the shapefile
+  xt <- extent(c(xn,xx,yn,yx))
+  rs <- crop(rs,xt); rs[] <- 1
+  rs <- rasterize(shp, rs, silent=T, getCover=T)
+  rs[which(rs[] == 0)] <- NA; rs[which(!is.na(rs[]))] <- 1
+  return(rs)
+}
+
+
 ########################################################
 #wrapper function for parallel processing of the climatology 
 #calculation, for ERA-40 data

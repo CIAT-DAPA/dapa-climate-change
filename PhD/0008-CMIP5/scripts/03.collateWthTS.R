@@ -64,8 +64,9 @@ if (!file.exists(paste(ouInData,"/cru-data/_ready.ctr",sep=""))) {
 
 #re-format the CRU time series
 if (!file.exists(paste(ouInData,"/cru-ts-data/_ready.ctr",sep=""))) {
-  x <- AsctoGTiff(paste(ouInData,"/cru-data",sep=""),keepASC=F)
-  cat("cru timeseries data were copied, tiff converted and gzipped on",date(),"by",
+  x <- AsctoGTiff(paste(ouInData,"/cru-ts-data",sep=""),keepASC=F)
+  cf <- file(paste(ouInData,"/cru-ts-data/_ready.ctr",sep=""),"w")
+  cat("cru timeseries data were copied, and tiff converted on",date(),"by",
       paste(as.data.frame(t(Sys.info()))$login),"@",
       paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cf)
   close(cf)
