@@ -67,7 +67,11 @@ mean_climate_skill <- function(this_proc) {
       sc_gcm <- scList$GCM[vid]
       clGCM <- paste(mdDir,"/baseline/",gcm,"/",ens,"_climatology",sep="")
       fList <- list.files(clGCM,pattern=paste(vn_gcm,"_",sep=""))
-      fPres <- as.character(sapply(paste(clGCM,"/",fList,sep=""),checkExists))
+      if (length(fList)==0) {
+        fPres <- fList
+      } else {
+        fPres <- as.character(sapply(paste(clGCM,"/",fList,sep=""),checkExists))
+      }
       
       #if the monthly files in fact exist
       if (length(which(is.na(fPres))) == 0) {
