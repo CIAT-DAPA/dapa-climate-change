@@ -31,7 +31,7 @@ mean_climate_skill <- function(this_proc) {
   
   #load GCM climatology data
   for (vid in 1:3) {
-    if (vid == 1) {calc_mean <- T} else {calc_mean <- F}
+    if (vid == 1) {calc_mean <- F} else {calc_mean <- T}
     vn_gcm <- paste(vnList$GCM[vid]) #variable name
     cat("processing variable",vid,":",vn_gcm,"\n")
     

@@ -116,6 +116,7 @@ sfExport("admDir")
 sfExport("vnList")
 sfExport("scList")
 sfExport("procList")
+sfExport("regions")
 
 
 #run the function in parallel
@@ -127,20 +128,54 @@ sfStop()
 
 
 
+#b. interannual variability: for each gridcell using the monthly series of GCMs,
+#                            matched with the data (scaled) from each source, calculate
+#                            the following:
+#   - pearson & p-value (origin-forced)
+#   - slope (origin-forced)
+#   - rmse
+
+#specify initial and final years
+yi <- 1961
+yf <- 2000
+
+this_proc <- 1
+
+#here the process starts for a given country-gcm_ens combination
+iso <- paste(procList$ISO[this_proc])
+reg <- paste(regions$REGION[which(regions$ISO == iso)])
+gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
+ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
+
+cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+cat("process started for",iso,"-",gcm,"-",ens,"\n")
+cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+
+oDir <- paste(outputDD,"/",reg,"/",iso,sep="") #create output directory
+if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
+procDir <- paste(oDir,"/y.proc",sep="") #output directory for .proc files
+if (!file.exists(procDir)) {dir.create(procDir)}
+
+#load shapefile
+shp <- readShapePoly(paste(admDir,"/",reg,"/",iso,"_adm/",iso,"0.shp",sep=""))
 
 
-
-
-
-
-
-
-
-
-
-
-for (i in 1:10) {
-  x <- mean_climate_skill(this_proc=i)
+for (vid in 1:3) {
+  if (vid == 1) {calc_mean <- F} else {calc_mean <- T}
+  vn_gcm <- paste(vnList$GCM[vid]) #variable name
+  cat("processing variable",vid,":",vn_gcm,"\n")
+  
+  procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
+  if (!file.exists(procFil)) {
+    sc_gcm <- scList$GCM[vid]
+    clGCM <- paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly",sep="")
+    fList <- list.files(clGCM,pattern=paste(vn_gcm,"_",sep=""))
+    fPres <- as.character(sapply(paste(clGCM,"/",fList,sep=""),checkExists))
+    
+    
+    
+    
+  }
 }
 
 
@@ -154,12 +189,6 @@ for (i in 1:10) {
 
 
 
-#b. interannual variability: for each gridcell using the monthly series of GCMs,
-#                            matched with the data (scaled) from each source, calculate
-#                            the following:
-#   - pearson & p-value (origin-forced)
-#   - slope (origin-forced)
-#   - rmse
 
 
 
