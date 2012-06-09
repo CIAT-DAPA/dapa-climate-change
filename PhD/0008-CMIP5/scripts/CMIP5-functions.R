@@ -25,7 +25,7 @@ check_done <- function(procList) {
   }
   ndList <- unique(ndList)
   procList <- procList[ndList,]
-  row.names(procList) <- 1:nrow(procList)
+  if (nrow(procList) != 0) {row.names(procList) <- 1:nrow(procList)}
   return(procList)
 }
 
@@ -139,7 +139,6 @@ mean_climate_skill <- function(this_proc) {
         sc_wst <- scList$CL_WST[vid]
         oclWST <- paste(oDir,"/cl-WST",sep="") #create output folder
         if (!file.exists(oclWST)) {dir.create(oclWST)} #create output folder
-        
         if (!file.exists(paste(oclWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
           wst_raw <- read.dbf(paste(clWST,"/wc_",vn_wst,"_stations.dbf",sep=""))
           wst_raw <- wst_raw[which(!is.na(wst_raw$NYEARS)),]
