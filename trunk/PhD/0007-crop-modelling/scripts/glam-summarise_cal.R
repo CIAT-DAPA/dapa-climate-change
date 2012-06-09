@@ -17,13 +17,13 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
-runs_set <- "mult_gridcell_kh_ra"
+runs_set <- "mult_gridcell_kh_ra_new_sel"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
 #load cell details
 #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
-cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v1.csv",sep=""))
+cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
 
 #get the mask needed (to which data will be appended)
 ncFile <- paste(bDir,"/../climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")

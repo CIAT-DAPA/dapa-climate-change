@@ -163,7 +163,7 @@ for (vid in 1:3) {
       fList$FILE <- paste(fList$FILE)
       fList$FILE[which(!fList$PRESENT)] <- paste(mdDir,"/baseline/",gcm,"/",ens,"_climatology/pr_01.tif",sep="")
       
-      if (which(!fList$PRESENT) != length(yi:yf)) {
+      if (length(which(!fList$PRESENT)) != length(yi:yf)) {
         
         ######extract for GCM
         fPres <- fList$FILE
@@ -172,7 +172,7 @@ for (vid in 1:3) {
         msk <- createMask(shp,gcm_data[[1]]) #create a mask with the shapefile with resolution of gcm
         gcm_data <- crop(gcm_data,msk) #cut gcm data to extent of country mask
         #those that are NA for files need to be turned into NAs in whole file general
-        for (gmiss in which(!fList$PRESENT)) {
+        for (gmiss in which(!fList$PRESENT)) { #set to NA any missing layer
           gcm_data <- setValues(gcm_data,values=rep(NA,times=ncell(gcm_data)),layer=gmiss)
         }
         xyNA <- xyFromCell(msk,which(is.na(msk[]))) #get the locations that are NA in the mask
@@ -180,7 +180,7 @@ for (vid in 1:3) {
         xy <- as.data.frame(xyFromCell(msk,which(!is.na(msk[])))) #which gridcells are to be calculated
         xyt <- as.data.frame(t(xy)) #transpose xy data.frame for handling many cells
         names(xyt) <- paste("C",1:ncol(xyt),sep="") #names of columns data.frame
-        gcm_mvals <- lapply(as.list(xyt),FUN = function(xy,x) {extract(gcm_data,cbind(xy[1],xy[2]))},gcm_data) #extract values for that month
+        gcm_mvals <- lapply(as.list(xyt),FUN = function(xy,x) {extract(x,cbind(xy[1],xy[2]))},gcm_data) #extract values for that month
         
         if (m == 1) { #create list of matrices if we're in first month
           gcm_vals <- lapply(gcm_mvals,FUN= function(x,ny) {matrix(data=NA,nrow=ny,ncol=12)},length(yi:yf))
@@ -194,10 +194,68 @@ for (vid in 1:3) {
         sc_cru <- scList$TS_CRU[vid]
         otsCRU <- paste(oDir,"/ts-CRU",sep="") #create output folder
         if (!file.exists(otsCRU)) {dir.create(otsCRU)} #create output folder
-        tsCRU
+        if (!file.exists(paste(otsCRU,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          cru_data <- stack(paste(tsCRU,"/cru_ts_3_10.1901.2009.",vn_cru,"_",yi:yf,"_",m,".tif",sep="")) #load all cru data
+          cru_data <- crop(cru_data,msk) #cut cru data to extent of country mask
+          fct <- res(msk)/res(cru_data)
+          cru_data <- aggregate(cru_data,fact=fct,fun=mean) #average onto model grid
+          cru_data <- resample(cru_data,msk,method="ngb") #resample aggregated result
+          cru_data[cellFromXY(cru_data,xyNA)] <- NA #set anything outside the actual country mask to NA
+          cru_mvals <- lapply(as.list(xyt),FUN = function(xy,x) {extract(x,cbind(xy[1],xy[2]))},cru_data) #extract values for that month
+          if (m == 1) {cru_vals <- gcm_vals}
+          for (j in 1:length(cru_vals)) { #assign values to the list
+            cru_vals[[j]][,m] <- cru_mvals[[j]]
+          }
+        }
         
+        ######extract the era40 data
+        vn_e40 <- paste(vnList$E40[vid]) #variable name
+        sc_e40 <- scList$E40[vid]
+        otsE40 <- paste(oDir,"/ts-E40",sep="") #create output folder
+        if (!file.exists(otsE40)) {dir.create(otsE40)} #create output folder
+        if (!file.exists(paste(otsE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+          e40_data <- stack(paste(tsE40,"/monthly_data_",vn_e40,"/",yi:yf,"/",vn_e40,"_",m,".tif",sep="")) #load all era40 data
+          e40_data <- crop(e40_data,msk) #cut cru data to extent of country mask
+          e40_data <- resample(e40_data,msk,method="ngb") #resample to model grid
+          e40_data[cellFromXY(e40_data,xyNA)] <- NA #set anything outside the actual country mask to NA
+          e40_mvals <- lapply(as.list(xyt),FUN = function(xy,x) {extract(x,cbind(xy[1],xy[2]))},e40_data) #extract values for that month
+          if (m == 1) {e40_vals <- gcm_vals}
+          for (j in 1:length(cru_vals)) { #assign values to the list
+            e40_vals[[j]][,m] <- e40_mvals[[j]]
+          }
+        }
+      }
+      
+      ######extract the wst historical data (does not need to be monthly looped)
+      vn_wst <- paste(vnList$TS_WST[vid])
+      sc_wst <- scList$TS_WST[vid]
+      otsWST <- paste(oDir,"/ts-WST",sep="") #create output folder
+      if (!file.exists(otsWST)) {dir.create(otsWST)} #create output folder
+      if (!file.exists(paste(oclWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
+        wst_raw <- read.csv(paste(tsWST,"/all_",vn_wst,"_data_ts_",yi,"-",yf,"_xy.csv",sep="")) #load raw data file
+        wst_raw$ISIN <- extract(msk,cbind(x=wst_raw$LONG,y=wst_raw$LAT)) #extract cell values
+        wst_raw <- wst_raw[which(!is.na(wst_raw$ISIN)),] #remove anything outside domain
+        wst_raw$ISIN <- NULL
+        wst_raw$CELL <- cellFromXY(msk,cbind(x=wst_raw$LONG,y=wst_raw$LAT))
+        wst_data <- cbind(wst_raw[,c("YEAR","LONG","LAT",toupper(month.abb),"CELL")])
+        if (m == 1) {wst_vals <- gcm_vals}
+        
+        xyMatch <- xy; xyMatch$CELL <- cellFromXY(msk,cbind(x=xy$x,y=xy$y))
+        for (yr in yi:yf) {
+          wst_data2 <- wst_data[which(wst_data$YEAR == yr),]
+          wst_data2 <- as.data.frame(t(sapply(unique(wst_data$CELL),getMean_points,wst_data2)))
+          names(wst_data2) <- c("CELL",toupper(month.abb))
+          wst_data2 <- merge(xyMatch,wst_data2,by="CELL",all=T)
+          wst_vals2 <- as.matrix(wst_data2[,toupper(month.abb)])
+          wst_vals2[which(is.na(wst_vals2[,]))] <- NA
+          for (j in 1:length(wst_vals)) {
+            wst_vals[[j]][which((yi:yf %in% yr)),] <- wst_vals2[j,]
+          }
+          
+        }
         
       }
+      
       cat("\n")
       gcm_vals <- lapply(gcm_vals,FUN= function(x) {x[,c(12,1:11)]}) #re-ordering
       gcm_vals <- lapply(gcm_vals,FUN= function(x,sc) {x * sc},sc_gcm) #scaling
