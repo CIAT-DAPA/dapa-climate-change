@@ -122,11 +122,39 @@ yf <- 2000
 #check those that are done already
 procList <- check_done(procList,"y.proc")
 
-#loop as test case
-for (i in 1:10) {
-  x <- interannual_skill(i)
-}
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
 
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("e40Dir")
+sfExport("inputDD")
+sfExport("outputDD")
+sfExport("tsCRU")
+sfExport("tsE40")
+sfExport("tsWST")
+sfExport("admDir")
+sfExport("vnList")
+sfExport("scList")
+sfExport("procList")
+sfExport("regions")
+sfExport("yi")
+sfExport("yf")
+
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),interannual_skill))
+
+#stop the cluster
+sfStop()
 
 
 
