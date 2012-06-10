@@ -174,6 +174,8 @@ interannual_skill <- function(this_proc) {
       gcm_vals <- lapply(gcm_vals,FUN= function(x,sc) {x * sc},sc_gcm) #scaling
       
       ######extract the wst historical data (does not need to be monthly looped)
+      otsWST <- paste(oDir,"/ts-WST",sep="") #create output folder
+      if (!file.exists(otsWST)) {dir.create(otsWST)} #create output folder
       if (!file.exists(paste(otsWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
         vn_wst <- paste(vnList$TS_WST[vid])
         sc_wst <- scList$TS_WST[vid]
@@ -191,6 +193,9 @@ interannual_skill <- function(this_proc) {
           for (yr in yi:yf) {
             wst_data2 <- wst_data[which(wst_data$YEAR == yr),]
             wst_data2 <- as.data.frame(t(sapply(unique(wst_data$CELL),getMean_points,wst_data2)))
+            if (length(wst_data2) == 0) {
+              wst_data2 <- as.data.frame(cbind(xyMatch$CELL,matrix(NA,nrow=nrow(xyMatch),ncol=12)))
+            }
             names(wst_data2) <- c("CELL",toupper(month.abb))
             wst_data2 <- merge(xyMatch,wst_data2,by="CELL",all=T)
             wst_vals2 <- as.matrix(wst_data2[,toupper(month.abb)])
