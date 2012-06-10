@@ -209,6 +209,11 @@ interannual_skill <- function(this_proc) {
         }
         wst_vals <- lapply(wst_vals,FUN= seas_organize) #re-ordering
         wst_vals <- lapply(wst_vals,FUN= function(x,sc) {x * sc},sc_wst) #scaling
+        
+        for (k in 1:length(wst_vals)) {
+          s_skill <- seasonal_skill(wst_vals[[k]],gcm_vals[[k]],calc_mean)
+        }
+        
         s_skill <- mapply(FUN= function(obs,gcm,mn) {seasonal_skill(obs,gcm,mn)},wst_vals,gcm_vals,MoreArgs=list(calc_mean),USE.NAMES=T) #assess seasonal skill using the two matrices
         s_skill <- as.data.frame(s_skill) #do some transformation to the output of the above
         s_skill <- lapply(s_skill,FUN= function(x) {as.data.frame(x)}) #do some transformation to the output of the above
@@ -244,8 +249,8 @@ interannual_skill <- function(this_proc) {
       }
       
       #calculating with cru time series
-      if (!file.exists(paste(otsE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
-        if (vn_e40 != "NA") {
+      if (vn_e40 != "NA") {
+        if (!file.exists(paste(otsE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
           e40_vals <- lapply(e40_vals,FUN= seas_organize) #re-ordering
           e40_vals <- lapply(e40_vals,FUN= function(x,sc) {x * sc},sc_e40) #scaling
           s_skill <- mapply(FUN= function(obs,gcm,mn) {seasonal_skill(obs,gcm,mn)},e40_vals,gcm_vals,MoreArgs=list(calc_mean),USE.NAMES=T) #assess seasonal skill using the two matrices
@@ -488,7 +493,9 @@ seasonal_skill <- function(obs_vals,gcm_vals,calc_mean=T) {
 calc_metrics <- function(vals) {
   #remove any column with NA
   vals <- vals[which(!is.na(vals$GCM)),]
+  vals <- vals[which(is.finite(vals$GCM)),]
   vals <- vals[which(!is.na(vals$OBS)),]
+  vals <- vals[which(is.finite(vals$OBS)),]
   
   #Check if vals has any of its columns with full zeros
   nz.GCM <- length(which(vals$GCM == 0))
