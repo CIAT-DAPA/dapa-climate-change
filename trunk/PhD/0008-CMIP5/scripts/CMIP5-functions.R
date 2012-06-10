@@ -34,6 +34,10 @@ check_done <- function(procList,check_dir="x.proc") {
 #function to assess interannual variability of a gcm against three obs. datasets#
 #################################################################################
 interannual_skill <- function(this_proc) {
+  library(raster); library(rgdal); library(maptools) #package loading
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep="")) #source functions
+  source(paste(src.dir,"/GHCND-GSOD-functions.R",sep="")) #source functions
+  
   #here the process starts for a given country-gcm_ens combination
   iso <- paste(procList$ISO[this_proc])
   reg <- paste(regions$REGION[which(regions$ISO == iso)])
