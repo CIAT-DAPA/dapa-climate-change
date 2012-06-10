@@ -52,6 +52,31 @@ system.time(sfSapply(as.vector(mList),wrapper_monthly_TS))
 sfStop()
 
 
+########here calculate MMM (multi-model means)
+#list of gcms
+gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
+vnList <- c("pr","tas","dtr")
+gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
+gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_monthly",sep="")
+
+for (vn in vnList) {
+  #vn <- vnList[1]
+  cat("processing variable",vn,"\n")
+  for (year in yi:yf) {
+    #year <- yi
+    for (m in 1:12) {
+      if (m < 10) {mth <- paste("0",m,sep="")} else {mth <- paste(m)}
+      fList <- paste(gcmList$DIR,"/",year,"/",vn,"_",mth,".tif",sep="")
+      fPres <- as.character(sapply(fList,checkExists))
+      fPres <- fPres[which(!is.na(fPres))]
+      
+      #loop through files, resampling them accordingly and adding them to a list, from which
+      #a rasterstack is created and then use calc() to get the mean, and just write it
+      
+    }
+  }
+}
+
 
 
 
