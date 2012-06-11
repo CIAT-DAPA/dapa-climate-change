@@ -401,3 +401,113 @@ createPrjFile <- function(msk, variable="prec", nsurf=0, gridfiles=c("longitude.
   #Closing the file
   close(fw)
 }
+
+
+#################################################################################
+#Function to process all years and get the values
+getAvailableWS <- function(re,gdir,hdir,cdir,iniyr,finyr,outEval) {
+  for (ye in iniyr:finyr) {
+    cat("\nProcessing year",ye,"\n")
+    #loading the input data
+    goData <- read.csv(paste(gdir,"/grouped_output-",re,"/",ye,".csv",sep=""))
+    goData$USAF <- NULL; goData$WBAN <- NULL #remove extra fields
+    if (nrow(goData)>0) {
+      goData$SOURCE <- "GSOD"
+    } else {
+      goData <- cbind(goData,SOURCE=logical(0))
+    }
+    
+    ghData <- read.csv(paste(hdir,"/grouped_output-",re,"/",ye,".csv",sep=""))
+    if (nrow(ghData)>0) {
+      ghData$SOURCE <- "GHCN"
+    } else {
+      ghData <- cbind(ghData,SOURCE=logical(0))
+    }
+    
+    if (file.exists(paste(cdir,"/grouped_output-",re,"/",ye,".csv",sep=""))) {
+      ciData <- read.csv(paste(cdir,"/grouped_output-",re,"/",ye,".csv",sep=""))
+      ciData$SOURCE <- "CIAT"
+      #merge the three datasets
+      gaData <- rbind(goData,ghData,ciData)
+    } else {
+      #merge only gsod and ghcn
+      gaData <- rbind(goData,ghData)
+    }
+    
+    nd <- leap(ye) #check whether leap year so to remove day 366 if needed
+    if (nd==365) {gaData$X366 <- NULL}
+    
+    for (day in 1:nd) {
+      cat(day," ")
+      intMx <- gaData[,c(1:4,4+day)] #get data for that day
+      names(intMx) <- c("ID","LON","LAT","ALT","RAIN") #rename matrix
+      intMx <- intMx[which(!is.na(intMx$RAIN)),] #remove all rows with NAs in rainfall
+      
+      #count of 0.5 degree gridcell station presence
+      rs <- raster(ncol=720,nrow=360); rs[] <- 1:ncell(rs)
+      intMx$cells <- cellFromXY(rs,cbind(intMx$LON,intMx$LAT))
+      uCells <- unique(intMx$cells)
+      
+      uStat <- nrow(intMx)
+      outRow <- data.frame(YEAR=ye,DAY=day,WST_TOTAL=uStat,WST_CELLS=length(uCells))
+      
+      if (day==1) {
+        outAll <- outRow
+      } else {
+        outAll <- rbind(outAll,outRow)
+      }
+    }
+    cat("\n")
+    
+    if (ye==1960) {
+      outYearAll <- outAll
+    } else {
+      outYearAll <- rbind(outYearAll,outAll)
+    }
+  }
+  write.csv(outYearAll,paste(outEval,"/all_years-availability-",re,".csv",sep=""),row.names=F,quote=F)
+  return(paste(outEval,"/all_years-availability-",re,".csv",sep=""))
+}
+
+
+##############################################################################
+##############################################################################
+#function to get r2 and rmse of the interpolated data vs. cru, once analysed
+getAllMetrics <- function(region,iniyr,finyr,ourEval) {
+  #set up region and output folder
+  if (region=="eaf" | region=="waf") {rgn <- "afr"} else {rgn <- "sas"}
+  
+  #loop through years
+  for (yr in iniyr:finyr) {
+    cat("year", yr,"\n")
+    yrDir <- paste("./",yr,"-",rgn,"-eval",sep="")
+    
+    #load metrics
+    mets <- read.csv(paste(yrDir,"/metrics-",region,".csv",sep=""))
+    rawd <- read.csv(paste(yrDir,"/raw_eval_data-",region,".csv",sep=""))
+    
+    rawd <- rawd[which(!is.na(rawd$CRU_RAIN)),]
+    rawd <- rawd[which(!is.na(rawd$INT_RAIN)),]
+    
+    #calculate origin-fixed correlation
+    fit.f <- lm(rawd$CRU_RAIN ~ rawd$INT_RAIN - 1) #Fit forced to origin
+    rsq.f <- summary(fit.f)$r.squared
+    pval.f <- pf(summary(fit.f)$fstatistic[1],summary(fit.f)$fstatistic[2],summary(fit.f)$fstatistic[3],lower.tail=F)
+    
+    #calculate RMSE
+    rawd$SQDIFF <- (rawd$CRU_RAIN-rawd$INT_RAIN)^2
+    rmse <- sqrt(sum(rawd$SQDIFF)/nrow(rawd))
+    
+    outRow <- data.frame(YEAR=yr,RMSE=rmse,RSQ.FORCED=rsq.f,PVAL.FORCED=pval.f)
+    
+    if (yr==iniyr) {
+      outAll <- outRow
+    } else {
+      outAll <- rbind(outAll,outRow)
+    }
+  }
+  
+  write.csv(outAll,paste(outEval,"/all_years-metrics-",region,".csv",sep=""),row.names=F,quote=F)
+  return(paste(outEval,"/all_years-metrics-",region,".csv",sep=""))
+}
+
