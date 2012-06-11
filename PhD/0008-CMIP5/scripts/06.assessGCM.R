@@ -48,6 +48,7 @@ scList <- data.frame(VID=1:3,GCM=c(1,1,1),WCL=c(1,1,1),
 
 #processes to complete
 gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
+gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
 isoList <- regions$ISO
 procList <- expand.grid(GCM=gcmList,ISO=isoList)
 
