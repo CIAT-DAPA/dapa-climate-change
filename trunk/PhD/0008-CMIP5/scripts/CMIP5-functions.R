@@ -2,6 +2,50 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+#plot points of seasons on top of boxplot
+plotpoints <- function(pdata,param="CCOEF") {
+  cnames <- unique(pdata$ISO)
+  ctr <- 1
+  for (iso in cnames) {
+    djf <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "DJF"),]
+    mam <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "MAM"),]
+    jja <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "JJA"),]
+    son <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "SON"),]
+    ann <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "ANN"),]
+    points(djf[,param],rep(ctr+.25,times=nrow(djf)),pch=20,cex=0.65,lwd=0.1,col="red")
+    points(mam[,param],rep(ctr+.1,times=nrow(mam)),pch=20,cex=0.65,lwd=0.1,col="blue")
+    points(ann[,param],rep(ctr,times=nrow(ann)),pch=20,cex=0.65,lwd=0.1,col="black")
+    points(jja[,param],rep(ctr-.1,times=nrow(jja)),pch=20,cex=0.65,lwd=0.1,col="purple")
+    points(son[,param],rep(ctr-.25,times=nrow(son)),pch=20,cex=0.65,lwd=0.1,col="dark green")
+    ctr <- ctr+1
+  }
+}
+
+
+##############################################################################
+# get metrics for mean climate skill assessment
+##############################################################################
+get_mean_climate_metrics <- function(proc,mdDir,regions) {
+  gcm <- paste(proc[1]) #paste(procList$GCM[1])
+  dst <- paste(proc[3]) #paste(procList$OBS[1])
+  vn <- paste(proc[4]) #paste(procList$VAR[1])
+  iso <- paste(proc[2]) #paste(procList$ISO[1])
+  reg <- paste(regions$REGION[which(regions$ISO == iso)])
+  
+  metsDir <- paste(mdDir,"/assessment/output-data/",reg,"/",iso,"",sep="")
+  fname <- paste(metsDir,"/",dst,"/",vn,"_",gsub("_ENS","",gcm),".csv",sep="")
+  cat(fname,"\n")
+  if (file.exists(fname)) {
+    mets <- read.csv(paste(fname))
+    mets <- cbind(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,mets)
+  } else {
+    mets <- data.frame(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,SEASON=NA,CCOEF=NA,PVAL=NA,RSQ=NA,MBR=NA,RMSE=NA,N=NA)
+  }
+  return(mets)
+}
+
+
+
 ##############################################################################
 #checking comparisons that are already processed
 ##############################################################################
