@@ -59,7 +59,7 @@ vnList <- c("pr","tas","dtr")
 gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
 gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_monthly",sep="")
 
-oDir <- paste(mdDir,"/multi_model_mean/r1i1p1",sep="")
+oDir <- paste(mdDir,"/multi_model_mean/r1i1p1_monthly",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 for (vn in vnList) {
@@ -71,8 +71,8 @@ for (vn in vnList) {
     if (!file.exists(oyrDir)) {dir.create(oyrDir)}
     #year <- yi
     for (m in 1:12) {
-      cat(m,". ",sep="")
       #m <- 1
+      cat(m,". ",sep="")
       if (m < 10) {mth <- paste("0",m,sep="")} else {mth <- paste(m)}
       
       if (!file.exists(paste(oyrDir,"/",vn,"_",mth,".tif",sep=""))) {
@@ -90,14 +90,12 @@ for (vn in vnList) {
           mList[[i]] <- rs
           xr <- c(xr,xres(rs)); yr <- c(yr,yres(rs))
         }
-        
         #loop through files to resample to the lowest resolution possible
         mList_res <- list()
         sxr <- which(xr==min(xr))[1]
         for (i in 1:length(mList)) {
           mList_res[[i]] <- resample(mList[[i]],mList[[sxr]],method="ngb")
         }
-        cat("\n")
         
         #a rasterstack is created and then use calc() to get the mean, and just write it
         rstk <- stack(mList_res)
