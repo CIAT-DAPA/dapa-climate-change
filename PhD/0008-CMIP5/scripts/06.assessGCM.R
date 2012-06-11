@@ -26,17 +26,6 @@ source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 inputDD <- paste(mdDir,"/assessment/input-data",sep="")
 outputDD <- paste(mdDir,"/assessment/output-data",sep="")
 
-#climatology data
-clWCL <- paste(inputDD,"/wcl-data",sep="")
-clCRU <- paste(inputDD,"/cru-data",sep="")
-clE40 <- e40Dir
-clWST <- paste(inputDD,"/wcl-weather-stations",sep="")
-
-#time series data
-tsWST <- paste(inputDD,"/all-weather-stations",sep="")
-tsE40 <- e40Dir
-tsCRU <- paste(inputDD,"/cru-ts-data",sep="")
-
 #administrative areas data
 admDir <- paste(inputDD,"/adm-data",sep="")
 
@@ -68,6 +57,12 @@ procList <- expand.grid(GCM=gcmList,ISO=isoList)
 #   - pearson & p-value (origin-forced)
 #   - slope (origin-forced)
 #   - rmse
+
+#climatology data
+clWCL <- paste(inputDD,"/wcl-data",sep="")
+clCRU <- paste(inputDD,"/cru-data",sep="")
+clE40 <- e40Dir
+clWST <- paste(inputDD,"/wcl-weather-stations",sep="")
 
 #check those that are done already
 procList <- check_done(procList,"x.proc")
@@ -118,6 +113,11 @@ sfStop()
 #specify initial and final years
 yi <- 1961
 yf <- 2000
+
+#time series data
+tsWST <- paste(inputDD,"/all-weather-stations",sep="")
+tsE40 <- e40Dir
+tsCRU <- paste(inputDD,"/cru-ts-data",sep="")
 
 #check those that are done already
 procList <- check_done(procList,"y.proc")

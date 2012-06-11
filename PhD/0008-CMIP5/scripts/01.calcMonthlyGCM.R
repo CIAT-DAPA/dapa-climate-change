@@ -59,21 +59,53 @@ vnList <- c("pr","tas","dtr")
 gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
 gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_monthly",sep="")
 
+oDir <- paste(mdDir,"/multi_model_mean/r1i1p1",sep="")
+if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
+
 for (vn in vnList) {
   #vn <- vnList[1]
-  cat("processing variable",vn,"\n")
+  cat("\nprocessing variable",vn,"\n")
   for (year in yi:yf) {
+    cat("year :",year,":")
+    oyrDir <- paste(oDir,"/",year,sep="")
+    if (!file.exists(oyrDir)) {dir.create(oyrDir)}
     #year <- yi
     for (m in 1:12) {
+      cat(m,". ",sep="")
+      #m <- 1
       if (m < 10) {mth <- paste("0",m,sep="")} else {mth <- paste(m)}
-      fList <- paste(gcmList$DIR,"/",year,"/",vn,"_",mth,".tif",sep="")
-      fPres <- as.character(sapply(fList,checkExists))
-      fPres <- fPres[which(!is.na(fPres))]
       
-      #loop through files, resampling them accordingly and adding them to a list, from which
-      #a rasterstack is created and then use calc() to get the mean, and just write it
-      
+      if (!file.exists(paste(oyrDir,"/",vn,"_",mth,".tif",sep=""))) {
+        fList <- paste(gcmList$DIR,"/",year,"/",vn,"_",mth,".tif",sep="")
+        fPres <- as.character(sapply(fList,checkExists))
+        fPres <- fPres[which(!is.na(fPres))]
+        
+        #loop through files, to load
+        mList <- list()
+        xr <- c(); yr <- c()
+        for (i in 1:length(fPres)) {
+          #cat(i,". ",sep="")
+          #i=1
+          rs <- raster(fPres[i])
+          mList[[i]] <- rs
+          xr <- c(xr,xres(rs)); yr <- c(yr,yres(rs))
+        }
+        
+        #loop through files to resample to the lowest resolution possible
+        mList_res <- list()
+        sxr <- which(xr==min(xr))[1]
+        for (i in 1:length(mList)) {
+          mList_res[[i]] <- resample(mList[[i]],mList[[sxr]],method="ngb")
+        }
+        cat("\n")
+        
+        #a rasterstack is created and then use calc() to get the mean, and just write it
+        rstk <- stack(mList_res)
+        rsm <- calc(rstk,fun= function(x) {mean(x,na.rm=T)})
+        rsm <- writeRaster(rsm,paste(oyrDir,"/",vn,"_",mth,".tif",sep=""),format="GTiff")
+      }
     }
+    cat("\n")
   }
 }
 
