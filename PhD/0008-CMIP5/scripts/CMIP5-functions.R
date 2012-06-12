@@ -159,7 +159,9 @@ interannual_skill <- function(this_proc) {
             cru_data <- stack(paste(tsCRU,"/cru_ts_3_10.1901.2009.",vn_cru,"_",yi:yf,"_",m,".tif",sep="")) #load all cru data
             cru_data <- crop(cru_data,msk) #cut cru data to extent of country mask
             fct <- res(msk)/res(cru_data)
-            cru_data <- aggregate(cru_data,fact=fct,fun=mean) #average onto model grid
+            if (class(try(aggregate(cru_data,fact=fct,fun=mean),silent=T)) != "try-error") {
+              cru_data <- aggregate(cru_data,fact=fct,fun=mean) #average onto model grid
+            }
             cru_data <- resample(cru_data,msk,method="ngb") #resample aggregated result
             cru_data[cellFromXY(cru_data,xyNA)] <- NA #set anything outside the actual country mask to NA
             cru_mvals <- lapply(as.list(xyt),FUN = function(xy,x) {extract(x,cbind(xy[1],xy[2]))},cru_data) #extract values for that month
