@@ -250,6 +250,49 @@ write_yield <- function(x,outfile,yld_stk,yri,yrf,cell=c(636),fields=list(CELL="
 }
 
 
+##############################
+## write ygp file
+write_ygp <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",X="X",Y="Y",YGP="YGP")) {
+  
+  if (length(which(toupper(names(fields)) %in% c("CELL","X","Y","YGP"))) != 4) {
+    stop("field list incomplete")
+  }
+  
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
+    stop("field list does not match with data.frame")
+  }
+  
+  if (class(x) != "data.frame") {
+    stop("x must be a data.frame")
+  }
+  
+  names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
+  names(x)[which(toupper(names(x)) == toupper(fields$X))] <- "X"
+  names(x)[which(toupper(names(x)) == toupper(fields$Y))] <- "Y"
+  names(x)[which(toupper(names(x)) == toupper(fields$YGP))] <- "YGP"
+  
+  fsg <- file(outfile,"w")
+  
+  col <- 0; row <- 1
+  for (cll in cell) {
+    if (col == 10) {
+      col <- 1
+      row <- row+1
+    } else {
+      col <- col+1
+    }
+    lon <- x$X[which(x$CELL == cll)]
+    lat <- x$Y[which(x$CELL == cll)]
+    
+    dat <- x$YGP[which(x$CELL == cll)]
+    cat(paste(sprintf("%1$3d%2$4d",row,col),
+              sprintf("%13.5f",dat),"\n",sep=""),file=fsg)
+  }
+  close(fsg)
+  return(outfile)
+}
+
+
 #create input directories for a glam run
 create_dirs <- function(glam_dir) {
   if (!file.exists(glam_dir)) {dir.create(glam_dir)}

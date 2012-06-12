@@ -17,7 +17,8 @@ source(paste(src.dir,"/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
-cmDir <- "F:/PhD-work/crop-modelling"
+#cmDir <- "F:/PhD-work/crop-modelling"
+cmDir <- "W:/eejarv/PhD-work/crop-modelling"
 #cmDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 bDir <- paste(cmDir,"/GLAM",sep="")
 cropName <- "gnut"
@@ -46,7 +47,8 @@ yieldDir <- paste(ascDir,"/obs",sep="")
 if (!file.exists(yieldDir)) {dir.create(yieldDir)}
 wthDir <- paste(ascDir,"/wth",sep="")
 if (!file.exists(wthDir)) {dir.create(wthDir)}
-
+ygpDir <- paste(ascDir,"/ygp",sep="")
+if (!file.exists(ygpDir)) {dir.create(ygpDir)}
 
 ######################################################
 #write the file
@@ -64,6 +66,38 @@ version <- "b"
 cell <- cells$CELL[which(cells$ZONE == z & cells$ISSEL_F == 1)]
 ######################################################
 ######################################################
+
+
+#here do some analysis of yield gap
+#zrs <- raster(paste(cDir,"/gnut-zones/zones_lr.asc",sep=""))
+#windows()
+#plot(zrs,col=rev(terrain.colors(5)))
+#points(cells$X[which(cells$ISSEL_F == 1)],cells$Y[which(cells$ISSEL_F == 1)],pch=20,cex=0.75)
+#points(ocells$X[which(ocells$ISSEL == 1)],ocells$Y[which(ocells$ISSEL == 1)],pch=20,cex=0.75)
+#points(out_cells$X[which(out_cells$CELL == 636)],out_cells$Y[which(out_cells$CELL == 636)],pch="+",cex=0.75)
+#plot(wrld_simpl,add=T)
+
+##calculate yield gap create yield gap parameter file
+z_cells <- cells[cells$CELL %in% cell,]
+
+ym <- mean(z_cells$YIELD_MN)
+yn <- min(z_cells$YIELD_MN)
+yx <- max(z_cells$YIELD_MN)
+
+cal_ygp <- 1-(yx-ym)/(yx-yn)
+cells$YGP <- round(cal_ygp,2)
+
+ygpFile <- paste(ygpDir,"/ygp_calz",z,version,".txt",sep="")
+if (!file.exists(ygpFile)) {
+  ygpFile <- write_ygp(x=cells,outfile=ygpFile,cell=cell,fields=list(CELL="CELL",X="X",Y="Y",YGP="YGP"))
+}
+
+
+#cat(cal_ygp,"\n")
+
+#barplot(z_cells$YIELD_MN,names.arg=z_cells$CELL)
+#abline(h=ym,col="red")
+
 
 ######################################################
 #soil types file

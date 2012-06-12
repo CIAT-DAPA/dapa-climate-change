@@ -45,6 +45,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   
   #files that were generated
   yFile <- RUN_setup$YIELD_FILE
+  ygpFile <- RUN_setup$YGP_FILE
   sowFile_rfd <- RUN_setup$SOW_FILE_RFD
   sowFile_irr <- RUN_setup$SOW_FILE_IRR
   wthDir_rfd <- RUN_setup$WTH_DIR_RFD
@@ -136,7 +137,15 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         } else {
           yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
         }
-        ygp_row <- "nofile"
+        if (ygpFile == "nofile") {
+          ygp_row <- "nofile"
+          if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+            stop("YGP needs to be specified either by value or by a file")
+          }
+        } else {
+          ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+          GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+        }
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
         fn <- file(ofnames,"w")
@@ -155,6 +164,10 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         
         if (sowFile_rfd != "nofile") {
           x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
+        
+        if (ygpFile != "nofile") {
+          x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
         }
         
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
@@ -177,6 +190,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         setwd(run_dir); setwd("./inputs/ascii/soil")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir); setwd("./inputs/ascii/sow")
+        x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir); setwd("./inputs")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
         
@@ -248,7 +263,15 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         } else {
           yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
         }
-        ygp_row <- "nofile"
+        if (ygpFile == "nofile") {
+          ygp_row <- "nofile"
+          if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+            stop("YGP needs to be specified either by value or by a file")
+          }
+        } else {
+          ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+          GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+        }
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
         fn <- file(ofnames,"w")
@@ -266,6 +289,9 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
         if (sowFile_irr != "nofile") {
           x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
+        if (ygpFile != "nofile") {
+          x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
         }
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
@@ -287,6 +313,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         setwd(run_dir); setwd("./inputs/ascii/soil")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir); setwd("./inputs/ascii/sow")
+        x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir); setwd("./inputs")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
         
@@ -357,7 +385,15 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         } else {
           yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
         }
-        ygp_row <- "nofile"
+        if (ygpFile == "nofile") {
+          ygp_row <- "nofile"
+          if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+            stop("YGP needs to be specified either by value or by a file")
+          }
+        } else {
+          ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+          GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+        }
         
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
         fn <- file(ofnames,"w")
@@ -375,6 +411,9 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
         if (sowFile_rfd != "nofile") {
           x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
+        if (ygpFile != "nofile") {
+          x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
         }
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
@@ -396,6 +435,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         setwd(run_dir); setwd("./inputs/ascii/soil")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir); setwd("./inputs/ascii/sow")
+        x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir); setwd("./inputs")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
         
@@ -459,7 +500,6 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
           sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
         }
         
-        
         ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
         fn <- file(ofnames,"w")
         cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)
@@ -476,6 +516,9 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
         if (sowFile_irr != "nofile") {
           x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+        }
+        if (ygpFile != "nofile") {
+          x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
         }
         x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
         x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
@@ -497,6 +540,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         setwd(run_dir); setwd("./inputs/ascii/soil")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir); setwd("./inputs/ascii/sow")
+        x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir); setwd("./inputs")
         x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
         setwd(run_dir)
         
@@ -589,6 +634,7 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   
   #files that were generated
   yFile <- RUN_setup$YIELD_FILE
+  ygpFile <- RUN_setup$YGP_FILE
   sowFile_rfd <- RUN_setup$SOW_FILE_RFD
   sowFile_irr <- RUN_setup$SOW_FILE_IRR
   wthDir_rfd <- RUN_setup$WTH_DIR_RFD
@@ -656,7 +702,15 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
       }
       yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
-      ygp_row <- "nofile"
+      if (ygpFile == "nofile") {
+        ygp_row <- "nofile"
+        if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+          stop("YGP needs to be specified either by value or by a file")
+        }
+      } else {
+        ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+        GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+      }
       
       ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
       fn <- file(ofnames,"w")
@@ -674,6 +728,9 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
       if (sowFile_rfd != "nofile") {
         x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+      }
+      if (ygpFile != "nofile") {
+        x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
       }
       x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
       x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
@@ -695,6 +752,8 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       setwd(run_dir); setwd("./inputs/ascii/soil")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir); setwd("./inputs/ascii/sow")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir)
       
@@ -781,6 +840,9 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       if (sowFile_irr != "nofile") {
         x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
       }
+      if (ygpFile != "nofile") {
+        x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
+      }
       x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
       x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
       x <- sapply(list.files(wthDir_irr),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_irr,paste(run_dir,"/inputs/ascii/wth",sep=""))
@@ -801,6 +863,8 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       setwd(run_dir); setwd("./inputs/ascii/soil")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir); setwd("./inputs/ascii/sow")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir)
       
