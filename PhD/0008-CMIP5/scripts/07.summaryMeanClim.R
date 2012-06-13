@@ -89,7 +89,7 @@ all_plots$UL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "dtr")] <- dtr_lim
 
 all_plots$XLAB <- NA
 all_plots$XLAB[which(all_plots$PAR == "CCOEF")] <- "Correlation coefficient"
-all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR == "pr")] <- "RMSE (mm/month)"
+all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR == "pr")] <- "RMSE (mm/season or mm/year)"
 all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR != "pr")] <- "RMSE (Celsius/month)"
 
 ####
@@ -108,6 +108,11 @@ for (i in 1:nrow(all_plots)) {
   pdata$ISO <- paste(pdata$ISO)
   pdata <- pdata[which(pdata$OBS != paste("cl-E40")),]
   
+  #fix levels in ISO to avoid problems in ordering stuff vs. automatic order of boxplot
+  pdata$ISO <- as.factor(pdata$ISO)
+  #oi <- as.numeric(order(unique(pdata$ISO)))
+  #pdata$ISO <- factor(pdata$ISO, levels=levels(pdata$ISO)[oi])
+  
   #plot figure
   figName <- paste(figDir,"/",i,"_",vn,"_cl_",reg,"_",param,".tif",sep="")
   tiff(figName,res=300,pointsize=14,width=1000,height=1200,units="px",compression="lzw")
@@ -118,11 +123,8 @@ for (i in 1:nrow(all_plots)) {
   plotpoints(pdata,param=param)
   abline(v=seq(ylims[1],ylims[2],by=(ylims[2]-ylims[1])/10),lty=2,col="gray 80",lwd=0.5)
   text(y=length(unique(pdata$ISO))+0.5,x=((ylims[2]-ylims[1])*0.075),labels=c(reg),cex=1.25)
-  #par(mar=c(5,5,1,5),xpd=T,cex=0.6,las=2,lwd=0.65,font.lab=21,font.axis=21)
-  # legend("bottom", inset=c(-0.15,0),ncol=5,cex=0.8,
-  #        legend=c("DJF","MAM","ANN","JJA","SON"), pch=rep(20,times=5),
-  #        title=NA,col=c("red","blue","black","purple","dark green"))
   dev.off()
+  
 }
 
 

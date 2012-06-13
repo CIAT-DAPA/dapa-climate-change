@@ -4,7 +4,7 @@
 
 #plot points of seasons on top of boxplot
 plotpoints <- function(pdata,param="CCOEF") {
-  cnames <- unique(pdata$ISO)
+  cnames <- levels(pdata$ISO)
   ctr <- 1
   for (iso in cnames) {
     djf <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "DJF"),]

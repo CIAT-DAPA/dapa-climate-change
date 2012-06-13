@@ -17,7 +17,7 @@ src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 cmipDir <- "/nfs/a102/eejarv/CMIP5"
 
-#source(paste(src.dir,"/09.03.optimise-ygp_ipdate.R",sep=""))
+#source(paste(src.dir2,"/09.03.glam-optimise-ygp_ipdate.R",sep=""))
 
 #check the existence of three parameters needed for sourcing this script
 if (class(try(get("src.dir"),silent=T)) == "try-error") {
