@@ -150,6 +150,48 @@ write_soilcodes <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="C
 }
 
 
+###### write soil codes in old Challinor et al. (2004) style
+write_soilcodes_oldstyle <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOILCODE="SOILCODE")) {
+  
+  if (length(which(toupper(names(fields)) %in% c("CELL","COL","ROW","SOILCODE"))) != 4) {
+    stop("field list incomplete")
+  }
+  
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
+    stop("field list does not match with data.frame")
+  }
+  
+  if (class(x) != "data.frame") {
+    stop("x must be a data.frame")
+  }
+  
+  names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
+  names(x)[which(toupper(names(x)) == toupper(fields$COL))] <- "COL"
+  names(x)[which(toupper(names(x)) == toupper(fields$ROW))] <- "ROW"
+  names(x)[which(toupper(names(x)) == toupper(fields$SOILCODE))] <- "SOILCODE"
+  
+  fsg <- file(outfile,"w")
+  cnt <- 1; col <- 0; row <- 1
+  for (cll in cell) {
+    if (col == 10) {
+      col <- 1
+      row <- row+1
+    } else {
+      col <- col+1
+    }
+    #col <-  #x$COL[which(x$CELL == cll)]
+    #row <-  #x$ROW[which(x$CELL == cll)]
+    dat <-  x$SOILCODE[which(x$CELL == cll)]
+    
+    cat(paste(sprintf("%1$4d%2$4d",row,col),
+              sprintf("%6d",dat),"\n",sep=""),file=fsg)
+    cnt <- cnt+1
+  }
+  close(fsg)
+  return(outfile)
+}
+
+
 #### Write the file with sowing dates
 #### a similar
 write_sowdates <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE")) {
