@@ -69,7 +69,7 @@ for (ci in ciList) {
   setup$ZONE <- cells$ZONE[ci]
   setup$METHOD <- "lin"
   setup$CROPNAME <- "gnut"
-  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel",sep="")
+  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel_precal_ygp",sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
   setup$YGP_FILE <- "nofile"
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
@@ -184,7 +184,7 @@ for (ci in ciList) {
       
       #update setup
       setup$WTH_DIR_RFD <- owthDir$WTH_DIR
-      setup$WTH_DIR_IRR <- owthDir$WTH_DIR
+      #setup$WTH_DIR_IRR <- owthDir$WTH_DIR
       
       #update values
       rng <- 365-sow_i+sow_f
