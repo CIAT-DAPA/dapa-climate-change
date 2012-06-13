@@ -52,9 +52,9 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 #input directories and model
 cropName <- "gnut"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
-pDir <- paste(cDir,"/params",sep="") #parameter files
 glam_dir <- paste(cmipDir,"/analysis_glam",sep="")
 input_dir <- paste(glam_dir,"/inputs",sep="")
+pDir <- paste(input_dir,"/params",sep="") #parameter files
 
 #load cell details
 cells <- read.csv(paste(input_dir,"/calib-cells-selection.csv",sep=""))
@@ -88,11 +88,9 @@ for (ci in ciList) {
   params$glam_param.mod_mgt$ISYR <- 1966 #start year
   params$glam_param.mod_mgt$IEYR <- 1993 #end year
   params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
-  
-  
-  #load list of parameters to optimise, ranges, and number of steps
-  opt_rules <- read.table(paste(pDir,"/optimisation-rules.txt",sep=""),sep="\t",header=T)
-  
+  params$glam_param.mod_mgt$HTS <- "-1" #turn off HTS
+  params$glam_param.sparer$RSPARE1$Value <- -99 #turn off TDS
+  params$glam_param.sparer$RSPARE2$Value <- -99 #turn off TDS
   
   #extract irrigation rates
   irDir <- paste(cDir,"/irrigated_ratio",sep="")
@@ -103,32 +101,9 @@ for (ci in ciList) {
   ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
   ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
   
-  
-  ###############################################
+  ######################################################
   # final calibration of IPDATE and YGP
-  ###############################################
-  
-  ###############################################
-  #load the calib.csv, last iteration
-  cal_data <- read.csv(paste(setup$CAL_DIR,"/z",setup$ZONE,"_rfd_irr/calib.csv",sep=""))
-  optimal <- cal_data[which(cal_data$iter==maxiter),]
-  
-  #update the parameter set
-  for (rw in 1:nrow(optimal)) {
-    pname <- paste(optimal$param[rw])
-    where <- paste(optimal$sect[rw])
-    
-    if (pname == "TB" | pname == "TO" | pname == "TM") {
-      params[[where]][[paste(pname,"FLWR",sep="")]][,"Value"] <- optimal$opt_val[rw]
-      params[[where]][[paste(pname,"PODF",sep="")]][,"Value"] <- optimal$opt_val[rw]
-      params[[where]][[paste(pname,"LMAX",sep="")]][,"Value"] <- optimal$opt_val[rw]
-      params[[where]][[paste(pname,"HARV",sep="")]][,"Value"] <- optimal$opt_val[rw]
-    } else {
-      params[[where]][[pname]][,"Value"] <- optimal$opt_val[rw]
-    }
-  }
-  
-  
+  ######################################################
   ######################################################
   #now optimise the planting date
   ######################################################
@@ -176,14 +151,14 @@ for (ci in ciList) {
       #create an alternative weather series so that it still catches the planting date,
       #yet solving the issue with the final harvest date
       icells <- cells; icells$SOW_DATE <- sow_i
-      altWthDir <- paste(cDir,"/inputs/ascii/wth/rfd_a",setup$CELL,sep="")
+      altWthDir <- paste(input_dir,"/ascii/wth/rfd_",setup$CELL,sep="")
       wthDataDir <- paste(bDir,"/../climate-data/gridcell-data/IND",sep="") #folder with gridded data
       owthDir <- make_wth(x=icells,cell=setup$CELL,wthDir=altWthDir,wthDataDir,
                           fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
       
       #update setup
       setup$WTH_DIR_RFD <- owthDir$WTH_DIR
-      setup$WTH_DIR_IRR <- owthDir$WTH_DIR
+      #setup$WTH_DIR_IRR <- owthDir$WTH_DIR
       
       #update values
       rng <- 365-sow_i+sow_f
@@ -215,7 +190,7 @@ for (ci in ciList) {
     
     #update the parameter set to -99 and replace the planting date file
     cells$SOW_DATE <- optimal$IPDATE
-    osowFile <- paste(cDir,"/inputs/ascii/sow/opt_",setup$SIM_NAME,".txt",sep="")
+    osowFile <- paste(input_dir,"/ascii/sow/opt_",setup$SIM_NAME,".txt",sep="")
     osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(setup$CELL),
                                fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
     
