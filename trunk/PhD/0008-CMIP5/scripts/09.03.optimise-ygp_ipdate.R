@@ -71,6 +71,7 @@ for (ci in ciList) {
   setup$CROPNAME <- "gnut"
   setup$CAL_DIR <- paste(glam_dir,"/model-runs/unperturbed_calib_ygp_ipdate",sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
+  setup$YGP_FILE <- "nofile"
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
   setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
   setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
