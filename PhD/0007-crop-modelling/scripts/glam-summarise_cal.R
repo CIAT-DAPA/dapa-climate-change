@@ -17,7 +17,7 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
-runs_set <- "mult_gridcell_kh_ra_new_sel"
+runs_set <- "mult_gridcell_kh_ra_new_sel_precal_ygp"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
@@ -36,6 +36,10 @@ msk[] <- NA
 
 #method of yield detrending
 method <- "lin"
+
+#load irrigation rates
+irDir <- paste(cDir,"/irrigated_ratio",sep="")
+ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
 
 #select cell
 #cell <- cells$CELL[1]
@@ -91,12 +95,9 @@ if (!file.exists(paste(cal_dir,"/calib_all_cells.csv",sep=""))) {
       y_irr <- rep(0,times=length(y_rfd))
     }
     
-    
     #get irrigation ratio
     #extract irrigation rates
     cat("get irrigation rates\n")
-    irDir <- paste(cDir,"/irrigated_ratio",sep="")
-    ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
     ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==cell)],Y=cells$Y[which(cells$CELL==cell)]))
     ir_vls <- as.numeric(ir_vls)
     ir_vls[which(ir_vls > 1)] <- 1
