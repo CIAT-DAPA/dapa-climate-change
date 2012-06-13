@@ -49,8 +49,14 @@ if (!file.exists(param_dir)) {dir.create(param_dir,recursive=T)}
 soil_dir <- paste(input_dir,"/ascii/soil",sep="")
 if (!file.exists(soil_dir)) {dir.create(soil_dir,recursive=T)}
 
+sow_dir <- paste(input_dir,"/ascii/sow",sep="")
+if (!file.exists(sow_dir)) {dir.create(sow_dir,recursive=T)}
+
 fwth_dir <- paste(input_dir,"/ascii/wth_fut",sep="")
 if (!file.exists(fwth_dir)) {dir.create(fwth_dir,recursive=T)}
+
+wth_dir <- paste(input_dir,"/ascii/wth",sep="")
+if (!file.exists(wth_dir)) {dir.create(wth_dir,recursive=T)}
 
 #write output gridcell selection
 write.csv(cells,paste(input_dir,"/calib-cells-selection.csv",sep=""),quote=T,row.names=F)
