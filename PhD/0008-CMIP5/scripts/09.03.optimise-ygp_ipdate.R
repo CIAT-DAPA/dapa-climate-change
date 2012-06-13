@@ -13,6 +13,7 @@
 
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 cmipDir <- "/nfs/a102/eejarv/CMIP5"
 
@@ -27,12 +28,12 @@ if (class(try(get("bDir"),silent=T)) == "try-error") {
   stop("bDir needs to be set")
 }
 
-if (class(try(get("maxiter"),silent=T)) == "try-error") {
-  stop("maxiter (max. num. iterations) needs to be set")
+if (class(try(get("src.dir2"),silent=T)) == "try-error") {
+  stop("src.dir2 needs to be set")
 }
 
-if (class(try(get("zone"),silent=T)) == "try-error") {
-  stop("zone to be calibrated needs to be set")
+if (class(try(get("cmipDir"),silent=T)) == "try-error") {
+  stop("cmip5 dir needs to be set")
 }
 
 #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
@@ -52,33 +53,32 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 cropName <- "gnut"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 pDir <- paste(cDir,"/params",sep="") #parameter files
+glam_dir <- paste(cmipDir,"/analysis_glam",sep="")
 input_dir <- paste(glam_dir,"/inputs",sep="")
 
 #load cell details
-#cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
-cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
+cells <- read.csv(paste(input_dir,"/calib-cells-selection.csv",sep=""))
 
 #ci <- 1
-ciList <- which(cells$ZONE == zone)
+ciList <- 1:nrow(cells)
 for (ci in ciList) {
   #get run setup
   #files that were generated
   setup <- list()
   setup$BDIR <- bDir
   setup$CELL <- cells$CELL[ci]
-  setup$ZONE <- cells$ZONE[ci]
   setup$METHOD <- "lin"
   setup$CROPNAME <- "gnut"
-  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel",sep="")
+  setup$CAL_DIR <- paste(glam_dir,"/model-runs/unperturbed_calib_ygp_ipdate",sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
   setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
   setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
   setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
   setup$WTH_ROOT <- "ingc"
-  setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
-  setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
-  setup$SIM_NAME <- paste("fcal_",setup$CELL,sep="")
+  setup$SOL_FILE <- paste(input_dir,"/ascii/soil/soiltypes2.txt",sep="")
+  setup$SOL_GRID <- paste(input_dir,"/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
+  setup$SIM_NAME <- paste("calib_",setup$CELL,sep="")
   setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
   
   cat("\nprocessing cell",setup$CELL,"\n")

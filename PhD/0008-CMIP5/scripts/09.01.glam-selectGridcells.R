@@ -37,6 +37,9 @@ if (!file.exists(glam_dir)) {dir.create(glam_dir)}
 input_dir <- paste(glam_dir,"/inputs",sep="")
 if (!file.exists(input_dir)) {dir.create(input_dir)}
 
+runs_dir <- paste(glam_dir,"/model-runs",sep="")
+if (!file.exists(runs_dir)) {dir.create(runs_dir)}
+
 grid_dir <- paste(input_dir,"/grid",sep="")
 if (!file.exists(grid_dir)) {dir.create(grid_dir,recursive=T)}
 

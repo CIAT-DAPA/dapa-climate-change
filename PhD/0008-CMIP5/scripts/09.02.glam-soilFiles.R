@@ -22,6 +22,7 @@ cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
 #input folder
 cmipDir <- "V:/eejarv/CMIP5"
+glam_dir <- paste(cmipDir,"/analysis_glam",sep="")
 input_dir <- paste(glam_dir,"/inputs",sep="")
 
 #these are the cells that have both yield and rainfall data
