@@ -10,7 +10,7 @@
 #maxiter <- 20
 #run <- 1
 #version <- "b"
-
+#expID <- "07"
 
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -18,6 +18,7 @@ bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 20
 #run <- 1 2 3 4 5
 version <- "b"
+expID <- "07"
 
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
@@ -75,7 +76,7 @@ setup$BDIR <- bDir
 setup$ZONE <- all_runs$zone[run]
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
-setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel_precal_ygp",sep="")
+setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,sep="")
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,version,"_",setup$METHOD,".txt",sep="")
 setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
 setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
