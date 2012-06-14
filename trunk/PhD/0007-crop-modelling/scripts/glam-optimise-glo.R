@@ -31,6 +31,10 @@ if (class(try(get("bDir"),silent=T)) == "try-error") {
   stop("bDir needs to be set")
 }
 
+if (class(try(get("expID"),silent=T)) == "try-error") {
+  stop("ID of experiment needs to be set")
+}
+
 if (class(try(get("run"),silent=T)) == "try-error") {
   stop("run needs to be set")
 }
