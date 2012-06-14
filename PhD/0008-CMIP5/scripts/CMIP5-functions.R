@@ -2,6 +2,75 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+
+#### wrapper function to create daily data from the extracted daily timeseries
+#### from the CMIP5 ensemble
+wrapper_create_wth_cmip5 <- function(this_proc) {
+  #load packages
+  library(raster)
+  
+  #source functions
+  source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+
+  #get gcm and ensemble member names
+  gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("process started for",gcm,"-",ens,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  #directories where the data is
+  cmip_wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND_CMIP5/",gcm,"/",ens,sep="") #folder with gridded data
+  base_wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
+  
+  owth_dir <- paste(wth_dir,"/",gcm,"_ENS_",ens,sep="")
+  if (!file.exists(owth_dir)) {dir.create(owth_dir)}
+  
+  ######################################################
+  ################## LOOP GRIDCELLS ####################
+  ######################################################
+  for (cell in cells$CELL) {
+    ######################################################
+    ######################################################
+    cat("\ncreating weather for gricell",cell,"\n")
+    ######################################################
+    ######################################################
+    
+    cat("extracting rainfed crop sowing date\n")
+    #sow_rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_start_lr.tif",sep=""))
+    sow_file <- paste(sow_dir,"/opt_calib_",cell,".txt",sep="")
+    sow_date <- as.numeric(read.fortran(sow_file,format=c("2I4","I6")))[3]
+    cells$SOW_DATE <- sow_date
+    
+    #write weather (irr and rainfed)
+    cat("extracting weather for rainfed system\n")
+    owthDir <- make_wth_gcm(x=cells,cell,wthDir=paste(owth_dir,"/rfd_",cell,sep=""),cmip_wthDataDir,
+                            base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+    
+    #Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
+    #between April and May: sown in day 32 [zone 2]
+    #in Uttar Pradesh it is 15th November (day 320) [zone 1]
+    #in Andhra Pradesh it is 15th November (day 320) [zone 5]
+    #in Karnataka and Tamil Nadu it is 15th January (day 15) [zone 5]
+    #in Orissa it is 15h November (day 320) [zone 4]
+    #in Madhya Pradesh it is 15th November (day 320) [zone 3]
+    
+    #This info was condensed into a raster file, which has the planting information per
+    #Indian groundnut growing zone (that was done manually). Loading it...
+    cat("extracting weather for rabi (irrigated) system\n")
+    rabi_sow <- raster(paste(cropDir,"/",tolower(cropName),"-zones/plant_rabi.asc",sep=""))
+    icells <- cells; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y))
+    owthDir <- make_wth_gcm(x=icells,cell,wthDir=paste(owth_dir,"/irr_",cell,sep=""),cmip_wthDataDir,
+                            base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+  }
+  return(owthDir)
+}
+
+
 #plot points of seasons on top of boxplot
 plotpoints <- function(pdata,param="CCOEF") {
   cnames <- levels(pdata$ISO)
