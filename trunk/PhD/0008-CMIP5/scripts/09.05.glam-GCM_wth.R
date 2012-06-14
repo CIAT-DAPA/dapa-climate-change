@@ -10,18 +10,24 @@
 library(raster)
 
 #load functions
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+
 source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
 source(paste(src.dir,"/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 
-cmDir <- "W:/eejarv/PhD-work/crop-modelling"
+#cmDir <- "W:/eejarv/PhD-work/crop-modelling"
+#cmipDir <- "V:/eejarv/CMIP5"
+cmDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+cmipDir <- "/nfs/a102/eejarv/CMIP5"
+
 bDir <- paste(cmDir,"/GLAM",sep="")
 cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
-cmipDir <- "V:/eejarv/CMIP5"
 glam_dir <- paste(cmipDir,"/analysis_glam",sep="")
 input_dir <- paste(glam_dir,"/inputs",sep="")
 
@@ -47,7 +53,7 @@ procList <- data.frame(GCM=gcmList)
 
 #determine number of CPUs
 ncpus <- nrow(procList)
-if (ncpus>12) {ncpus <- 12}
+if (ncpus>10) {ncpus <- 10}
 
 #here do the parallelisation
 #load library and create cluster
