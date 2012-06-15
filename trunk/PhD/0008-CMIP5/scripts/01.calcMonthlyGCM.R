@@ -89,7 +89,8 @@ for (vn in vnList) {
           #cat(i,". ",sep="")
           #i=1
           #rs <- raster(fPres[i])
-          mList[[i]] <- fPres_cor[[i]]
+          rs <- fPres_cor[[i]]
+          mList[[i]] <- rs
           xr <- c(xr,xres(rs)); yr <- c(yr,yres(rs))
         }
         
