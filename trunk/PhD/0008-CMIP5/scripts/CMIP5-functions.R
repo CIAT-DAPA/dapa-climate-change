@@ -2,6 +2,44 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+#compress outputs of weather from CMIP5 GCMs
+zip_unzip_wth_fut <- function(procList,wth_dir,unzip=F) {
+  setwd(wth_dir)
+  #loop over all CMIP5 climate model runs
+  for (i in 1:nrow(procList)) {
+    #i <- 1
+    gcm_ens <- procList$GCM[i]
+    cat("\nprocessing: ",paste(gcm_ens),"\n")
+    z_name <- paste(gcm_ens,".7z",sep="")
+    
+    if (!unzip) { #if decompress switch is off
+      if (!file.exists(z_name)) {
+        if (file.exists(paste(gcm_ens))) {
+          cat("compressing...\n")
+          system(paste("7z a -r ",z_name," ",gcm_ens,sep=""))
+        }
+      }
+      
+      if (file.exists(z_name)) {
+        if (file.exists(gcm_ens)) {
+          cat("compressing...\n")
+          system(paste("rm -rf ",gcm_ens,sep=""))
+        }
+      }
+    } else { #if decompress switch is on
+      if (file.exists(z_name)) {
+        if (file.exists(gcm_ens)) {
+          cat("uncompressing...\n")
+          system(paste("rm -rf ",gcm_ens,sep=""))
+        }
+        system(paste("7z x ",z_name,sep=""))
+      }
+    }
+  }
+  return(wth_dir)
+}
+
+
 
 #### wrapper function to create daily data from the extracted daily timeseries
 #### from the CMIP5 ensemble
