@@ -80,10 +80,12 @@ for (i in 1:nrow(procRepeat)) {
       rmf <- file.remove(procFil)
     }
     
-    cru <- read.csv(paste(outputDD,"/",reg,"/",iso,"/ts-CRU/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))
-    wst <- read.csv(paste(outputDD,"/",reg,"/",iso,"/ts-WST/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))
-    e40 <- read.csv(paste(outputDD,"/",reg,"/",iso,"/ts-E40/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))
-    
+    cru <- paste(outputDD,"/",reg,"/",iso,"/ts-CRU/",vn_gcm,"_",gcm,"_",ens,".csv",sep="")
+    if (file.exists(cru)) {rmf <- file.remove(cru)}
+    wst <- paste(outputDD,"/",reg,"/",iso,"/ts-WST/",vn_gcm,"_",gcm,"_",ens,".csv",sep="")
+    if (file.exists(wst)) {rmf <- file.remove(wst)}
+    e40 <- paste(outputDD,"/",reg,"/",iso,"/ts-E40/",vn_gcm,"_",gcm,"_",ens,".csv",sep="")
+    if (file.exists(e40)) {rmf <- file.remove(e40)}
   }
 }
 
