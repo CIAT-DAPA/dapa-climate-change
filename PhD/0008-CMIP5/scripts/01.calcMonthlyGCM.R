@@ -80,16 +80,20 @@ for (vn in vnList) {
         fPres <- as.character(sapply(fList,checkExists))
         fPres <- fPres[which(!is.na(fPres))]
         
+        fPres_cor <- sapply(fPres,checkMaxMin,vn=vn)
+        
         #loop through files, to load
         mList <- list()
         xr <- c(); yr <- c()
-        for (i in 1:length(fPres)) {
+        for (i in 1:length(fPres_cor)) {
           #cat(i,". ",sep="")
           #i=1
-          rs <- raster(fPres[i])
-          mList[[i]] <- rs
+          #rs <- raster(fPres[i])
+          mList[[i]] <- fPres_cor[[i]]
           xr <- c(xr,xres(rs)); yr <- c(yr,yres(rs))
         }
+        
+        
         #loop through files to resample to the lowest resolution possible
         mList_res <- list()
         sxr <- which(xr==min(xr))[1]

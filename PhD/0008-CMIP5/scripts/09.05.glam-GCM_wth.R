@@ -82,7 +82,3 @@ system.time(sfSapply(as.vector(1:nrow(procList)),wrapper_create_wth_cmip5))
 #stop the cluster
 sfStop()
 
-
-
-
-
