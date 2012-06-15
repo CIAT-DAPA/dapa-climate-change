@@ -2,6 +2,52 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+##### this is because of an issue with the GCM data that were corrupted. So i needed
+check_proc <- function(i) {
+  iso <- paste(procList$ISO[i])
+  reg <- paste(regions$REGION[which(regions$ISO == iso)])
+  gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
+  
+  oDir <- paste(outputDD,"/",reg,"/",iso,sep="")
+  procDir <- paste(oDir,"/y.proc",sep="")
+  
+  #open the three files
+  procRepeat <- data.frame()
+  for (vid in 1:3) {
+    vn_gcm <- paste(vnList$GCM[vid]) #variable name
+    cru <- read.csv(paste(outputDD,"/",reg,"/",iso,"/ts-CRU/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))
+    wst <- read.csv(paste(outputDD,"/",reg,"/",iso,"/ts-WST/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))
+    
+    if (vid != 3) {
+      e40 <- read.csv(paste(outputDD,"/",reg,"/",iso,"/ts-E40/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))
+      all_data <- rbind(cru,e40,wst)
+    } else {
+      all_data <- rbind(cru,wst)
+    }
+    
+    if (vid == 1) {
+      thresh <- 10000
+    } else {
+      thresh <- 100
+    }
+    all_data <- all_data[which(!is.na(all_data$RMSE)),]
+    no_data <- length(which(all_data$RMSE > thresh))
+    #View(all_data[which(all_data$RMSE > thresh),])
+    if (no_data > 0) {
+      isok <- F
+    } else {
+      isok <- T
+    }
+    prout <- data.frame(PID=i,VN=vn_gcm,REG=reg,ISO=iso,GCM=gcm,ENS=ens,ISOK=isok)
+    procRepeat <- rbind(procRepeat,prout)
+  }
+  return(procRepeat)
+}
+
+
+
+
 #compress outputs of weather from CMIP5 GCMs
 zip_unzip_wth_fut <- function(procList,wth_dir,unzip=F) {
   setwd(wth_dir)

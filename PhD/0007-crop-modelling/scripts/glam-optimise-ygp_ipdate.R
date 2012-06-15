@@ -9,6 +9,7 @@
 #bDir <- "F:/PhD-work/crop-modelling/GLAM"
 #maxiter <- 20
 #zone <- 1
+#expID <- "07"
 
 
 #eljefe
@@ -16,6 +17,7 @@ src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 20
 #zone <- 1
+expID <- "07"
 
 #source(paste(src.dir,"/glam-optimise-ygp_ipdate.R",sep=""))
 
@@ -69,7 +71,7 @@ for (ci in ciList) {
   setup$ZONE <- cells$ZONE[ci]
   setup$METHOD <- "lin"
   setup$CROPNAME <- "gnut"
-  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/mult_gridcell_kh_ra_new_sel_precal_ygp",sep="")
+  setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
   setup$YGP_FILE <- "nofile"
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_start.txt",sep="")
