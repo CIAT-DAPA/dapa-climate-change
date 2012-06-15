@@ -373,6 +373,19 @@ interannual_skill <- function(this_proc) {
         y <- matrix(y,ncol=12,nrow=nrow(gcm_vals[[1]]),byrow=T)
         return(y)
       }
+      
+      if (vid == 1) {
+        thresh <- 10000
+      } else {
+        thresh <- 100
+      }
+      gcm_check_minmax <- function(x,thresh) {
+        y <- as.vector(x)
+        y[which(y > thresh)] <- NA
+        y <- matrix(y,ncol=12,nrow=nrow(gcm_vals[[1]]),byrow=F)
+        return(y)
+      }
+      gcm_vals <- lapply(gcm_vals,FUN= gcm_check_minmax,thresh) #fixing the no data problem
       gcm_vals <- lapply(gcm_vals,FUN= seas_organize) #re-ordering
       gcm_vals <- lapply(gcm_vals,FUN= function(x,sc) {x * sc},sc_gcm) #scaling
       
