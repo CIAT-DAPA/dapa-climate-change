@@ -365,21 +365,29 @@ make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=li
       
       #fix matrix according to leap condition
       if (what_leap == "all30") {
-        wx <- wx[1:360,]
-        dg30 <- createDateGridCMIP5(whatLeap=what_leap,year=yr)
-        dg31 <- createDateGridCMIP5(whatLeap="no",year=yr)
-        wx$MTH.DAY <- dg30$MTH.DAY
-        wx2 <- merge(dg31,wx,by="MTH.DAY",sort=T,all.x=T,all.y=F)
-        wx2[which(wx2$MTH.DAY == "M01D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M01D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2[which(wx2$MTH.DAY == "M03D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M03D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2[which(wx2$MTH.DAY == "M05D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M05D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2[which(wx2$MTH.DAY == "M07D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M07D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2[which(wx2$MTH.DAY == "M08D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M08D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2[which(wx2$MTH.DAY == "M10D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M10D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2[which(wx2$MTH.DAY == "M12D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M12D30"),c("SRAD","TMAX","TMIN","RAIN")]
-        wx2$MTH.DAY <- NULL
-        wx2$JDAY <- 1:365
-        wx <- wx2
+        if (hdate > 365) {
+          wx[72,c("SRAD","TMAX","TMIN","RAIN")] <- wx[71,c("SRAD","TMAX","TMIN","RAIN")]
+          wx[73,c("SRAD","TMAX","TMIN","RAIN")] <- wx[71,c("SRAD","TMAX","TMIN","RAIN")]
+          wx[74,c("SRAD","TMAX","TMIN","RAIN")] <- wx[71,c("SRAD","TMAX","TMIN","RAIN")]
+          wx[75,c("SRAD","TMAX","TMIN","RAIN")] <- wx[71,c("SRAD","TMAX","TMIN","RAIN")]
+          wx[76,c("SRAD","TMAX","TMIN","RAIN")] <- wx[71,c("SRAD","TMAX","TMIN","RAIN")]
+        } else {
+          wx <- wx[1:360,]
+          dg30 <- createDateGridCMIP5(whatLeap=what_leap,year=yr)
+          dg31 <- createDateGridCMIP5(whatLeap="no",year=yr)
+          wx$MTH.DAY <- dg30$MTH.DAY
+          wx2 <- merge(dg31,wx,by="MTH.DAY",sort=T,all.x=T,all.y=F)
+          wx2[which(wx2$MTH.DAY == "M01D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M01D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2[which(wx2$MTH.DAY == "M03D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M03D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2[which(wx2$MTH.DAY == "M05D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M05D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2[which(wx2$MTH.DAY == "M07D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M07D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2[which(wx2$MTH.DAY == "M08D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M08D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2[which(wx2$MTH.DAY == "M10D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M10D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2[which(wx2$MTH.DAY == "M12D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M12D30"),c("SRAD","TMAX","TMIN","RAIN")]
+          wx2$MTH.DAY <- NULL
+          wx2$JDAY <- 1:365
+          wx <- wx2
+        }
       }
       
       wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
