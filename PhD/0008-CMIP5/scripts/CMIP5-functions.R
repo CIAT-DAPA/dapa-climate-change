@@ -113,7 +113,7 @@ wrapper_create_wth_cmip5 <- function(this_proc) {
   base_wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
   
   owth_dir <- paste(wth_dir,"/",gcm,"_ENS_",ens,sep="")
-  if (!file.exists(owth_dir)) {dir.create(owth_dir)}
+  if (!file.exists(owth_dir)) {dir.create(owth_dir,recursive=T)}
   
   ######################################################
   ################## LOOP GRIDCELLS ####################
