@@ -74,6 +74,7 @@ sfExport("cells")
 sfExport("asc_dir")
 sfExport("sow_dir")
 sfExport("wth_dir")
+sfExport("gcmChars")
 sfExport("procList")
 
 #run the function in parallel
