@@ -64,8 +64,9 @@ rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/",vn,"_01.tif",
 
 #load the data for all countries
 iso <- isoList[1]
+reg <- regions$REGION[which(regions$ISO == iso)]
 
-
+sdata <- read.csv(paste(mdDir,"/assessment/output-data/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep=""))
 
 
 
