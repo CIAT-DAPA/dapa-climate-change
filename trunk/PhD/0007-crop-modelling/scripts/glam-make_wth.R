@@ -399,7 +399,7 @@ make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=li
       tx_na <- length(which(is.na(wx$TMAX)))
       tn_na <- length(which(is.na(wx$TMIN)))
       
-      if (pr == 0 & tx_na == 0 & tn_na == 0) {
+      if (pr_na == 0 & tx_na == 0 & tn_na == 0) {
         wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
       }
     }
