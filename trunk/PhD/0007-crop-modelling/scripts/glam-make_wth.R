@@ -216,7 +216,7 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
 # function to make weather for a number of cells using GCM data
 #################################################################################
 #################################################################################
-make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE")) {
+make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"),what_leap="yes") {
   #checks
   if (length(which(toupper(names(fields)) %in% c("CELL","X","Y","SOW_DATE"))) != 4) {
     stop("field list incomplete")
@@ -362,16 +362,38 @@ make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=li
       }
       
       wx <- data.frame(DATE=NA,JDAY=1:365,SRAD=srad,TMAX=tmax,TMIN=tmin,RAIN=prec)
-      wx$SRAD[which(is.na(wx$SRAD))] <- -99.0
-      wx$TMAX[which(is.na(wx$TMAX))] <- -99.0
-      wx$TMIN[which(is.na(wx$TMIN))] <- -99.0
-      wx$RAIN[which(is.na(wx$RAIN))] <- -99.0
+      
+      #fix matrix according to leap condition
+      if (what_leap == "all30") {
+        wx <- wx[1:360,]
+        dg30 <- createDateGridCMIP5(whatLeap=what_leap,year=yr)
+        dg31 <- createDateGridCMIP5(whatLeap="no",year=yr)
+        wx$MTH.DAY <- dg30$MTH.DAY
+        wx2 <- merge(dg31,wx,by="MTH.DAY",sort=T,all.x=T,all.y=F)
+        wx2[which(wx2$MTH.DAY == "M01D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M01D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2[which(wx2$MTH.DAY == "M03D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M03D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2[which(wx2$MTH.DAY == "M05D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M05D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2[which(wx2$MTH.DAY == "M07D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M07D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2[which(wx2$MTH.DAY == "M08D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M08D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2[which(wx2$MTH.DAY == "M10D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M10D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2[which(wx2$MTH.DAY == "M12D31"),c("SRAD","TMAX","TMIN","RAIN")] <- wx2[which(wx2$MTH.DAY == "M12D30"),c("SRAD","TMAX","TMIN","RAIN")]
+        wx2$MTH.DAY <- NULL
+        wx2$JDAY <- 1:365
+        wx <- wx2
+      }
       
       wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
       wx$DATE[which(wx$JDAY >= 10 & wx$JDAY < 100)] <- paste(substr(yr,3,4),"0",wx$JDAY[which(wx$JDAY >= 10 & wx$JDAY < 100)],sep="")
       wx$DATE[which(wx$JDAY >= 100)] <- paste(substr(yr,3,4),wx$JDAY[which(wx$JDAY >= 100)],sep="")
       
-      wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
+      #if there is any missing data for that year do not write it
+      pr_na <- length(which(is.na(wx$RAIN)))
+      tx_na <- length(which(is.na(wx$TMAX)))
+      tn_na <- length(which(is.na(wx$TMIN)))
+      
+      if (pr == 0 & tx_na == 0 & tn_na == 0) {
+        wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
+      }
     }
   }
   return(list(WTH_DIR=wthDir,SOW_DATE=osdate))

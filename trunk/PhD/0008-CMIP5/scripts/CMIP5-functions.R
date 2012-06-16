@@ -102,6 +102,7 @@ wrapper_create_wth_cmip5 <- function(this_proc) {
   #get gcm and ensemble member names
   gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
   ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
+  wh_leap <- paste(gcmChars$has_leap[which(gcmChars$GCM == gcm & gcmChars$Ensemble == ens)][1])
   
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   cat("process started for",gcm,"-",ens,"\n")
@@ -133,7 +134,8 @@ wrapper_create_wth_cmip5 <- function(this_proc) {
     #write weather (irr and rainfed)
     cat("extracting weather for rainfed system\n")
     owthDir <- make_wth_gcm(x=cells,cell,wthDir=paste(owth_dir,"/rfd_",cell,sep=""),cmip_wthDataDir,
-                            base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+                            base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"),
+                            what_leap=wh_leap)
     
     #Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
     #between April and May: sown in day 32 [zone 2]
@@ -149,7 +151,8 @@ wrapper_create_wth_cmip5 <- function(this_proc) {
     rabi_sow <- raster(paste(cropDir,"/",tolower(cropName),"-zones/plant_rabi.asc",sep=""))
     icells <- cells; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y))
     owthDir <- make_wth_gcm(x=icells,cell,wthDir=paste(owth_dir,"/irr_",cell,sep=""),cmip_wthDataDir,
-                            base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+                            base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"),
+                            what_leap=wh_leap)
   }
   return(owthDir)
 }
