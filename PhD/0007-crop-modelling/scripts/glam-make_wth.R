@@ -362,6 +362,11 @@ make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=li
       }
       
       wx <- data.frame(DATE=NA,JDAY=1:365,SRAD=srad,TMAX=tmax,TMIN=tmin,RAIN=prec)
+      wx$SRAD[which(is.na(wx$SRAD))] <- -99.0
+      wx$TMAX[which(is.na(wx$TMAX))] <- -99.0
+      wx$TMIN[which(is.na(wx$TMIN))] <- -99.0
+      wx$RAIN[which(is.na(wx$RAIN))] <- -99.0
+      
       wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
       wx$DATE[which(wx$JDAY >= 10 & wx$JDAY < 100)] <- paste(substr(yr,3,4),"0",wx$JDAY[which(wx$JDAY >= 10 & wx$JDAY < 100)],sep="")
       wx$DATE[which(wx$JDAY >= 100)] <- paste(substr(yr,3,4),wx$JDAY[which(wx$JDAY >= 100)],sep="")

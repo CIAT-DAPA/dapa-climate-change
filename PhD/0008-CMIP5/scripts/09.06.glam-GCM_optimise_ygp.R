@@ -97,7 +97,7 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
   
   
   #create an output control directory if it does not exist yet
-  octr_dir <- paste(runs_odir,"/gcm.proc",sep="")
+  octr_dir <- paste(runs_odir,"/x.proc",sep="")
   if (!file.exists(octr_dir)) {dir.create(octr_dir)}
   
   cFile <- paste(octr_dir,"/",gcm,"_",ens,".proc",sep="")
@@ -223,9 +223,8 @@ sfExport("gcmList")
 sfExport("procList")
 sfExport("runs_odir")
 
-
 #run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(procList)),interannual_skill))
+system.time(sfSapply(as.vector(1:nrow(procList)),wrapper_GCM_glam_optimise_ygp))
 
 #stop the cluster
 sfStop()
