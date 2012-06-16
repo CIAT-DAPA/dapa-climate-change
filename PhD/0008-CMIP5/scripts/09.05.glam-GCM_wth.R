@@ -53,7 +53,7 @@ procList <- data.frame(GCM=gcmList)
 
 #determine number of CPUs
 ncpus <- nrow(procList)
-if (ncpus>12) {ncpus <- 12}
+if (ncpus>12) {ncpus <- 13}
 
 #here do the parallelisation
 #load library and create cluster
