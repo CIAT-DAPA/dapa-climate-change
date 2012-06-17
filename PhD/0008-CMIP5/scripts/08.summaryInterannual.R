@@ -5,10 +5,12 @@
 #CMIP5 skill analyses
 #7. Summarise the results of mean climate skill analyses
 
+library(raster)
+
 #variables to be set
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
-#src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#mdDir <- "/nfs/a102/eejarv/CMIP5"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+mdDir <- "/nfs/a102/eejarv/CMIP5"
 
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
@@ -61,20 +63,26 @@ vn <- paste(procList$VAR[this_proc])
 
 #read base raster to get characteristics
 rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/",vn,"_01.tif",sep=""))
+rs <- rotate(rs)
 
-#load the data for all countries
-iso <- isoList[1]
-reg <- regions$REGION[which(regions$ISO == iso)]
+#list of seasons and clean raster for result
+sList <- c("DJF","MAM","JJA","SON","ANN")
+seas <- sList[5]
+seas_rs <- raster(rs)
 
-sdata <- read.csv(paste(mdDir,"/assessment/output-data/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep=""))
-
-
-
-
-
-
-
-
+#load the data for all countries and put it into a raster
+for (iso in isoList) {
+  #iso <- isoList[1]
+  reg <- regions$REGION[which(regions$ISO == iso)]
+  
+  sdata <- read.csv(paste(mdDir,"/assessment/output-data/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep=""))
+  
+  #put the skill data into the raster
+  sel_data <- sdata[which(sdata$SEAS == seas),]
+  
+  wcells <- cellFromXY(seas_rs,cbind(x=sel_data$LON,y=sel_data$LAT))
+  seas_rs[wcells] <- sel_data$RMSE
+}
 
 
 
