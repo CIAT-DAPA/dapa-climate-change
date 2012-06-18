@@ -31,59 +31,53 @@ vnList <- data.frame(VID=1:3,GCM=c("pr","tas","dtr"),WCL=c("prec","tmean","dtr")
                      E40=c("prec","tasm",NA),CL_WST=c("rain","tean","dtr"),
                      TS_WST=c("pr","tas","dtr"))
 
-#scaling factors to datasets per variable
-scList <- data.frame(VID=1:3,GCM=c(1,1,1),WCL=c(1,1,1),
-                     CL_CRU=c(1,1,1),TS_CRU=c(0.1,0.1,0.1),
-                     E40=c(1,1,NA),CL_WST=c(1,1,1),
-                     TS_WST=c(1,0.1,0.1))
-
-
 #processes to complete
 gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
 gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
 isoList <- regions$ISO
-dsetList <- c("ts-CRU","cl-E40","ts-WST")
+dsetList <- c("ts-CRU","ts-E40","ts-WST")
 vnList <- c("pr","tas","dtr")
 procList <- expand.grid(GCM=gcmList,OBS=dsetList,VAR=vnList)
 procList$GCM <- paste(procList$GCM)
 procList$OBS <- paste(procList$OBS); procList$VAR <- paste(procList$VAR)
+procList <- procList[-which(procList$OBS == "ts-E40" & procList$VAR == "dtr"),]
 
 #create output folder
 oDir <- paste(mdDir,"/assessment/output-data/_summary",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
-this_proc <- 1
+odir_rs <- paste(oDir,"/interannual-skill",sep="")
+if (!file.exists(odir_rs)) {dir.create(odir_rs)}
 
-#get gcm 
-gcm_ens <- paste(procList$GCM[this_proc])
-gcm <- unlist(strsplit(gcm_ens,"_ENS_",fixed=T))[1]
-ens <- unlist(strsplit(gcm_ens,"_ENS_",fixed=T))[2]
-dset <- paste(procList$OBS[this_proc])
-vn <- paste(procList$VAR[this_proc])
+#this_proc <- 1
+#summarise_interannual(144)
 
-#read base raster to get characteristics
-rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/",vn,"_01.tif",sep=""))
-rs <- rotate(rs)
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>10) {ncpus <- 10}
 
-#list of seasons and clean raster for result
-sList <- c("DJF","MAM","JJA","SON","ANN")
-seas <- sList[5]
-seas_rs <- raster(rs)
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
 
-#load the data for all countries and put it into a raster
-for (iso in isoList) {
-  #iso <- isoList[1]
-  reg <- regions$REGION[which(regions$ISO == iso)]
-  
-  sdata <- read.csv(paste(mdDir,"/assessment/output-data/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep=""))
-  
-  #put the skill data into the raster
-  sel_data <- sdata[which(sdata$SEAS == seas),]
-  
-  wcells <- cellFromXY(seas_rs,cbind(x=sel_data$LON,y=sel_data$LAT))
-  seas_rs[wcells] <- sel_data$RMSE
-}
+#export variables
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("regions")
+sfExport("gcmChars")
+sfExport("gcmList")
+sfExport("isoList")
+sfExport("procList")
+sfExport("dsetList")
+sfExport("vnList")
+sfExport("oDir")
+sfExport("odir_rs")
 
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),summarise_interannual))
 
+#stop the cluster
+sfStop()
 
 

@@ -2,6 +2,68 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+##############################################################################
+# get metrics for interannual variability skill assessment
+##############################################################################
+summarise_interannual <- function(this_proc) {
+  
+  library(raster)
+  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+  
+  #get gcm, ensemble, dataset and variable
+  gcm_ens <- paste(procList$GCM[this_proc])
+  gcm <- unlist(strsplit(gcm_ens,"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(gcm_ens,"_ENS_",fixed=T))[2]
+  dset <- paste(procList$OBS[this_proc])
+  vn <- paste(procList$VAR[this_proc])
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("summarise for",vn,":",gcm,"-",ens,"-",dset,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  #read base raster to get characteristics
+  rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/",vn,"_01.tif",sep=""))
+  rs <- rotate(rs)
+  
+  #list of seasons and clean raster for result
+  sList <- c("DJF","MAM","JJA","SON","ANN")
+  for (seas in sList) {
+    #seas <- sList[5]
+    cat("creating output for season",paste(seas),"\n")
+    
+    odir_seas <- paste(odir_rs,"/",seas,sep="")
+    if (!file.exists(odir_seas)) {dir.create(odir_seas)}
+    
+    if (!file.exists(paste(odir_seas,"/mbr-",vn,"-",dset,"-",gcm,"_",ens,".tif",sep=""))) {
+      #output base rasters
+      rmse_rs <- raster(rs)
+      ccoef_rs <- raster(rs)
+      mbr_rs <- raster(rs)
+      
+      #load the data for all countries and put it into a raster
+      for (iso in isoList) {
+        #iso <- isoList[1]
+        reg <- regions$REGION[which(regions$ISO == iso)]
+        
+        sdata <- read.csv(paste(mdDir,"/assessment/output-data/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep=""))
+        
+        #put the skill data into the raster
+        sel_data <- sdata[which(sdata$SEAS == seas),]
+        
+        wcells <- cellFromXY(rs,cbind(x=sel_data$LON,y=sel_data$LAT))
+        rmse_rs[wcells] <- sel_data$RMSE
+        ccoef_rs[wcells] <- sel_data$CCOEF
+        mbr_rs[wcells] <- sel_data$MBR
+      }
+      
+      rmse_rs <- writeRaster(rmse_rs,paste(odir_seas,"/rmse-",vn,"-",dset,"-",gcm,"_",ens,".tif",sep=""),format="GTiff",overwrite=T)
+      ccoef_rs <- writeRaster(ccoef_rs,paste(odir_seas,"/ccoef-",vn,"-",dset,"-",gcm,"_",ens,".tif",sep=""),format="GTiff",overwrite=T)
+      mbr_rs <- writeRaster(mbr_rs,paste(odir_seas,"/mbr-",vn,"-",dset,"-",gcm,"_",ens,".tif",sep=""),format="GTiff",overwrite=T)
+    }
+  }
+}
+
+
 ##### this is because of an issue with the GCM data that were corrupted. So i needed
 check_proc <- function(i) {
   iso <- paste(procList$ISO[i])
