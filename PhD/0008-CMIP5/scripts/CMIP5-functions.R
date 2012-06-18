@@ -42,8 +42,12 @@ mean_summary_interannual <- function(this_proc) {
     #resample to the lowest cellsize
     mList_res <- lapply(mList,FUN= function(x,y) {resample(x,y,method="ngb")},res_base)
     
-    #cope with any missing data thing
-    mList_cor <- lapply(mList_res,FUN= function(x) {y <- x; y[which(x[] > 10000)] <- NA; return(y)})
+    #cope with any missing data
+    if (vn == "pr") {
+      mList_cor <- lapply(mList_res,FUN= function(x) {y <- x; y[which(x[] > 10000)] <- NA; return(y)})
+    } else {
+      mList_cor <- lapply(mList_res,FUN= function(x) {y <- x; y[which(x[] > 100)] <- NA; return(y)})
+    }
     
     #a rasterstack is created and then use calc() to get the mean, and just write it
     rstk <- stack(mList_cor)
