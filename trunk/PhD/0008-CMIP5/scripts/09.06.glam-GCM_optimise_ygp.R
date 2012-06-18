@@ -128,60 +128,66 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
       
       cat("\nprocessing cell",setup$CELL,"\n")
       
-      #get defaults (parameter set)
-      params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
-      params$glam_param.mod_mgt$ISYR <- 1966 #start year
-      params$glam_param.mod_mgt$IEYR <- 1993 #end year
-      params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
-      params$glam_param.mod_mgt$HTS <- "-1" #turn off HTS
-      params$glam_param.sparer$RSPARE1$Value <- -99 #turn off TDS
-      params$glam_param.sparer$RSPARE2$Value <- -99 #turn off TDS
+      nw_irr <- length(list.files(setup$WTH_DIR_IRR,pattern="\\.wth"))
+      nw_rfd <- length(list.files(setup$WTH_DIR_RFD,pattern="\\.wth"))
       
-      #extract irrigation rates
-      irDir <- paste(cDir,"/irrigated_ratio",sep="")
-      library(raster)
-      ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
-      ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==setup$CELL)],Y=cells$Y[which(cells$CELL==setup$CELL)]))
-      ir_vls <- as.numeric(ir_vls)
-      ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
-      ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
-      
-      ######################################################
-      # final calibration of YGP
-      ######################################################
-      #run the optimiser for YGP, 20 steps
-      parname <- "YGP"
-      where <- "glam_param.ygp"
-      nstep <- 20
-      
-      if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
-        # reset lists of output parameters
-        optimal <- list(); optimised <- list()
+      if (nw_rfd == 28 & nw_irr == 28) {
+        #get defaults (parameter set)
+        params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
+        params$glam_param.mod_mgt$ISYR <- 1966 #start year
+        params$glam_param.mod_mgt$IEYR <- 1993 #end year
+        params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
+        params$glam_param.mod_mgt$HTS <- "-1" #turn off HTS
+        params$glam_param.sparer$RSPARE1$Value <- -99 #turn off TDS
+        params$glam_param.sparer$RSPARE2$Value <- -99 #turn off TDS
         
-        optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                  param=parname,n.steps=20,iter=tolower(parname),
-                                                  iratio=ir_vls)
+        #extract irrigation rates
+        irDir <- paste(cDir,"/irrigated_ratio",sep="")
+        library(raster)
+        ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
+        ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==setup$CELL)],Y=cells$Y[which(cells$CELL==setup$CELL)]))
+        ir_vls <- as.numeric(ir_vls)
+        ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
+        ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
         
-        optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
-        cat(parname,":",optimal[[parname]],"\n")
-        if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+        ######################################################
+        # final calibration of YGP
+        ######################################################
+        #run the optimiser for YGP, 20 steps
+        parname <- "YGP"
+        where <- "glam_param.ygp"
+        nstep <- 20
         
-        save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
-        
-        #now make the plot
-        plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
-        if (!file.exists(plotsDir)) {dir.create(plotsDir)}
-        
-        tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
-             width=1250,pointsize=8)
-        par(mar=c(3,3,2,1))
-        plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
-             main=paste(parname," :: ",optimal[[parname]],sep=""),
-             xlab="Parameter value",ylab="RMSE (kg/ha)")
-        grid(nx=10,ny=10)
-        abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
-        dev.off()
-        
+        if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
+          # reset lists of output parameters
+          optimal <- list(); optimised <- list()
+          
+          optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
+                                                    param=parname,n.steps=20,iter=tolower(parname),
+                                                    iratio=ir_vls)
+          
+          optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+          cat(parname,":",optimal[[parname]],"\n")
+          if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+          
+          save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
+          
+          #now make the plot
+          plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
+          if (!file.exists(plotsDir)) {dir.create(plotsDir)}
+          
+          tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
+               width=1250,pointsize=8)
+          par(mar=c(3,3,2,1))
+          plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
+               main=paste(parname," :: ",optimal[[parname]],sep=""),
+               xlab="Parameter value",ylab="RMSE (kg/ha)")
+          grid(nx=10,ny=10)
+          abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
+          dev.off()
+        }
+      } else {
+        warning("incomplete set of weather files for ",gcm," - ",ens,"\n")
       }
     }
     
