@@ -10,7 +10,7 @@
 #maxiter <- 20
 #run <- 1
 #version <- "b"
-#expID <- "07"
+#expID <- "08"
 
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -18,7 +18,7 @@ bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 20
 #run <- 1 2 3 4 5
 version <- "b"
-expID <- "07"
+expID <- "08"
 
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
@@ -82,7 +82,8 @@ setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,sep="")
 setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,version,"_",setup$METHOD,".txt",sep="")
-setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
+#setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
+setup$YGP_FILE <- "nofile"
 setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
 setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_irr.txt",sep="")
 setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_calz",setup$ZONE,version,sep="")
@@ -98,7 +99,7 @@ params <- GLAM_get_default(x=cells,cell=NA,parDir=pDir)
 params$glam_param.mod_mgt$ISYR <- 1966 #start year
 params$glam_param.mod_mgt$IEYR <- 1993 #end year
 params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
-params$glam_param.ygp$YGP$Value <- -99.0
+#params$glam_param.ygp$YGP$Value <- -99.0
 
 
 #load list of parameters to optimise, ranges, and number of steps
