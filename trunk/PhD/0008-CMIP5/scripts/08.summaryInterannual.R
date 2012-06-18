@@ -81,3 +81,23 @@ system.time(sfSapply(as.vector(1:nrow(procList)),summarise_interannual))
 sfStop()
 
 
+
+#######################################
+#calculate average of all climate models for each metric
+
+metList <- c("rmse","mbr","ccoef")
+sList <- c("DJF","MAM","JJA","SON","ANN")
+gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
+
+for (met in metList) {
+  #met <- metList[1]
+  for (seas in sList) {
+    #seas <- sList[1]
+    
+    #load all models and all datasets (ts-CRU and ts-WST)
+    
+    
+  }
+}
+
+
