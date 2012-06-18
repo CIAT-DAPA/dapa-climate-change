@@ -22,7 +22,7 @@ summarise_interannual <- function(this_proc) {
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   #read base raster to get characteristics
-  rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/",vn,"_01.tif",sep=""))
+  rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/pr_01.tif",sep=""))
   rs <- rotate(rs)
   
   #list of seasons and clean raster for result
