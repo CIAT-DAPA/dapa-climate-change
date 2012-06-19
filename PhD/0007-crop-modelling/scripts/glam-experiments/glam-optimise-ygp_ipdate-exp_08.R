@@ -131,6 +131,9 @@ for (ci in ciList) {
     }
   }
   
+  #now make the plot
+  plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
+  if (!file.exists(plotsDir)) {dir.create(plotsDir)}
   
   ######################################################
   #now optimise the planting date
@@ -229,10 +232,6 @@ for (ci in ciList) {
     params[[where]][[parname]][,"Value"] <- -99
     params[[where]][[parname]][,"Min"] <- -99
     params[[where]][[parname]][,"Max"] <- -99
-    
-    #now make the plot
-    plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
-    if (!file.exists(plotsDir)) {dir.create(plotsDir)}
     
     tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
          width=1250,pointsize=8)
