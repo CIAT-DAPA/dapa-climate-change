@@ -243,6 +243,9 @@ for (ci in ciList) {
     grid(nx=10,ny=10)
     abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
     dev.off()
+  } else {
+    osowFile <- paste(cDir,"/inputs/ascii/sow/opt_",setup$SIM_NAME,".txt",sep="")
+    setup$SOW_FILE_RFD <- osowFile
   }
   
   
