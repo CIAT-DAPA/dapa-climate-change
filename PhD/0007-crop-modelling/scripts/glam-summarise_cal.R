@@ -17,7 +17,7 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
-runs_set <- "exp-07"
+runs_set <- "exp-08"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
