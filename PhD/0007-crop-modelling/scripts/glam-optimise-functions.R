@@ -600,6 +600,7 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   param <- toupper(param)
   simset <- RUN_setup$SIM_NAME
   zone <- RUN_setup$ZONE
+  num_cells <- RUN_setup$NUM_CELLS
   method <- RUN_setup$METHOD
   cropName <- RUN_setup$CROPNAME
   bDir <- RUN_setup$BDIR
