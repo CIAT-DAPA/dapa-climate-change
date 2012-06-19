@@ -17,8 +17,8 @@ src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 20
 #run <- 1 2 3 4 5
-version <- "b"
-expID <- "08"
+version <- "c"
+expID <- "09"
 
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
@@ -67,7 +67,7 @@ cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 pDir <- paste(cDir,"/params",sep="") #parameter files
 
 #load cell details
-cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
+cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
 
 #load runs to perform
 all_runs <- read.table(paste(cDir,"/calib/optim_zones.txt",sep=""),header=T,sep="\t")
@@ -78,6 +78,7 @@ all_runs <- read.table(paste(cDir,"/calib/optim_zones.txt",sep=""),header=T,sep=
 setup <- list()
 setup$BDIR <- bDir
 setup$ZONE <- all_runs$zone[run]
+setup$NUM_CELLS <- length(cells$CELL[which(cells$ISSEL_F == 1 & cells$ZONE == setup$ZONE)])
 setup$METHOD <- "lin"
 setup$CROPNAME <- "gnut"
 setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,sep="")
