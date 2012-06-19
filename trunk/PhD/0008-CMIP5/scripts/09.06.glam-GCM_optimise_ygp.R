@@ -201,6 +201,7 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
 }
 
 
+
 #determine number of CPUs
 ncpus <- nrow(procList)
 if (ncpus>12) {ncpus <- 12}

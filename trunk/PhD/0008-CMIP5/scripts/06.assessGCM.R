@@ -159,7 +159,10 @@ sfStop()
 
 
 
-#b. interannual variability: calculate the VI as in Scherrer 2011
+
+
+
+#c. interannual variability: calculate the VI as in Scherrer 2011
 #                            so that the issue of non-matching series is overcome
 
 #specify initial and final years
@@ -173,8 +176,6 @@ tsCRU <- paste(inputDD,"/cru-ts-data",sep="")
 
 #check those that are done already
 procList <- check_done(procList,"z.proc")
-
-interannual_vi(1)
 
 #determine number of CPUs
 ncpus <- nrow(procList)
