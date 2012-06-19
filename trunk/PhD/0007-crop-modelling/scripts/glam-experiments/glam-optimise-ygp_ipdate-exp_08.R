@@ -262,7 +262,7 @@ for (ci in ciList) {
     optimal <- list(); optimised <- list()
     
     optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                              param=parname,n.steps=20,iter=tolower(parname),
+                                              param=parname,n.steps=nstep,iter=tolower(parname),
                                               iratio=ir_vls)
     
     optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
