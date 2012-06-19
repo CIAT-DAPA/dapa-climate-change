@@ -56,54 +56,49 @@ ocells$IRATIO <- extract(mir,cbind(x=cells$X,y=cells$Y))
 ocells <- ocells[which(!is.na(ocells$YIELD_CV)),]
 ocells$ISSEL <- 0
 
-#version 1
-#ocells$ISSEL[which(ocells$YIELD_CV>15 & ocells$AHRATIO > 0.1 & ocells$IRATIO < .25)] <- 1 #v1
+#version 3
+ocells$ISSEL[which(ocells$AHRATIO>0.2 & ocells$YIELD_NA == 0)] <- 1 #v3
 
-#version 2
-ocells$ISSEL[which(ocells$YIELD_CV>25 & ocells$YIELD_MN>300 & ocells$AHRATIO>0.2 & ocells$YIELD_NA == 0)] <- 1 #v2
-ocells$ISSEL[which(ocells$ZONE == 4 & ocells$YIELD_NA == 0 & ocells$YIELD_CV>20 & ocells$YIELD_MN>300 & ocells$AHRATIO>0.2 )] <- 1 #v2
-ocells$ISSEL[which(ocells$CELL == 636)] <- 1 #v2
+#######################
+#The below plots are for visual inspection of maximum yield and reasonable harvested area
+windows()
+library(maptools); data(wrld_simpl)
+par(mfrow=c(1,2))
+plot(zrs,col=rev(terrain.colors(5)))
+plot(wrld_simpl,add=T)
+text(x=ocells$X[which(ocells$ISSEL==1)],
+     y=ocells$Y[which(ocells$ISSEL==1)],
+     labels=round(ocells$AHRATIO[which(ocells$ISSEL==1)]*10,0),cex=0.4)
 
 
-############################################################################
-### selection of various gridcells for optimisation
-#now select the gridcells that you would optimise based on the following rules
-#get how many gridcells are ISSEL == 1
-#from those that are ISSEL == 1, subselect randomly the number that
-#  corresponds to 30% of total
-#create a new column with truly selected gridcells
-for (z in unique(ocells$ZONE)) {
-  zcells <- ocells[which(ocells$ZONE == z),]
-  nsel <- 10 #round(nrow(zcells)*0.3+0.5,0)
-  
-  scells <- zcells[which(zcells$ISSEL == 1),]
-  if (nrow(scells) < 10) {stop(z,": less than 10 gridcells")}
-  row.names(scells) <- 1:nrow(scells)
-  
-  zcells$ISSEL_F <- 0
-  scells$ISSEL_F <- 0
-  if (nrow(scells) > nsel) {
-    scells$ISSEL_F[sample(1:nrow(scells),size=nsel)] <- 1
-    fcells <- scells$CELL[which(scells$ISSEL_F == 1)]
-    zcells$ISSEL_F[which(zcells$CELL %in% fcells)] <- 1
-  } else {
-    if (nrow(scells) > 0) {
-      scells$ISSEL_F <- 1
-      fcells <- scells$CELL[which(scells$ISSEL_F == 1)]
-      zcells$ISSEL_F[which(zcells$CELL %in% fcells)] <- 1
-    }
-  }
-  
-  if (z == unique(ocells$ZONE)[1]) {
-    out_cells <- zcells
-  } else {
-    out_cells <- rbind(out_cells,zcells)
-  }
-  
-}
+plot(zrs,col=rev(terrain.colors(5)))
+plot(wrld_simpl,add=T)
+text(x=ocells$X[which(ocells$ISSEL==1)],
+     y=ocells$Y[which(ocells$ISSEL==1)],
+     labels=round(ocells$YIELD_MN[which(ocells$ISSEL==1)]*0.1,0),cex=0.4)
+points(x=ocells$X[ocells$CELL==644],y=ocells$Y[ocells$CELL==644])
+
+
+###############
+#after this visual inspection the gridcells that I decided to select were:
+#zone 1: 435
+#zone 2: 565
+#zone 3: 644
+#zone 4: 720
+#zone 5: 960
+#
+
+out_cells <- ocells
+out_cells$ISSEL_F <- 0
+
+out_cells$ISSEL_F[which(out_cells$CELL == 435)] <- 1 #zone 1
+out_cells$ISSEL_F[which(out_cells$CELL == 565)] <- 1 #zone 2
+out_cells$ISSEL_F[which(out_cells$CELL == 644)] <- 1 #zone 3
+out_cells$ISSEL_F[which(out_cells$CELL == 720)] <- 1 #zone 4
+out_cells$ISSEL_F[which(out_cells$CELL == 960)] <- 1 #zone 5
 
 #write output data.frame
-write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""),row.names=F,quote=T)
+write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""),row.names=F,quote=T)
 
 
 #plot points in the selected cells
@@ -113,6 +108,5 @@ points(out_cells$X[which(out_cells$ISSEL_F == 1)],out_cells$Y[which(out_cells$IS
 #points(ocells$X[which(ocells$ISSEL == 1)],ocells$Y[which(ocells$ISSEL == 1)],pch=20,cex=0.75)
 #points(out_cells$X[which(out_cells$CELL == 636)],out_cells$Y[which(out_cells$CELL == 636)],pch="+",cex=0.75)
 #plot(wrld_simpl,add=T)
-
 
 

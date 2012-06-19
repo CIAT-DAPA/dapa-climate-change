@@ -25,7 +25,7 @@ cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
 #these are the cells that have both yield and rainfall data, and that can be selected
-cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
+cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
 
 #get longitude and latitude (row and column)
 rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/0_base_grids/igp_dummy.tif",sep=""))
@@ -62,7 +62,7 @@ if (!file.exists(ofil)) {
 ############ SELECTED ZONE AND GRIDCELLS #############
 ######################################################
 z <- 5
-version <- "b"
+version <- "c"
 cell <- cells$CELL[which(cells$ZONE == z & cells$ISSEL_F == 1)]
 ######################################################
 ######################################################
@@ -84,7 +84,11 @@ ym <- mean(z_cells$YIELD_MN)
 yn <- min(z_cells$YIELD_MN)
 yx <- max(z_cells$YIELD_MN)
 
-cal_ygp <- 1-(yx-ym)/(yx-yn)
+if (nrow(z_cells) > 1) {
+  cal_ygp <- 1-(yx-ym)/(yx-yn)
+} else {
+  cal_ygp <- 1
+}
 cells$YGP <- round(cal_ygp,2)
 
 ygpFile <- paste(ygpDir,"/ygp_calz",z,version,".txt",sep="")
