@@ -159,6 +159,56 @@ sfStop()
 
 
 
+#b. interannual variability: calculate the VI as in Scherrer 2011
+#                            so that the issue of non-matching series is overcome
+
+#specify initial and final years
+yi <- 1961
+yf <- 2000
+
+#time series data
+tsWST <- paste(inputDD,"/all-weather-stations",sep="")
+tsE40 <- e40Dir
+tsCRU <- paste(inputDD,"/cru-ts-data",sep="")
+
+#check those that are done already
+procList <- check_done(procList,"z.proc")
+
+interannual_vi(1)
+
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("e40Dir")
+sfExport("inputDD")
+sfExport("outputDD")
+sfExport("tsCRU")
+sfExport("tsE40")
+sfExport("tsWST")
+sfExport("admDir")
+sfExport("vnList")
+sfExport("scList")
+sfExport("procList")
+sfExport("regions")
+sfExport("yi")
+sfExport("yf")
+
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),interannual_vi))
+
+#stop the cluster
+sfStop()
 
 
 
