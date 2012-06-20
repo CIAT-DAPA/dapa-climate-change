@@ -9,7 +9,7 @@
 #bDir <- "F:/PhD-work/crop-modelling/GLAM"
 #maxiter <- 20
 #zone <- 1
-#expID <- "07"
+#expID <- "09"
 
 
 #eljefe
@@ -17,7 +17,7 @@ src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 20
 #zone <- 1
-expID <- "07"
+expID <- "09"
 
 #source(paste(src.dir,"/glam-optimise-ygp_ipdate.R",sep=""))
 
