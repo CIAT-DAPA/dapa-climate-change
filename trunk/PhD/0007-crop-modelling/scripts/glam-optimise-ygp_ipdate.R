@@ -250,14 +250,16 @@ for (ci in ciList) {
   #run the optimiser for YGP, 20 steps
   parname <- "YGP"
   where <- "glam_param.ygp"
-  nstep <- 20
+  nstep <- 100
+  params[[where]][[parname]][,"Min"] <- 0.01
+  params[[where]][[parname]][,"Max"] <- 1.00
   
   if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
     # reset lists of output parameters
     optimal <- list(); optimised <- list()
     
     optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                          param=parname,n.steps=20,iter=tolower(parname),
+                                          param=parname,n.steps=nstep,iter=tolower(parname),
                                           iratio=ir_vls)
     
     optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
