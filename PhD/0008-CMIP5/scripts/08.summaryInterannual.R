@@ -124,3 +124,60 @@ sfStop()
 
 
 
+
+##################################################################################
+#processes to complete
+#processes to complete
+gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
+gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
+isoList <- regions$ISO
+dsetList <- c("vi-CRU","vi-E40","vi-WST")
+vnList <- c("pr","tas","dtr")
+procList <- expand.grid(GCM=gcmList,OBS=dsetList,VAR=vnList)
+procList$GCM <- paste(procList$GCM)
+procList$OBS <- paste(procList$OBS); procList$VAR <- paste(procList$VAR)
+procList <- procList[-which(procList$OBS == "vi-E40" & procList$VAR == "dtr"),]
+
+#create output folder
+oDir <- paste(mdDir,"/assessment/output-data/_summary",sep="")
+if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
+
+odir_rs <- paste(oDir,"/interannual-skill-vi",sep="")
+if (!file.exists(odir_rs)) {dir.create(odir_rs)}
+
+#this_proc <- 1
+#summarise_interannual(144)
+
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("regions")
+sfExport("gcmChars")
+sfExport("gcmList")
+sfExport("isoList")
+sfExport("procList")
+sfExport("dsetList")
+sfExport("vnList")
+sfExport("oDir")
+sfExport("odir_rs")
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),summarise_interannual_vi))
+
+#stop the cluster
+sfStop()
+
+
+
+
+
+

@@ -6,7 +6,7 @@
 
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5/scripts"
+#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #bDir <- "F:/PhD-work/crop-modelling/GLAM"
 #cmipDir <- "V:/eejarv/CMIP5"
 
@@ -17,7 +17,7 @@ src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 cmipDir <- "/nfs/a102/eejarv/CMIP5"
 
-#source(paste(src.dir2,"/09.06.glam-GCM_optimise-ygp.R",sep=""))
+#source(paste(src.dir2,"/scripts/09.06.glam-GCM_optimise-ygp.R",sep=""))
 
 #check the existence of three parameters needed for sourcing this script
 if (class(try(get("src.dir"),silent=T)) == "try-error") {
@@ -199,6 +199,24 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
     cat("process is already done\n")
   }
 }
+
+
+############## check which runs are done already
+ndList <- c()
+for (i in 1:nrow(procList)) {
+  gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
+  
+  procDir <- paste(runs_odir,"/x.proc",sep="")
+  procFil <- paste(procDir,"/",gcm,"_",ens,".proc",sep="") #check file
+  if (!file.exists(procFil)) {
+    ndList <- c(ndList,i)
+  }
+}
+ndList <- unique(ndList)
+procList <- procList[ndList,]
+procList <- data.frame(GCM=procList)
+if (nrow(procList) != 0) {row.names(procList) <- 1:nrow(procList)}
 
 
 
