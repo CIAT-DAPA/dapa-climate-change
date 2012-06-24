@@ -124,10 +124,9 @@ sfStop()
 
 
 
-
 ##################################################################################
 #processes to complete
-#processes to complete
+#interannual variability index
 gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
 gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
 isoList <- regions$ISO
@@ -180,4 +179,42 @@ sfStop()
 
 
 
+#######################################
+#calculate average of all climate models for each metric
+#interannual variability index (vi)
+
+vnList <- c("pr","tas","dtr")
+metList <- c("vi")
+sList <- c("DJF","MAM","JJA","SON","ANN")
+gcmList <- unique(paste(gcmChars$GCM,"_",gcmChars$Ensemble,sep=""))
+
+procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
+#this_proc <- 1
+
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("regions")
+sfExport("gcmChars")
+sfExport("gcmList")
+sfExport("vnList")
+sfExport("procList")
+sfExport("metList")
+sfExport("oDir")
+sfExport("odir_rs")
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),mean_summary_interannual))
+
+#stop the cluster
+sfStop()
 
