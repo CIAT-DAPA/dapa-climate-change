@@ -17,13 +17,13 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
-runs_set <- "exp-08"
+runs_set <- "exp-09"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
 #load cell details
 #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
-cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""))
+cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
 
 #get the mask needed (to which data will be appended)
 ncFile <- paste(bDir,"/../climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
@@ -466,14 +466,18 @@ dev.off()
 out_all$AHRATIO <- cells$AHRATIO
 out_sct <- out_all[which(out_all$AHRATIO >= 0.2),]
 
+rval <- cor.test(out_all$Y_PRED,out_all$Y_OBS)$estimate
+pval <- cor.test(out_all$Y_PRED,out_all$Y_OBS)$p.value
+
 lims <- c(0,max(out_sct$Y_PRED,out_sct$Y_OBS))
 
 tiffName <- paste(out_rs_dir,"/yobs_ypred_xy.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
-par(mar=c(5,5,1,1))
+par(mar=c(5,5,2,1))
 plot(out_sct$Y_PRED,out_sct$Y_OBS,pch=20,cex=0.75,xlim=lims,ylim=lims,
      xlab="Predicted yield (kg/ha)",
-     ylab="Observed yield (kg/ha)")
+     ylab="Observed yield (kg/ha)",
+     main=paste("CCOEF=",round(rval,3),"(p=",round(pval,6),")",sep=""))
 abline(0,1)
 grid()
 dev.off()
@@ -481,13 +485,16 @@ dev.off()
 
 lims <- c(0,max(out_sct$YSD_PRED,out_sct$YSD_OBS))
 
+rval <- cor.test(out_all$YSD_PRED,out_all$YSD_OBS)$estimate
+pval <- cor.test(out_all$YSD_PRED,out_all$YSD_OBS)$p.value
 
 tiffName <- paste(out_rs_dir,"/sdobs_sdpred_xy.tif",sep="")
 tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
-par(mar=c(5,5,1,1))
+par(mar=c(5,5,2,1))
 plot(out_sct$YSD_PRED,out_sct$YSD_OBS,pch=20,cex=0.75,xlim=lims,ylim=lims,
      xlab="Predicted yield s.d. (kg/ha)",
-     ylab="Observed yield s.d. (kg/ha)")
+     ylab="Observed yield s.d. (kg/ha)",
+    main=paste("CCOEF=",round(rval,3),"(p=",round(pval,6),")",sep=""))
 abline(0,1)
 grid()
 dev.off()
