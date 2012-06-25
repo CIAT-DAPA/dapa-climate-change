@@ -3,7 +3,15 @@
 #June 2012
 
 
-glam_optimise_glo_wrapper <- function(run) {
+glam_optimise_glo_wrapper <- function(this_run) {
+  
+  #get the run details
+  sid <- runs_ref$SID[this_run]
+  run <- runs_ref$RUN[this_run]
+  seed <- runs_ref$SEED[this_run]
+  expID <- runs_ref$EXPID[this_run]
+  
+  
   #check the existence of three parameters needed for sourcing this script
   if (class(try(get("src.dir"),silent=T)) == "try-error") {
     stop("src.dir needs to be set")
