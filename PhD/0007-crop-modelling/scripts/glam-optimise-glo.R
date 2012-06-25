@@ -25,7 +25,6 @@ version <- "c"
 ####list of seeds to randomise parameter list
 set.seed(512)
 seeds <- c(sample(1:9999,20),NA)
-sid <- 1
 
 expIDs <- c(10:(9+length(seeds)))
 expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
@@ -61,9 +60,7 @@ sfExport("bDir")
 sfExport("maxiter")
 sfExport("version")
 sfExport("seeds")
-sfExport("expID")
 sfExport("cropName")
-sfExport("sid")
 sfExport("runs_ref")
 
 #run the function in parallel
