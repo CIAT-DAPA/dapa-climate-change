@@ -52,10 +52,12 @@ glam_optimise_glo_wrapper <- function(run) {
   #load list of parameters to optimise, ranges, and number of steps, randomise
   opt_rules <- read.table(paste(pDir,"/optimisation-rules.txt",sep=""),sep="\t",header=T)
   
-  set.seed(seeds[sid])
-  reord <- sample(1:nrow(opt_rules),replace=F)
-  opt_rules <- opt_rules[reord,]
-  row.names(opt_rules) <- 1:nrow(opt_rules)
+  if (!is.na(sid)) {
+    set.seed(seeds[sid])
+    reord <- sample(1:nrow(opt_rules),replace=F)
+    opt_rules <- opt_rules[reord,]
+    row.names(opt_rules) <- 1:nrow(opt_rules)
+  }
   
   
   #load cell details
