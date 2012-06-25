@@ -222,7 +222,7 @@ if (nrow(procList) != 0) {row.names(procList) <- 1:nrow(procList)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
-if (ncpus>12) {ncpus <- 12}
+if (ncpus>7) {ncpus <- 7}
 
 #here do the parallelisation
 #load library and create cluster

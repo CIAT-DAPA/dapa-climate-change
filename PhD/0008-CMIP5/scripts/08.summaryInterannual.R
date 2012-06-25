@@ -213,7 +213,7 @@ sfExport("oDir")
 sfExport("odir_rs")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(procList)),mean_summary_interannual))
+system.time(sfSapply(as.vector(1:nrow(procList)),mean_summary_interannual_vi))
 
 #stop the cluster
 sfStop()
