@@ -39,7 +39,7 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
 ncpus <- nrow(procList)
-if (ncpus>7) {ncpus <- 7}
+if (ncpus>5) {ncpus <- 5}
 
 #here do the parallelisation
 #load library and create cluster
@@ -56,7 +56,7 @@ sfExport("seeds")
 sfExport("sid")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(procList)),wrapper_GCM_glam_optimise_ygp))
+system.time(sfSapply(as.vector(1:5),glam_optimise_glo_wrapper))
 
 #stop the cluster
 sfStop()
