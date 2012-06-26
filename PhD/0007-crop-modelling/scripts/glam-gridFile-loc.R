@@ -66,7 +66,7 @@ for (cell in cells$CELL) {
   ######################################################
   ############# SELECTED GRIDCELL(S) ###################
   ######################################################
-  #cell <- 853
+  #cell <- 650
   ######################################################
   ######################################################
   cat("\ncreating inputs for gricell",cell,"\n")
@@ -144,9 +144,16 @@ for (cell in cells$CELL) {
   #write weather (irr and rainfed)
   cat("extracting weather for rainfed system\n")
   wthDataDir <- paste(cmDir,"/climate-data/gridcell-data/IND",sep="") #folder with gridded data
-  owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_x",cell,sep=""),wthDataDir,
+  owthDir <- make_wth(x=cells,cell,wthDir=paste(wthDir,"/rfd_",cell,sep=""),wthDataDir,
                      fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
   
+  #if the rainfed season needed to be modified then re-write the planting date
+  if (owthDir$SOW_DATE != cells$SOW_DATE[which(cells$CELL==cell)]) {
+    cells$SOW_DATE <- owthDir$SOW_DATE
+    osowFile <- paste(gsowDir,"/sowing_",cell,"_start.txt",sep="")
+    osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(cell),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
+    cells$SOW_DATE <- extract(sow_rs,cbind(X=cells$X,Y=cells$Y))
+  }
   
   #Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
   #between April and May: sown in day 32 [zone 2]

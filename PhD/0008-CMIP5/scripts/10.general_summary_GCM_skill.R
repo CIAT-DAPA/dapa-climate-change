@@ -13,3 +13,7 @@ library(raster)
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 cmipDir <- "/nfs/a102/eejarv/CMIP5"
+
+
+#calculate
+
