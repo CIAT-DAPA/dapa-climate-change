@@ -159,8 +159,12 @@ out_all3$P_VIA_A05_N <- out_all_n$P_VIA_A05
 out_all3$BLUE_TO_RED_X <- out_all_x$BLUE_TO_RED
 out_all3$BLUE_TO_RED_N <- out_all_n$BLUE_TO_RED
 
+if (!file.exists(paste(out_sum,"/all-plot_data.csv",sep=""))) {
+  write.csv(out_all3,paste(out_sum,"/all-plot_data.csv",sep=""),quote=F,row.names=F)
+} else {
+  out_all3 <- read.csv(paste(out_sum,"/all-plot_data.csv",sep=""))
+}
 
-write.csv(out_all3,paste(out_sum,"/all-plot_data.csv",sep=""),quote=F,row.names=F)
 
 pr_plot <- out_all3[which(out_all3$VAR == "pr"),]
 tas_plot <- out_all3[which(out_all3$VAR == "tas"),]
@@ -173,11 +177,11 @@ library(ggplot2)
 tiff(paste(out_sum,"/figures/pr_summary_model_skill.tif",sep=""),compression="lzw",
      units="px",width=800*ratio,height=600*ratio,res=300)
 ggplot(pr_plot, aes(P_CCOEF_B05, P_CCOEF_A08)) + 
-  geom_point(aes(size =  P_VIA_A05),colour="white", fill="grey 40", shape=21) + 
+  geom_point(aes(size =  P_VIA_A05),colour="white", fill="grey 40", shape=21) +
   scale_area(range=c(2,15),name="VI>0.5 (%)") +
   geom_errorbar(aes(ymin = P_CCOEF_A08_N, ymax = P_CCOEF_A08_X), width=0.07) +
   geom_errorbarh(aes(xmin = P_CCOEF_B05_N, xmax = P_CCOEF_B05_X), height=0.5) +
-  scale_x_continuous("Low correlations ratio (%)", limits = c(0, 6.5), breaks=seq(0, 6.5, by = 1)) + 
+  scale_x_continuous("Low correlations ratio (%)", limits = c(-0.1, 7), breaks=seq(0, 7, by = 1)) + 
   scale_y_continuous("High correlations ratio (%)", limits = c(60, 100), breaks=seq(60, 100, by = 5)) +
   theme_bw() +
   opts(axis.title.x = theme_text(face="bold", size=12),
@@ -185,7 +189,7 @@ ggplot(pr_plot, aes(P_CCOEF_B05, P_CCOEF_A08)) +
        legend.text = theme_text(size=12),
        legend.key = theme_blank()) + # switch off the rectangle around symbols in the legend
   geom_text(x=pr_plot$P_CCOEF_B05[1]-0.3,y=pr_plot$P_CCOEF_A08[1],label=pr_plot$GCM[1],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[2]-0.4,y=pr_plot$P_CCOEF_A08[2],label=pr_plot$GCM[2],size=3) +
+  geom_text(x=pr_plot$P_CCOEF_B05[2]-0.5,y=pr_plot$P_CCOEF_A08[2]-0.5,label=pr_plot$GCM[2],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[3]+0.4,y=pr_plot$P_CCOEF_A08[3]+1.2,label=pr_plot$GCM[3],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[4]+0.5,y=pr_plot$P_CCOEF_A08[4]+1.2,label=pr_plot$GCM[4],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[5]-0.4,y=pr_plot$P_CCOEF_A08[5],label=pr_plot$GCM[5],size=3) +
@@ -197,7 +201,7 @@ ggplot(pr_plot, aes(P_CCOEF_B05, P_CCOEF_A08)) +
   geom_text(x=pr_plot$P_CCOEF_B05[11]-0.55,y=pr_plot$P_CCOEF_A08[11],label=pr_plot$GCM[11],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[12]-0.3,y=pr_plot$P_CCOEF_A08[12]-0.3,label=pr_plot$GCM[12],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[13]-0.35,y=pr_plot$P_CCOEF_A08[13],label=pr_plot$GCM[13],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[14],y=pr_plot$P_CCOEF_A08[14]-1,label=pr_plot$GCM[14],size=3) +
+  geom_text(x=pr_plot$P_CCOEF_B05[14]+0.35,y=pr_plot$P_CCOEF_A08[14]-1,label=pr_plot$GCM[14],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[15]-0.5,y=pr_plot$P_CCOEF_A08[15],label=pr_plot$GCM[15],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[16]-0.5,y=pr_plot$P_CCOEF_A08[16],label=pr_plot$GCM[16],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[17]+0.4,y=pr_plot$P_CCOEF_A08[17]+.8,label=pr_plot$GCM[17],size=3) +
@@ -212,7 +216,6 @@ ggplot(pr_plot, aes(P_CCOEF_B05, P_CCOEF_A08)) +
   geom_text(x=pr_plot$P_CCOEF_B05[26]+0.5,y=pr_plot$P_CCOEF_A08[26],label=pr_plot$GCM[26],size=3) +
   geom_text(x=pr_plot$P_CCOEF_B05[27]+0.5,y=pr_plot$P_CCOEF_A08[27],label=pr_plot$GCM[27],size=3,colour="red") 
 dev.off()
-
 
 
 
