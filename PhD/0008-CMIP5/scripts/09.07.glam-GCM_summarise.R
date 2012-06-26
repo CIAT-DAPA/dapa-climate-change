@@ -55,6 +55,23 @@ method <- "lin"
 irDir <- paste(cDir,"/irrigated_ratio",sep="")
 ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
 
+############## check which runs are done already
+ndList <- c()
+for (i in 1:nrow(procList)) {
+  gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
+  
+  procFil <- paste(runs_odir,"/",gcm,"_",ens,"/calib_all_cells.csv",sep="") #check file
+  if (!file.exists(procFil)) {
+    ndList <- c(ndList,i)
+  }
+}
+ndList <- unique(ndList)
+procList <- procList[ndList,]
+procList <- data.frame(GCM=procList)
+if (nrow(procList) != 0) {row.names(procList) <- 1:nrow(procList)}
+
+
 
 ###select process
 #this_proc <- 1

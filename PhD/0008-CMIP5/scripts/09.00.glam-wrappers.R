@@ -46,6 +46,7 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
           yp_stdv <- NA
           yo_mean <- NA
           yo_stdv <- NA
+          n <- NA
         } else {
           ygpDir <- paste(run_dir,"/iter-ygp",sep="")
           

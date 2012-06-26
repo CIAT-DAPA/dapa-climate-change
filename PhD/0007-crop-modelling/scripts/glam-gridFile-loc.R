@@ -16,7 +16,7 @@ source(paste(src.dir,"/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
-cmDir <- "F:/PhD-work/crop-modelling"
+cmDir <- "W:/eejarv/PhD-work/crop-modelling"
 bDir <- paste(cmDir,"/GLAM",sep="")
 cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
