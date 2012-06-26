@@ -4,6 +4,7 @@
 
 ### wrapper function to summarise the YGP optimisation
 wrapper_summarise_GCM_cal <- function(this_proc) {
+  library(raster)
   
   #sourcing functions
   source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
