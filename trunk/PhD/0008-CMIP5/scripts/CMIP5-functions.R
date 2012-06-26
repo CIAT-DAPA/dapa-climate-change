@@ -385,7 +385,7 @@ zip_unzip_wth_fut <- function(procList,wth_dir,unzip=F) {
       
       if (file.exists(z_name)) {
         if (file.exists(paste(gcm_ens))) {
-          cat("compressing...\n")
+          cat("removing...\n")
           system(paste("rm -rf ",gcm_ens,sep=""))
         }
       }
