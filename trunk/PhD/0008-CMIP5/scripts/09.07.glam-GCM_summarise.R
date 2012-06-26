@@ -18,7 +18,7 @@ cmipDir <- "/nfs/a102/eejarv/CMIP5"
 
 #sourcing functions
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
-source(paste(src.dir2,"/scripts/09.00-glam-wrappers.R",sep=""))
+source(paste(src.dir2,"/scripts/09.00.glam-wrappers.R",sep=""))
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
