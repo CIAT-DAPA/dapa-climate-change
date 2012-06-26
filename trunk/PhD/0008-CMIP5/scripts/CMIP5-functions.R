@@ -384,14 +384,14 @@ zip_unzip_wth_fut <- function(procList,wth_dir,unzip=F) {
       }
       
       if (file.exists(z_name)) {
-        if (file.exists(gcm_ens)) {
+        if (file.exists(paste(gcm_ens))) {
           cat("compressing...\n")
           system(paste("rm -rf ",gcm_ens,sep=""))
         }
       }
     } else { #if decompress switch is on
       if (file.exists(z_name)) {
-        if (file.exists(gcm_ens)) {
+        if (file.exists(paste(gcm_ens))) {
           cat("uncompressing...\n")
           system(paste("rm -rf ",gcm_ens,sep=""))
         }

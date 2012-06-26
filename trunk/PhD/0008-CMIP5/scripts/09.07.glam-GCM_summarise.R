@@ -83,7 +83,7 @@ if (ncpus>10) {ncpus <- 10}
 #here do the parallelisation
 #load library and create cluster
 library(snowfall)
-sfInit(parallel=T,cpus=10)
+sfInit(parallel=T,cpus=ncpus)
 
 #export variables
 sfExport("src.dir")
