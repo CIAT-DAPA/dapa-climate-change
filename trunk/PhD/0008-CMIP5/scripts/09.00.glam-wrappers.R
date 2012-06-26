@@ -156,8 +156,6 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
     out_rs_dir <- paste(cal_dir,"/calib_results_spat",sep="")
     if (!file.exists(out_rs_dir)) {dir.create(out_rs_dir)}
     
-    library(maptools); data(wrld_simpl)
-    
     rnames <- names(out_all)[4:13]
     for (rn in rnames) {
       if (!file.exists(paste(out_rs_dir,"/",tolower(rn),".asc",sep=""))) {
