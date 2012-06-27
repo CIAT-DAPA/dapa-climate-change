@@ -3,7 +3,9 @@
 #May 2012
 
 ###wrapper to run a given perturbed crop parameter experiment
-run_perturbed_biol <- function(this_pt) {
+wrapper_perturbed_biol <- function(this_pt) {
+  #library
+  library(raster)
   
   #source all needed functions
   source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
