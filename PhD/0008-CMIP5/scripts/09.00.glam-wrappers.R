@@ -2,9 +2,135 @@
 #UoL / CCAFS / CIAT
 #May 2012
 
+###wrapper to run a given perturbed crop parameter experiment
+run_perturbed_biol <- function(this_pt) {
+  
+  #source all needed functions
+  source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir2,"/scripts/09.00.glam-wrappers.R",sep=""))
+  
+  parname <- paste(pert_runs$Parameter[this_pt])
+  where <- paste(pert_runs$Where[this_pt])
+  
+  if (parname!="HTS" & parname!="TDS") {
+    parlow <- as.numeric(paste(pert_runs$Unperturbed[this_pt])) - as.numeric(paste(pert_runs$Perturbation[this_pt]))
+    if (parlow < as.numeric(paste(pert_runs$Minimum.realistic[this_pt]))) {parlow <- as.numeric(paste(pert_runs$Minimum.realistic[this_pt]))}
+    parhigh <- as.numeric(paste(pert_runs$Unperturbed[this_pt])) + as.numeric(paste(pert_runs$Perturbation[this_pt]))
+  }
+  
+  #ci <- 1
+  ciList <- 1:nrow(cells)
+  for (ci in ciList) {
+    #get run setup
+    #files that were generated
+    setup <- list()
+    setup$BDIR <- bDir
+    setup$CELL <- cells$CELL[ci]
+    setup$METHOD <- "lin"
+    setup$CROPNAME <- "gnut"
+    setup$CAL_DIR <- paste(runs_odir,"/p-",tolower(parname),sep="")
+    setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
+    setup$YGP_FILE <- "nofile"
+    setup$SOW_FILE_RFD <- paste(sow_dir,"/opt_calib_",setup$CELL,".txt",sep="")
+    setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
+    setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
+    setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
+    setup$WTH_ROOT <- "ingc"
+    setup$SOL_FILE <- paste(input_dir,"/ascii/soil/soiltypes2.txt",sep="")
+    setup$SOL_GRID <- paste(input_dir,"/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
+    setup$SIM_NAME <- paste("calib_",setup$CELL,sep="")
+    setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+    
+    #update wth dir rainfed if there is a modification in weather files
+    if (file.exists(paste(wth_dir,"/rfd_",setup$CELL,sep=""))) {
+      setup$WTH_DIR_RFD <- paste(wth_dir,"/rfd_",setup$CELL,sep="")
+    }
+    
+    cat("\nprocessing cell",setup$CELL,"\n")
+    
+    #get defaults (parameter set)
+    params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
+    params$glam_param.mod_mgt$ISYR <- 1966 #start year
+    params$glam_param.mod_mgt$IEYR <- 1993 #end year
+    params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
+    
+    #extract irrigation rates
+    ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==setup$CELL)],Y=cells$Y[which(cells$CELL==setup$CELL)]))
+    ir_vls <- as.numeric(ir_vls)
+    ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
+    ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
+    
+    #get optimal YGP from unperturbed model run
+    load(paste(unp_rundir,"/calib_",setup$CELL,"/iter-ygp/output.RData",sep=""))
+    params$glam_param.ygp$YGP$Value <- optimal$YGP
+    rm(optimal); rm(optimised); g=gc(); rm(g)
+    
+    if (parname == "HTS") {
+      params$glam_param.mod_mgt$HTS <- "+1" #turn off HTS
+      params$glam_param.sparer$RSPARE1$Value <- -99 #turn off TDS
+      params$glam_param.sparer$RSPARE2$Value <- -99 #turn off TDS
+      
+      #run with all types
+      for (type in unique(hts_types$TYPE)) {
+        #type <- unique(hts_types$TYPE[1])
+        params[[where]][["TCRITMIN"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"TCRITMIN"]
+        params[[where]][["PPCRIT"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"PPCRIT"]
+        params[[where]][["TLINT"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"TLINT"]
+        params[[where]][["TCSLOPE"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"TCSLOPE"]
+        params[[where]][["TLSLOPE"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"TLSLOPE"]
+        params[[where]][["FDWIDTH"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"FDWIDTH"]
+        params[[where]][["FDOFFSET"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"FDOFFSET"]
+        params[[where]][["TLIMMIN"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"TLIMMIN"]
+        params[[where]][["IDURMAX"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"IDURMAX"]
+        params[[where]][["IBAMAX"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"IBAMAX"]
+        params[[where]][["IAAMAX"]]["Value"] <- hts_types[which(hts_types$TYPE==type),"IAAMAX"]
+        
+        setup$CAL_DIR <- paste(runs_odir,"/p-",tolower(parname),"_",type,sep="") #update setup
+        orcdir <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup,iratio=ir_vls) #run glam with this configuration
+      }
+      
+    } else if (parname == "TDS") {
+      params$glam_param.mod_mgt$HTS <- "-1" #turn off HTS
+      
+      #run with all types
+      for (type in unique(tds_types$TYPE)) {
+        #type <- unique(tds_types$TYPE[1])
+        params[[where]][["RSPARE1"]]["Value"] <- tds_types[which(tds_types$TYPE==type),"HIMIN"]
+        params[[where]][["RSPARE2"]]["Value"] <- tds_types[which(tds_types$TYPE==type),"FSW"]
+        
+        setup$CAL_DIR <- paste(runs_odir,"/p-",tolower(parname),"_",type,sep="") #update setup
+        orcdir <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup,iratio=ir_vls) #run glam with this configuration
+      }
+      
+    } else {
+      params$glam_param.mod_mgt$HTS <- "-1" #turn off HTS
+      params$glam_param.sparer$RSPARE1$Value <- -99 #turn off TDS
+      params$glam_param.sparer$RSPARE2$Value <- -99 #turn off TDS
+      
+      #run with low perturbation
+      params[[where]][[parname]]["Value"] <- parlow #update parameter set
+      setup$CAL_DIR <- paste(runs_odir,"/p-",tolower(parname),"_",parlow,sep="") #update setup
+      orcdir <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup,iratio=ir_vls) #run glam with this configuration
+      
+      #run with high perturbation
+      params[[where]][[parname]]["Value"] <- parhigh #update parameter set
+      setup$CAL_DIR <- paste(runs_odir,"/p-",tolower(parname),"_",parhigh,sep="") #update setup
+      orcdir <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup,iratio=ir_vls) #run glam with this configuration
+    }
+    
+  }
+}
+
+
+
 ############################################################
-####### function to optimise a given parameter in GLAM, 
-####### except sowing date, RLL, DUL, SAT
+####### function to run a given parameter set in GLAM, 
 ############################################################
 GLAM_run_loc <- function(GLAM_params,RUN_setup,iratio=0) {
   simset <- RUN_setup$SIM_NAME
