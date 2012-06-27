@@ -2,6 +2,492 @@
 #UoL / CCAFS / CIAT
 #May 2012
 
+############################################################
+####### function to optimise a given parameter in GLAM, 
+####### except sowing date, RLL, DUL, SAT
+############################################################
+GLAM_run_loc <- function(GLAM_params,RUN_setup,iratio=0) {
+  simset <- RUN_setup$SIM_NAME
+  cell <- RUN_setup$CELL
+  method <- RUN_setup$METHOD
+  cropName <- RUN_setup$CROPNAME
+  bDir <- RUN_setup$BDIR
+  
+  #input directories and model
+  #cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
+  execName <- paste("glam-",tolower(cropName),sep="")
+  
+  #determine operating system and bin folder
+  machine <- as.data.frame(t(Sys.info()))
+  machine <- paste(machine$sysname)
+  binDir <- paste(bDir,"/model-runs/bin/glam-",tolower(machine),sep="")
+  
+  if (tolower(machine) == "windows") {
+    glam_cmd <- paste(paste(execName,".exe",sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
+    execName <- paste(execName,".exe",sep="")
+  } else if (tolower(machine) == "linux") {
+    glam_cmd <- paste(paste("./",execName,sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
+  }
+  
+  #output directories
+  #parDir <- paste(cropDir,"/params",sep="") #parameter files
+  #cal_dir <- paste(cropDir,"/calib",sep="") #calibration directory
+  cal_dir <- RUN_setup$CAL_DIR #calibration directory
+  if (!file.exists(cal_dir)) {dir.create(cal_dir)}
+  
+  cal_dir <- paste(cal_dir,"/",simset,sep="") #calibration directory
+  if (!file.exists(cal_dir)) {dir.create(cal_dir)}
+  
+  #files that were generated
+  yFile <- RUN_setup$YIELD_FILE
+  ygpFile <- RUN_setup$YGP_FILE
+  sowFile_rfd <- RUN_setup$SOW_FILE_RFD
+  sowFile_irr <- RUN_setup$SOW_FILE_IRR
+  wthDir_rfd <- RUN_setup$WTH_DIR_RFD
+  wthDir_irr <- RUN_setup$WTH_DIR_IRR
+  solFile <- RUN_setup$SOL_FILE
+  solGrid <- RUN_setup$SOL_GRID
+  
+  #check consistency of yield file
+  ydum <- read.fortran(yFile,format=c("A12","F8"),n=28)
+  if (length(which(ydum$V2 < -90)) > 0) {
+    y_has_na <- T
+  } else {
+    y_has_na <- F
+  }
+  
+  #irrigated/rainfed/mix variable
+  if (length(which(iratio$IRATIO == 0)) == nrow(iratio)) {
+    run.type <- "RFD"
+  } else if (length(which(iratio$IRATIO == 1)) == nrow(iratio)) {
+    run.type <- "IRR"
+  } else {
+    run.type <- "MIX"
+  }
+  
+  #loop through sequence of values
+  cat("performing run",run.type,"gridcell =",cell,"\n")
+  
+  ##############here irrigation rate
+  if (run.type == "RFD") {
+    GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
+    
+    #check if the planting date is well configured
+    if (sowFile_rfd == "nofile") {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+        stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+      }
+    } else {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+        GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+      }
+    }
+    
+    #output folder
+    run_dir <- create_dirs(paste(cal_dir,"/",run.type,"_run",sep=""))
+    
+    #write the model params
+    opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run.txt",sep="")
+    opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
+    
+    #check whether the *.out already exists
+    outfile <- list.files(paste(run_dir,"/output",sep=""),pattern="\\.out")
+    if (length(outfile) == 0) {
+      
+      ######################################################
+      #write filenames file
+      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
+      wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
+      soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
+      soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
+      
+      if (sowFile_rfd == "nofile") {
+        sow_row <- sowFile_rfd
+      } else {
+        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
+      }
+      if (y_has_na) {
+        yield_row <- "nofile"
+      } else {
+        yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+      }
+      if (ygpFile == "nofile") {
+        ygp_row <- "nofile"
+        if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+          stop("YGP needs to be specified either by value or by a file")
+        }
+      } else {
+        ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+        GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+      }
+      
+      ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
+      fn <- file(ofnames,"w")
+      cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",wth_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilty_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilco_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",sow_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",yield_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",ygp_row),"\n",sep="",file=fn)
+      close(fn)
+      
+      #copy all inputs to run directory and write filenames
+      x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
+      x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
+      
+      if (sowFile_rfd != "nofile") {
+        x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+      }
+      
+      if (ygpFile != "nofile") {
+        x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
+      }
+      
+      x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- sapply(list.files(wthDir_rfd),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_rfd,paste(run_dir,"/inputs/ascii/wth",sep=""))
+      
+      #now run!
+      setwd(run_dir)
+      system(glam_cmd)
+      
+      #delete the exec file and compress the daily files
+      x <- file.remove(execName)
+      
+      #remove all input files
+      setwd("./inputs/ascii/wth")
+      #system(paste("7z a daily.7z -tzip *.wth"))
+      x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/obs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/soil")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/sow")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir)
+      
+      #if daily files were produced then compress and remove
+      if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+        setwd("./output/daily")
+        system(paste("7z a daily.7z -tzip *.out"))
+        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir)
+      }
+    } else {
+      setwd(run_dir)
+    }
+  } else if (run.type == "IRR") {
+    GLAM_params$glam_param.mod_mgt$SEASON <- "IRR"
+    
+    #check if the planting date is well configured
+    if (sowFile_irr == "nofile") {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+        stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+      }
+    } else {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+        GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+      }
+    }
+    
+    #output folder
+    run_dir <- create_dirs(paste(cal_dir,"/",run.type,"_run",sep=""))
+    
+    #write the model params
+    opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run.txt",sep="")
+    opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
+    
+    #check whether the *.out already exists
+    outfile <- list.files(paste(run_dir,"/output",sep=""),pattern="\\.out")
+    if (length(outfile) == 0) {
+      ######################################################
+      #write filenames file
+      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
+      wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
+      soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
+      soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
+      
+      if (sowFile_irr == "nofile") {
+        sow_row <- sowFile_irr
+      } else {
+        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
+      }
+      if (y_has_na) {
+        yield_row <- "nofile"
+      } else {
+        yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+      }
+      if (ygpFile == "nofile") {
+        ygp_row <- "nofile"
+        if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+          stop("YGP needs to be specified either by value or by a file")
+        }
+      } else {
+        ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+        GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+      }
+      
+      ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
+      fn <- file(ofnames,"w")
+      cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",wth_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilty_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilco_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",sow_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",yield_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",ygp_row),"\n",sep="",file=fn)
+      close(fn)
+      
+      #copy all inputs to run directory and write filenames
+      x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
+      x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
+      if (sowFile_irr != "nofile") {
+        x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+      }
+      if (ygpFile != "nofile") {
+        x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
+      }
+      x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- sapply(list.files(wthDir_irr),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_irr,paste(run_dir,"/inputs/ascii/wth",sep=""))
+      
+      #now run!
+      setwd(run_dir)
+      system(glam_cmd)
+      
+      #delete the exec file
+      x <- file.remove(execName)
+      
+      #remove all input files
+      setwd("./inputs/ascii/wth")
+      #system(paste("7z a daily.7z -tzip *.wth"))
+      x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/obs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/soil")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/sow")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir)
+      
+      #compress & remove daily files should they exist
+      if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+        setwd("./output/daily")
+        system(paste("7z a daily.7z -tzip *.out"))
+        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir)
+      }
+    } else {
+      setwd(run_dir)
+    }
+  } else if (run.type == "MIX") {
+    GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
+    
+    #check if the planting date is well configured
+    if (sowFile_rfd == "nofile") {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+        stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+      }
+    } else {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+        GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+      }
+    }
+    
+    #output folder
+    run_dir <- create_dirs(paste(cal_dir,"/RFD_run",sep=""))
+    
+    #write the model params
+    opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep="")
+    opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
+    
+    #check whether the *.out already exists
+    outfile <- list.files(paste(run_dir,"/output",sep=""),pattern="\\.out")
+    if (length(outfile) == 0) {
+      ######################################################
+      #write filenames file
+      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
+      wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
+      soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
+      soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
+      if (sowFile_rfd == "nofile") {
+        sow_row <- sowFile_rfd
+      } else {
+        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_rfd,"/",fixed=T))[length(unlist(strsplit(sowFile_rfd,"/",fixed=T)))],sep="")
+      }
+      if (y_has_na) {
+        yield_row <- "nofile"
+      } else {
+        yield_row <- paste("inputs/ascii/obs/",unlist(strsplit(yFile,"/",fixed=T))[length(unlist(strsplit(yFile,"/",fixed=T)))],sep="")
+      }
+      if (ygpFile == "nofile") {
+        ygp_row <- "nofile"
+        if (GLAM_params$glam_param.ygp$YGP$Value < -90) {
+          stop("YGP needs to be specified either by value or by a file")
+        }
+      } else {
+        ygp_row <- paste("inputs/",unlist(strsplit(ygpFile,"/",fixed=T))[length(unlist(strsplit(ygpFile,"/",fixed=T)))],sep="")
+        GLAM_params$glam_param.ygp$YGP$Value <- -99.0
+      }
+      
+      ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
+      fn <- file(ofnames,"w")
+      cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",wth_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilty_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilco_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",sow_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",yield_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",ygp_row),"\n",sep="",file=fn)
+      close(fn)
+      
+      #copy all inputs to run directory and write filenames
+      x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
+      x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
+      if (sowFile_rfd != "nofile") {
+        x <- file.copy(sowFile_rfd,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+      }
+      if (ygpFile != "nofile") {
+        x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
+      }
+      x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- sapply(list.files(wthDir_rfd),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_rfd,paste(run_dir,"/inputs/ascii/wth",sep=""))
+      
+      #now run!
+      setwd(run_dir)
+      system(glam_cmd)
+      
+      #delete the exec file
+      x <- file.remove(execName)
+      
+      #remove all input files
+      setwd("./inputs/ascii/wth")
+      #system(paste("7z a daily.7z -tzip *.wth"))
+      x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/obs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/soil")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/sow")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir)
+      
+      #compress & remove daily files
+      if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+        setwd("./output/daily")
+        system(paste("7z a daily.7z -tzip *.out"))
+        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir)
+      }
+    } else {
+      setwd(run_dir)
+    }
+    ##!
+    #Now the irrigated run
+    GLAM_params$glam_param.mod_mgt$SEASON <- "IRR"
+    
+    #check if the planting date is well configured
+    if (sowFile_irr == "nofile") {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
+        stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
+      }
+    } else {
+      if (GLAM_params$glam_param.spt_mgt$IPDATE$Value > -90) {
+        GLAM_params$glam_param.spt_mgt$IPDATE$Value <- -99
+      }
+    }
+    
+    #output folder
+    run_dir <- create_dirs(paste(cal_dir,"/IRR_run",sep=""))
+    
+    #write the model params
+    opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run.txt",sep="")
+    opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
+    
+    #check whether the *.out already exists
+    outfile <- list.files(paste(run_dir,"/output",sep=""),pattern="\\.out")
+    if (length(outfile) == 0) {
+      ######################################################
+      #write filenames file
+      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
+      
+      if (sowFile_irr == "nofile") {
+        sow_row <- sowFile_irr
+      } else {
+        sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
+      }
+      
+      ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
+      fn <- file(ofnames,"w")
+      cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",wth_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilty_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",soilco_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",sow_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",yield_row),"\n",sep="",file=fn)
+      cat(sprintf("%-41s",ygp_row),"\n",sep="",file=fn)
+      close(fn)
+      
+      #copy all inputs to run directory and write filenames
+      x <- file.copy(paste(binDir,"/",execName,sep=""),run_dir,overwrite=T)
+      x <- file.copy(yFile,paste(run_dir,"/inputs/ascii/obs",sep=""),overwrite=T)
+      if (sowFile_irr != "nofile") {
+        x <- file.copy(sowFile_irr,paste(run_dir,"/inputs/ascii/sow",sep=""),overwrite=T)
+      }
+      if (ygpFile != "nofile") {
+        x <- file.copy(ygpFile,paste(run_dir,"/inputs",sep=""),overwrite=T)
+      }
+      x <- file.copy(solFile,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- file.copy(solGrid,paste(run_dir,"/inputs/ascii/soil",sep=""),overwrite=T)
+      x <- sapply(list.files(wthDir_irr),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},wthDir_irr,paste(run_dir,"/inputs/ascii/wth",sep=""))
+      
+      #now run!
+      setwd(run_dir)
+      system(glam_cmd)
+      
+      #delete the exec file
+      x <- file.remove(execName)
+      
+      #remove all input files
+      setwd("./inputs/ascii/wth")
+      #system(paste("7z a daily.7z -tzip *.wth"))
+      x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/obs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/soil")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs/ascii/sow")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir); setwd("./inputs")
+      x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
+      setwd(run_dir)
+      
+      #compress & remove daily files, should they exist (IASCII = 2 or 3)
+      if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
+        setwd("./output/daily")
+        system(paste("7z a daily.7z -tzip *.out"))
+        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
+        setwd(run_dir)
+      }
+    } else {
+      setwd(run_dir)
+    }
+  }
+  return(run_dir)
+}
+
+
+
+
+
 ### wrapper function to summarise the YGP optimisation
 wrapper_summarise_GCM_cal <- function(this_proc) {
   library(raster)
