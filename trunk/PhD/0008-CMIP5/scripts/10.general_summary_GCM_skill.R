@@ -174,7 +174,7 @@ ratio <- 300/72
 
 #bubble plot
 library(ggplot2)
-tiff(paste(out_sum,"/figures/pr_summary_model_skill.tif",sep=""),compression="lzw",
+tiff(paste(out_sum,"/figures/FigS6.tif",sep=""),compression="lzw",
      units="px",width=800*ratio,height=600*ratio,res=300)
 ggplot(pr_plot, aes(P_CCOEF_B05, P_CCOEF_A08)) + 
   geom_point(aes(size =  P_VIA_A05),colour="white", fill="grey 40", shape=21) +

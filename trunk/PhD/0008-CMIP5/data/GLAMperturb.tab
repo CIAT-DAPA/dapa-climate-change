@@ -1,0 +1,8 @@
+Where	Parameter	Description	Units	Unperturbed	Minimum realistic	Maximum realistic	Perturbation
+glam_param.bmass	TE	Transpiration efficiency	Pa	1.4	1.3	4.5	0.64
+glam_param.spt_mgt	EXTC	Canopy extinction coefficient	N/A	0.5	0.3	0.9	0.12
+glam_param.phenol	TB	Base temperature for development	C	10	9	11	0.40
+glam_param.bmass	TEN_MAX	Maximum possible transpiration efficiency	g kg-1	3	1.5	5	0.70
+glam_param.bmass	DHDT	Rate of change in the harvest index	day-1	0.007	0.0042	0.0098	0.001
+glam_param.hts_fut	HTS	High temperature stress	N/A	no response	N/A	N/A	TOL or SEN
+glam_param.sparer	TDS	Terminal drought stress	N/A	no response	N/A	N/A	0.1 or 0.25
