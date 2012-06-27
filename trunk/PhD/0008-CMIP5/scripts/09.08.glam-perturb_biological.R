@@ -2,7 +2,9 @@
 #UoL / CCAFS / CIAT
 #May 2012
 
-#optimise GLAM parameters using pre-selected inputs
+#run GLAM parameters using perturbed crop parameters
+
+library(raster)
 
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -63,7 +65,7 @@ sow_dir <- paste(asc_dir,"/sow",sep="")
 wth_dir <- paste(asc_dir,"/wth",sep="")
 
 #output directory
-runs_odir <- paste(glam_dir,"/model-runs/perturbed_biological",sep="")
+runs_odir <- paste(glam_dir,"/model-runs/bio_runs",sep="")
 if (!file.exists(runs_odir)) {dir.create(runs_odir)}
 
 #load cell details
@@ -71,7 +73,6 @@ cells <- read.csv(paste(input_dir,"/calib-cells-selection.csv",sep=""))
 
 #load irrigation data
 irDir <- paste(cDir,"/irrigated_ratio",sep="")
-library(raster)
 ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
 
 ####perturbations and hts types
@@ -80,8 +81,38 @@ hts_types <- read.table(paste(src.dir2,"/data/HTSTypes.tab",sep=""),header=T,sep
 tds_types <- data.frame(TYPE=c("TDS1","TDS2"),HIMIN=c(0.1,0.25),FSW=c(0.1,0.01))
 
 #this_pt <- 7
+#run_perturbed_biol(1)
 
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=7)
 
+#export variables
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("bDir")
+sfExport("cmipDir")
+sfExport("cropName")
+sfExport("cDir")
+sfExport("glam_dir")
+sfExport("input_dir")
+sfExport("pDir")
+sfExport("unp_rundir")
+sfExport("runs_odir")
+sfExport("asc_dir")
+sfExport("sow_dir")
+sfExport("wth_dir")
+sfExport("cells")
+sfExport("irDir")
+sfExport("ir_stk")
+sfExport("pert_runs")
+sfExport("hts_types")
+sfExport("tds_types")
 
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(pert_runs)),wrapper_perturbed_biol))
 
+#stop the cluster
+sfStop()
 
