@@ -58,7 +58,7 @@ ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
 #this_proc <- 1
 
 #determine number of CPUs
-ncpus <- nrow(procList)
+ncpus <- length(procList)
 if (ncpus>10) {ncpus <- 10}
 
 #here do the parallelisation
@@ -86,7 +86,7 @@ sfExport("ir_stk")
 
 
 #run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(procList)),wrapper_summarise_biol))
+system.time(sfSapply(as.vector(1:length(procList)),wrapper_summarise_biol))
 
 #stop the cluster
 sfStop()
