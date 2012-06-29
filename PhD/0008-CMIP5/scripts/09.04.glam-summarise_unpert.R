@@ -208,6 +208,28 @@ if (!file.exists(paste(out_rs_dir,"/sdobs_by_sdpred.asc",sep=""))) {
   sdo_sdp <- raster(paste(out_rs_dir,"/sdobs_by_sdpred.asc",sep=""))
 }
 
+###
+#ratio of predicted to observed mean yields
+if (!file.exists(paste(out_rs_dir,"/ypred_by_yobs.asc",sep=""))) {
+  yo <- raster(paste(out_rs_dir,"/y_obs.asc",sep=""))
+  yp <- raster(paste(out_rs_dir,"/y_pred.asc",sep=""))
+  yp_yo <- yp/yo
+  yp_yo <- writeRaster(yp_yo,paste(out_rs_dir,"/ypred_by_yobs.asc",sep=""),format="ascii",overwrite=T)
+} else {
+  yp_yo <- raster(paste(out_rs_dir,"/ypred_by_yobs.asc",sep=""))
+}
+
+#ratio of predicted to observed sd yields
+if (!file.exists(paste(out_rs_dir,"/sdpred_by_sdobs.asc",sep=""))) {
+  sdo <- raster(paste(out_rs_dir,"/ysd_obs.asc",sep=""))
+  sdp <- raster(paste(out_rs_dir,"/ysd_pred.asc",sep=""))
+  sdp_sdo <- sdp/sdo
+  sdp_sdo <- writeRaster(sdp_sdo,paste(out_rs_dir,"/sdpred_by_sdobs.asc",sep=""),format="ascii",overwrite=T)
+} else {
+  sdo_sdp <- raster(paste(out_rs_dir,"/sdpred_by_sdobs.asc",sep=""))
+}
+
+
 #check which cells do actually have less than .2 in AHRATIO
 cellNo <- cells$CELL[which(cells$AHRATIO<.2)]
 
@@ -338,6 +360,53 @@ spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
        par.settings=list(fontsize=list(text=8)),
        at=brks,pretty=brks)
 dev.off()
+
+
+###
+#ratio pred to obs yield
+ht <- 1000
+fct <- (yp_yo@extent@xmin-yp_yo@extent@xmax)/(yp_yo@extent@ymin-yp_yo@extent@ymax)
+wt <- ht*(fct+.1)
+
+brks <- seq(0,max(yp_yo[],na.rm=T),by=.1)
+brks.lab <- round(brks,2)
+rs <- yp_yo
+
+cols <- rev(c(colorRampPalette(c("dark green","green","yellow","orange","red"))(length(brks))))
+wld <- list("sp.polygons",wrld_simpl,lwd=0.8,first=F)
+grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=5), norths=seq(-90,90,by=5))
+grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
+
+tiffName <- paste(out_rs_dir,"/ypred_by_yobs.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
+spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+       par.settings=list(fontsize=list(text=8)),
+       at=brks,pretty=brks)
+dev.off()
+
+
+#ratio obs to pred sd yield
+ht <- 1000
+fct <- (sdp_sdo@extent@xmin-sdp_sdo@extent@xmax)/(sdp_sdo@extent@ymin-sdp_sdo@extent@ymax)
+wt <- ht*(fct+.1)
+
+rs <- sdp_sdo
+
+brks <- seq(0,max(sdp_sdo[],na.rm=T),by=.1)
+brks.lab <- round(brks,2)
+cols <- rev(c(colorRampPalette(c("dark green","green","yellow","orange","red"))(length(brks))))
+wld <- list("sp.polygons",wrld_simpl,lwd=0.8,first=F)
+grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=5), norths=seq(-90,90,by=5))
+grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
+
+tiffName <- paste(out_rs_dir,"/sdpred_by_sdobs.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
+spplot(rs,sp.layout=list(wld,grli),col.regions=cols,
+       par.settings=list(fontsize=list(text=8)),
+       at=brks,pretty=brks)
+dev.off()
+
+
 
 
 #correlation coefficient and those gridcells with positive and strong (p<0.05) plotted on top
