@@ -79,7 +79,7 @@ glam_optimise_ygp_ipdate_wrapper <- function(this_run) {
     params$glam_param.mod_mgt$ISYR <- 1966 #start year
     params$glam_param.mod_mgt$IEYR <- 1993 #end year
     params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
-    
+    params$glam_param.sim_ctr$NDSLA <- 1
     
     #load list of parameters to optimise, ranges, and number of steps
     opt_rules <- read.table(paste(pDir,"/optimisation-rules.txt",sep=""),sep="\t",header=T)
