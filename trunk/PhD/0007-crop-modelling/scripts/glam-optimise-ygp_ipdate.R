@@ -29,8 +29,8 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-seeds <- c(sample(1:9999,20),NA)
-#seeds <- c(NA)
+#seeds <- c(sample(1:9999,20),NA)
+seeds <- c(NA)
 
 expIDs <- c(10:(9+length(seeds)))
 expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
