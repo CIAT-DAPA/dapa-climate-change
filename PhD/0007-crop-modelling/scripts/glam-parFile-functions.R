@@ -910,7 +910,7 @@ GLAM_get_default <- function(x,cell,parDir) {
   if (is.na(cell)) {
     GLAM_params$glam_param.sim_ctr$SMLON <- -99
   } else {
-    GLAM_params$glam_param.sim_ctr$SMLON <- round(cells$X[which(cells$CELL==cell)],1)
+    GLAM_params$glam_param.sim_ctr$SMLON <- round(x$X[which(x$CELL==cell)],1)
   }
   # windows()
   # plot(cells$X,cells$Y,pch=20,cex=0.001)
