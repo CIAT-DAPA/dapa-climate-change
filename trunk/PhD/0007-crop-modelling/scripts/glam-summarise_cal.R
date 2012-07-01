@@ -17,8 +17,27 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
-runs_set <- "exp-09"
 cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
+
+####list of seeds to randomise parameter list
+set.seed(512)
+#seeds <- c(sample(1:9999,20),NA)
+seeds <- c(NA)
+
+expIDs <- c(10:(9+length(seeds)))
+expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
+expIDs <- paste(expIDs)
+
+#list of runs to be performed
+runs_ref <- data.frame(SID=1:length(seeds),SEED=seeds,EXPID=expIDs)
+
+#input calibration directory
+this_run <- 1
+
+sid <- runs_ref$SID[this_run]
+seed <- runs_ref$SEED[this_run]
+expID <- runs_ref$EXPID[this_run]
+runs_set <- paste("exp-",expID,sep="")
 cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
 
 #load cell details
