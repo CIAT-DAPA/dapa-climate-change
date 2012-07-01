@@ -178,8 +178,9 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         setwd(run_dir)
         system(glam_cmd)
         
-        #delete the exec file and compress the daily files
+        #delete the exec file, .inf file and compress the daily files
         x <- file.remove(execName)
+        x <- file.remove("glam.inf")
         
         #remove all input files
         setwd("./inputs/ascii/wth")
@@ -303,6 +304,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         
         #delete the exec file
         x <- file.remove(execName)
+        x <- file.remove("glam.inf")
         
         #remove all input files
         setwd("./inputs/ascii/wth")
@@ -425,6 +427,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         
         #delete the exec file
         x <- file.remove(execName)
+        x <- file.remove("glam.inf")
         
         #remove all input files
         setwd("./inputs/ascii/wth")
@@ -530,6 +533,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
         
         #delete the exec file
         x <- file.remove(execName)
+        x <- file.remove("glam.inf")
         
         #remove all input files
         setwd("./inputs/ascii/wth")
@@ -743,6 +747,7 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       
       #delete the exec file
       x <- file.remove(execName)
+      x <- file.remove("glam.inf")
       
       #remove all input files
       setwd("./inputs/ascii/wth")
@@ -854,6 +859,7 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       
       #delete the exec file
       x <- file.remove(execName)
+      x <- file.remove("glam.inf")
       
       #remove all input files
       setwd("./inputs/ascii/wth")
