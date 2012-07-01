@@ -25,6 +25,7 @@ version <- "c"
 ####list of seeds to randomise parameter list
 set.seed(512)
 seeds <- c(sample(1:9999,20),NA)
+#seeds <- c(NA)
 
 expIDs <- c(10:(9+length(seeds)))
 expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
@@ -49,10 +50,12 @@ cropName <- "gnut"
 
 #source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
 
+if (nrow(runs_ref) > 8) {ncpus <- 8} else {ncpus <- nrow(runs_ref)}
+
 #here do the parallelisation
 #load library and create cluster
 library(snowfall)
-sfInit(parallel=T,cpus=8)
+sfInit(parallel=T,cpus=ncpus)
 
 #export variables
 sfExport("src.dir")
