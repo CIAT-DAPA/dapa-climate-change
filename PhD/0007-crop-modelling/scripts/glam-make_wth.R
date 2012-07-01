@@ -70,7 +70,7 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
   col <- 0; row <- 1
   for (cll in cell) {
     #site name and details
-    lon <- x$X[which(cells$CELL == cll)]; lat <- x$Y[which(cells$CELL == cll)]
+    lon <- x$X[which(x$CELL == cll)]; lat <- x$Y[which(x$CELL == cll)]
     
     if (col == 10) {
       col <- 1
@@ -89,7 +89,7 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
     
     
     ###sowing date
-    sdate <- x$SOW_DATE[which(cells$CELL == cll)]
+    sdate <- x$SOW_DATE[which(x$CELL == cll)]
     hdate <- sdate+120
     
     s_details <- data.frame(NAME=paste("gridcell ",cll,sep=""),INSI="INGC",LAT=lat,LONG=lon,ELEV=-99,TAV=-99,AMP=-99,REFHT=-99,WNDHT=-99)
@@ -242,7 +242,7 @@ make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=li
   col <- 0; row <- 1
   for (cll in cell) {
     #site name and details
-    lon <- x$X[which(cells$CELL == cll)]; lat <- x$Y[which(cells$CELL == cll)]
+    lon <- x$X[which(x$CELL == cll)]; lat <- x$Y[which(x$CELL == cll)]
     
     if (col == 10) {
       col <- 1
@@ -261,7 +261,7 @@ make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=li
     
     
     ###sowing date
-    sdate <- x$SOW_DATE[which(cells$CELL == cll)]
+    sdate <- x$SOW_DATE[which(x$CELL == cll)]
     hdate <- sdate+120
     
     s_details <- data.frame(NAME=paste("gridcell ",cll,sep=""),INSI="INGC",LAT=lat,LONG=lon,ELEV=-99,TAV=-99,AMP=-99,REFHT=-99,WNDHT=-99)
