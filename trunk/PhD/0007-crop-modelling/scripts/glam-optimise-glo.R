@@ -18,7 +18,7 @@ src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 10
 version <- "c"
-base_exp <- 11
+base_exp <- 11 #change if you have done any other experiment
 
 
 ####list of seeds to randomise parameter list
