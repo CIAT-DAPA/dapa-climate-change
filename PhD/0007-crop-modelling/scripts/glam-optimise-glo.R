@@ -18,16 +18,15 @@ src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 10
 version <- "c"
+base_exp <- 11
 
-#run <- 1 2 3 4 5
-#expID <- "10"
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-seeds <- c(sample(1:9999,20),NA)
+seeds <- sample(1:9999,20)
 #seeds <- c(NA)
 
-expIDs <- c(10:(9+length(seeds)))
+expIDs <- c(base_exp:((base_exp-1)+length(seeds)))
 expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
 expIDs <- paste(expIDs)
 
@@ -48,8 +47,10 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 cropName <- "gnut"
 
-#source(paste(src.dir,"/glam-optimise-glo.R",sep=""))
+#do i want to plot (not for eljefe)
+plot_all <- F
 
+#number of cpus to use
 if (nrow(runs_ref) > 8) {ncpus <- 8} else {ncpus <- nrow(runs_ref)}
 
 #here do the parallelisation
@@ -65,6 +66,7 @@ sfExport("version")
 sfExport("seeds")
 sfExport("cropName")
 sfExport("runs_ref")
+sfExport("plot_all")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_optimise_glo_wrapper))

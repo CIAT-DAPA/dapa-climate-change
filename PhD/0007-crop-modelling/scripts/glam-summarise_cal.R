@@ -11,6 +11,8 @@ library(raster)
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+base_exp <- 11
+
 
 #sourcing functions
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
@@ -25,7 +27,7 @@ set.seed(512)
 #seeds <- c(sample(1:9999,20),NA)
 seeds <- c(NA)
 
-expIDs <- c(10:(9+length(seeds)))
+expIDs <- c(base_exp:((base_exp-1)+length(seeds)))
 expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
 expIDs <- paste(expIDs)
 
