@@ -228,19 +228,21 @@ glam_optimise_ygp_ipdate_wrapper <- function(this_run) {
       params[[where]][[parname]][,"Min"] <- -99
       params[[where]][[parname]][,"Max"] <- -99
       
-      #now make the plot
-      plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
-      if (!file.exists(plotsDir)) {dir.create(plotsDir)}
-      
-      tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
-           width=1250,pointsize=8)
-      par(mar=c(3,3,2,1))
-      plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
-           main=paste(parname," :: ",optimal[[parname]],sep=""),
-           xlab="Parameter value",ylab="RMSE (kg/ha)")
-      grid(nx=10,ny=10)
-      abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
-      dev.off()
+      if (plot_all) {
+        #now make the plot
+        plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
+        if (!file.exists(plotsDir)) {dir.create(plotsDir)}
+        
+        tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
+             width=1250,pointsize=8)
+        par(mar=c(3,3,2,1))
+        plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
+             main=paste(parname," :: ",optimal[[parname]],sep=""),
+             xlab="Parameter value",ylab="RMSE (kg/ha)")
+        grid(nx=10,ny=10)
+        abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
+        dev.off()
+      }
     }
     
     
@@ -266,15 +268,17 @@ glam_optimise_ygp_ipdate_wrapper <- function(this_run) {
       
       save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
       
-      tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
-           width=1250,pointsize=8)
-      par(mar=c(3,3,2,1))
-      plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
-           main=paste(parname," :: ",optimal[[parname]],sep=""),
-           xlab="Parameter value",ylab="RMSE (kg/ha)")
-      grid(nx=10,ny=10)
-      abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
-      dev.off()
+      if (plot_all) {
+        tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
+             width=1250,pointsize=8)
+        par(mar=c(3,3,2,1))
+        plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
+             main=paste(parname," :: ",optimal[[parname]],sep=""),
+             xlab="Parameter value",ylab="RMSE (kg/ha)")
+        grid(nx=10,ny=10)
+        abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
+        dev.off()
+      }
       
     }
   }
