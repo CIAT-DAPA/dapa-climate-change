@@ -3,7 +3,7 @@
 #June 2012
 
 
-glam_summarise_cal_wrapper <- function(this_proc) {
+glam_summarise_cal_wrapper <- function(this_run) {
   #load required packages
   library(raster)
   

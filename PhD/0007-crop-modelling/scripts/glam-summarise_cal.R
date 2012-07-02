@@ -9,11 +9,12 @@ library(raster)
 #bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
 
 #eljefe
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 
 #sourcing functions
 source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/glam-summarise_cal_wrapper.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
