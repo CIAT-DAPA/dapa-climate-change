@@ -25,7 +25,7 @@ cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
 #these are the cells that have both yield and rainfall data, and that can be selected
-cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
+cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-v4.csv",sep=""))
 
 #get longitude and latitude (row and column)
 rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/0_base_grids/igp_dummy.tif",sep=""))
@@ -62,7 +62,7 @@ if (!file.exists(ofil)) {
 ############ SELECTED ZONE AND GRIDCELLS #############
 ######################################################
 z <- 5
-version <- "c"
+version <- "d"
 cell <- cells$CELL[which(cells$ZONE == z & cells$ISSEL_F == 1)]
 ######################################################
 ######################################################
@@ -80,16 +80,17 @@ cell <- cells$CELL[which(cells$ZONE == z & cells$ISSEL_F == 1)]
 ##calculate yield gap create yield gap parameter file
 z_cells <- cells[cells$CELL %in% cell,]
 
-ym <- mean(z_cells$YIELD_MN)
-yn <- min(z_cells$YIELD_MN)
-yx <- max(z_cells$YIELD_MN)
-
-if (nrow(z_cells) > 1) {
-  cal_ygp <- 1-(yx-ym)/(yx-yn)
-} else {
-  cal_ygp <- 1
-}
-cells$YGP <- round(cal_ygp,2)
+#failed testing with precalculated spatially constant YGP
+# ym <- mean(z_cells$YIELD_MN)
+# yn <- min(z_cells$YIELD_MN)
+# yx <- max(z_cells$YIELD_MN)
+# 
+# if (nrow(z_cells) > 1) {
+#   cal_ygp <- 1-(yx-ym)/(yx-yn)
+# } else {
+#   cal_ygp <- 1
+# }
+# cells$YGP <- round(cal_ygp,2)
 
 ygpFile <- paste(ygpDir,"/ygp_calz",z,version,".txt",sep="")
 if (!file.exists(ygpFile)) {
