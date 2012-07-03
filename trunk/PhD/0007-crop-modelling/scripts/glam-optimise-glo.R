@@ -18,6 +18,7 @@ src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 10
 version <- "d"
+selection <- "v4"
 base_exp <- 31 #change if you have done any other experiment
 
 
@@ -69,6 +70,7 @@ sfExport("cropName")
 sfExport("runs_ref")
 sfExport("plot_all")
 sfExport("use_ygp")
+sfExport("selection")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_optimise_glo_wrapper))

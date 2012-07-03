@@ -69,7 +69,7 @@ glam_optimise_glo_wrapper <- function(this_run) {
   
   
   #load cell details
-  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
+  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
   #load runs to perform
   all_runs <- read.table(paste(cDir,"/calib/optim_zones.txt",sep=""),header=T,sep="\t")

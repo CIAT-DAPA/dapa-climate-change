@@ -39,45 +39,50 @@ if (!file.exists(paste(cd,"/0_base_grids/india-1min-1d_cells.tif",sep=""))) {
 }
 
 #   2.3. Calculate areas per pixel
-if (!file.exists(paste(bDir,"/0_base_grids/india-1min-1d_cells_area.asc",sep=""))) {
+if (!file.exists(paste(cd,"/0_base_grids/india-1min-1d_cells_area.tif",sep=""))) {
   rs_a <- area(rs)
-  rs_a <- writeRaster(rs_a,paste(bDir,"/0_base_grids/india-1min-1d_cells_area.asc",sep=""),
+  rs_a <- writeRaster(rs_a,paste(cd,"/0_base_grids/india-1min-1d_cells_area.tif",sep=""),
                          format='ascii',overwrite=T)
 } else {
-  rs_a <- raster(paste(bDir,"/0_base_grids/india-1min-1d_cells_area.asc",sep=""))
+  rs_a <- raster(paste(cd,"/0_base_grids/india-1min-1d_cells_area.tif",sep=""))
 }
 
-rs_dis <- raster(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))
-method <- "fou"
-outDir <- paste(cDir,"/raster/gridded/",method,sep="")
-if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
+rs_dis <- raster(paste(cd,"/0_base_grids/india-1min-disid.tif",sep=""))
+methods <- c("fou","lin","qua","loe","raw")
 
-xy <- xyFromCell(dumm,which(!is.na(dumm[])))
-xy <- data.frame(CELL=which(!is.na(dumm[])),xy)
+for (method in methods) {
+  outDir <- paste(cDir,"/raster/gridded/",method,sep="")
+  if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
+  
+  yldDir <- paste(cd,"/raster/yearly/",method,sep="")
+  
+  xy <- xyFromCell(dumm,which(!is.na(dumm[])))
+  xy <- data.frame(CELL=which(!is.na(dumm[])),xy)
+  
+  #   2.4. parallelise years and grid the data
+  #o
+  library(snowfall)
+  sfInit(parallel=T,cpus=10) #initiate cluster
+  
+  #export functions
+  sfExport("weightValues")
+  
+  #export variables
+  sfExport("cDir")
+  sfExport("outDir")
+  sfExport("method")
+  sfExport("rs_dis")
+  sfExport("rs_c")
+  sfExport("rs_a")
+  sfExport("dumm")
+  sfExport("xy")
+  sfExport("yldDir")
+  
+  #run the control function
+  system.time(sfSapply(as.vector(66:98), controlGridding))
+  
+  #stop the cluster
+  sfStop()
 
-#   2.4. parallelise years and grid the data
-#o
-library(snowfall)
-sfInit(parallel=T,cpus=15) #initiate cluster
-
-#export functions
-sfExport("weightValues")
-
-#export variables
-sfExport("cDir")
-sfExport("outDir")
-sfExport("method")
-sfExport("rs_dis")
-sfExport("rs_c")
-sfExport("rs_a")
-sfExport("dumm")
-sfExport("xy")
-
-#run the control function
-system.time(sfSapply(as.vector(66:98), controlGridding))
-
-#stop the cluster
-sfStop()
-
-
+}
 
