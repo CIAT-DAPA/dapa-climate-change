@@ -95,18 +95,18 @@ glam_optimise_glo_wrapper <- function(this_run) {
   setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_calz",setup$ZONE,version,".txt",sep="")
   setup$SIM_NAME <- paste(all_runs$run_name[run]) 
   
-  #if there is a ygp file then add it to the run setup
-  if (use_ygp) {
-    setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
-  }
-  
   #get defaults (parameter set)
   params <- GLAM_get_default(x=cells,cell=NA,parDir=pDir)
   params$glam_param.mod_mgt$ISYR <- 1966 #start year
   params$glam_param.mod_mgt$IEYR <- 1993 #end year
   params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
   params$glam_param.sim_ctr$NDSLA <- 1
-  #params$glam_param.ygp$YGP$Value <- -99.0
+  
+  #if there is a ygp file then add it to the run setup
+  if (use_ygp) {
+    setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
+    params$glam_param.ygp$YGP$Value <- -99.0
+  }
   
   #extract irrigation rates for selected gridcells
   irDir <- paste(cDir,"/irrigated_ratio",sep="")
