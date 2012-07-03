@@ -85,7 +85,6 @@ glam_optimise_glo_wrapper <- function(this_run) {
   setup$CROPNAME <- "gnut"
   setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,sep="")
   setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_calz",setup$ZONE,version,"_",setup$METHOD,".txt",sep="")
-  #setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
   setup$YGP_FILE <- "nofile"
   setup$SOW_FILE_RFD <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_start.txt",sep="")
   setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_calz",setup$ZONE,version,"_irr.txt",sep="")
@@ -96,6 +95,10 @@ glam_optimise_glo_wrapper <- function(this_run) {
   setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_calz",setup$ZONE,version,".txt",sep="")
   setup$SIM_NAME <- paste(all_runs$run_name[run]) 
   
+  #if there is a ygp file then add it to the run setup
+  if (use_ygp) {
+    setup$YGP_FILE <- paste(cDir,"/inputs/ascii/ygp/ygp_calz",setup$ZONE,version,".txt",sep="")
+  }
   
   #get defaults (parameter set)
   params <- GLAM_get_default(x=cells,cell=NA,parDir=pDir)

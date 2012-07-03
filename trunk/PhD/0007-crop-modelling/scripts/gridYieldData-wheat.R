@@ -7,35 +7,35 @@ stop("Do not run whole thing")
 library(maptools); library(rgdal); library(raster)
 data(wrld_simpl)
 
-src.dir<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir <- "/home/jramirez/dapa-climate-change/PhD/0007-crop-modelling/scripts"
+#src.dir<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir,"/gridding-functions.R",sep=""))
 
 #set the working folder
-bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
-#bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 cropName <- "wheat"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
 ##   2.2. Create a 1x1 min resolution raster with the 1x1 degree cells
 cDir <- cd
 
-dumm <- raster(paste(bDir,"/0_base_grids/igp_dummy.asc",sep=""))
+dumm <- raster(paste(cd,"/0_base_grids/igp_dummy.tif",sep=""))
 dumm[] <- 1:ncell(dumm)
 
-msk <- raster(paste(bDir,"/0_base_grids/india-1min-msk.asc",sep=""))
+msk <- raster(paste(cd,"/0_base_grids/india-1min-msk.tif",sep=""))
 xy <- xyFromCell(msk,which(!is.na(msk[])))
 cells <- unique(cellFromXY(dumm,xy))
 dumm[] <- NA; dumm[cells] <- 1
 dumm[which(!is.na(dumm[]))] <- 1:length(which(!is.na(dumm[])))
 
 #create high resolution raster with values of coarse cells
-if (!file.exists(paste(bDir,"/0_base_grids/india-1min-1d_cells.asc",sep=""))) {
+if (!file.exists(paste(cd,"/0_base_grids/india-1min-1d_cells.tif",sep=""))) {
   rs_c <- raster(msk)
   rs_c <- resample(dumm,rs_c,method="ngb")
-  rs_c <- writeRaster(rs_c,paste(bDir,"/0_base_grids/india-1min-1d_cells.asc",sep=""),format='ascii')
+  rs_c <- writeRaster(rs_c,paste(bDir,"/0_base_grids/india-1min-1d_cells.tif",sep=""),format='ascii')
 } else {
-  rs_c <- raster(paste(bDir,"/0_base_grids/india-1min-1d_cells.asc",sep=""))
+  rs_c <- raster(paste(cd,"/0_base_grids/india-1min-1d_cells.tif",sep=""))
 }
 
 #   2.3. Calculate areas per pixel

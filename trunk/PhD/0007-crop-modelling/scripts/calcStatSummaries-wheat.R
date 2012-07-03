@@ -8,17 +8,17 @@ library(maptools); library(rgdal); library(raster)
 data(wrld_simpl)
 
 #sourcing important functions
-src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
-#src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop/src"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop/src"
 source(paste(src.dir,"/createMask.R",sep=""))
 
-src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir2 <- "/home/jramirez/dapa-climate-change/PhD/0007-crop-modelling/scripts"
+#src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
-bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
-#bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 cropName <- "wheat"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
@@ -57,19 +57,19 @@ if (!file.exists(paste(cd,"/data/detrended-IND2-",cropName,"-summary.csv",sep=""
 resol <- 1/60
 
 #clean mask raster
-if (!file.exists(paste(bDir,"/0_base_grids/india-1min-msk.asc",sep=""))) {
+if (!file.exists(paste(bDir,"/0_base_grids/india-1min-msk.tif",sep=""))) {
   rs <- createMask(shp,resol)
-  rs <- writeRaster(rs,paste(cd,"/0_base_grids/india-1min-msk.asc",sep=""),format='ascii')
+  rs <- writeRaster(rs,paste(cd,"/0_base_grids/india-1min-msk.tif",sep=""),format='ascii')
 } else {
-  rs <- raster(paste(bDir,"/0_base_grids/india-1min-msk.asc",sep=""))
+  rs <- raster(paste(bDir,"/0_base_grids/india-1min-msk.tif",sep=""))
 }
 
 #raster with district IDs
-if (!file.exists(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))) {
+if (!file.exists(paste(bDir,"/0_base_grids/india-1min-disid.tif",sep=""))) {
   rk <- rasterize(shp,rs,field="DISID")
-  rk <- writeRaster(rk,paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""),format='ascii')
+  rk <- writeRaster(rk,paste(bDir,"/0_base_grids/india-1min-disid.tif",sep=""),format='ascii')
 } else {
-  rk <- raster(paste(bDir,"/0_base_grids/india-1min-disid.asc",sep=""))
+  rk <- raster(paste(bDir,"/0_base_grids/india-1min-disid.tif",sep=""))
   rk <- readAll(rk)
 }
 
@@ -78,7 +78,7 @@ if (!file.exists(paste(cd,"/raster",sep=""))) {
 }
 
 if (!file.exists(paste(cd,"/raster/summaries",sep=""))) {
-  dir.create(paste(cd,"/raster/summaries",sep="")))
+  dir.create(paste(cd,"/raster/summaries",sep=""))
 }
 
 x <- createSummaryRasters(rs,rk,sData,"DISID",cd)
@@ -86,7 +86,7 @@ x <- createSummaryRasters(rs,rk,sData,"DISID",cd)
 
 #plot the summary rasters
 sumDir <- paste(cd,"/raster/summaries",sep="")
-ascList <- list.files(sumDir)
+ascList <- list.files(sumDir,pattern="\\.asc")
 
 imgOutDir <- paste(sumDir,"/images",sep="")
 if (!file.exists(imgOutDir)) {dir.create(imgOutDir)}

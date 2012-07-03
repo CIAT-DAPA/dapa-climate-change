@@ -20,14 +20,14 @@ cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signa
 
 #load yield data and calculate mean, std and cv
 yields <- stack(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/raster/gridded/",tolower(method),"/",tolower(method),"-",66:93,".asc",sep=""))
-ymn <- calc(yields,fun = function(x) {mean(x,na.rm=T)})
-ysd <- calc(yields,fun = function(x) {sd(x,na.rm=T)})
+ymn <- calc(yields,fun = function(x) {mean(x[which(x!=0)],na.rm=T)})
+ysd <- calc(yields,fun = function(x) {sd(x[which(x!=0)],na.rm=T)})
 ycv <- ysd/ymn*100
 yna <- calc(yields,fun = function(x) {length(which(x==0))})
 
 #load area harvested and calculate mean, std, etc
 aha <- stack(paste(cDir,"/harvested_area/raster/gridded/raw-",1966:1993,".asc",sep=""))
-mha <- calc(aha,fun = function(x) {mean(x,na.rm=T)})
+mha <- calc(aha,fun = function(x) {mean(x[which(x!=0)],na.rm=T)})
 car <- area(mha)
 car <- car*(1000^2)/(100^2)
 ahr <- mha*1000/car; ahr <- ahr*100
@@ -56,6 +56,16 @@ ocells$IRATIO <- extract(mir,cbind(x=cells$X,y=cells$Y))
 ocells <- ocells[which(!is.na(ocells$YIELD_CV)),]
 ocells$ISSEL <- 0
 
+#calculate "initial" ygp
+ocells_ygp <- data.frame()
+for (z in unique(ocells$ZONE)) {
+  #z <- unique(ocells$ZONE)[1]
+  zCells <- ocells[which(ocells$ZONE == z),]
+  zCells$YGP <- round(zCells$YIELD_MN/max(zCells$YIELD_MN),2)
+  ocells_ygp <- rbind(ocells_ygp,zCells)
+}
+
+
 #version 1
 #ocells$ISSEL[which(ocells$YIELD_CV>15 & ocells$AHRATIO > 0.1 & ocells$IRATIO < .25)] <- 1 #v1
 
@@ -64,6 +74,22 @@ ocells$ISSEL[which(ocells$YIELD_CV>25 & ocells$YIELD_MN>300 & ocells$AHRATIO>0.2
 ocells$ISSEL[which(ocells$ZONE == 4 & ocells$YIELD_NA == 0 & ocells$YIELD_CV>20 & ocells$YIELD_MN>300 & ocells$AHRATIO>0.2 )] <- 1 #v2
 ocells$ISSEL[which(ocells$CELL == 636)] <- 1 #v2
 
+#version 4 (3 is single "best" gridcells)
+ocells_ygp$ISSEL <- 0
+ocells_ygp$ISSEL[which(ocells_ygp$YIELD_CV>25 & ocells_ygp$YIELD_MN>300 & ocells_ygp$AHRATIO>0.2 & ocells_ygp$YIELD_NA == 0)] <- 1 #v2
+ocells_ygp$ISSEL[which(ocells_ygp$ZONE == 4 & ocells_ygp$YIELD_NA == 0 & ocells_ygp$YIELD_CV>20 & ocells_ygp$YIELD_MN>300 & ocells_ygp$AHRATIO>0.2 )] <- 1 #v2
+ocells_ygp$ISSEL[which(ocells_ygp$CELL == 636)] <- 1 #v2
+
+#windows()
+plot(zrs,col=rev(terrain.colors(5)))
+points(ocells_ygp$X[which(ocells_ygp$ISSEL == 1)],ocells_ygp$Y[which(ocells_ygp$ISSEL == 1)],pch=20,cex=0.75)
+
+plot(ocells_ygp$YIELD_MN,ocells_ygp$YIELD_SD,pch=20)
+points(ocells_ygp$YIELD_MN[which(ocells_ygp$ISSEL==1)],
+       ocells_ygp$YIELD_SD[which(ocells_ygp$ISSEL==1)],pch=20,col="red")
+
+###get back to original table
+ocells <- ocells_ygp
 
 ############################################################################
 ### selection of various gridcells for optimisation
@@ -103,7 +129,7 @@ for (z in unique(ocells$ZONE)) {
 }
 
 #write output data.frame
-write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v2.csv",sep=""),row.names=F,quote=T)
+write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v4.csv",sep=""),row.names=F,quote=T)
 
 
 #plot points in the selected cells
@@ -114,5 +140,8 @@ points(out_cells$X[which(out_cells$ISSEL_F == 1)],out_cells$Y[which(out_cells$IS
 #points(out_cells$X[which(out_cells$CELL == 636)],out_cells$Y[which(out_cells$CELL == 636)],pch="+",cex=0.75)
 #plot(wrld_simpl,add=T)
 
+plot(out_cells$YIELD_MN,out_cells$YIELD_SD,pch=20)
+points(out_cells$YIELD_MN[which(out_cells$ISSEL_F==1)],
+       out_cells$YIELD_SD[which(out_cells$ISSEL_F==1)],pch=20,col="red")
 
 

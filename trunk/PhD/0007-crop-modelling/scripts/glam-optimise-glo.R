@@ -47,8 +47,9 @@ source(paste(src.dir,"/climateSignals-functions.R",sep=""))
 
 cropName <- "gnut"
 
-#do i want to plot (not for eljefe)
+#do i want to plot (not for eljefe) and use ygp file?
 plot_all <- F
+use_ygp <- T
 
 #number of cpus to use
 if (nrow(runs_ref) > 8) {ncpus <- 8} else {ncpus <- nrow(runs_ref)}
@@ -67,6 +68,7 @@ sfExport("seeds")
 sfExport("cropName")
 sfExport("runs_ref")
 sfExport("plot_all")
+sfExport("use_ygp")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_optimise_glo_wrapper))

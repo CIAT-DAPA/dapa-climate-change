@@ -17,7 +17,7 @@ src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir2,"/detrender-functions.R",sep=""))
 
 #set the working folder
-bDir <- "F:/PhD-work/crop-modelling/GLAM/climate-signals-yield"
+bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 #bDir <- "/andromeda_data1/jramirez/crop-modelling/GLAM/climate-signals-yield"
 cropName <- "wheat"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
