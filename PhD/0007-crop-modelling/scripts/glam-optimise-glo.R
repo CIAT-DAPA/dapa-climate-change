@@ -16,7 +16,7 @@
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
-maxiter <- 10
+maxiter <- 15
 version <- "d"
 selection <- "v4"
 base_exp <- 31 #change if you have done any other experiment

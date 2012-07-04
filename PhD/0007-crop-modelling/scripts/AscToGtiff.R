@@ -10,7 +10,8 @@ library(raster)
 #Climate signals on yield for Indian wheat
 
 #local dirs
-bDir <- "F:/PhD-work/crop-modelling"
+#bDir <- "F:/PhD-work/crop-modelling"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 setwd(bDir)
 
 ###################################
