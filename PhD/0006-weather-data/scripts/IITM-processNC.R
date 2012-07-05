@@ -9,7 +9,7 @@ stop("Do not run whole thing")
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
-wd <- "F:/PhD-work/crop-modelling/climate-data/IND-TropMet"
+wd <- "F:/PhD-work/crop-modelling/climate-data/IND-TropMet_day"
 setwd(wd)
 
 library(raster)
