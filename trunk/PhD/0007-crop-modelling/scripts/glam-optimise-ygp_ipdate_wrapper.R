@@ -46,7 +46,7 @@ glam_optimise_ygp_ipdate_wrapper <- function(this_run) {
   
   #load cell details
   #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
-  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
+  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
   #ci <- 1
   ciList <- which(cells$ZONE == zone)

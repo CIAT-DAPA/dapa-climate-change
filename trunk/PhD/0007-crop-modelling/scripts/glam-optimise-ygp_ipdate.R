@@ -15,7 +15,8 @@
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 10
-base_exp <- 11
+selection <- "v4"
+base_exp <- 31
 
 
 source(paste(src.dir,"/glam-optimise-ygp_ipdate_wrapper.R",sep=""))
@@ -63,6 +64,7 @@ sfExport("seeds")
 sfExport("cropName")
 sfExport("runs_ref")
 sfExport("plot_all")
+sfExport("selection")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_optimise_ygp_ipdate_wrapper))
