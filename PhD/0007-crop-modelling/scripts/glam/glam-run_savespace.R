@@ -127,12 +127,19 @@ for (cell in cells$CELL) {
 
 
 #4. whole run (folder 'optimisation')
+for (z in zones) {
+  #z <- zones[1]
+  
+  #1. calib.csv
+  oz_dir <- paste(opt_dir,"/z",z,"_rfd_irr",sep="")
+  if (!file.exists(oz_dir)) {dir.create(oz_dir)}
+  
+  #2. output.RData for each iteration
+  #3. keep [cropname].out for best run of last optimised parameter for each iteration. 
+  #   Last optimised parameter should be obtained from the output.RData of each iteration
+  
+}
 
-
-#1. calib.csv
-#2. output.RData for each iteration
-#3. keep [cropname].out for best run of last optimised parameter for each iteration. 
-#   Last optimised parameter should be obtained from the output.RData of each iteration
 
 
 
