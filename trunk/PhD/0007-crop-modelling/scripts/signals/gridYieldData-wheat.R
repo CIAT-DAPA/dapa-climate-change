@@ -9,7 +9,7 @@ data(wrld_simpl)
 
 #src.dir<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir,"/gridding-functions.R",sep=""))
+source(paste(src.dir,"/signals/gridding-functions.R",sep=""))
 
 #set the working folder
 #bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
@@ -79,10 +79,12 @@ for (method in methods) {
   sfExport("yldDir")
   
   #run the control function
-  system.time(sfSapply(as.vector(66:98), controlGridding))
+  system.time(sfSapply(as.vector(67:94), controlGridding))
   
   #stop the cluster
   sfStop()
-
 }
+
+
+
 

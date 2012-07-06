@@ -9,12 +9,10 @@ data(wrld_simpl)
 
 #sourcing important functions
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop/src"
-#src.dir <- "/home/jramirez/dapa-climate-change/EcoCrop/src"
 source(paste(src.dir,"/createMask.R",sep=""))
 
 src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir2 <- "/home/jramirez/dapa-climate-change/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir2,"/detrender-functions.R",sep=""))
+source(paste(src.dir2,"/signals/detrender-functions.R",sep=""))
 
 #set the working folder
 bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
@@ -37,7 +35,7 @@ adm2Field <- "NAME_2" #field of adm2 names
 yieldData <- read.table(paste(cd,"/data/IND2-",cropName,".tab",sep=""),sep="\t",header=T)
 
 #1. Detrend each of the districts data using lowess, linear or polynomial regression and do summaries
-iyr <- 66; fyr <- 98
+iyr <- 67; fyr <- 94
 
 #important fields
 yfds <- paste("Y",iyr:fyr,sep="") #yield

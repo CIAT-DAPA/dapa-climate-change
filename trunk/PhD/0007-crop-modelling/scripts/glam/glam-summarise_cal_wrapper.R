@@ -8,7 +8,7 @@ glam_summarise_cal_wrapper <- function(this_run) {
   library(raster)
   
   #sourcing functions
-  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
   
   #details of run
   sid <- runs_ref$SID[this_run]
@@ -20,10 +20,10 @@ glam_summarise_cal_wrapper <- function(this_run) {
   cal_dir <- paste(cDir,"/calib/",runs_set,sep="")
   
   #load cell details
-  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""))
+  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
   #get the mask needed (to which data will be appended)
-  ncFile <- paste(bDir,"/../climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
+  ncFile <- paste(bDir,"/../climate-data/IND-TropMet_day/0_input_data/india_data.nc",sep="")
   ydDir <- paste(bDir,"/climate-signals-yield/GNUT/raster/gridded",sep="")
   
   metFile <- raster(ncFile,band=0)

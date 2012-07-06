@@ -3,8 +3,8 @@
 #June 2012
 
 
-#bd <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
-bd <- "W:/eejarv/PhD-work/crop-modelling"
+bd <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+#bd <- "W:/eejarv/PhD-work/crop-modelling"
 
 wd <- paste(bd,"/climate-data/IND-TropMet_mon",sep="")
 od <- paste(bd,"/climate-data/IND-TropMet_clm",sep="")
@@ -12,8 +12,8 @@ if (!file.exists(od)) {dir.create(od)}
 
 library(raster); library(rgdal)
 
-iniyr <- 1960
-finyr <- 2000
+iniyr <- 1966
+finyr <- 1993
 
 ocl_dir <- paste(od,"/climatology_",iniyr,"_",finyr,sep="")
 if (!file.exists(ocl_dir)) {dir.create(ocl_dir)}

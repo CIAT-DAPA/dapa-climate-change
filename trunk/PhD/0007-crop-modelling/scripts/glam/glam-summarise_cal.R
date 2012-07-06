@@ -11,12 +11,13 @@ library(raster)
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
-base_exp <- 11
+base_exp <- 31
+selection <- "v4"
 
 
 #sourcing functions
-source(paste(src.dir,"/climateSignals-functions.R",sep=""))
-source(paste(src.dir,"/glam-summarise_cal_wrapper.R",sep=""))
+source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-summarise_cal_wrapper.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
@@ -53,6 +54,7 @@ sfExport("seeds")
 sfExport("cropName")
 sfExport("runs_ref")
 sfExport("plot_all")
+sfExport("selection")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_summarise_cal_wrapper))

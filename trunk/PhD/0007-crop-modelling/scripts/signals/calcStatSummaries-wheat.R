@@ -14,7 +14,7 @@ source(paste(src.dir,"/createMask.R",sep=""))
 
 #src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir2,"/detrender-functions.R",sep=""))
+source(paste(src.dir2,"/signals/detrender-functions.R",sep=""))
 
 #set the working folder
 #bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
@@ -27,7 +27,7 @@ shp <- paste(cd,"/shp/IND2-",cropName,".shp",sep="")
 shp <- readShapePoly(shp)
 
 #important fields
-iyr <- 66; fyr <- 98
+iyr <- 67; fyr <- 94
 yfds <- paste("Y",iyr:fyr,sep="") #yield
 hfds <- paste("H",iyr:fyr,sep="") #area harvested
 pfds <- paste("T",iyr:fyr,sep="") #total production

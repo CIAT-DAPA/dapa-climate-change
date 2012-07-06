@@ -9,7 +9,6 @@ source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
 bd <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 #bd <- "W:/eejarv/PhD-work/crop-modelling"
-setwd(bd)
 
 wd <- paste(bd,"/climate-data/IND-TropMet_day",sep="")
 od <- paste(bd,"/climate-data/IND-TropMet_mon",sep="")

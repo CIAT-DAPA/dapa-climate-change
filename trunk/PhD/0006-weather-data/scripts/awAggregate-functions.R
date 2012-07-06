@@ -7,7 +7,7 @@
 
 #wrapper to parallelise
 agg_wrapper <- function(year) {
-  library(raster)
+  library(raster); library(rgdal)
   #cat("\nProcessing year",year,"\n")
   for (mth in 1:12) { #cru_ts_3_10.1901.2009.tmn_1960_1.asc
     cat(mth," ")

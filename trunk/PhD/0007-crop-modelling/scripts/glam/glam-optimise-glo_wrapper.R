@@ -42,13 +42,13 @@ glam_optimise_glo_wrapper <- function(this_run) {
   #running and optimising GLAM
   
   #source all needed functions
-  source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
-  source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-  source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
-  source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-  source(paste(src.dir,"/glam-make_wth.R",sep=""))
-  source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
-  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
   
   
   #input directories and model
