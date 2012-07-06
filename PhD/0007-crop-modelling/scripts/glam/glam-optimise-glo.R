@@ -37,14 +37,14 @@ runs_ref2 <- expand.grid(SID=runs_ref$SID,RUN=1:5)
 runs_ref <- merge(runs_ref2,runs_ref,by="SID",all=T,sort=F)
 
 #source all needed functions
-source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
-source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
-source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-source(paste(src.dir,"/glam-make_wth.R",sep=""))
-source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
-source(paste(src.dir,"/glam-optimise-glo_wrapper.R",sep=""))
-source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-optimise-glo_wrapper.R",sep=""))
+source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
 
 cropName <- "gnut"
 

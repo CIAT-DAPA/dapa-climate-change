@@ -14,7 +14,7 @@ source(paste(src.dir,"/createMask.R",sep=""))
 
 #src.dir2<-"D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir2,"/detrender-functions.R",sep=""))
+source(paste(src.dir2,"/signals/detrender-functions.R",sep=""))
 
 #set the working folder
 #bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
@@ -39,7 +39,7 @@ rk <- readAll(rk)
 outYearDir <- paste(cd,"/raster/yearly",sep="")
 if (!file.exists(outYearDir)) {dir.create(outYearDir)}
 
-dtList <- c("lin","qua","loe","raw") #c("fou","lin","qua","loe","raw")
+dtList <- c("fou","lin","qua","loe","raw")
 for (dataType in dtList) {
   pfx <- "Y"
   #dataType <- "fou"
@@ -65,7 +65,7 @@ for (dataType in dtList) {
   sfExport("pfx")
   
   #run the control function
-  system.time(sfSapply(as.vector(66:98), controlYear))
+  system.time(sfSapply(as.vector(67:94), controlYear))
   
   #stop the cluster
   sfStop()
