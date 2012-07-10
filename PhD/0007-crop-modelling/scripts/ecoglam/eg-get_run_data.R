@@ -21,9 +21,7 @@ crop_name <- "gnut"
 crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
 
 #load variable names
-varnames <- read.table(paste(src.dir,"/data/GLAM-varnames.tab",sep=""))
-
-
+varnames <- read.table(paste(src.dir,"/data/GLAM-varnames.tab",sep=""),header=T,sep="\t")
 
 #details of experiment i want to get
 exp_id <- 10
@@ -36,6 +34,20 @@ cal_dir <- paste(crop_dir,"/calib",sep="")
 exp_dir <- paste(cal_dir,"/exp-",exp_id,"_outputs",sep="")
 
 ###
+#select variable and gridcell
+cell <- cells$CELL[1]
+vname <- paste(varnames$EOS[8])
+
+#open out file
+
+
+#set names
+
+
+#capture values for all years
+
+
+#transpose
 
 
 
