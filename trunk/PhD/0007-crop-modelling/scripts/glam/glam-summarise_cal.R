@@ -11,8 +11,8 @@ library(raster)
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
-base_exp <- 31
-selection <- "v4"
+base_exp <- 11
+selection <- "v3"
 
 
 #sourcing functions
@@ -25,8 +25,8 @@ cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-#seeds <- c(sample(1:9999,20),NA)
-seeds <- c(NA)
+seeds <- c(sample(1:9999,20))
+#seeds <- c(NA)
 
 expIDs <- c(base_exp:((base_exp-1)+length(seeds)))
 expIDs[which(expIDs<10)] <- paste("0",expIDs,sep="")
@@ -39,7 +39,7 @@ runs_ref <- data.frame(SID=1:length(seeds),SEED=seeds,EXPID=expIDs)
 plot_all <- F
 
 #this_run <- 1
-if (nrow(runs_ref) > 8) {ncpus <- 8} else {ncpus <- nrow(runs_ref)}
+if (nrow(runs_ref) > 10) {ncpus <- 10} else {ncpus <- nrow(runs_ref)}
 
 #here do the parallelisation
 #load library and create cluster
