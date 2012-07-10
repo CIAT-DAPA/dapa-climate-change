@@ -10,12 +10,12 @@
 #these functions should be run after a given optimisation run is completed and fully summarised
 
 #local
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
 
 #eljefe
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 
 
 #sourcing functions
@@ -29,7 +29,10 @@ source(paste(src.dir,"/glam/glam-run_savespace-functions.R",sep=""))
 #details of experiment i want to get
 #exp_id <- 2
 
-x <- savespace(exp_id=2,b_dir=b_dir,zones=c(1:5),crop_name="gnut",crop_name_long="groundnut",dump=F)
+for (exp in 2:31) {
+  x <- savespace(exp_id=exp,b_dir=b_dir,zones=c(1:5),crop_name="gnut",crop_name_long="groundnut",dump=T)
+}
+
 
 
 
