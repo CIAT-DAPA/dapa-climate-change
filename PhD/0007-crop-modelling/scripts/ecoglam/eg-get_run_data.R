@@ -8,17 +8,21 @@
 #irrigation fraction needs to be input
 
 #local
-#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 #b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
 
 
 #eljefe
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 
 #details of crop and base folder of runs and data
 crop_name <- "gnut"
 crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
+
+#load variable names
+varnames <- read.table(paste(src.dir,"/data/GLAM-varnames.tab",sep=""))
+
 
 
 #details of experiment i want to get
@@ -29,10 +33,9 @@ cells <- read.csv(paste(crop_dir,"/inputs/calib-cells-selection-",selection,".cs
 
 #folders
 cal_dir <- paste(crop_dir,"/calib",sep="")
-exp_dir <- paste(cal_dir,"/exp-",exp_id,sep="")
+exp_dir <- paste(cal_dir,"/exp-",exp_id,"_outputs",sep="")
 
-
-
+###
 
 
 
