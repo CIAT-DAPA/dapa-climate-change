@@ -8,50 +8,59 @@
 #irrigation fraction needs to be input
 
 #local
-#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-#b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
-
+src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #eljefe
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+# src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+
+#source functions
+source(paste(src.dir,"/scripts/ecoglam/eg-get_run_data-functions.R",sep=""))
+source(paste(src.dir,"/scripts/signals/climateSignals-functions.R",sep=""))
+
+#libraries
+library(raster)
+
 
 #details of crop and base folder of runs and data
-crop_name <- "gnut"
-crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
+setup <- list()
+setup$B_DIR <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
+#setup$BDIR <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+setup$CROP_NAME <- "gnut"
+setup$CROP_LONG <- "groundnut"
+setup$POT <- F #switch to get either maximum yield (YGP=1), or actual yield (YGP-limited)
+setup$CROP_DIR <- paste(setup$B_DIR,"/model-runs/",toupper(setup$CROP_NAME),sep="")
+setup$EXPID <- 10
+if (setup$EXPID < 10) {setup$EXPID <- paste("0",setup$EXPID,sep="")} else {setup$EXPID <- paste(setup$EXPID)}
+setup$SELECTION <- "v4"
+setup$CAL_DIR <- paste(setup$CROP_DIR,"/calib",sep="")
+setup$EXP_DIR <- paste(setup$CAL_DIR,"/exp-",setup$EXPID,"_outputs",sep="")
+setup$OUT_DIR <- paste(setup$CROP_DIR,"/ecg_analyses",sep="")
+if (!file.exists(setup$OUT_DIR)) {dir.create(setup$OUT_DIR)}
+setup$OUT_GDIR <- paste(setup$OUT_DIR,"/glam_output",sep="")
+if (!file.exists(setup$OUT_GDIR)) {dir.create(setup$OUT_GDIR)}
 
-#load variable names
-varnames <- read.table(paste(src.dir,"/data/GLAM-varnames.tab",sep=""),header=T,sep="\t")
+#additional data
+vnames <- read.table(paste(src.dir,"/data/GLAM-varnames.tab",sep=""),header=T,sep="\t") #variable names
+ref_grid <- read.csv(paste(setup$CROP_DIR,"/inputs/calib-cells-selection-",setup$SELECTION,".csv",sep="")) #gridcells
 
-#details of experiment i want to get
-exp_id <- 10
-if (exp_id < 10) {exp_id <- paste("0",exp_id,sep="")} else {exp_id <- paste(exp_id)}
-selection <- "v4"
-cells <- read.csv(paste(crop_dir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
+#spatial grid
+ncFile <- paste(setup$B_DIR,"/../climate-data/IND-TropMet_day/0_input_data/india_data.nc",sep="")
+ydDir <- paste(setup$B_DIR,"/climate-signals-yield/GNUT/raster/gridded",sep="")
+metFile <- raster(ncFile,band=0); yldFile <- raster(paste(ydDir,"/raw/raw-66.asc",sep=""))
+mask <- maskCreate(metFile,yldFile); mask[] <- NA
 
-#folders
-cal_dir <- paste(crop_dir,"/calib",sep="")
-exp_dir <- paste(cal_dir,"/exp-",exp_id,"_outputs",sep="")
+#irrigation rates
+ifrc_dir <- paste(setup$CROP_DIR,"/irrigated_ratio",sep="")
 
 ###
-#select variable and gridcell
-vid <- 8
-cell <- cells$CELL[1]
-vname <- paste(varnames$EOS[8])
+#non-potential yields
+gy_data <- get_grid_data(run_setup=setup,cells=ref_grid,irr_dir=ifrc_dir,varnames=vnames,vid=8) #get yield data
+odir <- write_all_data(gdata=gy_data,cells=ref_grid,run_setup=setup,varnames=vnames,msk=mask,vid=8) #write yield data
 
-#open out file
-
-
-#set names
-
-
-#capture values for all years
-
-
-#transpose
-
-
-
+#potential (ygp=1) yields
+setup$POT <- T
+gy_data <- get_grid_data(run_setup=setup,cells=ref_grid,irr_dir=ifrc_dir,varnames=vnames,vid=8) #get yield data
+odir <- write_all_data(gdata=gy_data,cells=ref_grid,run_setup=setup,varnames=vnames,msk=mask,vid=8) #write yield data
 
 
 
