@@ -19,12 +19,12 @@ bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 15
 version <- "d"
 selection <- "v4"
-base_exp <- 31 #change if you have done any other experiment
+base_exp <- 32 #change if you have done any other experiment
 
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-seeds <- sample(1:9999,20)
+seeds <- sample(1:9999,50)
 #seeds <- c(NA)
 
 expIDs <- c(base_exp:((base_exp-1)+length(seeds)))
