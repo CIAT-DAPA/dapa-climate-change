@@ -1,5 +1,5 @@
 #Julian Ramirez-Villegas
-#June 2012
+#July 2012
 #CIAT / CCAFS / UoL
 
 #functions to summarise a given GLAM run based on a given inner folder
