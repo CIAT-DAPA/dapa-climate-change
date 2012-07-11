@@ -35,6 +35,7 @@ exp_dir <- paste(cal_dir,"/exp-",exp_id,"_outputs",sep="")
 
 ###
 #select variable and gridcell
+vid <- 8
 cell <- cells$CELL[1]
 vname <- paste(varnames$EOS[8])
 

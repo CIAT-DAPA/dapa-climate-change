@@ -20,7 +20,7 @@ savespace <- function(exp_id,b_dir,zones=c(1:5),crop_name,crop_name_long,dump=F)
   exp_dir <- paste(cal_dir,"/exp-",exp_id,sep="")
   
   #starting compression of experiment
-  cat("starting compression of experiment",exp_id,"\n")
+  cat("\nstarting compression of experiment",exp_id,"\n")
   #output folders
   oxp_dir <- paste(cal_dir,"/exp-",exp_id,"_outputs",sep="")
   if (!file.exists(oxp_dir)) {dir.create(oxp_dir)}
@@ -38,8 +38,7 @@ savespace <- function(exp_id,b_dir,zones=c(1:5),crop_name,crop_name_long,dump=F)
   con_fil <- paste(oxp_dir,"/savespace.wsp",sep="")
   if (!file.exists(con_fil)) {
     #####
-    #files that I want to keep for a given experiment:
-    #three categories
+    #files that I want to keep for a given experiment: three categories
     #####
     
     #general stuff (folder 'general')
@@ -109,10 +108,37 @@ savespace <- function(exp_id,b_dir,zones=c(1:5),crop_name,crop_name_long,dump=F)
         x <- file.copy(from=fnm_file,to=cell_dir,overwrite=T)
         if (!x) {stop("an error occurred while copying filenames-aaa-run.txt, check before proceeding")}
         
-        #6. keep [cropname].out for the best run
+        #6. keep [cropname].out for the best run (rfd and irr)
         out_file <- paste(exp_dir,"/fcal_",cell,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal$YGP,"/output/",tolower(crop_name_long),".out",sep="")
-        x <- file.copy(from=out_file,to=cell_dir,overwrite=T)
-        if (!x) {stop("an error occurred while copying aaa.out, check before proceeding")}
+        if (file.exists(out_file)) {
+          x <- file.copy(from=out_file,to=paste(cell_dir,"/",tolower(crop_name_long),"_RFD.out",sep=""),overwrite=T)
+          if (!x) {stop("an error occurred while copying aaa.out rfd, check before proceeding")}
+        }
+        
+        out_file <- paste(exp_dir,"/fcal_",cell,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal$YGP,"/output/",tolower(crop_name_long),".out",sep="")
+        if (file.exists(out_file)) {
+          x <- file.copy(from=out_file,to=paste(cell_dir,"/",tolower(crop_name_long),"_IRR.out",sep=""),overwrite=T)
+          if (!x) {stop("an error occurred while copying aaa.out irr, check before proceeding")}
+        }
+        
+        #7. keep [cropname].out for run with ygp=1
+        ygp1_dir <- paste(cell_dir,"/ygp_1",sep="")
+        if (!file.exists(ygp1_dir)) {dir.create(ygp1_dir)}
+        
+        ygp1_run <- which(optimised$YGP$VALUE == 1)
+        
+        out_file <- paste(exp_dir,"/fcal_",cell,"/iter-ygp/ygp/RFD_run-",ygp1_run,"_",1,"/output/",tolower(crop_name_long),".out",sep="")
+        if (file.exists(out_file)) {
+          x <- file.copy(from=out_file,to=paste(ygp1_dir,"/",tolower(crop_name_long),"_RFD.out",sep=""),overwrite=T)
+          if (!x) {stop("an error occurred while copying aaa.out for ygp=1 rfd, check before proceeding")}
+        }
+        
+        out_file <- paste(exp_dir,"/fcal_",cell,"/iter-ygp/ygp/IRR_run-",ygp1_run,"_",1,"/output/",tolower(crop_name_long),".out",sep="")
+        if (file.exists(out_file)) {
+          x <- file.copy(from=out_file,to=paste(ygp1_dir,"/",tolower(crop_name_long),"_IRR.out",sep=""),overwrite=T)
+          if (!x) {stop("an error occurred while copying aaa.out for ygp=1 irr, check before proceeding")}
+        }
+        
         rm(optimal); rm(optimised); g=gc(); rm(g)
       }
     }
