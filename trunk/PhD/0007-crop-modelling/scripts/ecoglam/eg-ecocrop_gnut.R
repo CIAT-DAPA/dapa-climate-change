@@ -141,34 +141,28 @@ for (varn in varList) {
 }
 write.csv(finalTable, paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""), row.names=F)
 
-###########
-#!!!here i am
-###########
-
 
 
 #Running the model
 source(paste(src.dir,"/src/EcoCrop.R",sep=""))
-gs <- 6
-#for (gs in c(1:12,"MEAN","MODE","MAX","MIN")) { #omitted as gs was defined to start in June
+gs <- 1
 cat("GS", gs, "\n")
-p <- read.csv("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/data/calibration-parameters.csv")
+p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
 p <- p[which(p$GS==gs),]
 vl <- c("tmean","tmin","tmax")
 for (rw in 2:4) {
-  if (!file.exists(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/runs/", gs, "-gnut-",vl[rw-1],"-suitability.jpg",sep=""))) {
-    eco <- suitCalc(climPath='D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_2_5min', 
+  if (!file.exists(paste(ec_dir,"/analyses/runs/", gs, "-",crop_name,"-",vl[rw-1],"-suitability.jpg",sep=""))) {
+    eco <- suitCalc(climPath=paste(ec_dir,"/climate/ind_2_5min",sep=""), 
                     Gmin=120,Gmax=120,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],
                     Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
                     Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
-                    outfolder='D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/runs', 
-                    cropname=paste(gs,'-gnut-',vl[rw-1],sep=""))
-    jpeg(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/runs/", gs, "-gnut-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
+                    outfolder=paste(ec_dir,"/analyses/runs",sep=""), 
+                    cropname=paste(gs,"-",crop_name,"-",vl[rw-1],sep=""),ext=".tif")
+    jpeg(paste(ec_dir,"/analyses/runs/", gs, "-",crop_name,"-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
     plot(eco)
     dev.off()
   }
 }
-#}
 
 
 #Assess accuracy of each growing season and each parameter tuning
