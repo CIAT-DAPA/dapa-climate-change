@@ -25,21 +25,23 @@ makeLogFile <- function(filePathName, climPath, cropname, Gmin, Gmax, Tkmp, Tmin
 	close(con)
 }
 
-suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='', cropname='') {
+suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topmax=25,Tmax=35,Rmin=150,Ropmin=300,Ropmax=400,Rmax=600, outfolder='', cropname='',ext=".asc") {
 	minAdapt <- 0
 	maxAdapt <- 1
 	
+  if (is.na(ext)) {ext <- ".asc"}
+  
 	#Checking climPath folder for consistency
 	if (!file.exists(climPath)) {
 		stop("The specified folder where the climate files should be does not exist, please check...")
 	}
 	#Checking climate files for existence
 	for (i in 1:12) {
-		if (!file.exists(paste(climPath, "/tmean_", i, ".asc", sep=""))) {
+		if (!file.exists(paste(climPath, "/tmean_", i, ext, sep=""))) {
 			stop("Error mean temperature for month ", i, ": file does not exist")
-		} else if (!file.exists(paste(climPath, "/tmin_", i, ".asc", sep=""))) {
+		} else if (!file.exists(paste(climPath, "/tmin_", i, ext, sep=""))) {
 			stop("Error min temperature for month ", i, ": file does not exist")
-		} else if (!file.exists(paste(climPath, "/prec_", i, ".asc", sep=""))) {
+		} else if (!file.exists(paste(climPath, "/prec_", i, ext, sep=""))) {
 			stop("Error precipitation for month ", i, ": file does not exist")
 		}
 	}
@@ -83,7 +85,7 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	createLog <- makeLogFile(logFileName, climPath, cropname, Gmin, Gmax, Tkmp, Tmin, Topmin, Topmax, Tmax, Rmin, Ropmin, Ropmax, Rmax)
 	
 	#Creating the stack of the whole list of variables
-	climateStack <- stack(stack(paste(climPath, "/tmean_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/tmin_", c(1:12), ".asc", sep="")), stack(paste(climPath, "/prec_", c(1:12), ".asc", sep="")))
+	climateStack <- stack(stack(paste(climPath, "/tmean_", c(1:12), ext, sep="")), stack(paste(climPath, "/tmin_", c(1:12), ext, sep="")), stack(paste(climPath, "/prec_", c(1:12), ext, sep="")))
 	
 	#Calculating regression models between Rmin-Ropmin and Ropmax-Rmax
 	rainLeftReg <- lsfit(x=c(Rmin,Ropmin), y=c(0,1))
