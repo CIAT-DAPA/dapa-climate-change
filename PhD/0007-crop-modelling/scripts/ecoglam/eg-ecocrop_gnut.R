@@ -106,7 +106,6 @@ rs$DUR[which(rs$HAR_MTH > rs$SOW_MTH)] <- rs$HAR_MTH[which(rs$HAR_MTH > rs$SOW_M
 #produce growing season parameters based on sowing date and duration
 #for (i in 1:nrow(rs)) {
 get_gs_data <- function(i,rs) {
-  #i=1
   x <- rs[i,] #get that row
   x2 <- calibrationParameters(x, gs=x$DUR, verbose=F) #get growing season data for that duration
   this_gs <- x$SOW_MTH #which month the crop was planted
@@ -146,7 +145,6 @@ write.csv(finalTable, paste(ec_dir,"/analyses/data/calibration-parameters.csv",s
 #Running the model
 source(paste(src.dir,"/src/EcoCrop.R",sep=""))
 gs <- 1
-cat("GS", gs, "\n")
 p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
 p <- p[which(p$GS==gs),]
 vl <- c("tmean","tmin","tmax")
@@ -165,18 +163,23 @@ for (rw in 2:4) {
 }
 
 
+
 #Assess accuracy of each growing season and each parameter tuning
 source(paste(src.dir,"/src/accuracy.R",sep=""))
-test <- read.csv("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/data/test.csv"); test <- cbind(test[,"longitude"], test[,"latitude"])
-train <- read.csv("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/data/train.csv"); train <- cbind(train[,"longitude"], train[,"latitude"])
-parList <- read.csv("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/data/calibration-parameters.csv")
+test <- read.csv(paste(ec_dir,"/analyses/data/test.csv",sep=""))
+test <- cbind(test[,"longitude"], test[,"latitude"])
+
+train <- read.csv(paste(ec_dir,"/analyses/data/train.csv",sep=""))
+train <- cbind(train[,"longitude"], train[,"latitude"])
+
+parList <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
 gsList <- unique(parList$GS)
 for (gs in gsList) {
   pList <- parList[which(parList$GS==gs),][2:4,]
   for (vr in pList$VARIABLE) {
     for (suf in c("_p","_t","_")) {
       cat("GS:", gs, "- VAR:", vr, "- SUF:", suf, "\n")
-      rs <- raster(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/runs/", gs, "-gnut-", vr, suf, "suitability.asc", sep=""))
+      rs <- raster(paste(ec_dir,"/analyses/runs/", gs, "-",crop_name,"-", vr, suf, "suitability.asc", sep=""))
       tem <- accMetrics(rs, test) #doing with test data
       trm <- accMetrics(rs, train) #doing with training data
       resrow <- data.frame(GS=gs, VARIABLE=vr, TYPE=paste(suf, "suitability", sep=""), TEST.AV.SUIT=tem$METRICS$SUIT, TEST.SD.SUIT=tem$METRICS$SUITSD, TEST.MAX.SUIT=tem$METRICS$SUITX, TEST.MIN.SUIT=tem$METRICS$SUITN, TEST.OMISSION.RATE=tem$METRICS$OMISSION_RATE, TEST.ERROR=tem$METRICS$RMSQE, TEST.ERR.DIST=tem$METRICS$ERR_DIST, TEST.MXE=tem$METRICS$MAX_ENT, TEST.SLOPE=tem$METRICS$SLOPE, TRAIN.AV.SUIT=trm$METRICS$SUIT, TRAIN.SD.SUIT=trm$METRICS$SUITSD, TRAIN.MAX.SUIT=trm$METRICS$SUITX, TRAIN.MIN.SUIT=trm$METRICS$SUITN, TRAIN.OMISSION.RATE=trm$METRICS$OMISSION_RATE, TRAIN.ERROR=trm$METRICS$RMSQE, TRAIN.ERR.DIST=trm$METRICS$ERR_DIST, TRAIN.MXE=trm$METRICS$MAX_ENT, TRAIN.SLOPE=trm$METRICS$SLOPE)
@@ -192,14 +195,14 @@ for (gs in gsList) {
     }
   }
 }
-write.csv(rres, "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/data/accuracy-metrics.csv", row.names=F)
-write.csv(cres, "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/data/entropy-curves.csv", row.names=F)
+write.csv(rres, paste(ec_dir,"/analyses/data/accuracy-metrics.csv",sep=""), row.names=F)
+write.csv(cres, paste(ec_dir,"/analyses/data/entropy-curves.csv",sep=""), row.names=F)
 
 
 #plot accuracy metrics here
 plot.acc <- rres[which(rres$TYPE=="_suitability"),]
-tiff("./analyses/img/accuracy.tiff",
-     res=300,pointsize=10,width=1500,height=1300,units="px",compression="lzw")
+tiff(paste(ec_dir,"/analyses/img/accuracy.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
 par(mar=c(4.5,4,1,1),cex=1)
 plot(plot.acc$TEST.OMISSION.RATE[which(plot.acc$VARIABLE=="tmean")],
      plot.acc$TEST.ERROR[which(plot.acc$VARIABLE=="tmean")],
@@ -219,19 +222,18 @@ dev.off()
 
 
 #Validation stuff... got to validate 1(!),2(!),3(!),4(!),5(!),6(!),7(!),ME(!),MO,MX
-setwd("D:/_tools/dapa-climate-change/trunk/EcoCrop")
 source(paste(src.dir,"/src/validation.R",sep=""))
 source(paste(src.dir,"/src/createMask.R",sep=""))
-rsl <- raster("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/runs/6-gnut-tmean_suitability.asc")
-shp.icrisat <- "D:/CIAT_work/GLAM/PNAS-paper/India-yield-data/shp/IND2-gnut.shp"
+rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
+shp.icrisat <- paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep="")
 oblist <- ls(pattern="shp")
 for (ob in oblist) {
   cat("Processing", ob, "\n")
   shp <- readShapePoly(get(ob))
   field <- "H_ISPRES"
   res <- extractFromShape(shp, field, naValue=-9999, rsl)
-  write.csv(res, paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/evaluation/", ob, ".csv", sep=""),row.names=F)
-  res <- read.csv(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/evaluation/", ob, ".csv", sep=""))
+  write.csv(res, paste(ec_dir,"/analyses/evaluation/", ob, ".csv", sep=""),row.names=F)
+  res <- read.csv(paste(ec_dir,"/analyses/evaluation/", ob, ".csv", sep=""))
   mets <- valMetrics(res, pres.field=field,thresh=0)
   if (ob == oblist[1]) {
     rr <- cbind(SHP=ob, mets)
@@ -240,41 +242,14 @@ for (ob in oblist) {
   }
   rm(res); rm(shp); rm(mets); gc()
 }
-write.csv(rr, "D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/evaluation/rates.csv", quote=F, row.names=F)
+write.csv(rr, paste(ec_dir,"/analyses/evaluation/rates.csv", sep=""),quote=F, row.names=F)
 
 
-#plot relation between yield/aharv/pdn and PS/ME
-res2 <- res[which(!is.na(res$H_ISPRES)),]
-res2 <- res2[which(res2$Y_AVG!=0),]; res2 <- res2[which(res2$PS!=1),]
+#aggregate the original 
+fct <- round(1/2.5*60,0) #aggregating factor
 
-tiff("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/img/yield-relations.tiff",
-     res=600,pointsize=5,width=2000,height=1300,units="px",compression="lzw")
-par(mar=c(4.5,4,1,1),cex=0.5,mfrow=c(2,3),lwd=0.7)
-plot(res2$Y_AVG,res2$PS,pch=20,xlab="Mean yield (kg/ha)",ylab="Fraction suitable",lwd=0.4); grid()
-plot(res2$H_AVG,res2$PS,pch=20,xlab="Mean area harvested (ha x 10^3)",ylab="Fraction suitable",lwd=0.4); grid()
-plot(res2$P_AVG,res2$PS,pch=20,xlab="Mean production (ton x 10^3)",ylab="Fraction suitable",lwd=0.4); grid()
-plot(res2$Y_AVG,res2$MZ,pch=20,xlab="Mean yield (kg/ha)",ylab="Mean suitability (%)",lwd=0.4); grid()
-plot(res2$H_AVG,res2$MZ,pch=20,xlab="Mean area harvested (ha x 10^3)",ylab="Mean suitability (%)",lwd=0.4); grid()
-plot(res2$P_AVG,res2$MZ,pch=20,xlab="Mean production (ton x 10^3)",ylab="Mean suitability (%)",lwd=0.4); grid()
-dev.off()
-
-
-#Calculate area for aggregating to average district size
-sh <- readShapePoly("D:/CIAT_work/GLAM/PNAS-paper/India-yield-data/shp/IND2-gnut.shp")
-npol <- length(sh@polygons)
-
-for (i in 1:npol) {
-  if (i==1) {
-    a <- sh@polygons[[i]]@area
-  } else {
-    a <- c(a,sh@polygons[[i]]@area)
-  }
-}
-
-fct <- round(mean(a)/2.5*60,0) #aggregating factor
-
-rsl <- raster("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/analyses/runs/6-gnut-tmean_suitability.asc")
-shp <- readShapePoly("D:/CIAT_work/GLAM/PNAS-paper/India-yield-data/shp/IND2-gnut.shp")
+rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
+shp <- readShapePoly(paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep=""))
 naValue <- -9999
 
 #Extract data from shapefile
@@ -283,50 +258,18 @@ pafield <- "H_ISPRES"
 
 #create raster
 rs <- raster(rsl)
-pars <- rasterize(shp,rs,field=pafield); pars[which(pars[]==naValue)] <- NA
+pars <- raster:::.polygonsToRaster(shp,rs,field=pafield)
+pars[which(pars[]==naValue)] <- NA
 
 #aggregate raster
 pars.agg <- aggregate(pars,fact=fct,fun=mean) #aggregate
-pars.agg[which(pars.agg[]<0.75)] <- 0; pars.agg[which(pars.agg[]>=0.75)] <- 1 #set anything below 25%
+pars.agg[which(pars.agg[]<0.75)] <- 0 #set anything below 25%
+pars.agg[which(pars.agg[]>=0.75)] <- 1 #set anything below 25%
 
-prec1 <- raster("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_2_5min/prec_1.asc")
-prec1.agg <- aggregate(prec1,fact=fct,fun=mean)
 
-brks <- quantile(c(prec1[],prec1.agg[]),probs=seq(0,1,by=0.05),na.rm=T)
-brks.lab <- round(brks,0)
-nb <- length(brks)-1
-
-tiff("analyses/img/prec-orig-res.tiff",
-     res=300,pointsize=10,width=1500,height=1500*aspect,units="px",compression="lzw")
-par(mar=c(2.5,2.5,1,1),cex=0.8)
-plot(prec1,useRaster=F,
-     col=colorRampPalette(c("light blue","blue","purple"))(nb),
-     breaks=brks,
-     lab.breaks=brks.lab,
-     horizontal=T,
-     legend.width=1.5,
-     legend.shrink=0.8,
-     nlevel=nb*100)
-plot(wrld_simpl,add=T,lwd=0.6)
-grid()
-dev.off()
-
-tiff("analyses/img/prec-aggr-res.tiff",
-     res=300,pointsize=10,width=1500,height=1500*aspect,units="px",compression="lzw")
-par(mar=c(2.5,2.5,1,1),cex=0.8)
-plot(prec1.agg,useRaster=F,
-     col=colorRampPalette(c("light blue","blue","purple"))(nb),
-     breaks=brks,
-     lab.breaks=brks.lab,
-     horizontal=T,
-     legend.width=1.5,
-     legend.shrink=0.8,
-     nlevel=nb*100)
-plot(wrld_simpl,add=T,lwd=0.6)
-grid()
-dev.off()
-
-tiff("analyses/img/crop-presence-aggr.tiff",
+#plot the presence-absence surface
+aspect <- (pars@extent@xmax-pars@extent@xmin)/(pars@extent@ymax-pars@extent@ymin)+0.15
+tiff(paste(ec_dir,"/analyses/img/crop-presence-aggr.tiff",sep=""),
      res=300,pointsize=10,width=1500,height=1500*aspect,units="px",compression="lzw")
 par(mar=c(2.5,2.5,1,1),cex=0.8)
 plot(pars.agg,useRaster=F,
@@ -336,49 +279,22 @@ plot(pars.agg,useRaster=F,
      horizontal=T,
      legend.width=1.5,
      legend.shrink=0.8,
-     nlevel=nb*100)
+     nlevel=100)
 #plot(wrld_simpl,add=T,lwd=0.6)
-plot(sh,add=T,border="black")
+plot(shp,add=T,border="black")
 grid()
 dev.off()
 
-#Quantify the effects of alteration (on Jan rain)
-d.prec1 <- density(prec1[],na.rm=T); d.prec1$y <- d.prec1$y / max(d.prec1$y)
-d.prec1.agg <- density(prec1.agg[],na.rm=T); d.prec1.agg$y <- d.prec1.agg$y / max(d.prec1.agg$y)
+#store the evaluation datasets
+pars.agg <- writeRaster(pars.agg,paste(ec_dir,"/analyses/evaluation/pa_coarse.asc",sep=""),format="ascii")
+pars <- writeRaster(pars,paste(ec_dir,"/analyses/evaluation/pa_fine.asc",sep=""),format="ascii")
 
-tiff("./analyses/img/aggregation-effects.tiff",
-     res=300,pointsize=10,width=1500,height=1300,units="px",compression="lzw")
-par(mar=c(4.5,4,1,1),cex=1)
-plot(d.prec1,xlim=c(0,100),col='red',main=NA,xlab="January rainfall (mm)",ylab="Normalised PDF",lwd=1.2)
-lines(d.prec1.agg,col='blue',lwd=1.2)
-abline(v=mean(prec1[],na.rm=T),lwd=1.2,lty=2,col='red')
-abline(v=mean(prec1.agg[],na.rm=T),lwd=1.2,lty=2,col='blue')
-grid()
-legend(60,1,cex=0.8,lty=c(1,1),legend=c("Original","Aggregated"),col=c("red","blue"))
-dev.off()
 
-#store the evaluation dataset
-dir.create("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/evaluation")
-pars <- writeRaster(pars,"D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/evaluation/pa_fine.asc",format='ascii')
-pars.agg <- writeRaster(pars.agg,"D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/shuffle-perturb/evaluation/pa_coarse.asc",format='ascii')
+### here i am. Need to:
 
-#aggregate the climate data
-dir.create("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse")
-for (i in 1:12) {
-  cat("Aggregating month",i,"\n")
-  prec <- raster(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_2_5min/prec_",i,".asc",sep=""))
-  tmin <- raster(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_2_5min/tmin_",i,".asc",sep=""))
-  tmean <- raster(paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_2_5min/tmean_",i,".asc",sep=""))
-  
-  prec <- aggregate(prec,fact=fct,fun=mean)
-  tmin <- aggregate(tmin,fact=fct,fun=mean)
-  tmean <- aggregate(tmean,fact=fct,fun=mean)
-  
-  prec <- writeRaster(prec,paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse/prec_",i,".asc",sep=""),format='ascii')
-  tmin <- writeRaster(tmin,paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse/tmin_",i,".asc",sep=""),format='ascii')
-  tmean <- writeRaster(tmean,paste("D:/CIAT_work/GLAM/PNAS-paper/EcoCrop-GNUT/climate/ind_coarse/tmean_",i,".asc",sep=""),format='ascii')
-}
-
+#1. run & assess EcoCrop with IITM/CRU data, climatological means
+#2. run historical simulations of EcoCrop (1966-1993)
+#3. start some exploratory data analysis with GLAM results
 
 
 
