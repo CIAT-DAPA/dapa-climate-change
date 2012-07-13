@@ -170,6 +170,13 @@ pr_plot <- out_all3[which(out_all3$VAR == "pr"),]
 tas_plot <- out_all3[which(out_all3$VAR == "tas"),]
 dtr_plot <- out_all3[which(out_all3$VAR == "dtr"),]
 
+gcms <- c("bcc_csm1_1","cancm4","canesm2","cnrm_cm5","csiro_mk360","ichec_ec_earth",
+          "inmcm4","ipsl_cm5a_lr","ipsl_cm5a_mr","miroc_esm","miroc_esm_chem","miroc4h",
+          "miroc5","hadcm3","hadgem2_cc","hadgem2_es","mpi_esm_lr","mri_cgcm3","ncar_ccsm4",
+          "noresm1_m","gfdl_esm2g","gfdl_esm2m","bnu_esm","csiro_access10","ipsl_cm5b_lr",
+          "mpi_esm_mr","MMM")
+pr_plot$GCM <- gcms
+
 ratio <- 300/72
 
 #bubble plot
@@ -188,33 +195,33 @@ ggplot(pr_plot, aes(P_CCOEF_B05, P_CCOEF_A08)) +
        axis.title.y = theme_text(face="bold", size=12, angle=90),
        legend.text = theme_text(size=12),
        legend.key = theme_blank()) + # switch off the rectangle around symbols in the legend
-  geom_text(x=pr_plot$P_CCOEF_B05[1]-0.3,y=pr_plot$P_CCOEF_A08[1],label=pr_plot$GCM[1],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[2]-0.5,y=pr_plot$P_CCOEF_A08[2]-0.5,label=pr_plot$GCM[2],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[3]+0.4,y=pr_plot$P_CCOEF_A08[3]+1.2,label=pr_plot$GCM[3],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[4]+0.5,y=pr_plot$P_CCOEF_A08[4]+1.2,label=pr_plot$GCM[4],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[5]-0.4,y=pr_plot$P_CCOEF_A08[5],label=pr_plot$GCM[5],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[6]+0.35,y=pr_plot$P_CCOEF_A08[6]+.9,label=pr_plot$GCM[6],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[7]-0.35,y=pr_plot$P_CCOEF_A08[7]+.3,label=pr_plot$GCM[7],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[8]+0.4,y=pr_plot$P_CCOEF_A08[8]+1.1,label=pr_plot$GCM[8],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[9]+0.4,y=pr_plot$P_CCOEF_A08[9]+1.1,label=pr_plot$GCM[9],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[10]-0.45,y=pr_plot$P_CCOEF_A08[10],label=pr_plot$GCM[10],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[11]-0.55,y=pr_plot$P_CCOEF_A08[11],label=pr_plot$GCM[11],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[12]-0.3,y=pr_plot$P_CCOEF_A08[12]-0.3,label=pr_plot$GCM[12],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[13]-0.35,y=pr_plot$P_CCOEF_A08[13],label=pr_plot$GCM[13],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[14]+0.35,y=pr_plot$P_CCOEF_A08[14]-1,label=pr_plot$GCM[14],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[15]-0.5,y=pr_plot$P_CCOEF_A08[15],label=pr_plot$GCM[15],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[16]-0.5,y=pr_plot$P_CCOEF_A08[16],label=pr_plot$GCM[16],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[17]+0.4,y=pr_plot$P_CCOEF_A08[17]+.8,label=pr_plot$GCM[17],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[18],y=pr_plot$P_CCOEF_A08[18]-1,label=pr_plot$GCM[18],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[19]+0.2,y=pr_plot$P_CCOEF_A08[19]-0.5,label=pr_plot$GCM[19],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[20],y=pr_plot$P_CCOEF_A08[20]-0.9,label=pr_plot$GCM[20],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[21]+0.4,y=pr_plot$P_CCOEF_A08[21]+.9,label=pr_plot$GCM[21],size=3)+
-  geom_text(x=pr_plot$P_CCOEF_B05[22],y=pr_plot$P_CCOEF_A08[22]-1.2,label=pr_plot$GCM[22],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[23]+0.3,y=pr_plot$P_CCOEF_A08[23],label=pr_plot$GCM[23],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[24]-0.4,y=pr_plot$P_CCOEF_A08[24],label=pr_plot$GCM[24],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[25],y=pr_plot$P_CCOEF_A08[25]+1.3,label=pr_plot$GCM[25],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[26]+0.5,y=pr_plot$P_CCOEF_A08[26],label=pr_plot$GCM[26],size=3) +
-  geom_text(x=pr_plot$P_CCOEF_B05[27]+0.5,y=pr_plot$P_CCOEF_A08[27],label=pr_plot$GCM[27],size=3,colour="red") 
+  geom_text(x=pr_plot$P_CCOEF_B05[1]-0.5,y=pr_plot$P_CCOEF_A08[1],label=pr_plot$GCM[1],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[2]-0.4,y=pr_plot$P_CCOEF_A08[2]-0.5,label=pr_plot$GCM[2],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[3]+0.4,y=pr_plot$P_CCOEF_A08[3]+1,label=pr_plot$GCM[3],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[4]+0.4,y=pr_plot$P_CCOEF_A08[4]+1.2,label=pr_plot$GCM[4],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[5]-0.5,y=pr_plot$P_CCOEF_A08[5],label=pr_plot$GCM[5],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[6]+0.5,y=pr_plot$P_CCOEF_A08[6]+.9,label=pr_plot$GCM[6],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[7]-0.35,y=pr_plot$P_CCOEF_A08[7]+.3,label=pr_plot$GCM[7],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[8]+0.4,y=pr_plot$P_CCOEF_A08[8]+1.1,label=pr_plot$GCM[8],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[9]+0.5,y=pr_plot$P_CCOEF_A08[9]+1.1,label=pr_plot$GCM[9],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[10]-0.45,y=pr_plot$P_CCOEF_A08[10],label=pr_plot$GCM[10],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[11]-0.6,y=pr_plot$P_CCOEF_A08[11],label=pr_plot$GCM[11],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[12]-0.3,y=pr_plot$P_CCOEF_A08[12]-0.4,label=pr_plot$GCM[12],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[13]-0.35,y=pr_plot$P_CCOEF_A08[13],label=pr_plot$GCM[13],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[14]+0.3,y=pr_plot$P_CCOEF_A08[14]-1,label=pr_plot$GCM[14],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[15]-0.5,y=pr_plot$P_CCOEF_A08[15],label=pr_plot$GCM[15],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[16]-0.55,y=pr_plot$P_CCOEF_A08[16],label=pr_plot$GCM[16],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[17]+0.4,y=pr_plot$P_CCOEF_A08[17]+.8,label=pr_plot$GCM[17],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[18],y=pr_plot$P_CCOEF_A08[18]-1,label=pr_plot$GCM[18],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[19]+0.15,y=pr_plot$P_CCOEF_A08[19]-1,label=pr_plot$GCM[19],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[20],y=pr_plot$P_CCOEF_A08[20]-1.1,label=pr_plot$GCM[20],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[21]+0.45,y=pr_plot$P_CCOEF_A08[21]+.9,label=pr_plot$GCM[21],size=3.5)+
+  geom_text(x=pr_plot$P_CCOEF_B05[22],y=pr_plot$P_CCOEF_A08[22]-1.2,label=pr_plot$GCM[22],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[23]+0.4,y=pr_plot$P_CCOEF_A08[23],label=pr_plot$GCM[23],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[24]-0.5,y=pr_plot$P_CCOEF_A08[24],label=pr_plot$GCM[24],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[25],y=pr_plot$P_CCOEF_A08[25]+1.3,label=pr_plot$GCM[25],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[26]+0.4,y=pr_plot$P_CCOEF_A08[26],label=pr_plot$GCM[26],size=3.5) +
+  geom_text(x=pr_plot$P_CCOEF_B05[27]+0.35,y=pr_plot$P_CCOEF_A08[27],label=pr_plot$GCM[27],size=3.5,colour="red") 
 dev.off()
 
 
