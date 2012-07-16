@@ -1,0 +1,334 @@
+&args rootdir sres outputdir type
+
+/* &r ConvertUnits.aml L:\climate_change\RCM_Data SRES_A1B D:\climate_change\RCM_Data_1 monthly
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+&messages &off
+
+&if [show program] NE GRID &then GRID
+&if not [exists %outputdir% -dir] &then &sys md %outputdir%
+
+&s modellist [listfile %rootdir%\%sres%\* -dir]
+&s nmodel [token %modellist% -count]
+
+&if %type% EQ daily &then
+	&do md = 1 &to %nmodel%
+
+		&s model [extract %md% %modellist%]
+		&s modeldir %rootdir%\%sres%\%model%\%type%_grids
+		&s yearlist [listfile %modeldir%\* -dir]
+		&s nyear [token %yearlist% -count]					
+		&do yr = 1 &to %nyear%
+			
+		&do var &list Prec  /*Tmax1_5 Tmean1_5 Tmin1_5 Wsmean CloudAm EvCR EvPotF1 EvPotF2 EvPotR EvSS Press RHum1_5 SHum1_5 SLHeat SoilMRZ SubSR  TransR TSmax TSmean TSmin Wsmax Wsmean
+		&do
+		
+		&s year [extract %yr% %yearlist%]	
+		&ty Converting units of %var% %type% Grids (%model%,%year%)
+
+			&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+			&s outgriddir %outputdir%\%sres%\%model%\%type%_grids\%year%\%var%
+			&if not [exists %outgriddir% -dir] &then &sys md %outgriddir%
+			
+			&if %gridlist% EQ 0 &then
+				&do
+					&ty
+					&ty There are no gridfiles within your desired input folder. Bailing out...
+					&ty 
+					&if [show program] EQ GRID &then QUIT
+					&call cleandirs
+					&return
+				&end
+			&else
+				&do
+					&ty
+			
+					&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+					
+					&do file = 1 &to %gridlist%
+
+						&s gridname [READ %openlist% READSTATUS]
+						&ty %type%	%year%	%gridname% 
+						&if not [exists %outgriddir%\%gridname% -GRID] &then %outgriddir%\%gridname% = abs(%modeldir%\%year%\%var%\%gridname% * 86400)
+
+					&end
+					&s closelist [CLOSE %openlist%]
+					&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+					
+					&ty
+					&ty Done!
+					&ty
+					
+				&end
+			&end
+		&end
+	&end
+&end		
+
+		
+&if %type% EQ monthly &then
+
+	&s modellist [listfile %rootdir%\%sres%\* -dir]
+	&s nmodel [token %modellist% -count]
+
+		&do md = 2 &to %nmodel%
+			
+		&s model [extract %md% %modellist%]
+		&s modeldir %rootdir%\%sres%\%model%\%type%_grids
+		&s yearlist [listfile %modeldir%\* -dir]
+		&s nyear [token %yearlist% -count]					
+		&do yr = 1 &to %nyear%
+			
+			&do var &list Prec EvCR EvPotR EvSS SubSR TransR
+			&do
+			
+			&s year [extract %yr% %yearlist%]	
+			&ty Converting units of %var% %type% Grids (%model%,%year%)
+
+				&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+				&s outgriddir %outputdir%\%sres%\%model%\%type%_grids\%year%
+				&if not [exists %outgriddir% -dir] &then &sys md %outgriddir%
+				
+				&if %gridlist% EQ 0 &then
+					&do
+						&ty
+						&ty There are no gridfiles within your desired input folder. Bailing out...
+						&ty 
+						&if [show program] EQ GRID &then QUIT
+						&call cleandirs
+						&return
+					&end
+				&else
+					&do
+						&ty
+
+						&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+						
+						&do file = 1 &to %gridlist%
+
+							&s gridname [READ %openlist% READSTATUS]
+							&ty %type%	%year%	%gridname% 
+							&if not [exists %outgriddir%\%gridname% -GRID] &then %outgriddir%\%gridname% = abs(%modeldir%\%year%\%var%\%gridname% * 2592000)
+
+						&end
+						&s closelist [CLOSE %openlist%]
+						&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+						
+						&ty
+						&ty Done!
+						&ty
+						
+					&end
+				&end
+			&end
+			
+			&do var &list TSmean TSmmax TSmmin 
+			&do
+			
+			&s year [extract %yr% %yearlist%]	
+			&ty Converting units of %var% %type% Grids (%model%,%year%)
+
+				&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+				&s outgriddir %outputdir%\%sres%\%model%\%type%_grids\%year%
+				&if not [exists %outgriddir% -dir] &then &sys md %outgriddir%
+				
+				&if %gridlist% EQ 0 &then
+					&do
+						&ty
+						&ty There are no gridfiles within your desired input folder. Bailing out...
+						&ty 
+						&if [show program] EQ GRID &then QUIT
+						&call cleandirs
+						&return
+					&end
+				&else
+					&do
+						&ty
+
+						&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+						
+						&do file = 1 &to %gridlist%
+
+							&s gridname [READ %openlist% READSTATUS]
+							&ty %type%	%year%	%gridname% 
+							
+							&s gridnamevar [before %gridname% _]	
+							&if not [exists %outgriddir%\%gridname% -GRID] &then %outgriddir%\%gridname% = int((%modeldir%\%year%\%var%\%gridname% - 273.15) * 10 + 0.5)
+
+						&end
+						&s closelist [CLOSE %openlist%]
+						&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+						
+						&ty
+						&ty Done!
+						&ty
+						
+					&end
+				&end
+			&end
+
+			&do var &list Tmean1_5 Tmmax1_5 Tmmin1_5
+			&do
+			
+			&s year [extract %yr% %yearlist%]	
+			&ty Converting units of %var% %type% Grids (%model%,%year%)
+
+				&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+				&s outgriddir %outputdir%\%sres%\%model%\%type%_grids\%year%
+				&if not [exists %outgriddir% -dir] &then &sys md %outgriddir%
+				
+				&if %gridlist% EQ 0 &then
+					&do
+						&ty
+						&ty There are no gridfiles within your desired input folder. Bailing out...
+						&ty 
+						&if [show program] EQ GRID &then QUIT
+						&call cleandirs
+						&return
+					&end
+				&else
+					&do
+						&ty
+						
+						&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+						
+						&do file = 1 &to %gridlist%
+
+							&s gridname [READ %openlist% READSTATUS]
+							&ty %type%	%year%	%gridname% 
+							
+							&s gridnamevar [before %gridname% _]	
+							&s monthprev [before %gridname% .]
+							&s month [after %monthprev% 5_]
+											
+							&if %gridnamevar% EQ tmmax1 &then &s gridnameout tmax
+							&else &if %gridnamevar% EQ tmean1 &then &s gridnameout tmean
+							&else &if %gridnamevar% EQ tmmin1 &then &s gridnameout tmin
+							
+							&if not [exists %outgriddir%\%gridnameout%_%month% -GRID] &then %outgriddir%\%gridnameout%_%month% = int((%modeldir%\%year%\%var%\%gridname% - 273.15) * 10 + 0.5)
+
+						&end
+						&s closelist [CLOSE %openlist%]
+						&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+						
+						&ty
+						&ty Done!
+						&ty
+						
+					&end
+				&end
+			&end
+			
+			
+			&do var &list RHum1_5 SHum1_5
+			&do
+			
+			&s year [extract %yr% %yearlist%]	
+			&ty Converting units of %var% %type% Grids (%model%,%year%)
+
+				&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+				&s outgriddir %outputdir%\%sres%\%model%\%type%_grids\%year%
+				&if not [exists %outgriddir% -dir] &then &sys md %outgriddir%
+				
+				&if %gridlist% EQ 0 &then
+					&do
+						&ty
+						&ty There are no gridfiles within your desired input folder. Bailing out...
+						&ty 
+						&if [show program] EQ GRID &then QUIT
+						&call cleandirs
+						&return
+					&end
+				&else
+					&do
+						&ty
+						
+						&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+						
+						&do file = 1 &to %gridlist%
+							
+							&s gridname [READ %openlist% READSTATUS]
+							&s gridnamevar [before %gridname% _]
+							&s monthprev [before %gridname% .]
+							&s month [after %monthprev% 5_]
+							
+							&if %gridnamevar% EQ rhum1 &then &s gridnameout rhum
+							&else &if %gridnamevar% EQ shum1 &then &s gridnameout shum
+							
+							&ty %type%	%year%	%gridname% 
+							&if not [exists %outgriddir%\%gridnameout%_%month% -GRID] &then %outgriddir%\%gridnameout%_%month% = %modeldir%\%year%\%var%\%gridname%
+
+						&end
+						&s closelist [CLOSE %openlist%]
+						&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+						
+						&ty
+						&ty Done!
+						&ty
+						
+					&end
+				&end
+			&end
+			
+			&do var &list CloudAm EvPotF1 EvPotF2 Press SLHeat SoilMAF SoilMRZ Wsmean Wsmmax 
+			&do
+			
+			&s year [extract %yr% %yearlist%]	
+			&ty Converting units of %var% %type% Grids (%model%,%year%)
+
+				&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+				&s outgriddir %outputdir%\%sres%\%model%\%type%_grids\%year%
+				&if not [exists %outgriddir% -dir] &then &sys md %outgriddir%
+				
+				&if %gridlist% EQ 0 &then
+					&do
+						&ty
+						&ty There are no gridfiles within your desired input folder. Bailing out...
+						&ty 
+						&if [show program] EQ GRID &then QUIT
+						&call cleandirs
+						&return
+					&end
+				&else
+					&do
+						&ty
+
+						&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+						
+						&do file = 1 &to %gridlist%
+
+							&s gridname [READ %openlist% READSTATUS]
+							&ty %type%	%year%	%gridname% 
+							
+							&s gridnamevar [before %gridname% _]	
+							&if not [exists %outgriddir%\%gridname% -GRID] &then %outgriddir%\%gridname% = %modeldir%\%year%\%var%\%gridname%
+
+						&end
+						&s closelist [CLOSE %openlist%]
+						&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+						
+						&ty
+						&ty Done!
+						&ty
+						
+					&end
+				&end
+			&end
+		&end		
+	&end
+
+
+&call cleandirs
+&return
+/********************************************************************************
+&routine cleandirs
+	&if [show program] EQ GRID &then QUIT
+	&if [exists log -file] &then &sys del log
+	&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+	&messages &on
+&return
+/********************************************************************************
