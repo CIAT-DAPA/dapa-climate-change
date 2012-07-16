@@ -16,7 +16,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A2\ECHAM4 1999 2069 monthly E:\climate_change\RCM_Data\SRES_A2\ECHAM4"
+	print "   - python ConvertAscii2Grid.py L:\climate_change\RCM_Data\SRES_A2\HadAM3P_2 2080 2100 daily G:\climate_change\RCM_Data\SRES_A2\HadAM3P_2"
 	sys.exit(1)
 
 # Arguments
@@ -136,7 +136,7 @@ if type == "daily":
 				for asc in ascList:
 					# Compress input files
 					InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
-					os.system("7za a " + InZipCom + " " + asc)
+					os.system("7za a -mmt8 " + InZipCom + " " + asc)
 					os.system("del " + asc)
 			
 
@@ -170,7 +170,7 @@ if type == "daily":
 		for ascday in ascdayList:	
 		
 			InZip = gp.workspace + "\\" + os.path.basename(ascday)[:-8] + str(year) + ".zip"
-			os.system("7za a " + InZip + " " + ascday)
+			os.system("7za a -mmt8 " + InZip + " " + ascday)
 			os.system("del " + ascday)
 
 		try:
@@ -285,7 +285,7 @@ if type == "monthly":
 				for asc in ascList:
 					# Compress input files
 					InZipCom = gp.workspace + "\\_Compiled_asciis.zip"
-					os.system("7za a " + InZipCom + " " + asc)
+					os.system("7za a -mmt8 " + InZipCom + " " + asc)
 					os.system("del " + asc)
 
 			# 2. Convert ASCII to Raster
@@ -315,7 +315,7 @@ if type == "monthly":
 			for ascmonth in ascmonthList:	
 			
 				InZip = gp.workspace + "\\" + os.path.basename(ascmonth)[:-6] + str(year) + ".zip"
-				os.system("7za a " + InZip + " " + ascmonth)
+				os.system("7za a -mmt8 " + InZip + " " + ascmonth)
 				os.system("del " + ascmonth)
 
 			try:
