@@ -10,23 +10,39 @@ stop("not to run yet")
 #sources dir
 src.dir <- "D:/_tools/dapa-climate-change/trunk/EcoCrop" #local
 src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
+src.dir3 <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
+#src.dir3 <- "~/Phd-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+
+source(paste(src.dir3,"/scripts/ecoglam/eg-ecocrop_gnut-functions.R",sep=""))
+source(paste(src.dir,"/src/getUniqueCoord.R",sep=""))
+source(paste(src.dir,"./src/randomSplit.R",sep=""))
+source(paste(src.dir,"/src/extractClimateData.R",sep=""))
+source(paste(src.dir,"/src/calibrationParameters.R",sep=""))
+source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
+source(paste(src.dir,"/src/getParameters.R",sep=""))
+source(paste(src.dir,"/src/EcoCrop.R",sep=""))
+source(paste(src.dir,"/src/validation.R",sep=""))
+source(paste(src.dir,"/src/createMask.R",sep=""))
+source(paste(src.dir,"/src/accuracy.R",sep=""))
+
 
 #basic information
 crop_name <- "gnut"
-b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
+r_dir <- "W:/eejarv/PhD-work/crop-modelling"
+b_dir <- paste(r_dir,"/GLAM",sep="")
 crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
 ec_dir <- paste(crop_dir,"/ecg_analyses/ecocrop-",tolower(crop_name),sep="")
 
-
+######################################################################
 #Getting unique coordinates
-source(paste(src.dir,"/src/getUniqueCoord.R",sep="")) #loading the function
 rs <- read.csv(paste(ec_dir,"/analyses/data/gnut-india.csv",sep="")) #load the data
 rs <- getUniqueCoord(rs, fields=c(24,23), resol=2.5/60) #running the function
 
 
+######################################################################
 #Dummy part of unloading and re-loading the data
 write.csv(rs, paste(ec_dir,"/analyses/data/dataset2_5m.csv",sep=""), row.names=F, quote=T) #write outcome into new file
 rs <- rs[which(rs$IS_UNIQUE == TRUE),] #selecting unique records
@@ -34,8 +50,8 @@ write.csv(rs, paste(ec_dir,"/analyses/data/unique2_5m.csv",sep=""), row.names=F,
 rs <- read.csv(paste(ec_dir,"/analyses/data/unique2_5m.csv",sep="")) #re-loading the data
 
 
+######################################################################
 #Splitting in test/train datasets
-source(paste(src.dir,"./src/randomSplit.R",sep=""))
 rs <- randomSplit(rs, 20) #20 is percentage of data to be taken out
 
 #Plot & write test and train datasets separately
@@ -54,8 +70,8 @@ write.csv(rs[which(rs$TEST_TRAIN == "TEST"),], paste(ec_dir,"/analyses/data/test
 write.csv(rs[which(rs$TEST_TRAIN == "TRAIN"),], paste(ec_dir,"/analyses/data/train.csv",sep=""), row.names=F, quote=T) #reselect and store train data
 
 
+######################################################################
 #Extracting climate data
-source(paste(src.dir,"/src/extractClimateData.R",sep=""))
 rs <- read.csv(paste(ec_dir,"/analyses/data/unique.csv",sep="")) #load unique records
 for (v in c("prec", "tmin", "tmean", "tmax")) {
   rs <- extractMonthlyData(wd=paste(ec_dir,"/climate/ind_2_5min",sep=""), 
@@ -64,8 +80,8 @@ for (v in c("prec", "tmin", "tmean", "tmax")) {
 write.csv(rs, paste(ec_dir,"/analyses/data/climates.csv",sep=""), row.names=F, quote=T)
 
 
+######################################################################
 #Calculating gs parameters for calibration
-source(paste(src.dir,"/src/calibrationParameters.R",sep=""))
 rs <- read.csv(paste(ec_dir,"/analyses/data/climates.csv",sep=""))
 
 #here use Sacks et al. (2010) planting dates to get an approximation of when each
@@ -82,19 +98,10 @@ hdate <- crop(hdate,xt)
 rs$SOW_DATE <- round(extract(pdate,cbind(x=rs$longitude,y=rs$latitude)),0)
 rs$HAR_DATE <- round(extract(hdate,cbind(x=rs$longitude,y=rs$latitude)),0)
 
-source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 dg <- createDateGrid(2005)
 dg$MTH <- as.numeric(substr(dg$MTH.DAY,2,3))
 dg$DAY <- as.numeric(substr(dg$MTH.DAY,5,6))
 dg$MTH.DAY <- NULL
-
-#function to find corresponding fraction of month for a given Julian day
-find_month <- function(jd,dg) {
-  mth <- dg$MTH[which(dg$JD==jd)]
-  day <- dg$DAY[which(dg$JD==jd)] / length(dg$DAY[which(dg$MTH==mth)])
-  mth <- mth+day
-  return(mth)
-}
 
 rs$SOW_MTH <- round(sapply(rs$SOW_DATE,FUN=find_month,dg),0)
 rs$HAR_MTH <- round(sapply(rs$HAR_DATE,FUN=find_month,dg),0)
@@ -102,30 +109,14 @@ rs$DUR <- NA
 rs$DUR[which(rs$HAR_MTH < rs$SOW_MTH)] <- (365-rs$HAR_MTH[which(rs$HAR_MTH < rs$SOW_MTH)]) + rs$SOW_MTH[which(rs$HAR_MTH < rs$SOW_MTH)]
 rs$DUR[which(rs$HAR_MTH > rs$SOW_MTH)] <- rs$HAR_MTH[which(rs$HAR_MTH > rs$SOW_MTH)] - rs$SOW_MTH[which(rs$HAR_MTH > rs$SOW_MTH)]
 
-
 #produce growing season parameters based on sowing date and duration
-#for (i in 1:nrow(rs)) {
-get_gs_data <- function(i,rs) {
-  x <- rs[i,] #get that row
-  x2 <- calibrationParameters(x, gs=x$DUR, verbose=F) #get growing season data for that duration
-  this_gs <- x$SOW_MTH #which month the crop was planted
-  fields <- c(paste("GS",this_gs,"_P",sep=""),paste("GS",this_gs,"_T",sep=""),
-              paste("GS",this_gs,"_N",sep=""),paste("GS",this_gs,"_X",sep=""))
-  gs_data <- x2[,fields] #get only data for the growing season when crop was planted
-  names(gs_data) <- c("GS1_P","GS1_T","GS1_N","GS1_X") #assign new names to fields for final merging
-  x <- cbind(x,gs_data) #merge with original input data
-  return(x)
-}
-
 rs_out <- lapply(1:nrow(rs),FUN=get_gs_data,rs)
 rs_out <- do.call("rbind",rs_out)
-
 write.csv(rs_out, paste(ec_dir,"/analyses/data/calibration.csv",sep=""), row.names=F, quote=T)
 
 
-
+######################################################################
 #Get calibration parameters
-source(paste(src.dir,"/src/getParameters.R",sep=""))
 dataset <- read.csv(paste(ec_dir,"/analyses/data/calibration.csv",sep=""))
 gs <- 1
 plotdata <- dataset[,grep(paste("GS", gs, "_", sep=""), names(dataset))]
@@ -141,9 +132,8 @@ for (varn in varList) {
 write.csv(finalTable, paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""), row.names=F)
 
 
-
+######################################################################
 #Running the model
-source(paste(src.dir,"/src/EcoCrop.R",sep=""))
 gs <- 1
 p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
 p <- p[which(p$GS==gs),]
@@ -163,9 +153,8 @@ for (rw in 2:4) {
 }
 
 
-
+######################################################################
 #Assess accuracy of each growing season and each parameter tuning
-source(paste(src.dir,"/src/accuracy.R",sep=""))
 test <- read.csv(paste(ec_dir,"/analyses/data/test.csv",sep=""))
 test <- cbind(test[,"longitude"], test[,"latitude"])
 
@@ -198,7 +187,6 @@ for (gs in gsList) {
 write.csv(rres, paste(ec_dir,"/analyses/data/accuracy-metrics.csv",sep=""), row.names=F)
 write.csv(cres, paste(ec_dir,"/analyses/data/entropy-curves.csv",sep=""), row.names=F)
 
-
 #plot accuracy metrics here
 plot.acc <- rres[which(rres$TYPE=="_suitability"),]
 tiff(paste(ec_dir,"/analyses/img/accuracy.tiff",sep=""),res=300,pointsize=10,
@@ -221,9 +209,8 @@ legend(0.6,1,cex=0.8,pch=c(21,22,24),legend=c("Tmean-based","Tmin-based","Tmax-b
 dev.off()
 
 
+######################################################################
 #Validation stuff... got to validate 1(!),2(!),3(!),4(!),5(!),6(!),7(!),ME(!),MO,MX
-source(paste(src.dir,"/src/validation.R",sep=""))
-source(paste(src.dir,"/src/createMask.R",sep=""))
 rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
 shp.icrisat <- paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep="")
 oblist <- ls(pattern="shp")
@@ -245,8 +232,10 @@ for (ob in oblist) {
 write.csv(rr, paste(ec_dir,"/analyses/evaluation/rates.csv", sep=""),quote=F, row.names=F)
 
 
-#aggregate the original 
-fct <- round(1/2.5*60,0) #aggregating factor
+######################################################################
+#aggregate the original evaluation data to desired resolution
+dres <- 1 #desired resolution, in degree
+fct <- round(dres/2.5*60,0) #aggregating factor
 
 rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
 shp <- readShapePoly(paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep=""))
@@ -265,7 +254,6 @@ pars[which(pars[]==naValue)] <- NA
 pars.agg <- aggregate(pars,fact=fct,fun=mean) #aggregate
 pars.agg[which(pars.agg[]<0.75)] <- 0 #set anything below 25%
 pars.agg[which(pars.agg[]>=0.75)] <- 1 #set anything below 25%
-
 
 #plot the presence-absence surface
 aspect <- (pars@extent@xmax-pars@extent@xmin)/(pars@extent@ymax-pars@extent@ymin)+0.15
@@ -290,10 +278,92 @@ pars.agg <- writeRaster(pars.agg,paste(ec_dir,"/analyses/evaluation/pa_coarse.as
 pars <- writeRaster(pars,paste(ec_dir,"/analyses/evaluation/pa_fine.asc",sep=""),format="ascii")
 
 
-### here i am. Need to:
-
+######################################################################
 #1. run & assess EcoCrop with IITM/CRU data, climatological means
+
+#a. copy the data to a folder for further runs
+iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_clm",sep="")
+cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data",sep="")
+clm_dir <- paste(ec_dir,"/climate/climatology",sep="")
+
+clm_type <- "1966_1993"
+oclm_dir <- copy_clim_data(clm_type=clm_type,
+                           iitm_dir=paste(iitm_dir,"/climatology_",clm_type,sep=""),
+                           cru_dir=paste(cru_dir,"/climatology_",clm_type,sep=""),
+                           oclm_dir=clm_dir,cru_prefix=NA)
+
+clm_type <- "1960_2000"
+oclm_dir <- copy_clim_data(clm_type=clm_type,
+                           iitm_dir=paste(iitm_dir,"/climatology_",clm_type,sep=""),
+                           cru_dir=paste(cru_dir,"/climatology_",clm_type,sep=""),
+                           oclm_dir=clm_dir,cru_prefix=NA)
+
+#b. run EcoCrop with these two datasets
+#run details (1966-1993 climatology)
+gs <- 1
+p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
+p <- p[which(p$GS==gs),]
+gs_type <- "tmean"
+gs_loc <- which(p$VARIABLE == gs_type)
+
+#model run
+period <- "1966_1993"
+eco <- suitCalc(climPath=paste(clm_dir,"/",period,sep=""), 
+                Gmin=120,Gmax=120,Tkmp=p$KILL[gs_loc],Tmin=p$MIN[gs_loc],Topmin=p$OPMIN[gs_loc],
+                Topmax=p$OPMAX[gs_loc],Tmax=p$MAX[gs_loc],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
+                Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
+                outfolder=paste(ec_dir,"/analyses/runs_eg/clm_",period,sep=""), 
+                cropname=paste(gs,"-",crop_name,"-",gs_type,sep=""),ext=".tif")
+
+#model run, second period
+period <- "1960_2000"
+eco <- suitCalc(climPath=paste(clm_dir,"/",period,sep=""), 
+                Gmin=120,Gmax=120,Tkmp=p$KILL[gs_loc],Tmin=p$MIN[gs_loc],Topmin=p$OPMIN[gs_loc],
+                Topmax=p$OPMAX[gs_loc],Tmax=p$MAX[gs_loc],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
+                Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
+                outfolder=paste(ec_dir,"/analyses/runs_eg/clm_",period,sep=""), 
+                cropname=paste(gs,"-",crop_name,"-",gs_type,sep=""),ext=".tif")
+
+#c. assess EcoCrop using the presence-absence surface (low resolution)
+pa_rs <- raster(paste(ec_dir,"/analyses/evaluation/pa_coarse.asc",sep=""))
+pred_p1 <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1966_1993/",gs,"-",crop_name,"-",gs_type,"_suitability.asc",sep=""))
+pred_p2 <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1960_2000/",gs,"-",crop_name,"-",gs_type,"_suitability.asc",sep=""))
+
+met_p1 <- eval_ecocrop(rsl=pred_p1,eval_rs=pa_rs)
+met_p1 <- cbind(PERIOD="1966_1993",met_p1)
+
+met_p2 <- eval_ecocrop(rsl=pred_p2,eval_rs=pa_rs)
+met_p2 <- cbind(PERIOD="1960_2000",met_p2)
+
+met <- rbind(met_p1,met_p2)
+
+#write evaluation metrics
+omet_dir <- paste(ec_dir,"/analyses/runs_eg/evaluation",sep="")
+if (!file.exists(omet_dir)) {dir.create(omet_dir,recursive=T)}
+write.csv(met,paste(omet_dir,"/clm_metrics.csv",sep=""),quote=T,row.names=F)
+
+
+######################################################################
 #2. run historical simulations of EcoCrop (1966-1993)
+yr <- 1966
+iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_mon",sep="")
+cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data/monthly_grids",sep="")
+clm_dir <- paste(ec_dir,"/climate/yearly",sep="")
+
+oclm_dir <- copy_clim_data("1966_1993",iitm_dir,cru_dir,oclm_dir=clm_dir)
+oclm_dir <- copy_clim_data("1960_2000",iitm_dir,cru_dir,oclm_dir=clm_dir)
+
+for (i in 1:12) {
+  
+  
+  
+}
+
+#use yearly harv. area data to assess EcoCrop, huh?
+
+
+
+######################################################################
 #3. start some exploratory data analysis with GLAM results
 
 
