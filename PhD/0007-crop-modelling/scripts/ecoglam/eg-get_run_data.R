@@ -29,7 +29,7 @@ setup$CROP_NAME <- "gnut"
 setup$CROP_LONG <- "groundnut"
 setup$POT <- F #switch to get either maximum yield (YGP=1), or actual yield (YGP-limited)
 setup$CROP_DIR <- paste(setup$B_DIR,"/model-runs/",toupper(setup$CROP_NAME),sep="")
-setup$EXPID <- 10
+setup$EXPID <- 31
 if (setup$EXPID < 10) {setup$EXPID <- paste("0",setup$EXPID,sep="")} else {setup$EXPID <- paste(setup$EXPID)}
 setup$SELECTION <- "v4"
 setup$CAL_DIR <- paste(setup$CROP_DIR,"/calib",sep="")

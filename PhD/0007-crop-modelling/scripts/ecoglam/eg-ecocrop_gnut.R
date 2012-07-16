@@ -14,11 +14,11 @@ src.dir3 <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
-#src.dir3 <- "~/Phd-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+#src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 source(paste(src.dir3,"/scripts/ecoglam/eg-ecocrop_gnut-functions.R",sep=""))
 source(paste(src.dir,"/src/getUniqueCoord.R",sep=""))
-source(paste(src.dir,"./src/randomSplit.R",sep=""))
+source(paste(src.dir,"/src/randomSplit.R",sep=""))
 source(paste(src.dir,"/src/extractClimateData.R",sep=""))
 source(paste(src.dir,"/src/calibrationParameters.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
@@ -32,10 +32,11 @@ source(paste(src.dir,"/src/accuracy.R",sep=""))
 #basic information
 crop_name <- "gnut"
 r_dir <- "W:/eejarv/PhD-work/crop-modelling"
-#r_dir <- "/nfs/a17/eejarv/PhD-work/crop_modelling"
+#r_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 b_dir <- paste(r_dir,"/GLAM",sep="")
 crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
 ec_dir <- paste(crop_dir,"/ecg_analyses/ecocrop-",tolower(crop_name),sep="")
+glam_dir <- paste(crop_dir,"/ecg_analyses/glam_output",sep="")
 
 ######################################################################
 #Getting unique coordinates
@@ -300,7 +301,7 @@ oclm_dir <- copy_clim_data(clm_type=clm_type,
                            oclm_dir=clm_dir,cru_prefix=NA)
 
 #b. run EcoCrop with these two datasets
-#run details (1966-1993 climatology)
+#run details (parameters)
 gs <- 1
 p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
 p <- p[which(p$GS==gs),]
@@ -346,25 +347,109 @@ write.csv(met,paste(omet_dir,"/clm_metrics.csv",sep=""),quote=T,row.names=F)
 
 ######################################################################
 #2. run historical simulations of EcoCrop (1966-1993)
-yr <- 1966
 iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_mon",sep="")
 cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data",sep="")
 clm_dir <- paste(ec_dir,"/climate/yearly",sep="")
 
-oclm_dirs <- sapply(1966:1993,FUN=copy_clim_data,iitm_dir=paste(iitm_dir,"/",yr,sep=""),
-                    cru_dir=paste(cru_dir,"/monthly_grids",sep=""),
-                    oclm_dir=clm_dir,cru_prefix=yr)
+#loop years to produce the datasets for running the model
+for (yr in 1966:1993) {
+  cat("processing year",yr,"\n")
+  oclim_dir <- copy_clim_data(clm_type=yr,
+                              iitm_dir=paste(iitm_dir,"/",yr,sep=""),
+                              cru_dir=paste(cru_dir,"/monthly_grids",sep=""),
+                              oclm_dir=clm_dir,cru_prefix=yr)
+}
 
 
+#run the model using each year's climate data
+#run details (1966-1993 climatology)
+gs <- 1
+p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
+p <- p[which(p$GS==gs),]
+gs_type <- "tmean"
+gs_loc <- which(p$VARIABLE == gs_type)
 
+#loop through years and calculate suitability
+met_all <- data.frame()
+for (yr in 1966:1993) {
+  cat("processing year",yr,"\n")
+  eco <- suitCalc(climPath=paste(clm_dir,"/",yr,sep=""), 
+                  Gmin=120,Gmax=120,Tkmp=p$KILL[gs_loc],Tmin=p$MIN[gs_loc],Topmin=p$OPMIN[gs_loc],
+                  Topmax=p$OPMAX[gs_loc],Tmax=p$MAX[gs_loc],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
+                  Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
+                  outfolder=paste(ec_dir,"/analyses/runs_eg/yearly/",yr,sep=""), 
+                  cropname=paste(gs,"-",crop_name,"-",gs_type,sep=""),ext=".tif")
+  
+  #use yearly harv. area data to assess EcoCrop
+  aha_dir <- paste(crop_dir,"/harvested_area/raster/gridded",sep="")
+  aha_rs <- raster(paste(aha_dir,"/raw-",yr,".asc",sep=""))
+  aha_rs[which(aha_rs[] > 0)] <- 1
+  
+  met_yr <- eval_ecocrop(rsl=eco[[5]],eval_rs=aha_rs)
+  met_yr <- cbind(YEAR=yr,met_yr)
+  met_all <- rbind(met_all,met_yr)
+}
+write.csv(met_all,paste(omet_dir,"/yearly_metrics.csv",sep=""),quote=T,row.names=F)
 
+#plot accuracy metrics here
+#true positive rate
+tiff(paste(ec_dir,"/analyses/img/historical_TPR.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(3,5,1,1),cex=1)
+plot(met_all$YEAR,met_all$TPR,ylim=c(0.75,1),pch=20,ty="l",xlab=NA,ylab="TPR")
+abline(h=met$TPR[1],lwd=1.2,lty=2,col="red")
+grid()
+dev.off()
 
-#use yearly harv. area data to assess EcoCrop, huh?
+#false positive rate
+tiff(paste(ec_dir,"/analyses/img/historical_FPR.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(3,5,1,1),cex=1)
+plot(met_all$YEAR,met_all$FPR,ylim=c(0,0.3),pch=20,ty="l",xlab=NA,ylab="FPR")
+abline(h=met$FPR[1],lwd=1.2,lty=2,col="red")
+grid()
+dev.off()
 
+#true negative rate
+tiff(paste(ec_dir,"/analyses/img/historical_TNR.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(3,5,1,1),cex=1)
+plot(met_all$YEAR,met_all$TNR,ylim=c(0.5,0.90),pch=20,ty="l",xlab=NA,ylab="TNR")
+abline(h=met$TNR[1],lwd=1.2,lty=2,col="red")
+grid()
+dev.off()
 
 
 ######################################################################
 #3. start some exploratory data analysis with GLAM results
+exp <- 31
+if (exp < 10) {exp <- paste("0",exp,sep="")} else {exp <- paste(exp)}
+
+#load glam potential yields
+glam_pot_rfd <- stack(paste(glam_dir,"/exp-",exp,"/gridded/pot_",1966:1993,"_yield_rfd.tif",sep=""))
+glam_pot_irr <- stack(paste(glam_dir,"/exp-",exp,"/gridded/pot_",1966:1993,"_yield_irr.tif",sep=""))
+glam_pot_bth <- stack(paste(glam_dir,"/exp-",exp,"/gridded/pot_",1966:1993,"_yield_bth.tif",sep=""))
+
+#load glam farmers (ygp-limited) yields
+glam_frm_rfd <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_rfd.tif",sep=""))
+glam_frm_irr <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_irr.tif",sep=""))
+glam_frm_brh <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_bth.tif",sep=""))
+
+
+#calculate mean glam potential yields
+
+#calculate mean glam farmers yields
+
+
+#load ecocrop yearly predictions
+ecrp_yr <- stack(paste(ec_dir,"/analyses/runs_eg/yearly/",1966:1993,"/1-",crop_name,"-tmean_suitability.asc",sep=""))
+
+#load ecocrop climatological mean prediction
+ecrp_cl <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1966_1993/1-",crop_name,"-tmean_suitability.asc",sep=""))
+
+
+
+
 
 
 
