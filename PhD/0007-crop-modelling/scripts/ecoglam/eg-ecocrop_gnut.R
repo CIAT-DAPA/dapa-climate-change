@@ -32,6 +32,7 @@ source(paste(src.dir,"/src/accuracy.R",sep=""))
 #basic information
 crop_name <- "gnut"
 r_dir <- "W:/eejarv/PhD-work/crop-modelling"
+#r_dir <- "/nfs/a17/eejarv/PhD-work/crop_modelling"
 b_dir <- paste(r_dir,"/GLAM",sep="")
 crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
 ec_dir <- paste(crop_dir,"/ecg_analyses/ecocrop-",tolower(crop_name),sep="")
@@ -347,17 +348,16 @@ write.csv(met,paste(omet_dir,"/clm_metrics.csv",sep=""),quote=T,row.names=F)
 #2. run historical simulations of EcoCrop (1966-1993)
 yr <- 1966
 iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_mon",sep="")
-cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data/monthly_grids",sep="")
+cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data",sep="")
 clm_dir <- paste(ec_dir,"/climate/yearly",sep="")
 
-oclm_dir <- copy_clim_data("1966_1993",iitm_dir,cru_dir,oclm_dir=clm_dir)
-oclm_dir <- copy_clim_data("1960_2000",iitm_dir,cru_dir,oclm_dir=clm_dir)
+oclm_dirs <- sapply(1966:1993,FUN=copy_clim_data,iitm_dir=paste(iitm_dir,"/",yr,sep=""),
+                    cru_dir=paste(cru_dir,"/monthly_grids",sep=""),
+                    oclm_dir=clm_dir,cru_prefix=yr)
 
-for (i in 1:12) {
-  
-  
-  
-}
+
+
+
 
 #use yearly harv. area data to assess EcoCrop, huh?
 

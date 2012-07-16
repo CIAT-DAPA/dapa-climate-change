@@ -38,7 +38,7 @@ copy_clim_data <- function(clm_type,iitm_dir,cru_dir,oclm_dir,cru_prefix=NA) {
   oclm_dir <- paste(oclm_dir,"/",clm_type,sep="")
   if (!file.exists(oclm_dir)) {dir.create(oclm_dir,recursive=T)}
   
-  if (!is.na(cru_prefix)) {cru_prefix <- paste(cru_prefix,"_")} else {cru_prefix <- ""}
+  if (!is.na(cru_prefix)) {cru_prefix <- paste(cru_prefix,"_",sep="")} else {cru_prefix <- ""}
   
   #loop through months
   for (i in 1:12) {
