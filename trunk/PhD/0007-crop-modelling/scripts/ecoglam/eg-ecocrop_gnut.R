@@ -422,7 +422,7 @@ dev.off()
 
 ######################################################################
 #3. start some exploratory data analysis with GLAM results
-exp <- 31
+exp <- 10
 if (exp < 10) {exp <- paste("0",exp,sep="")} else {exp <- paste(exp)}
 
 #load glam potential yields
@@ -433,12 +433,18 @@ glam_pot_bth <- stack(paste(glam_dir,"/exp-",exp,"/gridded/pot_",1966:1993,"_yie
 #load glam farmers (ygp-limited) yields
 glam_frm_rfd <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_rfd.tif",sep=""))
 glam_frm_irr <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_irr.tif",sep=""))
-glam_frm_brh <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_bth.tif",sep=""))
+glam_frm_bth <- stack(paste(glam_dir,"/exp-",exp,"/gridded/frm_",1966:1993,"_yield_bth.tif",sep=""))
 
 
 #calculate mean glam potential yields
+glam_pot_rfd_m <- calc(glam_pot_rfd,fun=function(x) {mean(x,na.rm=T)})
+glam_pot_irr_m <- calc(glam_pot_irr,fun=function(x) {mean(x,na.rm=T)})
+glam_pot_bth_m <- calc(glam_pot_bth,fun=function(x) {mean(x,na.rm=T)})
 
 #calculate mean glam farmers yields
+glam_frm_rfd_m <- calc(glam_frm_rfd,fun=function(x) {mean(x,na.rm=T)})
+glam_frm_irr_m <- calc(glam_frm_irr,fun=function(x) {mean(x,na.rm=T)})
+glam_frm_bth_m <- calc(glam_frm_bth,fun=function(x) {mean(x,na.rm=T)})
 
 
 #load ecocrop yearly predictions
@@ -447,11 +453,170 @@ ecrp_yr <- stack(paste(ec_dir,"/analyses/runs_eg/yearly/",1966:1993,"/1-",crop_n
 #load ecocrop climatological mean prediction
 ecrp_cl <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1966_1993/1-",crop_name,"-tmean_suitability.asc",sep=""))
 
+#load zones grid
+zones <- raster(paste(crop_dir,"/gnut-zones/zones_lr.asc",sep=""))
+
+#extract coordinates in GLAM, and then extract values of years and other stuff
+xy <- as.data.frame(xyFromCell(glam_pot_rfd[[1]],which(!is.na(glam_pot_rfd[[1]][]))))
+xy$CELL <- cellFromXY(glam_pot_rfd[[1]],cbind(x=xy$x,y=xy$y))
+xy$ZONE <- extract(zones,cbind(x=xy$x,y=xy$y))
+xy$GLAM.POT.RFD <- extract(glam_pot_rfd_m,cbind(x=xy$x,y=xy$y))
+xy$GLAM.POT.IRR <- extract(glam_pot_irr_m,cbind(x=xy$x,y=xy$y))
+xy$GLAM.POT.BTH <- extract(glam_pot_bth_m,cbind(x=xy$x,y=xy$y))
+
+xy$GLAM.FRM.RFD <- extract(glam_frm_rfd_m,cbind(x=xy$x,y=xy$y))
+xy$GLAM.FRM.IRR <- extract(glam_frm_irr_m,cbind(x=xy$x,y=xy$y))
+xy$GLAM.FRM.BTH <- extract(glam_frm_bth_m,cbind(x=xy$x,y=xy$y))
+
+xy$ECROP <- extract(ecrp_cl,cbind(x=xy$x,y=xy$y))
+xy <- xy[which(!is.na(xy$ECROP)),]
+
+
+#some basic plots
+plot(xy$GLAM.POT.RFD,xy$ECROP,pch=20)
+points(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
+points(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
+points(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange",pch=20)
+points(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
+points(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
+
+plot(xy$GLAM.POT.IRR,xy$ECROP,pch=20,col="red")
+points(xy$GLAM.POT.BTH,xy$ECROP,pch=20,col="blue")
+
+points(xy$GLAM.FRM.RFD,xy$ECROP,pch=20,col="red")
+points(xy$GLAM.FRM.IRR,xy$ECROP,pch=20,col="red")
+points(xy$GLAM.FRM.BTH,xy$ECROP,pch=20,col="blue")
+
+
+#density plots to see normality
+dp_glam <- density(scale(xy$GLAM.POT.RFD))
+dp_glam$y <- dp_glam$y/max(dp_glam$y)
+
+dp_ecoc <- density(scale(xy$ECROP))
+dp_ecoc$y <- dp_ecoc$y/max(dp_ecoc$y)
+
+plot(dp_glam$x,dp_glam$y,ty="l",col="blue")
+lines(dp_ecoc$x,dp_ecoc$y,col="red")
+
+
+plot(xy$GLAM.POT.RFD/max(xy$GLAM.POT.RFD),xy$ECROP/100,pch=20)
+abline(0,1,col="red")
+
+x <- xy$GLAM.POT.RFD[which(xy$ECROP<100)]/max(xy$GLAM.POT.RFD[which(xy$ECROP<100)])
+y <- xy$ECROP[which(xy$ECROP<100)]/100
+
+#plots per zones
+plot(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
+plot(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
+plot(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange",pch=20)
+plot(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
+plot(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
+
+a <- c(0,1)
+b <- c(0,1)
+p_fit <- lm(b~a)
+
+yp <- predict(p_fit,newdata=data.frame(a=x))
+plot(x,y)
+points(x,yp,col="red")
+yd <- y-yp
+plot(x,yd,col="blue")
+
+lfit <- lm(y~x-1)
+sfit <- summary(lfit)
+plot(x,y)
+#y2 <- lfit$coefficients[1]+x*lfit$coefficients[2]
+y2 <- lfit$coefficients[1]*x
+lines(x,y2,col="red")
+abline(0,1,col="red",lty=2)
+cor.test(y2,y)$estimate
+
+#write.csv(xy,paste(ec_dir,"/xydata.csv",sep=""),quote=T,row.names=F)
+
+#analyse certain gridcells
+#cells 921,992,328,291,886
+
+dfo <- data.frame()
+for (cell in c(921,992,328,291,886)) {
+  x_coord <- xy$x[which(xy$CELL == cell)]
+  y_coord <- xy$y[which(xy$CELL == cell)]
+  
+  yield <- as.numeric(extract(glam_pot_rfd,cbind(x=x_coord,y=y_coord)))
+  suit <- as.numeric(extract(ecrp_yr,cbind(x=x_coord,y=y_coord)))
+  dfp <- data.frame(CELL=cell,YEAR=1966:1993,YIELD=yield,SUIT=suit)
+  dfo <- rbind(dfo,dfp)
+  #plot(1966:1993,(yield-mean(yield))/sd(yield),ty="l",col="red")
+  #lines(1966:1993,(suit-mean(suit))/sd(suit),ty="l",col="blue")
+  #plot(yield,suit,pch=20,ylim=c(0,100),xlim=c(0,5000))
+}
+
+plot(dfo$YIELD,dfo$SUIT,pch=20,ylim=c(0,100),xlim=c(0,5000))
+
+cell <- 992
+yield <- as.numeric(dfo$YIELD[which(dfo$CELL==cell)])
+suit <- as.numeric(dfo$SUIT[which(dfo$CELL==cell)])
+plot(1966:1993,yield/max(yield),ty="l",col="red")
+lines(1966:1993,suit/100,ty="l",col="blue")
+plot(yield/max(yield),suit/100,pch=20,ylim=c(0,1),xlim=c(0,1))
+abline(0,1,col="red")
+
+#make data frame with data
+data_cell <- data.frame(YEAR=1966:1993,YIELD=yield,SUIT=suit)
+data_cell$SUIT_NORM <- data_cell$SUIT/100
+data_cell$YIELD_NORM <- data_cell$YIELD/max(data_cell$YIELD)
+
+#calculate the difference between each point and the perfect fit (0,1)
+x <- c(0,1)
+y <- c(0,1)
+p_fit <- lm(y~x)
+
+data_cell$PFIT <- as.numeric(predict(p_fit,newdata=data.frame(x=data_cell$YIELD_NORM)))
+data_cell$DIFF <- data_cell$SUIT_NORM-data_cell$PFIT
+
+plot(data_cell$YIELD_NORM,data_cell$SUIT_NORM,pch=20,ylim=c(0,1),xlim=c(0,1))
+abline(0,1,col="red")
+points(data_cell$YIELD_NORM,data_cell$PFIT,col="red",pch=20)
+points(data_cell$YIELD_NORM,data_cell$DIFF,col="red",pch=20)
+
+
+#year i want to get
+yr <- 1966
+#read weather data from *.wth file
+wth_dir <- paste(crop_dir,"/inputs/ascii/wth/rfd_",cell,sep="")
+wth_fil <- paste(wth_dir,"/ingc001001",yr,".wth",sep="")
+wth <- read.fortran()
+
+#get planting date from glam run
 
 
 
 
 
+
+
+
+#box-cox transform of data
+# lambda <- 1.5
+# x <- xy$ECROP
+# if (lambda == 0) {xt <- log(x)} else {xt <- (((x^lambda) - 1) / lambda)}
+# plot(density(xt))
+# 
+# lambda <- 0.35
+# y <- xy$GLAM.POT.RFD
+# if (lambda == 0) {yt <- log(y)} else {yt <- (((y^lambda) - 1) / lambda)}
+# plot(density(yt))
+
+#plot(yt/max(yt),x/max(x),pch=20)
+#plot(yt/max(yt),xt/max(xt),pch=20)
+
+#If the chosen alpha level is 0.05 and the p-value is less than 0.05, 
+#then the null hypothesis that the data are normally distributed is rejected. 
+#xt <- rnorm(100)
+# z.real <- (xt-mean(xt))/sd(xt)
+# shapiro.test(z.real)
+# 
+# z.real <- (yt-mean(yt))/sd(yt)
+# shapiro.test(z.real)
 
 
 
