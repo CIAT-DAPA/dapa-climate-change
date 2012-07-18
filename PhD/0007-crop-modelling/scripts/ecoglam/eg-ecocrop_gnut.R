@@ -22,6 +22,7 @@ source(paste(src.dir,"/src/randomSplit.R",sep=""))
 source(paste(src.dir,"/src/extractClimateData.R",sep=""))
 source(paste(src.dir,"/src/calibrationParameters.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
+source(paste(src.dir2,"/scripts/watbal.R",sep=""))
 source(paste(src.dir,"/src/getParameters.R",sep=""))
 source(paste(src.dir,"/src/EcoCrop.R",sep=""))
 source(paste(src.dir,"/src/validation.R",sep=""))
@@ -31,6 +32,7 @@ source(paste(src.dir,"/src/accuracy.R",sep=""))
 
 #basic information
 crop_name <- "gnut"
+vnames <- read.table(paste(src.dir3,"/data/GLAM-varnames.tab",sep=""),sep="\t",header=T)
 r_dir <- "W:/eejarv/PhD-work/crop-modelling"
 #r_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 b_dir <- paste(r_dir,"/GLAM",sep="")
@@ -512,6 +514,7 @@ plot(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange"
 plot(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
 plot(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
 
+#difference between
 a <- c(0,1)
 b <- c(0,1)
 p_fit <- lm(b~a)
@@ -578,16 +581,71 @@ abline(0,1,col="red")
 points(data_cell$YIELD_NORM,data_cell$PFIT,col="red",pch=20)
 points(data_cell$YIELD_NORM,data_cell$DIFF,col="red",pch=20)
 
+#loop through years
+out_df <- data.frame()
+for (yr in 1966:1993) {
+  #yr <- 1966 #year i want to get
+  cat("year",yr,"\n")
+  #read weather data from *.wth file
+  wth_dir <- paste(crop_dir,"/inputs/ascii/wth/rfd_",cell,sep="")
+  wth_fil <- paste(wth_dir,"/ingc001001",yr,".wth",sep="")
+  wth <- read.fortran(wth_fil,format=c("I5","F6","3F7"),skip=4)
+  names(wth) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+  wth$YEAR <- as.numeric(substr(wth$DATE,1,2))
+  wth$JDAY <- as.numeric(substr(wth$DATE,3,5))
+  
+  #get planting, idur, harvest date date from glam run
+  run_dir <- paste(crop_dir,"/calib/exp-",exp,"_outputs/gridcells/fcal_",cell,sep="")
+  
+  #get harvest date (from ygp=1 run, rainfed)
+  glam_file <- paste(run_dir,"/ygp_1/groundnut_RFD.out",sep="")
+  glam_run <- read.table(glam_file,sep="\t",header=F)
+  names(glam_run) <- vnames$EOS
+  
+  sow <- glam_run$IPDATE[which(glam_run$YEAR == yr)]
+  har <- sow + glam_run$IDUR[which(glam_run$YEAR == yr)]
+  
+  #Calculate the water balance
+  wth_out <- wth
+  wth_out$ETMAX <- NA; wth_out$AVAIL <- NA; wth_out$ERATIO <- NA
+  wth_out$CUM_RAIN <- NA; wth_out$RUNOFF <- NA; wth_out$DEMAND <- NA
+  wth_out <- watbal_wrapper(wth_out)
+  
+  #remove not-needed dates in the wth file
+  wth_out <- wth_out[which(wth_out$JDAY >= sow & wth_out$JDAY <= har),]
+  
+  #here try to correlate that difference with some metrics of the growing season, such as:
+  #number of days with rain > 0mm, 2mm, 5mm, 10mm, 15mm, 20mm
+  rain <- sum(wth_out$RAIN)
+  rd_0 <- length(which(wth_out$RAIN>0))
+  rd_2 <- length(which(wth_out$RAIN>2))
+  rd_5 <- length(which(wth_out$RAIN>5))
+  rd_10 <- length(which(wth_out$RAIN>10))
+  rd_15 <- length(which(wth_out$RAIN>15))
+  rd_20 <- length(which(wth_out$RAIN>20))
+  
+  #days exceeding thresholds of HTS and TETRS
+  hts_34 <- length(which(wth_out$TMAX>34))
+  hts_40 <- length(which(wth_out$TMAX>40))
+  
+  tetr_35 <- length(which(wth_out$TMAX>35))
+  tetr_47 <- length(which(wth_out$TMAX>47))
+  
+  #water stress days, calculated from simple WATBAL of PJones
+  #number of days with Ea/Ep ratio < 0.25, 0.5, 0.75
+  eratio_25 <- length(which(wth_out$ERATIO<0.25))
+  eratio_50 <- length(which(wth_out$ERATIO<0.5))
+  eratio_75 <- length(which(wth_out$ERATIO<0.75))
+  
+  orow <- data.frame(YEAR=yr,SOW=sow,HAR=har,RAIN=rain,RD.0=rd_0,RD.2=rd_2,RD.5=rd_5,
+                     RD.10=rd_10,RD.15=rd_15,RD.20=rd_20,HTS1=hts_34,HTS2=hts_40,
+                     TETR1=tetr_35,TETR2=tetr_47,ERATIO.25=eratio_25,ERATIO.50=eratio_50,
+                     ERATIO.75=eratio_75)
+  out_df <- rbind(out_df,orow)
+}
 
-#year i want to get
-yr <- 1966
-#read weather data from *.wth file
-wth_dir <- paste(crop_dir,"/inputs/ascii/wth/rfd_",cell,sep="")
-wth_fil <- paste(wth_dir,"/ingc001001",yr,".wth",sep="")
-wth <- read.fortran()
 
-#get planting date from glam run
-
+data_cell$WUE <- data_cell$YIELD/out_df$RAIN
 
 
 
