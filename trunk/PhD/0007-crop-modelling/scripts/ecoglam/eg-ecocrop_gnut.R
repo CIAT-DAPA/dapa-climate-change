@@ -3,7 +3,7 @@
 #CIAT / CCAFS / UoL
 
 #### LIBRARIES: raster, maptools, rgdal, sp
-library(raster); library(rgdal); library(maptools)
+library(raster); library(rgdal); library(maptools); library(MASS)
 data(wrld_simpl)
 stop("not to run yet")
 
@@ -497,157 +497,78 @@ dp_glam$y <- dp_glam$y/max(dp_glam$y)
 dp_ecoc <- density(scale(xy$ECROP))
 dp_ecoc$y <- dp_ecoc$y/max(dp_ecoc$y)
 
-plot(dp_glam$x,dp_glam$y,ty="l",col="blue")
-lines(dp_ecoc$x,dp_ecoc$y,col="red")
+#####################################################################
+#####################################################################
+#some analyses and plots here to see how the data looked like
+#plot(dp_glam$x,dp_glam$y,ty="l",col="blue")
+#lines(dp_ecoc$x,dp_ecoc$y,col="red")
 
-
-plot(xy$GLAM.POT.RFD/max(xy$GLAM.POT.RFD),xy$ECROP/100,pch=20)
-abline(0,1,col="red")
-
-x <- xy$GLAM.POT.RFD[which(xy$ECROP<100)]/max(xy$GLAM.POT.RFD[which(xy$ECROP<100)])
-y <- xy$ECROP[which(xy$ECROP<100)]/100
-
-#plots per zones
-plot(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
-plot(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
-plot(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange",pch=20)
-plot(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
-plot(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
-
-#difference between
-a <- c(0,1)
-b <- c(0,1)
-p_fit <- lm(b~a)
-
-yp <- predict(p_fit,newdata=data.frame(a=x))
-plot(x,y)
-points(x,yp,col="red")
-yd <- y-yp
-plot(x,yd,col="blue")
-
-lfit <- lm(y~x-1)
-sfit <- summary(lfit)
-plot(x,y)
-#y2 <- lfit$coefficients[1]+x*lfit$coefficients[2]
-y2 <- lfit$coefficients[1]*x
-lines(x,y2,col="red")
-abline(0,1,col="red",lty=2)
-cor.test(y2,y)$estimate
+# plot(xy$GLAM.POT.RFD/max(xy$GLAM.POT.RFD),xy$ECROP/100,pch=20)
+# abline(0,1,col="red")
+# 
+# x <- xy$GLAM.POT.RFD[which(xy$ECROP<100)]/max(xy$GLAM.POT.RFD[which(xy$ECROP<100)])
+# y <- xy$ECROP[which(xy$ECROP<100)]/100
+# 
+# #plots per zones
+# plot(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
+# plot(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
+# plot(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange",pch=20)
+# plot(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
+# plot(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
+# 
+# #difference between expected perfect 1:1 fit and actual predictions
+# a <- c(0,1)
+# b <- c(0,1)
+# p_fit <- lm(b~a)
+# 
+# yp <- predict(p_fit,newdata=data.frame(a=x))
+# plot(x,y)
+# points(x,yp,col="red")
+# yd <- y-yp
+# plot(x,yd,col="blue")
+# 
+# lfit <- lm(y~x-1)
+# sfit <- summary(lfit)
+# plot(x,y)
+# #y2 <- lfit$coefficients[1]+x*lfit$coefficients[2]
+# y2 <- lfit$coefficients[1]*x
+# lines(x,y2,col="red")
+# abline(0,1,col="red",lty=2)
+# cor.test(y2,y)$estimate
 
 #write.csv(xy,paste(ec_dir,"/xydata.csv",sep=""),quote=T,row.names=F)
 
-#analyse certain gridcells
-#cells 921,992,328,291,886
 
-dfo <- data.frame()
-for (cell in c(921,992,328,291,886)) {
-  x_coord <- xy$x[which(xy$CELL == cell)]
-  y_coord <- xy$y[which(xy$CELL == cell)]
-  
-  yield <- as.numeric(extract(glam_pot_rfd,cbind(x=x_coord,y=y_coord)))
-  suit <- as.numeric(extract(ecrp_yr,cbind(x=x_coord,y=y_coord)))
-  dfp <- data.frame(CELL=cell,YEAR=1966:1993,YIELD=yield,SUIT=suit)
-  dfo <- rbind(dfo,dfp)
-  #plot(1966:1993,(yield-mean(yield))/sd(yield),ty="l",col="red")
-  #lines(1966:1993,(suit-mean(suit))/sd(suit),ty="l",col="blue")
-  #plot(yield,suit,pch=20,ylim=c(0,100),xlim=c(0,5000))
+########################################################################
+########################################################################
+#proper analysis of all gridcells
+#get data of all gridcells
+
+glam_data <- extract(glam_pot_rfd,cbind(x=xy$x,y=xy$y))
+eco_data <- extract(ecrp_yr,cbind(x=xy$x,y=xy$y))
+
+cell_data <- lapply(as.numeric(xy$CELL),FUN=get_cell_data,xy,glam_data,eco_data)
+cell_data <- do.call("rbind",cell_data)
+
+
+#analysis of yield quantiles
+
+plot(cell_data$YIELD,cell_data$SUIT,pch=20,ylim=c(0,100),xlim=c(0,5000))
+qqplot(cell_data$YIELD,cell_data$SUIT)
+
+########################################################################
+########################################################################
+
+#c(291,328,886,921,992)
+
+out_all <- data.frame()
+for (cell in c(291,328,886,921,992)) {
+  reg_cell <- regress_cell(cell=cell,cell_data,crop_dir,wth_dir,exp)
+  out_all <- rbind(out_all,reg_cell)
 }
 
-plot(dfo$YIELD,dfo$SUIT,pch=20,ylim=c(0,100),xlim=c(0,5000))
-
-cell <- 992
-yield <- as.numeric(dfo$YIELD[which(dfo$CELL==cell)])
-suit <- as.numeric(dfo$SUIT[which(dfo$CELL==cell)])
-plot(1966:1993,yield/max(yield),ty="l",col="red")
-lines(1966:1993,suit/100,ty="l",col="blue")
-plot(yield/max(yield),suit/100,pch=20,ylim=c(0,1),xlim=c(0,1))
-abline(0,1,col="red")
-
-#make data frame with data
-data_cell <- data.frame(YEAR=1966:1993,YIELD=yield,SUIT=suit)
-data_cell$SUIT_NORM <- data_cell$SUIT/100
-data_cell$YIELD_NORM <- data_cell$YIELD/max(data_cell$YIELD)
-
-#calculate the difference between each point and the perfect fit (0,1)
-x <- c(0,1)
-y <- c(0,1)
-p_fit <- lm(y~x)
-
-data_cell$PFIT <- as.numeric(predict(p_fit,newdata=data.frame(x=data_cell$YIELD_NORM)))
-data_cell$DIFF <- data_cell$SUIT_NORM-data_cell$PFIT
-
-plot(data_cell$YIELD_NORM,data_cell$SUIT_NORM,pch=20,ylim=c(0,1),xlim=c(0,1))
-abline(0,1,col="red")
-points(data_cell$YIELD_NORM,data_cell$PFIT,col="red",pch=20)
-points(data_cell$YIELD_NORM,data_cell$DIFF,col="red",pch=20)
-
-#loop through years
-out_df <- data.frame()
-for (yr in 1966:1993) {
-  #yr <- 1966 #year i want to get
-  cat("year",yr,"\n")
-  #read weather data from *.wth file
-  wth_dir <- paste(crop_dir,"/inputs/ascii/wth/rfd_",cell,sep="")
-  wth_fil <- paste(wth_dir,"/ingc001001",yr,".wth",sep="")
-  wth <- read.fortran(wth_fil,format=c("I5","F6","3F7"),skip=4)
-  names(wth) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-  wth$YEAR <- as.numeric(substr(wth$DATE,1,2))
-  wth$JDAY <- as.numeric(substr(wth$DATE,3,5))
-  
-  #get planting, idur, harvest date date from glam run
-  run_dir <- paste(crop_dir,"/calib/exp-",exp,"_outputs/gridcells/fcal_",cell,sep="")
-  
-  #get harvest date (from ygp=1 run, rainfed)
-  glam_file <- paste(run_dir,"/ygp_1/groundnut_RFD.out",sep="")
-  glam_run <- read.table(glam_file,sep="\t",header=F)
-  names(glam_run) <- vnames$EOS
-  
-  sow <- glam_run$IPDATE[which(glam_run$YEAR == yr)]
-  har <- sow + glam_run$IDUR[which(glam_run$YEAR == yr)]
-  
-  #Calculate the water balance
-  wth_out <- wth
-  wth_out$ETMAX <- NA; wth_out$AVAIL <- NA; wth_out$ERATIO <- NA
-  wth_out$CUM_RAIN <- NA; wth_out$RUNOFF <- NA; wth_out$DEMAND <- NA
-  wth_out <- watbal_wrapper(wth_out)
-  
-  #remove not-needed dates in the wth file
-  wth_out <- wth_out[which(wth_out$JDAY >= sow & wth_out$JDAY <= har),]
-  
-  #here try to correlate that difference with some metrics of the growing season, such as:
-  #number of days with rain > 0mm, 2mm, 5mm, 10mm, 15mm, 20mm
-  rain <- sum(wth_out$RAIN)
-  rd_0 <- length(which(wth_out$RAIN>0))
-  rd_2 <- length(which(wth_out$RAIN>2))
-  rd_5 <- length(which(wth_out$RAIN>5))
-  rd_10 <- length(which(wth_out$RAIN>10))
-  rd_15 <- length(which(wth_out$RAIN>15))
-  rd_20 <- length(which(wth_out$RAIN>20))
-  
-  #days exceeding thresholds of HTS and TETRS
-  hts_34 <- length(which(wth_out$TMAX>34))
-  hts_40 <- length(which(wth_out$TMAX>40))
-  
-  tetr_35 <- length(which(wth_out$TMAX>35))
-  tetr_47 <- length(which(wth_out$TMAX>47))
-  
-  #water stress days, calculated from simple WATBAL of PJones
-  #number of days with Ea/Ep ratio < 0.25, 0.5, 0.75
-  eratio_25 <- length(which(wth_out$ERATIO<0.25))
-  eratio_50 <- length(which(wth_out$ERATIO<0.5))
-  eratio_75 <- length(which(wth_out$ERATIO<0.75))
-  
-  orow <- data.frame(YEAR=yr,SOW=sow,HAR=har,RAIN=rain,RD.0=rd_0,RD.2=rd_2,RD.5=rd_5,
-                     RD.10=rd_10,RD.15=rd_15,RD.20=rd_20,HTS1=hts_34,HTS2=hts_40,
-                     TETR1=tetr_35,TETR2=tetr_47,ERATIO.25=eratio_25,ERATIO.50=eratio_50,
-                     ERATIO.75=eratio_75)
-  out_df <- rbind(out_df,orow)
-}
-
-
-data_cell$WUE <- data_cell$YIELD/out_df$RAIN
-
-
+out_all <- lapply(as.numeric(unique(cell_data$CELL)),FUN=regress_cell,cell_data,crop_dir,wth_dir,exp)
+oall_reg <- do.call("rbind",out_all)
 
 
 

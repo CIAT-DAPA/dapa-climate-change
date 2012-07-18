@@ -17,8 +17,8 @@
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 15
-version <- "d"
-selection <- "v4"
+version <- "e"
+selection <- "v5"
 base_exp <- 32 #change if you have done any other experiment
 
 
