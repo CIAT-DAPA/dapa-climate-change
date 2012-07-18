@@ -11,10 +11,10 @@ library(raster)
 
 #load functions
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
-source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-source(paste(src.dir,"/glam-make_wth.R",sep=""))
-source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
 
 cmDir <- "W:/eejarv/PhD-work/crop-modelling"
 bDir <- paste(cmDir,"/GLAM",sep="")
@@ -58,11 +58,12 @@ if (!file.exists(ofil)) {
 method <- "lin"
 yields <- stack(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/raster/gridded/",tolower(method),"/",tolower(method),"-",66:94,".asc",sep=""))
 
-
+# repeat these: c(648:652,683:686)
 ######################################################
 ################## LOOP GRIDCELLS ####################
 ######################################################
 for (cell in cells$CELL) {
+#for (cell in c(648:652,683:686)) {
   ######################################################
   ############# SELECTED GRIDCELL(S) ###################
   ######################################################
@@ -88,7 +89,7 @@ for (cell in cells$CELL) {
   xys <- as.data.frame(xyFromCell(msk_sol,allCells))
   xys$CELLS_SOL <- allCells
   
-  ncFile <- paste(cmDir,"/climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
+  ncFile <- paste(cmDir,"/climate-data/IND-TropMet_day/0_input_data/india_data.nc",sep="")
   ydDir <- paste(cmDir,"/GLAM/climate-signals-yield/GNUT/raster/gridded",sep="")
   
   metFile <- raster(ncFile,band=0)
