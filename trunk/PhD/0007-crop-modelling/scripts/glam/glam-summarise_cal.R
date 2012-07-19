@@ -11,8 +11,8 @@ library(raster)
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
-base_exp <- 11
-selection <- "v3"
+base_exp <- 32
+selection <- "v5"
 
 
 #sourcing functions

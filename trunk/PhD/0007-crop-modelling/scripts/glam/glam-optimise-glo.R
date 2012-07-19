@@ -17,14 +17,14 @@
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 15
-version <- "e"
-selection <- "v5"
-base_exp <- 32 #change if you have done any other experiment
+version <- "c"
+selection <- "v6"
+base_exp <- 33 #change if you have done any other experiment
 
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-seeds <- sample(1:9999,50)
+seeds <- c(NA,sample(1:9999,50))
 #seeds <- c(NA)
 
 expIDs <- c(base_exp:((base_exp-1)+length(seeds)))

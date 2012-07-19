@@ -20,14 +20,14 @@ cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signa
 
 #load yield data and calculate mean, std and cv
 yields <- stack(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/raster/gridded/",tolower(method),"/",tolower(method),"-",66:93,".asc",sep=""))
-ymn <- calc(yields,fun = function(x) {mean(x,na.rm=T)})
-ysd <- calc(yields,fun = function(x) {sd(x,na.rm=T)})
+ymn <- calc(yields,fun = function(x) {mean(x[which(x!=0)],na.rm=T)})
+ysd <- calc(yields,fun = function(x) {sd(x[which(x!=0)],na.rm=T)})
 ycv <- ysd/ymn*100
 yna <- calc(yields,fun = function(x) {length(which(x==0))})
 
 #load area harvested and calculate mean, std, etc
 aha <- stack(paste(cDir,"/harvested_area/raster/gridded/raw-",1966:1993,".asc",sep=""))
-mha <- calc(aha,fun = function(x) {mean(x,na.rm=T)})
+mha <- calc(aha,fun = function(x) {mean(x[which(x!=0)],na.rm=T)})
 car <- area(mha)
 car <- car*(1000^2)/(100^2)
 ahr <- mha*1000/car; ahr <- ahr*100
@@ -58,6 +58,12 @@ ocells$ISSEL <- 0
 
 #version 3
 ocells$ISSEL[which(ocells$AHRATIO>0.2 & ocells$YIELD_NA == 0)] <- 1 #v3
+
+#version 6
+#remove gridcells which are not to be run anyway
+ocells <- ocells[which(ocells$AHRATIO>=.2),]
+ocells$ISSEL[which(ocells$AHRATIO>0.2 & ocells$YIELD_NA == 0)] <- 1 #v3
+
 
 #######################
 #The below plots are for visual inspection of maximum yield and reasonable harvested area
@@ -98,7 +104,7 @@ out_cells$ISSEL_F[which(out_cells$CELL == 720)] <- 1 #zone 4
 out_cells$ISSEL_F[which(out_cells$CELL == 960)] <- 1 #zone 5
 
 #write output data.frame
-write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v3.csv",sep=""),row.names=F,quote=T)
+write.csv(out_cells,paste(cDir,"/inputs/calib-cells-selection-v6.csv",sep=""),row.names=F,quote=T)
 
 
 #plot points in the selected cells

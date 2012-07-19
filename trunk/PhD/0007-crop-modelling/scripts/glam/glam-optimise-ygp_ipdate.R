@@ -15,8 +15,8 @@
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
 maxiter <- 15
-selection <- "v4"
-base_exp <- 31
+selection <- "v5"
+base_exp <- 32
 
 
 source(paste(src.dir,"/glam/glam-optimise-ygp_ipdate_wrapper.R",sep=""))
