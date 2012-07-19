@@ -560,15 +560,186 @@ qqplot(cell_data$YIELD,cell_data$SUIT)
 ########################################################################
 
 #c(291,328,886,921,992)
-
-out_all <- data.frame()
-for (cell in c(291,328,886,921,992)) {
-  reg_cell <- regress_cell(cell=cell,cell_data,crop_dir,wth_dir,exp)
-  out_all <- rbind(out_all,reg_cell)
-}
+# out_all <- data.frame()
+# for (cell in c(291,328,886,921,992)) {
+#   reg_cell <- regress_cell(cell=cell,cell_data,crop_dir,wth_dir,exp)
+#   out_all <- rbind(out_all,reg_cell)
+# }
 
 out_all <- lapply(as.numeric(unique(cell_data$CELL)),FUN=regress_cell,cell_data,crop_dir,wth_dir,exp)
 oall_reg <- do.call("rbind",out_all)
+
+nparam <- apply(oall_reg[,2:16],1,FUN=function(x) {length(which(x!=0))})
+oall_reg$NPAR <- nparam
+
+
+###average suitability per yield quantile
+y_quan <- quantile(cell_data$YIELD,probs=seq(0,1,by=0.1))
+q_mat <- data.frame(QUANTILE=seq(0,1,by=0.1),Y_VALUE=as.numeric(y_quan),YIELD=NA,SUIT=NA)
+
+cell_data$Y_QUANT <- NA
+for (i in 1:nrow(q_mat)) {
+  if (i == 1) {
+    cell_data$Y_QUANT[which(cell_data$YIELD<=q_mat$Y_VALUE[i])] <- i
+    
+    q_mat$YIELD[i] <- mean(cell_data$YIELD[which(cell_data$YIELD<=q_mat$Y_VALUE[i])],na.rm=T)
+    q_mat$SUIT[i] <- mean(cell_data$SUIT[which(cell_data$YIELD<=q_mat$Y_VALUE[i])],na.rm=T)
+  } else {
+    cell_data$Y_QUANT[which(cell_data$YIELD<=q_mat$Y_VALUE[i] & cell_data$YIELD>q_mat$Y_VALUE[i-1])] <- i
+    
+    q_mat$YIELD[i] <- mean(cell_data$YIELD[which(cell_data$YIELD<=q_mat$Y_VALUE[i] & cell_data$YIELD>q_mat$Y_VALUE[i-1])],na.rm=T)
+    q_mat$SUIT[i] <- mean(cell_data$SUIT[which(cell_data$YIELD<=q_mat$Y_VALUE[i] & cell_data$YIELD>q_mat$Y_VALUE[i-1])],na.rm=T)
+  }
+}
+
+
+###average yield per suitability class
+c_mat <- data.frame(CLASS=seq(1,11,by=1),S_VALUE=seq(0,100,by=10),YIELD=NA,SUIT=NA)
+cell_data$S_CLASS <- NA
+for (i in 1:nrow(c_mat)) {
+  if (i == 1) {
+    cell_data$S_CLASS[which(cell_data$SUIT<=c_mat$S_VALUE[i])] <- i
+    
+    c_mat$YIELD[i] <- mean(cell_data$YIELD[which(cell_data$SUIT<=c_mat$S_VALUE[i])],na.rm=T)
+    c_mat$SUIT[i] <- mean(cell_data$SUIT[which(cell_data$SUIT<=c_mat$S_VALUE[i])],na.rm=T)
+  } else {
+    cell_data$S_CLASS[which(cell_data$SUIT<=c_mat$S_VALUE[i] & cell_data$SUIT>c_mat$S_VALUE[i-1])] <- i
+    
+    c_mat$YIELD[i] <- mean(cell_data$YIELD[which(cell_data$SUIT<=c_mat$S_VALUE[i] & cell_data$SUIT>c_mat$S_VALUE[i-1])],na.rm=T)
+    c_mat$SUIT[i] <- mean(cell_data$SUIT[which(cell_data$SUIT<=c_mat$S_VALUE[i] & cell_data$SUIT>c_mat$S_VALUE[i-1])],na.rm=T)
+  }
+}
+
+
+#write results dir
+res_dir <- paste(crop_dir,"/ecg_analyses/results",sep="")
+if (!file.exists(res_dir)) {dir.create(res_dir)}
+
+write.csv(oall_reg,paste(res_dir,"/regression_residuals.csv",sep=""),quote=T,row.names=F)
+write.csv(cell_data,paste(res_dir,"/cell_data_yield_suit.csv",sep=""),quote=F,row.names=F)
+write.csv(q_mat,paste(res_dir,"/yield_quant.csv",sep=""),quote=F,row.names=F)
+write.csv(c_mat,paste(res_dir,"/suit_class.csv",sep=""),quote=F,row.names=F)
+
+
+#make rasters of correlations, and of number of regression terms
+ccoef_rs <- raster(glam_pot_rfd)
+ccoef_rs[oall_reg$CELL] <- oall_reg$CCOEF
+
+npars_rs <- raster(glam_pot_rfd)
+npars_rs[oall_reg$CELL] <- oall_reg$NPAR
+
+
+### here are the plots
+########################################################################
+########################################################################
+
+#yield quantiles vs. suitability
+tiff(paste(res_dir,"/yield_quantiles_xy.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=1)
+plot(q_mat$YIELD,q_mat$SUIT,ty="l",
+     ylab="Mean suitability (%)",xlab="Mean GLAM yield (kg/ha)")
+points(q_mat$YIELD,q_mat$SUIT,pch=20)
+grid()
+dev.off()
+
+tiff(paste(res_dir,"/yield_quantiles_boxplot.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=1)
+boxplot(cell_data$SUIT~cell_data$Y_QUANT,pch=NA,cex=0.75,col="grey 80",
+        ylab="Mean suitability (%)",xlab="GLAM yield quantile")
+grid()
+dev.off()
+
+#suitability classess vs. yield
+tiff(paste(res_dir,"/suit_classes_xy.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=1)
+plot(c_mat$SUIT,c_mat$YIELD,ty="p",pch=20,
+     ylab="Mean suitability (%)",xlab="Mean GLAM yield (kg/ha)")
+abline(400,(1200-400)/100)
+grid()
+dev.off()
+
+tiff(paste(res_dir,"/suit_classes_boxplot.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=1)
+boxplot(cell_data$YIELD~cell_data$S_CLASS,pch=NA,cex=0.75,col="grey 80",
+        ylab="Mean GLAM yield (kg/ha)",xlab="Suitability class",ylim=c(0,3000))
+grid()
+dev.off()
+
+
+#plot of historical mean comparisons
+tiff(paste(res_dir,"/yield_vs_suit_climatology.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=1)
+plot(xy$GLAM.POT.RFD,xy$ECROP,pch=20,
+     xlab="Rainfed GLAM yield, no YGP-limited (kg/ha)",
+     ylab="Crop suitability (%)")
+grid()
+dev.off()
+
+#plot of yearly data
+tiff(paste(res_dir,"/yield_vs_suit_yearly.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=1)
+plot(cell_data$YIELD, cell_data$SUIT,pch=20,cex=0.75,
+     xlab="Rainfed GLAM yield, no YGP-limited (kg/ha)",
+     ylab="Crop suitability (%)")
+grid()
+dev.off()
+
+#some kernel density stuff
+# plot(cell_data$YIELD, cell_data$SUIT, xlim = c(0,5000), ylim = c(0,100),pch=20,cex=0.75)
+f2 <- kde2d(cell_data$YIELD, cell_data$SUIT, 
+            n = 100, lims = c(-50, 5000, -10, 150),
+            h = c(1000,75))
+cols <- colorRampPalette(c("grey 80","grey 10"))(25)
+tiff(paste(res_dir,"/yield_vs_suit_density.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(5,5,1.5,1.5),cex=1)
+image(f2,ylim=c(0,100),xlim=c(0,4000),col=cols,useRaster=T,
+      xlab="GLAM yield, no YGP-limited (kg/ha)",
+      ylab="Crop suitability (%)")
+#points(cell_data$YIELD, cell_data$SUIT, pch=20,cex=0.5)
+grid(col="white")
+dev.off()
+
+
+### plot rasters here
+ht <- 1000
+fct <- (ccoef_rs@extent@xmin-ccoef_rs@extent@xmax)/(ccoef_rs@extent@ymin-ccoef_rs@extent@ymax)
+wt <- ht*(fct+.1)
+
+##plot correlation coefficient
+brks <- seq(0,1,by=0.1)
+brks.lab <- round(brks,2)
+cols <- c(colorRampPalette(c("grey 80","grey 10"))(length(brks)))
+
+tiffName <- paste(res_dir,"/ccoef.tiff",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(3,3,1,3.5))
+plot(ccoef_rs,col=cols,breaks=brks,lab.breaks=brks.lab,horizontal=T,legend.shrink=0.8)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
+
+
+##plot 
+brks <- seq(2,11,by=1)
+brks.lab <- round(brks,0)
+cols <- c(colorRampPalette(c("grey 80","grey 10"))(length(brks)))
+
+tiffName <- paste(res_dir,"/num_params.tiff",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(3,3,1,3.5))
+plot(npars_rs,col=cols,breaks=brks,lab.breaks=brks.lab,horizontal=T,legend.shrink=0.8)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
+
+
 
 
 

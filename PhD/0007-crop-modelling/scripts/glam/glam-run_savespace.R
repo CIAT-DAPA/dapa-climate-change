@@ -29,7 +29,7 @@ source(paste(src.dir,"/glam/glam-run_savespace-functions.R",sep=""))
 #details of experiment i want to get
 #exp_id <- 10
 
-for (exp in 10:30) {
+for (exp in 31:32) {
   x <- savespace(exp_id=exp,b_dir=b_dir,zones=c(1:5),crop_name="gnut",crop_name_long="groundnut",dump=T)
 }
 
