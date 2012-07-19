@@ -11,23 +11,22 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python 30yrAverage.py L:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\monthly_grids F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages_temp F:\climate_change\RCM_Data\SRES_A1B\HadCM3Q0\30yrAverages"
+	print "   - python 30yrAverage.py D:\climate_change\RCM_Data_1 SRES_A1B D:\climate_change\RCM_Data_1 ECHAM5"
 	sys.exit(1)
 
 # Arguments
 dirbase = sys.argv[1]
-dirtemp = sys.argv[2]
-if not os.path.exists(dirtemp):
-	os.system('mkdir ' + dirtemp)
+sres = sys.argv[2]
 dirout = sys.argv[3]
 if not os.path.exists(dirout):
 	os.system('mkdir ' + dirout)
-
+model = sys.argv[4]
+	
 os.system('cls')
 
 print "\n"
 print "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-print "                    	  AVERAGE GRIDS PRECIS                       "
+print "                    30 YR AVERAGE GRIDS PRECIS                     "
 print "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
@@ -38,150 +37,56 @@ gp.toolbox = "management"
 
 # List of periods and variables
 periodList =  "1961", "2010", "2020", "2030", "2040", "2050", "2060", "2070"
-fluxList = ["Prec", "EvSS", "EvCR", "SubSR", "TransR", "EvPotF1", "EvPotF2", "SoilMRZ"]
-kelvinList = ["TSmean", "TSmmax", "TSmmin", "Tmean1_5", "Tmmax1_5", "Tmmin1_5"]
-variableList = ["CloudAm", "EvPotR", "Press", "RHum1_5", "SHum1_5", "SLHeat", "SoilMAF", "Wsmean", "Wsmmax"]
+
+# periodList =  "2010", "2020", "2030", "2040", "2050", "2060", "2070" #echam4
+
+# period = "1961" #hadam3p_3 baseline
+# period = "1979" #ncep_r2 baseline
+# period = "2070" #hadam3p_3 sres a2
+
+variablelist = "cloudam", "evcr", "evpotf1", "evpotf2", "evpotr", "evss", "prec", "press", "rhum", "shum", "slheat", "soilmaf", "soilmrz", "subsr", "tmax", "tmean", "tmin", "transr", "tsmean", "tsmmax", "tsmmin", "wsmean", "wsmmax"
 
 for period in periodList:
 	
-	print "\t > Processing " + str(period) + "_" + str(int(period) + 29) + "\n"
-	diroutPeriod = dirout + "\\" + str(period) + "_" + str(int(period) + 29) 
-	if not os.path.exists(diroutPeriod):
-		os.system('mkdir ' + diroutPeriod)	
-	
-	# Variables to convert flux to mm/month
-	for flux in fluxList:
+	for variable in variablelist:
+
+		gp.workspace = dirbase + "\\" + sres + "\\" + str(model) + "\\monthly_grids"
+		diroutPeriod = dirout + "\\" + sres + "\\" + str(model) + "\\30yr_averages\\" + str(period) + "_" + str(int(period) + 29) 
+		if not os.path.exists(diroutPeriod):
+			os.system('mkdir ' + diroutPeriod)	
+		
+		print "Processing " + str(period) + "-" + str(int(period) + 29), model + "\n"
+
 		for month in range(1, 12 + 1, 1):
-			if month < 10 and not gp.Exists(diroutPeriod + "\\" + str(flux) + "_0" + str(month)):
-				lista = ""
-				print "\t   Processing " + str(flux) + "_0" + str(month) + "\n"
-				print "\t   ..listing grids "
-				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + flux + "\\" + str(flux) + "_0" + str(month)):
-						
-						raster = dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_0" + str(month)
-						print "\t  " + str(year) + " " + os.path.basename(raster)
-						lista = lista + ";" + raster
 			
-				LISTA = "\"" + lista[1:] + "\""		
+			if month < 10 and not gp.Exists(diroutPeriod + "\\" + variable + "_" + str(month)):
 				
-				print "\n\t   ..averaging " + str(flux) + "_0" + str(month) + "\n"
-				TmpRaster = dirtemp + "\\" + str(flux) + "_0" + str(month)
-				gp.CellStatistics_sa(LISTA, TmpRaster, "MEAN")
+				print "\t30yr Averaging " + variable + " 0" + str(month)
 				
-				OutRaster = diroutPeriod + "\\" + str(flux) + "_0" + str(month)
-				gp.Times_sa(TmpRaster, "2592000", OutRaster)
-				gp.delete_management(TmpRaster)
-				print "\n\t   ..done! \n"
-				
-			if month > 9 and not gp.Exists(diroutPeriod + "\\" + str(flux) + "_" + str(month)): 			
 				lista = ""
-				print "\t   Processing " + str(flux) + "_" + str(month) + "\n"
-				print "\t   ..listing grids "
 				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_" + str(month)):
-						
-						raster = dirbase + "\\" + str(year) + "\\" + str(flux) + "\\" + str(flux) + "_" + str(month)
-						print "\t  " + str(year) + " " + os.path.basename(raster)
-						lista = lista + ";" + raster
-			
-				LISTA = "\"" + lista[1:] + "\""		
-				
-				print "\n\t   ..averaging " + str(flux) + "_" + str(month) + "\n"
-				TmpRaster = dirtemp + "\\" + str(flux) + "_" + str(month)
-				gp.CellStatistics_sa(LISTA, TmpRaster, "MEAN")
-				
-				OutRaster = diroutPeriod + "\\" + str(flux) + "_" + str(month)
-				gp.Times_sa(TmpRaster, "86400", OutRaster)
-				gp.delete_management(TmpRaster)
-				print "\n\t   ..done! \n"
 					
-	# Variables to convert kelvin to celcius
-	for kelvin in kelvinList:
-		for month in range(1, 12 + 1, 1):
-			if month < 10 and not gp.Exists(diroutPeriod + "\\" + str(kelvin) + "_0" + str(month)):
-				lista = ""
-				print "\t   Processing " + str(kelvin) + "_0" + str(month) + "\n"
-				print "\t   ..listing grids "
-				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_0" + str(month)):
-						
-						raster = dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_0" + str(month)
-						print "\t  " + str(year) + " " + os.path.basename(raster)
+					if gp.Exists(gp.workspace + "\\" + str(year) + "\\" + variable + "_0" + str(month)):
+						raster = gp.workspace + "\\" + str(year) + "\\" + variable + "_0" + str(month)
 						lista = lista + ";" + raster
-			
+				LISTA = "\"" + lista[1:] + "\""		
+
+				gp.CellStatistics_sa(LISTA, diroutPeriod + "\\" + variable + "_" + str(month), "MEAN")
+				
+			if month > 10 and not gp.Exists(diroutPeriod + "\\" + variable + "_" + str(month)):
+				
+				print "\t30yr Averaging " + variable + " " + str(month)
+				
+				lista = ""
+				for year in range(int(period), int(period) + 29 + 1, 1):
+					
+					if gp.Exists(gp.workspace + "\\" + str(year) + "\\" + variable + "_" + str(month)):
+						raster = gp.workspace + "\\" + str(year) + "\\" + variable + "_" + str(month)
+						lista = lista + ";" + raster
 				LISTA = "\"" + lista[1:] + "\""		
 				
-				print "\n\t   ..averaging " + str(kelvin) + "_0" + str(month) + "\n"
-				TmpRaster = dirtemp + "\\" + str(kelvin) + "_0" + str(month)
-				gp.CellStatistics_sa(LISTA, TmpRaster, "MEAN")
-				
-				OutRaster = diroutPeriod + "\\" + str(kelvin) + "_0" + str(month)
-				InExpression = TmpRaster + " - 273.15"
-				gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
-				gp.delete_management(TmpRaster)
-				print "\n\t   ..done! \n"
-				
-			if month > 9 and not gp.Exists(diroutPeriod + "\\" + str(kelvin) + "_" + str(month)): 
-				lista = ""
-				print "\t   Processing " + str(kelvin) + "_" + str(month) + "\n"
-				print "\t   ..listing grids "
-				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_" + str(month)):
-						
-						raster = dirbase + "\\" + str(year) + "\\" + str(kelvin) + "\\" + str(kelvin) + "_" + str(month)
-						print "\t  " + str(year) + " " + os.path.basename(raster)
-						lista = lista + ";" + raster
-			
-				LISTA = "\"" + lista[1:] + "\""		
-				
-				print "\n\t   ..averaging " + str(kelvin) + "_" + str(month) + "\n"
-				TmpRaster = dirtemp + "\\" + str(kelvin) + "_" + str(month)
-				gp.CellStatistics_sa(LISTA, TmpRaster, "MEAN")
-				
-				OutRaster = diroutPeriod + "\\" + str(kelvin) + "_" + str(month)
-				InExpression = TmpRaster + " + 273.15"
-				gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
-				gp.delete_management(TmpRaster)
-				print "\n\t   ..done! \n"
-				
-	# Variables without convert
-	for variable in variableList:
-		for month in range(1, 12 + 1, 1):
-			if month < 10 and not gp.Exists(diroutPeriod + "\\" + str(variable) + "_0" + str(month)):
-				lista = ""
-				print "\t   Processing " + str(variable) + "_0" + str(month) + "\n"
-				print "\t   ..listing grids "
-				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_0" + str(month)):
-						
-						raster = dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_0" + str(month)
-						print "\t  " + str(year) + " " + os.path.basename(raster)
-						lista = lista + ";" + raster
-			
-				LISTA = "\"" + lista[1:] + "\""		
-				
-				print "\n\t   ..averaging " + str(variable) + "_0" + str(month) + "\n"
-				OutRaster = diroutPeriod + "\\" + str(variable) + "_0" + str(month)
-				gp.CellStatistics_sa(LISTA, OutRaster, "MEAN")
-				print "\n\t   ..done! \n"
-				
-			if month > 9 and not gp.Exists(diroutPeriod + "\\" + str(variable) + "_" + str(month)): 
-				lista = ""
-				print "\t   Processing " + str(variable) + "_" + str(month) + "\n"
-				print "\t   ..listing grids "
-				for year in range(int(period), int(period) + 29 + 1, 1):
-					if gp.Exists(dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_" + str(month)):
-						
-						raster = dirbase + "\\" + str(year) + "\\" + str(variable) + "\\" + str(variable) + "_" + str(month)
-						print "\t  " + str(year) + " " + os.path.basename(raster)
-						lista = lista + ";" + raster
-			
-				LISTA = "\"" + lista[1:] + "\""		
-				
-				print "\n\t   ..averaging " + str(variable) + "_" + str(month) + "\n"
-				OutRaster = diroutPeriod + "\\" + str(variable) + "_" + str(month)
-				gp.CellStatistics_sa(LISTA, OutRaster, "MEAN")
-				print "\n\t   ..done! \n"
-				
-print "\t > Process Done!!"
+				gp.CellStatistics_sa(LISTA, diroutPeriod + "\\" + variable + "_" + str(month), "MEAN")
+		
+		print "\nDone! \n"
+		
+print "Process Done!!"
