@@ -24,7 +24,7 @@ base_exp <- 33 #change if you have done any other experiment
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-seeds <- c(NA,sample(1:9999,50))
+seeds <- c(NA,sample(1:9999,49))
 #seeds <- c(NA)
 
 expIDs <- c(base_exp:((base_exp-1)+length(seeds)))
@@ -50,7 +50,7 @@ cropName <- "gnut"
 
 #do i want to plot (not for eljefe) and use ygp file?
 plot_all <- F
-use_ygp <- T
+use_ygp <- F
 
 #number of cpus to use
 if (nrow(runs_ref) > 8) {ncpus <- 8} else {ncpus <- nrow(runs_ref)}
