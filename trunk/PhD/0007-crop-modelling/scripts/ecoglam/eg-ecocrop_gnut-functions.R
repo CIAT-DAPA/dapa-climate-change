@@ -5,7 +5,7 @@
 
 #function to regress the data (remainder of perfect fit)
 #of a given gridcell, against key growing season weather variables
-regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
+regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp,fit_par="ALL") {
   cat("\ngricell",cell,"...\n")
   
   #extract yield and suitability values
@@ -68,6 +68,9 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
     wth_out$CUM_RAIN <- NA; wth_out$RUNOFF <- NA; wth_out$DEMAND <- NA
     wth_out <- watbal_wrapper(wth_out)
     
+    #calculate mean temperature
+    wth_out$TMEAN <- (wth_out$TMAX + wth_out$TMIN)/2
+    
     #remove not-needed dates in the wth file
     wth_out <- wth_out[which(wth_out$JDAY >= sow & wth_out$JDAY <= har),]
     
@@ -86,8 +89,8 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
     hts_34 <- length(which(wth_out$TMAX>34))
     hts_40 <- length(which(wth_out$TMAX>40))
     
-    tetr_35 <- length(which(wth_out$TMAX>35))
-    tetr_47 <- length(which(wth_out$TMAX>47))
+    tetr_35 <- length(which(wth_out$TMEAN>35))
+    tetr_47 <- length(which(wth_out$TMEAN>47))
     
     #water stress days, calculated from simple WATBAL of PJones
     #number of days with Ea/Ep ratio < 0.25, 0.5, 0.75
@@ -95,11 +98,26 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
     eratio_50 <- length(which(wth_out$ERATIO<0.5))
     eratio_75 <- length(which(wth_out$ERATIO<0.75))
     
+    #standard deviation of temperature
+    tstd <- sd(wth_out$TMEAN)
+    
+    #from Trnka et al. (2011) GCB
+    #sum of effective global radiation
+    #sum of global radiation of days with daily mean temperature >8
+    #daily minimum temperature >0, and ETRATIO>0.5
+    effsrad <- sum(wth_out$SRAD[which(wth_out$TMEAN > 8 & wth_out$TMIN > 0 & wth_out$ERATIO > 0.5)])
+    
+    #sum of effective growing days
+    #number of days with daily mean temperature >8, daily minimum
+    #temperature >0 and ERATIO>0.5
+    effgd <- length(which(wth_out$TMEAN > 8 & wth_out$TMIN > 0 & wth_out$ERATIO > 0.5))
+    
     #output row
     orow <- data.frame(YEAR=yr,SOW=sow,HAR=har,RAIN=rain,RSTD=rstd,RD.0=rd_0,
                        RD.2=rd_2,RD.5=rd_5,RD.10=rd_10,RD.15=rd_15,RD.20=rd_20,
                        HTS1=hts_34,HTS2=hts_40,TETR1=tetr_35,TETR2=tetr_47,
-                       ERATIO.25=eratio_25,ERATIO.50=eratio_50,ERATIO.75=eratio_75)
+                       ERATIO.25=eratio_25,ERATIO.50=eratio_50,ERATIO.75=eratio_75,
+                       TSTD=tstd,EFF.SRAD=effsrad,EFF.GD=effgd)
     out_df <- rbind(out_df,orow)
   }
   
@@ -113,11 +131,37 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
   
   #remove HTS thresholds if required
   if (is.na(cor_mx$HTS1[1])) {
+    if (length(fit_par) == 1) {
+      if (fit_par == "ALL") {
+        fit_par <- fit_par
+      } else {
+        if (length(which("TETR1" %in% fit_par)) > 0) {
+          stop("regression cannot be fitted with no variables TETR1")
+        }
+      }
+    } else {
+      if (length(which("HTS1" %in% fit_par)) > 0) {
+        fit_par <- fit_par[which(!fit_par %in% "HTS1")]
+      }
+    }
     cor_mx$HTS1 <- NULL
     w_rem <- which(row.names(cor_mx) == "HTS1")
     cor_mx <- cor_mx[c(1:(w_rem-1),(w_rem+1):nrow(cor_mx)),]
   }
   if (is.na(cor_mx$HTS2[1])) {
+    if (length(fit_par) == 1) {
+      if (fit_par == "ALL") {
+        fit_par <- fit_par
+      } else {
+        if (length(which("TETR1" %in% fit_par)) > 0) {
+          stop("regression cannot be fitted with no variables TETR1")
+        }
+      }
+    } else {
+      if (length(which("HTS2" %in% fit_par)) > 0) {
+        fit_par <- fit_par[which(!fit_par %in% "HTS2")]
+      }
+    }
     cor_mx$HTS2 <- NULL
     w_rem <- which(row.names(cor_mx) == "HTS2")
     cor_mx <- cor_mx[c(1:(w_rem-1),(w_rem+1):nrow(cor_mx)),]
@@ -125,11 +169,37 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
   
   #remove TETR thresholds if required
   if (is.na(cor_mx$TETR1[1])) {
+    if (length(fit_par) == 1) {
+      if (fit_par == "ALL") {
+        fit_par <- fit_par
+      } else {
+        if (length(which("TETR1" %in% fit_par)) > 0) {
+          stop("regression cannot be fitted with no variables TETR1")
+        }
+      }
+    } else {
+      if (length(which("TETR1" %in% fit_par)) > 0) {
+        fit_par <- fit_par[which(!fit_par %in% "TETR1")]
+      }
+    }
     cor_mx$TETR1 <- NULL
     w_rem <- which(row.names(cor_mx) == "TETR1")
     cor_mx <- cor_mx[c(1:(w_rem-1),(w_rem+1):nrow(cor_mx)),]
   }
   if (is.na(cor_mx$TETR2[1])) {
+    if (length(fit_par) == 1) {
+      if (fit_par == "ALL") {
+        fit_par <- fit_par
+      } else {
+        if (length(which("TETR1" %in% fit_par)) > 0) {
+          stop("regression cannot be fitted with no variables TETR1")
+        }
+      }
+    } else {
+      if (length(which("TETR2" %in% fit_par)) > 0) {
+        fit_par <- fit_par[which(!fit_par %in% "TETR2")]
+      }
+    }
     cor_mx$TETR2 <- NULL
     w_rem <- which(row.names(cor_mx) == "TETR2")
     cor_mx <- cor_mx[c(1:(w_rem-1),(w_rem+1):nrow(cor_mx)),]
@@ -142,7 +212,17 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
   
   cat("fitting multiple regression\n")
   #data for fitting
-  fit_data <- dcell[,names(cor_mx)]
+  if (length(fit_par) == 1) {
+    if (fit_par == "ALL") {
+      fit_data <- dcell[,names(cor_mx)]
+    } else {
+      fit_par <- c("DIFF",fit_par)
+      fit_data <- dcell[,fit_par]
+    }
+  } else {
+    fit_par <- c("DIFF",fit_par)
+    fit_data <- dcell[,fit_par]
+  }
   
   #fit the multiple regression
   reg_fit <- lm(DIFF ~ .,data=fit_data)
@@ -161,13 +241,12 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp) {
   #put this all into a matrix with the coefficients
   reg_df <- data.frame(CELL=cell,INT=0,RSTD=0,RD.0=0,RD.2=0,RD.5=0,RD.10=0,
                        RD.15=0,RD.20=0,HTS1=0,HTS2=0,TETR1=0,TETR2=0,ERATIO.25=0,
-                       ERATIO.50=0,ERATIO.75=0,CCOEF=ccoef)
+                       ERATIO.50=0,ERATIO.75=0,TSTD=0,EFF.SRAD=0,EFF.GD=0,CCOEF=ccoef)
   
   coef_mx <- as.data.frame(sum_stp$coefficients)
   row.names(coef_mx)[1] <- "INT"
   rnames <- row.names(coef_mx)
   for (rn in rnames) {
-    #rn <- rnames[1]
     reg_df[which(reg_df$CELL == cell),rn] <- coef_mx$Estimate[which(rnames==rn)]
   }
   #out_all <- rbind(out_all,reg_df)
