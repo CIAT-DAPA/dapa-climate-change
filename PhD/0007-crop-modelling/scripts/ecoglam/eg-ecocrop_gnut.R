@@ -348,6 +348,7 @@ write.csv(met,paste(omet_dir,"/clm_metrics.csv",sep=""),quote=T,row.names=F)
 
 
 ######################################################################
+######################################################################
 #2. run historical simulations of EcoCrop (1966-1993)
 iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_mon",sep="")
 cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data",sep="")
@@ -422,11 +423,17 @@ grid()
 dev.off()
 
 
-######################################################################
-#3. start some exploratory data analysis with GLAM results
-exp <- 10
+
+#####################################################################
+#####################################################################
+
+#####################################################################
+#3. coupling of both models
+exp <- 10 #experiment to focus in
 if (exp < 10) {exp <- paste("0",exp,sep="")} else {exp <- paste(exp)}
 
+#####################################################################
+##### data loading
 #load glam potential yields
 glam_pot_rfd <- stack(paste(glam_dir,"/exp-",exp,"/gridded/pot_",1966:1993,"_yield_rfd.tif",sep=""))
 glam_pot_irr <- stack(paste(glam_dir,"/exp-",exp,"/gridded/pot_",1966:1993,"_yield_irr.tif",sep=""))
@@ -458,6 +465,10 @@ ecrp_cl <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1966_1993/1-",crop_name,"-
 #load zones grid
 zones <- raster(paste(crop_dir,"/gnut-zones/zones_lr.asc",sep=""))
 
+
+#####################################################################
+###extract data for gridcells of interest
+
 #extract coordinates in GLAM, and then extract values of years and other stuff
 xy <- as.data.frame(xyFromCell(glam_pot_rfd[[1]],which(!is.na(glam_pot_rfd[[1]][]))))
 xy$CELL <- cellFromXY(glam_pot_rfd[[1]],cbind(x=xy$x,y=xy$y))
@@ -474,7 +485,9 @@ xy$ECROP <- extract(ecrp_cl,cbind(x=xy$x,y=xy$y))
 xy <- xy[which(!is.na(xy$ECROP)),]
 
 
-#some basic plots
+#####################################################################
+#exploratory plots
+#scatter plots
 plot(xy$GLAM.POT.RFD,xy$ECROP,pch=20)
 points(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
 points(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
@@ -489,13 +502,13 @@ points(xy$GLAM.FRM.RFD,xy$ECROP,pch=20,col="red")
 points(xy$GLAM.FRM.IRR,xy$ECROP,pch=20,col="red")
 points(xy$GLAM.FRM.BTH,xy$ECROP,pch=20,col="blue")
 
-
 #density plots to see normality
 dp_glam <- density(scale(xy$GLAM.POT.RFD))
 dp_glam$y <- dp_glam$y/max(dp_glam$y)
 
 dp_ecoc <- density(scale(xy$ECROP))
 dp_ecoc$y <- dp_ecoc$y/max(dp_ecoc$y)
+
 
 #####################################################################
 #####################################################################
@@ -541,8 +554,8 @@ dp_ecoc$y <- dp_ecoc$y/max(dp_ecoc$y)
 
 ########################################################################
 ########################################################################
-#proper analysis of all gridcells
-#get data of all gridcells
+#extract data for all years and gridcells for all further
+#analyses ##get data of all gridcells
 
 glam_data <- extract(glam_pot_rfd,cbind(x=xy$x,y=xy$y))
 eco_data <- extract(ecrp_yr,cbind(x=xy$x,y=xy$y))
@@ -551,29 +564,85 @@ cell_data <- lapply(as.numeric(xy$CELL),FUN=get_cell_data,xy,glam_data,eco_data)
 cell_data <- do.call("rbind",cell_data)
 
 
-#analysis of yield quantiles
-
-plot(cell_data$YIELD,cell_data$SUIT,pch=20,ylim=c(0,100),xlim=c(0,5000))
-qqplot(cell_data$YIELD,cell_data$SUIT)
-
 ########################################################################
 ########################################################################
+### analysis of suitability residuals
 
-#c(291,328,886,921,992)
 # out_all <- data.frame()
 # for (cell in c(291,328,886,921,992)) {
 #   reg_cell <- regress_cell(cell=cell,cell_data,crop_dir,wth_dir,exp)
 #   out_all <- rbind(out_all,reg_cell)
 # }
 
-out_all <- lapply(as.numeric(unique(cell_data$CELL)),FUN=regress_cell,cell_data,crop_dir,wth_dir,exp)
+out_all <- lapply(as.numeric(unique(cell_data$CELL)),
+                  FUN=regress_cell,cell_data,crop_dir,wth_dir,exp,fit_par="ALL")
 oall_reg <- do.call("rbind",out_all)
 
-nparam <- apply(oall_reg[,2:16],1,FUN=function(x) {length(which(x!=0))})
+nparam <- apply(oall_reg[,3:(ncol(oall_reg)-1)],1,FUN=function(x) {length(which(x!=0))})
 oall_reg$NPAR <- nparam
+oall_reg$NPAR_PER <- oall_reg$NPAR / length(3:(ncol(oall_reg)-1)) * 100
+
+#make rasters of correlations, and of number of regression terms
+ccoef_rs <- raster(glam_pot_rfd)
+ccoef_rs[oall_reg$CELL] <- oall_reg$CCOEF
+
+npars_rs <- raster(glam_pot_rfd)
+npars_rs[oall_reg$CELL] <- oall_reg$NPAR
+
+ppars_rs <- raster(glam_pot_rfd)
+ppars_rs[oall_reg$CELL] <- oall_reg$NPAR_PER
+
+###here second iteration
+#count number of times each term is included in a regression
+#
+
+pfreq <- as.numeric(apply(oall_reg,2,FUN=function(x) {length(which(x!=0))}))
+pfreq <- data.frame(PAR=names(oall_reg),FREQ=pfreq)
+pfreq$RFREQ <- pfreq$FREQ / nrow(oall_reg) * 100
+pfreq <- pfreq[which(pfreq$PAR %in% names(oall_reg[,3:(ncol(oall_reg)-3)])),]
+pfreq <- pfreq[order(pfreq$RFREQ,decreasing=T),]
+
+#re_run the fitting algorithm for all gridcells but only 
+#with variables that were found to be important
+
+fit_par <- paste(pfreq$PAR[which(pfreq$RFREQ >= 50)])
+
+out_all2 <- lapply(as.numeric(unique(cell_data$CELL)),
+                   FUN=regress_cell,cell_data,crop_dir,wth_dir,exp,fit_par)
+oall_reg2 <- do.call("rbind",out_all2)
+
+nparam <- apply(oall_reg2[,3:(ncol(oall_reg2)-1)],1,FUN=function(x) {length(which(x!=0))})
+oall_reg2$NPAR <- nparam
+oall_reg2$NPAR_PER <- oall_reg2$NPAR / length(3:(ncol(oall_reg2)-1)) * 100
+
+#make rasters of correlations, and of number of regression terms
+ccoef_rs2 <- raster(glam_pot_rfd)
+ccoef_rs2[oall_reg2$CELL] <- oall_reg2$CCOEF
+
+npars_rs2 <- raster(glam_pot_rfd)
+npars_rs2[oall_reg2$CELL] <- oall_reg2$NPAR
+
+ppars_rs2 <- raster(glam_pot_rfd)
+ppars_rs2[oall_reg2$CELL] <- oall_reg2$NPAR_PER
+
+#count number of times each term is included in a regression
+#
+pfreq2 <- as.numeric(apply(oall_reg2,2,FUN=function(x) {length(which(x!=0))}))
+pfreq2 <- data.frame(PAR=names(oall_reg2),FREQ=pfreq2)
+pfreq2$RFREQ <- pfreq2$FREQ / nrow(oall_reg2) * 100
+pfreq2 <- pfreq2[which(pfreq2$PAR %in% names(oall_reg2[,3:(ncol(oall_reg2)-3)])),]
+pfreq2 <- pfreq2[order(pfreq2$RFREQ,decreasing=T),]
+pfreq2 <- pfreq2[which(pfreq2$RFREQ > 0),]
 
 
-###average suitability per yield quantile
+
+
+
+
+
+########################################################################
+########################################################################
+###analysis of average suitability per yield quantile
 y_quan <- quantile(cell_data$YIELD,probs=seq(0,1,by=0.1))
 q_mat <- data.frame(QUANTILE=seq(0,1,by=0.1),Y_VALUE=as.numeric(y_quan),YIELD=NA,SUIT=NA)
 
@@ -592,8 +661,9 @@ for (i in 1:nrow(q_mat)) {
   }
 }
 
-
-###average yield per suitability class
+########################################################################
+########################################################################
+###analysis of average yield per suitability class
 c_mat <- data.frame(CLASS=seq(1,11,by=1),S_VALUE=seq(0,100,by=10),YIELD=NA,SUIT=NA)
 cell_data$S_CLASS <- NA
 for (i in 1:nrow(c_mat)) {
@@ -611,27 +681,58 @@ for (i in 1:nrow(c_mat)) {
 }
 
 
+
+########################################################################
+########################################################################
 #write results dir
 res_dir <- paste(crop_dir,"/ecg_analyses/results",sep="")
 if (!file.exists(res_dir)) {dir.create(res_dir)}
 
+#write all results into files
 write.csv(oall_reg,paste(res_dir,"/regression_residuals.csv",sep=""),quote=T,row.names=F)
+write.csv(oall_reg2,paste(res_dir,"/regression_residuals_i2.csv",sep=""),quote=T,row.names=F)
+write.csv(pfreq,paste(res_dir,"/parameter_importance.csv",sep=""),quote=T,row.names=F)
+write.csv(pfreq2,paste(res_dir,"/parameter_importance_i2.csv",sep=""),quote=T,row.names=F)
 write.csv(cell_data,paste(res_dir,"/cell_data_yield_suit.csv",sep=""),quote=F,row.names=F)
 write.csv(q_mat,paste(res_dir,"/yield_quant.csv",sep=""),quote=F,row.names=F)
 write.csv(c_mat,paste(res_dir,"/suit_class.csv",sep=""),quote=F,row.names=F)
 
+ccoef_rs <- writeRaster(ccoef_rs,paste(res_dir,"/ccoef_residuals.asc",sep=""),format="ascii")
+npars_rs <- writeRaster(npars_rs,paste(res_dir,"/npars_residuals.asc",sep=""),format="ascii")
+ppars_rs <- writeRaster(ppars_rs,paste(res_dir,"/ppars_residuals.asc",sep=""),format="ascii")
 
-#make rasters of correlations, and of number of regression terms
-ccoef_rs <- raster(glam_pot_rfd)
-ccoef_rs[oall_reg$CELL] <- oall_reg$CCOEF
-
-npars_rs <- raster(glam_pot_rfd)
-npars_rs[oall_reg$CELL] <- oall_reg$NPAR
+ccoef_rs2 <- writeRaster(ccoef_rs2,paste(res_dir,"/ccoef_residuals_i2.asc",sep=""),format="ascii")
+npars_rs2 <- writeRaster(npars_rs2,paste(res_dir,"/npars_residuals_i2.asc",sep=""),format="ascii")
+ppars_rs2 <- writeRaster(ppars_rs2,paste(res_dir,"/ppars_residuals_i2.asc",sep=""),format="ascii")
 
 
-### here are the plots
 ########################################################################
 ########################################################################
+### produce needed plots
+
+#spatial importance of parameters
+tiff(paste(res_dir,"/parameter_importance.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(6,5,1,1),cex=1)
+barplot(height=pfreq$RFREQ,names.arg=pfreq$PAR,las=2,
+        ylab="Percent gridcells where significant (%)",
+        xlab=NA,ylim=c(0,100))
+grid()
+abline(h=50,col="red")
+abline(h=30,col="red",lty=2)
+dev.off()
+
+#spatial importance of parameters
+tiff(paste(res_dir,"/parameter_importance_i2.tiff",sep=""),res=300,pointsize=10,
+     width=1500,height=1300,units="px",compression="lzw")
+par(mar=c(6,5,1,1),cex=1)
+barplot(height=pfreq2$RFREQ,names.arg=pfreq2$PAR,las=2,
+        ylab="Percent gridcells where significant (%)",
+        xlab=NA,ylim=c(0,100))
+grid()
+abline(h=50,col="red")
+abline(h=30,col="red",lty=2)
+dev.off()
 
 #yield quantiles vs. suitability
 tiff(paste(res_dir,"/yield_quantiles_xy.tiff",sep=""),res=300,pointsize=10,
@@ -725,9 +826,17 @@ plot(wrld_simpl,add=T)
 grid()
 dev.off()
 
+tiffName <- paste(res_dir,"/ccoef_i2.tiff",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(3,3,1,3.5))
+plot(ccoef_rs2,col=cols,breaks=brks,lab.breaks=brks.lab,horizontal=T,legend.shrink=0.8)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
 
-##plot 
-brks <- seq(2,11,by=1)
+
+##plot of number of explanatory terms
+brks <- seq(1,max(npars_rs[],na.rm=T),by=1)
 brks.lab <- round(brks,0)
 cols <- c(colorRampPalette(c("grey 80","grey 10"))(length(brks)))
 
@@ -739,34 +848,44 @@ plot(wrld_simpl,add=T)
 grid()
 dev.off()
 
+##plot of number of explanatory terms
+brks <- seq(1,max(npars_rs2[],na.rm=T),by=1)
+brks.lab <- round(brks,0)
+cols <- c(colorRampPalette(c("grey 80","grey 10"))(length(brks)))
+
+tiffName <- paste(res_dir,"/num_params_i2.tiff",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(3,3,1,3.5))
+plot(npars_rs2,col=cols,breaks=brks,lab.breaks=brks.lab,horizontal=T,legend.shrink=0.8)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
+
+##plot of percent of explanatory terms
+brks <- seq(0,100,by=10)
+brks.lab <- round(brks,0)
+cols <- c(colorRampPalette(c("grey 80","grey 10"))(length(brks)))
+
+tiffName <- paste(res_dir,"/per_params.tiff",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(3,3,1,3.5))
+plot(ppars_rs,col=cols,breaks=brks,lab.breaks=brks.lab,horizontal=T,legend.shrink=0.8)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
+
+tiffName <- paste(res_dir,"/per_params_i2.tiff",sep="")
+tiff(tiffName,res=300,compression="lzw",height=ht,width=wt,pointsize=5)
+par(mar=c(3,3,1,3.5))
+plot(ppars_rs2,col=cols,breaks=brks,lab.breaks=brks.lab,horizontal=T,legend.shrink=0.8)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
 
 
 
 
 
-
-#box-cox transform of data
-# lambda <- 1.5
-# x <- xy$ECROP
-# if (lambda == 0) {xt <- log(x)} else {xt <- (((x^lambda) - 1) / lambda)}
-# plot(density(xt))
-# 
-# lambda <- 0.35
-# y <- xy$GLAM.POT.RFD
-# if (lambda == 0) {yt <- log(y)} else {yt <- (((y^lambda) - 1) / lambda)}
-# plot(density(yt))
-
-#plot(yt/max(yt),x/max(x),pch=20)
-#plot(yt/max(yt),xt/max(xt),pch=20)
-
-#If the chosen alpha level is 0.05 and the p-value is less than 0.05, 
-#then the null hypothesis that the data are normally distributed is rejected. 
-#xt <- rnorm(100)
-# z.real <- (xt-mean(xt))/sd(xt)
-# shapiro.test(z.real)
-# 
-# z.real <- (yt-mean(yt))/sd(yt)
-# shapiro.test(z.real)
 
 
 
