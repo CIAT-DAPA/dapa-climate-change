@@ -55,6 +55,25 @@ GLAM_get_run_param <- function(cal_dir,exp_dir,crop="gnut",prefix="fcal_",gridce
 
 
 
+#get wth data
+
+
+
+#get irr data
+
+
+
+#run model
+  #create run dir
+  #copy necessary files
+  #run model under given configuration
+  
+
+
+
+
+
+
 
 
 
