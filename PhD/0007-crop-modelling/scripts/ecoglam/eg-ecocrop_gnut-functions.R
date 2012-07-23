@@ -5,7 +5,7 @@
 
 #function to regress the data (remainder of perfect fit)
 #of a given gridcell, against key growing season weather variables
-regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp,fit_par="ALL") {
+get_wth_data <- function(cell,cell_data,crop_dir,wth_dir,exp) {
   cat("\ngricell",cell,"...\n")
   
   #extract yield and suitability values
@@ -125,8 +125,20 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp,fit_par="ALL") {
   data_cell$WUE <- data_cell$YIELD/out_df$RAIN
   dcell <- data_cell
   dcell <- merge(dcell,out_df,by=c("YEAR"),sort=F)
+  dcell <- cbind(CELL=cell,dcell)
+  
+  return(dcell)
+}
+
+
+#function to regress the data (remainder of perfect fit)
+#of a given gridcell, against key growing season weather variables
+regress_cell <- function(dcell,fit_par="ALL") {
+  #cat("\ngricell",cell,"...\n")
   
   #correlation matrix to explore potential explanatory power for that difference
+  cell <- dcell$CELL[1]
+  dcell$CELL <- NULL
   cor_mx <- as.data.frame(cor(dcell))
   
   #remove HTS thresholds if required
@@ -210,7 +222,7 @@ regress_cell <- function(cell,cell_data,crop_dir,wth_dir,exp,fit_par="ALL") {
   cor_mx$SUIT_NORM <- NULL; cor_mx$YIELD_NORM <- NULL; cor_mx$PFIT <- NULL
   cor_mx$WUE <- NULL; cor_mx$SOW <- NULL; cor_mx$HAR <- NULL; cor_mx$RAIN <- NULL
   
-  cat("fitting multiple regression\n")
+  #cat("fitting multiple regression\n")
   #data for fitting
   if (length(fit_par) == 1) {
     if (fit_par == "ALL") {
