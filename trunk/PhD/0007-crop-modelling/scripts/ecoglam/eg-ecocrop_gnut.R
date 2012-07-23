@@ -574,8 +574,12 @@ cell_data <- do.call("rbind",cell_data)
 #   out_all <- rbind(out_all,reg_cell)
 # }
 
-out_all <- lapply(as.numeric(unique(cell_data$CELL)),
-                  FUN=regress_cell,cell_data,crop_dir,wth_dir,exp,fit_par="ALL")
+#get cell weather data
+cell_wth_data <- lapply(as.numeric(unique(cell_data$CELL)),
+                        FUN=get_wth_data,cell_data,crop_dir,wth_dir,exp)
+cell_wth_data.df <- do.call("rbind",cell_wth_data)
+
+out_all <- lapply(cell_wth_data,FUN=regress_cell,fit_par="ALL")
 oall_reg <- do.call("rbind",out_all)
 
 nparam <- apply(oall_reg[,3:(ncol(oall_reg)-1)],1,FUN=function(x) {length(which(x!=0))})
@@ -607,8 +611,7 @@ pfreq <- pfreq[order(pfreq$RFREQ,decreasing=T),]
 
 fit_par <- paste(pfreq$PAR[which(pfreq$RFREQ >= 50)])
 
-out_all2 <- lapply(as.numeric(unique(cell_data$CELL)),
-                   FUN=regress_cell,cell_data,crop_dir,wth_dir,exp,fit_par)
+out_all2 <- lapply(cell_wth_data,FUN=regress_cell,fit_par)
 oall_reg2 <- do.call("rbind",out_all2)
 
 nparam <- apply(oall_reg2[,3:(ncol(oall_reg2)-1)],1,FUN=function(x) {length(which(x!=0))})
@@ -661,6 +664,7 @@ for (i in 1:nrow(q_mat)) {
   }
 }
 
+
 ########################################################################
 ########################################################################
 ###analysis of average yield per suitability class
@@ -681,6 +685,97 @@ for (i in 1:nrow(c_mat)) {
 }
 
 
+#make include the above plot using the most water or temperature stressed years
+#(5% or 95% quantiles)
+
+#most temperature stressed years
+      #top 95% and low 5% of HTS1
+      #top 95% and low 5% of TSTD (much more extremes)
+hts1_top <- quantile(cell_wth_data.df$HTS1,probs=c(0.95))
+hts1_bot <- quantile(cell_wth_data.df$HTS1,probs=c(0.05))
+
+tstd_top <- quantile(cell_wth_data.df$TSTD,probs=c(0.95))
+tstd_bot <- quantile(cell_wth_data.df$TSTD,probs=c(0.05))
+
+#most drought stress years
+      #5/95% of RAIN
+rain_top <- quantile(cell_wth_data.df$RAIN,probs=c(0.95))
+rain_bot <- quantile(cell_wth_data.df$RAIN,probs=c(0.05))
+
+      #5/95% of RD.0
+rd.0_top <- quantile(cell_wth_data.df$RD.0,probs=c(0.95))
+rd.0_bot <- quantile(cell_wth_data.df$RD.0,probs=c(0.05))
+
+      #5/95% of RSTD (much more extremes)
+rstd_top <- quantile(cell_wth_data.df$RSTD,probs=c(0.95))
+rstd_bot <- quantile(cell_wth_data.df$RSTD,probs=c(0.05))
+
+      #5/95% of ERATIO.50 (water stress)
+ea50_top <- quantile(cell_wth_data.df$ERATIO.50,probs=c(0.95))
+ea50_bot <- quantile(cell_wth_data.df$ERATIO.50,probs=c(0.05))
+
+      #5/95% of ERATIO.25 (water stress)
+ea25_top <- quantile(cell_wth_data.df$ERATIO.25,probs=c(0.95))
+ea25_bot <- quantile(cell_wth_data.df$ERATIO.25,probs=c(0.05))
+
+#best and worst years overall
+      #5/95% of EFF.GD
+efgd_top <- quantile(cell_wth_data.df$EFF.GD,probs=c(0.95))
+efgd_bot <- quantile(cell_wth_data.df$EFF.GD,probs=c(0.05))
+
+#construct table with the above information
+extr_val <- data.frame(PAR=c("HTS1","TSTD","RAIN","RD.0","RSTD","ERATIO.25","ERATIO.50","EFF.GD"),
+                       TOP95=c(hts1_top,tstd_top,rain_top,rd.0_top,rstd_top,ea25_top,ea50_top,efgd_top),
+                       BOT05=c(hts1_bot,tstd_bot,rain_bot,rd.0_bot,rstd_bot,ea25_bot,ea50_bot,efgd_bot))
+
+#make table for heatmap
+cell_merg_wth <- cell_data
+cell_merg_wth$YIELD <- NULL; cell_merg_wth$SUIT <- NULL
+cell_merg_wth <- merge(cell_wth_data.df,cell_merg_wth,by=c("CELL","YEAR"),sort=F,all=T)
+for (i in 1:nrow(c_mat)) {
+  subs_merg <- cell_merg_wth[which(cell_merg_wth$S_CLASS == i),]
+  
+  ymo_df <- as.data.frame(matrix(nrow=3,ncol=1))
+  sdo_df <- as.data.frame(matrix(nrow=3,ncol=1))
+  #loop through accounting variables
+  for (j in 1:nrow(extr_val)) {
+    tpar <- paste(extr_val$PAR[j])
+    subs_merg$QUANT <- "MID"
+    subs_merg$QUANT[which(subs_merg[,tpar] <= extr_val$BOT05[j])] <- "B05"
+    subs_merg$QUANT[which(subs_merg[,tpar] >= extr_val$TOP95[j])] <- "T95"
+    
+    #mean values
+    ym1 <- mean(subs_merg$YIELD[which(subs_merg$QUANT == "B05")],na.rm=T)
+    sd1 <- sd(subs_merg$YIELD[which(subs_merg$QUANT == "B05")],na.rm=T)
+    ym2 <- mean(subs_merg$YIELD[which(subs_merg$QUANT == "MID")],na.rm=T)
+    sd2 <- sd(subs_merg$YIELD[which(subs_merg$QUANT == "MID")],na.rm=T)
+    ym3 <- mean(subs_merg$YIELD[which(subs_merg$QUANT == "T95")],na.rm=T)
+    sd3 <- sd(subs_merg$YIELD[which(subs_merg$QUANT == "T95")],na.rm=T)
+    yma <- mean(subs_merg$YIELD,na.rm=T)
+    sda <- sd(subs_merg$YIELD,na.rm=T)
+    
+    #output
+    ymo <- c(ym1/yma,ym2/yma,ym3/yma)
+    ymo_df <- cbind(ymo_df,ymo)
+    
+    sdo <- c(sd1/sda,sd2/sda,sd3/sda)
+    sdo_df <- cbind(sdo_df,sdo)
+  }
+  
+  names(ymo_df) <- c("QUANT",paste("MEAN.",extr_val$PAR,sep=""))
+  sdo_df$V1 <- NULL; names(sdo_df) <- paste("SD.",extr_val$PAR,sep="")
+  ymo_df$QUANT <- c("B05","MID","T95")
+  ymo_df <- cbind(CLASS=i,ymo_df)
+  
+  if (i==1) {
+    o_class <- cbind(ymo_df,sdo_df)
+  } else {
+    o_class <- rbind(o_class,cbind(ymo_df,sdo_df))
+  }
+}
+
+
+
 
 ########################################################################
 ########################################################################
@@ -694,8 +789,13 @@ write.csv(oall_reg2,paste(res_dir,"/regression_residuals_i2.csv",sep=""),quote=T
 write.csv(pfreq,paste(res_dir,"/parameter_importance.csv",sep=""),quote=T,row.names=F)
 write.csv(pfreq2,paste(res_dir,"/parameter_importance_i2.csv",sep=""),quote=T,row.names=F)
 write.csv(cell_data,paste(res_dir,"/cell_data_yield_suit.csv",sep=""),quote=F,row.names=F)
+write.csv(cell_wth_data.df,paste(res_dir,"/cell_data_wth.csv",sep=""),quote=T,row.names=F)
 write.csv(q_mat,paste(res_dir,"/yield_quant.csv",sep=""),quote=F,row.names=F)
 write.csv(c_mat,paste(res_dir,"/suit_class.csv",sep=""),quote=F,row.names=F)
+write.csv(extr_val,paste(res_dir,"/extreme_values.csv",sep=""),quote=F,row.names=F)
+write.csv(o_class,paste(res_dir,"/heatmap_extremes.csv",sep=""),quote=F,row.names=F)
+
+
 
 ccoef_rs <- writeRaster(ccoef_rs,paste(res_dir,"/ccoef_residuals.asc",sep=""),format="ascii")
 npars_rs <- writeRaster(npars_rs,paste(res_dir,"/npars_residuals.asc",sep=""),format="ascii")
@@ -722,7 +822,7 @@ abline(h=50,col="red")
 abline(h=30,col="red",lty=2)
 dev.off()
 
-#spatial importance of parameters
+#spatial importance of parameters (second iteration)
 tiff(paste(res_dir,"/parameter_importance_i2.tiff",sep=""),res=300,pointsize=10,
      width=1500,height=1300,units="px",compression="lzw")
 par(mar=c(6,5,1,1),cex=1)
@@ -752,6 +852,42 @@ boxplot(cell_data$SUIT~cell_data$Y_QUANT,pch=NA,cex=0.75,col="grey 80",
 grid()
 dev.off()
 
+### here make this boxplot in a loop for each of the parameters listed
+### in the data frame extr_val (extreme values)
+for (i in 1:nrow(extr_val)) {
+  tpar <- paste(extr_val$PAR[i])
+  
+  #years with values in the bottom of distribution
+  subs_merg <- cell_merg_wth[which(cell_merg_wth[,tpar] <= extr_val$BOT05[i] | cell_merg_wth[,tpar] >= extr_val$TOP95[i]),]
+  subs_merg$TOP_BOT <- NA
+  subs_merg$TOP_BOT[which(subs_merg[,tpar] <= extr_val$BOT05[i])] <- "BOT"
+  subs_merg$TOP_BOT[which(subs_merg[,tpar] >= extr_val$TOP95[i])] <- "TOP"
+  
+  
+  tiff(paste(res_dir,"/yield_quantiles_boxplot-",tpar,"-bottom.tiff",sep=""),res=300,pointsize=10,
+       width=1500,height=1300,units="px",compression="lzw")
+  par(mar=c(5,5,1,1),cex=1,las=2)
+  boxplot(subs_merg$SUIT~subs_merg$Y_QUANT,pch=NA,cex=0.75,col="grey 80",
+          ylab="Mean suitability (%)",xlab="GLAM yield quantile",
+          xlim=c(0,11))
+  grid()
+  dev.off()
+  
+  #years with values in the top of distribution
+  subs_merg <- cell_merg_wth[which(cell_merg_wth[,tpar] >= extr_val$TOP95[i]),]
+  tiff(paste(res_dir,"/yield_quantiles_boxplot-",tpar,"-top.tiff",sep=""),res=300,pointsize=10,
+       width=1500,height=1300,units="px",compression="lzw")
+  par(mar=c(5,5,1,1),cex=1)
+  boxplot(subs_merg$SUIT~subs_merg$Y_QUANT,pch=NA,cex=0.75,col="grey 80",
+          ylab="Mean suitability (%)",xlab="GLAM yield quantile",
+          xlim=c(0,11))
+  grid()
+  dev.off()
+}
+
+#plot(subs_merg$YIELD_NORM,subs_merg$SUIT_NORM,pch=20,col="blue",xlim=c(0,1),ylim=c(0,1))
+#points(subs_merg$YIELD_NORM,subs_merg$SUIT_NORM,pch=20,col="red")
+
 #suitability classess vs. yield
 tiff(paste(res_dir,"/suit_classes_xy.tiff",sep=""),res=300,pointsize=10,
      width=1500,height=1300,units="px",compression="lzw")
@@ -769,6 +905,41 @@ boxplot(cell_data$YIELD~cell_data$S_CLASS,pch=NA,cex=0.75,col="grey 80",
         ylab="Mean GLAM yield (kg/ha)",xlab="Suitability class",ylim=c(0,3000))
 grid()
 dev.off()
+
+
+##loop through extreme values
+for (i in 1:nrow(extr_val)) {
+  tpar <- paste(extr_val$PAR[i])
+  
+  #years with values in the bottom of distribution
+  subs_merg <- cell_merg_wth[which(cell_merg_wth[,tpar] <= extr_val$BOT05[i] | cell_merg_wth[,tpar] >= extr_val$TOP95[i]),]
+  subs_merg$TOP_BOT <- NA
+  subs_merg$TOP_BOT[which(subs_merg[,tpar] <= extr_val$BOT05[i])] <- "BOT"
+  subs_merg$TOP_BOT[which(subs_merg[,tpar] >= extr_val$TOP95[i])] <- "TOP"
+  
+  
+  tiff(paste(res_dir,"/suit_classes_boxplot-",tpar,"-bottom.tiff",sep=""),res=300,pointsize=10,
+       width=1500,height=1300,units="px",compression="lzw")
+  par(mar=c(5,5,1,1),cex=1)
+  boxplot(subs_merg$YIELD~subs_merg$S_CLASS,pch=NA,cex=0.75,col="grey 80",
+          ylab="Mean GLAM yield (kg/ha)",xlab="Suitability class",
+          ylim=c(0,5000),xlim=c(0,11))
+  grid()
+  dev.off()
+  
+  #years with values in the top of distribution
+  subs_merg <- cell_merg_wth[which(cell_merg_wth[,tpar] >= extr_val$TOP95[i]),]
+  tiff(paste(res_dir,"/suit_classes_boxplot-",tpar,"-top.tiff",sep=""),res=300,pointsize=10,
+       width=1500,height=1300,units="px",compression="lzw")
+  par(mar=c(5,5,1,1),cex=1)
+  boxplot(subs_merg$YIELD~subs_merg$S_CLASS,pch=NA,cex=0.75,col="grey 80",
+          ylab="Mean GLAM yield (kg/ha)",xlab="Suitability class",
+          ylim=c(0,5000),xlim=c(0,11))
+  grid()
+  dev.off()
+}
+
+
 
 
 #plot of historical mean comparisons
