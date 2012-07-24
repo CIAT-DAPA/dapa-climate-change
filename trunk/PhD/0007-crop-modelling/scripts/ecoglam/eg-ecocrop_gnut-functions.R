@@ -78,6 +78,11 @@ get_wth_data <- function(cell,cell_data,crop_dir,wth_dir,exp) {
     #number of days with rain > 0mm, 2mm, 5mm, 10mm, 15mm, 20mm
     rain <- sum(wth_out$RAIN)
     rstd <- sd(wth_out$RAIN)
+    if (mean(wth_out$RAIN) == 0) {
+      rcov <- rstd/1
+    } else {
+      rcov <- rstd/mean(wth_out$RAIN)
+    }
     rd_0 <- length(which(wth_out$RAIN>0))
     rd_2 <- length(which(wth_out$RAIN>2))
     rd_5 <- length(which(wth_out$RAIN>5))
@@ -100,6 +105,8 @@ get_wth_data <- function(cell,cell_data,crop_dir,wth_dir,exp) {
     
     #standard deviation of temperature
     tstd <- sd(wth_out$TMEAN)
+    tmen <- mean(wth_out$TMEAN)
+    tcov <- tstd/tmen
     
     #from Trnka et al. (2011) GCB
     #sum of effective global radiation
@@ -113,11 +120,11 @@ get_wth_data <- function(cell,cell_data,crop_dir,wth_dir,exp) {
     effgd <- length(which(wth_out$TMEAN > 8 & wth_out$TMIN > 0 & wth_out$ERATIO > 0.5))
     
     #output row
-    orow <- data.frame(YEAR=yr,SOW=sow,HAR=har,RAIN=rain,RSTD=rstd,RD.0=rd_0,
+    orow <- data.frame(YEAR=yr,SOW=sow,HAR=har,RAIN=rain,RSTD=rstd,RCOV=rcov,RD.0=rd_0,
                        RD.2=rd_2,RD.5=rd_5,RD.10=rd_10,RD.15=rd_15,RD.20=rd_20,
                        HTS1=hts_34,HTS2=hts_40,TETR1=tetr_35,TETR2=tetr_47,
                        ERATIO.25=eratio_25,ERATIO.50=eratio_50,ERATIO.75=eratio_75,
-                       TSTD=tstd,EFF.SRAD=effsrad,EFF.GD=effgd)
+                       TSTD=tstd,TMEN=tmen,TCOV=tcov,EFF.SRAD=effsrad,EFF.GD=effgd)
     out_df <- rbind(out_df,orow)
   }
   
@@ -221,6 +228,7 @@ regress_cell <- function(dcell,fit_par="ALL") {
   cor_mx$YEAR <- NULL; cor_mx$YIELD <- NULL; cor_mx$SUIT <- NULL
   cor_mx$SUIT_NORM <- NULL; cor_mx$YIELD_NORM <- NULL; cor_mx$PFIT <- NULL
   cor_mx$WUE <- NULL; cor_mx$SOW <- NULL; cor_mx$HAR <- NULL; cor_mx$RAIN <- NULL
+  cor_mx$TMEN <- NULL; cor_mx$RSTD <- NULL; cor_mx$TSTD <- NULL
   
   #cat("fitting multiple regression\n")
   #data for fitting
@@ -251,9 +259,9 @@ regress_cell <- function(dcell,fit_par="ALL") {
   #length(which(dcell$DIFF<0)) #number of years with diff < 0
   
   #put this all into a matrix with the coefficients
-  reg_df <- data.frame(CELL=cell,INT=0,RSTD=0,RD.0=0,RD.2=0,RD.5=0,RD.10=0,
+  reg_df <- data.frame(CELL=cell,INT=0,RCOV=0,RD.0=0,RD.2=0,RD.5=0,RD.10=0,
                        RD.15=0,RD.20=0,HTS1=0,HTS2=0,TETR1=0,TETR2=0,ERATIO.25=0,
-                       ERATIO.50=0,ERATIO.75=0,TSTD=0,EFF.SRAD=0,EFF.GD=0,CCOEF=ccoef)
+                       ERATIO.50=0,ERATIO.75=0,TCOV=0,EFF.SRAD=0,EFF.GD=0,CCOEF=ccoef)
   
   coef_mx <- as.data.frame(sum_stp$coefficients)
   row.names(coef_mx)[1] <- "INT"
