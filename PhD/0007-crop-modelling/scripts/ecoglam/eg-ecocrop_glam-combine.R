@@ -216,6 +216,11 @@ ppars_rs[oall_reg$CELL] <- oall_reg$NPAR_PER
 #count number of times each term is included in a regression
 #
 
+######################
+###################### from here onwards you might need to check consistency (due to
+###################### changes in variables used (CVs instead of STDs)
+######################
+
 pfreq <- as.numeric(apply(oall_reg,2,FUN=function(x) {length(which(x!=0))}))
 pfreq <- data.frame(PAR=names(oall_reg),FREQ=pfreq)
 pfreq$RFREQ <- pfreq$FREQ / nrow(oall_reg) * 100

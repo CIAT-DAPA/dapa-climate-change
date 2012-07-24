@@ -51,8 +51,12 @@ GLAM_get_run_param <- function(cal_dir,exp_dir,crop="gnut",prefix="fcal_",gridce
 }
 
 
-#get soil data for a given gridcell
-
+#get soil data files for a given gridcell
+get_soil_files <- function(asc_dir,gridcell) {
+  
+  
+  
+}
 
 
 #get wth data
