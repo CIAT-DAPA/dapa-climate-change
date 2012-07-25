@@ -337,7 +337,7 @@ write_ygp <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",X="X",Y="Y",
 
 #create input directories for a glam run
 create_dirs <- function(glam_dir) {
-  if (!file.exists(glam_dir)) {dir.create(glam_dir)}
+  if (!file.exists(glam_dir)) {dir.create(glam_dir,recursive=T)}
   if (!file.exists(paste(glam_dir,"/inputs",sep=""))) {dir.create(paste(glam_dir,"/inputs",sep=""))}
   if (!file.exists(paste(glam_dir,"/output",sep=""))) {dir.create(paste(glam_dir,"/output",sep=""))}
   if (!file.exists(paste(glam_dir,"/output/daily",sep=""))) {dir.create(paste(glam_dir,"/output/daily",sep=""))}

@@ -441,6 +441,8 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
   #(i.e. these need to be with proper names in the params list). If they're not
   #then they should be loaded from a dummy default file
   
+  #if base_file=NA it means all needed data is in the 'params' object
+  #(first argument of function)
   
   #open file in write mode
   if (file.exists(outfile)) {
