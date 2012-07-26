@@ -46,9 +46,13 @@ GLAM_get_run_param <- function(asc_dir,cal_dir,exp_dir,crop="gnut",prefix="fcal_
   }
   
   #name of parameter file
-  par_file <- paste(run_dir,"/glam-r2-param-",tolower(crop),"-run.txt",sep="")
-  if (!file.exists(par_file)) {
+  if (ipdate == "rfd") {
     par_file <- paste(run_dir,"/glam-r2-param-",tolower(crop),"-run-rfd.txt",sep="")
+    if (!file.exists(par_file)) {
+      par_file <- paste(run_dir,"/glam-r2-param-",tolower(crop),"-run.txt",sep="")
+    }
+  } else if (ipdate == "irr") {
+    par_file <- paste(run_dir,"/glam-r2-param-",tolower(crop),"-run.txt",sep="")
   }
   
   #update parameter file
@@ -174,9 +178,9 @@ GLAM_config <- function(run_setup,force="no") {
   #get irrigation data
   #if this is a forced rainfall run then set all irrigation ratios to zero
   if (force == "rfd") {
-    run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRATIO=0)
+    run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRR_RATIO=0)
   } else if (force == "irr") {
-    run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRATIO=1)
+    run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRR_RATIO=1)
   } else {
     idata <- run_setup$IDATA
     idata <- get_irr_data(irr_data=idata,gridcell=run_setup$GRIDCELL,yi=min(run_setup$YEARS),
