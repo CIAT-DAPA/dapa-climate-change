@@ -5,19 +5,25 @@
 ##### script to run GLAM based on a particular configuration
 
 #local
-b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/model-runs/GNUT"
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+# b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/model-runs/GNUT"
+# src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+# scratch <- paste(b_dir,"/runs/testing",sep="")
 
 #eljefe
-# b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM/model-runs/GNUT"
-# src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-# scratch <- "/scratch"
+b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM/model-runs/GNUT"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+scratch <- "/scratch/eejarv/constraints"
 
 #sourcing required functions
+source(paste(src.dir,"/scripts/glam/glam-run-functions.R",sep=""))
 source(paste(src.dir,"/scripts/glam/glam-optimise-functions.R",sep=""))
 source(paste(src.dir,"/scripts/glam/glam-runfiles-functions.R",sep=""))
 source(paste(src.dir,"/scripts/glam/glam-parFile-functions.R",sep=""))
+source(paste(src.dir,"/scripts/glam/glam-make_wth.R",sep=""))
 
+
+#load list of constraints to apply
+constraints <- read.table(paste(b_dir,"/runs/constraints.tab",sep=""),header=T,sep="\t")
 
 #initial run configuration
 GLAM_setup <- list()
@@ -26,10 +32,10 @@ GLAM_setup$BIN_DIR <- paste(GLAM_setup$B_DIR,"/./../bin",sep="")
 GLAM_setup$CAL_DIR <- paste(GLAM_setup$B_DIR,"/calib",sep="")
 GLAM_setup$INPUTS_DIR <- paste(GLAM_setup$B_DIR,"/inputs",sep="")
 GLAM_setup$ASC_DIR <- paste(GLAM_setup$INPUTS_DIR,"/ascii",sep="")
-GLAM_setup$RUNS_DIR <- paste(GLAM_setup$B_DIR,"/runs/testing",sep="")
+GLAM_setup$RUNS_DIR <- scratch
 GLAM_setup$CROP <- "gnut"
 GLAM_setup$YEARS <- 1966:1993
-GLAM_setup$EXP_DIR <- "exp-02_outputs"
+GLAM_setup$EXP_DIR <- "exp-10_outputs"
 GLAM_setup$GRID <- paste(GLAM_setup$INPUTS_DIR,"/calib-cells-selection-v6.csv",sep="")
 GLAM_setup$PREFIX <- "fcal_"
 GLAM_setup$GRIDCELL <- 636
@@ -51,6 +57,23 @@ GLAM_setup$IDATA <- load_irr_data(rs_dir=GLAM_setup$IRR_RS_DIR,
 #configure GLAM run
 GLAM_setup <- GLAM_config(GLAM_setup,force="no")
 
+GLAM_setup$WTH_DIR_RFD <- GLAM_chg_wth(wth_dir=paste(GLAM_setup$RUN_DIR,"/inputs/ascii/wth",sep=""),
+                                       wth_root=GLAM_setup$WTH_ROOT,yi=min(GLAM_setup$YEARS),
+                                       yf=max(GLAM_setup$YEARS),target_var="TMIN",
+                                       values=rep(GLAM_setup$PARAM_RFD$glam_param.phenol$TOFLWR$Value-0.5,times=365))
+
+GLAM_setup$WTH_DIR_RFD <- GLAM_chg_wth(wth_dir=paste(GLAM_setup$RUN_DIR,"/inputs/ascii/wth",sep=""),
+                                       wth_root=GLAM_setup$WTH_ROOT,yi=min(GLAM_setup$YEARS),
+                                       yf=max(GLAM_setup$YEARS),target_var="TMAX",
+                                       values=rep(GLAM_setup$PARAM_RFD$glam_param.phenol$TOFLWR$Value+0.5,times=365))
+
+
 #make this particular glam run
 GLAM_setup <- GLAM_run(GLAM_setup)
+
+
+
+
+
+
 
