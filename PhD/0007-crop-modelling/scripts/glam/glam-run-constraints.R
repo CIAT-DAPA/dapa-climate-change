@@ -72,7 +72,7 @@ for (proc in unique(constraints$process)) {
   cons <- constraints[which(constraints$process == proc),]
   cnam <- paste(cons$constraint[1])
   
-  cat("\ncrop sensitivity to",cnam,"--",proc,"\n")
+  cat("\ncrop sensitivity to",cnam,"---",proc,"\n")
   
   #configure the model run
   GLAM_setup <- GLAM_setup_base
