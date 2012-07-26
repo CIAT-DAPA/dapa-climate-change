@@ -31,7 +31,7 @@ constraints <- read.table(paste(b_dir,"/runs/constraints/constraints.tab",sep=""
 ### to do: parallelise
 ### to do: collate data
 
-gc_list <- read.csv(paste(GLAM_setup$B_DIR,"/inputs/calib-cells-selection-v6.csv",sep=""))$CELL
+gc_list <- read.csv(paste(b_dir,"/inputs/calib-cells-selection-v6.csv",sep=""))$CELL
 
 ### to do: this for is to be replaced by a parallel process
 for (cell in gc_list) {
