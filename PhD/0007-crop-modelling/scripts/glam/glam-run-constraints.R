@@ -79,6 +79,7 @@ sfExport("scratch")
 sfExport("cell_xy")
 sfExport("GLAM_setup_base")
 sfExport("gc_list")
+sfExport("constraints")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(gc_list),glam_constraint_wrapper))
