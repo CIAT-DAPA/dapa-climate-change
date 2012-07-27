@@ -74,7 +74,7 @@ wrapper_cell_const <- function(cell) {
   cat("########################################################\n")
   
   #object to keep initial configuration
-  GLAM_setup_base$GRIDCELL <- NA
+  GLAM_setup_base$GRIDCELL <- cell
   
   #perform the "control" run
   GLAM_setup <- GLAM_setup_base
