@@ -3,6 +3,163 @@
 #July 2012
 
 
+#get all constraints data for a given experiment
+get_constraint_data <- function(run_setup) {
+  #get results of control run
+  cat("\ngetting results of control run\n")
+  run_setup$RUN_DIR <- paste(run_setup$RUNS_DIR,"/",run_setup$EXP_DIR,"/control",sep="")
+  
+  #get the yield data
+  yield_data <- lapply(X=gc_list,FUN=get_yearly_gridcell,run_setup,vlist,"rfd")
+  yield_data <- do.call("rbind",yield_data)
+  
+  #output object
+  constraint_data <- yield_data
+  names(constraint_data)[3] <- c("CONTROL")
+  
+  #loop through processes tested
+  for (proc in unique(constraints$process)) {
+    #proc <- paste(unique(constraints$process)[1])
+    proc <- paste(proc)
+    cons <- constraints[which(constraints$process == proc),]
+    cnam <- paste(cons$constraint[1])
+    
+    cat("getting results of",cnam,"---",proc,"\n")
+    run_setup$RUN_DIR <- paste(run_setup$RUNS_DIR,"/",run_setup$EXP_DIR,"/",cnam,"_",proc,sep="")
+    yield_data <- lapply(X=gc_list,FUN=get_yearly_gridcell,run_setup,vlist,"rfd")
+    yield_data <- do.call("rbind",yield_data)
+    
+    constraint_data <- cbind(constraint_data,NEWVAL=yield_data$YIELD)
+    names(constraint_data)[ncol(constraint_data)] <- toupper(paste(cnam,"_",proc,sep=""))
+  }
+  return(constraint_data)
+}
+
+
+
+#wrap the gridcells
+get_yearly_gridcell <- function(gridcell,run_setup,var_list,season="rfd") {
+  run_setup$GRIDCELL <- gridcell
+  output_dir <- paste(run_setup$RUN_DIR,"/run_",run_setup$GRIDCELL,"/output",sep="")
+  
+  #check if rainfed file exists
+  if (season == "rfd") {
+    glam_file <- paste(run_setup$CROP_LONG,"-",season,".out",sep="")
+    if (file.exists(paste(output_dir,"/",glam_file,sep=""))) {
+      run_setup$OUT_FILE <- glam_file
+      yield <- get_glam_data_year(run_setup=run_setup,var_list=var_list,varname=run_setup$TARGET_VAR)
+    } else {
+      stop("the file for rainfed season does not exist")
+    }
+  } else if (season == "irr") {
+    glam_file <- paste(run_setup$CROP_LONG,"-",season,".out",sep="")
+    if (file.exists(paste(output_dir,"/",glam_file,sep=""))) {
+      run_setup$OUT_FILE <- glam_file
+      yield <- get_glam_data_year(run_setup=run_setup,var_list=var_list,varname=run_setup$TARGET_VAR)
+    } else {
+      stop("the file for irrigated season does not exist")
+    }
+  } else {
+    #determine whether both seasons were run, if so, then
+    #rainfed data
+    glam_file <- paste(run_setup$CROP_LONG,"-rfd.out",sep="")
+    if (file.exists(paste(output_dir,"/",glam_file,sep=""))) {
+      run_setup$OUT_FILE <- glam_file
+      yield_rfd <- get_glam_data_year(run_setup=run_setup,var_list=var_list,varname=run_setup$TARGET_VAR)
+    } else {
+      stop("the file for rainfed season does not exist")
+    }
+    #irrigated data
+    glam_file <- paste(run_setup$CROP_LONG,"-irr.out",sep="")
+    if (file.exists(paste(output_dir,"/",glam_file,sep=""))) {
+      run_setup$OUT_FILE <- glam_file
+      yield_irr <- get_glam_data_year(run_setup=run_setup,var_list=var_list,varname=run_setup$TARGET_VAR)
+    } else {
+      stop("the file for rainfed season does not exist")
+    }
+    
+    #get irrigation data
+    iratio <- as.numeric(run_setup$IDATA[which(run_setup$IDATA$CELL==run_setup$GRIDCELL),paste("Y",min(run_setup$YEARS):max(run_setup$YEARS),sep="")])
+    
+    #final yield data frame
+    yield <- data.frame(YEAR=yield_rfd$YEAR,YIELD=(yield_irr$YIELD*iratio + yield_rfd$YIELD*(1-iratio)))
+  }
+  yield <- cbind(GRIDCELL=run_setup$GRIDCELL,yield)
+  return(yield)
+}
+
+
+### function to get data of a given variable of a given run
+get_glam_data_year <- function(run_setup,var_list,varname="YIELD") {
+  #check whether the variable is in the list
+  if (!toupper(varname) %in% toupper(var_list)) {
+    warning("varname is not in var_list, assuming varname=YIELD")
+  }
+  
+  if (!"YEAR" %in% toupper(var_list)) {
+    stop("variable YEAR needs to be present in var_list")
+  }
+  
+  out_file <- paste(run_setup$RUN_DIR,"/run_",run_setup$GRIDCELL,"/output/",run_setup$OUT_FILE,sep="")
+  if (!file.exists(out_file)) {
+    stop("run_setup$OUT_FILE does not exist in the file system")
+  } else {
+    glam_data <- read.table(out_file,header=F,sep="\t")
+  }
+  
+  #check whether the variable list has appropriate length
+  if (ncol(glam_data) != length(var_list)) {
+    stop("var_list needs to have an appropriate number of terms")
+  } else {
+    names(glam_data) <- toupper(paste(var_list))
+  }
+  
+  #get the variable of interest
+  var_data <- data.frame(YEAR=glam_data[,"YEAR"],VALUES=as.numeric(glam_data[,toupper(varname)]))
+  names(var_data)[2] <- toupper(varname)
+  return(var_data)
+}
+
+
+
+### function to copy the results from the scratch folder to some
+### other folder (typically in the NFS)
+copy_results <- function(run_setup,o_dir,dump_scratch=F) {
+  if (run_setup$RUNS_DIR == o_dir) {
+    stop("scratch and output directories cannot be the same")
+  }
+  
+  con_file <- paste(o_dir,"/",run_setup$EXP_DIR,"/run.info",sep="")
+  run_setup$RUNS_DIR <- paste(run_setup$RUNS_DIR,"/",run_setup$EXP_DIR,sep="")
+  if (file.exists(con_file)) {
+    if (file.exists(run_setup$RUNS_DIR) & dump_scratch) {
+      cat("already there, removing...")
+      system(paste("rm -rf ",run_setup$RUNS_DIR,sep=""))
+      run_setup$COPY_STATUS <- "DUMPED"
+    }
+  } else {
+    if (!file.exists(o_dir)) {dir.create(o_dir,recursive=T)}
+    cat("copying...\n")
+    system(paste("cp -rf ",run_setup$RUNS_DIR," ",paste(o_dir,"/.",sep=""),sep=""))
+    #write status file
+    fc <- file(con_file,"w")
+    cat("copied on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
+        paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=fc)
+    close(fc)
+    run_setup$COPY_STATUS <- "COPIED"
+  }
+  
+  if (file.exists(paste(o_dir,"/",run_setup$EXP_dir,sep="")) & dump_scratch) {
+    cat("removing...\n")
+    system(paste("rm -rf ",run_setup$RUNS_DIR,sep=""))
+    run_setup$COPY_STATUS <- "COPIED AND DUMPED"
+  }
+  run_setup$NFS_OUT_DIR <- paste(o_dir,"/",run_setup$EXP_dir,sep="")
+  return(run_setup)
+}
+
+
+
 #### function to wrap the constraints analysis of a given gridcell
 glam_constraint_wrapper <- function(cell) {
   #sourcing required functions

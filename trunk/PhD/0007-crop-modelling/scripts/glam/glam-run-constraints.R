@@ -25,8 +25,6 @@ source(paste(src.dir,"/scripts/glam/glam-constraints-functions.R",sep=""))
 #load list of constraints to apply
 constraints <- read.table(paste(b_dir,"/runs/constraints/constraints.tab",sep=""),header=T,sep="\t")
 
-### to do: collate data
-
 #################################################################################
 #################################################################################
 #initial run configuration
@@ -61,7 +59,10 @@ GLAM_setup_base <- GLAM_setup
 #################################################################################
 #################################################################################
 
-#get list of gridcells to process
+
+#################################################################################
+#################################################################################
+#perform the model runs
 gc_list <- read.csv(GLAM_setup$GRID)$CELL
 
 #number of cpus to use
@@ -86,6 +87,132 @@ system.time(sfSapply(as.vector(gc_list),glam_constraint_wrapper))
 
 #stop the cluster
 sfStop()
+#################################################################################
+#################################################################################
+
+
+
+#################################################################################
+#################################################################################
+#collate data
+
+### 1. copy the results to the nfs
+odir <- paste(b_dir,"/runs/constraints",sep="")
+rsetup <- copy_results(run_setup=GLAM_setup,o_dir=odir,dump_scratch=F)
+
+### 2. grab yield data into the form of a table with each
+###    constraint being a column.  Save data into file also
+if (!file.exists(paste(GLAM_setup$RUNS_DIR,"/",GLAM_setup$EXP_DIR,"/yield_data.csv",sep=""))) {
+  vlist <- paste(read.table(paste(src.dir,"/data/GLAM-varnames.tab",sep=""),header=T,sep="\t")$EOS)
+  
+  #initial configuration
+  GLAM_setup <- GLAM_setup_base
+  GLAM_setup$CROP_LONG <- "groundnut"
+  GLAM_setup$TARGET_VAR <- "YIELD"
+  GLAM_setup$RUNS_DIR <- paste(GLAM_setup$B_DIR,"/runs/constraints",sep="")
+  
+  #get constraints data
+  cons_data <- get_constraint_data(run_setup=GLAM_setup)
+  
+  #write these data
+  write.csv(cons_data,paste(GLAM_setup$RUNS_DIR,"/",GLAM_setup$EXP_DIR,"/yield_data.csv",sep=""),quote=T,row.names=F)
+} else {
+  cons_data <- read.csv(paste(GLAM_setup$RUNS_DIR,"/",GLAM_setup$EXP_DIR,"/yield_data.csv",sep=""))
+}
+
+
+#################################################################################
+#################################################################################
+# map the constraints
+GLAM_setup$RUNS_DIR <- paste(GLAM_setup$B_DIR,"/runs/constraints",sep="")
+GLAM_setup$OUT_RS_DIR <- paste(GLAM_setup$RUNS_DIR,"/",GLAM_setup$EXP_DIR,"/rasters",sep="")
+if (!file.exists(GLAM_setup$OUT_RS_DIR)) {dir.create(GLAM_setup$OUT_RS_DIR)}
+
+#1. for a given year put the percent change in yield caused by that given
+#   process into a raster
+if (require(raster)) {
+  base_rs <- raster(paste(GLAM_setup$CAL_DIR,"/",GLAM_setup$EXP_DIR,"/general/calib_results_spat/y_obs.asc",sep=""))
+  base_rs[] <- NA
+}
+
+#loop the years
+for (yr in min(GLAM_setup$YEARS):max(GLAM_setup$YEARS)) {
+  #output yearly directory
+  out_dir <- paste(GLAM_setup$OUT_RS_DIR,"/",yr,sep="")
+  if (!file.exists(out_dir)) {dir.create(out_dir)}
+  
+  yr_data <- cons_data[which(cons_data$YEAR==yr),]
+  
+  if (!file.exists(paste(out_dir,"/control.tif",sep=""))) {
+    rs_control <- raster(base_rs)
+    rs_control[yr_data$GRIDCELL] <- yr_data$CONTROL
+    rs_control <- writeRaster(rs_control,paste(out_dir,"/control.tif",sep=""),format="GTiff")
+  } else {
+    rs_control <- raster(paste(out_dir,"/control.tif",sep=""))
+  }
+  
+  ratios <- c()
+  for (i in 4:ncol(yr_data)) {
+    cname <- paste(names(yr_data)[i])
+    #get the yield data in
+    if (!file.exists(paste(out_dir,"/",tolower(cname),".tif",sep=""))) {
+      rs <- raster(base_rs)
+      rs[yr_data$GRIDCELL] <- yr_data[,i]
+      rs <- writeRaster(rs,paste(out_dir,"/",tolower(cname),".tif",sep=""),format="GTiff")
+    } else {
+      rs <- raster(paste(out_dir,"/",tolower(cname),".tif",sep=""))
+    }
+    
+    #calculate ratio of change
+    if (!file.exists(paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""))) {
+      rs_ratio <- (rs - rs_control) / rs_control * 100
+      rs_ratio <- writeRaster(rs_ratio,paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""),format="GTiff")
+    } else {
+      rs_ratio <- raster(paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""))
+    }
+    ratios <- c(ratios,rs_ratio)
+  }
+  
+  #create raster stack
+  ratios <- stack(ratios)
+  
+  #with a calc function get which position is the most constrained, including
+  #the drought growth one
+  find_max <- function(x) {
+    if (length(which(is.na(x))) == length(x)) {
+      ro <- NA
+    } else if (length(which(x==0)) == length(x)) {
+      ro <- 0
+    } else if (length(which(x>0)) == 0) {
+      ro <- 0
+    } else {
+      ro <- which(x == max(x))
+    }
+    return(ro)
+  }
+  constraint <- calc(ratios,fun=find_max)
+  #plot(constraint,col=rev(terrain.colors(9)))
+  #text(x=xFromCell(rs,yr_data$GRIDCELL),y=yFromCell(rs,yr_data$GRIDCELL),cex=0.4,labels=yr_data$GRIDCELL)
+  
+  #with a calc function get which position is the most constrained, excluding
+  #the drought one
+  ratios2 <- ratios
+  ratios2 <- dropLayer(ratios2,1)
+  
+}
+
+
+#2. per year create a raster that shows from 1 to n the dominating process
+#   dominating process is hereby referred to as that which when removed
+#   causes the largest increase in crop yield
+#
+
+
+#3. per constraint, calculate percent of cells over each year
+#   that is subjected to that. Plot all constraints in
+#   the chart. Maybe as an stacked barplot.
+
+
 
 
 
