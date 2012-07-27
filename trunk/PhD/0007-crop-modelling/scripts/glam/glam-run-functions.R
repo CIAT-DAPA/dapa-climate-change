@@ -2,6 +2,7 @@
 #UoL / CCAFS / CIAT
 #July 2012
 
+
 #get parameter set from a given GLAM run
 #this is gridcell specific
 GLAM_get_run_param <- function(asc_dir,cal_dir,exp_dir,crop="gnut",prefix="fcal_",gridcell,ygp="opt",ipdate="rfd") {
