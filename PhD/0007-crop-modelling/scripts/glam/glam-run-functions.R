@@ -170,106 +170,113 @@ GLAM_config <- function(run_setup,force="no") {
   #creating output base folder
   if (!file.exists(run_setup$RUNS_DIR)) {dir.create(run_setup$RUNS_DIR,recursive=T)}
   
-  #load grid
-  g_xy <- read.csv(run_setup$GRID)
-  g_ids <- g_xy$CELL
-  g_xy <- cbind(x=g_xy$X,y=g_xy$Y)
+  #list possible output files
+  ofiles <- list.files(paste(run_setup$RUNS_DIR,"/run_",run_setup$GRIDCELL,"/output",sep=""),pattern="\\.out")
+  if (length(ofiles) > 0) {
   
-  #get irrigation data
-  #if this is a forced rainfall run then set all irrigation ratios to zero
-  if (force == "rfd") {
-    run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRR_RATIO=0)
-  } else if (force == "irr") {
-    run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRR_RATIO=1)
-  } else {
-    idata <- run_setup$IDATA
-    idata <- get_irr_data(irr_data=idata,gridcell=run_setup$GRIDCELL,yi=min(run_setup$YEARS),
-                          yf=max(run_setup$YEARS))
-    run_setup$IRATIO <- idata
-  }
-  
-  #create run dir
-  run_setup$RUN_DIR <- create_dirs(paste(run_setup$RUNS_DIR,"/run_",run_setup$GRIDCELL,sep=""))
-  
-  #get parameter set(s): if there is some irrigated fraction then grab
-  #the two parameter sets run_type <- "rfd" or "irr", accordingly
-  if (length(which(run_setup$IRATIO$IRR_RATIO == 0)) == nrow(run_setup$IRATIO)) {
-    #no irrigation, so only rainfed
-    run_setup$PARAM_RFD <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
-                                   exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
-                                   prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
-                                   ygp=run_setup$YGP,ipdate="rfd")
-    run_setup$RUN_TYPE <- "RFD"
-  } else if (length(which(run_setup$IRATIO$IRR_RATIO == 1)) == nrow(run_setup$IRATIO)) {
-    #get only irrigated parameter set
-    run_setup$PARAM_IRR <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
-                                   exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
-                                   prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
-                                   ygp=run_setup$YGP,ipdate="irr")
-    run_setup$RUN_TYPE <- "IRR"
-  } else {
-    #get both parameter sets
-    run_setup$PARAM_RFD <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
-                                   exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
-                                   prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
-                                   ygp=run_setup$YGP,ipdate="rfd")
-    run_setup$PARAM_IRR <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
-                                   exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
-                                   prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
-                                   ygp=run_setup$YGP,ipdate="irr")
-    run_setup$RUN_TYPE <- "MIX"
-  }
-  
-  #get soil files
-  run_setup <- get_soil_files(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
-                              codes_prefix=run_setup$CODES_PREFIX,types_prefix=run_setup$TYPES_PREFIX)
-  
-  #get wth files (locations and wthroot)
-  if (run_setup$RUN_TYPE == "RFD") {
-    run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
-                              wth_root=run_setup$WTH_ROOT,run_type="rfd",yi=1966,yf=1993)
-  } else if (run_setup$RUN_TYPE == "IRR") {
-    run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
-                              wth_root=run_setup$WTH_ROOT,run_type="irr",yi=1966,yf=1993)
-  } else {
-    run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
-                              wth_root=run_setup$WTH_ROOT,run_type="rfd",yi=1966,yf=1993)
+    #load grid
+    g_xy <- read.csv(run_setup$GRID)
+    g_ids <- g_xy$CELL
+    g_xy <- cbind(x=g_xy$X,y=g_xy$Y)
     
-    run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
-                              wth_root=run_setup$WTH_ROOT,run_type="irr",yi=1966,yf=1993)
-  }
-  
-  
-  #which executable to copy
-  machine <- as.data.frame(t(Sys.info())) #determine operating system and bin folder
-  machine <- paste(machine$sysname)
-  run_setup$EXEC_NAME <- paste("glam-",tolower(run_setup$CROP),sep="")
-  run_setup$BIN_DIR <- paste(run_setup$BIN_DIR,"/glam-",tolower(machine),sep="")
-  if (tolower(machine) == "windows") {
-    run_setup$EXEC_NAME <- paste(run_setup$EXEC_NAME,".exe",sep="")
-  } else if (tolower(machine) == "linux") {
-    run_setup$EXEC_NAME <- paste("./",run_setup$EXEC_NAME,sep="")
-  }
-  
-  #copy files that are necessary for this run
-  #executable
-  x <- file.copy(paste(run_setup$BIN_DIR,"/",run_setup$EXEC_NAME,sep=""),run_setup$RUN_DIR,overwrite=T)
-  #soil codes
-  x <- file.copy(run_setup$SOILCODES,paste(run_setup$RUN_DIR,"/inputs/ascii/soil",sep=""),overwrite=T)
-  #soil types
-  x <- file.copy(run_setup$SOILTYPES,paste(run_setup$RUN_DIR,"/inputs/ascii/soil",sep=""),overwrite=T)
-  
-  #copy weather. If both things (RFD & irr) have to be run then create extra folder
-  if (run_setup$RUN_TYPE == "RFD") {
-    x <- sapply(list.files(run_setup$WTH_DIR_RFD),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_RFD,paste(run_setup$RUN_DIR,"/inputs/ascii/wth",sep=""))
-  } else if (run_setup$RUN_TYPE == "IRR") {
-    x <- sapply(list.files(run_setup$WTH_DIR_IRR),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_IRR,paste(run_setup$RUN_DIR,"/inputs/ascii/wth",sep=""))
+    #get irrigation data
+    #if this is a forced rainfall run then set all irrigation ratios to zero
+    if (force == "rfd") {
+      run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRR_RATIO=0)
+    } else if (force == "irr") {
+      run_setup$IRATIO <- data.frame(YEAR=run_setup$YEARS,IRR_RATIO=1)
+    } else {
+      idata <- run_setup$IDATA
+      idata <- get_irr_data(irr_data=idata,gridcell=run_setup$GRIDCELL,yi=min(run_setup$YEARS),
+                            yf=max(run_setup$YEARS))
+      run_setup$IRATIO <- idata
+    }
+    
+    #create run dir
+    run_setup$RUN_DIR <- create_dirs(paste(run_setup$RUNS_DIR,"/run_",run_setup$GRIDCELL,sep=""))
+    
+    #get parameter set(s): if there is some irrigated fraction then grab
+    #the two parameter sets run_type <- "rfd" or "irr", accordingly
+    if (length(which(run_setup$IRATIO$IRR_RATIO == 0)) == nrow(run_setup$IRATIO)) {
+      #no irrigation, so only rainfed
+      run_setup$PARAM_RFD <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
+                                     exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
+                                     prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
+                                     ygp=run_setup$YGP,ipdate="rfd")
+      run_setup$RUN_TYPE <- "RFD"
+    } else if (length(which(run_setup$IRATIO$IRR_RATIO == 1)) == nrow(run_setup$IRATIO)) {
+      #get only irrigated parameter set
+      run_setup$PARAM_IRR <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
+                                     exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
+                                     prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
+                                     ygp=run_setup$YGP,ipdate="irr")
+      run_setup$RUN_TYPE <- "IRR"
+    } else {
+      #get both parameter sets
+      run_setup$PARAM_RFD <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
+                                     exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
+                                     prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
+                                     ygp=run_setup$YGP,ipdate="rfd")
+      run_setup$PARAM_IRR <- GLAM_get_run_param(asc_dir=run_setup$ASC_DIR,cal_dir=run_setup$CAL_DIR,
+                                     exp_dir=run_setup$EXP_DIR,crop=run_setup$CROP,
+                                     prefix=run_setup$PREFIX,gridcell=run_setup$GRIDCELL,
+                                     ygp=run_setup$YGP,ipdate="irr")
+      run_setup$RUN_TYPE <- "MIX"
+    }
+    
+    #get soil files
+    run_setup <- get_soil_files(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
+                                codes_prefix=run_setup$CODES_PREFIX,types_prefix=run_setup$TYPES_PREFIX)
+    
+    #get wth files (locations and wthroot)
+    if (run_setup$RUN_TYPE == "RFD") {
+      run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
+                                wth_root=run_setup$WTH_ROOT,run_type="rfd",yi=1966,yf=1993)
+    } else if (run_setup$RUN_TYPE == "IRR") {
+      run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
+                                wth_root=run_setup$WTH_ROOT,run_type="irr",yi=1966,yf=1993)
+    } else {
+      run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
+                                wth_root=run_setup$WTH_ROOT,run_type="rfd",yi=1966,yf=1993)
+      
+      run_setup <- get_wth_data(run_setup,asc_dir=run_setup$ASC_DIR,gridcell=run_setup$GRIDCELL,
+                                wth_root=run_setup$WTH_ROOT,run_type="irr",yi=1966,yf=1993)
+    }
+    
+    
+    #which executable to copy
+    machine <- as.data.frame(t(Sys.info())) #determine operating system and bin folder
+    machine <- paste(machine$sysname)
+    run_setup$EXEC_NAME <- paste("glam-",tolower(run_setup$CROP),sep="")
+    run_setup$BIN_DIR <- paste(run_setup$BIN_DIR,"/glam-",tolower(machine),sep="")
+    if (tolower(machine) == "windows") {
+      run_setup$EXEC_NAME <- paste(run_setup$EXEC_NAME,".exe",sep="")
+    } else if (tolower(machine) == "linux") {
+      run_setup$EXEC_NAME <- paste("./",run_setup$EXEC_NAME,sep="")
+    }
+    
+    #copy files that are necessary for this run
+    #executable
+    x <- file.copy(paste(run_setup$BIN_DIR,"/",run_setup$EXEC_NAME,sep=""),run_setup$RUN_DIR,overwrite=T)
+    #soil codes
+    x <- file.copy(run_setup$SOILCODES,paste(run_setup$RUN_DIR,"/inputs/ascii/soil",sep=""),overwrite=T)
+    #soil types
+    x <- file.copy(run_setup$SOILTYPES,paste(run_setup$RUN_DIR,"/inputs/ascii/soil",sep=""),overwrite=T)
+    
+    #copy weather. If both things (RFD & irr) have to be run then create extra folder
+    if (run_setup$RUN_TYPE == "RFD") {
+      x <- sapply(list.files(run_setup$WTH_DIR_RFD),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_RFD,paste(run_setup$RUN_DIR,"/inputs/ascii/wth",sep=""))
+    } else if (run_setup$RUN_TYPE == "IRR") {
+      x <- sapply(list.files(run_setup$WTH_DIR_IRR),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_IRR,paste(run_setup$RUN_DIR,"/inputs/ascii/wth",sep=""))
+    } else {
+      if (!file.exists(paste(run_setup$RUN_DIR,"/inputs/ascii/wth_irr",sep=""))) {dir.create(paste(run_setup$RUN_DIR,"/inputs/ascii/wth_irr",sep=""))}
+      x <- sapply(list.files(run_setup$WTH_DIR_RFD),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_RFD,paste(run_setup$RUN_DIR,"/inputs/ascii/wth",sep=""))
+      x <- sapply(list.files(run_setup$WTH_DIR_IRR),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_IRR,paste(run_setup$RUN_DIR,"/inputs/ascii/wth_irr",sep=""))
+    }
+    run_setup$STATUS <- "READY"
   } else {
-    if (!file.exists(paste(run_setup$RUN_DIR,"/inputs/ascii/wth_irr",sep=""))) {dir.create(paste(run_setup$RUN_DIR,"/inputs/ascii/wth_irr",sep=""))}
-    x <- sapply(list.files(run_setup$WTH_DIR_RFD),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_RFD,paste(run_setup$RUN_DIR,"/inputs/ascii/wth",sep=""))
-    x <- sapply(list.files(run_setup$WTH_DIR_IRR),FUN= function(x,idir,odir) {s <- file.copy(paste(idir,"/",x,sep=""),odir,overwrite=T)},run_setup$WTH_DIR_IRR,paste(run_setup$RUN_DIR,"/inputs/ascii/wth_irr",sep=""))
+    run_setup$STATUS <- "DONE"
   }
-  
   #return run_setup
   return(run_setup)
 }
