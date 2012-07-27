@@ -172,7 +172,7 @@ GLAM_config <- function(run_setup,force="no") {
   
   #list possible output files
   ofiles <- list.files(paste(run_setup$RUNS_DIR,"/run_",run_setup$GRIDCELL,"/output",sep=""),pattern="\\.out")
-  if (length(ofiles) > 0) {
+  if (length(ofiles) == 0) {
   
     #load grid
     g_xy <- read.csv(run_setup$GRID)
