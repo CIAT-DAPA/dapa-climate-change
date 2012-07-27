@@ -187,25 +187,36 @@ for (yr in min(GLAM_setup$YEARS):max(GLAM_setup$YEARS)) {
       ro <- 0
     } else {
       ro <- which(x == max(x))
+      if (length(ro)>1) {ro <- as.numeric(paste(ro,collapse=""))}
     }
     return(ro)
   }
-  constraint <- calc(ratios,fun=find_max)
-  #plot(constraint,col=rev(terrain.colors(9)))
-  #text(x=xFromCell(rs,yr_data$GRIDCELL),y=yFromCell(rs,yr_data$GRIDCELL),cex=0.4,labels=yr_data$GRIDCELL)
+  
+  #2. per year create a raster that shows from 1 to n the dominating process
+  #   dominating process is hereby referred to as that which when removed
+  #   causes the largest increase in crop yield
+  #
+  if (!file.exists(paste(out_dir,"/constraints.tif",sep=""))) {
+    constraint <- calc(ratios,fun=find_max)
+    constraint <- writeRaster(constraint,paste(out_dir,"/constraints.tif",sep=""),format="GTiff")
+    #plot(constraint,col=rev(terrain.colors(9)))
+    #text(x=xFromCell(rs,yr_data$GRIDCELL),y=yFromCell(rs,yr_data$GRIDCELL),cex=0.4,labels=yr_data$GRIDCELL)
+  } else {
+    constraint <- raster(paste(out_dir,"/constraints.tif",sep=""))
+  }
   
   #with a calc function get which position is the most constrained, excluding
   #the drought one
-  ratios2 <- ratios
-  ratios2 <- dropLayer(ratios2,1)
-  
+  if (!file.exists(paste(out_dir,"/constraints_no_irr.tif",sep=""))) {
+    ratios2 <- ratios
+    ratios2 <- dropLayer(ratios2,1)
+    constraint2 <- calc(ratios2,fun=find_max)
+    constraint2 <- writeRaster(constraint2,paste(out_dir,"/constraints_no_irr.tif",sep=""),format="GTiff")
+  } else {
+    constraint2 <- raster(paste(out_dir,"/constraints_no_irr.tif",sep=""))
+  }
 }
 
-
-#2. per year create a raster that shows from 1 to n the dominating process
-#   dominating process is hereby referred to as that which when removed
-#   causes the largest increase in crop yield
-#
 
 
 #3. per constraint, calculate percent of cells over each year
