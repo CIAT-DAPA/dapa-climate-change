@@ -5,6 +5,14 @@
 
 #### function to wrap the constraints analysis of a given gridcell
 glam_constraint_wrapper <- function(cell) {
+  #sourcing required functions
+  source(paste(src.dir,"/scripts/glam/glam-run-functions.R",sep=""))
+  source(paste(src.dir,"/scripts/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/scripts/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/scripts/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/scripts/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/scripts/glam/glam-constraints-functions.R",sep=""))
+  
   
   cat("\n########################################################\n")
   cat("##############gridcell",cell,"###############################\n")
