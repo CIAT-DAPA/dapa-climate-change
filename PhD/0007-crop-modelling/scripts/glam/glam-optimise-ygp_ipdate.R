@@ -68,6 +68,7 @@ sfExport("runs_ref")
 sfExport("plot_all")
 sfExport("selection")
 sfExport("use_scratch")
+sfExport("scratch")
 
 #run the function in parallel
 system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_optimise_ygp_ipdate_wrapper))
