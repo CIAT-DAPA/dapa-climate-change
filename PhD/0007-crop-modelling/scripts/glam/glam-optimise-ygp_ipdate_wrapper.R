@@ -55,6 +55,8 @@ glam_optimise_ygp_ipdate_wrapper <- function(this_run) {
     #files that were generated
     setup <- list()
     setup$BDIR <- bDir
+    setup$SCRATCH <- scratch
+    setup$USE_SCRATCH <- use_scratch
     setup$CELL <- cells$CELL[ci]
     setup$ZONE <- cells$ZONE[ci]
     setup$METHOD <- "lin"
@@ -71,6 +73,9 @@ glam_optimise_ygp_ipdate_wrapper <- function(this_run) {
     setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
     setup$SIM_NAME <- paste("fcal_",setup$CELL,sep="")
     setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+    
+    #if using scratch directory instead of nfs
+    if (use_scratch) {setup$SCRATCH <- paste(setup$SCRATCH,"/exp-",expID,sep="")}
     
     cat("\nprocessing cell",setup$CELL,"\n")
     

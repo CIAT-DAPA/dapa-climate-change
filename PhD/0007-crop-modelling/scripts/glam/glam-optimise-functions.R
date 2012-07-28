@@ -34,8 +34,14 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   #output directories
   #parDir <- paste(cropDir,"/params",sep="") #parameter files
   #cal_dir <- paste(cropDir,"/calib",sep="") #calibration directory
-  cal_dir <- RUN_setup$CAL_DIR #calibration directory
-  if (!file.exists(cal_dir)) {dir.create(cal_dir)}
+  if (RUN_setup$USE_SCRATCH) {
+    cal_dir <- RUN_setup$SCRATCH #calibration directory
+    nfs_dir <- paste(RUN_setup$CAL_DIR,"/",simset,sep="")
+    if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
+  } else {
+    cal_dir <- RUN_setup$CAL_DIR #calibration directory
+  }
+  if (!file.exists(cal_dir)) {dir.create(cal_dir,recursive=T)}
   
   cal_dir <- paste(cal_dir,"/",simset,sep="") #calibration directory
   if (!file.exists(cal_dir)) {dir.create(cal_dir)}
@@ -586,6 +592,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
     
   }
   write.table(out_all,sep="\t",quote=F,file=paste(optDir,"/optim.txt",sep=""))
+  
   return(out_all)
 }
 
@@ -920,6 +927,9 @@ GLAM_optimise_glo <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
     
   }
   write.table(out_all,sep="\t",quote=F,file=paste(optDir,"/optim.txt",sep=""))
+  if (RUN_setup$USE_SCRATCH) {
+    system(paste("cp -rf ",cal_dir," ",paste(RUN_setup$CAL_DIR,"/.",sep=""),sep="")
+  }
   return(out_all)
 }
 
