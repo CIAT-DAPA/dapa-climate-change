@@ -593,7 +593,8 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   }
   write.table(out_all,sep="\t",quote=F,file=paste(optDir,"/optim.txt",sep=""))
   if (RUN_setup$USE_SCRATCH) {
-    system(paste("cp -rf ",cal_dir," ",paste(RUN_setup$CAL_DIR,"/.",sep=""),sep=""))
+    system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
+    system(paste("rm -rf ",cal_dir,sep=""))
   }
   return(out_all)
 }
