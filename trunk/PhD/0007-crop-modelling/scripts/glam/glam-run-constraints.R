@@ -137,6 +137,7 @@ if (require(raster)) {
 
 #loop the years
 for (yr in min(GLAM_setup$YEARS):max(GLAM_setup$YEARS)) {
+  cat("processing year",yr,"\n")
   #output yearly directory
   out_dir <- paste(GLAM_setup$OUT_RS_DIR,"/",yr,sep="")
   if (!file.exists(out_dir)) {dir.create(out_dir)}
@@ -219,8 +220,8 @@ for (yr in min(GLAM_setup$YEARS):max(GLAM_setup$YEARS)) {
 
 
 
-#3. per constraint, calculate percent of cells over each year
-#   that is subjected to that. Plot all constraints in
+#3. per constraint, calculate percent of cells over each year that is
+#   subjected to that particular constraint. Plot all constraints in
 #   the chart. Maybe as an stacked barplot.
 
 
