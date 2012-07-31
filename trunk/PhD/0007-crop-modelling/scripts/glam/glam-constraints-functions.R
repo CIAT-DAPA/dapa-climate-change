@@ -3,6 +3,118 @@
 #July 2012
 
 
+#function to map the constraints of a given year. This function will produce
+#a map in which a number is assigned to each constraint. Such number corresponds
+#to the constraint that when removed will produce the largest yield gain.
+#
+#the total number of constraints that have been evaluated is 8 for the first map
+#(i.e. constraints.tif) and 7 for the second map (i.e. constraints_no_irr.tif). Since
+#the impact of whole-growing season irrigation is high and includes all 
+#water-stress-related sub-seasonal processes it was removed for the second map.
+#
+#a value of zero in the map indicates that no removal produced an increase in
+#predicted yields. A value above 8 (first map) or 7 (second map) indicates that
+#more than one process produced the same yield increase. For instance, a value of
+#35 would indicate process 3 and 5 were limiting yield at the same extent.
+#
+#the list of processes is: 
+#(1) drought during the growing season (i.e. irrigated run),
+#(2) terminal drought stress, 
+#(3) drought stress during flowering, 
+#(4) mean temperature during the gs (i.e. data were set to optimal value), 
+#(5) mean temperature (i.e. modification of thermal time equation so that maximum 
+#    TEFF was obtained in each day,
+#(6) high temperature effects on transpiration efficiency (TETRS)
+#(7) high temperature stress during flowering
+#(8) effects of limited radiation (assumed the crop could capture 100% radiation, EXTC=0)
+#
+map_constraint_year <- function(yr,run_setup,cons_data,base_rs) {
+  #for (yr in min(GLAM_setup$YEARS):max(GLAM_setup$YEARS)) {}
+  cat("processing year",yr,"\n")
+  
+  #output yearly directory
+  out_dir <- paste(GLAM_setup$OUT_RS_DIR,"/",yr,sep="")
+  if (!file.exists(out_dir)) {dir.create(out_dir)}
+  
+  yr_data <- cons_data[which(cons_data$YEAR==yr),]
+  
+  if (!file.exists(paste(out_dir,"/control.tif",sep=""))) {
+    rs_control <- raster(base_rs)
+    rs_control[yr_data$GRIDCELL] <- yr_data$CONTROL
+    rs_control <- writeRaster(rs_control,paste(out_dir,"/control.tif",sep=""),format="GTiff")
+  } else {
+    rs_control <- raster(paste(out_dir,"/control.tif",sep=""))
+  }
+  
+  ratios <- c()
+  for (i in 4:ncol(yr_data)) {
+    cname <- paste(names(yr_data)[i])
+    #get the yield data in
+    if (!file.exists(paste(out_dir,"/",tolower(cname),".tif",sep=""))) {
+      rs <- raster(base_rs)
+      rs[yr_data$GRIDCELL] <- yr_data[,i]
+      rs <- writeRaster(rs,paste(out_dir,"/",tolower(cname),".tif",sep=""),format="GTiff")
+    } else {
+      rs <- raster(paste(out_dir,"/",tolower(cname),".tif",sep=""))
+    }
+    
+    #calculate ratio of change
+    if (!file.exists(paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""))) {
+      rs_ratio <- (rs - rs_control) / rs_control * 100
+      rs_ratio <- writeRaster(rs_ratio,paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""),format="GTiff")
+    } else {
+      rs_ratio <- raster(paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""))
+    }
+    ratios <- c(ratios,rs_ratio)
+  }
+  
+  #create raster stack
+  ratios <- stack(ratios)
+  
+  #with a calc function get which position is the most constrained, including
+  #the drought growth one
+  find_max <- function(x) {
+    if (length(which(is.na(x))) == length(x)) {
+      ro <- NA
+    } else if (length(which(x==0)) == length(x)) {
+      ro <- 0
+    } else if (length(which(x>0)) == 0) {
+      ro <- 0
+    } else {
+      ro <- which(x == max(x))
+      if (length(ro)>1) {ro <- as.numeric(paste(ro,collapse=""))}
+    }
+    return(ro)
+  }
+  
+  #2. per year create a raster that shows from 1 to n the dominating process
+  #   dominating process is hereby referred to as that which when removed
+  #   causes the largest increase in crop yield
+  #
+  if (!file.exists(paste(out_dir,"/constraints.tif",sep=""))) {
+    constraint <- calc(ratios,fun=find_max)
+    constraint <- writeRaster(constraint,paste(out_dir,"/constraints.tif",sep=""),format="GTiff")
+    #plot(constraint,col=rev(terrain.colors(9)))
+    #text(x=xFromCell(rs,yr_data$GRIDCELL),y=yFromCell(rs,yr_data$GRIDCELL),cex=0.4,labels=yr_data$GRIDCELL)
+  } else {
+    constraint <- raster(paste(out_dir,"/constraints.tif",sep=""))
+  }
+  
+  #with a calc function get which position is the most constrained, excluding
+  #the drought one
+  if (!file.exists(paste(out_dir,"/constraints_no_irr.tif",sep=""))) {
+    ratios2 <- ratios
+    ratios2 <- dropLayer(ratios2,1)
+    constraint2 <- calc(ratios2,fun=find_max)
+    constraint2 <- writeRaster(constraint2,paste(out_dir,"/constraints_no_irr.tif",sep=""),format="GTiff")
+  } else {
+    constraint2 <- raster(paste(out_dir,"/constraints_no_irr.tif",sep=""))
+  }
+  return(out_dir)
+}
+
+
+
 #get all constraints data for a given experiment
 get_constraint_data <- function(run_setup) {
   #get results of control run
