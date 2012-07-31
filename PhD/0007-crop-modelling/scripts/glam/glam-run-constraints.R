@@ -135,98 +135,25 @@ if (require(raster)) {
   base_rs[] <- NA
 }
 
-#loop the years
-for (yr in min(GLAM_setup$YEARS):max(GLAM_setup$YEARS)) {
-  cat("processing year",yr,"\n")
-  #output yearly directory
-  out_dir <- paste(GLAM_setup$OUT_RS_DIR,"/",yr,sep="")
-  if (!file.exists(out_dir)) {dir.create(out_dir)}
-  
-  yr_data <- cons_data[which(cons_data$YEAR==yr),]
-  
-  if (!file.exists(paste(out_dir,"/control.tif",sep=""))) {
-    rs_control <- raster(base_rs)
-    rs_control[yr_data$GRIDCELL] <- yr_data$CONTROL
-    rs_control <- writeRaster(rs_control,paste(out_dir,"/control.tif",sep=""),format="GTiff")
-  } else {
-    rs_control <- raster(paste(out_dir,"/control.tif",sep=""))
-  }
-  
-  ratios <- c()
-  for (i in 4:ncol(yr_data)) {
-    cname <- paste(names(yr_data)[i])
-    #get the yield data in
-    if (!file.exists(paste(out_dir,"/",tolower(cname),".tif",sep=""))) {
-      rs <- raster(base_rs)
-      rs[yr_data$GRIDCELL] <- yr_data[,i]
-      rs <- writeRaster(rs,paste(out_dir,"/",tolower(cname),".tif",sep=""),format="GTiff")
-    } else {
-      rs <- raster(paste(out_dir,"/",tolower(cname),".tif",sep=""))
-    }
-    
-    #calculate ratio of change
-    if (!file.exists(paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""))) {
-      rs_ratio <- (rs - rs_control) / rs_control * 100
-      rs_ratio <- writeRaster(rs_ratio,paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""),format="GTiff")
-    } else {
-      rs_ratio <- raster(paste(out_dir,"/ratio-",tolower(cname),".tif",sep=""))
-    }
-    ratios <- c(ratios,rs_ratio)
-  }
-  
-  #create raster stack
-  ratios <- stack(ratios)
-  
-  #with a calc function get which position is the most constrained, including
-  #the drought growth one
-  find_max <- function(x) {
-    if (length(which(is.na(x))) == length(x)) {
-      ro <- NA
-    } else if (length(which(x==0)) == length(x)) {
-      ro <- 0
-    } else if (length(which(x>0)) == 0) {
-      ro <- 0
-    } else {
-      ro <- which(x == max(x))
-      if (length(ro)>1) {ro <- as.numeric(paste(ro,collapse=""))}
-    }
-    return(ro)
-  }
-  
-  #2. per year create a raster that shows from 1 to n the dominating process
-  #   dominating process is hereby referred to as that which when removed
-  #   causes the largest increase in crop yield
-  #
-  if (!file.exists(paste(out_dir,"/constraints.tif",sep=""))) {
-    constraint <- calc(ratios,fun=find_max)
-    constraint <- writeRaster(constraint,paste(out_dir,"/constraints.tif",sep=""),format="GTiff")
-    #plot(constraint,col=rev(terrain.colors(9)))
-    #text(x=xFromCell(rs,yr_data$GRIDCELL),y=yFromCell(rs,yr_data$GRIDCELL),cex=0.4,labels=yr_data$GRIDCELL)
-  } else {
-    constraint <- raster(paste(out_dir,"/constraints.tif",sep=""))
-  }
-  
-  #with a calc function get which position is the most constrained, excluding
-  #the drought one
-  if (!file.exists(paste(out_dir,"/constraints_no_irr.tif",sep=""))) {
-    ratios2 <- ratios
-    ratios2 <- dropLayer(ratios2,1)
-    constraint2 <- calc(ratios2,fun=find_max)
-    constraint2 <- writeRaster(constraint2,paste(out_dir,"/constraints_no_irr.tif",sep=""),format="GTiff")
-  } else {
-    constraint2 <- raster(paste(out_dir,"/constraints_no_irr.tif",sep=""))
-  }
-}
+#map the constraints for ech year
+yr_odir <- lapply(min(GLAM_setup$YEARS):max(GLAM_setup$YEARS),FUN=map_constraint_year,GLAM_setup,cons_data,base_rs)
 
 
-
-#3. per constraint, calculate percent of cells over each year that is
+#3. per constraint, calculate percent of gridcells over each year that is
 #   subjected to that particular constraint. Plot all constraints in
-#   the chart. Maybe as an stacked barplot.
+#   the chart. Maybe as an stacked barplot with x-axis being years
 
+cons_list <- names(cons_data)
+cons_list <- cons_list[4:length(cons_list)]
 
-
-
+#get the proportion of gridcells for each constraint into a table
+for (cons in cons_list) {
+  #cons <- cons_list[1]
+  cat("processing constraint",tolower(cons),"...\n")
+  
+  GLAM_setup$OUT_RS_DIR
+  
+}
 
 
 
