@@ -7,10 +7,10 @@
 #local
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
-maxiter <- 10
+maxiter <- 15
 version <- "c"
-selection <- "v3"
-base_exp <- 10 #change if you have done any other experiment
+selection <- "v6"
+base_exp <- 33 #change if you have done any other experiment
 
 #run <- 1
 #expID <- "10"
@@ -28,7 +28,7 @@ cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
 ####list of seeds to randomise parameter list
 set.seed(512)
-seeds <- c(NA,sample(1:9999,20))
+seeds <- c(NA,sample(1:9999,49))
 #seeds <- c(NA)
 
 expIDs <- c(base_exp:((base_exp-1)+length(seeds)))
@@ -39,6 +39,11 @@ expIDs <- paste(expIDs)
 runs_ref <- data.frame(SID=1:length(seeds),SEED=seeds,EXPID=expIDs)
 runs_ref2 <- expand.grid(SID=runs_ref$SID,RUN=1:5)
 runs_ref <- merge(runs_ref2,runs_ref,by="SID",all=T,sort=F)
+
+# #dodgy, need to remove the below. this is for testing purposes
+# runs_ref <- runs_ref[1:145,]
+# seeds <- unique(runs_ref$SEED)
+# #dodgy, need to remove the above this is for testing purposes
 
 #load the list of parameters that have been optimised
 opt_list <- read.table(paste(cropDir,"/params/optimisation-rules.txt",sep=""),header=T,sep="\t")
@@ -57,7 +62,6 @@ zones <- unique(runs_ref$RUN)
 
 for (z in zones) {
   #z <- zones[1]
-  
   cat("summarising zone",z,"...\n")
   
   #output zone dir
@@ -67,6 +71,7 @@ for (z in zones) {
   if (!file.exists(paste(z_odir,"/plot_data.RData",sep=""))) {
     #output list
     plot_list <- list()
+    pdfs_list <- list()
     #here loop params
     for (pid in 1:length(par_list)) {
       param <- paste(par_list[pid])
@@ -82,9 +87,13 @@ for (z in zones) {
         }
         
         #load parameter response from output.RData in last iteration of a given seed
-        r_dir <- paste(cropDir,"/calib/exp-",idexp,"/z",z,"_rfd_irr/iter-",maxiter,sep="")
-        load(paste(r_dir,"/output.RData",sep=""))
+        r_dir <- paste(cropDir,"/calib/exp-",idexp,"_outputs/optimisation/z",z,"_rfd_irr",sep="")
+        load(paste(r_dir,"/iter-",maxiter,"_output.RData",sep=""))
         
+        #get optimal value
+        this_opt <- optimal[[param]]
+        
+        #get response curve
         this_res <- optimised[[param]]
         names(this_res) <- c("VALUE",paste("S.",seed,sep=""))
         
@@ -92,22 +101,31 @@ for (z in zones) {
         if (sctr == 1) {
           par_res <- rbind(par_res,this_res)
           par_res <- cbind(PARAM=param,par_res)
+          pdf_res <- data.frame(PARAM=param,SEED=paste("S.",seed,sep=""),VALUE=this_opt)
         } else {
           par_res <- merge(par_res,this_res,by="VALUE",all=T,sort=F)
+          pdf_res <- rbind(pdf_res,data.frame(PARAM=param,SEED=paste("S.",seed,sep=""),VALUE=this_opt))
         }
         sctr <- sctr+1
       }
       
       #put the data into the plotting list
       plot_list[[param]] <- par_res
+      pdfs_list[[param]] <- pdf_res
     }
     
+    #response curves data
     plot_data <- do.call("rbind",plot_list)
     row.names(plot_data) <- 1:nrow(plot_data)
     write.csv(plot_data,paste(z_odir,"/plot_data.csv",sep=""),row.names=F,quote=T)
     
+    #pdfs data
+    pdfs_data <- do.call("rbind",pdfs_list)
+    row.names(pdfs_data) <- 1:nrow(pdfs_data)
+    write.csv(pdfs_data,paste(z_odir,"/parameter_values.csv",sep=""),row.names=F,quote=T)
+    
     #save plot_list into a summary folder and create a folder for plots
-    save(list=c("plot_list"),file=paste(z_odir,"/plot_data.RData",sep=""))
+    save(list=c("plot_list","pdfs_data"),file=paste(z_odir,"/plot_data.RData",sep=""))
     
   } else {
     load(paste(z_odir,"/plot_data.RData",sep=""))
@@ -119,6 +137,9 @@ for (z in zones) {
   #plot each parameter response in a different graph with all seeds
   pr_odir <- paste(z_odir,"/param_response_curves",sep="")
   if (!file.exists(pr_odir)) {dir.create(pr_odir)}
+  
+  pf_odir <- paste(z_odir,"/parameter_pdfs",sep="")
+  if (!file.exists(pf_odir)) {dir.create(pf_odir)}
   
   for (i in 1:length(plot_list)) {
     x <- plot_list[[i]]
@@ -139,6 +160,18 @@ for (z in zones) {
         lines(x$VALUE,x[,cid],ty="l",lwd=0.75,col="grey 50")
       }
     }
+    grid(nx=10,ny=10)
+    dev.off()
+    
+    #make density plot
+    dp <- density(pdfs_list[[param]][,"VALUE"])
+    dp$y <- dp$y/max(dp$y)
+    pf_name <- paste(pf_odir,"/",tolower(param),".tif",sep="")
+    tiff(pf_name,res=300,compression="lzw",height=1000,width=1250,pointsize=8)
+    par(mar=c(5,5,2,1))
+    plot(dp$x,dp$y,ty="l",ylim=c(0,1),
+         main=paste(param,sep=""),lwd=0.75,col="black",
+         xlab="Parameter value",ylab="Normalised PDF")
     grid(nx=10,ny=10)
     dev.off()
   }
