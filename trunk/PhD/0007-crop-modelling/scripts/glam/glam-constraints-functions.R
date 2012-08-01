@@ -3,6 +3,52 @@
 #July 2012
 
 
+#change the names of the columns to real names before the
+#stacked plot
+fix_names <- function(in_data,real_names) {
+  for (i in 2:length(names(in_data))) {
+    nam <- names(in_data)[i]
+    if (as.numeric(nam)==0) {
+      rnam <- "NONE"
+    } else {
+      if (nchar(nam) == 1) {
+        rnam <- real_names[as.numeric(nam)]
+      } else {
+        jc <- c()
+        for (j in 1:nchar(nam)) {
+          jc <- c(jc,as.numeric(substr(nam,j,j)))
+          }
+        rnam <- paste(real_names[jc],collapse="_")
+      }
+    }
+    #cat(rnam,"\n")
+    names(in_data)[i] <- rnam
+  }
+  return(in_data)
+}
+
+
+
+#### function to calculate proportion of each constraint in the dominant
+#### constraint raster
+calc_portion_dominant <- function(x,vals) {
+  x <- raster(x)
+  stacked <- data.frame(CONSTRAINT=vals,RATIO=0)
+  #x <- constraints1[[1]]
+  for (i in 1:nrow(stacked)) {
+    v <- stacked$CONSTRAINT[i]
+    pc <- length(which(x[] == v))/length(which(!is.na(x[])))
+    stacked$RATIO[i] <- pc
+  }
+  s2 <- data.frame()
+  s2 <- rbind(s2,t(stacked$RATIO))
+  names(s2) <- stacked$CONSTRAINT
+  #s2 <- cbind(LAYER=layerNames(x),s2)
+  return(s2)
+}
+
+
+
 #function to map the constraints of a given year. This function will produce
 #a map in which a number is assigned to each constraint. Such number corresponds
 #to the constraint that when removed will produce the largest yield gain.
