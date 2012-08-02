@@ -23,6 +23,8 @@ base_exp <- 33 #change if you have done any other experiment
 # selection <- "v4"
 # base_exp <- 31 #change if you have done any other experiment
 
+source(paste(src.dir,"/glam/glam-randomiser-functions.R",sep=""))
+
 cropName <- "gnut"
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
 
@@ -37,12 +39,6 @@ expIDs <- paste(expIDs)
 
 #list of runs to be performed
 runs_ref <- data.frame(SID=1:length(seeds),SEED=seeds,EXPID=expIDs)
-
-#dodgy, need to remove the below. this is for testing purposes
-runs_ref <- runs_ref[1:29,]
-seeds <- unique(runs_ref$SEED)
-#dodgy, need to remove the above this is for testing purposes
-
 
 #output summary folders
 sum_out <- paste(cropDir,"/calib/results_exp",sep="")
@@ -195,86 +191,5 @@ for (z in 1:5) {
     skill_all <- read.csv(paste(sum_spatial,"/skill_spatial.csv",sep=""))
   }
 }
-
-
-
-##############################################################################
-##############################################################################
-#using the skill_all data.frame, here do a K-S test from the one which presents
-#the lowest median RMSE. See what is the significance of the result
-z <- 2
-
-#define folders
-z_odir <- paste(set_odir,"/z",z,"_rfd_irr",sep="")
-sum_spatial <- paste(z_odir,"/spatial",sep="")
-
-#load the skill_spatial.csv
-skill_all <- read.csv(paste(sum_spatial,"/skill_spatial.csv",sep=""))
-
-#create output data.frame
-out_data <- data.frame(EXP=names(skill_all)[5:ncol(skill_all)])
-
-#determine the parameter set with the best skill using the following criteria
-# a. percent of negative correlations should be the lowest (1 best, n worst)
-# b. mean ccoef should be the highest
-# c. median ccoef should be the highest
-# d. highest high-likelihood ccoef should be the highest
-# e. mean rmse lowest
-# f. median rmse lowest
-# g. highest high-likelihood rmse lowest
-# h. mean prmse lowest
-# i. median prmse lowest
-# j. highest high-likelihood prmse lowest
-
-sk_data <- skill_all[skill_all$METRIC == "CCOEF",]
-#a. percent negative correlations should be the lowest
-fun <- function(x) {y <- length(which(x<0)); return(y)}
-x <- apply(sk_data[,5:ncol(sk_data)],2,FUN=fun)
-out_data$a <- order(x,decreasing=F)
-
-#b. percent negative correlations should be the lowest
-x <- apply(sk_data[,5:ncol(sk_data)],2,FUN=mean)
-out_data$b <- order(x,decreasing=T)
-
-#c. percent negative correlations should be the lowest
-x <- apply(sk_data[,5:ncol(sk_data)],2,FUN=median)
-out_data$c <- order(x,decreasing=T)
-
-#d. highest highest-likelihood ccoef
-fun <- function(x) {dp <- density(x);y <- dp$x[which(dp$y==max(dp$y))]; return(y)}
-x <- apply(sk_data[,5:ncol(sk_data)],2,FUN=fun)
-out_data$d <- order(x,decreasing=T)
-
-sk_data <- skill_all[skill_all$METRIC == "RMSE",]
-#e. mean rmse lowest
-fun <- function(x) {dp <- density(x);y <- dp$x[which(dp$y==max(dp$y))]; return(y)}
-x <- apply(sk_data[,5:ncol(sk_data)],2,FUN=fun)
-out_data$e <- order(x,decreasing=F)
-
-
-# b <- apply(t(x),1,FUN=best)
-# x <- as.numeric(which(x == b))
-# best_dist <- sk_data[,x+4]
-# plot(density(sk_data[,x+4]))
-# abline(v=b)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

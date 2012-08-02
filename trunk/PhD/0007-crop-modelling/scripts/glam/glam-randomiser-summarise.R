@@ -40,11 +40,6 @@ runs_ref <- data.frame(SID=1:length(seeds),SEED=seeds,EXPID=expIDs)
 runs_ref2 <- expand.grid(SID=runs_ref$SID,RUN=1:5)
 runs_ref <- merge(runs_ref2,runs_ref,by="SID",all=T,sort=F)
 
-# #dodgy, need to remove the below. this is for testing purposes
-# runs_ref <- runs_ref[1:145,]
-# seeds <- unique(runs_ref$SEED)
-# #dodgy, need to remove the above this is for testing purposes
-
 #load the list of parameters that have been optimised
 opt_list <- read.table(paste(cropDir,"/params/optimisation-rules.txt",sep=""),header=T,sep="\t")
 par_list <- opt_list$param
