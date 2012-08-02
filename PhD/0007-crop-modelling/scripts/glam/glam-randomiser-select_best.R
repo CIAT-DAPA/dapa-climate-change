@@ -237,6 +237,22 @@ for (z in 1:5) {
   }
 }
 
+#final selected parameter optimisation runs. Those that were selected in at least 4
+#of the runs
+if (!file.exists(paste(set_odir,"/runs_discard.csv",sep=""))) {
+  z1_sel <- read.csv(paste(set_odir,"/z1_rfd_irr/parameter_selection/runs_discard.csv",sep=""))
+  z2_sel <- read.csv(paste(set_odir,"/z2_rfd_irr/parameter_selection/runs_discard.csv",sep=""))
+  z3_sel <- read.csv(paste(set_odir,"/z3_rfd_irr/parameter_selection/runs_discard.csv",sep=""))
+  z4_sel <- read.csv(paste(set_odir,"/z4_rfd_irr/parameter_selection/runs_discard.csv",sep=""))
+  z5_sel <- read.csv(paste(set_odir,"/z5_rfd_irr/parameter_selection/runs_discard.csv",sep=""))
+  
+  parset <- data.frame(EXPID=z1_sel$EXPID,Z1=z1_sel$ISSEL_F,Z2=z2_sel$ISSEL_F,
+                       Z3=z3_sel$ISSEL_F,Z4=z4_sel$ISSEL_F,Z5=z5_sel$ISSEL_F)
+  parset$TOTAL <- rowSums(parset[,2:6])
+  parset$ISSEL <- 0
+  parset$ISSEL[which(parset$TOTAL >= 4)] <- 1
+  write.csv(parset,paste(set_odir,"/runs_discard.csv",sep=""),quote=T,row.names=F)
+}
 
 # plot(density(sk_data[,paste(best_post)]))
 # lines(density(sk_data[,"EXP.79"]))
