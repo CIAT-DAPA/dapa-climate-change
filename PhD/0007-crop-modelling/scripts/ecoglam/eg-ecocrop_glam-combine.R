@@ -40,12 +40,16 @@ crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
 ec_dir <- paste(crop_dir,"/ecg_analyses/ecocrop-",tolower(crop_name),sep="")
 glam_dir <- paste(crop_dir,"/ecg_analyses/glam_output",sep="")
 
+###read the experiments that will be used
+parset_list <- read.csv(paste(crop_dir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
+expid_list <- parset_list$EXPID[which(parset_list$ISSEL==1)]
+
 
 #####################################################################
 #####################################################################
 #####################################################################
 #3. coupling of both models
-exp <- 10 #experiment to focus in
+exp <- expid_list[1]
 if (exp < 10) {exp <- paste("0",exp,sep="")} else {exp <- paste(exp)}
 
 #####################################################################
@@ -101,29 +105,29 @@ xy$ECROP <- extract(ecrp_cl,cbind(x=xy$x,y=xy$y))
 xy <- xy[which(!is.na(xy$ECROP)),]
 
 
-#####################################################################
-#exploratory plots
-#scatter plots
-plot(xy$GLAM.POT.RFD,xy$ECROP,pch=20)
-points(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
-points(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
-points(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange",pch=20)
-points(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
-points(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
+# #####################################################################
+# #exploratory plots
+# #scatter plots
+# plot(xy$GLAM.POT.RFD,xy$ECROP,pch=20)
+# points(xy$GLAM.POT.RFD[which(xy$ZONE==1)],xy$ECROP[which(xy$ZONE==1)],col="red",pch=20)
+# points(xy$GLAM.POT.RFD[which(xy$ZONE==2)],xy$ECROP[which(xy$ZONE==2)],col="blue",pch=20)
+# points(xy$GLAM.POT.RFD[which(xy$ZONE==3)],xy$ECROP[which(xy$ZONE==3)],col="orange",pch=20)
+# points(xy$GLAM.POT.RFD[which(xy$ZONE==4)],xy$ECROP[which(xy$ZONE==4)],col="pink",pch=20)
+# points(xy$GLAM.POT.RFD[which(xy$ZONE==5)],xy$ECROP[which(xy$ZONE==5)],col="grey 50",pch=20)
 
-plot(xy$GLAM.POT.IRR,xy$ECROP,pch=20,col="red")
-points(xy$GLAM.POT.BTH,xy$ECROP,pch=20,col="blue")
+# plot(xy$GLAM.POT.IRR,xy$ECROP,pch=20,col="red")
+# points(xy$GLAM.POT.BTH,xy$ECROP,pch=20,col="blue")
+# 
+# points(xy$GLAM.FRM.RFD,xy$ECROP,pch=20,col="red")
+# points(xy$GLAM.FRM.IRR,xy$ECROP,pch=20,col="red")
+# points(xy$GLAM.FRM.BTH,xy$ECROP,pch=20,col="blue")
 
-points(xy$GLAM.FRM.RFD,xy$ECROP,pch=20,col="red")
-points(xy$GLAM.FRM.IRR,xy$ECROP,pch=20,col="red")
-points(xy$GLAM.FRM.BTH,xy$ECROP,pch=20,col="blue")
-
-#density plots to see normality
-dp_glam <- density(scale(xy$GLAM.POT.RFD))
-dp_glam$y <- dp_glam$y/max(dp_glam$y)
-
-dp_ecoc <- density(scale(xy$ECROP))
-dp_ecoc$y <- dp_ecoc$y/max(dp_ecoc$y)
+# #density plots to see normality
+# dp_glam <- density(scale(xy$GLAM.POT.RFD))
+# dp_glam$y <- dp_glam$y/max(dp_glam$y)
+# 
+# dp_ecoc <- density(scale(xy$ECROP))
+# dp_ecoc$y <- dp_ecoc$y/max(dp_ecoc$y)
 
 
 #####################################################################
