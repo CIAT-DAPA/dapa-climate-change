@@ -15,6 +15,7 @@ source(paste(src.dir,"/signals/gridding-functions.R",sep=""))
 #bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM/climate-signals-yield"
 cropName <- "wheatqump"
+format <- "gtiff"
 cd <- paste(bDir,"/",toupper(cropName),sep="")
 
 ##   2.2. Create a 1x1 min resolution raster with the 1x1 degree cells
@@ -77,6 +78,7 @@ for (method in methods) {
   sfExport("dumm")
   sfExport("xy")
   sfExport("yldDir")
+  sfExport("format")
   
   #run the control function
   system.time(sfSapply(as.vector(67:94), controlGridding))
