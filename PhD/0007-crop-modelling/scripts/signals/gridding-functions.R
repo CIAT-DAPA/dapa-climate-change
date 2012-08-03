@@ -34,7 +34,7 @@ gridRaster <- function(inRs,outRs,naVal=-9999,rs_dis,rs_c,rs_a,xy) {
 #Functions for yield data gridding
 #####################################################################
 #function wrapper for parallelising the process over years
-controlGridding <- function(year,format="ascii") {
+controlGridding <- function(year) {
   if (tolower(format)=="ascii") {
     format <- "ascii"
     ext <- ".asc"
