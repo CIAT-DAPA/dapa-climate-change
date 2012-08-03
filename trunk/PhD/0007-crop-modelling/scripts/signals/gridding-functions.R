@@ -41,6 +41,8 @@ controlGridding <- function(year) {
   } else if (tolower(format) == "gtiff") {
     format <- "GTiff"
     ext <- ".tif"
+  } else {
+    stop("invalid format: only gtiff or ascii are allowed")
   }
   
   library(raster)
