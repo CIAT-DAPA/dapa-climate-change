@@ -34,7 +34,15 @@ gridRaster <- function(inRs,outRs,naVal=-9999,rs_dis,rs_c,rs_a,xy) {
 #Functions for yield data gridding
 #####################################################################
 #function wrapper for parallelising the process over years
-controlGridding <- function(year) {
+controlGridding <- function(year,format="ascii") {
+  if (tolower(format)=="ascii") {
+    format <- "ascii"
+    ext <- ".asc"
+  } else if (tolower(format) == "gtiff") {
+    format <- "GTiff"
+    ext <- ".tif"
+  }
+  
   library(raster)
   if (!file.exists(paste(outDir,"/",method,"-",year,".asc",sep=""))) {
     yield_rs <- raster(paste(yldDir,"/",method,"-",year,".asc",sep=""))
@@ -50,7 +58,7 @@ controlGridding <- function(year) {
     #create and write output raster
     out_rs <- raster(dumm)
     out_rs[which(!is.na(dumm[]))] <- x
-    out_rs <- writeRaster(out_rs,paste(outDir,"/",method,"-",year,".asc",sep=""),format="ascii")
+    out_rs <- writeRaster(out_rs,paste(outDir,"/",method,"-",year,ext,sep=""),format=format)
   }
 }
 

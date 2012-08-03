@@ -28,7 +28,6 @@ setup <- list()
 setup$B_DIR <- b_dir
 setup$CROP_NAME <- "gnut"
 setup$CROP_LONG <- "groundnut"
-setup$POT <- F #switch to get either maximum yield (YGP=1), or actual yield (YGP-limited)
 setup$CROP_DIR <- paste(setup$B_DIR,"/model-runs/",toupper(setup$CROP_NAME),sep="")
 setup$SELECTION <- "v6"
 setup$CAL_DIR <- paste(setup$CROP_DIR,"/calib",sep="")
@@ -66,6 +65,7 @@ for (expid in expid_list) {
   ###
   #non-potential yields
   cat("yield-gap limited yields...\n")
+  setup$POT <- F #switch to get either maximum yield (YGP=1), or actual yield (YGP-limited)
   gy_data <- get_grid_data(run_setup=setup,cells=ref_grid,irr_dir=ifrc_dir,varnames=vnames,vid=8) #get yield data
   odir <- write_all_data(gdata=gy_data,cells=ref_grid,run_setup=setup,varnames=vnames,msk=mask,vid=8) #write yield data
   

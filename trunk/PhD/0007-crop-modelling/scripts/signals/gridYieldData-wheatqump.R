@@ -48,7 +48,7 @@ if (!file.exists(paste(cd,"/0_base_grids/india-1min-1d_cells_area.tif",sep="")))
 }
 
 rs_dis <- raster(paste(cd,"/0_base_grids/india-1min-disid.tif",sep=""))
-methods <- c("fou","lin","qua","loe","raw")
+methods <- c("lin","fou","qua","loe","raw")
 
 for (method in methods) {
   outDir <- paste(cDir,"/raster/gridded/",method,sep="")
