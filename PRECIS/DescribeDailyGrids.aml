@@ -1,6 +1,6 @@
-&args rootdir sres model outputdir type
+&args rootdir sres outputdir type
 
-/* &r DescribeDailyGrids.aml L:\climate_change\RCM_Data SRES_A1B ECHAM5 D:\climate_change\RCM_Data\_describes daily
+/* &r DescribeDailyGrids.aml L:\climate_change\RCM_Data SRES_A1B D:\climate_change\RCM_Data\_describes\daily_sres_a1b daily
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
 &sys cls
@@ -8,76 +8,151 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-&s modeldir %rootdir%\%sres%\%model%\%type%_grids
-&s yearlist [listfile %modeldir%\* -dir]
-&s nyear [token %yearlist% -count]
-
 &if [show program] NE GRID &then GRID
 &if not [exists %outputdir% -dir] &then &sys md %outputdir%
 
-&setvar file_unit = [open %outputdir%\precis_%model%_%type%_grids.csv openstatus -write]
-&setvar record = SRES,MODEL,TYPE,YEAR,VAR,GRIDNAME,MEAN,STDV,ZMIN,ZMAX,DX,DY,NCOLS,NROWS
-&if [write %file_unit% %record%] = 0 &then
-&if [close %file_unit%] = 0 &then 
-					
-&do yr = 1 &to %nyear%
-	
-	&s year [extract %yr% %yearlist%]
-		
-		
-		
-	&do var &list CloudAm EvCR EvPotF1 EvPotF2 EvPotR EvSS Prec Press RHum1_5 SHum1_5 SLHeat SoilMRZ SubSR Tmax1_5 Tmean1_5 Tmin1_5 TransR TSmax TSmean TSmin Wsmax Wsmean
-			
-		&ty Describing Daily Grids (%model%,%year%)
-		
-			
-			&do
+&if %type% EQ daily &then
+	&do var &list Tmean1_5 /*Tmin1_5 Wsmean CloudAm EvCR EvPotF1 EvPotF2 EvPotR EvSS Press RHum1_5 SHum1_5 SLHeat SoilMRZ SubSR  TransR TSmax TSmean TSmin Wsmax Wsmean /* Prec Tmax1_5 
 
-				&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+			
+		&setvar file_unit = [open %outputdir%\precis_%sres%_%var%_%type%_grids.csv openstatus -write]
+		&setvar record = SRES,MODEL,TYPE,YEAR,VAR,GRIDNAME,MEAN,STDV,ZMIN,ZMAX,DX,DY,NCOLS,NROWS
+		&if [write %file_unit% %record%] = 0 &then
+		&if [close %file_unit%] = 0 &then 
+
+		&do
+		&s modellist [listfile %rootdir%\%sres%\* -dir]
+		&s nmodel [token %modellist% -count]
+
+			&do md = 1 &to %nmodel%
 				
-				&if %gridlist% EQ 0 &then
-					&do
-						&ty
-						&ty There are no gridfiles within your desired input folder. Bailing out...
-						&ty 
-						&if [show program] EQ GRID &then QUIT
-						&call cleandirs
-						&return
-					&end
-				&else
-					&do
-						&ty
-						&ty Preparing to process %gridlist% files
-						&ty
-						
-						&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
-						
-						&do file = 1 &to %gridlist%
-							
-							&s gridname [READ %openlist% READSTATUS]
-							
-							&ty		%type%	%year%	%gridname% 
-							&describe %modeldir%\%year%\%var%\%gridname%
+				&s model [extract %md% %modellist%]
+				&s modeldir %rootdir%\%sres%\%model%\%type%_grids
 
-							&setvar file_unit = [OPEN %outputdir%\precis_%model%_%type%_grids.csv openstatus -append]
-							&setvar record = %sres%,%model%,%type%,%year%,%var%,%GRD$GRID%,%GRD$MEAN%,%GRD$STDV%,%GRD$ZMIN%,%GRD$ZMAX%,%GRD$DX%,%GRD$DY%,%GRD$NCOLS%,%GRD$NROWS%
-							&if [write %file_unit% %record%] = 0 &then
-							&if [close %file_unit%] = 0 &then 
+				&s yearlist [listfile %modeldir%\* -dir]
+				&s nyear [token %yearlist% -count]					
+				&do yr = 1 &to %nyear%
+					
+					&s year [extract %yr% %yearlist%]	
+					&ty Describing %type% Grids (%model%,%year%)
 
+						&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+						
+						&if %gridlist% EQ 0 &then
+							&do
+								&ty
+								&ty There are no gridfiles within your desired input folder. Bailing out...
+								&ty 
+								&if [show program] EQ GRID &then QUIT
+								&call cleandirs
+								&return
+							&end
+						&else
+							&do
+								&ty
+								&ty Preparing to process %gridlist% files
+								&ty
+								
+								&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+								
+								&do file = 1 &to %gridlist%
+									
+									&s gridname [READ %openlist% READSTATUS]
+									
+									&ty		%type%	%year%	%gridname% 
+									&describe %modeldir%\%year%\%var%\%gridname%
+
+									&setvar file_unit = [OPEN %outputdir%\precis_%sres%_%var%_%type%_grids.csv openstatus -append]
+									&setvar record = %sres%,%model%,%type%,%year%,%var%,%GRD$GRID%,%GRD$MEAN%,%GRD$STDV%,%GRD$ZMIN%,%GRD$ZMAX%,%GRD$DX%,%GRD$DY%,%GRD$NCOLS%,%GRD$NROWS%
+									&if [write %file_unit% %record%] = 0 &then
+									&if [close %file_unit%] = 0 &then 
+
+								&end
+
+								&s closelist [CLOSE %openlist%]
+								&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+								
+								&ty
+								&ty Done!
+								&ty
+								
+							&end
 						&end
+				&end
+			&end		
+	&end
 
-						&s closelist [CLOSE %openlist%]
-						&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
-						
-						&ty
-						&ty Done!
-						&ty
-						
+&else
+&do var &list Prec Tmean1_5 Tmmax1_5 Tmmin1_5 Wsmean CloudAm EvCR EvPotF1 EvPotF2 EvPotR EvSS Press RHum1_5 SHum1_5 SLHeat SoilMAF SoilMRZ SubSR TransR TSmean TSmmax TSmmin Wsmmax 
+
+	&setvar file_unit = [open %outputdir%\precis_%sres%_%var%_%type%_grids.csv openstatus -write]
+	&setvar record = SRES,MODEL,TYPE,YEAR,VAR,GRIDNAME,MEAN,STDV,ZMIN,ZMAX,DX,DY,NCOLS,NROWS
+	&if [write %file_unit% %record%] = 0 &then
+	&if [close %file_unit%] = 0 &then 
+
+	&do
+	&s modellist [listfile %rootdir%\%sres%\* -dir]
+	&s nmodel [token %modellist% -count]
+
+		&do md = 1 &to %nmodel%
+			
+			&s model [extract %md% %modellist%]
+			&s modeldir %rootdir%\%sres%\%model%\%type%_grids
+
+			&s yearlist [listfile %modeldir%\* -dir]
+			&s nyear [token %yearlist% -count]					
+			&do yr = 1 &to %nyear%
+				
+				&s year [extract %yr% %yearlist%]	
+				&ty Describing %type% Grids (%model%,%year%)
+
+					&s gridlist [listfile %modeldir%\%year%\%var%\* -grid %outputdir%\filelist.list]
+					
+					&if %gridlist% EQ 0 &then
+						&do
+							&ty
+							&ty There are no gridfiles within your desired input folder. Bailing out...
+							&ty 
+							&if [show program] EQ GRID &then QUIT
+							&call cleandirs
+							&return
+						&end
+					&else
+						&do
+							&ty
+							&ty Preparing to process %gridlist% files
+							&ty
+							
+							&s openlist [OPEN %outputdir%\filelist.list openstatus -READ]
+							
+							&do file = 1 &to %gridlist%
+								
+								&s gridname [READ %openlist% READSTATUS]
+								
+								&ty		%type%	%year%	%gridname% 
+								&describe %modeldir%\%year%\%var%\%gridname%
+
+								&setvar file_unit = [OPEN %outputdir%\precis_%sres%_%var%_%type%_grids.csv openstatus -append]
+								&setvar record = %sres%,%model%,%type%,%year%,%var%,%GRD$GRID%,%GRD$MEAN%,%GRD$STDV%,%GRD$ZMIN%,%GRD$ZMAX%,%GRD$DX%,%GRD$DY%,%GRD$NCOLS%,%GRD$NROWS%
+								&if [write %file_unit% %record%] = 0 &then
+								&if [close %file_unit%] = 0 &then 
+
+							&end
+
+							&s closelist [CLOSE %openlist%]
+							&if [exists %outputdir%\filelist.list -file] &then &sys del %outputdir%\filelist.list
+							
+							&ty
+							&ty Done!
+							&ty
+							
+						&end
 					&end
 			&end
+		&end		
 	&end
-		
 &end
+
 &call cleandirs
 &return
 /********************************************************************************
