@@ -214,6 +214,7 @@ make_wth <- function(x,cell,wthDir,wthDataDir,fields=list(CELL="CELL",X="X",Y="Y
 #################################################################################
 #################################################################################
 # function to make weather for a number of cells using GCM data
+# IMPORTANT NOTE: for NCC paper only
 #################################################################################
 #################################################################################
 make_wth_gcm <- function(x,cell,wthDir,cmip_wthDataDir,base_wthDataDir,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"),what_leap="yes") {
