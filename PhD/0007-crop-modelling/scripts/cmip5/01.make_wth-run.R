@@ -75,6 +75,7 @@ cmip_wth <- paste(clim_dir,"/gridcell-data/IND_CMIP5/",gcm,"/",ens,sep="") #fold
 outfol <- write_cmip5_cell(cells,cell=cells$CELL[3],gcm,ens,yi=1966,yf=1993,
                            wh_leap,crop_dir,wth_dir,cmip_wth,sow_dir,crop_short)
 
-
+#use this_process <- 23 (csiro_mk3_6_0_ENS_r6i1p1) to solve the issue when 
+#radiation data are monthly and not daily
 
 
