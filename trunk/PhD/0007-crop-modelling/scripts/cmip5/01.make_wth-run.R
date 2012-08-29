@@ -44,6 +44,7 @@ cells$ROW <- rowFromY(rs,cells$Y)
 asc_dir <- paste(input_dir,"/ascii",sep="")
 sow_dir <- paste(asc_dir,"/sow",sep="")
 wth_dir <- paste(asc_dir,"/wth-cmip5",sep="")
+rabi_sow <- raster(paste(crop_dir,"/",tolower(crop_short),"-zones/plant_rabi.asc",sep=""))
 
 if (!file.exists(wth_dir)) {dir.create(wth_dir)}
 
@@ -52,14 +53,13 @@ gcm_chars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,se
 gcm_list <- unique(paste(gcm_chars$GCM,"_ENS_",gcm_chars$Ensemble,sep=""))
 proc_list <- data.frame(GCM=gcm_list)
 
-
 #process a given GCM
-this_proc <- 43
-
+this_proc <- 1 #23 for monthly #test 43 for missing data
 
 #get gcm and ensemble member names
 gcm <- unlist(strsplit(paste(proc_list$GCM[this_proc]),"_ENS_",fixed=T))[1]
 ens <- unlist(strsplit(paste(proc_list$GCM[this_proc]),"_ENS_",fixed=T))[2]
+sce <- paste(gcm,"_ENS_",ens,sep="")
 wh_leap <- paste(gcm_chars$has_leap[which(gcm_chars$GCM == gcm & gcm_chars$Ensemble == ens)][1])
 
 cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
@@ -72,10 +72,21 @@ cmip_wth <- paste(clim_dir,"/gridcell-data/IND_CMIP5/",gcm,"/",ens,sep="") #fold
 ######################################################
 ################## LOOP GRIDCELLS ####################
 ######################################################
-outfol <- write_cmip5_cell(cells,cell=cells$CELL[3],gcm,ens,yi=1966,yf=1993,
-                           wh_leap,crop_dir,wth_dir,cmip_wth,sow_dir,crop_short)
+for (i in 1:nrow(cells)) {
+  cat("processing gridcell number",i,"of",195,"\n")
+  outfol <- write_cmip5_loc(all_locs=cells,gridcell=cells$CELL[i],scen=sce,
+                            year_i=1966,year_f=1993,wleap=wh_leap,out_wth_dir=wth_dir,
+                            fut_wth_dir=cmip_wth,sow_date_dir=sow_dir)
+}
+
 
 #use this_process <- 23 (csiro_mk3_6_0_ENS_r6i1p1) to solve the issue when 
-#radiation data are monthly and not daily
+#radiation data are monthly and not daily. These just need to be linearised
+
+#then run!
+
+
+
+
 
 
