@@ -2,42 +2,80 @@
 #UoL / CCAFS / CIAT
 #August 2012
 
-
+#out_wth_dir <- ./inputs/ascii/wth-cmip5
+#fut_wth_dir <- ./gridcell-data/IND_CMIP5/$GCM$/$ENS$
+#sow_date_dir <- ./inputs/sow
+#wleap <- either no, yes, or "all30" (calendar type)
+#year_i <- initial year of simulation
+#year_f <- final year of simulation
+#all_locs <- all gridcells
+#gridcell <- number of gridcell to process
 #################################################################################
 ### function to write data for a given cell
 #################################################################################
-write_cmip5_cell <- function(cells,cell,gcm,ens,yi,yf,wh_leap,crop_dir,wth_dir,cmip_wth,sow_dir,crop_short) {
+write_cmip5_loc <- function(all_locs,gridcell,scen,year_i,year_f,wleap,out_wth_dir,fut_wth_dir,sow_date_dir) {
   #open the weather files for each variables and select corresponding years
-  pr_data <- read.csv(paste(cmip_wth,"/pr/cell-",cell,".csv",sep=""))
-  pr_data <- pr_data[which(pr_data$YEAR >= yi & pr_data$YEAR <= yf),]
-  pr_mis <- as.numeric(apply(pr_data,1,check_missing,wh_leap,1000))
-  pr_datac <- as.data.frame(t(apply(pr_data,1,correct_neg,wh_leap)))
-  pr_datac <- cbind(YEAR=yi:yf,pr_datac)
+  pr_data <- read.csv(paste(fut_wth_dir,"/pr/cell-",gridcell,".csv",sep=""))
+  pr_data <- pr_data[which(pr_data$YEAR >= year_i & pr_data$YEAR <= year_f),]
+  pr_mis <- as.numeric(apply(pr_data,1,check_missing,wleap,1000))
+  pr_datac <- as.data.frame(t(apply(pr_data,1,correct_neg,0,wleap,"zero")))
+  pr_datac <- cbind(YEAR=year_i:year_f,pr_datac)
   
-  tx_data <- read.csv(paste(cmip_wth,"/tasmax/cell-",cell,".csv",sep=""))
-  tx_data <- tx_data[which(tx_data$YEAR >= yi & tx_data$YEAR <= yf),]
-  tx_mis <- as.numeric(apply(tx_data,1,check_missing,wh_leap,100))
-  tx_mis <- max(c(tx_mis,as.numeric(apply(tx_data,1,check_missing,wh_leap,-100))))
+  tx_data <- read.csv(paste(fut_wth_dir,"/tasmax/cell-",gridcell,".csv",sep=""))
+  tx_data <- tx_data[which(tx_data$YEAR >= year_i & tx_data$YEAR <= year_f),]
+  tx_datac <- as.data.frame(t(apply(tx_data,1,correct_neg,100,wleap,"mean")))
+  tx_datac <- cbind(YEAR=year_i:year_f,tx_datac)
+  tx_mis <- as.numeric(apply(tx_datac,1,check_missing,wleap,100))
+  tx_datac <- as.data.frame(t(apply(tx_datac,1,correct_neg,-100,wleap,"mean")))
+  tx_datac <- cbind(YEAR=year_i:year_f,tx_datac)
+  tx_mis <- max(c(tx_mis,as.numeric(apply(tx_datac,1,check_missing,wleap,-100))))
   
-  tn_data <- read.csv(paste(cmip_wth,"/tasmin/cell-",cell,".csv",sep=""))
-  tn_data <- tn_data[which(tn_data$YEAR >= yi & tn_data$YEAR <= yf),]
-  tn_mis <- as.numeric(apply(tn_data,1,check_missing,wh_leap,100))
-  tn_mis <- max(c(tn_mis,as.numeric(apply(tn_data,1,check_missing,wh_leap,-100))))
+  tn_data <- read.csv(paste(fut_wth_dir,"/tasmin/cell-",gridcell,".csv",sep=""))
+  tn_data <- tn_data[which(tn_data$YEAR >= year_i & tn_data$YEAR <= year_f),]
+  tn_datac <- as.data.frame(t(apply(tn_data,1,correct_neg,100,wleap,"mean")))
+  tn_datac <- cbind(YEAR=year_i:year_f,tn_datac)
+  tn_mis <- as.numeric(apply(tn_datac,1,check_missing,wleap,100))
+  tn_datac <- as.data.frame(t(apply(tn_datac,1,correct_neg,-100,wleap,"mean")))
+  tn_datac <- cbind(YEAR=year_i:year_f,tn_datac)
+  tn_mis <- max(c(tn_mis,as.numeric(apply(tn_datac,1,check_missing,wleap,-100))))
   
-  rs_data <- read.csv(paste(cmip_wth,"/rsds/cell-",cell,".csv",sep=""))
-  rs_data <- rs_data[which(rs_data$YEAR >= yi & rs_data$YEAR <= yf),]
-  rs_mis <- as.numeric(apply(rs_data,1,check_missing,wh_leap,100))
+  rs_data <- read.csv(paste(fut_wth_dir,"/rsds/cell-",gridcell,".csv",sep=""))
+  if (ncol(rs_data) == 13) {
+    rs_data <- rs_data[which(rs_data$YEAR >= (year_i-1) & rs_data$YEAR <= (year_f+1)),]
+  } else {
+    rs_data <- rs_data[which(rs_data$YEAR >= year_i & rs_data$YEAR <= year_f),]
+    rs_datac <- as.data.frame(t(apply(rs_data,1,correct_neg,100,wleap,"mean")))
+    rs_datac <- cbind(YEAR=year_i:year_f,rs_datac)
+    rs_datac <- as.data.frame(t(apply(rs_datac,1,correct_neg,-1e50,wleap,"mean")))
+    rs_datac <- cbind(YEAR=year_i:year_f,rs_datac)
+    rs_data <- rs_datac
+  }
+  rs_mis <- as.numeric(apply(rs_data,1,check_missing,wleap,100))
+  rs_mis <- max(c(rs_mis,as.numeric(apply(rs_data,1,check_missing,wleap,-1e50))))
+  
+  #if no missing radiation data and data are monthly, these need to be linearised
+  if (max(rs_mis) == 0 & ncol(rs_data) == 13) {
+    #put dec prev year into m0 and jan next yr into m13
+    rs_datas <- rs_data; rs_datas$YEAR <- NULL
+    rs_datas <- cbind(MONTH0=c(NA,rs_datas$MONTH12[1:(nrow(rs_datas)-1)]),rs_datas)
+    rs_datas <- cbind(rs_datas,MONTH13=c(rs_datas$MONTH1[2:nrow(rs_datas)],NA))
+    rs_datas <- cbind(YEAR=rs_data$YEAR,rs_datas)
+    rs_datas <- rs_datas[which(rs_datas$YEAR >= year_i & rs_datas$YEAR <= year_f),]
+    rs_datas <- as.data.frame(t(apply(rs_datas,1,scale_monthly)))
+    rs_datas <- cbind(YEAR=year_i:year_f,rs_datas)
+    names(rs_datas) <- c("YEAR",paste("X",1:365,sep=""))
+    rs_data <- rs_datas
+  }
   
   ##########################################################################
   #only if there is no missing data this will be written per year to a file
-  
   #folder and file where missing reports will be filed
-  mis_dir <- paste(wth_dir,"/_missing",sep="")
+  mis_dir <- paste(out_wth_dir,"/_missing",sep="")
   if (!file.exists(mis_dir)) {dir.create(mis_dir)}
-  mis_fil <- paste(mis_dir,"/",gcm,"_ENS_",ens,".missing",sep="")
+  mis_fil <- paste(mis_dir,"/",scen,".missing",sep="")
   
   #output folder
-  owth_dir <- paste(wth_dir,"/",gcm,"_ENS_",ens,sep="")
+  owth_dir <- paste(out_wth_dir,"/",scen,sep="")
   
   data_val <- max(c(pr_mis,tx_mis,tn_mis,rs_mis))
   if (data_val == 0) {
@@ -47,16 +85,16 @@ write_cmip5_cell <- function(cells,cell,gcm,ens,yi,yf,wh_leap,crop_dir,wth_dir,c
       if (!file.exists(owth_dir)) {dir.create(owth_dir,recursive=T)}
       
       #load sowing date (khariff)
-      sow_date <- read.fortran(paste(sow_dir,"/sowing_",cell,"_start.txt",sep=""),format=c("2I4","I6"))
+      sow_date <- read.fortran(paste(sow_date_dir,"/sowing_",gridcell,"_start.txt",sep=""),format=c("2I4","I6"))
       sow_date <- as.numeric(sow_date$V3)
-      cells$SOW_DATE <- sow_date
+      all_locs$SOW_DATE <- sow_date
       
       cat("constructing wth files for rainfed system\n")
-      out_wth <- make_wth_cmip5(x=cells,cell,wthDir=paste(owth_dir,"/rfd_",cell,sep=""),
-                                cmip_wthDataDir=cmip_wth,
+      out_wth <- make_wth_cmip5(x=all_locs,gridcell,wthDir=paste(owth_dir,"/rfd_",gridcell,sep=""),
+                                cmip_wthDataDir=fut_wth_dir,
                                 fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"),
-                                what_leap=wh_leap,yi=yi,yf=yf,pr=pr_datac,tasmax=tx_data,
-                                tasmin=tn_data,rsds=rs_data)
+                                what_leap=wleap,yi=year_i,yf=year_f,pr=pr_datac,
+                                tasmax=tx_datac,tasmin=tn_datac,rsds=rs_data)
       
       #Study on groundnuts says that irrigated gnuts in Gujarat are sown between Jan-Feb and harvested
       #between April and May: sown in day 32 [zone 2]
@@ -68,22 +106,21 @@ write_cmip5_cell <- function(cells,cell,gcm,ens,yi,yf,wh_leap,crop_dir,wth_dir,c
       
       #This info was condensed into a raster file, which has the planting information per
       #Indian groundnut growing zone (that was done manually). Loading it...
-      rabi_sow <- raster(paste(crop_dir,"/",tolower(crop_short),"-zones/plant_rabi.asc",sep=""))
-      icells <- cells; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y))
+      icells <- all_locs; icells$SOW_DATE <- extract(rabi_sow,cbind(x=icells$X,y=icells$Y))
       
       cat("constructing wth files for rabi (irrigated) system\n")
-      owthDir <- make_wth_cmip5(x=icells,cell,wthDir=paste(owth_dir,"/irr_",cell,sep=""),
-                                cmip_wthDataDir=cmip_wth,
+      owthDir <- make_wth_cmip5(x=icells,gridcell,wthDir=paste(owth_dir,"/irr_",gridcell,sep=""),
+                                cmip_wthDataDir=fut_wth_dir,
                                 fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"),
-                                what_leap=wh_leap,yi=yi,yf=yf,pr=pr_datac,tasmax=tx_data,
-                                tasmin=tn_data,rsds=rs_data)
+                                what_leap=wleap,yi=year_i,yf=year_f,pr=pr_datac,
+                                tasmax=tx_datac,tasmin=tn_datac,rsds=rs_data)
     }
   } else {
     #if there is missing data then i have to write some file indicative of
     #missing data, so i can verify and not write anything else for that model
     #(as needed)
     mf <- file(mis_fil,"a")
-    cat("missing data found at cell:",cell,"\n",file=mf)
+    cat("missing data found at gridcell:",gridcell,"\n",file=mf)
     close(mf)
     
     if (file.exists(owth_dir)) {
@@ -277,9 +314,20 @@ make_wth_cmip5 <- function(x,cell,wthDir,cmip_wthDataDir,
 
 
 #########################################################
+#function to scale all monthly data to daily (linear interpolation)
+#########################################################
+scale_monthly <- function(x) {
+  year <- x[1]
+  data <- x[2:length(x)]
+  data <- linearise(data)[16:(365+15)]
+  return(data)
+}
+
+
+#########################################################
 #function to check whether there is any missing data in the set of years selected
 #########################################################
-correct_neg <- function(x,wleap) {
+correct_neg <- function(x,thresh=0,wleap,how="thresh") {
   year <- x[1]
   data <- x[2:length(x)]
   
@@ -288,7 +336,19 @@ correct_neg <- function(x,wleap) {
   if (wleap == "no") {data <- data[1:365]}
   if (wleap == "all30") {data <- data[1:360]}
   
-  data[which(data<0)] <- 0
+  if (how=="zero") {
+    data[which(data<thresh)] <- thresh
+  } else if (how=="mean") {
+    if (thresh < 0) {
+      mis_p <- which(data<thresh)
+    } else {
+      mis_p <- which(data>thresh)
+    }
+    for (i in 1:length(mis_p)) {
+      this_pos <- mis_p[i]
+      data[this_pos] <- mean(c(data[(this_pos-1)],data[(this_pos+1)]),na.rm=F)
+    }
+  }
   return(data)
 }
 
@@ -301,16 +361,27 @@ check_missing <- function(x,wleap,thresh) {
   year <- x[1]
   data <- x[2:length(x)]
   
-  nd <- leap(year)
-  if (nd == 365) {data <- data[1:nd]}
-  if (wleap == "no") {data <- data[1:365]}
-  if (wleap == "all30") {data <- data[1:360]}
-  
-  nas <- length(which(is.na(data))) #number of no data
-  if (thresh > 0) {
-    nex <- length(which(data>thresh)) #number of data exceeding a given threshold
+  if (length(data) == 12) {
+    #if data are monthly
+    nas <- length(which(is.na(data))) #number of no data
+    if (thresh > 0) {
+      nex <- length(which(data>thresh)) #number of data exceeding a given threshold
+    } else {
+      nex <- length(which(data<thresh)) #number of data exceeding a given threshold
+    }
+    
   } else {
-    nex <- length(which(data<thresh)) #number of data exceeding a given threshold
+    nd <- leap(year)
+    if (nd == 365) {data <- data[1:nd]}
+    if (wleap == "no") {data <- data[1:365]}
+    if (wleap == "all30") {data <- data[1:360]}
+    
+    nas <- length(which(is.na(data))) #number of no data
+    if (thresh > 0) {
+      nex <- length(which(data>thresh)) #number of data exceeding a given threshold
+    } else {
+      nex <- length(which(data<thresh)) #number of data exceeding a given threshold
+    }
   }
   
   nms <- max(c(nas,nex))
