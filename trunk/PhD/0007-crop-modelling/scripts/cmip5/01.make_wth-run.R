@@ -53,6 +53,8 @@ proc_list <- data.frame(GCM=gcm_list)
 #process a given GCM #23 for monthly #test 43 for missing data
 wth_cmip5_wrapper(1)
 
+## do something to the process status so repetition is avoided
+
 #then run!
 
 
