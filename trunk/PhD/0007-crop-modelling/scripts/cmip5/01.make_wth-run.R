@@ -20,41 +20,38 @@ source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
 source(paste(src.dir,"/cmip5/01.make_wth-functions.R",sep=""))
 
-base_dir <- "W:/eejarv/PhD-work/crop-modelling"
+#base directory
+#base_dir <- "W:/eejarv/PhD-work/crop-modelling"
 base_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 
-ver <- "v6"
-
-glam_dir <- paste(base_dir,"/GLAM",sep="")
-clim_dir <- paste(base_dir,"/climate-data",sep="")
+#other details
 crop_name <- "groundnut"
 crop_short <- "gnut"
+ver <- "v6"
+
+#input directories
+glam_dir <- paste(base_dir,"/GLAM",sep="")
+clim_dir <- paste(base_dir,"/climate-data",sep="")
 crop_dir <- paste(glam_dir,"/model-runs/",toupper(crop_short),sep="")
 input_dir <- paste(crop_dir,"/inputs",sep="")
-
-#these are the cells that have both yield and rainfall data
-cells <- read.csv(paste(input_dir,"/calib-cells-selection-",ver,".csv",sep=""))
-
-#get longitude and latitude (row and column)
-rs <- raster(paste(glam_dir,"/climate-signals-yield/",toupper(crop_short),"/0_base_grids/igp_dummy.tif",sep=""))
-cells$COL <- colFromX(rs,cells$X)
-cells$ROW <- rowFromY(rs,cells$Y)
-
-#output folders
 asc_dir <- paste(input_dir,"/ascii",sep="")
 sow_dir <- paste(asc_dir,"/sow",sep="")
-wth_dir <- paste(asc_dir,"/wth-cmip5",sep="")
-rabi_sow <- raster(paste(crop_dir,"/",tolower(crop_short),"-zones/plant_rabi.asc",sep=""))
 
+#output directories
+wth_dir <- paste(asc_dir,"/wth-cmip5",sep="")
 if (!file.exists(wth_dir)) {dir.create(wth_dir)}
+
+#data that is needed by the process
+cells <- read.csv(paste(input_dir,"/calib-cells-selection-",ver,".csv",sep=""))
+rabi_sow <- raster(paste(crop_dir,"/",tolower(crop_short),"-zones/plant_rabi.asc",sep=""))
 
 #list of gcms
 gcm_chars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
 gcm_list <- unique(paste(gcm_chars$GCM,"_ENS_",gcm_chars$Ensemble,sep=""))
 proc_list <- data.frame(GCM=gcm_list)
 
-#process a given GCM
-this_proc <- 1 #23 for monthly #test 43 for missing data
+#process a given GCM #23 for monthly #test 43 for missing data
+wth_cmip5_wrapper(1)
 
 #then run!
 
