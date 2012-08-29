@@ -2,6 +2,35 @@
 #UoL / CCAFS / CIAT
 #August 2012
 
+#################################################################################
+### wrapper function to write data for a scenario
+#################################################################################
+wth_cmip5_wrapper <- function(this_proc) {
+  #get gcm and ensemble member names
+  gcm <- unlist(strsplit(paste(proc_list$GCM[this_proc]),"_ENS_",fixed=T))[1]
+  ens <- unlist(strsplit(paste(proc_list$GCM[this_proc]),"_ENS_",fixed=T))[2]
+  sce <- paste(gcm,"_ENS_",ens,sep="")
+  wh_leap <- paste(gcm_chars$has_leap[which(gcm_chars$GCM == gcm & gcm_chars$Ensemble == ens)][1])
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("process started for",gcm,"-",ens,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  #directories where the data is
+  cmip_wth <- paste(clim_dir,"/gridcell-data/IND_CMIP5/",gcm,"/",ens,sep="") #folder with gridded data
+  
+  ######################################################
+  ################## LOOP GRIDCELLS ####################
+  ######################################################
+  for (i in 1:nrow(cells)) {
+    cat("processing gridcell number",i,"of",195,"\n")
+    outfol <- write_cmip5_loc(all_locs=cells,gridcell=cells$CELL[i],scen=sce,
+                              year_i=1966,year_f=1993,wleap=wh_leap,out_wth_dir=wth_dir,
+                              fut_wth_dir=cmip_wth,sow_date_dir=sow_dir)
+  }
+}
+
+
 #out_wth_dir <- ./inputs/ascii/wth-cmip5
 #fut_wth_dir <- ./gridcell-data/IND_CMIP5/$GCM$/$ENS$
 #sow_date_dir <- ./inputs/sow
