@@ -28,6 +28,7 @@ wth_cmip5_wrapper <- function(this_proc) {
                               year_i=1966,year_f=1993,wleap=wh_leap,out_wth_dir=wth_dir,
                               fut_wth_dir=cmip_wth,sow_date_dir=sow_dir)
   }
+  return("done!")
 }
 
 
