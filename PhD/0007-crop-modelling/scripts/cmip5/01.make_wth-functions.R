@@ -19,15 +19,22 @@ wth_cmip5_wrapper <- function(this_proc) {
   #directories where the data is
   cmip_wth <- paste(clim_dir,"/gridcell-data/IND_CMIP5/",gcm,"/",ens,sep="") #folder with gridded data
   
+  #directories where check files are
+  check_dir <- paste(wth_dir,"/_process",sep="")
+  if (!file.exists(check_dir)) {dir.create(check_dir)}
+  
   ######################################################
   ################## LOOP GRIDCELLS ####################
   ######################################################
   for (i in 1:nrow(cells)) {
-    cat("processing gridcell number",i,"of",195,"\n")
+    cat("\nprocessing gridcell number",i,"of",195,"\n")
     outfol <- write_cmip5_loc(all_locs=cells,gridcell=cells$CELL[i],scen=sce,
                               year_i=1966,year_f=1993,wleap=wh_leap,out_wth_dir=wth_dir,
                               fut_wth_dir=cmip_wth,sow_date_dir=sow_dir)
   }
+  ff <- file(paste(check_dir,"/",sce,".proc",sep=""),"w")
+  cat("Processed on",date(),"\n",file=ff)
+  close(ff)
   return("done!")
 }
 
