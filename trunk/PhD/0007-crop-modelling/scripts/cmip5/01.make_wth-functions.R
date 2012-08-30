@@ -3,9 +3,25 @@
 #August 2012
 
 #################################################################################
+### function to check which of the models are indeed done
+#################################################################################
+check_progress <- function(this_proc,out_wth_dir) {
+  check_dir <- paste(out_wth_dir,"/_process",sep="")
+  scen <- proc_list$GCM[this_proc]
+  ctrl_file <- paste(check_dir,"/",scen,".proc",sep="")
+  if (!file.exists(ctrl_file)) {val <- this_proc} else {val <- NA}
+  return(val)
+}
+
+#################################################################################
 ### wrapper function to write data for a scenario
 #################################################################################
 wth_cmip5_wrapper <- function(this_proc) {
+  #sourcing required scripts
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/01.make_wth-functions.R",sep=""))
+  
   #get gcm and ensemble member names
   gcm <- unlist(strsplit(paste(proc_list$GCM[this_proc]),"_ENS_",fixed=T))[1]
   ens <- unlist(strsplit(paste(proc_list$GCM[this_proc]),"_ENS_",fixed=T))[2]
