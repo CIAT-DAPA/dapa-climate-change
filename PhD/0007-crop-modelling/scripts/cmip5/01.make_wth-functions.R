@@ -17,6 +17,9 @@ check_progress <- function(this_proc,out_wth_dir) {
 ### wrapper function to write data for a scenario
 #################################################################################
 wth_cmip5_wrapper <- function(this_proc) {
+  #loading libraries
+  library(rgdal); library(sp); library(raster)
+  
   #sourcing required scripts
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
