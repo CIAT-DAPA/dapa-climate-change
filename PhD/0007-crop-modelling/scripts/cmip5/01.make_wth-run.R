@@ -28,6 +28,7 @@ base_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 crop_name <- "groundnut"
 crop_short <- "gnut"
 ver <- "v6"
+max_cpus <- 10
 
 #input directories
 glam_dir <- paste(base_dir,"/GLAM",sep="")
@@ -48,14 +49,56 @@ rabi_sow <- raster(paste(crop_dir,"/",tolower(crop_short),"-zones/plant_rabi.asc
 #list of gcms
 gcm_chars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
 gcm_list <- unique(paste(gcm_chars$GCM,"_ENS_",gcm_chars$Ensemble,sep=""))
-proc_list <- data.frame(GCM=gcm_list)
+proc_list <- data.frame(PID=1:length(gcm_list),GCM=gcm_list)
 
+#list processes
+done_list <- unlist(lapply(1:nrow(proc_list),check_progress,wth_dir))
+done_list <- done_list[which(!is.na(done_list))]
+if (length(done_list)==0) {
+  proc_list <- data.frame(GCM=NA)
+} else {
+  proc_list <- proc_list[done_list,]
+}
+
+#determine number of cpus
+if (nrow(proc_list) > max_cpus) {ncpus <- max_cpus} else {ncpus <- nrow(proc_list)}
+
+#testing runs!
 #process a given GCM #23 for monthly #test 43 for missing data
-wth_cmip5_wrapper(1)
+#wth_cmip5_wrapper(1)
 
-## do something to the process status so repetition is avoided
+#then run in parallel
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
 
-#then run!
+#export variables
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("base_dir")
+sfExport("crop_name")
+sfExport("crop_short")
+sfExport("ver")
+sfExport("max_cpus")
+sfExport("glam_dir")
+sfExport("clim_dir")
+sfExport("crop_dir")
+sfExport("input_dir")
+sfExport("asc_dir")
+sfExport("sow_dir")
+sfExport("wth_dir")
+sfExport("cells")
+sfExport("rabi_sow")
+sfExport("gcm_chars")
+sfExport("gcm_list")
+sfExport("proc_list")
+sfExport("gcm_chars")
+
+#run the function in parallel
+system.time(sfSapply(as.vector(proc_list$PID),wth_cmip5_wrapper))
+
+#stop the cluster
+sfStop()
+
 
 
 
