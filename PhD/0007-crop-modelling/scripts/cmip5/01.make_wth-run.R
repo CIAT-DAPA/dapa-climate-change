@@ -39,7 +39,7 @@ asc_dir <- paste(input_dir,"/ascii",sep="")
 sow_dir <- paste(asc_dir,"/sow",sep="")
 
 #output directories
-wth_dir <- paste(asc_dir,"/wth-cmip5",sep="")
+wth_dir <- paste(asc_dir,"/wth-cmip5_hist",sep="")
 if (!file.exists(wth_dir)) {dir.create(wth_dir)}
 
 #data that is needed by the process

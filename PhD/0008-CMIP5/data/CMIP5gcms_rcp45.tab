@@ -1,0 +1,226 @@
+ID	Fileset	GCM	Ensemble	iYear	iMonth	iDay	fYear	fMonth	fDay	ncol	res_x	nrow	res_y	has_leap	pr_unit	tas_unit	naming	srad_naming	Notes
+1	1	bcc_csm1_1	r1i1p1	2006	1	1	2099	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_bcc-csm1-1_rcp45_r1i1p1_20060101-20991231.nc	rsds_day_bcc-csm1-1_rcp45_r1i1p1_20060101-20991231.nc	NA
+2	1	bnu_esm	r1i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_BNU-ESM_rcp45_r1i1p1_20060101-21001231.nc	rsds_day_BNU-ESM_rcp45_r1i1p1_20060101-21001231.nc	NA
+3	1	cccma_canesm2	r1i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_rcp45_r1i1p1_20060101-21001231.nc	rsds_day_CanESM2_rcp45_r1i1p1_20060101-21001231.nc	NA
+4	2	cccma_canesm2	r2i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_rcp45_r2i1p1_20060101-21001231.nc	rsds_day_CanESM2_rcp45_r2i1p1_20060101-21001231.nc	NA
+5	3	cccma_canesm2	r3i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_rcp45_r3i1p1_20060101-21001231.nc	rsds_day_CanESM2_rcp45_r3i1p1_20060101-21001231.nc	NA
+6	4	cccma_canesm2	r4i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_rcp45_r4i1p1_20060101-21001231.nc	rsds_day_CanESM2_rcp45_r4i1p1_20060101-21001231.nc	NA
+7	5	cccma_canesm2	r5i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	no	kg m-2 s-1	K	%var%_day_CanESM2_rcp45_r5i1p1_20060101-21001231.nc	rsds_day_CanESM2_rcp45_r5i1p1_20060101-21001231.nc	NA
+8	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2016	1	1	2020	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20160101-20201231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20160101-20201231.nc	NA
+9	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2021	1	1	2025	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20210101-20251231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20210101-20251231.nc	NA
+10	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2026	1	1	2030	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20260101-20301231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20260101-20301231.nc	NA
+11	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2031	1	1	2035	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20310101-20351231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20310101-20351231.nc	NA
+12	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2036	1	1	2040	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20360101-20401231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20360101-20401231.nc	NA
+13	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2041	1	1	2045	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20410101-20451231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20410101-20451231.nc	NA
+14	1	cnrm_cerfacs_cnrm_cm5	r1i1p1	2046	1	1	2050	12	31	256	1.40625	128	1.40625	yes	kg m-2 s-1	K	%var%_day_CNRM-CM5_rcp45_r1i1p1_20460101-20501231.nc	rsds_day_CNRM-CM5_rcp45_r1i1p1_20460101-20501231.nc	NA
+15	1	csiro_access1_0	r1i1p1	2006	1	1	2030	12	31	192	1.875	145	1.24138	yes	kg m-2 s-1	K	%var%_day_ACCESS1-0_rcp45_r1i1p1_20060101-20301231.nc	rsds_Amon_ACCESS1-0_rcp45_r1i1p1_200601-210012.nc	NA
+16	1	csiro_access1_0	r1i1p1	2031	1	1	2055	12	31	192	1.875	145	1.24138	yes	kg m-2 s-1	K	%var%_day_ACCESS1-0_rcp45_r1i1p1_20310101-20551231.nc	rsds_Amon_ACCESS1-0_rcp45_r1i1p1_200601-210012.nc	NA
+17	1	csiro_access1_0	r1i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r1i1p1_20060101-20251231.nc	rsds_day_CSIRO-Mk3-6-0_rcp45_r1i1p1_20060101-20251231.nc	NA
+18	1	csiro_access1_0	r1i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r1i1p1_20260101-20451231.nc	rsds_day_CSIRO-Mk3-6-0_rcp45_r1i1p1_20260101-20451231.nc	NA
+19	1	csiro_access1_0	r1i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r1i1p1_20460101-20651231.nc	rsds_day_CSIRO-Mk3-6-0_rcp45_r1i1p1_20460101-20651231.nc	NA
+20	2	csiro_access1_0	r2i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r2i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r2i1p1_200601-210012.nc	NA
+21	2	csiro_access1_0	r2i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r2i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r2i1p1_200601-210012.nc	NA
+22	2	csiro_access1_0	r2i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r2i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r2i1p1_200601-210012.nc	NA
+23	3	csiro_access1_0	r3i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r3i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r3i1p1_200601-210012.nc	NA
+24	3	csiro_access1_0	r3i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r3i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r3i1p1_200601-210012.nc	NA
+25	3	csiro_access1_0	r3i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r3i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r3i1p1_200601-210012.nc	NA
+26	4	csiro_access1_0	r4i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r4i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r4i1p1_200601-210012.nc	NA
+27	4	csiro_access1_0	r4i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r4i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r4i1p1_200601-210012.nc	NA
+28	4	csiro_access1_0	r4i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r4i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r4i1p1_200601-210012.nc	NA
+29	5	csiro_access1_0	r5i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r5i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r5i1p1_200601-210012.nc	NA
+30	5	csiro_access1_0	r5i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r5i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r5i1p1_200601-210012.nc	NA
+31	5	csiro_access1_0	r5i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r5i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r5i1p1_200601-210012.nc	NA
+32	6	csiro_access1_0	r6i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r6i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r6i1p1_200601-210012.nc	NA
+33	6	csiro_access1_0	r6i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r6i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r6i1p1_200601-210012.nc	NA
+34	6	csiro_access1_0	r6i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r6i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r6i1p1_200601-210012.nc	NA
+35	7	csiro_access1_0	r7i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r7i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r7i1p1_200601-210012.nc	NA
+36	7	csiro_access1_0	r7i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r7i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r7i1p1_200601-210012.nc	NA
+37	7	csiro_access1_0	r7i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r7i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r7i1p1_200601-210012.nc	NA
+38	8	csiro_access1_0	r8i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r8i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r8i1p1_200601-210012.nc	NA
+39	8	csiro_access1_0	r8i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r8i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r8i1p1_200601-210012.nc	NA
+40	8	csiro_access1_0	r8i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r8i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r8i1p1_200601-210012.nc	NA
+41	9	csiro_access1_0	r9i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r9i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r9i1p1_200601-210012.nc	NA
+42	9	csiro_access1_0	r9i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r9i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r9i1p1_200601-210012.nc	NA
+43	9	csiro_access1_0	r9i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r9i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r9i1p1_200601-210012.nc	NA
+44	10	csiro_access1_0	r9i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r10i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r10i1p1_200601-210012.nc	NA
+45	10	csiro_access1_0	r9i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r10i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r10i1p1_200601-210012.nc	NA
+46	10	csiro_access1_0	r9i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r10i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r10i1p1_200601-210012.nc	NA
+47	1	ichec_ec_earth	r6i1p1	2006	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r6i1p1_20060101-20251231.nc	missing	NA
+48	1	ichec_ec_earth	r6i1p1	2026	1	1	2050	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r6i1p1_20260101-20501231.nc	missing	NA
+49	2	ichec_ec_earth	r8i1p1	2006	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r8i1p1_20060101-20251231.nc	missing	NA
+50	2	ichec_ec_earth	r8i1p1	2026	1	1	2050	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r8i1p1_20260101-20501231.nc	missing	NA
+51	1	inm_inmcm4	r1i1p1	2016	1	1	2025	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20160101-20251231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20160101-20251231.nc	NA
+52	1	inm_inmcm4	r1i1p1	2026	1	1	2035	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20260101-20351231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20260101-20351231.nc	NA
+53	1	inm_inmcm4	r1i1p1	2036	1	1	2045	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20360101-20451231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20360101-20451231.nc	NA
+54	1	inm_inmcm4	r1i1p1	2046	1	1	2055	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20460101-20551231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20460101-20551231.nc	NA
+55	1	ipsl_ipsl_cm5a_lr	r1i1p1	2006	1	1	2205	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_rcp45_r1i1p1_20060101-22051231.nc	rsds_day_IPSL-CM5A-LR_rcp45_r1i1p1_20060101-22051231.nc	NA
+56	2	ipsl_ipsl_cm5a_lr	r2i1p1	2006	1	1	2055	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_rcp45_r2i1p1_20060101-20551231.nc	rsds_day_IPSL-CM5A-LR_rcp45_r2i1p1_20060101-20551231.nc	NA
+57	3	ipsl_ipsl_cm5a_lr	r3i1p1	2006	1	1	2100	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_rcp45_r3i1p1_20060101-21001231.nc	rsds_day_IPSL-CM5A-LR_rcp45_r3i1p1_20060101-21001231.nc	NA
+58	4	ipsl_ipsl_cm5a_lr	r4i1p1	2006	1	1	2100	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-LR_rcp45_r4i1p1_20060101-21001231.nc	rsds_day_IPSL-CM5A-LR_rcp45_r4i1p1_20060101-21001231.nc	NA
+59	1	ipsl_ipsl_cm5a_mr	r1i1p1	2006	1	1	2055	12	31	144	2.5	143	1.2587	no	kg m-2 s-1	K	%var%_day_IPSL-CM5A-MR_rcp45_r1i1p1_20060101-20551231.nc	rsds_day_IPSL-CM5A-MR_rcp45_r1i1p1_20060101-20551231.nc	NA
+60	1	ipsl_ipsl_cm5b_lr	r1i1p1	2006	1	1	2100	12	31	96	3.75	96	1.875	no	kg m-2 s-1	K	%var%_day_IPSL-CM5B-LR_rcp45_r1i1p1_20060101-21001231.nc	rsds_day_IPSL-CM5B-LR_rcp45_r1i1p1_20060101-21001231.nc	NA
+61	1	miroc_miroc_esm	r1i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	yes	kg m-2 s-1	K	%var%_day_MIROC-ESM_rcp45_r1i1p1_20060101-21001231.nc	rsds_day_MIROC-ESM_rcp45_r1i1p1_20060101-21001231.nc	NA
+62	1	miroc_miroc_esm_chem	r1i1p1	2006	1	1	2100	12	31	128	2.8125	64	2.8125	yes	kg m-2 s-1	K	%var%_day_MIROC-ESM-CHEM_rcp45_r1i1p1_20060101-21001231.nc	rsds_day_MIROC-ESM-CHEM_rcp45_r1i1p1_20060101-21001231.nc	NA
+63	1	miroc_miroc4h	r1i1p1	2006	1	1	2006	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20060101-20061231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20060101-20061231.nc	NA
+64	1	miroc_miroc4h	r1i1p1	2007	1	1	2007	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20070101-20071231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20070101-20071231.nc	NA
+65	1	miroc_miroc4h	r1i1p1	2008	1	1	2008	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20080101-20081231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20080101-20081231.nc	NA
+66	1	miroc_miroc4h	r1i1p1	2009	1	1	2009	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20090101-20091231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20090101-20091231.nc	NA
+67	1	miroc_miroc4h	r1i1p1	2010	1	1	2010	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20100101-20101231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20100101-20101231.nc	NA
+68	1	miroc_miroc4h	r1i1p1	2011	1	1	2011	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20110101-20111231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20110101-20111231.nc	NA
+69	1	miroc_miroc4h	r1i1p1	2012	1	1	2012	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20120101-20121231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20120101-20121231.nc	NA
+70	1	miroc_miroc4h	r1i1p1	2013	1	1	2013	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20130101-20131231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20130101-20131231.nc	NA
+71	1	miroc_miroc4h	r1i1p1	2014	1	1	2014	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20140101-20141231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20140101-20141231.nc	NA
+72	1	miroc_miroc4h	r1i1p1	2015	1	1	2015	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20150101-20151231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20150101-20151231.nc	NA
+73	1	miroc_miroc4h	r1i1p1	2016	1	1	2016	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20160101-20161231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20160101-20161231.nc	NA
+74	1	miroc_miroc4h	r1i1p1	2017	1	1	2017	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20170101-20171231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20170101-20171231.nc	NA
+75	1	miroc_miroc4h	r1i1p1	2018	1	1	2018	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20180101-20181231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20180101-20181231.nc	NA
+76	1	miroc_miroc4h	r1i1p1	2019	1	1	2019	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20190101-20191231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20190101-20191231.nc	NA
+77	1	miroc_miroc4h	r1i1p1	2020	1	1	2020	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20200101-20201231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20200101-20201231.nc	NA
+78	1	miroc_miroc4h	r1i1p1	2021	1	1	2021	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20210101-20211231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20210101-20211231.nc	NA
+79	1	miroc_miroc4h	r1i1p1	2022	1	1	2022	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20220101-20221231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20220101-20221231.nc	NA
+80	1	miroc_miroc4h	r1i1p1	2023	1	1	2023	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20230101-20231231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20230101-20231231.nc	NA
+81	1	miroc_miroc4h	r1i1p1	2024	1	1	2024	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20240101-20241231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20240101-20241231.nc	NA
+82	1	miroc_miroc4h	r1i1p1	2025	1	1	2025	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20250101-20251231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20250101-20251231.nc	NA
+83	1	miroc_miroc4h	r1i1p1	2026	1	1	2026	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20260101-20261231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20260101-20261231.nc	NA
+84	1	miroc_miroc4h	r1i1p1	2027	1	1	2027	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20270101-20271231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20270101-20271231.nc	NA
+85	1	miroc_miroc4h	r1i1p1	2028	1	1	2028	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20280101-20281231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20280101-20281231.nc	NA
+86	1	miroc_miroc4h	r1i1p1	2029	1	1	2029	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20290101-20291231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20290101-20291231.nc	NA
+87	1	miroc_miroc4h	r1i1p1	2030	1	1	2030	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20300101-20301231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20300101-20301231.nc	NA
+88	1	miroc_miroc4h	r1i1p1	2031	1	1	2031	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20310101-20311231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20310101-20311231.nc	NA
+89	1	miroc_miroc4h	r1i1p1	2032	1	1	2032	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20320101-20321231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20320101-20321231.nc	NA
+90	1	miroc_miroc4h	r1i1p1	2033	1	1	2033	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20330101-20331231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20330101-20331231.nc	NA
+91	1	miroc_miroc4h	r1i1p1	2034	1	1	2034	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20340101-20341231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20340101-20341231.nc	NA
+92	1	miroc_miroc4h	r1i1p1	2035	1	1	2035	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r1i1p1_20350101-20351231.nc	rsds_day_MIROC4h_rcp45_r1i1p1_20350101-20351231.nc	NA
+93	2	miroc_miroc4h	r2i1p1	2006	1	1	2006	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20060101-20061231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+94	2	miroc_miroc4h	r2i1p1	2007	1	1	2007	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20070101-20071231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+95	2	miroc_miroc4h	r2i1p1	2008	1	1	2008	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20080101-20081231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+96	2	miroc_miroc4h	r2i1p1	2009	1	1	2009	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20090101-20091231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+97	2	miroc_miroc4h	r2i1p1	2010	1	1	2010	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20100101-20101231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+98	2	miroc_miroc4h	r2i1p1	2011	1	1	2011	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20110101-20111231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+99	2	miroc_miroc4h	r2i1p1	2012	1	1	2012	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20120101-20121231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+100	2	miroc_miroc4h	r2i1p1	2013	1	1	2013	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20130101-20131231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+101	2	miroc_miroc4h	r2i1p1	2014	1	1	2014	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20140101-20141231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+102	2	miroc_miroc4h	r2i1p1	2015	1	1	2015	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20150101-20151231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_200601-201512.nc	NA
+103	2	miroc_miroc4h	r2i1p1	2016	1	1	2016	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20160101-20161231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+104	2	miroc_miroc4h	r2i1p1	2017	1	1	2017	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20170101-20171231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+105	2	miroc_miroc4h	r2i1p1	2018	1	1	2018	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20180101-20181231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+106	2	miroc_miroc4h	r2i1p1	2019	1	1	2019	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20190101-20191231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+107	2	miroc_miroc4h	r2i1p1	2020	1	1	2020	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20200101-20201231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+108	2	miroc_miroc4h	r2i1p1	2021	1	1	2021	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20210101-20211231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+109	2	miroc_miroc4h	r2i1p1	2022	1	1	2022	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20220101-20221231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+110	2	miroc_miroc4h	r2i1p1	2023	1	1	2023	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20230101-20231231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+111	2	miroc_miroc4h	r2i1p1	2024	1	1	2024	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20240101-20241231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+112	2	miroc_miroc4h	r2i1p1	2025	1	1	2025	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20250101-20251231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_201601-202512.nc	NA
+113	2	miroc_miroc4h	r2i1p1	2026	1	1	2026	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20260101-20261231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+114	2	miroc_miroc4h	r2i1p1	2027	1	1	2027	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20270101-20271231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+115	2	miroc_miroc4h	r2i1p1	2028	1	1	2028	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20280101-20281231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+116	2	miroc_miroc4h	r2i1p1	2029	1	1	2029	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20290101-20291231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+117	2	miroc_miroc4h	r2i1p1	2030	1	1	2030	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20300101-20301231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+118	2	miroc_miroc4h	r2i1p1	2031	1	1	2031	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20310101-20311231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+119	2	miroc_miroc4h	r2i1p1	2032	1	1	2032	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20320101-20321231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+120	2	miroc_miroc4h	r2i1p1	2033	1	1	2033	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20330101-20331231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+121	2	miroc_miroc4h	r2i1p1	2034	1	1	2034	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20340101-20341231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+122	2	miroc_miroc4h	r2i1p1	2035	1	1	2035	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r2i1p1_20350101-20351231.nc	rsds_Amon_MIROC4h_rcp45_r2i1p1_202601-203512.nc	NA
+123	3	miroc_miroc4h	r3i1p1	2006	1	1	2006	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20060101-20061231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+124	3	miroc_miroc4h	r3i1p1	2007	1	1	2007	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20070101-20071231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+125	3	miroc_miroc4h	r3i1p1	2008	1	1	2008	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20080101-20081231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+126	3	miroc_miroc4h	r3i1p1	2009	1	1	2009	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20090101-20091231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+127	3	miroc_miroc4h	r3i1p1	2010	1	1	2010	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20100101-20101231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+128	3	miroc_miroc4h	r3i1p1	2011	1	1	2011	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20110101-20111231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+129	3	miroc_miroc4h	r3i1p1	2012	1	1	2012	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20120101-20121231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+130	3	miroc_miroc4h	r3i1p1	2013	1	1	2013	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20130101-20131231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+131	3	miroc_miroc4h	r3i1p1	2014	1	1	2014	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20140101-20141231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+132	3	miroc_miroc4h	r3i1p1	2015	1	1	2015	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20150101-20151231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_200601-201512.nc	NA
+133	3	miroc_miroc4h	r3i1p1	2016	1	1	2016	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20160101-20161231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+134	3	miroc_miroc4h	r3i1p1	2017	1	1	2017	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20170101-20171231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+135	3	miroc_miroc4h	r3i1p1	2018	1	1	2018	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20180101-20181231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+136	3	miroc_miroc4h	r3i1p1	2019	1	1	2019	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20190101-20191231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+137	3	miroc_miroc4h	r3i1p1	2020	1	1	2020	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20200101-20201231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+138	3	miroc_miroc4h	r3i1p1	2021	1	1	2021	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20210101-20211231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+139	3	miroc_miroc4h	r3i1p1	2022	1	1	2022	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20220101-20221231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+140	3	miroc_miroc4h	r3i1p1	2023	1	1	2023	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20230101-20231231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+141	3	miroc_miroc4h	r3i1p1	2024	1	1	2024	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20240101-20241231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+142	3	miroc_miroc4h	r3i1p1	2025	1	1	2025	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20250101-20251231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_201601-202512.nc	NA
+143	3	miroc_miroc4h	r3i1p1	2026	1	1	2026	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20260101-20261231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+144	3	miroc_miroc4h	r3i1p1	2027	1	1	2027	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20270101-20271231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+145	3	miroc_miroc4h	r3i1p1	2028	1	1	2028	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20280101-20281231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+146	3	miroc_miroc4h	r3i1p1	2029	1	1	2029	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20290101-20291231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+147	3	miroc_miroc4h	r3i1p1	2030	1	1	2030	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20300101-20301231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+148	3	miroc_miroc4h	r3i1p1	2031	1	1	2031	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20310101-20311231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+149	3	miroc_miroc4h	r3i1p1	2032	1	1	2032	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20320101-20321231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+150	3	miroc_miroc4h	r3i1p1	2033	1	1	2033	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20330101-20331231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+151	3	miroc_miroc4h	r3i1p1	2034	1	1	2034	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20340101-20341231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+152	3	miroc_miroc4h	r3i1p1	2035	1	1	2035	12	31	640	0.5625	320	0.5625	yes	kg m-2 s-1	K	%var%_day_MIROC4h_rcp45_r3i1p1_20350101-20351231.nc	rsds_Amon_MIROC4h_rcp45_r3i1p1_202601-203512.nc	NA
+153	1	miroc_miroc5	r1i1p1	2006	1	1	2029	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r1i1p1_20200101-20291231.nc	rsds_day_MIROC5_rcp45_r1i1p1_20200101-20291231.nc	NA
+154	1	miroc_miroc5	r1i1p1	2030	1	1	2039	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r1i1p1_20300101-20391231.nc	rsds_day_MIROC5_rcp45_r1i1p1_20300101-20391231.nc	NA
+155	1	miroc_miroc5	r1i1p1	2040	1	1	2049	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r1i1p1_20400101-20491231.nc	rsds_day_MIROC5_rcp45_r1i1p1_20400101-20491231.nc	NA
+156	2	miroc_miroc5	r2i1p1	2006	1	1	2029	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r2i1p1_20200101-20291231.nc	rsds_day_MIROC5_rcp45_r2i1p1_20200101-20291231.nc	NA
+157	2	miroc_miroc5	r2i1p1	2030	1	1	2039	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r2i1p1_20300101-20391231.nc	rsds_day_MIROC5_rcp45_r2i1p1_20300101-20391231.nc	NA
+158	2	miroc_miroc5	r2i1p1	2040	1	1	2049	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r2i1p1_20400101-20491231.nc	rsds_day_MIROC5_rcp45_r2i1p1_20400101-20491231.nc	NA
+159	3	miroc_miroc5	r3i1p1	2006	1	1	2029	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r3i1p1_20200101-20291231.nc	rsds_day_MIROC5_rcp45_r3i1p1_20200101-20291231.nc	NA
+160	3	miroc_miroc5	r3i1p1	2030	1	1	2039	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r3i1p1_20300101-20391231.nc	rsds_day_MIROC5_rcp45_r3i1p1_20300101-20391231.nc	NA
+161	3	miroc_miroc5	r3i1p1	2040	1	1	2049	12	31	256	1.40625	128	1.40625	no	kg m-2 s-1	K	%var%_day_MIROC5_rcp45_r3i1p1_20400101-20491231.nc	rsds_day_MIROC5_rcp45_r3i1p1_20400101-20491231.nc	NA
+162	1	mohc_hadgem2_cc	r1i1p1	2015	12	1	2020	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20151201-20201130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20151201-20201130.nc	360-day calendar
+163	1	mohc_hadgem2_cc	r1i1p1	2020	12	1	2025	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20201201-20251130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20201201-20251130.nc	360-day calendar
+164	1	mohc_hadgem2_cc	r1i1p1	2025	12	1	2030	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20251201-20301130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20251201-20301130.nc	360-day calendar
+165	1	mohc_hadgem2_cc	r1i1p1	2030	12	1	2035	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20301201-20351130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20301201-20351130.nc	360-day calendar
+166	1	mohc_hadgem2_cc	r1i1p1	2035	12	1	2040	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20351201-20401130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20351201-20401130.nc	360-day calendar
+167	1	mohc_hadgem2_cc	r1i1p1	2040	12	1	2045	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20401201-20451130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20401201-20451130.nc	360-day calendar
+168	1	mohc_hadgem2_cc	r1i1p1	2045	12	1	2050	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-CC_rcp45_r1i1p1_20451201-20501130.nc	rsds_day_HadGEM2-CC_rcp45_r1i1p1_20451201-20501130.nc	360-day calendar
+169	1	mohc_hadgem2_es	r1i1p1	2015	12	1	2025	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r1i1p1_20151201-20251130.nc	rsds_day_HadGEM2-ES_rcp45_r1i1p1_20151201-20251130.nc	360-day calendar
+170	1	mohc_hadgem2_es	r1i1p1	2025	12	1	2035	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r1i1p1_20251201-20351130.nc	rsds_day_HadGEM2-ES_rcp45_r1i1p1_20251201-20351130.nc	360-day calendar
+171	1	mohc_hadgem2_es	r1i1p1	2035	12	1	2045	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r1i1p1_20351201-20451130.nc	rsds_day_HadGEM2-ES_rcp45_r1i1p1_20351201-20451130.nc	360-day calendar
+172	1	mohc_hadgem2_es	r1i1p1	2045	12	1	2055	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r1i1p1_20451201-20551130.nc	rsds_day_HadGEM2-ES_rcp45_r1i1p1_20451201-20551130.nc	360-day calendar
+173	2	mohc_hadgem2_es	r2i1p1	2015	12	1	2025	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r2i1p1_20151201-20251130.nc	rsds_Amon_HadGEM2-ES_rcp45_r2i1p1_200512-203011.nc	360-day calendar
+174	2	mohc_hadgem2_es	r2i1p1	2025	12	1	2035	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r2i1p1_20251201-20351130.nc	rsds_Amon_HadGEM2-ES_rcp45_r2i1p1_200512-203011.nc	360-day calendar
+175	2	mohc_hadgem2_es	r2i1p1	2035	12	1	2045	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r2i1p1_20351201-20451130.nc	rsds_Amon_HadGEM2-ES_rcp45_r2i1p1_203012-205511.nc	360-day calendar
+176	2	mohc_hadgem2_es	r2i1p1	2045	12	1	2055	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r2i1p1_20451201-20551130.nc	rsds_Amon_HadGEM2-ES_rcp45_r2i1p1_203012-205511.nc	360-day calendar
+177	3	mohc_hadgem2_es	r3i1p1	2015	12	1	2025	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r3i1p1_20151201-20251130.nc	rsds_Amon_HadGEM2-ES_rcp45_r3i1p1_200512-203011.nc	360-day calendar
+178	3	mohc_hadgem2_es	r3i1p1	2025	12	1	2035	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r3i1p1_20251201-20351130.nc	rsds_Amon_HadGEM2-ES_rcp45_r3i1p1_200512-203011.nc	360-day calendar
+179	3	mohc_hadgem2_es	r3i1p1	2035	12	1	2045	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r3i1p1_20351201-20451130.nc	rsds_Amon_HadGEM2-ES_rcp45_r3i1p1_203012-205511.nc	360-day calendar
+180	3	mohc_hadgem2_es	r3i1p1	2045	12	1	2055	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r3i1p1_20451201-20551130.nc	rsds_Amon_HadGEM2-ES_rcp45_r3i1p1_203012-205511.nc	360-day calendar
+181	4	mohc_hadgem2_es	r4i1p1	2015	12	1	2025	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r4i1p1_20151201-20251130.nc	rsds_Amon_HadGEM2-ES_rcp45_r4i1p1_200512-203011.nc	360-day calendar
+182	4	mohc_hadgem2_es	r4i1p1	2025	12	1	2035	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r4i1p1_20251201-20351130.nc	rsds_Amon_HadGEM2-ES_rcp45_r4i1p1_200512-203011.nc	360-day calendar
+183	4	mohc_hadgem2_es	r4i1p1	2035	12	1	2045	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r4i1p1_20351201-20451130.nc	rsds_Amon_HadGEM2-ES_rcp45_r4i1p1_203012-205511.nc	360-day calendar
+184	4	mohc_hadgem2_es	r4i1p1	2045	12	1	2055	11	30	192	1.875	145	1.2414	all30	kg m-2 s-1	K	%var%_day_HadGEM2-ES_rcp45_r4i1p1_20451201-20551130.nc	rsds_Amon_HadGEM2-ES_rcp45_r4i1p1_203012-205511.nc	360-day calendar
+185	1	mpi_esm_mr	r1i1p1	2020	1	1	2029	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_rcp45_r1i1p1_20200101-20291231.nc	rsds_day_MPI-ESM-MR_rcp45_r1i1p1_20200101-20291231.nc	NA
+186	1	mpi_esm_mr	r1i1p1	2030	1	1	2039	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_rcp45_r1i1p1_20300101-20391231.nc	rsds_day_MPI-ESM-MR_rcp45_r1i1p1_20300101-20391231.nc	NA
+187	1	mpi_esm_mr	r1i1p1	2040	1	1	2049	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-MR_rcp45_r1i1p1_20400101-20491231.nc	rsds_day_MPI-ESM-MR_rcp45_r1i1p1_20400101-20491231.nc	NA
+188	1	mpi_m_mpi_esm_lr	r1i1p1	2020	1	1	2029	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r1i1p1_20200101-20291231.nc	rsds_day_MPI-ESM-LR_rcp45_r1i1p1_20200101-20291231.nc	NA
+189	1	mpi_m_mpi_esm_lr	r1i1p1	2030	1	1	2039	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r1i1p1_20300101-20391231.nc	rsds_day_MPI-ESM-LR_rcp45_r1i1p1_20300101-20391231.nc	NA
+190	1	mpi_m_mpi_esm_lr	r1i1p1	2040	1	1	2049	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r1i1p1_20400101-20491231.nc	rsds_day_MPI-ESM-LR_rcp45_r1i1p1_20400101-20491231.nc	NA
+191	2	mpi_m_mpi_esm_lr	r2i1p1	2020	1	1	2029	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r2i1p1_20200101-20291231.nc	rsds_day_MPI-ESM-LR_rcp45_r2i1p1_20200101-20291231.nc	NA
+192	2	mpi_m_mpi_esm_lr	r2i1p1	2030	1	1	2039	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r2i1p1_20300101-20391231.nc	rsds_day_MPI-ESM-LR_rcp45_r2i1p1_20300101-20391231.nc	NA
+193	2	mpi_m_mpi_esm_lr	r2i1p1	2040	1	1	2049	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r2i1p1_20400101-20491231.nc	rsds_day_MPI-ESM-LR_rcp45_r2i1p1_20400101-20491231.nc	NA
+194	3	mpi_m_mpi_esm_lr	r3i1p1	2020	1	1	2029	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r3i1p1_20200101-20291231.nc	rsds_day_MPI-ESM-LR_rcp45_r3i1p1_20200101-20291231.nc	NA
+195	3	mpi_m_mpi_esm_lr	r3i1p1	2030	1	1	2039	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r3i1p1_20300101-20391231.nc	rsds_day_MPI-ESM-LR_rcp45_r3i1p1_20300101-20391231.nc	NA
+196	3	mpi_m_mpi_esm_lr	r3i1p1	2040	1	1	2049	12	31	192	1.875	96	1.875	yes	kg m-2 s-1	K	%var%_day_MPI-ESM-LR_rcp45_r3i1p1_20400101-20491231.nc	rsds_day_MPI-ESM-LR_rcp45_r3i1p1_20400101-20491231.nc	NA
+197	1	mri_mri_cgcm3	r1i1p1	2016	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_rcp45_r1i1p1_20160101-20251231.nc	rsds_day_MRI-CGCM3_rcp45_r1i1p1_20160101-20251231.nc	NA
+198	1	mri_mri_cgcm3	r1i1p1	2026	1	1	2035	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_rcp45_r1i1p1_20260101-20351231.nc	rsds_day_MRI-CGCM3_rcp45_r1i1p1_20260101-20351231.nc	NA
+199	1	mri_mri_cgcm3	r1i1p1	2036	1	1	2045	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_rcp45_r1i1p1_20360101-20451231.nc	rsds_day_MRI-CGCM3_rcp45_r1i1p1_20360101-20451231.nc	NA
+200	1	mri_mri_cgcm3	r1i1p1	2046	1	1	2055	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_MRI-CGCM3_rcp45_r1i1p1_20460101-20551231.nc	rsds_day_MRI-CGCM3_rcp45_r1i1p1_20460101-20551231.nc	NA
+201	1	ncar_ccsm4	r1i1p1	2006	1	1	2040	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r1i1p1_20060101-20401231.nc	rsds_Amon_CCSM4_rcp45_r1i1p1_200501-210012.nc	NA
+202	1	ncar_ccsm4	r1i1p1	2041	1	1	2075	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r1i1p1_20410101-20751231.nc	rsds_Amon_CCSM4_rcp45_r1i1p1_200501-210012.nc	NA
+203	2	ncar_ccsm4	r2i1p1	2006	1	1	2040	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r2i1p1_20060101-20401231.nc	rsds_Amon_CCSM4_rcp45_r2i1p1_200501-210012.nc	NA
+204	2	ncar_ccsm4	r2i1p1	2041	1	1	2075	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r2i1p1_20410101-20751231.nc	rsds_Amon_CCSM4_rcp45_r2i1p1_200501-210012.nc	NA
+205	3	ncar_ccsm4	r3i1p1	2006	1	1	2040	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r3i1p1_20060101-20401231.nc	rsds_Amon_CCSM4_rcp45_r3i1p1_200501-210012.nc	NA
+206	3	ncar_ccsm4	r3i1p1	2041	1	1	2075	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r3i1p1_20410101-20751231.nc	rsds_Amon_CCSM4_rcp45_r3i1p1_200501-210012.nc	NA
+207	4	ncar_ccsm4	r4i1p1	2006	1	1	2040	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r4i1p1_20060101-20401231.nc	rsds_Amon_CCSM4_rcp45_r4i1p1_200501-210012.nc	NA
+208	4	ncar_ccsm4	r4i1p1	2041	1	1	2075	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r4i1p1_20410101-20751231.nc	rsds_Amon_CCSM4_rcp45_r4i1p1_200501-210012.nc	NA
+209	5	ncar_ccsm4	r5i1p1	2006	1	1	2040	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r5i1p1_20060101-20401231.nc	rsds_Amon_CCSM4_rcp45_r5i1p1_200501-210012.nc	NA
+210	5	ncar_ccsm4	r5i1p1	2041	1	1	2075	12	31	288	1.25	192	0.9375	no	kg m-2 s-1	K	%var%_day_CCSM4_rcp45_r5i1p1_20410101-20751231.nc	rsds_Amon_CCSM4_rcp45_r5i1p1_200501-210012.nc	NA
+211	1	ncc_noresm1_m	r1i1p1	2006	1	1	2055	12	31	144	2.5	96	1.875	no	kg m-2 s-1	K	%var%_day_NorESM1-M_rcp45_r1i1p1_20060101-20551231.nc	rsds_day_NorESM1-M_rcp45_r1i1p1_20060101-20551231.nc	NA
+212	1	noaa_gfdl_esm2g	r1i1p1	2016	1	1	2020	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20160101-20201231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20160101-20201231.nc	NA
+213	1	noaa_gfdl_esm2g	r1i1p1	2021	1	1	2025	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20210101-20251231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20210101-20251231.nc	NA
+214	1	noaa_gfdl_esm2g	r1i1p1	2026	1	1	2030	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20260101-20301231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20260101-20301231.nc	NA
+215	1	noaa_gfdl_esm2g	r1i1p1	2031	1	1	2035	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20310101-20351231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20310101-20351231.nc	NA
+216	1	noaa_gfdl_esm2g	r1i1p1	2036	1	1	2040	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20360101-20401231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20360101-20401231.nc	NA
+217	1	noaa_gfdl_esm2g	r1i1p1	2041	1	1	2045	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20410101-20451231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20410101-20451231.nc	NA
+218	1	noaa_gfdl_esm2g	r1i1p1	2046	1	1	2050	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2G_rcp45_r1i1p1_20460101-20501231.nc	rsds_day_GFDL-ESM2G_rcp45_r1i1p1_20460101-20501231.nc	NA
+219	1	noaa_gfdl_esm2m	r1i1p1	2016	1	1	2020	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20160101-20201231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20160101-20201231.nc	NA
+220	1	noaa_gfdl_esm2m	r1i1p1	2021	1	1	2025	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20210101-20251231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20210101-20251231.nc	NA
+221	1	noaa_gfdl_esm2m	r1i1p1	2026	1	1	2030	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20260101-20301231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20260101-20301231.nc	NA
+222	1	noaa_gfdl_esm2m	r1i1p1	2031	1	1	2035	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20310101-20351231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20310101-20351231.nc	NA
+223	1	noaa_gfdl_esm2m	r1i1p1	2036	1	1	2040	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20360101-20401231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20360101-20401231.nc	NA
+224	1	noaa_gfdl_esm2m	r1i1p1	2041	1	1	2045	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20410101-20451231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20410101-20451231.nc	NA
+225	1	noaa_gfdl_esm2m	r1i1p1	2046	1	1	2050	12	31	144	2.5	90	2	no	kg m-2 s-1	K	%var%_day_GFDL-ESM2M_rcp45_r1i1p1_20460101-20501231.nc	rsds_day_GFDL-ESM2M_rcp45_r1i1p1_20460101-20501231.nc	NA
