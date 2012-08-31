@@ -387,13 +387,13 @@ scale_monthly <- function(x) {
 #function to check whether there is any missing data in the set of years selected
 #########################################################
 correct_neg <- function(x,thresh=0,wleap,how="thresh") {
+  x <- as.numeric(x)
   year <- x[1]
   data <- x[2:length(x)]
   
   nd <- leap(year)
   if (nd == 365) {data <- data[1:nd]}
-  if (wleap == "no") {data <- data[1:365]}
-  if (wleap == "all30") {data <- data[1:360]}
+  if (wleap == "all30") {data <- data[1:360]} else {data <- data[1:365]} #GLAM does not care leap
   
   if (how=="zero") {
     data[which(data<thresh)] <- thresh
@@ -432,8 +432,7 @@ check_missing <- function(x,wleap,thresh) {
   } else {
     nd <- leap(year)
     if (nd == 365) {data <- data[1:nd]}
-    if (wleap == "no") {data <- data[1:365]}
-    if (wleap == "all30") {data <- data[1:360]}
+    if (wleap == "all30") {data <- data[1:360]} else {data <- data[1:365]}
     
     nas <- length(which(is.na(data))) #number of no data
     if (thresh > 0) {
