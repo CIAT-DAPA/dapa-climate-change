@@ -184,7 +184,7 @@ for (i in 1:length(gcmList)) {
             
             if (nfil != nd) {
               #name of netCDF file
-              ncFile <- paste(mdDir,"/",gcm,"/",ens,"/",fName,sep="")
+              nc_file <- paste(mdDir,"/",gcm,"/",ens,"/",fName,sep="")
               
               #copy to /dev/shm if it does not exist already
               if (!file.exists(paste("/dev/shm/",fName,sep=""))) {
