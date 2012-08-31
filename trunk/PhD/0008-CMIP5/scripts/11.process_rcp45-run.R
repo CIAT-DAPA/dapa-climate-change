@@ -10,10 +10,10 @@
 library(raster)
 
 #load functions
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
-src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
-#src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
+#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 
 #sourcing needed functions
 source(paste(src.dir,"/scripts/GHCND-GSOD-functions.R",sep=""))
@@ -23,10 +23,15 @@ source(paste(src.dir2,"/scripts/11.process_rcp45-functions.R",sep=""))
 #input directories
 base_dir <- "/nfs/a102/eejarv"
 gcm_dir <- paste(base_dir,"/CMIP5/rcp45",sep="")
+scratch <- "/scratch/eejarv"
 
 #output directories
 out_dir <- paste(base_dir,"/CMIP5/rcp45",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir,recursive=T)}
+
+#other details
+yi <- 2020
+yf <- 2049
 
 #load GCM characteristics
 gcm_chars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),sep="\t",header=T)
@@ -43,8 +48,9 @@ for (i in 1:length(gcm_list)) {
   this_gcm <- gcm_chars[which(gcm_chars$GCM == gcm),]
   ens_list <- unique(this_gcm$Ensemble)
   
+  #loop ensembles for that GCM
   for (ens in ens_list) {
-    #ens <- ensList[1]
+    #ens <- ens_list[1]
     cat("Processing ensemble",paste(ens),"\n")
     this_ens <- this_gcm[which(this_gcm$Ensemble == ens),]
     
@@ -55,23 +61,204 @@ for (i in 1:length(gcm_list)) {
     #list of variables depends on number of nc files (i.e. tas is not always available)
     patn <- gsub("%var%","",this_ens$naming[1])
     ncf <- list.files(ens_odir,pattern=patn)
-    srn <- unique(thisEns$srad_naming)
+    
+    #maybe remove this part and processing srad separately
+    srn <- unique(this_ens$srad_naming)
+    #maybe remove this part
+    
     ncf <- ncf[which(!ncf %in% paste(srn))]
-    if (length(list.files(outEnsDir,pattern="\\.control")) != 4) {
-      if (length(list.files(outEnsDir,pattern="\\.control")) != 3) {
-        if (length(ncf) == 4) {
-          vnList <- c("pr","tasmin","tasmax","tas")
-        } else if (length(ncf) == 3) {
-          vnList <- c("pr","tasmin","tasmax")
-        } else {
-          stop("number of files not 3 or 4, check!")
+    if (length(list.files(ens_odir,pattern="\\.control")) != 4) {
+      if (length(ncf) != 4) {stop("number of files not 4, check!")}
+    }
+    #produce vector with names of variables
+    var_list <- unlist(lapply(ncf,function(x) unlist(strsplit(x,"_",fixed=T))[[1]][1]))
+    
+    #loop through variables
+    for (vn in var_list) {
+      #vn <- "pr" #tasmin, tasmax
+      cat("variable:",vn,"\n")
+      
+      #here you need to create a workspace in /scratch
+      work_dir <- paste(scratch,"/cmip5",sep="")
+      if (!file.exists(work_dir)) {
+        dir.create(work_dir) #create if doesnt exist
+      } else {
+        setwd(work_dir)
+        system(paste("rm -f *")) #clean up if exists
+      }
+      
+      #which is the control file
+      ctrl_fil <- paste(ens_odir,"/",vn,"_",gcm,"_",ens,".control",sep="")
+      if (!file.exists(ctrl_fil)) {
+        for (year in yi:yf) {
+          #year <- 2020
+          cat("year:",year,"\n")
+          file_name <- paste(this_ens$naming[which(year >= this_ens$iYear & year <= this_ens$fYear)])
+          file_name <- gsub("%var%",vn,file_name)
+          
+          #leap condition
+          wleap <- paste(this_ens$has_leap[which(year >= this_ens$iYear & year <= this_ens$fYear)][1])
+          
+          #create output year dir
+          year_odir <- paste(ens_odir,"/",vn,"_",year,sep="")
+          if (!file.exists(year_odir)) {dir.create(year_odir)}
+          
+          #if there are two files i need to read both, extract the first 11 months from the first 
+          #one and the last month from the second file. As this only happens with UKMO models
+          #i did not care about making it generic (i.e. it works only for a 360 day calendar)
+          #although the above might not apply to the process done in this script
+          if (length(file_name) > 1) {
+            #check if year was already done
+            nfil <- length(list.files(year_odir,pattern="\\.nc"))
+            nd <- leap(year)
+            if (wleap=="all30") {
+              nd <- 360
+            } else if (wleap == "no") {
+              nd <- 365
+            }
+            
+            if (nfil != nd) {
+              #first part of the year
+              nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[1]
+              
+              #copy to scratch if it does not exist already
+              if (!file.exists(paste(work_dir"/",file_name[1],sep=""))) {
+                setwd(work_dir)
+                system(paste("rm -f *"))
+                setwd(base_dir)
+                x <- file.copy(nc_file,work_dir)
+              }
+              
+              #select the year I'm looking for using the CDO command "selyear"
+              setwd(work_dir)
+              temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+              system(paste("cdo selyear,",year," ",file_name[1]," ",temp_file,sep=""))
+              
+              #now use splitmon to split the months, and remove tFile
+              mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+              system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+              x <- file.remove(temp_file)
+              
+              #second part of the year
+              nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[2]
+              
+              #copy to scratch if it does not exist already
+              if (!file.exists(paste(work_dir,"/",file_name[2],sep=""))) {
+                x <- file.copy(nc_file,work_dir)
+              }
+              
+              #select the year I'm looking for using the CDO command "selyear"
+              setwd(work_dir)
+              temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+              system(paste("cdo selyear,",year," ",file_name[2]," ",temp_file,sep=""))
+              
+              #now use splitmon to split the months, and remove tFile
+              mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+              system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+              x <- file.remove(temp_file)
+              
+              #now loop the monthly files
+              mth_files <- list.files(".",pattern="_mth_")
+              for (mf in mth_files) {
+                #split the monthly file into daily files and remove monthly file
+                day_px <- paste(gsub("\\.nc","",mf),"_day_",sep="")
+                system(paste("cdo splitday ",mf," ",day_px,sep=""))
+                x <- file.remove(mf)
+              }
+              
+              #move the daily files to the output folder
+              system(paste("mv -f *_mth_* ",year_odir,sep=""))
+              
+            } else {
+              cat("this year was already done!\n")
+            }
+            
+          } else {
+            #normal case: there was only one file with the year data that i need, 
+            ###           so just do the process for that one this is when
+            ###           the year is not split into two different files.
+            
+            #check if year was already done
+            nfil <- length(list.files(year_odir,pattern="\\.nc"))
+            nd <- leap(year)
+            if (wleap=="all30") {
+              nd <- 360
+            } else if (wleap == "no") {
+              nd <- 365
+            }
+            
+            if (nfil != nd) {
+              #name of netCDF file
+              nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")
+              
+              #copy to scratch if it does not exist already
+              if (!file.exists(paste(work_dir,"/",file_name,sep=""))) {
+                setwd(work_dir)
+                system(paste("rm -f *"))
+                setwd(base_dir)
+                x <- file.copy(nc_file,work_dir)
+              }
+              
+              #select the year I'm looking for using the CDO command "selyear"
+              setwd(work_dir)
+              temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+              system(paste("cdo selyear,",year," ",file_name," ",temp_file,sep=""))
+              
+              #now use splitmon to split the months, and remove tFile
+              mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+              system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+              x <- file.remove(temp_file)
+              
+              #now loop the monthly files
+              mth_files <- list.files(".",pattern="_mth_")
+              for (mf in mth_files) {
+                #split the monthly file into daily files and remove monthly file
+                day_px <- paste(gsub("\\.nc","",mf),"_day_",sep="")
+                system(paste("cdo splitday ",mf," ",day_px,sep=""))
+                x <- file.remove(mf)
+              }
+              
+              #move the daily files to the output folder
+              system(paste("mv -f *_mth_* ",year_odir,sep=""))
+            } else {
+              cat("this year was already done!\n")
+            }
+          }
         }
+        #write control file
+        cfo <- file(ctrl_fil,"w")
+        cat("processed on",date(),"by",paste(as.data.frame(t(Sys.info()))$login),"@",
+            paste(as.data.frame(t(Sys.info()))$nodename),"\n",file=cfo)
+        close(cfo)
+      } else {
+        cat("this job was already done!\n")
+      }
+    }
+    
+    #removing ensemble original big files only if the number of control files equals
+    #the number of original nc files, else stop
+    setwd(ens_odir)
+    nnc <- list.files(".",pattern=patn)
+    nnc <- nnc[which(!nnc %in% paste(srn))]
+    cnc <- length(nnc)
+    cct <- length(list.files(".",pattern="\\.control"))
+    
+    ######
+    #check this last part, and modify for processing of solar radiation
+    if (cnc != 0) {
+      if (cnc == cct) {
+        #system("rm -f *.nc")
+        anc <- list.files(".",pattern="\\.nc")
+        anc <- anc[which(!anc %in% paste(srn))]
+        x <- sapply(anc,FUN= function(x) {s <- file.remove(x)})
+      } else {
+        stop("something weird happened, need to check before removing original files")
       }
     }
     
   }
   
-  
 }
+
 
 
