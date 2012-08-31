@@ -94,11 +94,10 @@ sfExport("proc_list")
 sfExport("gcm_chars")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(proc_list$PID),wth_cmip5_wrapper))
+system.time(sfSapply(as.vector(1:nrow(proc_list)),wth_cmip5_wrapper))
 
 #stop the cluster
 sfStop()
-
 
 
 
