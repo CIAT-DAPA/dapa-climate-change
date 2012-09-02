@@ -84,7 +84,7 @@ for (i in 1:length(gcm_list)) {
     
     #loop through variables
     for (vn in var_list) {
-      #vn <- "pr" #tasmin, tasmax
+      #vn <- "pr" #tasmin, tasmax, rsds
       cat("variable:",vn,"\n")
       
       #define frequencies here
@@ -105,8 +105,13 @@ for (i in 1:length(gcm_list)) {
         for (year in yi:yf) {
           #year <- 2020
           cat("year:",year,"\n")
-          file_name <- paste(this_ens$naming[which(year >= this_ens$iYear & year <= this_ens$fYear)])
-          file_name <- gsub("%var%",vn,file_name)
+          
+          if (vn == "rsds") {
+            file_name <- unique(paste(this_ens$srad_naming[which(year >= this_ens$iYear & year <= this_ens$fYear)]))
+          } else {
+            file_name <- paste(this_ens$naming[which(year >= this_ens$iYear & year <= this_ens$fYear)])
+            file_name <- gsub("%var%",vn,file_name)
+          }
           
           #leap condition
           wleap <- paste(this_ens$has_leap[which(year >= this_ens$iYear & year <= this_ens$fYear)][1])
@@ -136,7 +141,7 @@ for (i in 1:length(gcm_list)) {
               nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[1]
               
               #copy to scratch if it does not exist already
-              if (!file.exists(paste(work_dir"/",file_name[1],sep=""))) {
+              if (!file.exists(paste(work_dir,"/",file_name[1],sep=""))) {
                 setwd(work_dir)
                 system(paste("rm -f *"))
                 setwd(base_dir)
@@ -203,7 +208,6 @@ for (i in 1:length(gcm_list)) {
               }
               #move the daily files to the output folder
               system(paste("mv -f *_mth_* ",year_odir,sep=""))
-              
             } else {
               cat("this year was already done!\n")
             }
