@@ -62,10 +62,6 @@ for (i in 1:length(gcm_list)) {
     patn <- gsub("%var%","",this_ens$naming[1])
     ncf <- list.files(ens_odir,pattern=patn)
     
-    #maybe remove this part and processing srad here
-    #srn <- unique(this_ens$srad_naming)
-    #maybe remove this part
-    
     #get the frequency of srad data
     srn <- unique(this_ens$srad_naming)
     if (srn %in% ncf) {
