@@ -74,7 +74,7 @@ sfExport("use_scratch")
 sfExport("scratch")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_optimise_ygp_ipdate_wrapper))
+system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_ygp_half_half))
 
 #stop the cluster
 sfStop()
