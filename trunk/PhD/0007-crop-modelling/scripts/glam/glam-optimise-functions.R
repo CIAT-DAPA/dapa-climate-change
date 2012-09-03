@@ -14,6 +14,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   method <- RUN_setup$METHOD
   cropName <- RUN_setup$CROPNAME
   bDir <- RUN_setup$BDIR
+  nyears <- GLAM_params$glam_param.mod_mgt$IEYR-GLAM_params$glam_param.mod_mgt$ISYR+1
   
   #input directories and model
   #cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
@@ -60,7 +61,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   solGrid <- RUN_setup$SOL_GRID
   
   #check consistency of yield file
-  ydum <- read.fortran(yFile,format=c("A12","F8"),n=28)
+  ydum <- read.fortran(yFile,format=c("A12","F8"),n=nyears)
   if (length(which(ydum$V2 < -90)) > 0) {
     y_has_na <- T
   } else {
@@ -221,7 +222,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
                        "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
                        "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
       y_p <- pred$YIELD
-      y_o <- read.fortran(yFile,format=c("A12","F8"),n=28)
+      y_o <- read.fortran(yFile,format=c("A12","F8"),n=nyears)
       y_o <- y_o$V2
       
       #calc rmse
@@ -345,7 +346,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
                        "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
                        "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
       y_p <- pred$YIELD
-      y_o <- read.fortran(yFile,format=c("A12","F8"),n=28)
+      y_o <- read.fortran(yFile,format=c("A12","F8"),n=nyears)
       y_o <- y_o$V2
       
       #calc rmse
@@ -468,7 +469,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
                        "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
                        "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
       y_p <- pred$YIELD
-      y_o <- read.fortran(yFile,format=c("A12","F8"),n=28)
+      y_o <- read.fortran(yFile,format=c("A12","F8"),n=nyears)
       y_o <- y_o$V2
       odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
                         OBS=y_o,RFD=y_p)
