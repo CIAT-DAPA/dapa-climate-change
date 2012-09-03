@@ -75,9 +75,6 @@ glam_ygp_half_half <- function(this_run) {
     CAL_setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",CAL_setup$CELL,".txt",sep="")
     CAL_setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
     
-    #inner cal dir
-    CAL_setup$CAL_DIR <- paste(CAL_setup$CAL_DIR,"/half_half_ygp",sep="")
-    
     #create the run setup
     RUN_setup <- list()
     RUN_setup$B_DIR <- paste(CAL_setup$BDIR,"/model-runs/",toupper(cropName),sep="")
@@ -163,6 +160,9 @@ glam_ygp_half_half <- function(this_run) {
     ######################################################################################
     ######################################################################################
     ##
+    #inner cal dir
+    CAL_setup$CAL_DIR <- paste(CAL_setup$CAL_DIR,"/half_half_ygp",sep="")
+    
     #calib for the first 14 years of the time series
     #and then run with that YGP value the latter part of the time series
     params$glam_param.mod_mgt$ISYR <- 1966 #start year
