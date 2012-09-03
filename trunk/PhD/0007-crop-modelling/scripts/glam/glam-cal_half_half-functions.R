@@ -3,6 +3,7 @@
 #June 2012
 
 
+##### run the whole process
 glam_ygp_half_half <- function(this_run) {
   #get the run details
   sid <- runs_ref$SID[this_run]
@@ -53,33 +54,33 @@ glam_ygp_half_half <- function(this_run) {
   for (ci in ciList) {
     #get run setup
     #files that were generated
-    setup <- list()
-    setup$BDIR <- bDir
-    setup$SCRATCH <- scratch
-    setup$USE_SCRATCH <- use_scratch
-    setup$CELL <- cells$CELL[ci]
-    setup$ZONE <- cells$ZONE[ci]
-    setup$METHOD <- "lin"
-    setup$CROPNAME <- "gnut"
-    setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,"_outputs",sep="")
-    setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
-    setup$YGP_FILE <- "nofile"
-    setup$SOW_FILE_RFD <- paste(setup$CAL_DIR,"/gridcells/fcal_",setup$CELL,"/opt_fcal_",setup$CELL,".txt",sep="")
-    setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
-    setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
-    setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
-    setup$WTH_ROOT <- "ingc"
-    setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
-    setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
-    setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+    CAL_setup <- list()
+    CAL_setup$BDIR <- bDir
+    CAL_setup$SCRATCH <- scratch
+    CAL_setup$USE_SCRATCH <- use_scratch
+    CAL_setup$CELL <- cells$CELL[ci]
+    CAL_setup$ZONE <- cells$ZONE[ci]
+    CAL_setup$METHOD <- "lin"
+    CAL_setup$CROPNAME <- "gnut"
+    CAL_setup$CAL_DIR <- paste(CAL_setup$BDIR,"/model-runs/",toupper(CAL_setup$CROPNAME),"/calib/exp-",expID,"_outputs",sep="")
+    CAL_setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",CAL_setup$CELL,"_",CAL_setup$METHOD,".txt",sep="")
+    CAL_setup$YGP_FILE <- "nofile"
+    CAL_setup$SOW_FILE_RFD <- paste(CAL_setup$CAL_DIR,"/gridcells/fcal_",CAL_setup$CELL,"/opt_fcal_",CAL_setup$CELL,".txt",sep="")
+    CAL_setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",CAL_setup$CELL,"_irr.txt",sep="")
+    CAL_setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth/rfd_",CAL_setup$CELL,sep="")
+    CAL_setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth/irr_",CAL_setup$CELL,sep="")
+    CAL_setup$WTH_ROOT <- "ingc"
+    CAL_setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",CAL_setup$CELL,".txt",sep="")
+    CAL_setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",CAL_setup$CELL,".txt",sep="")
+    CAL_setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
     
     #if using scratch directory instead of nfs
-    if (use_scratch) {setup$SCRATCH <- paste(setup$SCRATCH,"/exp-",expID,"_hhp1",sep="")}
+    if (use_scratch) {CAL_setup$SCRATCH <- paste(CAL_setup$SCRATCH,"/exp-",expID,"_hhp1",sep="")}
     
-    cat("\nprocessing cell",setup$CELL,"\n")
+    cat("\nprocessing cell",CAL_setup$CELL,"\n")
     
     #get defaults (parameter set)
-    params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
+    params <- GLAM_get_default(x=cells,cell=CAL_setup$CELL,parDir=pDir)
     params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
     params$glam_param.sim_ctr$NDSLA <- 1
     
@@ -97,7 +98,7 @@ glam_ygp_half_half <- function(this_run) {
     irDir <- paste(cDir,"/irrigated_ratio",sep="")
     library(raster)
     ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
-    ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==setup$CELL)],Y=cells$Y[which(cells$CELL==setup$CELL)]))
+    ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==CAL_setup$CELL)],Y=cells$Y[which(cells$CELL==CAL_setup$CELL)]))
     ir_vls <- as.numeric(ir_vls)
     ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
     ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
@@ -112,7 +113,7 @@ glam_ygp_half_half <- function(this_run) {
     
     ###############################################
     #load the calib.csv, last iteration
-    cal_data <- read.csv(paste(setup$CAL_DIR,"/optimisation/z",setup$ZONE,"_rfd_irr/calib.csv",sep=""))
+    cal_data <- read.csv(paste(CAL_setup$CAL_DIR,"/optimisation/z",CAL_setup$ZONE,"_rfd_irr/calib.csv",sep=""))
     optimal <- cal_data[which(cal_data$iter==maxiter),]
     
     #update the parameter set
@@ -138,9 +139,12 @@ glam_ygp_half_half <- function(this_run) {
     params$glam_param.mod_mgt$ISYR <- 1966 #start year
     params$glam_param.mod_mgt$IEYR <- 1979 #end year
     
+    #correct ir_vls for years i'm interested in
+    ir_vls <- ir_vls[which(ir_vls$YEAR >= params$glam_param.mod_mgt$ISYR & ir_vls$YEAR <= params$glam_param.mod_mgt$IEYR),]
+    
     #where this specific run will be put
-    setup$CAL_DIR <- paste(setup$CAL_DIR,"/half_half_ygp",sep="")
-    setup$SIM_NAME <- paste("hhp1_",setup$CELL,sep="")
+    CAL_setup$CAL_DIR <- paste(CAL_setup$CAL_DIR,"/half_half_ygp",sep="")
+    CAL_setup$SIM_NAME <- paste("hhp1_",CAL_setup$CELL,sep="")
     
     #################################################################################
     #run the optimiser for YGP, 20 steps
@@ -150,11 +154,11 @@ glam_ygp_half_half <- function(this_run) {
     params[[where]][[parname]][,"Min"] <- 0.01
     params[[where]][[parname]][,"Max"] <- 1.00
     
-    if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/ygp.RData",sep=""))) {
+    if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/ygp.RData",sep=""))) {
       # reset lists of output parameters
       optimal <- list(); optimised <- list()
       
-      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
+      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
                                                 param=parname,n.steps=nstep,iter=tolower(parname),
                                                 iratio=ir_vls)
       
@@ -162,22 +166,86 @@ glam_ygp_half_half <- function(this_run) {
       cat(parname,":",optimal[[parname]],"\n")
       if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
       
-      save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
+      save(list=c("optimised","optimal"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/ygp.RData",sep=""))
       
-      if (plot_all) {
-        tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
-             width=1250,pointsize=8)
-        par(mar=c(3,3,2,1))
-        plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
-             main=paste(parname," :: ",optimal[[parname]],sep=""),
-             xlab="Parameter value",ylab="RMSE (kg/ha)")
-        grid(nx=10,ny=10)
-        abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
-        dev.off()
+      #copy outputs from each run
+      best_run <- which(optimised[[parname]][["VALUE"]] == optimal[[parname]])
+      #if irrigated run exists then copy everything from it
+      rd_irr <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal[[parname]],sep="")
+      rd_rfd <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal[[parname]],sep="")
+      
+      if (file.exists(rd_irr)) {
+        x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
+                       to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,sep=""))
+        x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+                       to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,sep=""))
+        x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
+                       to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/",tolower(cropLong),"_IRR.out",sep=""))
       }
+      
+      if (file.exists(rd_rfd)) {
+        x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
+                       to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,sep=""),overwrite=T)
+        
+        if (file.exists(paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
+          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,sep=""))
+        } else {
+          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
+        }
+        
+        x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
+                       to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/",tolower(cropLong),"_RFD.out",sep=""))
+        system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
+      } else {
+        load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/ygp.RData",sep=""))
+      }
+      
+      #now perform model run with that value of ygp
+      params$glam_param.ygp$YGP$Value <- optimal$YGP
+      
+      #grab required run data and perform the run
+      #initial run configuration
+      RUN_setup <- list()
+      RUN_setup$B_DIR <- paste(CAL_setup$BDIR)
+      RUN_setup$BIN_DIR <- paste(RUN_setup$B_DIR,"/./../bin",sep="")
+      RUN_setup$CAL_DIR <- paste(RUN_setup$B_DIR,"/calib",sep="")
+      RUN_setup$INPUTS_DIR <- paste(RUN_setup$B_DIR,"/inputs",sep="")
+      RUN_setup$ASC_DIR <- paste(RUN_setup$INPUTS_DIR,"/ascii",sep="")
+      RUN_setup$RUNS_DIR <- paste(RUN_setup$B_DIR,"/runs/testing",sep="")
+      RUN_setup$CROP <- "gnut"
+      RUN_setup$YEARS <- 1966:1993
+      RUN_setup$EXP_DIR <- "exp-02_outputs"
+      RUN_setup$GRID <- paste(RUN_setup$INPUTS_DIR,"/calib-cells-selection-v6.csv",sep="")
+      RUN_setup$PREFIX <- "fcal_"
+      RUN_setup$GRIDCELL <- 636
+      RUN_setup$YGP <- "opt"
+      RUN_setup$CODES_PREFIX <- "soilcodes_"
+      RUN_setup$TYPES_PREFIX <- "soiltypes_"
+      RUN_setup$WTH_ROOT <- "ingc"
+      RUN_setup$IRR_RS_DIR <- paste(RUN_setup$B_DIR,"/irrigated_ratio",sep="")
+      RUN_setup$IRR_RS_PREFIX <- "raw-"
+      RUN_setup$IRR_RS_EXT <- ".asc"
+      
+      #load irrigation data
+      cell_xy <- read.csv(RUN_setup$GRID)
+      RUN_setup$IDATA <- load_irr_data(rs_dir=RUN_setup$IRR_RS_DIR,
+                                       rs_prefix=RUN_setup$IRR_RS_PREFIX,yi=min(RUN_setup$YEARS),
+                                       yf=max(RUN_setup$YEARS),xy=cbind(x=cell_xy$X,y=cell_xy$Y),
+                                       ext=RUN_setup$IRR_RS_EXT,cell_ids=cell_xy$CELL)
+      
+      #configure GLAM run
+      RUN_setup <- GLAM_config(RUN_setup,force="no")
+      
+      #make this particular glam run
+      RUN_setup <- GLAM_run(RUN_setup)
+      
+      
       
     }
   }
 }
+
 
 

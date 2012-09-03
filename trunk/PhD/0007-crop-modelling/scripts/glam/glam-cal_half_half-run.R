@@ -45,6 +45,7 @@ runs_ref2 <- expand.grid(SID=runs_ref$SID,RUN=1:5)
 runs_ref <- merge(runs_ref2,runs_ref,by="SID",all=T,sort=F)
 
 cropName <- "gnut"
+cropLong <- "groundnut"
 
 #do i want to plot (not for eljefe)
 plot_all <- F
@@ -64,6 +65,7 @@ sfExport("bDir")
 sfExport("maxiter")
 sfExport("seeds")
 sfExport("cropName")
+sfExport("cropLong")
 sfExport("runs_ref")
 sfExport("plot_all")
 sfExport("selection")
