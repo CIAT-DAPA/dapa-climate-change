@@ -27,6 +27,7 @@ source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
 source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-run-functions.R",sep=""))
 source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
 
 
