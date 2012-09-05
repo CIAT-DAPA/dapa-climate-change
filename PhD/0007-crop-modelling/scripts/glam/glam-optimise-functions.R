@@ -63,7 +63,7 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   solGrid <- RUN_setup$SOL_GRID
   
   #check consistency of yield file
-  ydum <- read.fortran(yFile,format=c("A12","F8"),n=nyears)
+  ydum <- read.fortran(yFile,format=c("A12","F8"),n=28)
   if (length(which(ydum$V2 < -90)) > 0) {
     y_has_na <- T
   } else {
