@@ -16,7 +16,6 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   bDir <- RUN_setup$BDIR
   isyr <- GLAM_params$glam_param.mod_mgt$ISYR
   ieyr <- GLAM_params$glam_param.mod_mgt$IEYR
-  nyears <- ieyr-isyr+1
   
   #input directories and model
   #cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
