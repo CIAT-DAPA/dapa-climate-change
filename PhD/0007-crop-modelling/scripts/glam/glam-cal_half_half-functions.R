@@ -223,7 +223,7 @@ glam_ygp_half_half <- function(this_run) {
                        to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
         
         if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
-          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+          x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
                          to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
         } else {
           x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
