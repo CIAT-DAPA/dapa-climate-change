@@ -219,20 +219,21 @@ glam_ygp_half_half <- function(this_run) {
       }
       
       if (file.exists(rd_rfd)) {
-        x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
+        x <- file.copy(from=paste(rd_rfd,"/filenames-",tolower(cropName),"-run.txt",sep=""),
                        to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
         
-        if (file.exists(paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
+        if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
           x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
                          to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
         } else {
-          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+          x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
                          to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
         }
         
-        x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
+        x <- file.copy(from=paste(rd_rfd,"/output/",tolower(cropLong),".out",sep=""),
                        to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_RFD.out",sep=""))
       }
+      setwd(scratch)
       system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
     } else {
       load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/ygp.RData",sep=""))
@@ -286,6 +287,7 @@ glam_ygp_half_half <- function(this_run) {
       }
       
       #remove scratch folder
+      setwd(scratch)
       system(paste("rm -rf ",RUN_setup$RUN_DIR,sep=""))
       
       #save run config
@@ -359,20 +361,21 @@ glam_ygp_half_half <- function(this_run) {
       }
       
       if (file.exists(rd_rfd)) {
-        x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
+        x <- file.copy(from=paste(rd_rfd,"/filenames-",tolower(cropName),"-run.txt",sep=""),
                        to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
         
-        if (file.exists(paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
-          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+        if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
+          x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
                          to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
         } else {
-          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+          x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
                          to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
         }
         
-        x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
+        x <- file.copy(from=paste(rd_rfd,"/output/",tolower(cropLong),".out",sep=""),
                        to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_RFD.out",sep=""))
       }
+      setwd(scratch)
       system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
     } else {
       load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/ygp.RData",sep=""))
@@ -426,6 +429,7 @@ glam_ygp_half_half <- function(this_run) {
       }
       
       #remove scratch folder
+      setwd(scratch)
       system(paste("rm -rf ",RUN_setup$RUN_DIR,sep=""))
       
       #save run config
