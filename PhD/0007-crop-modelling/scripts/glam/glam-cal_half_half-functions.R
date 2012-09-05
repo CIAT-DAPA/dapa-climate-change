@@ -169,7 +169,7 @@ glam_ygp_half_half <- function(this_run) {
     params$glam_param.mod_mgt$IEYR <- 1979 #end year
     
     #correct ir_vls for years i'm interested in
-    ir_vls_sel <- ir_vls[which(ir_vls$YEAR >= params$glam_param.mod_mgt$ISYR & ir_vls$YEAR <= params$glam_param.mod_mgt$IEYR),]
+    #ir_vls_sel <- ir_vls[which(ir_vls$YEAR >= params$glam_param.mod_mgt$ISYR & ir_vls$YEAR <= params$glam_param.mod_mgt$IEYR),]
     
     #if using scratch directory instead of nfs
     if (use_scratch) {CAL_setup$SCRATCH <- paste(scratch,"/exp-",expID,"_hhp1",sep="")}
@@ -191,7 +191,7 @@ glam_ygp_half_half <- function(this_run) {
       
       optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
                                                 param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls_sel)
+                                                iratio=ir_vls)
       
       optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
       cat(parname,":",optimal[[parname]],"\n")
@@ -309,7 +309,7 @@ glam_ygp_half_half <- function(this_run) {
     params$glam_param.mod_mgt$IEYR <- 1993 #end year
     
     #correct ir_vls for years i'm interested in
-    ir_vls_sel <- ir_vls[which(ir_vls$YEAR >= params$glam_param.mod_mgt$ISYR & ir_vls$YEAR <= params$glam_param.mod_mgt$IEYR),]
+    #ir_vls_sel <- ir_vls[which(ir_vls$YEAR >= params$glam_param.mod_mgt$ISYR & ir_vls$YEAR <= params$glam_param.mod_mgt$IEYR),]
     
     #if using scratch directory instead of nfs
     if (use_scratch) {CAL_setup$SCRATCH <- paste(scratch,"/exp-",expID,"_hhp2",sep="")}
@@ -331,7 +331,7 @@ glam_ygp_half_half <- function(this_run) {
       
       optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
                                                 param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls_sel)
+                                                iratio=ir_vls)
       
       optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
       cat(parname,":",optimal[[parname]],"\n")
