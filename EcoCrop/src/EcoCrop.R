@@ -98,7 +98,7 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	Tkill <- Tkmp + 40
 	cat("Growing season is", Gavg, "months \n")
 	
-	#This is the function that evaluates the suitability in a pixel basis
+	#This is the function that evaluates the suitability on a pixel basis
 	suitFun <- function(dataPixel) {
 		if(length(which(is.na(dataPixel)))!=0) {
 			return(c(NA,NA,NA,NA,NA))
@@ -109,86 +109,164 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 			tSuit <- rep(NA, 12)
 			pSuit <- rep(NA, 12)
 			cumPpt <- rep(NA, 12)
-			for (i in 1:12) {
-				start.month <- i
-				end.month <- i + Gavg - 1
-				
-				#Temp. iteration
-				if (TnDataPixel[i] < Tkill) {
-					tSuit[i] <- 0
-				} else if (TavDataPixel[i] < Tmin) {
-					tSuit[i] <- 0
-				} else if (TavDataPixel[i] < Topmin) {
-					tSuit[i] <- 1 - ((Topmin - TavDataPixel[i]) * (1 / (Topmin - Tmin)))
-				} else if (TavDataPixel[i] < Topmax) {
-					tSuit[i] <- 1
-				} else if (TavDataPixel[i] < Tmax) {
-					tSuit[i] <- (Tmax - TavDataPixel[i]) * (1 / (Tmax - Topmax))
-				} else {
-					tSuit[i] <- 0
-				}
-				
-				#Ppt growing season
-				end.mth.p <- end.month
-				if (end.mth.p > 12) {
-					end.mth.p <- end.mth.p - 12
-					cumPpt[i] <- sum(PptDataPixel[c(start.month:12,1:end.mth.p)])
-				} else {
-					cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
-				}
-				
-				
-				#Precipitation iteration
-				if (cumPpt[i] < Rmin) {
-					pSuit[i] <- 0
-				} else if (cumPpt[i] >= Rmin & cumPpt[i] <= Ropmin) {
-					pSuit[i] <- (rainLeftM) * cumPpt[i] + (rainLeftB)
-				} else if (cumPpt[i] > Ropmin & cumPpt[i] < Ropmax) {
-					pSuit[i] <- 1
-				} else if (cumPpt[i] >= Ropmax &  cumPpt[i] <= Rmax) {
-					pSuit[i] <- (rainRightM) * cumPpt[i] + (rainRightB)
-				} else if (cumPpt[i] > Rmax) {
-					pSuit[i] <- 0
-				} else {
-					pSuit[i] <- NA
-				}
-			}
-			
-			#Minimum cumulated temperature and rainfall suitability
-			ecotf <- rep(NA, 12)
-			ecopf <- rep(NA, 12)
-			for (i in 1:12) {
-				start.month <- i
-				end.month <- i + Gavg - 1
-				ecot <- rep(NA, Gavg)
-				ecop <- rep(NA, Gavg)
-				ecot[1] <- 1
-				ecop[1] <- 0
-				mthCounter <- 1
-				for (j in start.month:end.month) {
-					r.end.mth <- j
-					if (r.end.mth > 12) {r.end.mth <- r.end.mth - 12}
-					r.nxt.mth <- r.end.mth + 1
-					
-					nxtCounter <- mthCounter + 1
-					if (tSuit[r.end.mth] < ecot[mthCounter]) {
-						ecot[nxtCounter] <- tSuit[r.end.mth]
-					} else {
-						ecot[nxtCounter] <- ecot[mthCounter]
-					}
-					
-					if (pSuit[r.end.mth] > ecop[mthCounter]) {
-						ecop[nxtCounter] <- pSuit[r.end.mth]
-					} else {
-						ecop[nxtCounter] <- ecop[mthCounter]
-					}
-					mthCounter <- mthCounter + 1
-				}
-				ecot <- ecot[which(!is.na(ecot[]))]
-				ecop <- ecop[which(!is.na(ecot[]))]
-				ecotf[i] <- min(ecot)
-				ecopf[i] <- max(ecop)
-			}
+      
+      ##########################
+      #Note: below if will reduce computational time for a perennial crop (where Gavg=12)
+      if (Gavg == 12) {
+        #for perennial crop
+        for (i in 1:12) {
+          #Temp. iteration
+          if (TnDataPixel[i] < Tkill) {
+            tSuit[i] <- 0
+          } else if (TavDataPixel[i] < Tmin) {
+            tSuit[i] <- 0
+          } else if (TavDataPixel[i] < Topmin) {
+            tSuit[i] <- 1 - ((Topmin - TavDataPixel[i]) * (1 / (Topmin - Tmin)))
+          } else if (TavDataPixel[i] < Topmax) {
+            tSuit[i] <- 1
+          } else if (TavDataPixel[i] < Tmax) {
+            tSuit[i] <- (Tmax - TavDataPixel[i]) * (1 / (Tmax - Topmax))
+          } else {
+            tSuit[i] <- 0
+          }
+        }
+        
+        #total annual rainfall
+        cumPpt <- sum(PptDataPixel[1:12])
+        
+        #Single precipitation iteration
+        if (cumPpt < Rmin) {
+          pSuit <- 0
+        } else if (cumPpt >= Rmin & cumPpt <= Ropmin) {
+          pSuit <- (rainLeftM) * cumPpt + (rainLeftB)
+        } else if (cumPpt > Ropmin & cumPpt < Ropmax) {
+          pSuit <- 1
+        } else if (cumPpt >= Ropmax &  cumPpt <= Rmax) {
+          pSuit <- (rainRightM) * cumPpt + (rainRightB)
+        } else if (cumPpt > Rmax) {
+          pSuit <- 0
+        } else {
+          pSuit <- NA
+        }
+        
+        #Minimum cumulated temperature and rainfall suitability
+        i <- 1
+        start.month <- i
+        end.month <- i + Gavg - 1
+        
+        ecotf <- rep(NA, 12)
+        ecot <- rep(NA, Gavg)
+        ecot[1] <- 1
+        ecopf <- rep(NA, 12)
+        #ecop <- rep(NA, Gavg)
+        #ecop[1] <- 0
+        mthCounter <- 1
+        for (j in start.month:end.month) {
+          r.end.mth <- j
+          if (r.end.mth > 12) {r.end.mth <- r.end.mth - 12}
+          r.nxt.mth <- r.end.mth + 1
+          
+          nxtCounter <- mthCounter + 1
+          if (tSuit[r.end.mth] < ecot[mthCounter]) {
+            ecot[nxtCounter] <- tSuit[r.end.mth]
+          } else {
+            ecot[nxtCounter] <- ecot[mthCounter]
+          }
+          
+          #if (pSuit[r.end.mth] > ecop[mthCounter]) {
+          #  ecop[nxtCounter] <- pSuit[r.end.mth]
+          #} else {
+          #  ecop[nxtCounter] <- ecop[mthCounter]
+          #}
+          mthCounter <- mthCounter + 1
+        }
+        #ecot <- ecot[which(!is.na(ecot[]))]
+        #ecop <- ecop[which(!is.na(ecot[]))]
+        ecotf[1:12] <- min(ecot,na.rm=T)
+        ecopf[1:12] <- pSuit #max(ecop,na.rm=T)
+        
+      } else {
+        #for annual crop (Gavg is less than 12)
+  			for (i in 1:12) {
+  				start.month <- i
+  				end.month <- i + Gavg - 1
+  				
+  				#Temp. iteration
+  				if (TnDataPixel[i] < Tkill) {
+  					tSuit[i] <- 0
+  				} else if (TavDataPixel[i] < Tmin) {
+  					tSuit[i] <- 0
+  				} else if (TavDataPixel[i] < Topmin) {
+  					tSuit[i] <- 1 - ((Topmin - TavDataPixel[i]) * (1 / (Topmin - Tmin)))
+  				} else if (TavDataPixel[i] < Topmax) {
+  					tSuit[i] <- 1
+  				} else if (TavDataPixel[i] < Tmax) {
+  					tSuit[i] <- (Tmax - TavDataPixel[i]) * (1 / (Tmax - Topmax))
+  				} else {
+  					tSuit[i] <- 0
+  				}
+  				
+  				#Ppt growing season
+  				end.mth.p <- end.month
+  				if (end.mth.p > 12) {
+  					end.mth.p <- end.mth.p - 12
+  					cumPpt[i] <- sum(PptDataPixel[c(start.month:12,1:end.mth.p)])
+  				} else {
+  					cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
+  				}
+  				
+  				#Precipitation iteration
+  				if (cumPpt[i] < Rmin) {
+  					pSuit[i] <- 0
+  				} else if (cumPpt[i] >= Rmin & cumPpt[i] <= Ropmin) {
+  					pSuit[i] <- (rainLeftM) * cumPpt[i] + (rainLeftB)
+  				} else if (cumPpt[i] > Ropmin & cumPpt[i] < Ropmax) {
+  					pSuit[i] <- 1
+  				} else if (cumPpt[i] >= Ropmax &  cumPpt[i] <= Rmax) {
+  					pSuit[i] <- (rainRightM) * cumPpt[i] + (rainRightB)
+  				} else if (cumPpt[i] > Rmax) {
+  					pSuit[i] <- 0
+  				} else {
+  					pSuit[i] <- NA
+  				}
+  			}
+  			
+  			#Minimum cumulated temperature and rainfall suitability
+  			ecotf <- rep(NA, 12)
+  			ecopf <- rep(NA, 12)
+  			for (i in 1:12) {
+  				start.month <- i
+  				end.month <- i + Gavg - 1
+  				ecot <- rep(NA, Gavg)
+  				ecop <- rep(NA, Gavg)
+  				ecot[1] <- 1
+  				ecop[1] <- 0
+  				mthCounter <- 1
+  				for (j in start.month:end.month) {
+  					r.end.mth <- j
+  					if (r.end.mth > 12) {r.end.mth <- r.end.mth - 12}
+  					r.nxt.mth <- r.end.mth + 1
+  					
+  					nxtCounter <- mthCounter + 1
+  					if (tSuit[r.end.mth] < ecot[mthCounter]) {
+  						ecot[nxtCounter] <- tSuit[r.end.mth]
+  					} else {
+  						ecot[nxtCounter] <- ecot[mthCounter]
+  					}
+  					
+  					if (pSuit[r.end.mth] > ecop[mthCounter]) {
+  						ecop[nxtCounter] <- pSuit[r.end.mth]
+  					} else {
+  						ecop[nxtCounter] <- ecop[mthCounter]
+  					}
+  					mthCounter <- mthCounter + 1
+  				}
+  				#ecot <- ecot[which(!is.na(ecot[]))]
+  				#ecop <- ecop[which(!is.na(ecot[]))]
+  				ecotf[i] <- min(ecot,na.rm=T)
+  				ecopf[i] <- max(ecop,na.rm=T)
+  			}
+		  }
 			precFinSuit <- round(max(ecopf * 100))
 			if (precFinSuit == 0) {precFinGS <- 0} else {precFinGS <- max(which(ecopf == max(ecopf)))}
 			tempFinSuit <- round(max(ecotf * 100))
@@ -216,7 +294,14 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 	cat("(", bs$n, " chunks) \n", sep="")
 	pb <- pbCreate(bs$n, type='text', style=3)
 	for (b in 1:bs$n) {
-		rowVals <- getValues(climateStack, row=bs$row[b], nrows=bs$nrow[b])
+	  iniCell <- 1+(bs$row[b]-1)*ncol(pSuitRaster)
+	  finCell <- (bs$row[b]+bs$nrow[b]-1)*ncol(pSuitRaster)
+    allCells <- iniCell:finCell
+    validCells <- allCells[which(!is.na(climateStack[[1]][allCells]))]
+    #cat("b=",b," / cells=",length(validCells),"\n",sep="")
+	  rowVals <- extract(climateStack,validCells)
+    #rowVals <- getValues(climateStack, row=bs$row[b], nrows=bs$nrow[b])
+    
 		rasVals <- apply(rowVals, 1, suitFun)
 		precVecSuit <- rasVals[1,]
 		tempVecSuit <- rasVals[2,]
@@ -225,14 +310,18 @@ suitCalc <- function(climPath='', Gmin=90,Gmax=90,Tkmp=0,Tmin=10,Topmin=16,Topma
 		tempVecGS <- rasVals[5,]
 		rm(rasVals)
 		
-		iniCell <- 1+(bs$row[b]-1)*ncol(pSuitRaster)
-		finCell <- (bs$row[b]+bs$nrow[b]-1)*ncol(pSuitRaster)
-		pSuitRaster[iniCell:finCell] <- precVecSuit
-		tSuitRaster[iniCell:finCell] <- tempVecSuit
-		fSuitRaster[iniCell:finCell] <- finlVecSuit
-		pGSRaster[iniCell:finCell] <- precVecGS
-		tGSRaster[iniCell:finCell] <- tempVecGS
+		#pSuitRaster[iniCell:finCell] <- precVecSuit
+		#tSuitRaster[iniCell:finCell] <- tempVecSuit
+		#fSuitRaster[iniCell:finCell] <- finlVecSuit
+		#pGSRaster[iniCell:finCell] <- precVecGS
+		#tGSRaster[iniCell:finCell] <- tempVecGS
 		
+	  pSuitRaster[validCells] <- precVecSuit
+	  tSuitRaster[validCells] <- tempVecSuit
+	  fSuitRaster[validCells] <- finlVecSuit
+	  pGSRaster[validCells] <- precVecGS
+	  tGSRaster[validCells] <- tempVecGS
+    
 		pbStep(pb, b)
 	}
 	pbClose(pb)
