@@ -69,7 +69,9 @@ process_cmip5_rcp45_gcm <- function(i) {
       sr_freq <- "day"
     } else {
       sr_freq <- "mth"
-      sr_file <- list.files(ens_odir,pattern="rsds")
+      sr_patn <- unlist(strsplit(paste(srn),"_",fixed=T))[1:2]
+      sr_patn <- paste(sr_patn,collapse="_")
+      sr_file <- list.files(ens_odir,pattern=sr_patn)
       ncf <- c(ncf,sr_file)
     }
     
@@ -291,7 +293,7 @@ process_cmip5_rcp45_gcm <- function(i) {
     #nnc <- nnc[which(!nnc %in% paste(srn))]
     
     if (!srn %in% nnc) {
-      sr_file <- list.files(".",pattern="rsds")
+      sr_file <- list.files(".",pattern=sr_patn)
       nnc <- c(nnc,sr_file)
     }
     cnc <- length(nnc)
