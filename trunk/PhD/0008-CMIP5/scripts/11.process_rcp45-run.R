@@ -64,7 +64,7 @@ for (i in 1:length(gcm_list)) {
     ncf <- list.files(ens_odir,pattern=patn)
     
     #get the frequency of srad data
-    srn <- unique(this_ens$srad_naming)
+    srn <- unique(this_ens$srad_naming)[1]
     if (srn %in% ncf) {
       sr_freq <- "day"
     } else {
