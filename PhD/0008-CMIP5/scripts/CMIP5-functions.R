@@ -512,6 +512,27 @@ get_mean_climate_metrics_revised <- function(proc,mdDir,regions) {
   if (file.exists(fname)) {
     mets <- read.csv(paste(fname))
     mets <- cbind(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,mets)
+    if (!"PRMSE1" %in% names(mets)) {
+      mets$PRMSE1 <- NA
+    }
+    
+    if (!"PRMSE2" %in% names(mets)) {
+      mets$PRMSE2 <- NA
+    }
+    
+    if (!"mean_OBS" %in% names(mets)) {
+      mets$mean_OBS <- NA
+    }
+    
+    if (!"mean_GCM" %in% names(mets)) {
+      mets$mean_GCM <- NA
+    }
+    
+    mets <- data.frame(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,SEASON=mets$SEASON,
+                       CCOEF=mets$CCOEF,PVAL=mets$PVAL,RSQ=mets$RSQ,MBR=mets$MBR,
+                       RMSE=mets$RMSE,PRMSE1=mets$PRMSE1,PRMSE2=mets$PRMSE2,
+                       mean_OBS=mets$mean_OBS,mean_GCM=mets$mean_GCM,N=mets$N)
+    
   } else {
     mets <- data.frame(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,SEASON=NA,CCOEF=NA,
                        PVAL=NA,RSQ=NA,MBR=NA,RMSE=NA,PRMSE1=NA,PRMSE2=NA,mean_OBS=NA,
