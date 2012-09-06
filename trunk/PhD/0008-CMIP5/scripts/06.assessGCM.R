@@ -214,6 +214,63 @@ sfStop()
 
 
 
+#################################################################################
+#################################################################################
+######################### REVISION FOR NCC PAPER ################################
+#################################################################################
+#################################################################################
+#a. mean climates: for each area using the values of GCM gridcells and the mean
+#                  values of the datasets calculate the following
+#   - pearson & p-value (origin-forced)
+#   - slope (origin-forced)
+#   - rmse
+
+#climatology data
+clWCL <- paste(inputDD,"/wcl-data",sep="")
+clCRU <- paste(inputDD,"/cru-data",sep="")
+clE40 <- e40Dir
+clWST <- paste(inputDD,"/wcl-weather-stations",sep="")
+
+#check those that are done already
+procList <- check_done(procList,"x_rev.proc")
+
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("e40Dir")
+sfExport("inputDD")
+sfExport("outputDD")
+sfExport("clWCL")
+sfExport("clCRU")
+sfExport("clE40")
+sfExport("clWST")
+sfExport("admDir")
+sfExport("vnList")
+sfExport("scList")
+sfExport("procList")
+sfExport("regions")
+
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),mean_climate_skill_revised))
+
+#stop the cluster
+sfStop()
+
+
+
+
+
 
 
 
