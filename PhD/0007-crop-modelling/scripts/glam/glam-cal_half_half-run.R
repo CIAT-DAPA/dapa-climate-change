@@ -53,7 +53,7 @@ plot_all <- F
 use_scratch <- T
 
 #number of cpus to use
-if (nrow(runs_ref) > 14) {ncpus <- 14} else {ncpus <- nrow(runs_ref)}
+if (nrow(runs_ref) > 13) {ncpus <- 13} else {ncpus <- nrow(runs_ref)}
 
 #here do the parallelisation
 #load library and create cluster
