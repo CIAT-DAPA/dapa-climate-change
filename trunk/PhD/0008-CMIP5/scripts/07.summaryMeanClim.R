@@ -40,19 +40,27 @@ scList <- data.frame(VID=1:3,GCM=c(1,1,1),WCL=c(1,1,1),
 gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
 gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
 isoList <- regions$ISO
-dsetList <- c("cl-CRU","cl-E40","cl-WCL","cl-WST")
+
+#### the below line was commented for NCC revised version
+#dsetList <- c("cl-CRU","cl-E40","cl-WCL","cl-WST")
+
+#### the below line was introduced for NCC revised version
+dsetList <- c("cl_rev-CRU","cl_rev-E40","cl_rev-WCL","cl_rev-WST")
+
 vnList <- c("pr","tas","dtr")
 procList <- expand.grid(GCM=gcmList,ISO=isoList,OBS=dsetList,VAR=vnList)
 procList$GCM <- paste(procList$GCM); procList$ISO <- paste(procList$ISO)
 procList$OBS <- paste(procList$OBS); procList$VAR <- paste(procList$VAR)
 
 #create output folder
-oDir <- paste(mdDir,"/assessment/output-data/_summary",sep="")
+#oDir <- paste(mdDir,"/assessment/output-data/_summary",sep="") #original
+oDir <- paste(mdDir,"/assessment/output-data/_summary_revised",sep="") #NCC revision
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 #get all metrics
 if (!file.exists(paste(oDir,"/cl-summary.csv",sep=""))) {
-  all_mets <- apply(procList,1,get_mean_climate_metrics,mdDir,regions)
+  #all_mets <- apply(procList,1,get_mean_climate_metrics,mdDir,regions)
+  all_mets <- apply(procList,1,get_mean_climate_metrics_revised,mdDir,regions)
   #write outputs
   save(list=c("all_mets"),file=paste(oDir,"/cl-summary_raw.RData",sep=""))
   all_mets <- do.call("rbind", all_mets)

@@ -497,6 +497,32 @@ plotpoints <- function(pdata,param="CCOEF") {
 
 ##############################################################################
 # get metrics for mean climate skill assessment
+# revised version for NCC paper
+##############################################################################
+get_mean_climate_metrics_revised <- function(proc,mdDir,regions) {
+  gcm <- paste(proc[1]) #paste(procList$GCM[1])
+  dst <- paste(proc[3]) #paste(procList$OBS[1])
+  vn <- paste(proc[4]) #paste(procList$VAR[1])
+  iso <- paste(proc[2]) #paste(procList$ISO[1])
+  reg <- paste(regions$REGION[which(regions$ISO == iso)])
+  
+  metsDir <- paste(mdDir,"/assessment/output-data/",reg,"/",iso,"",sep="")
+  fname <- paste(metsDir,"/",dst,"/",vn,"_",gsub("_ENS","",gcm),".csv",sep="")
+  cat(fname,"\n")
+  if (file.exists(fname)) {
+    mets <- read.csv(paste(fname))
+    mets <- cbind(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,mets)
+  } else {
+    mets <- data.frame(GCM=gcm,OBS=dst,VAR=vn,ISO=iso,REG=reg,SEASON=NA,CCOEF=NA,
+                       PVAL=NA,RSQ=NA,MBR=NA,RMSE=NA,PRMSE1=NA,PRMSE2=NA,mean_OBS=NA,
+                       mean_GCM=NA,N=NA)
+  }
+  return(mets)
+}
+
+
+##############################################################################
+# get metrics for mean climate skill assessment
 ##############################################################################
 get_mean_climate_metrics <- function(proc,mdDir,regions) {
   gcm <- paste(proc[1]) #paste(procList$GCM[1])
