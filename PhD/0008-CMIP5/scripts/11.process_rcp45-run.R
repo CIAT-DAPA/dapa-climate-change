@@ -18,7 +18,7 @@ src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #sourcing needed functions
 source(paste(src.dir,"/scripts/GHCND-GSOD-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
-source(paste(src.dir2,"/scripts/11.process_rcp45-run.R",sep=""))
+#source(paste(src.dir2,"/scripts/11.process_rcp45-run.R",sep=""))
 
 #input directories
 base_dir <- "/nfs/a102/eejarv"
