@@ -482,8 +482,8 @@ glam_ygp_half_half <- function(this_run) {
     
     cf <- file(ctrl_file,"w")
     cat("Process finished on",date(),"\n",file=cf)
-    cat("Part 1:",exit_p1,"\n")
-    cat("Part 2:",exit_p2,"\n")
+    cat("Part 1:",exit_p1,"\n",file=cf)
+    cat("Part 2:",exit_p2,"\n",file=cf)
     close(cf)
   }
 }
