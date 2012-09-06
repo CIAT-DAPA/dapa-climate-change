@@ -50,7 +50,7 @@ glam_ygp_half_half <- function(this_run) {
   #cells <- read.csv(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
   cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
-  ctrl_file <- paste(cDir,"/calib/exp-",expID,"_outputs/half_half_ygp/",expID,"_",sid,"_",zone,".proc",sep="")
+  ctrl_file <- paste(cDir,"/calib/exp-",expID,"_outputs/half_half_ygp/status_",expID,"_",sid,"_",zone,".proc",sep="")
   
   if (!file.exists(ctrl_file)) {
     #ci <- 1
@@ -192,11 +192,20 @@ glam_ygp_half_half <- function(this_run) {
         # reset lists of output parameters
         optimal <- list(); optimised <- list()
         
-        optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
-                                                  param=parname,n.steps=nstep,iter=tolower(parname),
-                                                  iratio=ir_vls_sel)
+        ydum <- read.fortran(CAL_setup$YIELD_FILE,format=c("3I4","F8"),n=28)
+        ydum$V4[which(ydum$V4 < -90)] <- NA
+        ydum <- ydum$V4[which(ydum$V1 >= params$glam_param.mod_mgt$ISYR & ydum$V1 <= params$glam_param.mod_mgt$IEYR)]
+        if (length(which(is.na(ydum))) == length(ydum)) {
+          seq_vals <- seq(params[[where]][[parname]][,"Min"],params[[where]][[parname]][,"Max"],length.out=nstep)
+          optimised[[parname]] <- data.frame(VALUE=seq_vals,RMSE=NA)
+          optimal[[parname]] <- NA
+        } else {
+          optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
+                                                    param=parname,n.steps=nstep,iter=tolower(parname),
+                                                    iratio=ir_vls_sel)
+          optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+        }
         
-        optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
         cat(parname,":",optimal[[parname]],"\n")
         if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
         
@@ -206,97 +215,107 @@ glam_ygp_half_half <- function(this_run) {
         save(list=c("optimised","optimal"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/ygp.RData",sep=""))
         save(list=c("CAL_setup"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/CAL_setup.RData",sep=""))
         
-        #copy outputs from each run
-        best_run <- which(optimised[[parname]][["VALUE"]] == optimal[[parname]])
-        #if irrigated run exists then copy everything from it
-        rd_irr <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal[[parname]],sep="")
-        rd_rfd <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal[[parname]],sep="")
-        
-        if (file.exists(rd_irr)) {
-          x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
-          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
-          x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_IRR.out",sep=""))
-        }
-        
-        if (file.exists(rd_rfd)) {
-          x <- file.copy(from=paste(rd_rfd,"/filenames-",tolower(cropName),"-run.txt",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
+        #copy outputs from each run if it could be done
+        if (!is.na(optimal[[parname]])) {
+          best_run <- which(optimised[[parname]][["VALUE"]] == optimal[[parname]])
+          #if irrigated run exists then copy everything from it
+          rd_irr <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal[[parname]],sep="")
+          rd_rfd <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal[[parname]],sep="")
           
-          if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
-            x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+          if (file.exists(rd_irr)) {
+            x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
                            to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
-          } else {
-            x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
-                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
+            x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
+            x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_IRR.out",sep=""))
           }
           
-          x <- file.copy(from=paste(rd_rfd,"/output/",tolower(cropLong),".out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_RFD.out",sep=""))
+          if (file.exists(rd_rfd)) {
+            x <- file.copy(from=paste(rd_rfd,"/filenames-",tolower(cropName),"-run.txt",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
+            
+            if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
+              x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+                             to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
+            } else {
+              x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+                             to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
+            }
+            
+            x <- file.copy(from=paste(rd_rfd,"/output/",tolower(cropLong),".out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_RFD.out",sep=""))
+          }
+          setwd(scratch)
+          system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
         }
-        setwd(scratch)
-        system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
       } else {
         load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/ygp.RData",sep=""))
         load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/CAL_setup.RData",sep=""))
       }
       
-      #now perform model run with that value of ygp
-      #params$glam_param.ygp$YGP$Value <- optimal$YGP
-      if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))) {
-        #grab required run data and perform the run
-        #initial run configuration
-        RUN_setup <- base_RUN_setup
-        RUN_setup$RUNS_DIR <- CAL_setup$SCRATCH
-        RUN_setup$YGP <- optimal$YGP
-        RUN_setup$YEARS <- 1980:1993
-        
-        #load irrigation data
-        cell_xy <- read.csv(RUN_setup$GRID)
-        RUN_setup$IDATA <- load_irr_data(rs_dir=RUN_setup$IRR_RS_DIR,
-                                         rs_prefix=RUN_setup$IRR_RS_PREFIX,yi=min(RUN_setup$YEARS),
-                                         yf=max(RUN_setup$YEARS),xy=cbind(x=cell_xy$X,y=cell_xy$Y),
-                                         ext=RUN_setup$IRR_RS_EXT,cell_ids=cell_xy$CELL)
-        
-        #configure GLAM run
-        RUN_setup <- GLAM_config(RUN_setup,force="no")
-        RUN_setup$PARAM_IRR$glam_param.mod_mgt$ISYR <- 1980
-        RUN_setup$PARAM_IRR$glam_param.mod_mgt$IEYR <- 1993
-        RUN_setup$PARAM_RFD$glam_param.mod_mgt$ISYR <- 1980
-        RUN_setup$PARAM_RFD$glam_param.mod_mgt$IEYR <- 1993
-        
-        #make this particular glam run
-        RUN_setup <- GLAM_run(RUN_setup)
-        
-        #copy the outputs
-        if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))) {
-          dir.create(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""),recursive=T)
-        }
-        
-        #copying output files
-        if (RUN_setup$RUN_TYPE=="RFD") {
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
-        } else if (RUN_setup$RUN_TYPE=="RFD") {
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+      #now perform model run with that value of ygp, if the previous one was ok
+      if (!is.na(optimal[[parname]])) {
+        #params$glam_param.ygp$YGP$Value <- optimal$YGP
+        if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))) {
+          #grab required run data and perform the run
+          #initial run configuration
+          RUN_setup <- base_RUN_setup
+          RUN_setup$RUNS_DIR <- CAL_setup$SCRATCH
+          RUN_setup$YGP <- optimal$YGP
+          RUN_setup$YEARS <- 1980:1993
+          
+          #load irrigation data
+          cell_xy <- read.csv(RUN_setup$GRID)
+          RUN_setup$IDATA <- load_irr_data(rs_dir=RUN_setup$IRR_RS_DIR,
+                                           rs_prefix=RUN_setup$IRR_RS_PREFIX,yi=min(RUN_setup$YEARS),
+                                           yf=max(RUN_setup$YEARS),xy=cbind(x=cell_xy$X,y=cell_xy$Y),
+                                           ext=RUN_setup$IRR_RS_EXT,cell_ids=cell_xy$CELL)
+          
+          #configure GLAM run
+          RUN_setup <- GLAM_config(RUN_setup,force="no")
+          RUN_setup$PARAM_IRR$glam_param.mod_mgt$ISYR <- 1980
+          RUN_setup$PARAM_IRR$glam_param.mod_mgt$IEYR <- 1993
+          RUN_setup$PARAM_RFD$glam_param.mod_mgt$ISYR <- 1980
+          RUN_setup$PARAM_RFD$glam_param.mod_mgt$IEYR <- 1993
+          
+          #make this particular glam run
+          RUN_setup <- GLAM_run(RUN_setup)
+          
+          #copy the outputs
+          if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))) {
+            dir.create(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""),recursive=T)
+          }
+          
+          #copying output files
+          if (RUN_setup$RUN_TYPE=="RFD") {
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          } else if (RUN_setup$RUN_TYPE=="RFD") {
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          } else {
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          }
+          
+          #remove scratch folder
+          setwd(scratch)
+          system(paste("rm -rf ",RUN_setup$RUN_DIR,sep=""))
+          
+          #run status
+          exit_p1 <- "SUCCESSFUL"
+          
+          #save run config
+          save(list=c("RUN_setup"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
         } else {
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          load(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
         }
-        
-        #remove scratch folder
-        setwd(scratch)
-        system(paste("rm -rf ",RUN_setup$RUN_DIR,sep=""))
-        
-        #save run config
-        save(list=c("RUN_setup"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
       } else {
-        load(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
+        #run status
+        exit_p1 <- "FAILED: too many missing data"
       }
       
       
@@ -334,11 +353,20 @@ glam_ygp_half_half <- function(this_run) {
         # reset lists of output parameters
         optimal <- list(); optimised <- list()
         
-        optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
-                                                  param=parname,n.steps=nstep,iter=tolower(parname),
-                                                  iratio=ir_vls_sel)
+        ydum <- read.fortran(CAL_setup$YIELD_FILE,format=c("3I4","F8"),n=28)
+        ydum$V4[which(ydum$V4 < -90)] <- NA
+        ydum <- ydum$V4[which(ydum$V1 >= params$glam_param.mod_mgt$ISYR & ydum$V1 <= params$glam_param.mod_mgt$IEYR)]
+        if (length(which(is.na(ydum))) == length(ydum)) {
+          seq_vals <- seq(params[[where]][[parname]][,"Min"],params[[where]][[parname]][,"Max"],length.out=nstep)
+          optimised[[parname]] <- data.frame(VALUE=seq_vals,RMSE=NA)
+          optimal[[parname]] <- NA
+        } else {
+          optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=CAL_setup,sect=where,
+                                                    param=parname,n.steps=nstep,iter=tolower(parname),
+                                                    iratio=ir_vls_sel)
+          optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+        }
         
-        optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
         cat(parname,":",optimal[[parname]],"\n")
         if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
         
@@ -348,102 +376,114 @@ glam_ygp_half_half <- function(this_run) {
         save(list=c("optimised","optimal"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/ygp.RData",sep=""))
         save(list=c("CAL_setup"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/CAL_setup.RData",sep=""))
         
-        #copy outputs from each run
-        best_run <- which(optimised[[parname]][["VALUE"]] == optimal[[parname]])
-        #if irrigated run exists then copy everything from it
-        rd_irr <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal[[parname]],sep="")
-        rd_rfd <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal[[parname]],sep="")
-        
-        if (file.exists(rd_irr)) {
-          x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
-          x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
-          x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_IRR.out",sep=""))
-        }
-        
-        if (file.exists(rd_rfd)) {
-          x <- file.copy(from=paste(rd_rfd,"/filenames-",tolower(cropName),"-run.txt",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
+        #copy outputs from each run if it could be done
+        if (!is.na(optimal[[parname]])) {
+          best_run <- which(optimised[[parname]][["VALUE"]] == optimal[[parname]])
+          #if irrigated run exists then copy everything from it
+          rd_irr <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal[[parname]],sep="")
+          rd_rfd <- paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal[[parname]],sep="")
           
-          if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
-            x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+          if (file.exists(rd_irr)) {
+            x <- file.copy(from=paste(rd_irr,"/filenames-",tolower(cropName),"-run.txt",sep=""),
                            to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
-          } else {
-            x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
-                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
+            x <- file.copy(from=paste(rd_irr,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
+            x <- file.copy(from=paste(rd_irr,"/output/",tolower(cropLong),".out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_IRR.out",sep=""))
           }
           
-          x <- file.copy(from=paste(rd_rfd,"/output/",tolower(cropLong),".out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_RFD.out",sep=""))
+          if (file.exists(rd_rfd)) {
+            x <- file.copy(from=paste(rd_rfd,"/filenames-",tolower(cropName),"-run.txt",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""),overwrite=T)
+            
+            if (file.exists(paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))) {
+              x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""),
+                             to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train",sep=""))
+            } else {
+              x <- file.copy(from=paste(rd_rfd,"/glam-r2-param-",tolower(cropName),"-run.txt",sep=""),
+                             to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep=""))
+            }
+            
+            x <- file.copy(from=paste(rd_rfd,"/output/",tolower(cropLong),".out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/",tolower(cropLong),"_RFD.out",sep=""))
+          }
+          setwd(scratch)
+          system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
         }
-        setwd(scratch)
-        system(paste("rm -rf ",CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/iter-ygp",sep=""))
       } else {
         load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/ygp.RData",sep=""))
         load(file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/train/CAL_setup.RData",sep=""))
       }
       
-      #now perform model run with that value of ygp
-      #params$glam_param.ygp$YGP$Value <- optimal$YGP
-      if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))) {
-        #grab required run data and perform the run
-        #initial run configuration
-        RUN_setup <- base_RUN_setup
-        RUN_setup$RUNS_DIR <- CAL_setup$SCRATCH
-        RUN_setup$YGP <- optimal$YGP
-        RUN_setup$YEARS <- 1966:1979
-        
-        #load irrigation data
-        cell_xy <- read.csv(RUN_setup$GRID)
-        RUN_setup$IDATA <- load_irr_data(rs_dir=RUN_setup$IRR_RS_DIR,
-                                         rs_prefix=RUN_setup$IRR_RS_PREFIX,yi=min(RUN_setup$YEARS),
-                                         yf=max(RUN_setup$YEARS),xy=cbind(x=cell_xy$X,y=cell_xy$Y),
-                                         ext=RUN_setup$IRR_RS_EXT,cell_ids=cell_xy$CELL)
-        
-        #configure GLAM run
-        RUN_setup <- GLAM_config(RUN_setup,force="no")
-        RUN_setup$PARAM_IRR$glam_param.mod_mgt$ISYR <- 1966
-        RUN_setup$PARAM_IRR$glam_param.mod_mgt$IEYR <- 1979
-        RUN_setup$PARAM_RFD$glam_param.mod_mgt$ISYR <- 1966
-        RUN_setup$PARAM_RFD$glam_param.mod_mgt$IEYR <- 1979
-        
-        #make this particular glam run
-        RUN_setup <- GLAM_run(RUN_setup)
-        
-        #copy the outputs
-        if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))) {
-          dir.create(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""),recursive=T)
-        }
-        
-        #copying output files
-        if (RUN_setup$RUN_TYPE=="RFD") {
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
-        } else if (RUN_setup$RUN_TYPE=="RFD") {
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+      #now perform model run with that value of ygp, if the previous one was ok
+      if (!is.na(optimal[[parname]])) {
+        #params$glam_param.ygp$YGP$Value <- optimal$YGP
+        if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))) {
+          #grab required run data and perform the run
+          #initial run configuration
+          RUN_setup <- base_RUN_setup
+          RUN_setup$RUNS_DIR <- CAL_setup$SCRATCH
+          RUN_setup$YGP <- optimal$YGP
+          RUN_setup$YEARS <- 1966:1979
+          
+          #load irrigation data
+          cell_xy <- read.csv(RUN_setup$GRID)
+          RUN_setup$IDATA <- load_irr_data(rs_dir=RUN_setup$IRR_RS_DIR,
+                                           rs_prefix=RUN_setup$IRR_RS_PREFIX,yi=min(RUN_setup$YEARS),
+                                           yf=max(RUN_setup$YEARS),xy=cbind(x=cell_xy$X,y=cell_xy$Y),
+                                           ext=RUN_setup$IRR_RS_EXT,cell_ids=cell_xy$CELL)
+          
+          #configure GLAM run
+          RUN_setup <- GLAM_config(RUN_setup,force="no")
+          RUN_setup$PARAM_IRR$glam_param.mod_mgt$ISYR <- 1966
+          RUN_setup$PARAM_IRR$glam_param.mod_mgt$IEYR <- 1979
+          RUN_setup$PARAM_RFD$glam_param.mod_mgt$ISYR <- 1966
+          RUN_setup$PARAM_RFD$glam_param.mod_mgt$IEYR <- 1979
+          
+          #make this particular glam run
+          RUN_setup <- GLAM_run(RUN_setup)
+          
+          #copy the outputs
+          if (!file.exists(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))) {
+            dir.create(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""),recursive=T)
+          }
+          
+          #copying output files
+          if (RUN_setup$RUN_TYPE=="RFD") {
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          } else if (RUN_setup$RUN_TYPE=="RFD") {
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          } else {
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+            x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
+                           to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          }
+          
+          #remove scratch folder
+          setwd(scratch)
+          system(paste("rm -rf ",RUN_setup$RUN_DIR,sep=""))
+          
+          #run status
+          exit_p2 <- "SUCCESSFUL"
+          
+          #save run config
+          save(list=c("RUN_setup"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
         } else {
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-rfd.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
-          x <- file.copy(from=paste(RUN_setup$RUN_DIR,"/output/",tolower(cropLong),"-irr.out",sep=""),
-                         to=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test",sep=""))
+          load(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
         }
-        
-        #remove scratch folder
-        setwd(scratch)
-        system(paste("rm -rf ",RUN_setup$RUN_DIR,sep=""))
-        
-        #save run config
-        save(list=c("RUN_setup"),file=paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
       } else {
-        load(paste(CAL_setup$CAL_DIR,"/",CAL_setup$SIM_NAME,"/test/RUN_setup.RData",sep=""))
+        #run status
+        exit_p2 <- "FAILED: too many missing data"
       }
     }
     
     cf <- file(ctrl_file,"w")
     cat("Process finished on",date(),"\n",file=cf)
+    cat("Part 1:",exit_p1,"\n")
+    cat("Part 2:",exit_p2,"\n")
     close(cf)
   }
 }
