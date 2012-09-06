@@ -38,8 +38,8 @@ gcm_chars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),sep="
 gcm_list <- unique(gcm_chars$GCM)
 
 #processsing list of GCMs
-#for (i in 1:length(gcm_list)) {
-process_cmip5_rcp45_gcm <- function(i) {
+for (i in 1:length(gcm_list)) {
+#process_cmip5_rcp45_gcm <- function(i) {
   gcm <- gcm_list[i]
   
   gcm_odir <- paste(out_dir,"/",gcm,sep="")
@@ -306,7 +306,7 @@ process_cmip5_rcp45_gcm <- function(i) {
         #system("rm -f *.nc")
         anc <- list.files(".",pattern="\\.nc")
         #anc <- anc[which(!anc %in% paste(srn))]
-        #x <- sapply(anc,FUN= function(x) {s <- file.remove(x)})
+        x <- sapply(anc,FUN= function(x) {s <- file.remove(x)})
       } else {
         stop("something weird happened, need to check before removing original files")
       }
