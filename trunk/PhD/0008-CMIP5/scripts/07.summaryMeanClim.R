@@ -71,7 +71,8 @@ if (!file.exists(paste(oDir,"/cl-summary.csv",sep=""))) {
 }
 
 ## make some nice plots
-figDir <- paste(oDir,"/figures",sep="")
+#figDir <- paste(oDir,"/figures",sep="")
+figDir <- paste(oDir,"/figures_revised",sep="")
 if (!file.exists(figDir)) {dir.create(figDir)}
 
 #list of things to plot
