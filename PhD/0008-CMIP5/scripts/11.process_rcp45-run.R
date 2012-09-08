@@ -113,167 +113,169 @@ for (i in 1:length(gcm_list)) {
             file_name <- gsub("%var%",vn,file_name)
           }
           
-          #leap condition
-          wleap <- paste(this_ens$has_leap[which(year >= this_ens$iYear & year <= this_ens$fYear)][1])
-          
-          #create output year dir
-          year_odir <- paste(ens_odir,"/",vn,"_",year,sep="")
-          if (!file.exists(year_odir)) {dir.create(year_odir)}
-          
-          #if there are two files i need to read both, extract the first 11 months from the first 
-          #one and the last month from the second file. As this only happens with UKMO models
-          #i did not care about making it generic (i.e. it works only for a 360 day calendar)
-          #although the above might not apply to the process done in this script
-          if (length(file_name) > 1) {
-            #check if year was already done
-            nfil <- length(list.files(year_odir,pattern="\\.nc"))
-            nd <- leap(year)
-            if (wleap=="all30") {
-              nd <- 360
-            } else if (wleap == "no") {
-              nd <- 365
-            }
+          if (length(file_name) != 0) {
+            #leap condition
+            wleap <- paste(this_ens$has_leap[which(year >= this_ens$iYear & year <= this_ens$fYear)][1])
             
-            if (vn_freq == "mth") {nd <- 12}
+            #create output year dir
+            year_odir <- paste(ens_odir,"/",vn,"_",year,sep="")
+            if (!file.exists(year_odir)) {dir.create(year_odir)}
             
-            if (nfil != nd) {
-              #first part of the year
-              nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[1]
-              
-              #copy to scratch if it does not exist already
-              if (!file.exists(paste(work_dir,"/",file_name[1],sep=""))) {
-                setwd(work_dir)
-                system(paste("rm -f *"))
-                setwd(base_dir)
-                x <- file.copy(nc_file,work_dir)
+            #if there are two files i need to read both, extract the first 11 months from the first 
+            #one and the last month from the second file. As this only happens with UKMO models
+            #i did not care about making it generic (i.e. it works only for a 360 day calendar)
+            #although the above might not apply to the process done in this script
+            if (length(file_name) > 1) {
+              #check if year was already done
+              nfil <- length(list.files(year_odir,pattern="\\.nc"))
+              nd <- leap(year)
+              if (wleap=="all30") {
+                nd <- 360
+              } else if (wleap == "no") {
+                nd <- 365
               }
               
-              if (vn_freq == "mth") {
-                setwd(work_dir)
-                temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
-                system(paste("cdo selyear,",year," ",file_name[1]," ",temp_file,sep=""))
-                
-                #now use splitmon to split the months, and remove tFile
-                mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
-                system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
-                x <- file.remove(temp_file)
-              } else {
-                #select the year I'm looking for using the CDO command "selyear"
-                setwd(work_dir)
-                temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
-                system(paste("cdo selyear,",year," ",file_name[1]," ",temp_file,sep=""))
-                
-                #now use splitmon to split the months, and remove tFile
-                mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
-                system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
-                x <- file.remove(temp_file)
-              }
+              if (vn_freq == "mth") {nd <- 12}
               
-              #second part of the year
-              nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[2]
-              
-              #copy to scratch if it does not exist already
-              if (!file.exists(paste(work_dir,"/",file_name[2],sep=""))) {
-                x <- file.copy(nc_file,work_dir)
-              }
-              
-              if (vn_freq == "mth") {
-                setwd(work_dir)
-                temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
-                system(paste("cdo selyear,",year," ",file_name[2]," ",temp_file,sep=""))
+              if (nfil != nd) {
+                #first part of the year
+                nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[1]
                 
-                #now use splitmon to split the months, and remove tFile
-                mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
-                system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
-                x <- file.remove(temp_file)
-              } else {
-                #select the year I'm looking for using the CDO command "selyear"
-                setwd(work_dir)
-                temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
-                system(paste("cdo selyear,",year," ",file_name[2]," ",temp_file,sep=""))
-                
-                #now use splitmon to split the months, and remove tFile
-                mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
-                system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
-                x <- file.remove(temp_file)
-                
-                #now loop the monthly files
-                mth_files <- list.files(".",pattern="_mth_")
-                for (mf in mth_files) {
-                  #split the monthly file into daily files and remove monthly file
-                  day_px <- paste(gsub("\\.nc","",mf),"_day_",sep="")
-                  system(paste("cdo splitday ",mf," ",day_px,sep=""))
-                  x <- file.remove(mf)
+                #copy to scratch if it does not exist already
+                if (!file.exists(paste(work_dir,"/",file_name[1],sep=""))) {
+                  setwd(work_dir)
+                  system(paste("rm -f *"))
+                  setwd(base_dir)
+                  x <- file.copy(nc_file,work_dir)
                 }
-              }
-              #move the daily files to the output folder
-              system(paste("mv -f *_mth_* ",year_odir,sep=""))
-            } else {
-              cat("this year was already done!\n")
-            }
-            
-          } else {
-            #normal case: there was only one file with the year data that i need, 
-            ###           so just do the process for that one this is when
-            ###           the year is not split into two different files.
-            
-            #check if year was already done
-            nfil <- length(list.files(year_odir,pattern="\\.nc"))
-            nd <- leap(year)
-            if (wleap=="all30") {
-              nd <- 360
-            } else if (wleap == "no") {
-              nd <- 365
-            }
-            
-            if (vn_freq == "mth") {nd <- 12}
-            
-            if (nfil != nd) {
-              #name of netCDF file
-              nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")
-              
-              #copy to scratch if it does not exist already
-              if (!file.exists(paste(work_dir,"/",file_name,sep=""))) {
-                setwd(work_dir)
-                system(paste("rm -f *"))
-                setwd(base_dir)
-                x <- file.copy(nc_file,work_dir)
-              }
-              
-              #if the variable data is monthly
-              if (vn_freq == "mth") {
-                setwd(work_dir)
-                temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
-                system(paste("cdo selyear,",year," ",file_name," ",temp_file,sep=""))
                 
-                #now use splitmon to split the months, and remove tFile
-                mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
-                system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
-                x <- file.remove(temp_file)
-              } else {
-                #select the year I'm looking for using the CDO command "selyear"
-                setwd(work_dir)
-                temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
-                system(paste("cdo selyear,",year," ",file_name," ",temp_file,sep=""))
-                
-                #now use splitmon to split the months, and remove tFile
-                mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
-                system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
-                x <- file.remove(temp_file)
-                
-                #now loop the monthly files
-                mth_files <- list.files(".",pattern="_mth_")
-                for (mf in mth_files) {
-                  #split the monthly file into daily files and remove monthly file
-                  day_px <- paste(gsub("\\.nc","",mf),"_day_",sep="")
-                  system(paste("cdo splitday ",mf," ",day_px,sep=""))
-                  x <- file.remove(mf)
+                if (vn_freq == "mth") {
+                  setwd(work_dir)
+                  temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+                  system(paste("cdo selyear,",year," ",file_name[1]," ",temp_file,sep=""))
+                  
+                  #now use splitmon to split the months, and remove tFile
+                  mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+                  system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+                  x <- file.remove(temp_file)
+                } else {
+                  #select the year I'm looking for using the CDO command "selyear"
+                  setwd(work_dir)
+                  temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+                  system(paste("cdo selyear,",year," ",file_name[1]," ",temp_file,sep=""))
+                  
+                  #now use splitmon to split the months, and remove tFile
+                  mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+                  system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+                  x <- file.remove(temp_file)
                 }
+                
+                #second part of the year
+                nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")[2]
+                
+                #copy to scratch if it does not exist already
+                if (!file.exists(paste(work_dir,"/",file_name[2],sep=""))) {
+                  x <- file.copy(nc_file,work_dir)
+                }
+                
+                if (vn_freq == "mth") {
+                  setwd(work_dir)
+                  temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+                  system(paste("cdo selyear,",year," ",file_name[2]," ",temp_file,sep=""))
+                  
+                  #now use splitmon to split the months, and remove tFile
+                  mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+                  system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+                  x <- file.remove(temp_file)
+                } else {
+                  #select the year I'm looking for using the CDO command "selyear"
+                  setwd(work_dir)
+                  temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+                  system(paste("cdo selyear,",year," ",file_name[2]," ",temp_file,sep=""))
+                  
+                  #now use splitmon to split the months, and remove tFile
+                  mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+                  system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+                  x <- file.remove(temp_file)
+                  
+                  #now loop the monthly files
+                  mth_files <- list.files(".",pattern="_mth_")
+                  for (mf in mth_files) {
+                    #split the monthly file into daily files and remove monthly file
+                    day_px <- paste(gsub("\\.nc","",mf),"_day_",sep="")
+                    system(paste("cdo splitday ",mf," ",day_px,sep=""))
+                    x <- file.remove(mf)
+                  }
+                }
+                #move the daily files to the output folder
+                system(paste("mv -f *_mth_* ",year_odir,sep=""))
+              } else {
+                cat("this year was already done!\n")
               }
-              #move the daily files to the output folder
-              system(paste("mv -f *_mth_* ",year_odir,sep=""))
+              
             } else {
-              cat("this year was already done!\n")
+              #normal case: there was only one file with the year data that i need, 
+              ###           so just do the process for that one this is when
+              ###           the year is not split into two different files.
+              
+              #check if year was already done
+              nfil <- length(list.files(year_odir,pattern="\\.nc"))
+              nd <- leap(year)
+              if (wleap=="all30") {
+                nd <- 360
+              } else if (wleap == "no") {
+                nd <- 365
+              }
+              
+              if (vn_freq == "mth") {nd <- 12}
+              
+              if (nfil != nd) {
+                #name of netCDF file
+                nc_file <- paste(gcm_dir,"/",gcm,"/",ens,"/",file_name,sep="")
+                
+                #copy to scratch if it does not exist already
+                if (!file.exists(paste(work_dir,"/",file_name,sep=""))) {
+                  setwd(work_dir)
+                  system(paste("rm -f *"))
+                  setwd(base_dir)
+                  x <- file.copy(nc_file,work_dir)
+                }
+                
+                #if the variable data is monthly
+                if (vn_freq == "mth") {
+                  setwd(work_dir)
+                  temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+                  system(paste("cdo selyear,",year," ",file_name," ",temp_file,sep=""))
+                  
+                  #now use splitmon to split the months, and remove tFile
+                  mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+                  system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+                  x <- file.remove(temp_file)
+                } else {
+                  #select the year I'm looking for using the CDO command "selyear"
+                  setwd(work_dir)
+                  temp_file <- paste(gcm,"_",ens,"_",year,".nc",sep="")
+                  system(paste("cdo selyear,",year," ",file_name," ",temp_file,sep=""))
+                  
+                  #now use splitmon to split the months, and remove tFile
+                  mon_px <- paste(gcm,"_",ens,"_",year,"_mth_",sep="")
+                  system(paste("cdo splitmon ",temp_file," ",mon_px,sep=""))
+                  x <- file.remove(temp_file)
+                  
+                  #now loop the monthly files
+                  mth_files <- list.files(".",pattern="_mth_")
+                  for (mf in mth_files) {
+                    #split the monthly file into daily files and remove monthly file
+                    day_px <- paste(gsub("\\.nc","",mf),"_day_",sep="")
+                    system(paste("cdo splitday ",mf," ",day_px,sep=""))
+                    x <- file.remove(mf)
+                  }
+                }
+                #move the daily files to the output folder
+                system(paste("mv -f *_mth_* ",year_odir,sep=""))
+              } else {
+                cat("this year was already done!\n")
+              }
             }
           }
         }
