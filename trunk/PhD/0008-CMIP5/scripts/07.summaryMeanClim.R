@@ -495,12 +495,26 @@ cor.test(dtr_data$mean_OBS,dtr_data$mean_GCM,na.rm=T)
 
 
 ##### here plot the differences between climates
-all_perm <- expand.grid(SEASON=unique(all_mets$SEASON),REGION=unique(regions$REGION))
+all_perm <- expand.grid(SEASON=unique(all_mets$SEASON),
+                        REGION=unique(paste(regions$REGION,"_",regions$ISO,sep="")))
 all_perm <- all_perm[which(!is.na(all_perm$SEASON)),]
-all_perm$SEAS_REG <- paste(all_perm$SEASON,"_",all_perm$REGION)
+all_perm$SEAS_REG <- paste(all_perm$SEASON,"_",all_perm$REGION,sep="")
+all_perm <- expand.grid(REF=all_perm$SEAS_REG,TAR=all_perm$SEAS_REG)
 
+obs_data <- all_mets
+obs_data$MBR <- NULL; obs_data$CCOEF <- NULL; obs_data$PVAL <- NULL
+obs_data$RSQ <- NULL; obs_data$RMSE <- NULL; obs_data$PRMSE1 <- NULL
+obs_data$PRMSE2 <- NULL; obs_data$N <- NULL
 
+data_sets <- c(unique(paste(obs_data$GCM)),unique(paste(obs_data$OBS)))
 
+for (vn in vnList) {
+  for (dset in data_sets) {
+    ds_data <- obs_data[which(obs_data),]
+    
+    
+  }
+}
 
 
 
