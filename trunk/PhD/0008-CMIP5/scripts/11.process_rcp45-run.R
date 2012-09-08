@@ -71,8 +71,8 @@ for (i in 1:length(gcm_list)) {
         sr_freq <- "day"
       } else {
         sr_freq <- "mth"
-        #sr_patn <- unlist(strsplit(paste(srn),"_",fixed=T))[1:2]
-        #sr_patn <- paste(sr_patn,collapse="_")
+        sr_patn <- unlist(strsplit(paste(srn),"_",fixed=T))[1:2]
+        sr_patn <- paste(sr_patn,collapse="_")
         #sr_file <- list.files(ens_odir,pattern=sr_patn)
         ncf <- c(ncf,paste(srn))
       }
@@ -295,7 +295,7 @@ for (i in 1:length(gcm_list)) {
     #nnc <- nnc[which(!nnc %in% paste(srn))]
     
     if (!srn %in% nnc) {
-      sr_file <- list.files(".",pattern=sr_patn)
+      sr_file <- list.files(".",pattern=sr_patn)[1]
       nnc <- c(nnc,sr_file)
     }
     cnc <- length(nnc)
