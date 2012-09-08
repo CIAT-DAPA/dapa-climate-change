@@ -500,6 +500,37 @@ all_perm <- expand.grid(SEASON=unique(all_mets$SEASON),
 all_perm <- all_perm[which(!is.na(all_perm$SEASON)),]
 all_perm$SEAS_REG <- paste(all_perm$SEASON,"_",all_perm$REGION,sep="")
 all_perm <- expand.grid(REF=all_perm$SEAS_REG,TAR=all_perm$SEAS_REG)
+all_perm <- all_perm[which(all_perm$REF != all_perm$TAR),]
+row.names(all_perm) <- 1:nrow(all_perm)
+
+#function to identify positions where a particular combination already exists
+not_dups <- function(x,all_perm,round) {
+  x1 <- x[1]
+  x2 <- x[2]
+  wh_org <- which(all_perm$REF==x1 & all_perm$TAR==x2)
+  wh_rep <- which(all_perm$TAR==x1 & all_perm$REF==x2)
+  
+  return(c(wh_org,wh_rep))
+}
+
+wh_reps <- apply(all_perm,1,FUN=not_dups,all_perm,1) #repetitions
+wh_reps <- t(wh_reps)
+
+all_perm2 <- all_perm
+for (i in 1:nrow(wh_reps)) {
+  tokep <- as.numeric(wh_reps[i,1])
+  ori_row <- all_perm[tokep,]
+  wh_ori <- which(all_perm2$REF == paste(ori_row$REF) & all_perm2$TAR == paste(ori_row$TAR))
+  if (length(wh_ori) != 0) {
+    torem <- as.numeric(wh_reps[i,2])
+    all_perm2 <- all_perm2[-torem,]
+  }
+}
+
+
+st_reps <- as.numeric(which(wh_reps[,2] == 1)[1]
+
+all_perm <- all_perm[-wh_reps,]
 
 obs_data <- all_mets
 obs_data$MBR <- NULL; obs_data$CCOEF <- NULL; obs_data$PVAL <- NULL
@@ -509,11 +540,48 @@ obs_data$PRMSE2 <- NULL; obs_data$N <- NULL
 data_sets <- c(unique(paste(obs_data$GCM)),unique(paste(obs_data$OBS)))
 
 for (vn in vnList) {
+  #vn <- vnList[1]
+  out_perm <- all_perm
   for (dset in data_sets) {
-    ds_data <- obs_data[which(obs_data),]
+    #dset <- data_sets[1]
     
+    cat("VAR = ",vn," / DATASET = ",dset,"\n")
+    
+    #select the data
+    if (length(grep("_ENS_",dset)) != 0) { #dealing with GCM data
+      type <- "mean_GCM"
+      ds_data <- obs_data[which(obs_data$VAR == vn & obs_data$GCM == dset),]
+    } else { #dealing with observed data
+      type <- "mean_OBS"
+      ds_data <- obs_data[which(obs_data$VAR == vn & obs_data$OBS == dset),]
+    }
+    
+    #output column
+    out_perm$VALUE <- NA
+    names(out_perm)[ncol(out_perm)] <- dset
+    
+    #loop the combinations we're looking for
+    for (i in 1:nrow(all_perm)) {
+      ref_seas <- unlist(strsplit(paste(all_perm$REF[i]),"_",fixed=T))[1]
+      ref_reg <- unlist(strsplit(paste(all_perm$REF[i]),"_",fixed=T))[2]
+      ref_iso <- unlist(strsplit(paste(all_perm$REF[i]),"_",fixed=T))[3]
+      
+      tar_seas <- unlist(strsplit(paste(all_perm$TAR[i]),"_",fixed=T))[1]
+      tar_reg <- unlist(strsplit(paste(all_perm$TAR[i]),"_",fixed=T))[2]
+      tar_iso <- unlist(strsplit(paste(all_perm$TAR[i]),"_",fixed=T))[3]
+      
+      #grab values
+      ref_val <- ds_data[which(ds_data$SEASON == ref_seas & ds_data$REG == ref_reg & ds_data$ISO == ref_iso),]
+      ref_val <- mean(ref_val[,type],na.rm=T)
+      
+      tar_val <- ds_data[which(ds_data$SEASON == tar_seas & ds_data$REG == tar_reg & ds_data$ISO == tar_iso),]
+      tar_val <- mean(tar_val[,type],na.rm=T)
+      
+      out_perm[i,dset] <- (ref_val-tar_val)/abs(ref_val)
+    }
     
   }
+  write.csv(out_perm,paste(oDir,"/diff_reg_seas_cl-",vn,".csv",sep=""),quote=T,row.names=F)
 }
 
 
