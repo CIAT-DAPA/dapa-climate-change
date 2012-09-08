@@ -528,10 +528,6 @@ for (i in 1:nrow(wh_reps)) {
 }
 
 
-st_reps <- as.numeric(which(wh_reps[,2] == 1)[1]
-
-all_perm <- all_perm[-wh_reps,]
-
 obs_data <- all_mets
 obs_data$MBR <- NULL; obs_data$CCOEF <- NULL; obs_data$PVAL <- NULL
 obs_data$RSQ <- NULL; obs_data$RMSE <- NULL; obs_data$PRMSE1 <- NULL
@@ -541,50 +537,129 @@ data_sets <- c(unique(paste(obs_data$GCM)),unique(paste(obs_data$OBS)))
 
 for (vn in vnList) {
   #vn <- vnList[1]
-  out_perm <- all_perm
-  for (dset in data_sets) {
-    #dset <- data_sets[1]
-    
-    cat("VAR = ",vn," / DATASET = ",dset,"\n")
-    
-    #select the data
-    if (length(grep("_ENS_",dset)) != 0) { #dealing with GCM data
-      type <- "mean_GCM"
-      ds_data <- obs_data[which(obs_data$VAR == vn & obs_data$GCM == dset),]
-    } else { #dealing with observed data
-      type <- "mean_OBS"
-      ds_data <- obs_data[which(obs_data$VAR == vn & obs_data$OBS == dset),]
+  if (!file.exists(paste(oDir,"/diff_reg_seas_cl-",vn,".csv",sep=""))) {
+    out_perm <- all_perm2
+    for (dset in data_sets) {
+      #dset <- data_sets[1]
+      
+      cat("VAR = ",vn," / DATASET = ",dset,"\n")
+      
+      #select the data
+      if (length(grep("_ENS_",dset)) != 0) { #dealing with GCM data
+        type <- "mean_GCM"
+        ds_data <- obs_data[which(obs_data$VAR == vn & obs_data$GCM == dset),]
+      } else { #dealing with observed data
+        type <- "mean_OBS"
+        ds_data <- obs_data[which(obs_data$VAR == vn & obs_data$OBS == dset),]
+      }
+      
+      #output column
+      out_perm$VALUE <- NA
+      names(out_perm)[ncol(out_perm)] <- dset
+      
+      #loop the combinations we're looking for
+      for (i in 1:nrow(all_perm2)) {
+        ref_seas <- unlist(strsplit(paste(all_perm2$REF[i]),"_",fixed=T))[1]
+        ref_reg <- unlist(strsplit(paste(all_perm2$REF[i]),"_",fixed=T))[2]
+        ref_iso <- unlist(strsplit(paste(all_perm2$REF[i]),"_",fixed=T))[3]
+        
+        tar_seas <- unlist(strsplit(paste(all_perm2$TAR[i]),"_",fixed=T))[1]
+        tar_reg <- unlist(strsplit(paste(all_perm2$TAR[i]),"_",fixed=T))[2]
+        tar_iso <- unlist(strsplit(paste(all_perm2$TAR[i]),"_",fixed=T))[3]
+        
+        #grab values
+        ref_val <- ds_data[which(ds_data$SEASON == ref_seas & ds_data$REG == ref_reg & ds_data$ISO == ref_iso),]
+        ref_val <- mean(ref_val[,type],na.rm=T)
+        
+        tar_val <- ds_data[which(ds_data$SEASON == tar_seas & ds_data$REG == tar_reg & ds_data$ISO == tar_iso),]
+        tar_val <- mean(tar_val[,type],na.rm=T)
+        
+        out_perm[i,dset] <- (ref_val-tar_val)/abs(ref_val)
+      }
     }
-    
-    #output column
-    out_perm$VALUE <- NA
-    names(out_perm)[ncol(out_perm)] <- dset
-    
-    #loop the combinations we're looking for
-    for (i in 1:nrow(all_perm)) {
-      ref_seas <- unlist(strsplit(paste(all_perm$REF[i]),"_",fixed=T))[1]
-      ref_reg <- unlist(strsplit(paste(all_perm$REF[i]),"_",fixed=T))[2]
-      ref_iso <- unlist(strsplit(paste(all_perm$REF[i]),"_",fixed=T))[3]
-      
-      tar_seas <- unlist(strsplit(paste(all_perm$TAR[i]),"_",fixed=T))[1]
-      tar_reg <- unlist(strsplit(paste(all_perm$TAR[i]),"_",fixed=T))[2]
-      tar_iso <- unlist(strsplit(paste(all_perm$TAR[i]),"_",fixed=T))[3]
-      
-      #grab values
-      ref_val <- ds_data[which(ds_data$SEASON == ref_seas & ds_data$REG == ref_reg & ds_data$ISO == ref_iso),]
-      ref_val <- mean(ref_val[,type],na.rm=T)
-      
-      tar_val <- ds_data[which(ds_data$SEASON == tar_seas & ds_data$REG == tar_reg & ds_data$ISO == tar_iso),]
-      tar_val <- mean(tar_val[,type],na.rm=T)
-      
-      out_perm[i,dset] <- (ref_val-tar_val)/abs(ref_val)
-    }
-    
+    write.csv(out_perm,paste(oDir,"/diff_reg_seas_cl-",vn,".csv",sep=""),quote=T,row.names=F)
   }
-  write.csv(out_perm,paste(oDir,"/diff_reg_seas_cl-",vn,".csv",sep=""),quote=T,row.names=F)
 }
 
 
+#get the data
+pr_diffs <- read.csv(paste(oDir,"/diff_reg_seas_cl-pr.csv",sep=""))
+tas_diffs <- read.csv(paste(oDir,"/diff_reg_seas_cl-tas.csv",sep=""))
+dtr_diffs <- read.csv(paste(oDir,"/diff_reg_seas_cl-dtr.csv",sep=""))
+
+
+#pr plot
+pdata <- data.frame()
+gcm_list <- unique(paste(obs_data$GCM))
+for (gcm in gcm_list) {
+  gcm_df <- data.frame(OBS_SET="cl_rev-CRU",GCM=gcm,GCM_vals=pr_diffs[,gcm],OBS_vals=pr_diffs$cl_rev.CRU)
+  gcm_df <- rbind(gcm_df,data.frame(OBS_SET="cl_rev-WCL",GCM=gcm,GCM_vals=pr_diffs[,gcm],OBS_vals=pr_diffs$cl_rev.WCL))
+  gcm_df <- rbind(gcm_df,data.frame(OBS_SET="cl_rev-WST",GCM=gcm,GCM_vals=pr_diffs[,gcm],OBS_vals=pr_diffs$cl_rev.WST))
+  pdata <- rbind(pdata,gcm_df)
+}
+
+
+####
+figName <- paste(figDir,"/FigS6a.tif",sep="")
+tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=0.5,lwd=0.3,font.lab=21,font.axis=21)
+plot(pdata$OBS_vals,pdata$GCM_vals,pch=21,cex=0.5,xlim=c(-400,1),ylim=c(-400,1),
+     xlab="Observed difference (%)",
+     ylab="GCM difference (%)",font.lab=21,font.axis=21)
+abline(0,1,lwd=0.5)
+grid(lwd=0.5)
+dev.off()
+
+
+#tas plot
+tdata <- data.frame()
+gcm_list <- unique(paste(obs_data$GCM))
+for (gcm in gcm_list) {
+  gcm_df <- data.frame(OBS_SET="cl_rev-CRU",GCM=gcm,GCM_vals=tas_diffs[,gcm],OBS_vals=tas_diffs$cl_rev.CRU)
+  gcm_df <- rbind(gcm_df,data.frame(OBS_SET="cl_rev-WCL",GCM=gcm,GCM_vals=tas_diffs[,gcm],OBS_vals=tas_diffs$cl_rev.WCL))
+  gcm_df <- rbind(gcm_df,data.frame(OBS_SET="cl_rev-WST",GCM=gcm,GCM_vals=tas_diffs[,gcm],OBS_vals=tas_diffs$cl_rev.WST))
+  tdata <- rbind(tdata,gcm_df)
+}
+
+####
+figName <- paste(figDir,"/FigS6b.tif",sep="")
+tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=0.5,lwd=0.3,font.lab=21,font.axis=21)
+plot(tdata$OBS_vals,tdata$GCM_vals,pch=21,cex=0.5,xlim=c(-10,1),ylim=c(-125,1),
+     xlab="Observed difference (%)",
+     ylab="GCM difference (%)",font.lab=21,font.axis=21)
+abline(0,1,lwd=0.5)
+grid(lwd=0.5)
+dev.off()
+
+
+
+
+#dtr plot
+ddata <- data.frame()
+gcm_list <- unique(paste(obs_data$GCM))
+for (gcm in gcm_list) {
+  gcm_df <- data.frame(OBS_SET="cl_rev-CRU",GCM=gcm,GCM_vals=dtr_diffs[,gcm],OBS_vals=dtr_diffs$cl_rev.CRU)
+  gcm_df <- rbind(gcm_df,data.frame(OBS_SET="cl_rev-WCL",GCM=gcm,GCM_vals=dtr_diffs[,gcm],OBS_vals=dtr_diffs$cl_rev.WCL))
+  gcm_df <- rbind(gcm_df,data.frame(OBS_SET="cl_rev-WST",GCM=gcm,GCM_vals=dtr_diffs[,gcm],OBS_vals=dtr_diffs$cl_rev.WST))
+  ddata <- rbind(ddata,gcm_df)
+}
+
+####
+figName <- paste(figDir,"/FigS6c.tif",sep="")
+tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
+par(mar=c(5,5,1,1),cex=0.5,lwd=0.3,font.lab=21,font.axis=21)
+plot(ddata$OBS_vals,ddata$GCM_vals,pch=21,cex=0.5,xlim=c(-5,1),ylim=c(-5,1),
+     xlab="Observed difference (%)",
+     ylab="GCM difference (%)",font.lab=21,font.axis=21)
+abline(0,1,lwd=0.5)
+grid(lwd=0.5)
+dev.off()
+
+
+cor.test(pdata$OBS_vals,pdata$GCM_vals,na.rm=T)
+cor.test(tdata$OBS_vals,tdata$GCM_vals,na.rm=T)
+cor.test(ddata$OBS_vals,ddata$GCM_vals,na.rm=T)
 
 
 
