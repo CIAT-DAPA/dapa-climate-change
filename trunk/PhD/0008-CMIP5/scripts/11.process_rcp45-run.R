@@ -73,7 +73,7 @@ for (i in 1:length(gcm_list)) {
       sr_patn <- unlist(strsplit(paste(srn),"_",fixed=T))[1:2]
       sr_patn <- paste(sr_patn,collapse="_")
       sr_file <- list.files(ens_odir,pattern=sr_patn)
-      ncf <- c(ncf,sr_file)
+      ncf <- c(ncf,sr_file[1])
     }
     
     if (length(list.files(ens_odir,pattern="\\.control")) != 5) {
