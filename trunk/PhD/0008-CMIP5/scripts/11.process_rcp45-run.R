@@ -295,7 +295,10 @@ for (i in 1:length(gcm_list)) {
     #nnc <- nnc[which(!nnc %in% paste(srn))]
     
     if (!srn %in% nnc) {
-      sr_file <- list.files(".",pattern=sr_patn)[1]
+      sr_file <- list.files(".",pattern=sr_patn)
+      if (length(sr_file) != 0) {
+        sr_file <- sr_file[1]
+      }
       nnc <- c(nnc,sr_file)
     }
     cnc <- length(nnc)
