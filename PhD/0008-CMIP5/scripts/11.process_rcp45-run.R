@@ -64,19 +64,18 @@ for (i in 1:length(gcm_list)) {
     patn <- gsub("%var%","",this_ens$naming[1])
     ncf <- list.files(ens_odir,pattern=patn)
     
-    #get the frequency of srad data
-    srn <- unique(this_ens$srad_naming)[1]
-    if (srn %in% ncf) {
-      sr_freq <- "day"
-    } else {
-      sr_freq <- "mth"
-      #sr_patn <- unlist(strsplit(paste(srn),"_",fixed=T))[1:2]
-      #sr_patn <- paste(sr_patn,collapse="_")
-      #sr_file <- list.files(ens_odir,pattern=sr_patn)
-      ncf <- c(ncf,srn)
-    }
-    
     if (length(list.files(ens_odir,pattern="\\.control")) != 5) {
+      #get the frequency of srad data
+      srn <- unique(this_ens$srad_naming)[1]
+      if (srn %in% ncf) {
+        sr_freq <- "day"
+      } else {
+        sr_freq <- "mth"
+        #sr_patn <- unlist(strsplit(paste(srn),"_",fixed=T))[1:2]
+        #sr_patn <- paste(sr_patn,collapse="_")
+        #sr_file <- list.files(ens_odir,pattern=sr_patn)
+        ncf <- c(ncf,paste(srn))
+      }
       if (length(ncf) != 5) {stop("number of files not 5, check!")}
     }
     #produce vector with names of variables
