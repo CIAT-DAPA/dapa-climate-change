@@ -1,4 +1,22 @@
 #!/usr/bin/env python
+
+## Python gzip/gunzip utility
+## Submitted by Ritesh Raj Sarraf on Wed, 10/18/2006 - 00:12
+##
+## If you are a person like me who likes to read books in html format, you sure
+## would have lot of soft books. These books occupy a lot of diskspace because
+## they are small files and just text.  Apache's transparent decompression (mod_
+## deflate) is a good solution to read these books while keeping them compressed.
+##
+## Hence this small utility which'll gunzip/gzip all your html/text files on all
+## Python supported platforms. Hope you find it useful.
+##
+## Note:  There is a small bug in this script where giving a . as the path ends
+## up in some error. I haven't tried looking much into it. Hence please give
+## absolute path when using it. Eg: /tmp, C:\books et cetera.
+##
+## Source: http://www.researchut.com/site/node/81?page=7
+
 import os, sys, gzip, string, tempfile
 
 class ZipManipulator:
