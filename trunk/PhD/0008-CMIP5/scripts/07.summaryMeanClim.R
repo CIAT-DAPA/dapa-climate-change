@@ -407,7 +407,7 @@ pr_data <- obs_data[which(obs_data$VAR == "pr"),]
 tas_data <- obs_data[which(obs_data$VAR == "tas"),]
 dtr_data <- obs_data[which(obs_data$VAR == "dtr"),]
 
-figName <- paste(figDir,"/FigS5a.tif",sep="")
+figName <- paste(figDir,"/FigS6a.tif",sep="")
 tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
 par(mar=c(5,5,1,1),cex=0.5,lwd=0.65,font.lab=21,font.axis=21)
 plot(pr_data$mean_OBS,pr_data$mean_GCM,pch=20,cex=0.7,
@@ -434,7 +434,7 @@ grid(lwd=0.5)
 dev.off()
 
 
-figName <- paste(figDir,"/FigS5b.tif",sep="")
+figName <- paste(figDir,"/FigS6b.tif",sep="")
 tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
 par(mar=c(5,5,1,1),cex=0.6,lwd=0.65,font.lab=21,font.axis=21)
 plot(tas_data$mean_OBS,tas_data$mean_GCM,pch=20,cex=0.7,xlim=c(0,35),ylim=c(0,35),
@@ -461,7 +461,7 @@ grid(lwd=0.5)
 dev.off()
 
 
-figName <- paste(figDir,"/FigS5c.tif",sep="")
+figName <- paste(figDir,"/FigS6c.tif",sep="")
 tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
 par(mar=c(5,5,1,1),cex=0.6,lwd=0.65,font.lab=21,font.axis=21)
 plot(dtr_data$mean_OBS,dtr_data$mean_GCM,pch=20,cex=0.7,xlim=c(0,20),ylim=c(0,30),
@@ -600,7 +600,7 @@ for (gcm in gcm_list) {
 
 
 ####
-figName <- paste(figDir,"/FigS6a.tif",sep="")
+figName <- paste(figDir,"/FigS6d.tif",sep="")
 tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
 par(mar=c(5,5,1,1),cex=0.5,lwd=0.3,font.lab=21,font.axis=21)
 plot(pdata$OBS_vals,pdata$GCM_vals,pch=21,cex=0.5,xlim=c(-400,1),ylim=c(-400,1),
@@ -622,7 +622,7 @@ for (gcm in gcm_list) {
 }
 
 ####
-figName <- paste(figDir,"/FigS6b.tif",sep="")
+figName <- paste(figDir,"/FigS6e.tif",sep="")
 tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
 par(mar=c(5,5,1,1),cex=0.5,lwd=0.3,font.lab=21,font.axis=21)
 plot(tdata$OBS_vals,tdata$GCM_vals,pch=21,cex=0.5,xlim=c(-10,1),ylim=c(-125,1),
@@ -646,7 +646,7 @@ for (gcm in gcm_list) {
 }
 
 ####
-figName <- paste(figDir,"/FigS6c.tif",sep="")
+figName <- paste(figDir,"/FigS6f.tif",sep="")
 tiff(figName,res=300,pointsize=20,width=2000,height=1500,units="px",compression="lzw")
 par(mar=c(5,5,1,1),cex=0.5,lwd=0.3,font.lab=21,font.axis=21)
 plot(ddata$OBS_vals,ddata$GCM_vals,pch=21,cex=0.5,xlim=c(-5,1),ylim=c(-5,1),

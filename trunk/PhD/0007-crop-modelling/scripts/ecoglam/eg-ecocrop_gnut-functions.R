@@ -157,7 +157,7 @@ wrapper_eg_combine <- function(i) {
       oall_reg <- do.call("rbind",out_all)
       nparam <- apply(oall_reg[,3:(ncol(oall_reg)-1)],1,FUN=function(x) {length(which(x!=0))})
       oall_reg$NPAR <- nparam
-      oall_reg$NPAR_PER <- oall_reg$NPAR / length(3:(ncol(oall_reg)-1)) * 100
+      oall_reg$NPAR_PER <- oall_reg$NPAR / length(3:(ncol(oall_reg)-2)) * 100
       write.csv(oall_reg,paste(res_dir,"/regression_residuals.csv",sep=""),quote=T,row.names=F)
     } else {
       oall_reg <- read.csv(paste(res_dir,"/regression_residuals.csv",sep=""))
@@ -219,8 +219,27 @@ wrapper_eg_combine <- function(i) {
     #re_run the fitting algorithm for all gridcells but only 
     #with variables that were found to be important
     cat("\nfinal regressions...")
-    fit_par <- paste(pfreq$PAR[which(pfreq$RFREQ >= 50)])
+    #fit_par <- paste(pfreq$PAR[which(pfreq$RFREQ >= 50)])
+    fit_par <- paste(pfreq$PAR[order(pfreq$RFREQ,decreasing=T)][1:3])
     
+    ########### do the cross-validation just here
+    if (!file.exists(paste(res_dir,"/bootstrapping_residuals_i2.RData",sep=""))) {
+      out_bts <- lapply(cell_wth_data,FUN=regress_cell,fit_par,100,7) #28 row * 25% = 7
+      save(list=c("out_bts"),file=paste(res_dir,"/bootstrapping_residuals_i2.RData",sep=""))
+    } else {
+      load(paste(res_dir,"/bootstrapping_residuals_i2.RData",sep=""))
+    }
+    if (!file.exists(paste(res_dir,"/bootstrapping_residuals_i2.csv",sep=""))) {
+      obts_all <- do.call("rbind",out_bts)
+      bts_nparam <- apply(obts_all[,4:(ncol(obts_all)-1)],1,FUN=function(x) {length(which(x!=0))})
+      obts_all$NPAR <- bts_nparam
+      obts_all$NPAR_PER <- obts_all$NPAR / length(4:(ncol(obts_all)-2)) * 100
+      write.csv(obts_all,paste(res_dir,"/bootstrapping_residuals_i2.csv",sep=""),quote=T,row.names=F)
+    } else {
+      obts_all <- read.csv(paste(res_dir,"/bootstrapping_residuals_i2.csv",sep=""))
+    }
+    
+    #perform the actual regressions
     if (!file.exists(paste(res_dir,"/regression_residuals_i2.RData",sep=""))) {
       out_all2 <- lapply(cell_wth_data,FUN=regress_cell,fit_par)
       save(list=c("out_all2"),file=paste(res_dir,"/regression_residuals_i2.RData",sep=""))
@@ -231,7 +250,7 @@ wrapper_eg_combine <- function(i) {
       oall_reg2 <- do.call("rbind",out_all2)
       nparam <- apply(oall_reg2[,3:(ncol(oall_reg2)-1)],1,FUN=function(x) {length(which(x!=0))})
       oall_reg2$NPAR <- nparam
-      oall_reg2$NPAR_PER <- oall_reg2$NPAR / length(3:(ncol(oall_reg2)-1)) * 100
+      oall_reg2$NPAR_PER <- oall_reg2$NPAR / length(3:(ncol(oall_reg2)-2)) * 100
       write.csv(oall_reg2,paste(res_dir,"/regression_residuals_i2.csv",sep=""),quote=T,row.names=F)
     } else {
       oall_reg2 <- read.csv(paste(res_dir,"/regression_residuals_i2.csv",sep=""))
@@ -382,7 +401,7 @@ wrapper_eg_combine <- function(i) {
     
     ########################################################################################
     ########################################################################################
-    #make include the above plot using the most water or temperature stressed years
+    #make the above plot using the most water or temperature stressed years
     #(5% or 95% quantiles)
     cat("\nanalysis of extremes...")
     if (!file.exists(paste(res_dir,"/extreme_values.csv",sep=""))) {
@@ -727,7 +746,7 @@ get_wth_data <- function(cell,cell_data,crop_dir,wth_dir,exp) {
 
 #function to regress the data (remainder of perfect fit)
 #of a given gridcell, against key growing season weather variables
-regress_cell <- function(dcell,fit_par="ALL") {
+regress_cell <- function(dcell,fit_par="ALL",nboots=0,nsize=1) {
   #cat("\ngricell",cell,"...\n")
   
   #correlation matrix to explore potential explanatory power for that difference
@@ -817,7 +836,6 @@ regress_cell <- function(dcell,fit_par="ALL") {
   cor_mx$WUE <- NULL; cor_mx$SOW <- NULL; cor_mx$HAR <- NULL; cor_mx$RAIN <- NULL
   cor_mx$TMEN <- NULL; cor_mx$RSTD <- NULL; cor_mx$TSTD <- NULL
   
-  #cat("fitting multiple regression\n")
   #data for fitting
   if (length(fit_par) == 1) {
     if (fit_par == "ALL") {
@@ -831,32 +849,68 @@ regress_cell <- function(dcell,fit_par="ALL") {
     fit_data <- dcell[,fit_par]
   }
   
-  #fit the multiple regression
-  reg_fit <- lm(DIFF ~ .,data=fit_data)
-  
-  #stepwise the regression based on AIC
-  reg_stp <- stepAIC(reg_fit,direction="both",trace=F)
-  anv_stp <- reg_stp$anova
-  sum_stp <- summary(reg_stp)
-  
-  #calculate the response and do some plots (commented)
-  diffp <- predict(reg_stp,dcell)
-  #plot(diffp,dcell$DIFF)
-  ccoef <- cor(diffp,dcell$DIFF)
-  #length(which(dcell$DIFF<0)) #number of years with diff < 0
-  
-  #put this all into a matrix with the coefficients
-  reg_df <- data.frame(CELL=cell,INT=0,RCOV=0,RD.0=0,RD.2=0,RD.5=0,RD.10=0,
-                       RD.15=0,RD.20=0,HTS1=0,HTS2=0,TETR1=0,TETR2=0,ERATIO.25=0,
-                       ERATIO.50=0,ERATIO.75=0,TCOV=0,EFF.SRAD=0,EFF.GD=0,CCOEF=ccoef)
-  
-  coef_mx <- as.data.frame(sum_stp$coefficients)
-  row.names(coef_mx)[1] <- "INT"
-  rnames <- row.names(coef_mx)
-  for (rn in rnames) {
-    reg_df[which(reg_df$CELL == cell),rn] <- coef_mx$Estimate[which(rnames==rn)]
+  #here do the bootstrapping
+  if (nboots == 0) {
+    #cat("fitting multiple regression\n")
+    #fit the multiple regression
+    reg_fit <- lm(DIFF ~ .,data=fit_data)
+    
+    #stepwise the regression based on AIC
+    reg_stp <- stepAIC(reg_fit,direction="both",trace=F)
+    anv_stp <- reg_stp$anova
+    sum_stp <- summary(reg_stp)
+    
+    #calculate the response and do some plots (commented)
+    diffp <- predict(reg_stp,dcell)
+    #plot(diffp,dcell$DIFF)
+    ccoef <- cor(diffp,dcell$DIFF)
+    #length(which(dcell$DIFF<0)) #number of years with diff < 0
+    
+    #put this all into a matrix with the coefficients
+    reg_df <- data.frame(CELL=cell,INT=0,RCOV=0,RD.0=0,RD.2=0,RD.5=0,RD.10=0,
+                         RD.15=0,RD.20=0,HTS1=0,HTS2=0,TETR1=0,TETR2=0,ERATIO.25=0,
+                         ERATIO.50=0,ERATIO.75=0,TCOV=0,EFF.SRAD=0,EFF.GD=0,CCOEF=ccoef)
+    
+    coef_mx <- as.data.frame(sum_stp$coefficients)
+    row.names(coef_mx)[1] <- "INT"
+    rnames <- row.names(coef_mx)
+    for (rn in rnames) {
+      reg_df[which(reg_df$CELL == cell),rn] <- coef_mx$Estimate[which(rnames==rn)]
+    }
+    #out_all <- rbind(out_all,reg_df)
+  } else {
+    reg_df <- data.frame()
+    for (br in 1:nboots) {
+      boots_data <- sample(1:nrow(fit_data),size=nsize)
+      boots_data <- fit_data[-boots_data,]
+      reg_fit <- lm(DIFF ~ .,data=boots_data)
+      
+      #stepwise the regression based on AIC
+      reg_stp <- stepAIC(reg_fit,direction="both",trace=F)
+      anv_stp <- reg_stp$anova
+      sum_stp <- summary(reg_stp)
+      
+      #calculate the response and do some plots (commented)
+      diffp <- predict(reg_stp,dcell)
+      #plot(diffp,dcell$DIFF)
+      ccoef <- cor(diffp,dcell$DIFF)
+      #length(which(dcell$DIFF<0)) #number of years with diff < 0
+      
+      #put this all into a matrix with the coefficients
+      bts_df <- data.frame(CELL=cell,INT=0,RCOV=0,RD.0=0,RD.2=0,RD.5=0,RD.10=0,
+                           RD.15=0,RD.20=0,HTS1=0,HTS2=0,TETR1=0,TETR2=0,ERATIO.25=0,
+                           ERATIO.50=0,ERATIO.75=0,TCOV=0,EFF.SRAD=0,EFF.GD=0,CCOEF=ccoef)
+      
+      coef_mx <- as.data.frame(sum_stp$coefficients)
+      row.names(coef_mx)[1] <- "INT"
+      rnames <- row.names(coef_mx)
+      for (rn in rnames) {
+        bts_df[which(bts_df$CELL == cell),rn] <- coef_mx$Estimate[which(rnames==rn)]
+      }
+      bts_df <- cbind(REP=br,bts_df)
+      reg_df <- rbind(reg_df,bts_df)
+    }
   }
-  #out_all <- rbind(out_all,reg_df)
   return(reg_df)
 }
 
