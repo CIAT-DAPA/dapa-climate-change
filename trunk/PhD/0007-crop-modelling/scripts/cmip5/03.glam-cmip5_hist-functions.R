@@ -31,6 +31,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/03.glam-cmip5_hist-functions.R",sep=""))
   
   #input directories and model
   cropName <- "gnut"

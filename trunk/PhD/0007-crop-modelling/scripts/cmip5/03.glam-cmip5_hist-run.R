@@ -33,6 +33,7 @@ source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
 source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/cmip5/03.glam-cmip5_hist-functions.R",sep=""))
 
 #other directories
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
