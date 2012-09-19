@@ -32,10 +32,10 @@ mdDir <- paste(model_dir,"/CMIP5/rcp45",sep="")
 
 #get the list of unprocessed GCMs
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),sep="\t",header=T)
-cDataDir <- paste(bDir,"/climate-data/gridcell-data",sep="")
+cDataDir <- paste(base_dir,"/climate-data/gridcell-data",sep="")
 outDir <- paste(cDataDir,"/IND_RCP45",sep="")
 cropName <- "gnut"
-cells <- read.csv(paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
+cells <- read.csv(paste(base_dir,"/GLAM/climate-signals-yield/",toupper(cropName),"/signals/cells-process.csv",sep=""))
 gcmList <- unique(gcmChars$GCM)
 mList <- c()
 for (i in 1:length(gcmList)) {
@@ -61,8 +61,6 @@ mList <- unique(mList)
 ncpus <- length(mList)
 if (ncpus>12) {ncpus <- 12}
 
-#od <- CMIP5_extract(cells=all_cells,cChars=gcmChars,dum_rs=drs,i=1,yi=2020,yf=2049,oDir=outDir)
-
 #here do the parallelisation
 #load library and create cluster
 library(snowfall)
@@ -79,7 +77,7 @@ sfExport("ys")
 sfExport("ye")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(mList),wrapper_CMIP_extract))
+system.time(sfSapply(as.vector(mList),wrapper_RCP45_extract))
 
 #stop the cluster
 sfStop()
