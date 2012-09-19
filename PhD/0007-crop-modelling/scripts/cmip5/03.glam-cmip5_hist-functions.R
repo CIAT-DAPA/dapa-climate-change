@@ -2,106 +2,248 @@
 #UoL / CCAFS / CIAT
 #Sept 2012
 
-##### script to run GLAM based on a particular configuration
-
-#local
-# b_dir <- "W:/eejarv/PhD-work/crop-modelling/GLAM/model-runs/GNUT"
-# src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-# scratch <- paste(b_dir,"/runs/cmip5_hist",sep="")
-
-#eljefe
-b_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM/model-runs/GNUT"
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-scratch <- "/scratch/eejarv/constraints"
-
-#sourcing required functions
-source(paste(src.dir,"/scripts/glam/glam-run-functions.R",sep=""))
-source(paste(src.dir,"/scripts/glam/glam-optimise-functions.R",sep=""))
-source(paste(src.dir,"/scripts/glam/glam-runfiles-functions.R",sep=""))
-source(paste(src.dir,"/scripts/glam/glam-parFile-functions.R",sep=""))
-source(paste(src.dir,"/scripts/glam/glam-make_wth.R",sep=""))
-source(paste(src.dir,"/scripts/glam/glam-constraints-functions.R",sep=""))
-
-
-###read the experiments that will be used
-parset_list <- read.csv(paste(b_dir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
-expid_list <- parset_list$EXPID[which(parset_list$ISSEL==1)]
-
-#loop through experiments
-for (expid in expid_list) {
-  cat("....\n")
-  cat("running experiment",expid,"\n")
-  cat("....\n")
-  #################################################################################
-  #################################################################################
-  #initial run configuration
-  GLAM_setup <- list()
-  GLAM_setup$B_DIR <- b_dir
-  GLAM_setup$BIN_DIR <- paste(GLAM_setup$B_DIR,"/./../bin",sep="")
-  GLAM_setup$CAL_DIR <- paste(GLAM_setup$B_DIR,"/calib",sep="")
-  GLAM_setup$INPUTS_DIR <- paste(GLAM_setup$B_DIR,"/inputs",sep="")
-  GLAM_setup$ASC_DIR <- paste(GLAM_setup$INPUTS_DIR,"/ascii",sep="")
-  GLAM_setup$RUNS_DIR <- scratch
-  GLAM_setup$CROP <- "gnut"
-  GLAM_setup$YEARS <- 1966:1993
-  GLAM_setup$EXP_DIR <- paste("exp-",expid,"_outputs",sep="")
-  GLAM_setup$GRID <- paste(GLAM_setup$INPUTS_DIR,"/calib-cells-selection-v6.csv",sep="")
-  GLAM_setup$PREFIX <- "fcal_"
-  GLAM_setup$GRIDCELL <- NA
-  GLAM_setup$YGP <- "opt"
-  GLAM_setup$CODES_PREFIX <- "soilcodes_"
-  GLAM_setup$TYPES_PREFIX <- "soiltypes_"
-  GLAM_setup$WTH_ROOT <- "ingc"
-  GLAM_setup$IRR_RS_DIR <- paste(GLAM_setup$B_DIR,"/irrigated_ratio",sep="")
-  GLAM_setup$IRR_RS_PREFIX <- "raw-"
-  GLAM_setup$IRR_RS_EXT <- ".asc"
+glam_cmip5_hist_wrapper <- function(this_run) {
+  #get the run details
+  expID <- runs_ref$EXPID[this_run]
+  gcm <- paste(runs_ref$GCM[this_run])
   
-  #load irrigation data
-  cell_xy <- read.csv(GLAM_setup$GRID)
-  GLAM_setup$IDATA <- load_irr_data(rs_dir=GLAM_setup$IRR_RS_DIR,
-                                    rs_prefix=GLAM_setup$IRR_RS_PREFIX,yi=min(GLAM_setup$YEARS),
-                                    yf=max(GLAM_setup$YEARS),xy=cbind(x=cell_xy$X,y=cell_xy$Y),
-                                    ext=GLAM_setup$IRR_RS_EXT,cell_ids=cell_xy$CELL)
-  GLAM_setup_base <- GLAM_setup
-  #################################################################################
-  #################################################################################
+  #check the existence of three parameters needed for sourcing this script
+  if (class(try(get("src.dir"),silent=T)) == "try-error") {
+    stop("src.dir needs to be set")
+  }
   
+  if (class(try(get("bDir"),silent=T)) == "try-error") {
+    stop("bDir needs to be set")
+  }
   
-  #################################################################################
-  #################################################################################
-  #perform the model runs
-  gc_list <- read.csv(GLAM_setup$GRID)$CELL
+  if (class(try(get("maxiter"),silent=T)) == "try-error") {
+    stop("maxiter needs to be set")
+  }
   
-  #number of cpus to use
-  if (length(gc_list) > 12) {ncpus <- 12} else {ncpus <- length(gc_list)}
+  #Read in a dummy GLAM parameter file and create a new one based on a new parameter for
+  #running and optimising GLAM
   
-  #here do the parallelisation
-  #load library and create cluster
-  library(snowfall)
-  sfInit(parallel=T,cpus=ncpus)
+  #source all needed functions
+  source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
   
-  #export variables
-  sfExport("src.dir")
-  sfExport("b_dir")
-  sfExport("scratch")
-  sfExport("cell_xy")
-  sfExport("GLAM_setup_base")
-  sfExport("gc_list")
-  sfExport("constraints")
+  #input directories and model
+  cropName <- "gnut"
+  cDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
+  pDir <- paste(cDir,"/params",sep="") #parameter files
   
-  #run the function in parallel
-  system.time(sfSapply(as.vector(gc_list),glam_constraint_wrapper))
+  #load cell details
+  cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
-  #stop the cluster
-  sfStop()
-  
-  #################################################################################
-  #################################################################################
-  #collate data
-  ### 1. copy the results to the nfs
-  odir <- paste(b_dir,"/runs/constraints",sep="")
-  rsetup <- copy_results(run_setup=GLAM_setup,o_dir=odir,dump_scratch=F)
+  #ci <- 1
+  ciList <- 1:nrow(cells) #which(cells$ZONE == zone)
+  for (ci in ciList) {
+    #get run setup
+    #files that were generated
+    setup <- list()
+    setup$BDIR <- bDir
+    setup$SCRATCH <- scratch
+    setup$USE_SCRATCH <- use_scratch
+    setup$CELL <- cells$CELL[ci]
+    setup$ZONE <- cells$ZONE[ci]
+    setup$METHOD <- "lin"
+    setup$CROPNAME <- "gnut"
+    setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/runs/cmip5_hist/exp-",expID,"_outputs",sep="")
+    setup$PRE_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,"_outputs",sep="")
+    setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
+    setup$YGP_FILE <- "nofile"
+    setup$SOW_FILE_RFD <- paste(setup$PRE_DIR,"/gridcells/fcal_",setup$CELL,"/opt_fcal_",setup$CELL,".txt",sep="")
+    setup$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup$CELL,"_irr.txt",sep="")
+    setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/rfd_",setup$CELL,sep="")
+    setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/irr_",setup$CELL,sep="")
+    setup$WTH_ROOT <- "ingc"
+    setup$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup$CELL,".txt",sep="")
+    setup$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
+    setup$SIM_NAME <- paste("allin_",setup$CELL,sep="")
+    setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+    
+    #if using scratch directory instead of nfs
+    if (use_scratch) {setup$SCRATCH <- paste(setup$SCRATCH,"/exp-",expID,sep="")}
+    
+    cat("\nprocessing cell",setup$CELL,"\n")
+    
+    #get defaults (parameter set)
+    params <- GLAM_get_default(x=cells,cell=setup$CELL,parDir=pDir)
+    params$glam_param.mod_mgt$ISYR <- 1966 #start year
+    params$glam_param.mod_mgt$IEYR <- 1993 #end year
+    params$glam_param.mod_mgt$IASCII <- 1 #output only to .out file
+    params$glam_param.sim_ctr$NDSLA <- 1
+    
+    #extract irrigation rates
+    irDir <- paste(cDir,"/irrigated_ratio",sep="")
+    library(raster)
+    ir_stk <- stack(paste(irDir,"/raw-",1966:1993,".asc",sep=""))
+    ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==setup$CELL)],Y=cells$Y[which(cells$CELL==setup$CELL)]))
+    ir_vls <- as.numeric(ir_vls)
+    ir_vls <- data.frame(YEAR=1966:1993,IRATIO=ir_vls)
+    ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
+    
+    ###############################################
+    # final calibration of (IPDATE and) YGP
+    ###############################################
+    
+    ###############################################
+    #load the calib.csv, last iteration
+    cal_data <- read.csv(paste(setup$PRE_DIR,"/optimisation/z",setup$ZONE,"_rfd_irr/calib.csv",sep=""))
+    optimal <- cal_data[which(cal_data$iter==maxiter),]
+    
+    #update the parameter set
+    for (rw in 1:nrow(optimal)) {
+      pname <- paste(optimal$param[rw])
+      where <- paste(optimal$sect[rw])
+      
+      if (pname == "TB" | pname == "TO" | pname == "TM") {
+        params[[where]][[paste(pname,"FLWR",sep="")]][,"Value"] <- optimal$opt_val[rw]
+        params[[where]][[paste(pname,"PODF",sep="")]][,"Value"] <- optimal$opt_val[rw]
+        params[[where]][[paste(pname,"LMAX",sep="")]][,"Value"] <- optimal$opt_val[rw]
+        params[[where]][[paste(pname,"HARV",sep="")]][,"Value"] <- optimal$opt_val[rw]
+      } else {
+        params[[where]][[pname]][,"Value"] <- optimal$opt_val[rw]
+      }
+    }
+    
+    
+#     ######################################################
+#     #now optimise the planting date
+#     ######################################################
+#     #which and where is the param
+#     parname <- "IPDATE"
+#     where <- "glam_param.spt_mgt"
+#     
+#     if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
+#       #reset lists of output parameters
+#       optimal <- list(); optimised <- list()
+#       
+#       # get the planting date from Sacks et al. (2010)
+#       rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/0_base_grids/igp_dummy.tif",sep=""))
+#       
+#       # get longitude and latitude (row and column)
+#       cells$COL <- colFromX(rs,cells$X)
+#       cells$ROW <- rowFromY(rs,cells$Y)
+#       
+#       #load the planting date rasters
+#       sow_rs <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_start_lr.tif",sep=""))
+#       sow_re <- raster(paste(bDir,"/climate-signals-yield/",toupper(cropName),"/calendar/",tolower(cropName),"/plant_end_lr.tif",sep=""))
+#       
+#       #grab the planting data into the cells matrix
+#       cells$SOW_START <- round(extract(sow_rs,cbind(X=cells$X,Y=cells$Y)),0)
+#       cells$SOW_END <- round(extract(sow_re,cbind(X=cells$X,Y=cells$Y)),0)
+#       
+#       #get the initial and final reported sowing dates
+#       sow_i <- cells$SOW_START[which(cells$CELL == setup$CELL)]
+#       sow_f <- cells$SOW_END[which(cells$CELL == setup$CELL)]
+#       
+#       #if either the final sowing date would result in an incomplete weather series
+#       #just reduce the day of harvest so that the maximum
+#       if ((sow_i+120) < 365) {
+#         if (sow_f < sow_i) {sow_f <- 365-120}
+#       }
+#       
+#       #if the initial sowing date + 120 is greater than 365 then i need to generate a new
+#       #weather series, this should be done as follows
+#       #1. create an alternate weather series
+#       #2. change the wthdir in the SETUP list
+#       #3. write a new sowing file (rainfed)
+#       #4. change the sowing file thing in the SETUP list
+#       #5. update sow_i and sow_f
+#       if ((sow_i+120) > 365) {
+#         #create an alternative weather series so that it still catches the planting date,
+#         #yet solving the issue with the final harvest date
+#         icells <- cells; icells$SOW_DATE <- sow_i
+#         altWthDir <- paste(setup$CAL_DIR,"/altered_wth/rfd_a",setup$CELL,sep="")
+#         if (!file.exists(altWthDir)) {dir.create(altWthDir,recursive=T)}
+#         wthDataDir <- paste(bDir,"/../climate-data/gridcell-data/IND",sep="") #folder with gridded data
+#         owthDir <- make_wth(x=icells,cell=setup$CELL,wthDir=altWthDir,wthDataDir,
+#                             fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE"))
+#         
+#         #update setup
+#         setup$WTH_DIR_RFD <- owthDir$WTH_DIR
+#         #setup$WTH_DIR_IRR <- owthDir$WTH_DIR
+#         
+#         #update values
+#         rng <- 365-sow_i+sow_f
+#         sow_i <- owthDir$SOW_DATE
+#         sow_f <- sow_i+rng
+#       }
+#       
+#       sow_seq <- seq(sow_i,sow_f,by=1)
+#       nstep <- length(sow_seq)
+#       
+#       #set the planting date file to NA, so to pass the configuration check
+#       setup$SOW_FILE_RFD <- "nofile"
+#       
+#       #put these data in the parameter file
+#       params[[where]][[parname]][,"Value"] <- sow_i
+#       params[[where]][[parname]][,"Min"] <- sow_i
+#       params[[where]][[parname]][,"Max"] <- sow_f
+#       
+#       optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
+#                                                 param=parname,n.steps=nstep,iter=tolower(parname),
+#                                                 iratio=ir_vls)
+#       
+#       optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+#       cat(parname,":",optimal[[parname]],"\n")
+#       if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+#       
+#       #save the two outputs
+#       save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
+#       
+#       #update the parameter set to -99 and replace the planting date file
+#       cells$SOW_DATE <- optimal$IPDATE
+#       sdate_odir <- paste(setup$CAL_DIR,"/optim_ipdate",sep="")
+#       if (!file.exists(sdate_odir)) {dir.create(sdate_odir)}
+#       
+#       osowFile <- paste(sdate_odir,"/opt_",setup$SIM_NAME,".txt",sep="")
+#       osowFile <- write_sowdates(x=cells,outfile=osowFile,cell=c(setup$CELL),
+#                                  fields=list(CELL="CELL",COL="COL",ROW="ROW",SOW_DATE="SOW_DATE"))
+#       
+#       #update setup list
+#       setup$SOW_FILE_RFD <- osowFile
+#       
+#       #set IPDATE again to file input
+#       params[[where]][[parname]][,"Value"] <- -99
+#       params[[where]][[parname]][,"Min"] <- -99
+#       params[[where]][[parname]][,"Max"] <- -99
+#       
+#     }
+#     
+    
+    #################################################################################
+    #run the optimiser for YGP, 20 steps
+    parname <- "YGP"
+    where <- "glam_param.ygp"
+    nstep <- 100
+    params[[where]][[parname]][,"Min"] <- 0.01
+    params[[where]][[parname]][,"Max"] <- 1.00
+    
+    if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
+      # reset lists of output parameters
+      optimal <- list(); optimised <- list()
+      
+      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
+                                                param=parname,n.steps=nstep,iter=tolower(parname),
+                                                iratio=ir_vls)
+      
+      optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+      cat(parname,":",optimal[[parname]],"\n")
+      if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+      
+      save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
+    }
+  }
 }
+
+
 
 
 

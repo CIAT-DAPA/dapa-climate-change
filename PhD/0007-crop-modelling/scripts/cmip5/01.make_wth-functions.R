@@ -75,38 +75,38 @@ wth_cmip5_wrapper <- function(this_proc) {
 write_cmip5_loc <- function(all_locs,gridcell,scen,year_i,year_f,wleap,out_wth_dir,fut_wth_dir,sow_date_dir) {
   #open the weather files for each variables and select corresponding years
   pr_data <- read.csv(paste(fut_wth_dir,"/pr/cell-",gridcell,".csv",sep=""))
-  pr_data <- pr_data[which(pr_data$YEAR >= year_i & pr_data$YEAR <= year_f),]
+  pr_data <- pr_data[which(pr_data$YEAR >= (year_i-1) & pr_data$YEAR <= year_f),]
   pr_mis <- as.numeric(apply(pr_data,1,check_missing,wleap,1000))
   pr_datac <- as.data.frame(t(apply(pr_data,1,correct_neg,0,wleap,"zero")))
-  pr_datac <- cbind(YEAR=year_i:year_f,pr_datac)
+  pr_datac <- cbind(YEAR=(year_i-1):year_f,pr_datac)
   
   tx_data <- read.csv(paste(fut_wth_dir,"/tasmax/cell-",gridcell,".csv",sep=""))
-  tx_data <- tx_data[which(tx_data$YEAR >= year_i & tx_data$YEAR <= year_f),]
+  tx_data <- tx_data[which(tx_data$YEAR >= (year_i-1) & tx_data$YEAR <= year_f),]
   tx_datac <- as.data.frame(t(apply(tx_data,1,correct_neg,100,wleap,"mean")))
-  tx_datac <- cbind(YEAR=year_i:year_f,tx_datac)
+  tx_datac <- cbind(YEAR=(year_i-1):year_f,tx_datac)
   tx_mis <- as.numeric(apply(tx_datac,1,check_missing,wleap,100))
   tx_datac <- as.data.frame(t(apply(tx_datac,1,correct_neg,-100,wleap,"mean")))
-  tx_datac <- cbind(YEAR=year_i:year_f,tx_datac)
+  tx_datac <- cbind(YEAR=(year_i-1):year_f,tx_datac)
   tx_mis <- max(c(tx_mis,as.numeric(apply(tx_datac,1,check_missing,wleap,-100))))
   
   tn_data <- read.csv(paste(fut_wth_dir,"/tasmin/cell-",gridcell,".csv",sep=""))
-  tn_data <- tn_data[which(tn_data$YEAR >= year_i & tn_data$YEAR <= year_f),]
+  tn_data <- tn_data[which(tn_data$YEAR >= (year_i-1) & tn_data$YEAR <= year_f),]
   tn_datac <- as.data.frame(t(apply(tn_data,1,correct_neg,100,wleap,"mean")))
-  tn_datac <- cbind(YEAR=year_i:year_f,tn_datac)
+  tn_datac <- cbind(YEAR=(year_i-1):year_f,tn_datac)
   tn_mis <- as.numeric(apply(tn_datac,1,check_missing,wleap,100))
   tn_datac <- as.data.frame(t(apply(tn_datac,1,correct_neg,-100,wleap,"mean")))
-  tn_datac <- cbind(YEAR=year_i:year_f,tn_datac)
+  tn_datac <- cbind(YEAR=(year_i-1):year_f,tn_datac)
   tn_mis <- max(c(tn_mis,as.numeric(apply(tn_datac,1,check_missing,wleap,-100))))
   
   rs_data <- read.csv(paste(fut_wth_dir,"/rsds/cell-",gridcell,".csv",sep=""))
   if (ncol(rs_data) == 13) {
     rs_data <- rs_data[which(rs_data$YEAR >= (year_i-1) & rs_data$YEAR <= (year_f+1)),]
   } else {
-    rs_data <- rs_data[which(rs_data$YEAR >= year_i & rs_data$YEAR <= year_f),]
+    rs_data <- rs_data[which(rs_data$YEAR >= (year_i-1) & rs_data$YEAR <= year_f),]
     rs_datac <- as.data.frame(t(apply(rs_data,1,correct_neg,100,wleap,"mean")))
-    rs_datac <- cbind(YEAR=year_i:year_f,rs_datac)
+    rs_datac <- cbind(YEAR=(year_i-1):year_f,rs_datac)
     rs_datac <- as.data.frame(t(apply(rs_datac,1,correct_neg,-1e50,wleap,"mean")))
-    rs_datac <- cbind(YEAR=year_i:year_f,rs_datac)
+    rs_datac <- cbind(YEAR=(year_i-1):year_f,rs_datac)
     rs_data <- rs_datac
   }
   rs_mis <- as.numeric(apply(rs_data,1,check_missing,wleap,100))
