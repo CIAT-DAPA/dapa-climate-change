@@ -270,9 +270,6 @@ glam_cmip5_hist_wrapper <- function(this_run) {
     ###############################################
     # final calibration of YGP for the GCM, using srad from obs
     ###############################################
-    ###############################################
-    # final calibration of YGP for the GCM, using tmin/tmax from obs
-    ###############################################
     owth_dir_rfd <- paste(setup$SCRATCH,"/rfd_",setup$CELL,sep="")
     if (file.exists(owth_dir_rfd)) {system(paste("rm -rf ",owth_dir_rfd,sep=""))}
     owth_dir_irr <- paste(setup$SCRATCH,"/irr_",setup$CELL,sep="")
