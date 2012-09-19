@@ -36,11 +36,11 @@ yf <- 2049
 #load GCM characteristics
 gcm_chars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),sep="\t",header=T)
 gcm_list <- unique(gcm_chars$GCM)
-gcm_list <- gcm_list[-7] #temporary because ichec_ec_earth does not have rsds
+#gcm_list <- gcm_list[-7] #temporary because ichec_ec_earth does not have rsds
 
 #processsing list of GCMs
-#for (i in 1:length(gcm_list)) {
-process_cmip5_rcp45_gcm <- function(i) {
+for (i in 1:length(gcm_list)) {
+#process_cmip5_rcp45_gcm <- function(i) {
   gcm <- gcm_list[i]
   
   gcm_odir <- paste(out_dir,"/",gcm,sep="")
