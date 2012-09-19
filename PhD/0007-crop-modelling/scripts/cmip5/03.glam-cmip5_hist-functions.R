@@ -54,7 +54,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
     setup$ZONE <- cells$ZONE[ci]
     setup$METHOD <- "lin"
     setup$CROPNAME <- "gnut"
-    setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/runs/cmip5_hist/exp-",expID,"_outputs",sep="")
+    setup$CAL_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/runs/cmip5_hist/exp-",expID,"_outputs/",gcm,sep="")
     setup$PRE_DIR <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/calib/exp-",expID,"_outputs",sep="")
     setup$YIELD_FILE <- paste(cDir,"/inputs/ascii/obs/yield_",setup$CELL,"_",setup$METHOD,".txt",sep="")
     setup$YGP_FILE <- "nofile"

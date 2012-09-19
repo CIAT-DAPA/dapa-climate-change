@@ -60,7 +60,6 @@ sfInit(parallel=T,cpus=ncpus)
 sfExport("src.dir")
 sfExport("bDir")
 sfExport("maxiter")
-sfExport("seeds")
 sfExport("cropName")
 sfExport("runs_ref")
 sfExport("plot_all")
@@ -73,4 +72,7 @@ system.time(sfSapply(as.vector(1:nrow(runs_ref)),glam_cmip5_hist_wrapper))
 
 #stop the cluster
 sfStop()
+
+
+
 
