@@ -45,10 +45,10 @@ ID	Fileset	GCM	Ensemble	iYear	iMonth	iDay	fYear	fMonth	fDay	ncol	res_x	nrow	res_
 44	10	csiro_mk3_6_0	r10i1p1	2006	1	1	2025	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r10i1p1_20060101-20251231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r10i1p1_200601-210012.nc	NA
 45	10	csiro_mk3_6_0	r10i1p1	2026	1	1	2045	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r10i1p1_20260101-20451231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r10i1p1_200601-210012.nc	NA
 46	10	csiro_mk3_6_0	r10i1p1	2046	1	1	2065	12	31	192	1.875	96	1.875	no	kg m-2 s-1	K	%var%_day_CSIRO-Mk3-6-0_rcp45_r10i1p1_20460101-20651231.nc	rsds_Amon_CSIRO-Mk3-6-0_rcp45_r10i1p1_200601-210012.nc	NA
-47	1	ichec_ec_earth	r6i1p1	2006	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r6i1p1_20060101-20251231.nc	missing	NA
-48	1	ichec_ec_earth	r6i1p1	2026	1	1	2050	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r6i1p1_20260101-20501231.nc	missing	NA
-49	2	ichec_ec_earth	r8i1p1	2006	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r8i1p1_20060101-20251231.nc	missing	NA
-50	2	ichec_ec_earth	r8i1p1	2026	1	1	2050	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r8i1p1_20260101-20501231.nc	missing	NA
+47	1	ichec_ec_earth	r6i1p1	2006	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r6i1p1_20060101-20251231.nc	rsds_day_EC-EARTH_rcp45_r6i1p1_20060101-20251231.nc	NA
+48	1	ichec_ec_earth	r6i1p1	2026	1	1	2050	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r6i1p1_20260101-20501231.nc	rsds_day_EC-EARTH_rcp45_r6i1p1_20260101-20501231.nc	NA
+49	2	ichec_ec_earth	r8i1p1	2006	1	1	2025	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r8i1p1_20060101-20251231.nc	rsds_day_EC-EARTH_rcp45_r8i1p1_20060101-20251231.nc	NA
+50	2	ichec_ec_earth	r8i1p1	2026	1	1	2050	12	31	320	1.125	160	1.125	yes	kg m-2 s-1	K	%var%_day_EC-EARTH_rcp45_r8i1p1_20260101-20501231.nc	rsds_day_EC-EARTH_rcp45_r8i1p1_20260101-20501231.nc	NA
 51	1	inm_inmcm4	r1i1p1	2016	1	1	2025	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20160101-20251231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20160101-20251231.nc	NA
 52	1	inm_inmcm4	r1i1p1	2026	1	1	2035	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20260101-20351231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20260101-20351231.nc	NA
 53	1	inm_inmcm4	r1i1p1	2036	1	1	2045	12	31	180	2	120	1.5	no	kg m-2 s-1	K	%var%_day_inmcm4_rcp45_r1i1p1_20360101-20451231.nc	rsds_day_inmcm4_rcp45_r1i1p1_20360101-20451231.nc	NA
