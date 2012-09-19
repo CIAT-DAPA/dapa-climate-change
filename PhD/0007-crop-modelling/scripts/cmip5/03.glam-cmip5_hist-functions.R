@@ -342,7 +342,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
 
 #function to replace the weather files using a set of prescribed values
 GLAM_chg_wth_cmip5 <- function(wth_dir,wth_root,yr,target_var="TMIN",values=NA) {
-  cat("transforming",target_var,"...\n")
+  #cat("transforming",target_var,"...\n")
   #open the file
   wth_file <- paste(wth_dir,"/",wth_root,"001001",yr,".wth",sep="")
   wth_data <- read.fortran(wth_file,format=c("I5","F6","3F7"),skip=4)
