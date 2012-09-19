@@ -24,7 +24,7 @@ yi <- 1961
 yf <- 2005
 
 #get the list of unprocessed GCMs
-gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),sep="\t",header=T)
+gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),sep="\t",header=T)
 gcmList <- unique(gcmChars$GCM)
 
 mList <- 1:length(gcmList)
@@ -53,7 +53,7 @@ sfStop()
 
 ########here calculate MMM (multi-model means)
 #list of gcms
-gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
+gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),header=T,sep="\t")
 vnList <- c("pr","tas","dtr")
 gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
 gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_monthly",sep="")
