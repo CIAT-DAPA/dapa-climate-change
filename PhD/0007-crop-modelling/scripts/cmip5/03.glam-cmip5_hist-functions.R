@@ -69,7 +69,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
     setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
     
     #if using scratch directory instead of nfs
-    if (use_scratch) {setup$SCRATCH <- paste(setup$SCRATCH,"/exp-",expID,sep="")}
+    if (use_scratch) {setup$SCRATCH <- paste(setup$SCRATCH,"/exp-",expID,"_",gcm,sep="")}
     
     cat("\nprocessing cell",setup$CELL,"\n")
     
