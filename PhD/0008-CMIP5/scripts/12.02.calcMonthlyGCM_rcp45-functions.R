@@ -136,16 +136,6 @@ wrapper_monthly_TS_rcp45 <- function(i) {
                   #if the length of the daily file list (dfList) is >0 then use the first file
                   rs <- raster(paste(yrDir,"/",flist1[1],sep=""),varname=vn)
                   rs[] <- NA
-                } else if (vn == "tasmax" & dif_nf > max_allow) {
-                  #create a raster with all pixels set to NA
-                  #if the length of the daily file list (dfList) is >0 then use the first file
-                  rs <- raster(paste(yrDir,"/",flist1[1],sep=""),varname=vn)
-                  rs[] <- NA
-                } else if (vn == "tasmin" & dif_nf > max_allow) {
-                  #create a raster with all pixels set to NA
-                  #if the length of the daily file list (dfList) is >0 then use the first file
-                  rs <- raster(paste(yrDir,"/",flist1[1],sep=""),varname=vn)
-                  rs[] <- NA
                 } else {
                   #everything is fine, so then
                   #read these files into a raster stack
@@ -156,12 +146,6 @@ wrapper_monthly_TS_rcp45 <- function(i) {
                     rd <- calc(rstk,fun = function(x) {return(length(which(x>0.01)))})
                     rd <- writeRaster(rd,paste(yroDir,"/rd_",mthstr,".tif",sep=""),format="GTiff")
                   } else if (vn == "tas") {
-                    rstk <- rstk - 273.15
-                    rs <- mean(rstk)
-                  } else if (vn == "tasmin") {
-                    rstk <- rstk - 273.15
-                    rs <- mean(rstk)
-                  } else if (vn == "tasmin") {
                     rstk <- rstk - 273.15
                     rs <- mean(rstk)
                   }

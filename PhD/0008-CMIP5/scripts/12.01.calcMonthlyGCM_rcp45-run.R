@@ -10,7 +10,7 @@ library(raster)
 #variables to be set
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#mdDir <- "/nfs/a102/eejarv/CMIP5/baseline"
+#mdDir <- "/nfs/a102/eejarv/CMIP5/rcp45"
 #i <- 1 #gcm to process
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
