@@ -166,11 +166,10 @@ glam_cmip5_hist_wrapper <- function(this_run) {
       names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
       obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
       obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
-      wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir,setup$WTH_ROOT,yr,
-                                        target_var="RAIN",values=obs_data$RAIN)
+      wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir,setup$WTH_ROOT,yr,target_var="RAIN",values=obs_data$RAIN)
     }
     
-    setup$SIM_NAME <- "norain_291"
+    setup$SIM_NAME <- paste("norain_",setup$CELL,sep="") #"norain_291"
     setup$WTH_DIR_RFD <- owth_dir
     if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
       # reset lists of output parameters
@@ -238,7 +237,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
                                         target_var="TMAX",values=obs_data$TMAX)
     }
     
-    setup$SIM_NAME <- "notemp_291"
+    setup$SIM_NAME <- paste("notemp_",setup$CELL,sep="") #"notemp_291"
     setup$WTH_DIR_RFD <- owth_dir
     if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
       # reset lists of output parameters
@@ -302,7 +301,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
                                         target_var="SRAD",values=obs_data$SRAD)
     }
     
-    setup$SIM_NAME <- "nosrad_291"
+    setup$SIM_NAME <- paste("nosrad_",setup$CELL,sep="") #"nosrad_291"
     setup$WTH_DIR_RFD <- owth_dir
     if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
       # reset lists of output parameters
