@@ -15,13 +15,14 @@ library(raster)
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#mdDir <- "V:/eejarv/CMIP5/baseline"
+#mdDir <- "V:/eejarv/CMIP5/rcp45"
 #i <- 1 #gcm to process
 
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+source(paste(src.dir2,"/scripts/12.02.calcMonthlyGCM_rcp45-functions.R",sep=""))
 
-yi <- 1961
-yf <- 2005
+yi <- 2020
+yf <- 2049
 
 #get the list of unprocessed GCMs
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),sep="\t",header=T)
@@ -45,12 +46,16 @@ sfExport("yi")
 sfExport("yf")
 
 #run the function in parallel
-system.time(sfSapply(as.vector(mList),wrapper_monthly_TS))
+system.time(sfSapply(as.vector(mList),wrapper_monthly_TS_rcp45))
 
 #stop the cluster
 sfStop()
 
 
+
+
+#############################################################################
+#############################################################################
 ########here calculate MMM (multi-model means)
 #list of gcms
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),header=T,sep="\t")
