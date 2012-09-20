@@ -42,10 +42,10 @@ glam_cmip5_hist_wrapper <- function(this_run) {
   cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
   #here construct a control file folder
-  out_bdir <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/runs/cmip5_hist/exp-",expID,"_outputs/",gcm,sep="")
+  out_bdir <- paste(setup$BDIR,"/model-runs/",toupper(setup$CROPNAME),"/runs/cmip5_hist",sep="")
   ctrl_dir <- paste(out_bdir,"/_process",sep="")
   if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir)}
-  ctrl_fil <- paste(ctrl_dir,"/",gcm,".proc",sep="")
+  ctrl_fil <- paste(ctrl_dir,"/exp-",expID,"_",gcm,".proc",sep="")
   
   if (!file.exists(ctrl_fil)) {
     #ci <- 1
