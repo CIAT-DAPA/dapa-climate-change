@@ -63,6 +63,8 @@ vnList <- c("pr","tas","dtr")
 gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
 gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_monthly",sep="")
 
+#dont average miroc4h!!!
+
 oDir <- paste(mdDir,"/multi_model_mean/r1i1p1_monthly",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
