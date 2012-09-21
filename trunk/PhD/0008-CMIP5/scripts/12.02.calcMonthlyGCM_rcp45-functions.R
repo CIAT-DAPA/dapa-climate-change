@@ -29,7 +29,7 @@ wrapper_monthly_TS_rcp45 <- function(i) {
     
     #looping list of variables. These are all daily, so no worries about that
     #if the variable is not present, just skip it
-    vnList <- c("pr","tas","dtr","tasmin","tasmax")
+    vnList <- c("pr","tas","dtr") #,"tasmin","tasmax")
     for (vn in vnList) {
       #vn <- vnList[1]
       cat("\nvariable:",vn,"\n")
@@ -107,7 +107,7 @@ wrapper_monthly_TS_rcp45 <- function(i) {
                   rs[] <- NA
                   rs2 <- rs
                 } else {
-                  rstk2 <- stack(paste(yrDir2,"/",dfList1,sep=""),varname="tasmax")
+                  rstk2 <- stack(paste(yrDir2,"/",dfList2,sep=""),varname="tasmax")
                   rstk2 <- rstk2 - 273.15
                   rs2 <- mean(rstk2)
                 }

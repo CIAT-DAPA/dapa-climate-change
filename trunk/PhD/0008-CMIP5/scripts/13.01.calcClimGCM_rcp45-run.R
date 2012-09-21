@@ -62,9 +62,11 @@ sfStop()
 ########here calculate MMM (multi-model means)
 #list of gcms
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
-vnList <- c("pr","tas","dtr")
+vnList <- c("pr","tas","dtr","tasmin","tasmax")
 gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
 gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_climatology",sep="")
+
+### do not include miroc4h!!!
 
 oDir <- paste(mdDir,"/multi_model_mean/r1i1p1_climatology",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
