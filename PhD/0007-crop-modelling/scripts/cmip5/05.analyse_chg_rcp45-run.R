@@ -17,13 +17,16 @@ selection <- "v6"
 
 #other directories
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
+wthDir_obs <- paste(cropDir,"/inputs/ascii/wth",sep="")
 wthDir_hist <- paste(cropDir,"/inputs/ascii/wth-cmip5_hist",sep="")
 wthDir_rcp <- paste(cropDir,"/inputs/ascii/wth-cmip5_rcp45",sep="")
-wthDir_obs <- paste(cropDir,"/inputs/ascii/wth",sep="")
 
 #list of gcms hist and future
 gcmList_hist <- list.files(wthDir_hist,pattern="_ENS_")
 gcmList_rcp <- list.files(wthDir_rcp,pattern="_ENS_")
+
+#merge both lists
+gcmList <- gcmList_rcp[which(!gcmList_rcp %in% gcmList_hist)]
 
 #matrix gridcells
 cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
@@ -32,7 +35,26 @@ cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-",selection,".csv
 loc <- 529 #this is in northern Gujarat, one of the highest ccoef gridcells
 
 #1. load all years of data into a data.frame for all GCMs
-#   one data.frame for historical + obs, one data.frame for rcp45
+#       a. one data.frame for hist + obs, 
+year <- 1966
+
+#observed weather
+wthFil_obs <- paste(wthDir_obs,"/rfd_",loc,"/ingc001001",year,".wth",sep="")
+wth_obs <- read.fortran(wthFil_obs,format=c("I5","F6","3F7"),skip=4)
+names(wth_obs) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+wth_obs$YEAR <- as.numeric(substr(wth_obs$DATE,1,2))
+wth_obs$JDAY <- as.numeric(substr(wth_obs$DATE,3,5))
+
+#cmip5 hist
+wthFil_hist <- paste(wthDir_hist,"/rfd_",loc,"/ingc001001",year,".wth",sep="")
+wth_obs <- read.fortran(wthFil_hist,format=c("I5","F6","3F7"),skip=4)
+names(wth_obs) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+wth_obs$YEAR <- as.numeric(substr(wth_obs$DATE,1,2))
+wth_obs$JDAY <- as.numeric(substr(wth_obs$DATE,3,5))
+
+
+
+#       b. one data.frame for rcp45
 
 
 
