@@ -122,8 +122,8 @@ glam_cmip5_hist_wrapper <- function(this_run) {
       #run the optimiser for YGP, 100 steps
       parname <- "YGP"
       where <- "glam_param.ygp"
-      nstep <- 100
-      params[[where]][[parname]][,"Min"] <- 0.01
+      nstep <- 20
+      params[[where]][[parname]][,"Min"] <- 0.05
       params[[where]][[parname]][,"Max"] <- 1.00
       
       if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
@@ -143,7 +143,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
         opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
         suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
         ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-        ers_run <- ers_run[-grep("_run-100_1",ers_run,fixed=T)]
+        ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
         for (ers in 1:length(ers_run)) {
           system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
         }
@@ -195,7 +195,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
         opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
         suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
         ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-        ers_run <- ers_run[-grep("_run-100_1",ers_run,fixed=T)]
+        ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
         for (ers in 1:length(ers_run)) {
           system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
         }
@@ -263,7 +263,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
         opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
         suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
         ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-        ers_run <- ers_run[-grep("_run-100_1",ers_run,fixed=T)]
+        ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
         for (ers in 1:length(ers_run)) {
           system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
         }
@@ -327,7 +327,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
         opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
         suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
         ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-        ers_run <- ers_run[-grep("_run-100_1",ers_run,fixed=T)]
+        ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
         for (ers in 1:length(ers_run)) {
           system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
         }
