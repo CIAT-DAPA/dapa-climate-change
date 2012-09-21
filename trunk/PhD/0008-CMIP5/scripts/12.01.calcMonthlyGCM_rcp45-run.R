@@ -59,11 +59,11 @@ sfStop()
 ########here calculate MMM (multi-model means)
 #list of gcms
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms_rcp45.tab",sep=""),header=T,sep="\t")
-vnList <- c("pr","tas","dtr","tasmin","tasmax")
+vnList <- c("pr","tas","dtr")
 gcmList <- unique(data.frame(GCM=gcmChars$GCM,ENS=gcmChars$Ensemble)) #model runs to average
 gcmList$DIR <- paste(mdDir,"/",gcmList$GCM,"/",gcmList$ENS,"_monthly",sep="")
 
-#dont average miroc4h!!!
+#dont average miroc4h as it has missing data for half the period
 
 oDir <- paste(mdDir,"/multi_model_mean/r1i1p1_monthly",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
