@@ -4,16 +4,31 @@
 
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
 #bDir <- "W:/eejarv/PhD-work/crop-modelling/GLAM"
 
 
 #eljefe
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/GLAM"
+
+#sourcing scripts
+source(paste(src.dir,"/cmip5/05.analyse_chg_rcp45-functions.R",sep=""))
+source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
+source(paste(src.dir2,"/scripts/watbal.R",sep=""))
 
 #name of crop and other details
 cropName <- "gnut"
 selection <- "v6"
+gsi <- 152 #1st of june
+gsf <- 243 #31st of august
+
+yh_i <- 1966
+yh_f <- 1993
+yf_i <- 2021
+yf_f <- 2049
+i <- 1 #gcm position to analyse
 
 #other directories
 cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
@@ -26,65 +41,66 @@ gcmList_hist <- list.files(wthDir_hist,pattern="_ENS_")
 gcmList_rcp <- list.files(wthDir_rcp,pattern="_ENS_")
 
 #merge both lists
-gcmList <- gcmList_rcp[which(!gcmList_rcp %in% gcmList_hist)]
+gcmList <- gcmList_rcp[which(gcmList_rcp %in% gcmList_hist)]
 
 #matrix gridcells
 cells <- read.csv(paste(cropDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
 
-#cell to analyse
+#cell and gcm to analyse
 loc <- 529 #this is in northern Gujarat, one of the highest ccoef gridcells
+gcm <- gcmList[i]
 
 #1. load all years of data into a data.frame for all GCMs
-#       a. one data.frame for hist + obs, 
-year <- 1966
+wthFil_obs <- paste(wthDir_obs,"/rfd_",loc,"/ingc001001",yh_i:yh_f,".wth",sep="")
+wthFil_hist <- paste(wthDir_hist,"/",gcm,"/rfd_",loc,"/ingc001001",yh_i:yh_f,".wth",sep="")
+wthFil_rcp <- paste(wthDir_rcp,"/",gcm,"/rfd_",loc,"/ingc001001",yf_i:yf_f,".wth",sep="")
 
-#observed weather
-wthFil_obs <- paste(wthDir_obs,"/rfd_",loc,"/ingc001001",year,".wth",sep="")
-wth_obs <- read.fortran(wthFil_obs,format=c("I5","F6","3F7"),skip=4)
-names(wth_obs) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-wth_obs$YEAR <- as.numeric(substr(wth_obs$DATE,1,2))
-wth_obs$JDAY <- as.numeric(substr(wth_obs$DATE,3,5))
+#       a. one data.frame for obs
+list_obs <- lapply(wthFil_obs,FUN=get_wth,1900)
+names(list_obs) <- paste("Y.",yh_i:yh_f,sep="")
 
-#cmip5 hist
-wthFil_hist <- paste(wthDir_hist,"/rfd_",loc,"/ingc001001",year,".wth",sep="")
-wth_obs <- read.fortran(wthFil_hist,format=c("I5","F6","3F7"),skip=4)
-names(wth_obs) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-wth_obs$YEAR <- as.numeric(substr(wth_obs$DATE,1,2))
-wth_obs$JDAY <- as.numeric(substr(wth_obs$DATE,3,5))
+#       b. one data.frame for hist
+list_hist <- lapply(wthFil_hist,FUN=get_wth,1900)
+names(list_hist) <- paste("Y.",yh_i:yh_f,sep="")
 
+#       c. one data.frame for rcp45
+list_rcp <- lapply(wthFil_rcp,FUN=get_wth,2000)
+names(list_rcp) <- paste("Y.",yf_i:yf_f,sep="")
 
 
-#       b. one data.frame for rcp45
+#2. calculate few specific metrics for each of these time series (per year).
 
+#run the water balance first
+list_obs_wbal <- lapply(list_obs,FUN=do_wbal)
+list_hist_wbal <- lapply(list_hist,FUN=do_wbal)
+list_rcp_wbal <- lapply(list_rcp,FUN=do_wbal)
 
-
-#2. calculate few specific metrics for each of these time series
-#   metrics are:
-#      a. rainfall during groundnut growing season
-#      b. mean temperature during groundnut growing season
-#      c. number of days with rain > 0mm, 2mm, 5mm, 10mm, 15mm, 20mm
-#      d. rainfall std, rainfall c.v.
-#      e. number of days TMAX>34
-#      f. number of days TMAX>40
-#      g. number of days TMEAN>35
-#      h. number of days TMEAN>47
-#      i. tmean std, tmean c.v.
-#      j. number of days with Ea/Ep ratio < 0.25, 0.5, 0.75
-#      k. sum of global radiation of days with daily mean temperature >8, 
-#         daily minimum temperature >0, and ETRATIO>0.5
-#      l. number of days with daily mean temperature >8, daily minimum
-#         temperature >0 and ERATIO>0.5
-
-# wth_out$ETMAX <- NA; wth_out$AVAIL <- NA; wth_out$ERATIO <- NA
-# wth_out$CUM_RAIN <- NA; wth_out$RUNOFF <- NA; wth_out$DEMAND <- NA
-# wth_out <- watbal_wrapper(wth_out)
-# wth_out <- wth_out[which(wth_out$JDAY >= sow & wth_out$JDAY <= har),]
+#calculate all metrics
+obs_mets <- do.call("rbind",lapply(list_obs_wbal,FUN=do_metrics,gsi,gsf))
+hist_mets <- do.call("rbind",lapply(list_hist_wbal,FUN=do_metrics,gsi,gsf))
+rcp_mets <- do.call("rbind",lapply(list_rcp_wbal,FUN=do_metrics,gsi,gsf))
 
 
 #3. construct PDFs for these metrics
+metList <- names(obs_mets)[4:(ncol(obs_mets))]
 
+met <- metList[1]
+obs_pdf <- density(obs_mets[,met])
+hist_pdf <- density(hist_mets[,met])
+rcp_pdf <- density(rcp_mets[,met])
 
+obs_pdf$y <- obs_pdf$y/max(obs_pdf$y)
+hist_pdf$y <- hist_pdf$y/max(hist_pdf$y)
+rcp_pdf$y <- rcp_pdf$y/max(rcp_pdf$y)
 
+#plot(obs_mets[,met],hist_mets[,met],pch=20)
 
+plot(obs_pdf,xlim=c(min(c(obs_pdf$x,hist_pdf$x,rcp_pdf$x)),
+                    max(c(obs_pdf$x,hist_pdf$x,rcp_pdf$x))))
+#plot(hist_pdf,col="blue")
+lines(hist_pdf,col="blue")
+lines(rcp_pdf,col="red")
 
+met <- "EFF.SRAD"
+range(obs_mets[,met]); range(hist_mets[,met]); range(rcp_mets[,met])
 
