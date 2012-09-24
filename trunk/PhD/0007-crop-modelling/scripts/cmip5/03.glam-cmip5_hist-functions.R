@@ -44,7 +44,7 @@ glam_cmip5_hist_wrapper <- function(this_run) {
   #here construct a control file folder
   out_bdir <- paste(bDir,"/model-runs/",toupper(cropName),"/runs/cmip5_hist",sep="")
   ctrl_dir <- paste(out_bdir,"/_process",sep="")
-  if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir)}
+  if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir,recursive=T)}
   ctrl_fil <- paste(ctrl_dir,"/exp-",expID,"_",gcm,".proc",sep="")
   
   if (!file.exists(ctrl_fil)) {
