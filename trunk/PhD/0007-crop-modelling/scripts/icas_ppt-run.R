@@ -4,7 +4,7 @@
 
 ### script to make some nice charts for 15th Oct ICAS presentation
 ### some of these functions are to be re-used for further PhD reporting
-
+stop("STop!!!")
 library(raster)
 library(maptools); data(wrld_simpl)
 
@@ -250,6 +250,7 @@ expDir_hist <- paste(cmip5_hist,"/exp-",best_exp,"_outputs",sep="")
 
 #list of gcms
 gcmList <- list.files(expDir_hist)
+out_all <- data.frame()
 for (gcm in gcmList) {
   for (runtype in c("allin","norain","nosrad","notemp")) {
     locDir <- paste(expDir_hist,"/",gcm,"/",runtype,"_",loc,sep="")
@@ -257,11 +258,186 @@ for (gcm in gcmList) {
     #load output.RData
     load(file=paste(locDir,"/iter-ygp/output.RData",sep=""))
     
+    #find which calib run has the optimal ygp, and grab its rmse
+    best_run <- which(optimised$YGP$VALUE == optimal$YGP)
     
+    #directories and files
+    rf_dir <- paste(locDir,"/iter-ygp/ygp/RFD_run-",best_run,"_",optimal$YGP,sep="")
+    rfd_dat <- paste(rf_dir,"/output/groundnut.out",sep="")
+    ir_dir <- paste(locDir,"/iter-ygp/ygp/IRR_run-",best_run,"_",optimal$YGP,sep="")
+    irr_dat <- paste(ir_dir,"/output/groundnut.out",sep="")
+    
+    if (file.exists(rfd_dat) & file.exists(irr_dat)) {
+      #get rmse
+      rmse_gcm <- optimised$YGP$RMSE[best_run]
+      
+      #load rainfed run data
+      rfd_dat <- read.table(rfd_dat,sep="\t")
+      names(rfd_dat) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                          "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                          "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                          "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                          "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+      run_data <- data.frame(YEAR=rfd_dat$YEAR,RFD=rfd_dat$YIELD)
+      
+      #load irrigated run data
+      irr_dat <- read.table(irr_dat,sep="\t")
+      names(irr_dat) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                          "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                          "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                          "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                          "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+      run_data$IRR <- irr_dat$YIELD
+      run_data$IRATIO <- ir_vls$IRATIO
+      run_data$YIELD <- run_data$IRR*run_data$IRATIO + run_data$RFD*(1-run_data$IRATIO)
+    }
+      
+    #calculate mean yield
+    ybar <- mean(run_data$YIELD,na.rm=T)
+    
+    #calculate sigma yield
+    ysig <- sd(run_data$YIELD,na.rm=T)
+    
+    #output data.frame
+    out_df <- data.frame(GCM=gcm,RUN_TYPE=runtype,MEAN=ybar,SD=ysig,RMSE=rmse_gcm)
+    out_all <- rbind(out_all,out_df)
   }
 }
 
+ybar_obs <- mean(yo_data$YIELD,na.rm=T)
+ysig_obs <- sd(yo_data$YIELD,na.rm=T)
+rmse_all <- apply(all_runs[,3:21],2,FUN=function(x,y) {rmse(x,y)}, all_runs$OBS)
+ybar_all <- apply(all_runs[,3:21],2,FUN=function(x) {mean(x,na.rm=T)})
+ysig_all <- apply(all_runs[,3:21],2,FUN=function(x) {sd(x,na.rm=T)})
+
+ctr_df <- data.frame(GCM="control",RUN_TYPE="control",MEAN=as.numeric(ybar_all),
+                     SD=as.numeric(ysig_all),RMSE=as.numeric(rmse_all))
+out_all <- rbind(out_all,ctr_df)
+out_all$MEAN_NORM <- out_all$MEAN/ybar_obs
+out_all$SD_NORM <- out_all$SD/ysig_obs
+
+gcm_tab <- paste(out_all$GCM)
+gcm_tab <- lapply(gcm_tab,FUN=function(x) {strsplit(x,"_ENS_",fixed=T)[[1]][1]})
+gcm_tab <- unlist(gcm_tab)
+out_all <- cbind(GCM_NAME=gcm_tab,out_all)
+
+texp_ybar <- ybar_all[which(names(ybar_all) == paste("EXP.",best_exp,sep=""))] / ybar_obs
+texp_ysig <- ysig_all[which(names(ysig_all) == paste("EXP.",best_exp,sep=""))] / ysig_obs
+texp_rmse <- rmse_all[which(names(rmse_all) == paste("EXP.",best_exp,sep=""))]
+
+#a boxplot that shows the variation of all run_types each gcm
+tiffName <- paste(out_dir,"/loc-",loc,"_gcm_biases_mean.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(10,5,1,1),lwd=0.75)
+boxplot(out_all$MEAN_NORM~out_all$GCM_NAME,pch=20,col="grey",
+        ylab="Mean yield (normalised by observed)")
+abline(h=texp_ybar,col="red")
+grid()
+dev.off()
+
+tiffName <- paste(out_dir,"/loc-",loc,"_gcm_biases_sd.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(10,5,1,1),lwd=0.75)
+boxplot(out_all$SD_NORM~out_all$GCM_NAME,pch=20,col="grey",
+        ylab="S.d. yield (normalised by observed)")
+abline(h=texp_ysig,col="red")
+grid()
+dev.off()
+
+tiffName <- paste(out_dir,"/loc-",loc,"_gcm_biases_rmse.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(10,5,1,1),lwd=0.75)
+boxplot(out_all$RMSE~out_all$GCM_NAME,pch=20,col="grey",
+        ylab="RMSE (kg/ha)")
+abline(h=texp_rmse,col="red")
+grid()
+dev.off()
+
+
+#a boxplot that shows the variation of all GCMs for each run_type
+tiffName <- paste(out_dir,"/loc-",loc,"_gcm_runtype_biases_mean.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(5,5,1,1),lwd=0.75)
+boxplot(out_all$MEAN_NORM~out_all$RUN_TYPE,pch=20,col="grey",
+        ylab="Mean yield (normalised by observed)")
+abline(h=texp_ybar,col="red")
+grid()
+dev.off()
+
+tiffName <- paste(out_dir,"/loc-",loc,"_gcm_runtype_biases_sd.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(5,5,1,1),lwd=0.75)
+boxplot(out_all$SD_NORM~out_all$RUN_TYPE,pch=20,col="grey",
+        ylab="S.d. yield (normalised by observed)")
+abline(h=texp_ysig,col="red")
+grid()
+dev.off()
+
+tiffName <- paste(out_dir,"/loc-",loc,"_gcm_runtype_biases_rmse.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(5,5,1,1),lwd=0.75)
+boxplot(out_all$RMSE~out_all$RUN_TYPE,pch=20,col="grey",
+        ylab="RMSE (kg/ha)")
+abline(h=texp_rmse,col="red")
+grid()
+dev.off()
+
+
+#take one of the best models and show the rmse as a barplot compared with control simulation
+#(hadgem2_cc)
+this_gcm <- "mohc_hadgem2_cc"
+gcm_data <- out_all[which(out_all$GCM_NAME == this_gcm),]
+
+ctr_ybar <- mean(out_all$MEAN_NORM[which(out_all$GCM_NAME == "control")],na.rm=T)
+ctr_ybar_sd <- sd(out_all$MEAN_NORM[which(out_all$GCM_NAME == "control")],na.rm=T)
+ctr_ysig <- mean(out_all$SD_NORM[which(out_all$GCM_NAME == "control")],na.rm=T)
+ctr_ysig_sd <- sd(out_all$SD_NORM[which(out_all$GCM_NAME == "control")],na.rm=T)
+ctr_rmse <- mean(out_all$RMSE[which(out_all$GCM_NAME == "control")],na.rm=T)
+ctr_rmse_sd <- sd(out_all$RMSE[which(out_all$GCM_NAME == "control")],na.rm=T)
+
+gcm_data <- rbind(gcm_data,data.frame(GCM_NAME="control",GCM="control",RUN_TYPE="control",
+                                      MEAN=ctr_ybar,SD=ctr_ysig,RMSE=ctr_rmse,
+                                      MEAN_NORM=ctr_ybar,SD_NORM=ctr_ysig))
+
+tiffName <- paste(out_dir,"/loc-",loc,"_",this_gcm,"_runtype_biases_mean.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(5,5,1,1),lwd=0.75)
+barplot(gcm_data$MEAN_NORM,col="grey",ylab="Mean yield (normalised by observed)",
+        names.arg=paste(gcm_data$RUN_TYPE),ylim=c(0,1))
+lines(c(5.5,5.5),c((ctr_ybar-ctr_ybar_sd*1.5),(ctr_ybar+ctr_ybar_sd*1.5)))
+points(5.5,texp_ybar,pch=20,col="red")
+grid()
+dev.off()
+
+tiffName <- paste(out_dir,"/loc-",loc,"_",this_gcm,"_runtype_biases_sd.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(5,5,1,1),lwd=0.75)
+barplot(gcm_data$SD_NORM,col="grey",ylab="S.d. yield (normalised by observed)",
+        names.arg=paste(gcm_data$RUN_TYPE),ylim=c(0,1.5))
+lines(c(5.5,5.5),c((ctr_ysig-ctr_ysig_sd*1.5),(ctr_ysig+ctr_ysig_sd*1.5)))
+points(5.5,texp_ysig,pch=20,col="red")
+grid()
+dev.off()
+
+tiffName <- paste(out_dir,"/loc-",loc,"_",this_gcm,"_runtype_biases_rmse.tif",sep="")
+tiff(tiffName,res=300,compression="lzw",height=1000,width=1000,pointsize=6.5)
+par(las=2,mar=c(5,5,1,1),lwd=0.75)
+barplot(gcm_data$RMSE,col="grey",ylab="RMSE (kg/ha)",
+        names.arg=paste(gcm_data$RUN_TYPE))
+lines(c(5.5,5.5),c((ctr_rmse-ctr_rmse_sd*1.5),(ctr_rmse+ctr_rmse_sd*1.5)))
+points(5.5,texp_rmse,pch=20,col="red")
+grid()
+dev.off()
+
+
+###################################################
+## part b: get all GLAM runs for a gcm
 #get all GLAM runs for hadgem2_cc
+
+
+#plot that shows variation in all simulations (inputs removed)
+
+
 
 
 

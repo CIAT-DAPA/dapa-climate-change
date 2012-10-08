@@ -2,6 +2,12 @@
 #University of Leeds / CCAFS / CIAT
 #October 2012
 
+#calculate rmse
+rmse <- function(x,y) {
+  rmse_val <- sqrt(sum(((x - y)^2)) / length(y))
+  return(rmse_val)
+}
+
 #make a map wrapping spplot
 make_spplot <- function(prs,pcols,pbrks,ht=1000,tiffName="test.tif",add_items=NULL) {
   #required package
