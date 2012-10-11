@@ -21,12 +21,11 @@ dirout = sys.argv[2]
 
 
 modellist = sorted(os.listdir(dirbase))
-
 for model in modellist:
 	print dirbase + "\\" + str(model) + "\n"
 	if not os.path.exists(dirout + "\\" + str(model) + "\\2040_2069\\_asciis"):
-		os.system('mkdir ' + dirout + "\\" + str(model) + "\\2020_2049\\_asciis")
-		os.system("robocopy " +  dirbase + "\\" + str(model) + "\\2020_2049\\_asciis " + dirout + "\\" + str(model)+ "\\2020_2049\\_asciis /Z /E /XF *grd.zip*")
+		os.system('mkdir ' + dirout + "\\" + str(model) + "\\2040_2069\\_asciis")
+		os.system("robocopy " +  dirbase + "\\" + str(model) + "\\2040_2069\\_asciis " + dirout + "\\" + str(model)+ "\\2040_2069\\_asciis /Z /E /XF *grd.zip*")
 	# # periodlist = sorted(os.listdir(dirbase + "\\" + str(model)))
 	# # for period in periodlist:
 		# # print dirbase + "\\" + str(model) + "\\" + str(period) + "\n"

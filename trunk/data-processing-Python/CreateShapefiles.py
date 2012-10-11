@@ -12,17 +12,9 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python CreateShapefiles.py <dirbase> <scenario> <dirout> <resolution> <method>"
-	print "    - ie: python CreateShapefiles.py D:\Masks\COL_adm\COL_adm1.shp D:\Masks\COL_adm\_by_departaments HASC_1"
+	print "    - ie: python CreateShapefiles.py D:\Workspace\PNUMA\Zonas\mun_zon.shp D:\Workspace\PNUMA\Zonas\municipios HASC_2"
 	sys.exit(1)
 
-# ---------------------------------------------------------------------------
-# Notes
-# Units Resolution: arcminutes
-# Resample types:   NEAREST Nearest neighbor assignment This is the default 
-#                   BILINEAR Bilinear interpolation 
-#                   CUBIC Cubic convolution 
-#                   MAJORITY Majority resampling
-# ---------------------------------------------------------------------------
 
 inshape = sys.argv[1]
 dirout = sys.argv[2]
@@ -42,11 +34,11 @@ cur = gp.SearchCursor(inshape,"","",fieldname,"")
 row = cur.Next()
 
 while row <> None:
-	print str(row.HASC_1).split(".")[1]
-	diroutshape = dirout + "\\" + str(row.HASC_1).split(".")[1] + "_adm"
+	print str(row.HASC_2).split(".")
+	diroutshape = dirout 
 	if not os.path.exists(diroutshape):
 		os.system('mkdir ' + diroutshape)
-	outshape = diroutshape + "\\" + str(row.HASC_1).split(".")[1] + "0.shp"
-	gp.select_analysis(inshape, outshape, fieldname + " = '" + row.HASC_1 + "'")
+	outshape = diroutshape + "\\" + str(row.HASC_2).split(".")[0] + "_" + str(row.HASC_2).split(".")[1] + "_" + str(row.HASC_2).split(".")[2] + ".shp"
+	gp.select_analysis(inshape, outshape, fieldname + " = '" + row.HASC_2 + "'")
 	row = cur.Next()
 
