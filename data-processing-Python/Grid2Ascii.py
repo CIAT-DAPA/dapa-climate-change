@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python Grid2Ascii.py <dirbase> <outdir> <variable>"
-	print "   - ie: python Grid2Ascii.py D:\Workspace\Mexico\Baseline\SMO_30s_1951_2010 D:\Workspace\Mexico\Baseline\SMO_30s_1951_2010\_asciis"
+	print "   - ie: python Grid2Ascii.py P:\ExtractWorld_tiles\Baseline\Global_2_5min\current\bio D:\Workspace\Analogues_GCM_data\test_2_5min_asciis_sizes"
 	sys.exit(1)
 
 dirbase =sys.argv[1]
@@ -29,7 +29,7 @@ gp.workspace = dirbase
 print "\n---> Processing: " + dirbase
 
 gp.workspace = dirbase 
-rasters = gp.ListRasters("bio*", "GRID")
+rasters = gp.ListRasters("bio_1_*", "GRID")
 for raster in rasters:
 	print raster
 	

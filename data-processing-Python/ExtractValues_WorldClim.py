@@ -18,7 +18,7 @@ print "\n"
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ExtractValues_WorldClim.py D:\Workspace\Requests\Jvalencia\Ensemble\2040_2069 D:\Workspace\Mexico_SMO\Estaciones_Mexico\Estaciones_PCP.shp D:\Workspace\Requests\Jvalencia\Ensemble\2040_2069\_extract"
+	print "   - ie: python ExtractValues_WorldClim.py K:\ClimateData\WorldClim_data\Global_30s D:\Workspace\Requests\jramirez\_extract_nic\_points\2010_r1.shp D:\Workspace\Requests\jramirez\_extract_nic\Baseline"
 	sys.exit(1)
 gp.CheckOutExtension("Spatial")
 # Arguments
@@ -29,7 +29,7 @@ if not os.path.exists(dirout):
 	os.system('mkdir ' + dirout)
 	
 gp.workspace = dirbase 
-dsList = gp.ListDatasets("precd*", "all")
+dsList = gp.ListDatasets("*", "all")
 
 for ds in dsList:
 	print "Extracting " + ds
@@ -45,10 +45,10 @@ for ds in dsList:
 		gp.Sample_sa(ds, InPointsFC, OutPointsFC, "")
 		# gp.ZonalStatisticsAsTable_sa(mask, "FID", ds, OutPointsFC, "DATA")
 	
-dbfList = sorted(glob.glob(dirout + "\\precd*.dbf"))
+dbfList = sorted(glob.glob(dirout + "\\*.dbf"))
 for dbf in dbfList:
-	InData = dirout + "\\" + "precd_1.dbf"
-	if not os.path.basename(dbf)[-11:] == "precd_1.dbf":
+	InData = dirout + "\\" + "bio_1.dbf"
+	if not os.path.basename(dbf)[-9:] == "bio_1.dbf":
 		fields = os.path.basename(dbf)[:-4].split("_")[-2:]
 		gp.joinfield (InData, "mask", dbf, "mask", fields[0] + "_" + fields[1])
 		print dbf + " joined"

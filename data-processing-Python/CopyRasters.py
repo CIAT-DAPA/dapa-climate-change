@@ -9,7 +9,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python CopyRasters.py D:\Workspace\Danny\all\all_grids D:\Workspace\Danny\all\Monfreda_Without_0"
+	print "   - ie: python CopyRasters.py S:\tiles_by_countries\aus_30s\bccr_bcm2_0\2020_2049 S:\tiles_by_countries\aus_30s\bccr_bcm2_0\2020_2049\bio"
 	sys.exit(1)
 
 # Arguments
@@ -30,8 +30,9 @@ print "\t ..listing grids into " + gp.workspace
 	# raster = gp.workspace + "\\tean_" + str(month)
 	# gp.copy_management(raster, dirout + "\\tmean_" + str(month))
 	
-rasters = sorted(gp.ListRasters("*", "GRID"))
+rasters = sorted(gp.ListRasters("bio*", "GRID"))
 for raster in rasters:
+	print raster
 	gp.copy_management(raster, dirout + "\\" + raster)
 	
 print "\t ..done!!"

@@ -8,7 +8,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ConvertMonthlyUnits.py L:\climate_change\RCM_Data SRES_A1B ECHAM5 D:\climate_change\RCM_Data_1 monthly YES"
+	print "   - ie: python ConvertMonthlyUnits.py D:\climate_change\RCM_Data SRES_A1B ECHAM5 D:\climate_change\RCM_Data_1 monthly YES"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -29,9 +29,10 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "     CONVERT MONTHLY UNITS PRECIS     "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
-yearlist = sorted(os.listdir(dirbase + "\\" + sres + "\\" + str(model) + "\\" + frec + "_grids"))
+# yearlist = sorted(os.listdir(dirbase + "\\" + sres + "\\" + str(model) + "\\" + frec + "_grids"))
 
-for year in yearlist:
+# for year in yearlist:
+for year in range(1959, 2100 + 1, 1):
 	
 	if (int(year)%4==0 and not int(year)%100==0) or int(year)%400==0:
 		daysdic = {"01": 31, "02": 29, "03": 31, "04": 30, "05": 31, "06": 30, "07": 31, "08": 31, "09": 30, "10": 31, "11": 30, "12": 31}
@@ -76,9 +77,7 @@ for year in yearlist:
 		
 		gridlist = sorted(gp.ListRasters("", "GRID"))
 		for grid in gridlist:
-			
-			month = os.path.basename(grid).split("_")[1]
-			
+				
 			if os.path.basename(grid).split("_")[0] == "tmean1":
 				gridvar = "tmean"
 				month = os.path.basename(grid).split("_")[2]

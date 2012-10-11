@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ExtractValues1.py E:\MRI_grids E:\MRI_Analysis\Extracted\Corpoica E:\MRI_grids\mask\Extract_MRI_Edwin\Points.shp 2015 2039 prec"
+	print "   - ie: python ExtractValues1.py K:\MRIData\MRI_grids E:\MRI_Analysis\Outputs E:\MRI_Analysis\Points.shp 2015 2039 SP0A prec"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -20,7 +20,8 @@ if not os.path.exists(dirout):
 mask = sys.argv[3]
 inityear = int(sys.argv[4])
 finalyear = int(sys.argv[5])
-variable = sys.argv[6]
+period = sys.argv[6]
+variable = sys.argv[7]
 
 os.system('cls')
 
@@ -34,11 +35,11 @@ for year in range(inityear, finalyear + 1, 1):
 
 	for month in range (1, 12 + 1, 1):
 
-		if month < 10 and gp.Exists(dirbase + "\\" + variable + "\\SN0A\\OUT_" + str(year) + "0" + str(month) + "010000"):
+		if month < 10 and gp.Exists(dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + "0" + str(month) + "010000"):
 		
-			gp.workspace = dirbase + "\\" + variable + "\\SN0A\\OUT_" + str(year) + "0" + str(month) + "010000"
-			print "--->...processing : " + dirbase + "\\" + variable + "\\SN0A\\OUT_" + str(year) + "0" + str(month) + "010000"
-			diroutraster = dirout + "\\" + variable + "\\SN0A\\OUT_" + str(year) + "0" + str(month) + "010000"
+			gp.workspace = dirbase + "\\" + period + "\\" + variable  + "\\OUT_" + str(year) + "0" + str(month) + "010000"
+			print "--->...processing : " period, variable,str(year) + "0" + str(month) + "010000"
+			diroutraster = dirout + "\\" + variable + "_" + period + "_" + str(year) + "0" + str(month) + "010000"
 			if not os.path.exists(diroutraster):
 				os.system('mkdir ' + diroutraster)
 			
@@ -60,12 +61,12 @@ for year in range(inityear, finalyear + 1, 1):
 			
 			print "\t ..done!!"
 
-		if month > 9 and gp.Exists(dirbase + "\\" + variable + "\\SN0A\\OUT_" + str(year) + str(month) + "010000"):
+		if month > 9 and gp.Exists(dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month) + "010000"):
 		
-			gp.workspace = dirbase + "\\" + variable + "\\SN0A\\OUT_" + str(year) + str(month) + "010000"
-			print "--->...processing : " + dirbase + "\\" + variable + "\\SN0A\\OUT_" + str(year) + str(month) + "010000"
+			gp.workspace = dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month) + "010000"
+			print "--->...processing : " + dirbase + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month) + "010000"
 
-			diroutraster = dirout + "\\" + variable + "\\SN0A\\OUT_" + str(year) + str(month) + "010000"
+			diroutraster = dirout + "\\" + variable + "\\" + period + "\\OUT_" + str(year) + str(month) + "010000"
 			if not os.path.exists(diroutraster):
 				os.system('mkdir ' + diroutraster)
 			
