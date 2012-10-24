@@ -69,16 +69,56 @@ gcmList <- gcmList_his[gcmList_his %in% gcmList_rcp]
 #permutation of gridcells and GCMs
 all_proc <- expand.grid(LOC=cells$CELL,GCM=gcmList)
 
+#number of cpus to use
+if (nrow(all_proc) > 3) {ncpus <- 3} else {ncpus <- nrow(all_proc)}
 
-for (k in 1:100) {
-  ######
-  # bias correct the data
-  lmts <- bc_rain_wrapper(1200)
-  
-  ######
-  # generate the wth files
-  ctrf <- make_bc_wth_wrapper(1200)
-}
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("bDir")
+sfExport("climDir")
+sfExport("glamDir")
+sfExport("obsDir")
+sfExport("hisDir")
+sfExport("rcpDir")
+sfExport("cropName")
+sfExport("ver")
+sfExport("cropDir")
+sfExport("glamInDir")
+sfExport("ascDir")
+sfExport("sowDir")
+sfExport("wthDir_his")
+sfExport("wthDir_rcp")
+sfExport("bcDir_his")
+sfExport("bcDir_rcp")
+sfExport("wthDirBc_his")
+sfExport("wthDirBc_rcp")
+sfExport("vn")
+sfExport("vn_gcm")
+sfExport("yi_h")
+sfExport("yf_h")
+sfExport("yi_f")
+sfExport("yf_f")
+sfExport("cells")
+sfExport("rabi_sow")
+sfExport("gcmChars")
+sfExport("all_proc")
+
+#run the bias correction function in parallel
+system.time(sfSapply(as.vector(1:nrow(all_proc)),wrap_bc_wthmkr))
+
+#run the wth file generation function in parallel
+#system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
+
+#stop the cluster
+sfStop()
+
+
+#
 
 
 
