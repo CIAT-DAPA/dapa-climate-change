@@ -69,12 +69,17 @@ gcmList <- gcmList_his[gcmList_his %in% gcmList_rcp]
 #permutation of gridcells and GCMs
 all_proc <- expand.grid(LOC=cells$CELL,GCM=gcmList)
 
-###### 
-# bias correct the data
-lmts <- bc_rain_wrapper(1200)
 
-######
-# generate the wth files
-ctrf <- make_bc_wth_wrapper(1200)
+for (k in 1:100) {
+  ######
+  # bias correct the data
+  lmts <- bc_rain_wrapper(1200)
+  
+  ######
+  # generate the wth files
+  ctrf <- make_bc_wth_wrapper(1200)
+}
+
+
 
 
