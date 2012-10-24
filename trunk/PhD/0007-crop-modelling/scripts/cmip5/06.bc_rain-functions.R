@@ -5,13 +5,9 @@
 
 #final wrap
 wrap_bc_wthmkr <- function(k) {
-  ######
-  # bias correct the data
-  lmts <- bc_rain_wrapper(k)
-  
-  ######
-  # generate the wth files
-  ctrf <- make_bc_wth_wrapper(k)
+  source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/06.bc_rain-functions.R",sep=""))
+  lmts <- bc_rain_wrapper(k) # bias correct the data
+  ctrf <- make_bc_wth_wrapper(k) # generate the wth files
 }
 
 
@@ -63,7 +59,8 @@ make_bc_wth_wrapper <- function(i) {
     #remove extra files
     for (cvn in c("rsds","tasmax","tasmin")) {
       codir <- paste(oDir_his_bc,"/",cvn,sep="")
-      system(paste("rm -rf ",codir,sep=""))
+      ff <- file.remove(from=paste(codir,"/cell-",loc,".csv",sep=""),to=codir)
+      #system(paste("rm -rf ",codir,sep=""))
     }
     
     ff <- file(checkFil_his,"w")
@@ -92,7 +89,8 @@ make_bc_wth_wrapper <- function(i) {
     #remove extra files
     for (cvn in c("rsds","tasmax","tasmin")) {
       codir <- paste(oDir_rcp_bc,"/",cvn,sep="")
-      system(paste("rm -rf ",codir,sep=""))
+      ff <- file.remove(from=paste(codir,"/cell-",loc,".csv",sep=""),to=codir)
+      #system(paste("rm -rf ",codir,sep=""))
     }
     
     ff <- file(checkFil_rcp,"w")

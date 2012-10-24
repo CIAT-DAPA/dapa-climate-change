@@ -119,7 +119,8 @@ sfStop()
 
 
 #
-
-
+for (j in 1:100) {
+  wrap_bc_wthmkr(j)
+}
 
 
