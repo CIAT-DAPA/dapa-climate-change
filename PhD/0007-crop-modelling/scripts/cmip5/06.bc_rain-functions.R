@@ -3,9 +3,28 @@
 #Oct 2012
 
 
+#final wrap
+wrap_bc_wthmkr <- function(k) {
+  ######
+  # bias correct the data
+  lmts <- bc_rain_wrapper(k)
+  
+  ######
+  # generate the wth files
+  ctrf <- make_bc_wth_wrapper(k)
+}
+
+
 #make bias corrected weather files for GLAM runs
 make_bc_wth_wrapper <- function(i) {
   library(raster)
+  
+  #source functions of interest
+  source(paste(src.dir,"/0006-weather-data/scripts/GHCND-GSOD-functions.R",sep=""))
+  source(paste(src.dir,"/0008-CMIP5/scripts/CMIP5-functions.R",sep=""))
+  source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/06.bc_rain-functions.R",sep=""))
+  source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/01.make_wth-functions.R",sep=""))
+  source(paste(src.dir,"/0007-crop-modelling/scripts/glam/glam-make_wth.R",sep=""))
   
   sce <- paste(all_proc$GCM[i])
   gcm <- unlist(strsplit(sce,"_ENS_",fixed=T))[1]
@@ -24,7 +43,7 @@ make_bc_wth_wrapper <- function(i) {
   #directories where check files are
   checkDir <- paste(wthDirBc_his,"/_process",sep="")
   if (!file.exists(checkDir)) {dir.create(checkDir)}
-  checkFil_his <- paste(checkDir,"/",sce,".proc",sep="")
+  checkFil_his <- paste(checkDir,"/",sce,"_loc-",loc,".proc",sep="")
   
   #historical period
   if (!file.exists(checkFil_his)) {
@@ -55,7 +74,7 @@ make_bc_wth_wrapper <- function(i) {
   #directories where check files are
   checkDir <- paste(wthDirBc_rcp,"/_process",sep="")
   if (!file.exists(checkDir)) {dir.create(checkDir)}
-  checkFil_rcp <- paste(checkDir,"/",sce,".proc",sep="")
+  checkFil_rcp <- paste(checkDir,"/",sce,"_loc-",loc,".proc",sep="")
   
   if (!file.exists(checkFil_rcp)) {
     #copy all other data from the uncorrected output, and then remove it
@@ -88,6 +107,13 @@ make_bc_wth_wrapper <- function(i) {
 #bias correction wrapper function
 bc_rain_wrapper <- function(i) {
   library(raster)
+  
+  #source functions of interest
+  source(paste(src.dir,"/0006-weather-data/scripts/GHCND-GSOD-functions.R",sep=""))
+  source(paste(src.dir,"/0008-CMIP5/scripts/CMIP5-functions.R",sep=""))
+  source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/06.bc_rain-functions.R",sep=""))
+  source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/01.make_wth-functions.R",sep=""))
+  source(paste(src.dir,"/0007-crop-modelling/scripts/glam/glam-make_wth.R",sep=""))
   
   sce <- paste(all_proc$GCM[i])
   gcm <- unlist(strsplit(sce,"_ENS_",fixed=T))[1]
