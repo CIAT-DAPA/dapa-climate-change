@@ -17,6 +17,24 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
   isyr <- GLAM_params$glam_param.mod_mgt$ISYR
   ieyr <- GLAM_params$glam_param.mod_mgt$IEYR
   
+  
+  #here is the optimisation method
+  #RMSE: is yearly root mean square error (classical)
+  #CH07: is the MSE method proposed in Challinor et al. (2007) AGEE, that optimises based on
+  #      the differences between mean and standard deviations of the simulated time series
+  #CH10: is the MSE method proposed in Challinor et al. (2010) ERL, that optimises based
+  #      on the difference between mean yields only. I guess this method is only valid when
+  #      an insufficiently large observed yield + weather time series is available.
+  if (is.null(RUN_setup$OPT_METHOD)) {
+    optMeth <- "RMSE"
+  } else {
+    optMeth <- toupper(RUN_setup$OPT_METHOD)
+  }
+  
+  if (!optMeth %in% c("RMSE","CH07","CH10")) {
+    optMeth <- "RMSE" #defaulting the RMSE
+  }
+  
   #input directories and model
   #cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
   execName <- paste("glam-",tolower(cropName),sep="")
@@ -231,7 +249,15 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
                         OBS=y_o,PRED=y_p)
       odf$OBS[which(odf$OBS < -90)] <- NA
-      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+      
+      if (optMeth == "RMSE") {
+        rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+      } else if (optMeth == "CH07") {
+        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+      } else if (optMeth == "CH10") {
+        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+      }
+      
     } else if (run.type == "IRR") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "IRR"
       
@@ -356,7 +382,15 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
                         OBS=y_o,PRED=y_p)
       odf$OBS[which(odf$OBS < -90)] <- NA
-      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+      
+      if (optMeth == "RMSE") {
+        rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+      } else if (optMeth == "CH07") {
+        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+      } else if (optMeth == "CH10") {
+        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+      }
+      
     } else if (run.type == "MIX") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
       
@@ -584,7 +618,13 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       odf$PRED <- (1-odf$IRATIO)*odf$RFD + (odf$IRATIO)*odf$IRR
       
       #calc rmse
-      rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+      if (optMeth == "RMSE") {
+        rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+      } else if (optMeth == "CH07") {
+        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+      } else if (optMeth == "CH10") {
+        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+      }
     }
     
     out_row <- data.frame(VALUE=vals[i],RMSE=rmse)
