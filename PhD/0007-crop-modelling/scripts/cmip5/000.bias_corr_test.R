@@ -206,8 +206,9 @@ pDir <- paste(cDir,"/params",sep="") #parameter files
 cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",ver,".csv",sep=""))
 
 #list of tests to run
-run_tests <- data.frame(SIM_NAME=c("bcin","bcout"),
-                        WTH_DIR=c("wth-cmip5_hist_bc","wth-cmip5_hist"))
+run_tests <- data.frame(SIM_NAME=c("bcin","bcout","bcin_ch07","bcout_ch07","bcin_ch10","bcout_ch10"),
+                        WTH_DIR=rep(c("wth-cmip5_hist_bc","wth-cmip5_hist"),3),
+                        OPT_METH=c("RMSE","RMSE","CH07","CH07","CH10","CH10"))
 
 
 #here construct a control file folder
@@ -298,6 +299,7 @@ for (i in 1:nrow(run_tests)) {
   setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/",run_tests$WTH_DIR[i],"/",sce,"/rfd_",setup$CELL,sep="")
   setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/",run_tests$WTH_DIR[i],"/",sce,"/irr_",setup$CELL,sep="")
   setup$SIM_NAME <- paste(run_tests$SIM_NAME[i],"_",setup$CELL,sep="")
+  setup$OPT_METHOD <- run_tests$OPT_METH[i]
   
   #if the output control file does not exist
   if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
@@ -367,7 +369,7 @@ for (i in 1:nrow(run_tests)) {
     ccoef <- cor(odf$OBS,odf$PRED)
     mnyi <- mean(odf$PRED)
     sdyi <- sd(odf$PRED)
-    omets <- data.frame(TEST=i,SIM_NAME=setup$SIM_NAME,RMSE=rmse,CCOEF=ccoef,MEAN=mnyi,SD=sdyi)
+    omets <- data.frame(TEST=i,SIM_NAME=setup$SIM_NAME,YGP=optimal[[parname]],RMSE=rmse,CCOEF=ccoef,MEAN=mnyi,SD=sdyi)
     
     all_simy <- rbind(all_simy,odf)
     all_mets <- rbind(all_mets,omets)
@@ -379,6 +381,8 @@ for (i in 1:nrow(run_tests)) {
 crun_dir <- paste(setup$PRE_DIR,"/gridcells/fcal_",loc,sep="")
 rfd_fil <- paste(crun_dir,"/groundnut_RFD.out",sep="")
 irr_fil <- paste(crun_dir,"/groundnut_IRR.out",sep="")
+
+load(paste(crun_dir,"/ygp.RData",sep=""))
 
 if (file.exists(rfd_fil) & file.exists(irr_fil)) {
   #rainfed data
@@ -413,7 +417,7 @@ if (file.exists(rfd_fil) & file.exists(irr_fil)) {
   ccoef <- cor(odf$OBS,odf$PRED)
   mnyi <- mean(odf$PRED)
   sdyi <- sd(odf$PRED)
-  omets <- data.frame(TEST=NA,SIM_NAME="CTRL",RMSE=rmse,CCOEF=ccoef,MEAN=mnyi,SD=sdyi)
+  omets <- data.frame(TEST=NA,SIM_NAME="CTRL",YGP=optimal$YGP,RMSE=rmse,CCOEF=ccoef,MEAN=mnyi,SD=sdyi)
   
   all_simy <- rbind(all_simy,odf)
   all_mets <- rbind(all_mets,omets)
@@ -429,10 +433,7 @@ all_mets$MEAN_NORM <- all_mets$MEAN/mean(odf$OBS)
 all_mets$SD_NORM <- all_mets$SD/sd(odf$OBS)
 
 windows()
-plot(1966:1993,all_simy$OBS[which(all_simy$SIM_NAME == "bcin_635")],ty="l")
-lines(1966:1993,all_simy$PRED[which(all_simy$SIM_NAME == "CTRL")],lty=2)
-lines(1966:1993,all_simy$PRED[which(all_simy$SIM_NAME == "bcin_635")],col="red")
-lines(1966:1993,all_simy$PRED[which(all_simy$SIM_NAME == "bcout_635")],col="blue")
+par(mar=c(8,5,1,1),las=2)
 boxplot(all_simy$PRED~all_simy$SIM_NAME,las=2,col="grey 80",pch=20,ylab="yield (kg/ha)")
 barplot(all_mets$RMSE,names.arg=all_mets$SIM_NAME,axes=T,ylab="RMSE (kg/ha)")
 barplot(all_mets$CCOEF,names.arg=all_mets$SIM_NAME,axes=T,ylab="Correlation coefficient")
