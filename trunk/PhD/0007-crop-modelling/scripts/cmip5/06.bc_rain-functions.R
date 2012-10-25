@@ -280,13 +280,14 @@ loci_cal_mth <- function(ts_obs,ts_mod,wdt_obs=1,iter_step=0.0001) {
 }
 
 #find the GCM wet-day threshold that matches the observed ones
-find_wdt <- function(values,nwd_obs,iter_step=0.0001) {
+find_wdt <- function(values,nwd_obs,iter_step=1e-4) {
   nwd_mod <- length(values)+1 #initialise
   wdt_mod <- iter_step*-1 #initialise
   
   if (length(which(values>=0)) < nwd_obs) {
     wdt_mod <- 0
   } else {
+    nwitr <- 0
     while (nwd_mod > nwd_obs) {
       wdt_mod <- wdt_mod+iter_step
       nwd_mod <- length(which(values>=wdt_mod))
@@ -294,16 +295,22 @@ find_wdt <- function(values,nwd_obs,iter_step=0.0001) {
       
       #if the next value exceeds the value i'm looking for
       if (nxt_nwd < nwd_obs) {
+        new_istep <- iter_step
         niter <- 0
         
         #until a value of iter_step is found so that it does not exceed
         #the value i'm looking for
         while (nxt_nwd < nwd_obs) {
-          iter_step <- iter_step*0.1
-          nxt_nwd <- length(which(values>=(wdt_mod+iter_step)))
+          new_istep <- new_istep*0.1
+          nxt_nwd <- length(which(values>=(wdt_mod+new_istep)))
           niter <- niter+1
+          #if (niter == 100) {nxt_nwd <- nwd_obs}
         }
+        iter_step <- new_istep
       }
+      nwitr <- nwitr+1
+      #truncation
+      if (nwitr==100000) {nwd_mod <- nwd_obs}
     }
   }
   return(wdt_mod)
