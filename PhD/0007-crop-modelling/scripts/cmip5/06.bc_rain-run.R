@@ -118,9 +118,9 @@ system.time(sfSapply(as.vector(1:nrow(all_proc)),wrap_bc_wthmkr))
 sfStop()
 
 
-#
-for (j in 1:100) {
-  wrap_bc_wthmkr(j)
-}
+
+# for (j in 1:780) {
+#   wrap_bc_wthmkr(j)
+# }
 
 
