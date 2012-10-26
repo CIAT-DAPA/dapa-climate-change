@@ -77,7 +77,9 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     params$glam_param.sim_ctr$NDSLA <- 1
     
     #extract irrigation rates
-    ir_vls <- get_ir_vls(setup,cDir,cells,params$glam_param.mod_mgt$ISYR,params$glam_param.mod_mgt$IEYR)
+    #change this to be done beforehand for all gridcells
+    #to save computing time
+    ir_vls <- get_loc_irr(setup$CELL,ENV_CFG$IRR_DATA)
     
     ###############################################
     #load the calib.csv, last iteration
@@ -104,46 +106,77 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     
     inputType <- gsub("his_","",RUN_CFG$WTYPE)
     
+    #maybe all the below needs to go into a function
     if (inputType == "allin") {
-      #run model with original data
-      setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
-      setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
-      setup$SIM_NAME <- paste("allin_",setup$CELL,sep="")
-      
-      #here run the model
-      optimal <- list(); optimised <- list()
-      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls)
-      
-      
-    }
-    
-    
-    if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
-      # reset lists of output parameters
-      optimal <- list(); optimised <- list()
-      
-      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls)
-      
-      optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
-      cat(parname,":",optimal[[parname]],"\n")
-      if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
-      
-      #keep only IRR and RFD for YGP=opt & YGP=1
-      run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
-      opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
-      suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
-      ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-      ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
-      for (ers in 1:length(ers_run)) {
-        system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
+      saveFile <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/output.RData",sep="")
+      if (!file.exists(saveFile)) {
+        #run model with original data
+        setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+        setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+        setup$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",setup$CELL,sep="")
+        
+        #here run the model
+        optimal <- list(); optimised <- list()
+        optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
+                                                  param=parname,n.steps=nstep,iter=tolower(parname),
+                                                  iratio=ir_vls)
+        optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+        cat(parname,":",optimal[[parname]],"\n")
+        if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+        
+        if (length(optimal[[parname]]) > 0) {
+          #keep only IRR and RFD for YGP=opt & YGP=1
+          run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
+          opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
+          suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
+          ers_run <- run_list[grep(suffix,run_list,fixed=T)]
+          ers_run <- c(ers_run,run_list[grep(paste("_run-",nstep,"_1",sep=""),run_list,fixed=T)])
+          ers_run <- unique(ers_run)
+          
+          out_data <- list()
+          #load glam output data and keep into list
+          for (ers in 1:length(ers_run)) {
+            ers_dir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep="")
+            setwd(ers_dir)
+            
+            out_data[[ers]] <- list()
+            out_data[[ers]][["RUN_TYPE"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[1]
+            out_data[[ers]][["RUN_NO"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[2]
+            out_data[[ers]][["YGP"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[3]
+            
+            if (file.exists("./output/groundnut.out")) {
+              out_data[[ers]][["DATA"]] <- read.table("./output/groundnut.out",header=F,sep="\t")
+            } else {
+              out_data[[ers]][["DATA"]] <- as.data.frame(matrix(NA,nrow=28,ncol=42))
+            }
+            names(out_data[[ers]][["DATA"]]) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                                                  "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                                                  "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                                                  "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                                                  "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+            
+            #system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
+          }
+        } else {
+          out_data <- list(); out_data[[1]] <- list()
+          out_data[[1]][["RUN_TYPE"]] <- NA
+          out_data[[1]][["RUN_NO"]] <- NA
+          out_data[[1]][["YGP"]] <- NA
+          out_data[[1]][["DATA"]] <- as.data.frame(matrix(NA,nrow=28,ncol=42))
+          names(out_data[[1]][["DATA"]]) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                                              "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                                              "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                                              "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                                              "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+        }
+        #here save the thing
+        save(list=c("optimised","optimal","out_data"),file=saveFile)
+        
+        #here remove everything
+        system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),sep="")))
       }
-      
-      save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
     }
+    
     
     
     ###############################################
@@ -400,14 +433,21 @@ update_params <- function(optimal,params) {
 }
 
 #get irrigation data
-get_ir_vls <- function(setup,cDir,cells,isyr,ieyr) {
+get_ir_vls <- function(cDir,cells,isyr,ieyr) {
   library(raster)
   irDir <- paste(cDir,"/irrigated_ratio",sep="")
   ir_stk <- stack(paste(irDir,"/raw-",isyr:ieyr,".asc",sep=""))
-  ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==setup$CELL)],Y=cells$Y[which(cells$CELL==setup$CELL)]))
-  ir_vls <- as.numeric(ir_vls)
-  ir_vls <- data.frame(YEAR=isyr:ieyr,IRATIO=ir_vls)
-  ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
+  ir_vls <- extract(ir_stk,cbind(X=cells$X,Y=cells$Y))
+  ir_vls <- data.frame(t(ir_vls))
+  names(ir_vls) <- paste("LOC.",cells$CELL,sep="")
+  ir_vls <- cbind(YEAR=isyr:ieyr,ir_vls)
+  row.names(ir_vls) <- 1:nrow(ir_vls)
   return(ir_vls)
 }
 
+
+get_loc_irr <- function(loc,irr_data) {
+  ir_vls <- data.frame(YEAR=irr_data$YEAR,IRATIO=irr_data[,paste("LOC.",loc,sep="")])
+  ir_vls$IRATIO[which(ir_vls$IRATIO > 1)] <- 1
+  return(ir_vls)
+}
