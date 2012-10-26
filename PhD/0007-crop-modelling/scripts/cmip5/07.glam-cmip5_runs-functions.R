@@ -2,11 +2,9 @@
 #UoL / CIAT / CCAFS
 #Oct 2012
 
+
+#historical wrapper
 glam_hist_run_wrapper <- function(RUN_CFG) {
-  #get the run details
-  #expID <- runs_ref$EXPID[this_run]
-  #gcm <- paste(runs_ref$GCM[this_run])
-  
   #check the existence of the environment set up, before running
   if (class(try(get("ENV_CFG"),silent=T)) == "try-error") {
     stop("src.dir needs to be set")
@@ -28,9 +26,6 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
   cropName <- ENV_CFG$CROP_NAME
   cDir <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),sep="")
   pDir <- paste(cDir,"/params",sep="") #parameter files
-  
-  #load cell details
-  #cells <- read.csv(paste(cDir,"/inputs/calib-cells-selection-",selection,".csv",sep=""))
   
   #here construct a control file folder
   #out_bdir <- paste(bDir,"/model-runs/",toupper(cropName),"/runs/cmip5_hist",sep="")
@@ -77,17 +72,13 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     params$glam_param.sim_ctr$NDSLA <- 1
     
     #extract irrigation rates
-    #change this to be done beforehand for all gridcells
-    #to save computing time
     ir_vls <- get_loc_irr(setup$CELL,ENV_CFG$IRR_DATA)
     
     ###############################################
-    #load the calib.csv, last iteration
+    #load the calib.csv, last iteration, and update parameter set
     cal_data <- read.csv(paste(setup$PRE_DIR,"/optimisation/z",setup$ZONE,"_rfd_irr/calib.csv",sep=""))
     optimal <- cal_data[which(cal_data$iter==ENV_CFG$MAXITER),]
-    
-    #update parameter set
-    params <- update_params(optimal,params)
+    params <- update_params(optimal,params) #update parameter set
     
     ###############################################
     # final calibration of YGP for the GCM, using all GCM inputs
@@ -99,272 +90,222 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     params[[where]][[parname]][,"Min"] <- 0.05
     params[[where]][[parname]][,"Max"] <- 1.00
     
-    #these need to be updated according to type of experiment
-    #setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/rfd_",setup$CELL,sep="")
-    #setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/irr_",setup$CELL,sep="")
-    #setup$SIM_NAME <- paste("allin_",setup$CELL,sep="")
     
-    inputType <- gsub("his_","",RUN_CFG$WTYPE)
-    
+    #######
+    #######
     #maybe all the below needs to go into a function
+    inputType <- gsub("his_","",RUN_CFG$WTYPE)
+    setup$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",setup$CELL,sep="")
+    
+    #### choosing the types of inputs
     if (inputType == "allin") {
-      saveFile <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/output.RData",sep="")
-      if (!file.exists(saveFile)) {
-        #run model with original data
-        setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
-        setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
-        setup$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",setup$CELL,sep="")
+      setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+      setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+    } else if (inputType == "bcrain") {
+      setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist_bc/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+      setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist_bc/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+    } else if (inputType == "norain") {
+      #copy the irr_rfd data to a temporary location
+      #remove data from location if needed
+      wthTmp <- paste(setup$SCRATCH,"/wth_tmp",sep="")
+      if (!file.exists(paste(wthTmp,"/",RUN_CFG$WTYPE,sep=""))) {
+        dir.create(paste(wthTmp,"/",RUN_CFG$WTYPE,sep=""),recursive=T)
+      }
+      
+      owth_dir <- paste(wthTmp,"/",RUN_CFG$WTYPE,"/rfd_",setup$CELL,sep="")
+      if (file.exists(owth_dir)) {system(paste("rm -rf ",owth_dir,sep=""))}
+      
+      ori_wth <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+      system(paste("cp -r ",ori_wth," ",owth_dir,sep=""))
+      
+      #observed data folders
+      obs_wth <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
+      
+      #loop years
+      for (yr in params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR) {
+        #grab obs values
+        obs_file <- paste(obs_wth,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
+        obs_data <- read.fortran(obs_file,format=c("I5","F6","3F7"),skip=4)
+        names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+        obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
+        obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
+        wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir,setup$WTH_ROOT,yr,target_var="RAIN",values=obs_data$RAIN)
+      }
+      #run model with original data
+      setup$WTH_DIR_RFD <- wth_dir_rfd
+      setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+      
+    } else if (inputType == "notemp") {
+      ####temperature from observations
+      wthTmp <- paste(setup$SCRATCH,"/wth_tmp",sep="")
+      if (!file.exists(paste(wthTmp,"/",RUN_CFG$WTYPE,sep=""))) {
+        dir.create(paste(wthTmp,"/",RUN_CFG$WTYPE,sep=""),recursive=T)
+      }
+      
+      #removing existing data
+      owth_dir_rfd <- paste(wthTmp,"/",RUN_CFG$WTYPE,"/rfd_",setup$CELL,sep="")
+      if (file.exists(owth_dir_rfd)) {system(paste("rm -rf ",owth_dir_rfd,sep=""))}
+      owth_dir_irr <- paste(wthTmp,"/",RUN_CFG$WTYPE,"/irr_",setup$CELL,sep="")
+      if (file.exists(owth_dir_irr)) {system(paste("rm -rf ",owth_dir_irr,sep=""))}
+      
+      #copying needed data
+      ori_wth_rfd <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+      system(paste("cp -r ",ori_wth_rfd," ",owth_dir_rfd,sep=""))
+      ori_wth_irr <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+      system(paste("cp -r ",ori_wth_irr," ",owth_dir_irr,sep=""))
+      
+      #observed data folders
+      obs_wth_rfd <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
+      obs_wth_irr <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
+      
+      #loop years
+      for (yr in params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR) {
+        #grab obs values, rainfed
+        obs_file <- paste(obs_wth_rfd,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
+        obs_data <- read.fortran(obs_file,format=c("I5","F6","3F7"),skip=4)
+        names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+        obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
+        obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
+        wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir_rfd,setup$WTH_ROOT,yr,
+                                          target_var="TMIN",values=obs_data$TMIN)
+        wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir_rfd,setup$WTH_ROOT,yr,
+                                          target_var="TMAX",values=obs_data$TMAX)
         
-        #here run the model
-        optimal <- list(); optimised <- list()
-        optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                  param=parname,n.steps=nstep,iter=tolower(parname),
-                                                  iratio=ir_vls)
-        optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
-        cat(parname,":",optimal[[parname]],"\n")
-        if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+        #grab obs values, irrigated
+        obs_file <- paste(obs_wth_irr,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
+        obs_data <- read.fortran(obs_file,format=c("I5","F6","3F7"),skip=4)
+        names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+        obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
+        obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
+        wth_dir_irr <- GLAM_chg_wth_cmip5(owth_dir_irr,setup$WTH_ROOT,yr,
+                                          target_var="TMIN",values=obs_data$TMIN)
+        wth_dir_irr <- GLAM_chg_wth_cmip5(owth_dir_irr,setup$WTH_ROOT,yr,
+                                          target_var="TMAX",values=obs_data$TMAX)
+      }
+      setup$WTH_DIR_RFD <- wth_dir_rfd
+      setup$WTH_DIR_IRR <- wth_dir_irr
+    } else if (inputType == "nosrad") {
+      ####solar radiation from observations
+      wthTmp <- paste(setup$SCRATCH,"/wth_tmp",sep="")
+      if (!file.exists(paste(wthTmp,"/",RUN_CFG$WTYPE,sep=""))) {
+        dir.create(paste(wthTmp,"/",RUN_CFG$WTYPE,sep=""),recursive=T)
+      }
+      
+      #removing existing data
+      owth_dir_rfd <- paste(wthTmp,"/",RUN_CFG$WTYPE,"/rfd_",setup$CELL,sep="")
+      if (file.exists(owth_dir_rfd)) {system(paste("rm -rf ",owth_dir_rfd,sep=""))}
+      owth_dir_irr <- paste(wthTmp,"/",RUN_CFG$WTYPE,"/irr_",setup$CELL,sep="")
+      if (file.exists(owth_dir_irr)) {system(paste("rm -rf ",owth_dir_irr,sep=""))}
+      
+      #copying needed data
+      ori_wth_rfd <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+      system(paste("cp -r ",ori_wth_rfd," ",owth_dir_rfd,sep=""))
+      ori_wth_irr <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+      system(paste("cp -r ",ori_wth_irr," ",owth_dir_irr,sep=""))
+      
+      #observed data folders
+      obs_wth_rfd <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
+      obs_wth_irr <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
+      
+      #loop years
+      for (yr in params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR) {
+        #grab obs values, rainfed
+        obs_file <- paste(obs_wth_rfd,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
+        obs_data <- read.fortran(obs_file,format=c("I5","F6","3F7"),skip=4)
+        names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+        obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
+        obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
+        wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir_rfd,setup$WTH_ROOT,yr,
+                                          target_var="SRAD",values=obs_data$SRAD)
         
-        if (length(optimal[[parname]]) > 0) {
-          #keep only IRR and RFD for YGP=opt & YGP=1
-          run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
-          opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
-          suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
-          ers_run <- run_list[grep(suffix,run_list,fixed=T)]
-          ers_run <- c(ers_run,run_list[grep(paste("_run-",nstep,"_1",sep=""),run_list,fixed=T)])
-          ers_run <- unique(ers_run)
+        #grab obs values, irrigated
+        obs_file <- paste(obs_wth_irr,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
+        obs_data <- read.fortran(obs_file,format=c("I5","F6","3F7"),skip=4)
+        names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
+        obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
+        obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
+        wth_dir_irr <- GLAM_chg_wth_cmip5(owth_dir_irr,setup$WTH_ROOT,yr,
+                                          target_var="SRAD",values=obs_data$SRAD)
+      }
+      setup$WTH_DIR_RFD <- owth_dir_rfd
+      setup$WTH_DIR_IRR <- owth_dir_irr
+    }
+     
+    
+    
+    ############
+    #here the model is being run
+    ############
+    saveFile <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/output.RData",sep="")
+    if (!file.exists(saveFile)) {
+      #run model with original data
+      
+      #here run the model
+      optimal <- list(); optimised <- list()
+      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
+                                                param=parname,n.steps=nstep,iter=tolower(parname),
+                                                iratio=ir_vls)
+      optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
+      cat(parname,":",optimal[[parname]],"\n")
+      if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
+      
+      #here grab the output of relevant runs
+      if (length(optimal[[parname]]) > 0) {
+        #keep only IRR and RFD for YGP=opt & YGP=1
+        run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
+        opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
+        suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
+        ers_run <- run_list[grep(suffix,run_list,fixed=T)]
+        ers_run <- c(ers_run,run_list[grep(paste("_run-",nstep,"_1",sep=""),run_list,fixed=T)])
+        ers_run <- unique(ers_run)
+        
+        out_data <- list()
+        #load glam output data and keep into list
+        for (ers in 1:length(ers_run)) {
+          ers_dir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep="")
+          setwd(ers_dir)
           
-          out_data <- list()
-          #load glam output data and keep into list
-          for (ers in 1:length(ers_run)) {
-            ers_dir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep="")
-            setwd(ers_dir)
-            
-            out_data[[ers]] <- list()
-            out_data[[ers]][["RUN_TYPE"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[1]
-            out_data[[ers]][["RUN_NO"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[2]
-            out_data[[ers]][["YGP"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[3]
-            
-            if (file.exists("./output/groundnut.out")) {
-              out_data[[ers]][["DATA"]] <- read.table("./output/groundnut.out",header=F,sep="\t")
-            } else {
-              out_data[[ers]][["DATA"]] <- as.data.frame(matrix(NA,nrow=28,ncol=42))
-            }
-            names(out_data[[ers]][["DATA"]]) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                                                  "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                                                  "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                                                  "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                                                  "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
-            
-            #system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
+          out_data[[ers]] <- list()
+          out_data[[ers]][["RUN_TYPE"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[1]
+          out_data[[ers]][["RUN_NO"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[2]
+          out_data[[ers]][["YGP"]] <- unlist(strsplit(ers_run[ers],"_",fixed=T))[3]
+          
+          if (file.exists("./output/groundnut.out")) {
+            out_data[[ers]][["DATA"]] <- read.table("./output/groundnut.out",header=F,sep="\t")
+          } else {
+            out_data[[ers]][["DATA"]] <- as.data.frame(matrix(NA,nrow=28,ncol=42))
           }
-        } else {
-          out_data <- list(); out_data[[1]] <- list()
-          out_data[[1]][["RUN_TYPE"]] <- NA
-          out_data[[1]][["RUN_NO"]] <- NA
-          out_data[[1]][["YGP"]] <- NA
-          out_data[[1]][["DATA"]] <- as.data.frame(matrix(NA,nrow=28,ncol=42))
-          names(out_data[[1]][["DATA"]]) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                                              "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                                              "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                                              "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                                              "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+          names(out_data[[ers]][["DATA"]]) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                                                "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                                                "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                                                "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                                                "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
         }
-        #here save the thing
-        save(list=c("optimised","optimal","out_data"),file=saveFile)
-        
-        #here remove everything
-        system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),sep="")))
+      } else {
+        out_data <- list(); out_data[[1]] <- list()
+        out_data[[1]][["RUN_TYPE"]] <- NA
+        out_data[[1]][["RUN_NO"]] <- NA
+        out_data[[1]][["YGP"]] <- NA
+        out_data[[1]][["DATA"]] <- as.data.frame(matrix(NA,nrow=28,ncol=42))
+        names(out_data[[1]][["DATA"]]) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                                            "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                                            "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                                            "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                                            "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
       }
+      #here save the thing
+      save(list=c("optimised","optimal","out_data","ir_vls","params","setup"),file=saveFile)
+      
+      #here remove everything
+      setwd(setup$BDIR)
+      system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),sep="")))
     }
     
+    #delete folders of temporary data, if they exist
+    if (file.exists(wth_dir_rfd)) {system(paste("rm -rf ",wth_dir_rfd,sep=""))}
+    if (file.exists(wth_dir_irr)) {system(paste("rm -rf ",wth_dir_irr,sep=""))}
     
-    
-    ###############################################
-    # final calibration of YGP for the GCM, using rainfall from obs
-    # this would only hold for the rainfed run, rain is not relevant for irr
-    ###############################################
-    #copy the irr_rfd data to a temporary location
-    #remove data from location if needed
-    owth_dir <- paste(setup$SCRATCH,"/rfd_",setup$CELL,sep="")
-    if (file.exists(owth_dir)) {system(paste("rm -rf ",owth_dir,sep=""))}
-    system(paste("cp -r ",setup$WTH_DIR_RFD," ",setup$SCRATCH,sep=""))
-    
-    #observed data folders
-    obs_dir_rfd <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
-    
-    #loop years
-    for (yr in params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR) {
-      #grab obs values
-      obs_wth_file <- paste(obs_dir_rfd,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
-      obs_data <- read.fortran(obs_wth_file,format=c("I5","F6","3F7"),skip=4)
-      names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-      obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
-      obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
-      wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir,setup$WTH_ROOT,yr,target_var="RAIN",values=obs_data$RAIN)
-    }
-    
-    setup$SIM_NAME <- paste("norain_",setup$CELL,sep="") #"norain_291"
-    setup$WTH_DIR_RFD <- owth_dir
-    if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
-      # reset lists of output parameters
-      optimal <- list(); optimised <- list()
-      
-      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls)
-      
-      optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
-      cat(parname,":",optimal[[parname]],"\n")
-      if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
-      
-      #keep only IRR and RFD for YGP=opt & YGP=1
-      run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
-      opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
-      suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
-      ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-      ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
-      for (ers in 1:length(ers_run)) {
-        system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
-      }
-      
-      save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
-    }
-    setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/rfd_",setup$CELL,sep="")
-    setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/irr_",setup$CELL,sep="")
-    
-    ###############################################
-    # final calibration of YGP for the GCM, using tmin/tmax from obs
-    ###############################################
-    owth_dir_rfd <- paste(setup$SCRATCH,"/rfd_",setup$CELL,sep="")
-    if (file.exists(owth_dir_rfd)) {system(paste("rm -rf ",owth_dir_rfd,sep=""))}
-    owth_dir_irr <- paste(setup$SCRATCH,"/irr_",setup$CELL,sep="")
-    if (file.exists(owth_dir_irr)) {system(paste("rm -rf ",owth_dir_irr,sep=""))}
-    system(paste("cp -r ",setup$WTH_DIR_RFD," ",setup$SCRATCH,sep=""))
-    system(paste("cp -r ",setup$WTH_DIR_IRR," ",setup$SCRATCH,sep=""))
-    
-    #observed data folders
-    obs_dir_rfd <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
-    obs_dir_irr <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
-    
-    #loop years
-    for (yr in params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR) {
-      #grab obs values, rainfed
-      obs_wth_file <- paste(obs_dir_rfd,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
-      obs_data <- read.fortran(obs_wth_file,format=c("I5","F6","3F7"),skip=4)
-      names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-      obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
-      obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
-      wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir_rfd,setup$WTH_ROOT,yr,
-                                        target_var="TMIN",values=obs_data$TMIN)
-      wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir_rfd,setup$WTH_ROOT,yr,
-                                        target_var="TMAX",values=obs_data$TMAX)
-      
-      #grab obs values, irrigated
-      obs_wth_file <- paste(obs_dir_irr,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
-      obs_data <- read.fortran(obs_wth_file,format=c("I5","F6","3F7"),skip=4)
-      names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-      obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
-      obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
-      wth_dir_irr <- GLAM_chg_wth_cmip5(owth_dir_irr,setup$WTH_ROOT,yr,
-                                        target_var="TMIN",values=obs_data$TMIN)
-      wth_dir_irr <- GLAM_chg_wth_cmip5(owth_dir_irr,setup$WTH_ROOT,yr,
-                                        target_var="TMAX",values=obs_data$TMAX)
-    }
-    
-    setup$SIM_NAME <- paste("notemp_",setup$CELL,sep="") #"notemp_291"
-    setup$WTH_DIR_RFD <- owth_dir
-    if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
-      # reset lists of output parameters
-      optimal <- list(); optimised <- list()
-      
-      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls)
-      
-      optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
-      cat(parname,":",optimal[[parname]],"\n")
-      if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
-      
-      #keep only IRR and RFD for YGP=opt & YGP=1
-      run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
-      opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
-      suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
-      ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-      ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
-      for (ers in 1:length(ers_run)) {
-        system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
-      }
-      
-      save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
-    }
-    setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/rfd_",setup$CELL,sep="")
-    setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/irr_",setup$CELL,sep="")
-    
-    ###############################################
-    # final calibration of YGP for the GCM, using srad from obs
-    ###############################################
-    owth_dir_rfd <- paste(setup$SCRATCH,"/rfd_",setup$CELL,sep="")
-    if (file.exists(owth_dir_rfd)) {system(paste("rm -rf ",owth_dir_rfd,sep=""))}
-    owth_dir_irr <- paste(setup$SCRATCH,"/irr_",setup$CELL,sep="")
-    if (file.exists(owth_dir_irr)) {system(paste("rm -rf ",owth_dir_irr,sep=""))}
-    system(paste("cp -r ",setup$WTH_DIR_RFD," ",setup$SCRATCH,sep=""))
-    system(paste("cp -r ",setup$WTH_DIR_IRR," ",setup$SCRATCH,sep=""))
-    
-    #observed data folders
-    obs_dir_rfd <- paste(cDir,"/inputs/ascii/wth/rfd_",setup$CELL,sep="")
-    obs_dir_irr <- paste(cDir,"/inputs/ascii/wth/irr_",setup$CELL,sep="")
-    
-    #loop years
-    for (yr in params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR) {
-      #grab obs values, rainfed
-      obs_wth_file <- paste(obs_dir_rfd,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
-      obs_data <- read.fortran(obs_wth_file,format=c("I5","F6","3F7"),skip=4)
-      names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-      obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
-      obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
-      wth_dir_rfd <- GLAM_chg_wth_cmip5(owth_dir_rfd,setup$WTH_ROOT,yr,
-                                        target_var="SRAD",values=obs_data$SRAD)
-      
-      #grab obs values, irrigated
-      obs_wth_file <- paste(obs_dir_irr,"/",setup$WTH_ROOT,"001001",yr,".wth",sep="")
-      obs_data <- read.fortran(obs_wth_file,format=c("I5","F6","3F7"),skip=4)
-      names(obs_data) <- c("DATE","SRAD","TMAX","TMIN","RAIN")
-      obs_data$YEAR <- as.numeric(substr(obs_data$DATE,1,2))
-      obs_data$JDAY <- as.numeric(substr(obs_data$DATE,3,5))
-      wth_dir_irr <- GLAM_chg_wth_cmip5(owth_dir_irr,setup$WTH_ROOT,yr,
-                                        target_var="SRAD",values=obs_data$SRAD)
-    }
-    
-    setup$SIM_NAME <- paste("nosrad_",setup$CELL,sep="") #"nosrad_291"
-    setup$WTH_DIR_RFD <- owth_dir
-    if (!file.exists(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))) {
-      # reset lists of output parameters
-      optimal <- list(); optimised <- list()
-      
-      optimised[[parname]] <- GLAM_optimise_loc(GLAM_params=params,RUN_setup=setup,sect=where,
-                                                param=parname,n.steps=nstep,iter=tolower(parname),
-                                                iratio=ir_vls)
-      
-      optimal[[parname]] <- optimised[[parname]]$VALUE[which(optimised[[parname]]$RMSE == min(optimised[[parname]]$RMSE))]
-      cat(parname,":",optimal[[parname]],"\n")
-      if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
-      
-      #keep only IRR and RFD for YGP=opt & YGP=1
-      run_list <- list.files(paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),sep=""),pattern="_run-")
-      opt_run <- which(optimised[[parname]]$VALUE == optimal[[parname]])
-      suffix <- paste("_run-",opt_run,"_",optimal[[parname]],sep="")
-      ers_run <- run_list[-grep(suffix,run_list,fixed=T)]
-      ers_run <- ers_run[-grep(paste("_run-",nstep,"_1",sep=""),ers_run,fixed=T)]
-      for (ers in 1:length(ers_run)) {
-        system(paste("rm -rf ",paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/",tolower(parname),"/",ers_run[ers],sep=""),sep=""))
-      }
-      
-      save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
-    }
-    setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/rfd_",setup$CELL,sep="")
-    setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist/",gcm,"/irr_",setup$CELL,sep="")
-    if (file.exists(owth_dir_rfd)) {system(paste("rm -rf ",owth_dir_rfd,sep=""))}
-    if (file.exists(owth_dir_irr)) {system(paste("rm -rf ",owth_dir_irr,sep=""))}
+    #write control file
     ff <- file(ctrl_fil,"w")
     cat("Processed on",date(),"\n",file=ff)
     close(ff)
