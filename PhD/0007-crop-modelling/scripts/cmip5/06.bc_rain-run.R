@@ -5,8 +5,8 @@
 library(raster)
 
 #source directories
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD"
 
 #source functions of interest
 source(paste(src.dir,"/0006-weather-data/scripts/GHCND-GSOD-functions.R",sep=""))
@@ -16,8 +16,8 @@ source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/01.make_wth-functions.R
 source(paste(src.dir,"/0007-crop-modelling/scripts/glam/glam-make_wth.R",sep=""))
 
 #base and data directories
-bDir <- "W:/eejarv/PhD-work/crop-modelling"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 climDir <- paste(bDir,"/climate-data",sep="")
 glamDir <- paste(bDir,"/GLAM",sep="")
 obsDir <- paste(climDir,"/gridcell-data/IND",sep="")
@@ -118,9 +118,17 @@ system.time(sfSapply(as.vector(1:nrow(all_proc)),wrap_bc_wthmkr))
 sfStop()
 
 
-
-# for (j in 1:780) {
+# #temporary processing in eljefe
+# for (j in 781:1560) {
 #   wrap_bc_wthmkr(j)
 # }
+
+# #temporary processing local
+# for (j in 1561:2340) {
+#   wrap_bc_wthmkr(j)
+# }
+
+
+
 
 

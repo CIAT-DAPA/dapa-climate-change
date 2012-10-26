@@ -234,28 +234,32 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       }
       #read in the predicted yield
       outfile <- list.files("./output/",pattern="\\.out")
-      pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
-      names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                       "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                       "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                       "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                       "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
-      y_p <- pred$YIELD
-      y_o <- read.fortran(yFile,format=c("3I4","F8"),n=28)
-      y_o <- y_o[which(y_o$V1 >= isyr & y_o$V1 <= ieyr),]
-      y_o <- y_o$V4
-      
-      #calc rmse
-      odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
-                        OBS=y_o,PRED=y_p)
-      odf$OBS[which(odf$OBS < -90)] <- NA
-      
-      if (optMeth == "RMSE") {
-        rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
-      } else if (optMeth == "CH07") {
-        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
-      } else if (optMeth == "CH10") {
-        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+      if (length(outfile) == 0) {
+        rmse <- NA
+      } else {
+        pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
+        names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                         "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                         "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                         "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                         "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+        y_p <- pred$YIELD
+        y_o <- read.fortran(yFile,format=c("3I4","F8"),n=28)
+        y_o <- y_o[which(y_o$V1 >= isyr & y_o$V1 <= ieyr),]
+        y_o <- y_o$V4
+        
+        #calc rmse
+        odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
+                          OBS=y_o,PRED=y_p)
+        odf$OBS[which(odf$OBS < -90)] <- NA
+        
+        if (optMeth == "RMSE") {
+          rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+        } else if (optMeth == "CH07") {
+          rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+        } else if (optMeth == "CH10") {
+          rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+        }
       }
       
     } else if (run.type == "IRR") {
@@ -367,30 +371,33 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       }
       #read in the predicted yield
       outfile <- list.files("./output/",pattern="\\.out")
-      pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
-      names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                       "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                       "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                       "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                       "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
-      y_p <- pred$YIELD
-      y_o <- read.fortran(yFile,format=c("3I4","F8"),n=28)
-      y_o <- y_o[which(y_o$V1 >= isyr & y_o$V1 <= ieyr),]
-      y_o <- y_o$V4
-      
-      #calc rmse
-      odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
-                        OBS=y_o,PRED=y_p)
-      odf$OBS[which(odf$OBS < -90)] <- NA
-      
-      if (optMeth == "RMSE") {
-        rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
-      } else if (optMeth == "CH07") {
-        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
-      } else if (optMeth == "CH10") {
-        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+      if (length(outfile) == 0) {
+        rmse <- NA
+      } else {
+        pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
+        names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                         "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                         "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                         "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                         "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+        y_p <- pred$YIELD
+        y_o <- read.fortran(yFile,format=c("3I4","F8"),n=28)
+        y_o <- y_o[which(y_o$V1 >= isyr & y_o$V1 <= ieyr),]
+        y_o <- y_o$V4
+        
+        #calc rmse
+        odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
+                          OBS=y_o,PRED=y_p)
+        odf$OBS[which(odf$OBS < -90)] <- NA
+        
+        if (optMeth == "RMSE") {
+          rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+        } else if (optMeth == "CH07") {
+          rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+        } else if (optMeth == "CH10") {
+          rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+        }
       }
-      
     } else if (run.type == "MIX") {
       GLAM_params$glam_param.mod_mgt$SEASON <- "RFD"
       
@@ -497,21 +504,27 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       } else {
         setwd(run_dir)
       }
+      
       #read in the predicted yield
       outfile <- list.files("./output/",pattern="\\.out")
-      pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
-      names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                       "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                       "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                       "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                       "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
-      y_p <- pred$YIELD
-      y_o <- read.fortran(yFile,format=c("3I4","F8"),n=28)
-      y_o <- y_o[which(y_o$V1 >= isyr & y_o$V1 <= ieyr),]
-      y_o <- y_o$V4
-      odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
-                        OBS=y_o,RFD=y_p)
-      odf$OBS[which(odf$OBS < -90)] <- NA
+      if (length(outfile) == 0) {
+        odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
+                          OBS=NA,RFD=NA)
+      } else {
+        pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
+        names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                         "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                         "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                         "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                         "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+        y_p <- pred$YIELD
+        y_o <- read.fortran(yFile,format=c("3I4","F8"),n=28)
+        y_o <- y_o[which(y_o$V1 >= isyr & y_o$V1 <= ieyr),]
+        y_o <- y_o$V4
+        odf <- data.frame(YEAR=GLAM_params$glam_param.mod_mgt$ISYR:GLAM_params$glam_param.mod_mgt$IEYR,
+                          OBS=y_o,RFD=y_p)
+        odf$OBS[which(odf$OBS < -90)] <- NA
+      }
       
       ##!
       #Now the irrigated run
@@ -606,24 +619,32 @@ GLAM_optimise_loc <- function(GLAM_params,RUN_setup,sect="glam_param.ygp",param=
       }
       #read in the predicted yield
       outfile <- list.files("./output/",pattern="\\.out")
-      pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
-      names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                       "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                       "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                       "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                       "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
-      y_p <- pred$YIELD
-      odf$IRR <- y_p
-      odf$IRATIO <- iratio$IRATIO
-      odf$PRED <- (1-odf$IRATIO)*odf$RFD + (odf$IRATIO)*odf$IRR
-      
-      #calc rmse
-      if (optMeth == "RMSE") {
-        rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
-      } else if (optMeth == "CH07") {
-        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
-      } else if (optMeth == "CH10") {
-        rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+      if (length(outfile) == 0) {
+        rmse <- NA
+      } else {
+        pred <- read.table(paste("./output/",outfile,sep=""),header=F,sep="\t")
+        names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                         "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                         "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                         "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                         "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+        y_p <- pred$YIELD
+        odf$IRR <- y_p
+        odf$IRATIO <- iratio$IRATIO
+        odf$PRED <- (1-odf$IRATIO)*odf$RFD + (odf$IRATIO)*odf$IRR
+        
+        #calc rmse
+        if (optMeth == "RMSE") {
+          rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+        } else if (optMeth == "CH07") {
+          rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+        } else if (optMeth == "CH10") {
+          rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+        }
+        
+        #if rmse is NaN then return NA
+        if (is.na(rmse)) {rmse <- NA}
+        
       }
     }
     
