@@ -48,6 +48,7 @@ wthDir_rcp_bc <- paste(ascDir,"/wth-cmip5_rcp45_bc",sep="")
 #here you need to put the permutation factors
 #Factor 1: Gridcells
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
+irrData <- get_ir_vls(cropDir,cells,1966,1993)
 
 #Factor 2: GCMs
 gcmList_his <- list.files(wthDir_his_rw,pattern="_ENS_")
@@ -147,12 +148,12 @@ ENV_CFG$VER <- ver
 ENV_CFG$MAXITER <- maxiter
 ENV_CFG$PLOT_ALL <- plot_all
 ENV_CFG$RUNS_NAME <- runs_name
-ENV_CFG$SCRATCH <- paste(scratch,"/",runs_name,sep="")
+ENV_CFG$SCRATCH <- paste(scratch,"/",ENV_CFG$RUNS_NAME,sep="")
 ENV_CFG$USE_SCRATCH <- use_scratch
 ENV_CFG$CELLS <- cells
+ENV_CFG$IRR_DATA <- irrData
 ENV_CFG$OPT_METHOD <- "CH07"
 ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/runs/",ENV_CFG$RUNS_NAME,sep="")
-
 
 #if historical then run one wrapper else run the other
 if (RUN_CFG$PERIOD == "HIS") {
