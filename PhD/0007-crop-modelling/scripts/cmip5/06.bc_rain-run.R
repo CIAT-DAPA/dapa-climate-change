@@ -119,12 +119,12 @@ sfStop()
 
 
 # #temporary processing in eljefe
-# for (j in 781:1560) {
+# for (j in 1:780) {
 #   wrap_bc_wthmkr(j)
 # }
-
+# 
 # #temporary processing local
-# for (j in 1561:2340) {
+# for (j in 781:1561) {
 #   wrap_bc_wthmkr(j)
 # }
 

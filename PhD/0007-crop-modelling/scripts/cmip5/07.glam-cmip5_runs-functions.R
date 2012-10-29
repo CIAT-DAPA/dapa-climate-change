@@ -230,8 +230,6 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
       setup$WTH_DIR_RFD <- owth_dir_rfd
       setup$WTH_DIR_IRR <- owth_dir_irr
     }
-     
-    
     
     ############
     #here the model is being run
@@ -302,8 +300,8 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     }
     
     #delete folders of temporary data, if they exist
-    if (file.exists(wth_dir_rfd)) {system(paste("rm -rf ",wth_dir_rfd,sep=""))}
-    if (file.exists(wth_dir_irr)) {system(paste("rm -rf ",wth_dir_irr,sep=""))}
+    if (exists("wth_dir_rfd")) {if (file.exists(wth_dir_rfd)) {system(paste("rm -rf ",wth_dir_rfd,sep=""))}}
+    if (exists("wth_dir_irr")) {if (file.exists(wth_dir_irr)) {system(paste("rm -rf ",wth_dir_irr,sep=""))}}
     
     #write control file
     ff <- file(ctrl_fil,"w")
