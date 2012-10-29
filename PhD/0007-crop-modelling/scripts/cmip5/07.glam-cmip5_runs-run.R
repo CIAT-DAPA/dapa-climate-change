@@ -135,44 +135,44 @@ all_proc <- rbind(all_proc_his,all_proc_rcp)
 #4. when the run is failed just fill everything in as NA
 
 i <- 503881 # 1 125971 251941 377911 503881 #for hist
-#i <- 629851 # 755821 #for rcp
+#i <- 881791 # 629851 755821 881791 #for rcp
 
-#here get initial model configuration
-RUN_CFG <- get_cfg(i,all_proc)
+#some testing
+ids <- which(all_proc$LOC == 291 & all_proc$PARSET == 33 & all_proc$GCM == "bcc_csm1_1_ENS_r1i1p1")
+test_procs <- all_proc[ids,]
 
-#variable ENV_CFG
-ENV_CFG <- list()
-ENV_CFG$SRC.DIR <- src.dir
-ENV_CFG$BDIR <- glamDir
-ENV_CFG$CROP_NAME <- cropName
-ENV_CFG$VER <- ver
-ENV_CFG$MAXITER <- maxiter
-ENV_CFG$PLOT_ALL <- plot_all
-ENV_CFG$RUNS_NAME <- runs_name
-ENV_CFG$SCRATCH <- paste(scratch,"/",ENV_CFG$RUNS_NAME,sep="")
-ENV_CFG$USE_SCRATCH <- use_scratch
-ENV_CFG$CELLS <- cells
-ENV_CFG$IRR_DATA <- irrData
-ENV_CFG$OPT_METHOD <- "CH07"
-ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/runs/",ENV_CFG$RUNS_NAME,sep="")
-
-#if historical then run one wrapper else run the other
-if (RUN_CFG$PERIOD == "HIS") {
-  #call wraper to historical
-  system.time(glam_hist_run_wrapper(RUN_CFG))
-} else {
-  #wrapper to rcp
-  system.time(glam_rcp_run_wrapper(RUN_CFG))
+timeall <- c()
+for (i in ids) {
+  
+  #here get initial model configuration
+  RUN_CFG <- get_cfg(i,all_proc)
+  
+  #variable ENV_CFG
+  ENV_CFG <- list()
+  ENV_CFG$SRC.DIR <- src.dir
+  ENV_CFG$BDIR <- glamDir
+  ENV_CFG$CROP_NAME <- cropName
+  ENV_CFG$VER <- ver
+  ENV_CFG$MAXITER <- maxiter
+  ENV_CFG$PLOT_ALL <- plot_all
+  ENV_CFG$RUNS_NAME <- runs_name
+  ENV_CFG$SCRATCH <- paste(scratch,"/",ENV_CFG$RUNS_NAME,sep="")
+  ENV_CFG$USE_SCRATCH <- use_scratch
+  ENV_CFG$CELLS <- cells
+  ENV_CFG$IRR_DATA <- irrData
+  ENV_CFG$OPT_METHOD <- "CH07"
+  ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/runs/",ENV_CFG$RUNS_NAME,sep="")
+  
+  #if historical then run one wrapper else run the other
+  if (RUN_CFG$PERIOD == "HIS") {
+    #call wraper to historical
+    runtime <- system.time(glam_hist_run_wrapper(RUN_CFG))
+  } else {
+    #wrapper to rcp
+    runtime <- system.time(glam_rcp_run_wrapper(RUN_CFG))
+  }
+  timeall <- c(timeall,as.numeric(runtime)[3])
 }
-
-
-
-#elapsed
-#42.5
-#56.0
-#55.2
-#38.4
-
 
 
 
