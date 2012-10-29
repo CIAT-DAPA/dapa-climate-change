@@ -14,6 +14,7 @@ source(paste(src.dir,"/0008-CMIP5/scripts/CMIP5-functions.R",sep=""))
 source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/06.bc_rain-functions.R",sep=""))
 source(paste(src.dir,"/0007-crop-modelling/scripts/cmip5/01.make_wth-functions.R",sep=""))
 source(paste(src.dir,"/0007-crop-modelling/scripts/glam/glam-make_wth.R",sep=""))
+source(paste(src.dir,"/0007-crop-modelling/scripts/signals/climateSignals-functions.R",sep=""))
 
 #base and data directories
 #bDir <- "W:/eejarv/PhD-work/crop-modelling"
