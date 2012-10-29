@@ -2,6 +2,34 @@
 #UoL / CIAT / CCAFS
 #Oct 2012
 
+run_group_his_rcp <- function(j) {
+  this_loc <- groupingList$LOC[j]
+  this_pst <- groupingList$PARSET[j]
+  this_gcm <- paste(groupingList$GCM[j])
+  
+  ids <- which(all_proc$LOC == this_loc & all_proc$PARSET == this_pst & all_proc$GCM == this_gcm)
+  
+  cat("running",length(ids),"ids \n")
+  
+  #loop ids in this group
+  timeall <- c()
+  for (i in ids) {
+    #here get initial model configuration
+    RUN_CFG <- get_cfg(i,all_proc)
+    #if historical then run one wrapper else run the other
+    if (RUN_CFG$PERIOD == "HIS") {
+      #call wraper to historical
+      runtime <- system.time(glam_hist_run_wrapper(RUN_CFG))
+    } else {
+      #wrapper to rcp
+      runtime <- system.time(glam_rcp_run_wrapper(RUN_CFG))
+    }
+    timeall <- c(timeall,as.numeric(runtime)[3])
+  }
+  return(timeall)
+}
+
+
 
 #rcp wrapper
 glam_rcp_run_wrapper <- function(RUN_CFG) {

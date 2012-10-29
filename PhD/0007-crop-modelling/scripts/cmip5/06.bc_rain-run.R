@@ -118,15 +118,15 @@ system.time(sfSapply(as.vector(1:nrow(all_proc)),wrap_bc_wthmkr))
 sfStop()
 
 
-# #temporary processing in eljefe
-# for (j in 1:780) {
-#   wrap_bc_wthmkr(j)
-# }
-# 
-# #temporary processing local
-# for (j in 781:1561) {
-#   wrap_bc_wthmkr(j)
-# }
+#temporary processing in eljefe
+for (j in 1562:2340) {
+  wrap_bc_wthmkr(j)
+}
+
+#temporary processing local
+for (j in 781:1561) {
+  wrap_bc_wthmkr(j)
+}
 
 
 
