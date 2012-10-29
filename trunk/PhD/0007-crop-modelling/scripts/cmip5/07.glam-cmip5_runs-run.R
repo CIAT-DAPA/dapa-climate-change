@@ -134,7 +134,7 @@ all_proc <- rbind(all_proc_his,all_proc_rcp)
 #3. store outputs in a single R object
 #4. when the run is failed just fill everything in as NA
 
-i <- 503881 # 1 125971 251941 377911 503881
+i <- 1 # 1 125971 251941 377911 503881
 
 #here get initial model configuration
 RUN_CFG <- get_cfg(i,all_proc)
