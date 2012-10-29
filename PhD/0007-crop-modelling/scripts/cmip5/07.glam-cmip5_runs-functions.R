@@ -133,23 +133,52 @@ glam_rcp_run_wrapper <- function(RUN_CFG) {
           sdCount <- sdCount+1
         }
         
-        #here run the model. perhaps here loop the sowing dates
+        #here run the model. Loop the sowing dates
         sdCount <- sdCount-1
+        sd_data <- list()
         for (sdc in 1:sdCount) {
+          cat(paste("sowing date _r",sdc,".txt: ",sep=""))
+          
+          #which planting dates
           setup_rcp$SOW_FILE_RFD <- paste(osow_dir,"/rfd_r",sdc,".txt",sep="")
           setup_rcp$SOW_FILE_IRR <- paste(osow_dir,"/irr_r",sdc,".txt",sep="")
           
+          #run the model
           run_data <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup_rcp,
                                    iratio=ir_vls,subdir=paste("r",sdc,sep=""))
-          
+          sd_data[[sdc]] <- list()
+          sd_data[[sdc]]$DATA <- run_data$DATA
+          sd_data[[sdc]]$SOW_OFFSET <- sdList[sdc]
+          sd_data[[sdc]]$SOW_DATE_RFD <- sowDate_rfd
+          sd_data[[sdc]]$SOW_DATE_IRR <- sowDate_irr
         }
+        
+        run_data <- list()
+        run_data$RUNS <- sd_data
+        run_data$PARAMS <- params
+        run_data$SETUP <- setup_rcp
+        run_data$IRATIO <- ir_vls
+        run_data$YGP <- cal_ygp
+        
+        save(list=c("run_data"),file=saveFile)
+        
+        #here remove everything
+        setwd(setup_rcp$BDIR)
+        system(paste("rm -rf ",paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/",setup_rcp$SIM_NAME,sep="")))
+        
+        #delete folders of temporary data, if they exist
+        if (exists("osow_dir")) {if (file.exists(osow_dir)) {system(paste("rm -rf ",osow_dir,sep=""))}}
+        
+        #write control file
+        ff <- file(ctrl_fil,"w")
+        cat("Processed on",date(),"\n",file=ff)
+        close(ff)
       }
     } else {
       cat("baseline experiment for this run has not yet been run \n")
     }
-    
   }
-  
+  return(ctrl_fil)
 }
 
 
