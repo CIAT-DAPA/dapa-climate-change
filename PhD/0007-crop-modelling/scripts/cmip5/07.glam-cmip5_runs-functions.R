@@ -3,6 +3,30 @@
 #Oct 2012
 
 
+#rcp wrapper
+glam_rcp_run_wrapper <- function(RUN_CFG) {
+  #check the existence of the environment set up, before running
+  if (class(try(get("ENV_CFG"),silent=T)) == "try-error") {
+    stop("src.dir needs to be set")
+  }
+  
+  #source functions of interest
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-ygp_ipdate_wrapper.R",sep=""))
+  source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/07.glam-cmip5_runs-functions.R",sep=""))
+  
+  
+  
+}
+
+
 #historical wrapper
 glam_hist_run_wrapper <- function(RUN_CFG) {
   #check the existence of the environment set up, before running
@@ -247,6 +271,9 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
       cat(parname,":",optimal[[parname]],"\n")
       if (length(optimal[[parname]]) > 1) {optimal[[parname]] <- optimal[[parname]][round(length(optimal[[parname]])/2,0)]}
       
+      #update parameter file (YGP value
+      params[[where]][[parname]][,"Value"] <- optimal[[parname]]
+      
       #here grab the output of relevant runs
       if (length(optimal[[parname]]) > 0) {
         #keep only IRR and RFD for YGP=opt & YGP=1
@@ -308,6 +335,7 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     cat("Processed on",date(),"\n",file=ff)
     close(ff)
   }
+  return(ctrl_fil)
 }
 
 
