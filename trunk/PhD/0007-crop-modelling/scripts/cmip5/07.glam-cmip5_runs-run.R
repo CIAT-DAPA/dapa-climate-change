@@ -134,7 +134,7 @@ all_proc <- rbind(all_proc_his,all_proc_rcp)
 #3. store outputs in a single R object
 #4. when the run is failed just fill everything in as NA
 
-i <- 1 # 1 125971 251941 377911 503881
+i <- 503881 # 1 125971 251941 377911 503881
 
 #here get initial model configuration
 RUN_CFG <- get_cfg(i,all_proc)
@@ -158,6 +158,7 @@ ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME)
 #if historical then run one wrapper else run the other
 if (RUN_CFG$PERIOD == "HIS") {
   #call wraper to historical
+  glam_hist_run_wrapper(RUN_CFG)
 } else {
   #wrapper to rcp
 }
