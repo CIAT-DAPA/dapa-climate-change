@@ -134,12 +134,14 @@ glam_rcp_run_wrapper <- function(RUN_CFG) {
         }
         
         #here run the model. perhaps here loop the sowing dates
-        for (sdc in 1:(sdCount-1)) {
+        sdCount <- sdCount-1
+        for (sdc in 1:sdCount) {
           setup_rcp$SOW_FILE_RFD <- paste(osow_dir,"/rfd_r",sdc,".txt",sep="")
           setup_rcp$SOW_FILE_IRR <- paste(osow_dir,"/irr_r",sdc,".txt",sep="")
           
-          loc_dir <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup,
-                                  iratio=ir_vls,subdir=paste("r",sdc,sep=""))
+          run_data <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup_rcp,
+                                   iratio=ir_vls,subdir=paste("r",sdc,sep=""))
+          
         }
       }
     } else {
@@ -961,7 +963,7 @@ GLAM_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
     }
     
     #output folder
-    run_dir <- create_dirs(paste(optDir,"/IRR_run-",subdir,sep=""))
+    run_dir <- create_dirs(paste(cal_dir,"/IRR_run-",subdir,sep=""))
     
     #write the model params
     opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run-irr.txt",sep="")
