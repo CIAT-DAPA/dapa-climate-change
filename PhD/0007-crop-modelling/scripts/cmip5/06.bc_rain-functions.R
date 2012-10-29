@@ -47,7 +47,7 @@ make_bc_wth_wrapper <- function(i) {
     for (cvn in c("rsds","tasmax","tasmin")) {
       codir <- paste(oDir_his_bc,"/",cvn,sep="")
       if (!file.exists(codir)) {dir.create(codir)}
-      ff <- file.copy(from=paste(inDir_his,"/tasmax/cell-",loc,".csv",sep=""),to=codir)
+      ff <- file.copy(from=paste(inDir_his,"/",cvn,"/cell-",loc,".csv",sep=""),to=codir)
     }
     
     #create the daily data files for historical
@@ -78,7 +78,7 @@ make_bc_wth_wrapper <- function(i) {
     for (cvn in c("rsds","tasmax","tasmin")) {
       codir <- paste(oDir_rcp_bc,"/",cvn,sep="")
       if (!file.exists(codir)) {dir.create(codir)}
-      ff <- file.copy(from=paste(inDir_rcp,"/tasmax/cell-",loc,".csv",sep=""),to=codir)
+      ff <- file.copy(from=paste(inDir_rcp,"/",cvn,"/cell-",loc,".csv",sep=""),to=codir)
     }
     
     outfol_rcp <- write_cmip5_loc(all_locs=cells,gridcell=loc,scen=sce,
