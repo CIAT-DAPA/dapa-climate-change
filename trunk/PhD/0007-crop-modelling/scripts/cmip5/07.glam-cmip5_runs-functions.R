@@ -10,6 +10,9 @@ run_group_his_rcp <- function(j) {
   ids <- which(all_proc$LOC == this_loc & all_proc$PARSET == this_pst & all_proc$GCM == this_gcm)
   
   cat("running",length(ids),"ids \n")
+  cat("LOC:",this_loc,"\n")
+  cat("PARSET:",this_pst,"\n")
+  cat("GCM:",this_gcm,"\n")
   
   #loop ids in this group
   timeall <- c()

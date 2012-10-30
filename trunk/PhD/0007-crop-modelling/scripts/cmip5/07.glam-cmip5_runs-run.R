@@ -67,7 +67,7 @@ expList_rcp <- c("rcp_allin","rcp_bcrain")
 
 #Factor 5: planting date (30 days around baseline value)
 #only relevant for rcp experiments
-sdList <- c(-5:5)
+sdList <- c(-7:7)
 
 #Factor 6: values of parameters for increased CO2
 #following Challinor and Wheeler (2008a,b), changes in the following parameters
@@ -167,8 +167,9 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
 #total 51395760 sec = 856596 min = 14276.6 hr = 594.86 days
 #in 32 processors, total = 18 days
 
-tll1 <- run_group_his_rcp(1)
-
+for (k in 101:195) {
+  tll1 <- run_group_his_rcp(k)
+}
 
 
 
