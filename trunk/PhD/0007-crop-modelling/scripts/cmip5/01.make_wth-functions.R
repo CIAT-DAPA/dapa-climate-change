@@ -76,7 +76,7 @@ write_cmip5_loc <- function(all_locs,gridcell,scen,year_i,year_f,wleap,out_wth_d
   #open the weather files for each variables and select corresponding years
   pr_data <- read.csv(paste(fut_wth_dir,"/pr/cell-",gridcell,".csv",sep=""))
   pr_data <- pr_data[which(pr_data$YEAR >= (year_i-1) & pr_data$YEAR <= year_f),]
-  pr_mis <- as.numeric(apply(pr_data,1,check_missing,wleap,100000))
+  pr_mis <- as.numeric(apply(pr_data,1,check_missing,wleap,1000000))
   pr_datac <- as.data.frame(t(apply(pr_data,1,correct_neg,0,wleap,"zero")))
   pr_datac <- cbind(YEAR=(year_i-1):year_f,pr_datac)
   
