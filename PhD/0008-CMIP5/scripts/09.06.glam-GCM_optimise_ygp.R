@@ -46,7 +46,7 @@ source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
 source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
 source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
 source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
-source(paste(src.dir,"/signals//climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/09.00.glam-wrappers.R",sep=""))
 
