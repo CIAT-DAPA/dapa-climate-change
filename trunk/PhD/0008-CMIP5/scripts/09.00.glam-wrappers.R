@@ -1044,6 +1044,8 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
       
       cat("\nprocessing cell",setup$CELL,"\n")
       
+      if (setup$USE_SCRATCH) {setup$SCRATCH <- paste(setup$SCRATCH,"/",gcm,"_",ens,sep="")}
+      
       nw_irr <- length(list.files(setup$WTH_DIR_IRR,pattern="\\.wth"))
       nw_rfd <- length(list.files(setup$WTH_DIR_RFD,pattern="\\.wth"))
       
