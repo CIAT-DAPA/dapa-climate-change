@@ -1023,6 +1023,8 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
       #files that were generated
       setup <- list()
       setup$BDIR <- bDir
+      setup$SCRATCH <- "/scratch/eejarv/cmip5_paper"
+      setup$USE_SCRATCH <- T
       setup$CELL <- cells$CELL[ci]
       setup$METHOD <- "lin"
       setup$CROPNAME <- "gnut"
@@ -1038,6 +1040,7 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
       setup$SOL_GRID <- paste(input_dir,"/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
       setup$SIM_NAME <- paste("calib_",setup$CELL,sep="")
       setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
+      RUN_setup$OPT_METHOD <- "CH07"
       
       cat("\nprocessing cell",setup$CELL,"\n")
       
@@ -1086,18 +1089,18 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
           save(list=c("optimised","optimal"),file=paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/iter-",tolower(parname),"/output.RData",sep=""))
           
           #now make the plot
-          plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
-          if (!file.exists(plotsDir)) {dir.create(plotsDir)}
+          #plotsDir <- paste(setup$CAL_DIR,"/",setup$SIM_NAME,"/plots",sep="")
+          #if (!file.exists(plotsDir)) {dir.create(plotsDir)}
           
-          tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
-               width=1250,pointsize=8)
-          par(mar=c(3,3,2,1))
-          plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
-               main=paste(parname," :: ",optimal[[parname]],sep=""),
-               xlab="Parameter value",ylab="RMSE (kg/ha)")
-          grid(nx=10,ny=10)
-          abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
-          dev.off()
+          #tiff(paste(plotsDir,"/",tolower(parname),".tif",sep=""),res=300,compression="lzw",height=1000,
+          #     width=1250,pointsize=8)
+          #par(mar=c(3,3,2,1))
+          #plot(optimised[[parname]]$VALUE,optimised[[parname]]$RMSE,ty="l",
+          #     main=paste(parname," :: ",optimal[[parname]],sep=""),
+          #     xlab="Parameter value",ylab="RMSE (kg/ha)")
+          #grid(nx=10,ny=10)
+          #abline(v=optimal[[parname]],col="red",lty=2,lwd=0.8)
+          #dev.off()
         }
       } else {
         warning("incomplete set of weather files for ",gcm," - ",ens,"\n")

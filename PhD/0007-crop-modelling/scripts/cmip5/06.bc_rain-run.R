@@ -120,7 +120,7 @@ sfStop()
 
 
 #temporary processing in eljefe
-for (j in 1:6630) {
+for (j in 5656:5850) {
   wrap_bc_wthmkr(j)
 }
 
