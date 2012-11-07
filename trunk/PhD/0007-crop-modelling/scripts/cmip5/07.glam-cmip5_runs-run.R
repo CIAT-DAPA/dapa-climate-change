@@ -168,9 +168,9 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
 #in 32 processors, total = 18 days
 
 #eljefe01 is running from 1561 to 1950
-#eljefe02 is running from 1951 to 2340
+#eljefe02 is running from 2341 to 2730
 
-for (k in 1951:2340) {
+for (k in 2341:2730) {
   tll1 <- run_group_his_rcp(k)
 }
 
