@@ -40,14 +40,15 @@ if (class(try(get("cmipDir"),silent=T)) == "try-error") {
 #running and optimising GLAM
 
 #source all needed functions
-source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
-source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
-source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-source(paste(src.dir,"/glam-make_wth.R",sep=""))
-source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
-source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+source(paste(src.dir,"/signals//climateSignals-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+source(paste(src.dir2,"/scripts/09.00.glam-wrappers.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
@@ -96,7 +97,7 @@ if (nrow(procList) != 0) {row.names(procList) <- 1:nrow(procList)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
-if (ncpus>7) {ncpus <- 7}
+if (ncpus>10) {ncpus <- 10}
 
 #here do the parallelisation
 #load library and create cluster

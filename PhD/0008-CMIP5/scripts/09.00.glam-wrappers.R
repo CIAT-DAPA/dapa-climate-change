@@ -991,13 +991,13 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
 wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
   
   #source all needed functions
-  source(paste(src.dir,"/glam-parFile-functions.R",sep=""))
-  source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-  source(paste(src.dir,"/glam-runfiles-functions.R",sep=""))
-  source(paste(src.dir,"/glam-soil-functions.R",sep=""))
-  source(paste(src.dir,"/glam-make_wth.R",sep=""))
-  source(paste(src.dir,"/glam-optimise-functions.R",sep=""))
-  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/signals//climateSignals-functions.R",sep=""))
   source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
   
   #get gcm and ensemble member names
