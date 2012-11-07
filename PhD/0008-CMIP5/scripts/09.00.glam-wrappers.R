@@ -1040,7 +1040,7 @@ wrapper_GCM_glam_optimise_ygp <- function(this_proc) {
       setup$SOL_GRID <- paste(input_dir,"/ascii/soil/soilcodes_",setup$CELL,".txt",sep="")
       setup$SIM_NAME <- paste("calib_",setup$CELL,sep="")
       setup$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
-      RUN_setup$OPT_METHOD <- "CH07"
+      setup$OPT_METHOD <- "CH07"
       
       cat("\nprocessing cell",setup$CELL,"\n")
       
