@@ -167,10 +167,10 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
 #total 51395760 sec = 856596 min = 14276.6 hr = 594.86 days
 #in 32 processors, total = 18 days
 
-#eljefe01 is running from 1561 to 1950
+#eljefe01 is running from 2731 to 3120
 #eljefe02 is running from 2341 to 2730
 
-for (k in 2341:2730) {
+for (k in 2731:3120) {
   tll1 <- run_group_his_rcp(k)
 }
 

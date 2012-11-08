@@ -802,7 +802,7 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
   
   #sourcing functions
   source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
-  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
   
   #get gcm and ensemble member names
   gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
