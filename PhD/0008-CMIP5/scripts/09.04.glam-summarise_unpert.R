@@ -133,6 +133,9 @@ if (!file.exists(paste(cal_dir,"/calib_all_cells.csv",sep=""))) {
       p_val <- NA
     }
     
+    #5. MSE1
+    mse1 <- (mean(y_pred$OBS,na.rm=T)-mean(y_pred$PRED,na.rm=T))^2 + (sd(y_pred$OBS,na.rm=T)-sd(y_pred$PRED,na.rm=T))^2
+    
     #5. RMSE
     rmse <- sqrt(sum((y_pred$OBS-y_pred$PRED)^2) / nrow(y_pred))
     
@@ -155,7 +158,7 @@ if (!file.exists(paste(cal_dir,"/calib_all_cells.csv",sep=""))) {
     #output data frame
     out_row <- data.frame(CELL=cell,X=cells$X[which(cells$CELL == cell)],
                           Y=cells$Y[which(cells$CELL == cell)],YGP=ygp,Y_OBS=yo_mean,YSD_OBS=yo_stdv,
-                          Y_PRED=yp_mean,YSD_PRED=yp_stdv,CCOEF=r_val,PVAL=p_val,RMSE=rmse,P_RMSE=prmse,
+                          Y_PRED=yp_mean,YSD_PRED=yp_stdv,CCOEF=r_val,PVAL=p_val,MSE1=mse1,RMSE=rmse,P_RMSE=prmse,
                           SOW_DATE=sow_date,N=n)
     
     if (cell == cells$CELL[1]) {

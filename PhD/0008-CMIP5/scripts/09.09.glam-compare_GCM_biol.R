@@ -44,14 +44,16 @@ ys_obs <- raster(paste(unp_rundir,"/calib_results_spat/ysd_obs.asc",sep=""))
 ym_unp <- raster(paste(unp_rundir,"/calib_results_spat/y_pred.asc",sep=""))
 ys_unp <- raster(paste(unp_rundir,"/calib_results_spat/ysd_pred.asc",sep=""))
 rmse_unp <- raster(paste(unp_rundir,"/calib_results_spat/rmse.asc",sep=""))
+mse1_unp <- raster(paste(unp_rundir,"/calib_results_spat/mse1.asc",sep=""))
 
 #deviation (ratio of simulated to observed yield)
 rt_ym <- ym_unp/ym_obs
 rt_ys <- ys_unp/ys_obs
 
 df_all <- data.frame(RUN="CTRL",P="CTRL",RMSE=rmse_unp[which(!is.na(rmse_unp[]))],
-                       YM_NORM=rt_ym[which(!is.na(rt_ym[]))],
-                       YS_NORM=rt_ys[which(!is.na(rt_ys[]))])
+                     MSE1=mse1_unp[which(!is.na(mse1_unp[]))],
+                     YM_NORM=rt_ym[which(!is.na(rt_ym[]))],
+                     YS_NORM=rt_ys[which(!is.na(rt_ys[]))])
 
 #GCM data loading
 gcmList <- list.files(gcm_rundir)
@@ -64,11 +66,13 @@ for (gcm in gcmList) {
   ym_gcm <- raster(paste(gcm_rundir,"/",gcm,"/calib_results_spat/y_pred.asc",sep=""))
   ys_gcm <- raster(paste(gcm_rundir,"/",gcm,"/calib_results_spat/ysd_pred.asc",sep=""))
   rmse_gcm <- raster(paste(gcm_rundir,"/",gcm,"/calib_results_spat/rmse.asc",sep=""))
+  mse1_gcm <- raster(paste(gcm_rundir,"/",gcm,"/calib_results_spat/mse1.asc",sep=""))
   
   rt_ym <- ym_gcm/ym_obs
   rt_ys <- ys_gcm/ys_obs
   
   df_all <- rbind(df_all,data.frame(RUN="CLIM",P=gcm,RMSE=rmse_gcm[which(!is.na(rmse_gcm[]))],
+                                    MSE1=mse1_gcm[which(!is.na(mse1_gcm[]))],
                                     YM_NORM=rt_ym[which(!is.na(rt_ym[]))],
                                     YS_NORM=rt_ys[which(!is.na(rt_ys[]))]))
 }
@@ -84,11 +88,13 @@ for (bio in bioList) {
   ym_bio <- raster(paste(bio_rundir,"/",bio,"/calib_results_spat/y_pred.asc",sep=""))
   ys_bio <- raster(paste(bio_rundir,"/",bio,"/calib_results_spat/ysd_pred.asc",sep=""))
   rmse_bio <- raster(paste(bio_rundir,"/",bio,"/calib_results_spat/rmse.asc",sep=""))
+  mse1_bio <- raster(paste(bio_rundir,"/",bio,"/calib_results_spat/mse1.asc",sep=""))
   
   rt_ym <- ym_bio/ym_obs
   rt_ys <- ys_bio/ys_obs
   
   df_all <- rbind(df_all,data.frame(RUN="CROP",P=bio,RMSE=rmse_bio[which(!is.na(rmse_bio[]))],
+                                    MSE1=mse1_bio[which(!is.na(mse1_bio[]))],
                                     YM_NORM=rt_ym[which(!is.na(rt_ym[]))],
                                     YS_NORM=rt_ys[which(!is.na(rt_ys[]))]))
 }
