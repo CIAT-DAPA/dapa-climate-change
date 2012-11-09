@@ -19,7 +19,7 @@ cmipDir <- "/nfs/a102/eejarv/CMIP5"
 #sourcing functions
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 source(paste(src.dir2,"/scripts/09.00.glam-wrappers.R",sep=""))
-source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
 
 #input directories and model
 cropName <- "gnut"
@@ -38,7 +38,7 @@ procList <- list.files(runs_odir,pattern="p-")
 cells <- read.csv(paste(input_dir,"/calib-cells-selection.csv",sep=""))
 
 #get the mask needed (to which data will be appended)
-ncFile <- paste(bDir,"/../climate-data/IND-TropMet/0_input_data/india_data.nc",sep="")
+ncFile <- paste(bDir,"/../climate-data/IND-TropMet_day/0_input_data/india_data.nc",sep="")
 ydDir <- paste(bDir,"/climate-signals-yield/GNUT/raster/gridded",sep="")
 
 metFile <- raster(ncFile,band=0)
