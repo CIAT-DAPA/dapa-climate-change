@@ -834,6 +834,7 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
           ygp <- NA
           r_val <- NA
           p_val <- NA
+          mse1 <- NA
           rmse <- NA
           prmse <- NA
           yp_mean <- NA
@@ -855,13 +856,27 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
           cat("load rainfed yields\n")
           data_dir <- paste(run_dir,"/iter-ygp/ygp/RFD_run-",opt_pos,"_",ygp,"/output",sep="")
           outfile <- list.files(data_dir,pattern="\\.out")
-          pred <- read.table(paste(data_dir,"/",outfile,sep=""),header=F,sep="\t")
-          names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                           "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                           "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                           "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                           "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
-          y_rfd <- pred$YIELD
+          if (file.exists(data_dir)) {
+            pred <- read.table(paste(data_dir,"/",outfile,sep=""),header=F,sep="\t")
+            names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                             "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                             "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                             "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                             "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT")
+            y_rfd <- pred$YIELD
+          } else {
+            y_rfd <- rep(NA,10)
+            ygp <- NA
+            r_val <- NA
+            p_val <- NA
+            mse1 <- NA
+            rmse <- NA
+            prmse <- NA
+            yp_mean <- NA
+            yp_stdv <- NA
+            yo_mean <- NA
+            yo_stdv <- NA
+          }
           
           #load irrigated yields
           cat("load irrigated yields\n")
@@ -879,52 +894,57 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
             y_irr <- rep(0,times=length(y_rfd))
           }
           
-          #get irrigation ratio
-          #extract irrigation rates
-          cat("get irrigation rates\n")
-          ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==cell)],Y=cells$Y[which(cells$CELL==cell)]))
-          ir_vls <- as.numeric(ir_vls)
-          ir_vls[which(ir_vls > 1)] <- 1
-          
-          #put all this into a data.frame
-          cat("calculate 'true' predicted yield\n")
-          y_pred <- data.frame(YEAR=1966:1993,RFD=y_rfd,IRR=y_irr,IRATIO=ir_vls)
-          y_pred$PRED <- y_pred$RFD*(1-y_pred$IRATIO) + y_pred$IRR*y_pred$IRATIO
-          
-          #load observed yields
-          cat("load observed yields\n")
-          yfil <- paste(cDir,"/inputs/ascii/obs/yield_",cell,"_",method,".txt",sep="")
-          y_o <- read.fortran(yfil,format=c("A12","F8"),n=28)
-          y_pred$OBS <- y_o$V2
-          
-          #get anything -99 to NA
-          y_pred$OBS[which(y_pred$OBS < -90)] <- NA
-          
-          #remove all lines that are NA in OBS and calculate 'n' (number of observations)
-          y_pred <- y_pred[which(!is.na(y_pred$OBS)),]
-          n <- nrow(y_pred)
-          
-          #4. R pearson and pvalue
-          if (n >= 2) {
-            cat("calculate final metrics\n")
-            r_val <- cor.test(y_pred$PRED,y_pred$OBS)$estimate
-            p_val <- cor.test(y_pred$PRED,y_pred$OBS)$p.value
-          } else {
-            r_val <- NA
-            p_val <- NA
+          if (!is.na(y_rfd[1])) {
+            #get irrigation ratio
+            #extract irrigation rates
+            cat("get irrigation rates\n")
+            ir_vls <- extract(ir_stk,cbind(X=cells$X[which(cells$CELL==cell)],Y=cells$Y[which(cells$CELL==cell)]))
+            ir_vls <- as.numeric(ir_vls)
+            ir_vls[which(ir_vls > 1)] <- 1
+            
+            #put all this into a data.frame
+            cat("calculate 'true' predicted yield\n")
+            y_pred <- data.frame(YEAR=1966:1993,RFD=y_rfd,IRR=y_irr,IRATIO=ir_vls)
+            y_pred$PRED <- y_pred$RFD*(1-y_pred$IRATIO) + y_pred$IRR*y_pred$IRATIO
+            
+            #load observed yields
+            cat("load observed yields\n")
+            yfil <- paste(cDir,"/inputs/ascii/obs/yield_",cell,"_",method,".txt",sep="")
+            y_o <- read.fortran(yfil,format=c("A12","F8"),n=28)
+            y_pred$OBS <- y_o$V2
+            
+            #get anything -99 to NA
+            y_pred$OBS[which(y_pred$OBS < -90)] <- NA
+            
+            #remove all lines that are NA in OBS and calculate 'n' (number of observations)
+            y_pred <- y_pred[which(!is.na(y_pred$OBS)),]
+            n <- nrow(y_pred)
+            
+            #4. R pearson and pvalue
+            if (n >= 2) {
+              cat("calculate final metrics\n")
+              r_val <- cor.test(y_pred$PRED,y_pred$OBS)$estimate
+              p_val <- cor.test(y_pred$PRED,y_pred$OBS)$p.value
+            } else {
+              r_val <- NA
+              p_val <- NA
+            }
+            
+            #5. MSE1
+            mse1 <- (mean(y_pred$OBS,na.rm=T)-mean(y_pred$PRED,na.rm=T))^2 + (sd(y_pred$OBS,na.rm=T)-sd(y_pred$PRED,na.rm=T))^2
+            
+            #5. RMSE
+            rmse <- sqrt(sum((y_pred$OBS-y_pred$PRED)^2) / nrow(y_pred))
+            
+            #6. RMSE / mean obs. yield * 100
+            prmse <- rmse/mean(y_pred$OBS)*100
+            
+            #mean and standard deviation of predicted and observed yield
+            yp_mean <- mean(y_pred$PRED)
+            yp_stdv <- sd(y_pred$PRED)
+            yo_mean <- mean(y_pred$OBS)
+            yo_stdv <- sd(y_pred$OBS)
           }
-          
-          #5. RMSE
-          rmse <- sqrt(sum((y_pred$OBS-y_pred$PRED)^2) / nrow(y_pred))
-          
-          #6. RMSE / mean obs. yield * 100
-          prmse <- rmse/mean(y_pred$OBS)*100
-          
-          #mean and standard deviation of predicted and observed yield
-          yp_mean <- mean(y_pred$PRED)
-          yp_stdv <- sd(y_pred$PRED)
-          yo_mean <- mean(y_pred$OBS)
-          yo_stdv <- sd(y_pred$OBS)
           
           #remove optimal and optimised
           rm(optimal); rm(optimised)
@@ -933,8 +953,8 @@ wrapper_summarise_GCM_cal <- function(this_proc) {
         #output data frame
         out_row <- data.frame(CELL=cell,X=cells$X[which(cells$CELL == cell)],
                               Y=cells$Y[which(cells$CELL == cell)],YGP=ygp,Y_OBS=yo_mean,YSD_OBS=yo_stdv,
-                              Y_PRED=yp_mean,YSD_PRED=yp_stdv,CCOEF=r_val,PVAL=p_val,RMSE=rmse,P_RMSE=prmse,
-                              SOW_DATE=NA,N=n)
+                              Y_PRED=yp_mean,YSD_PRED=yp_stdv,CCOEF=r_val,PVAL=p_val,MSE1=mse1,RMSE=rmse,
+                              P_RMSE=prmse,SOW_DATE=NA,N=n)
         
         if (cell == cells$CELL[1]) {
           out_all <- out_row
