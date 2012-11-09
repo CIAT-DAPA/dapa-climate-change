@@ -9,7 +9,7 @@ wrapper_summarise_biol <- function(this_proc) {
   
   #sourcing functions
   source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
-  source(paste(src.dir,"/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
   
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   cat("process started for",procList[this_proc],"\n")
@@ -37,6 +37,7 @@ wrapper_summarise_biol <- function(this_proc) {
         if (!file.exists(run_dir)) {
           r_val <- NA
           p_val <- NA
+          mse1 <- NA
           rmse <- NA
           prmse <- NA
           yp_mean <- NA
@@ -108,6 +109,9 @@ wrapper_summarise_biol <- function(this_proc) {
             p_val <- NA
           }
           
+          #5. MSE1
+          mse1 <- (mean(y_pred$OBS,na.rm=T)-mean(y_pred$PRED,na.rm=T))^2 + (sd(y_pred$OBS,na.rm=T)-sd(y_pred$PRED,na.rm=T))^2
+                    
           #5. RMSE
           rmse <- sqrt(sum((y_pred$OBS-y_pred$PRED)^2) / nrow(y_pred))
           
@@ -127,8 +131,8 @@ wrapper_summarise_biol <- function(this_proc) {
         #output data frame
         out_row <- data.frame(CELL=cell,X=cells$X[which(cells$CELL == cell)],
                               Y=cells$Y[which(cells$CELL == cell)],YGP=NA,Y_OBS=yo_mean,YSD_OBS=yo_stdv,
-                              Y_PRED=yp_mean,YSD_PRED=yp_stdv,CCOEF=r_val,PVAL=p_val,RMSE=rmse,P_RMSE=prmse,
-                              SOW_DATE=NA,N=n)
+                              Y_PRED=yp_mean,YSD_PRED=yp_stdv,CCOEF=r_val,PVAL=p_val,MSE1=mse1,RMSE=rmse,
+                              P_RMSE=prmse,SOW_DATE=NA,N=n)
         
         if (cell == cells$CELL[1]) {
           out_all <- out_row
