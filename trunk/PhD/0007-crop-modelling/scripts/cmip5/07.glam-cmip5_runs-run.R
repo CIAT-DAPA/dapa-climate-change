@@ -168,12 +168,64 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
 #in 32 processors, total = 18 days
 
 #eljefe01 is running from 2731 to 3120
-#eljefe02 is running from 2341 to 2730
+#eljefe02 is running from 3120 to 12870
 
-for (k in 2731:3120) {
-  tll1 <- run_group_his_rcp(k)
-}
+#for (k in 3121:12870) {
+#  tll1 <- run_group_his_rcp(k)
+#}
 
+#number of cpus to use
+if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("cropName")
+sfExport("ver")
+sfExport("runs_name")
+sfExport("maxiter")
+sfExport("plot_all")
+sfExport("scratch")
+sfExport("use_scratch")
+sfExport("bDir")
+sfExport("glamDir")
+sfExport("cropDir")
+sfExport("glamInDir")
+sfExport("ascDir")
+sfExport("sowDir")
+sfExport("wthDir_his_rw")
+sfExport("wthDir_rcp_rw")
+sfExport("wthDir_his_bc")
+sfExport("wthDir_rcp_bc")
+sfExport("cells")
+sfExport("irrData")
+sfExport("gcmList_his")
+sfExport("gcmList_rcp")
+sfExport("gcmList")
+sfExport("parsetList")
+sfExport("expList_his")
+sfExport("expList_rcp")
+sfExport("sdList")
+sfExport("CO2Exp")
+sfExport("CO2ExpList")
+sfExport("all_proc_his")
+sfExport("all_proc_rcp")
+sfExport("all_proc")
+sfExport("ENV_CFG")
+sfExport("groupingList")
+
+#run the bias correction function in parallel
+system.time(sfSapply(as.vector(1:nrow(all_proc)),wrap_bc_wthmkr))
+
+#run the wth file generation function in parallel
+#system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
+
+#stop the cluster
+sfStop()
 
 
 
