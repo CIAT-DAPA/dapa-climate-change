@@ -106,17 +106,39 @@ if (!file.exists(out_sum)) {dir.create(out_sum)}
 
 #write the previously generated tables
 write.csv(df_all,paste(out_sum,"/all_unp_gcm_bio.csv",sep=""),quote=T,row.names=F)
+#df_all <- read.csv(paste(out_sum,"/all_unp_gcm_bio.csv",sep=""))
 
 #calculate medians of all climate models and parameter perturbations 
+df_all$MSE1 <- sqrt(df_all$MSE1)
 ctl <- subset(df_all,RUN=="CTRL")
 gcm <- subset(df_all,RUN=="CLIM")
 bio <- subset(df_all,RUN=="CROP")
 
 fld <- "RMSE"
-tiff(paste(out_sum,"/Fig3a.tif",sep=""),res=300,pointsize=12,
+tiff(paste(out_sum,"/Fig3a1.tif",sep=""),res=300,pointsize=12,
      units="px",compression="lzw",height=1500,width=1500)
 par(mar=c(4,5,1,1))
 boxplot(df_all[,fld] ~ df_all$RUN,ylab="RMSE (kg/ha)",pch=NA,
+        cex=0.75,las=2,ylim=c(0,1200),col="grey 80",notch=F,font.lab=21,font.axis=21)
+for (gcm_ens in unique(gcm$P)) {
+  this_data <- gcm[which(gcm$P == paste(gcm_ens)),fld]
+  points(2,mean(this_data,na.rm=T),pch=15,col="red",cex=0.75)
+  cat(paste(gcm_ens),round(mean(this_data,na.rm=T),2),"\n")
+}
+
+for (bio_run in unique(bio$P)) {
+  this_data <- bio[which(bio$P == paste(bio_run)),fld]
+  points(3,mean(this_data,na.rm=T),pch=15,col="red",cex=0.75)
+  cat(paste(bio_run),round(mean(this_data,na.rm=T),2),"\n")
+}
+grid()
+dev.off()
+
+fld <- "MSE1"
+tiff(paste(out_sum,"/Fig3a2.tif",sep=""),res=300,pointsize=12,
+     units="px",compression="lzw",height=1500,width=1500)
+par(mar=c(4,5,1,1))
+boxplot(df_all[,fld] ~ df_all$RUN,ylab="RMSE with r=1 (kg/ha)",pch=NA,
         cex=0.75,las=2,ylim=c(0,1200),col="grey 80",notch=F,font.lab=21,font.axis=21)
 for (gcm_ens in unique(gcm$P)) {
   this_data <- gcm[which(gcm$P == paste(gcm_ens)),fld]
