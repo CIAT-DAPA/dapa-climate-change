@@ -3,6 +3,18 @@
 #Oct 2012
 
 run_group_his_rcp <- function(j) {
+  #source functions of interest
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-ygp_ipdate_wrapper.R",sep=""))
+  source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/07.glam-cmip5_runs-functions.R",sep=""))
+  
   this_loc <- groupingList$LOC[j]
   this_pst <- groupingList$PARSET[j]
   this_gcm <- paste(groupingList$GCM[j])
