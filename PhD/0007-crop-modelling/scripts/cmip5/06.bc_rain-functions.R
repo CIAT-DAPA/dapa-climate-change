@@ -228,8 +228,9 @@ loci_correct <- function(his_data,loci_mets) {
     s <- loci_mets$S[which(loci_mets$MTH==mth)]
     wdt_obs <- loci_mets$WDT_OBS[which(loci_mets$MTH==mth)]
     wdt_mod <- loci_mets$WDT_MOD[which(loci_mets$MTH==mth)]
+    nwd_obs <- loci_mets$NWD_OBS[which(loci_mets$MTH==mth)]
     
-    his_data[[paste("MTH.",mth,sep="")]]$VALUE_BC <- sapply(his_data[[paste("MTH.",mth,sep="")]]$VALUE,FUN=function(x) {y<-max(c(0,s*(x-wdt_mod)+wdt_obs));return(y)})
+    his_data[[paste("MTH.",mth,sep="")]]$VALUE_BC <- sapply(his_data[[paste("MTH.",mth,sep="")]]$VALUE,FUN=function(x) {y<-max(c(0,s*(x-wdt_mod)+wdt_obs));if (nwd_obs == 0) {y<-0}; return(y)})
   }
   return(his_data)
 }
