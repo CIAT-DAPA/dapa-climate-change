@@ -11,4 +11,4 @@ G_END=$2
 
 #cd ~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/cmip5/
 rm ~/workspace/run.Rout
-R CMD BATCH --slave --no-save "--args g_ini=$G_INI g_end=$G_END" 07.glam-cmip5_runs-run_ARC1.R ~/workspace/run.Rout
+R CMD BATCH --slave --no-save "--args g_ini=$G_INI g_end=$G_END" 07.glam-cmip5_runs-run_ARC1.R ~/workspace/run_${G_INI}_${G_END}.Rout
