@@ -126,6 +126,10 @@ load(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
 #send jobs of 90 groups
 #j1: qsub run.sh 71371 71470
 #j2: qsub run.sh 71471 71560
+#j3: qsub run.sh 71561 71650
+#j4: qsub run.sh 71651 71740
+#j5: qsub run.sh
+#j6: qsub run.sh
 
 #send jobs of 1 processor and 24 hours
 
