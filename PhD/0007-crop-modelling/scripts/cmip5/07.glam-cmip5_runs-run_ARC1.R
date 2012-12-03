@@ -119,8 +119,15 @@ load(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
 #model runs
 ##########################################################
 #eljefe02 is running from 51871 to 71370
-#first test with 71371 to 71375
-#second test with 71376 to 71377
+#first test with 71371 to 71375 -> succeeded
+#second test with 71376 to 71377 -> succeeded
+#first test of qsub with 71378 71380 -> succeeded in 39min (this is 3)
+
+#send jobs of 90 groups
+#j1: qsub run.sh 71371 71470
+#j2: qsub run.sh 71471 71560
+
+#send jobs of 1 processor and 24 hours
 
 for (k in g_ini:g_end) {
  tll1 <- run_group_his_rcp(k)
