@@ -120,6 +120,7 @@ load(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
 ##########################################################
 #eljefe02 is running from 51871 to 71370
 #first test with 71371 to 71375
+#second test with 71376 to 71377
 
 for (k in g_ini:g_end) {
  tll1 <- run_group_his_rcp(k)
