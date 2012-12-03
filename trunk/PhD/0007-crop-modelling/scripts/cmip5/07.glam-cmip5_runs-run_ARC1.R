@@ -96,9 +96,6 @@ CO2Exp <- data.frame(EXP_NAME=c("CO2_p1","CO2_p2","CO2_p3","CO2_p4"),
                      P_TRANS_MAX=c(0.9377,0.9377,0.9377,0.9377))
 CO2ExpList <- CO2Exp$EXP_NAME
 
-#load analysis objects
-load(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
-
 #variable ENV_CFG
 ENV_CFG <- list()
 ENV_CFG$SRC.DIR <- src.dir
@@ -114,6 +111,9 @@ ENV_CFG$CELLS <- cells
 ENV_CFG$IRR_DATA <- irrData
 ENV_CFG$OPT_METHOD <- "CH07"
 ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/runs/",ENV_CFG$RUNS_NAME,sep="")
+
+#load analysis objects
+load(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
 
 ##########################################################
 #model runs
