@@ -48,7 +48,12 @@ wthDir_rcp_bc <- paste(ascDir,"/wth-cmip5_rcp45_bc",sep="")
 #here you need to put the permutation factors
 #Factor 1: Gridcells
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
-irrData <- get_ir_vls(cropDir,cells,1966,1993)
+if (!file.exists(paste(cropDir,"/irrigated_ratio/irrData.RData",sep=""))) {
+  irrData <- get_ir_vls(cropDir,cells,1966,1993)
+  save(list=c("irrData"),file=paste(cropDir,"/irrigated_ratio/irrData.RData",sep=""))
+} else {
+  load(paste(cropDir,"/irrigated_ratio/irrData.RData",sep=""))
+}
 
 #Factor 2: GCMs
 gcmList_his <- list.files(wthDir_his_rw,pattern="_ENS_")
@@ -152,6 +157,14 @@ ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME)
 groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
 #this is 125970 processes
 
+#store objects for arc1 processing
+if (!file.exists(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))) {
+  if (!file.exists(paste(ENV_CFG$OUT_BDIR,"/_config",sep=""))) {
+    dir.create(paste(ENV_CFG$OUT_BDIR,"/_config",sep=""))
+  }
+  save(list=c("all_proc","all_proc_his","all_proc_rcp","groupingList"),file=paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
+}
+
 #with 31 sowing dates
 #time 1 run = ~695 sec
 #total 87549150 sec = 1459153 min = 24319.22 hr = 1013.30 days
@@ -219,7 +232,7 @@ sfExport("ENV_CFG")
 sfExport("groupingList")
 
 #run the bias correction function in parallel
-system.time(sfSapply(as.vector(12871:32370),run_group_his_rcp))
+system.time(sfSapply(as.vector(51871:71370),run_group_his_rcp))
 
 #run the wth file generation function in parallel
 #system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
