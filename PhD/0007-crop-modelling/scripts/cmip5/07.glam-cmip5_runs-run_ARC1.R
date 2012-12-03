@@ -46,7 +46,7 @@ use_scratch <- T
 
 #base and data directories
 bDir <- "~/PhD-work/crop-modelling"
-glamDir <- paste(bDir,"/GLAM",sep="")
+glamDir <- bDir #paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
 ascDir <- paste(glamInDir,"/ascii",sep="")
