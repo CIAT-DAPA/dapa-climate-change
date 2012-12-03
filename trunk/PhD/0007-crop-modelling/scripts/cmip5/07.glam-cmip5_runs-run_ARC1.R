@@ -125,5 +125,7 @@ for (k in g_ini:g_end) {
  tll1 <- run_group_his_rcp(k)
 }
 
+#cd /home/ufaserv1_m/eejarv/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/cmip5
+#./07.glam-cmip5_runs-run_ARC1.sh 71371 71375
 
 
