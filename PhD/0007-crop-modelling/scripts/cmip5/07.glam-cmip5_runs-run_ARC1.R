@@ -123,18 +123,6 @@ load(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))
 #second test with 71376 to 71377 -> succeeded
 #first test of qsub with 71378 71380 -> succeeded in 39min (this is 3)
 
-#send jobs of 90 groups
-#j1: qsub run.sh 71371 71470
-#j2: qsub run.sh 71471 71560
-#j3: qsub run.sh 71561 71650
-#j4: qsub run.sh 71651 71740
-#j5: qsub run.sh 71741 71830
-#j6: qsub run.sh 71831 71920
-#j7: qsub run.sh 71921 72010
-#j8: qsub run.sh 72011 72100
-#j9: qsub run.sh 72101 72190
-#j10: qsub run.sh 72191 72280
-
 #send jobs of 1 processor and 24 hours
 
 for (k in g_ini:g_end) {
