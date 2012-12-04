@@ -2,7 +2,7 @@
 
 #$ -l h_rt=48:00:00
 #$ -l h_vmem=5G
-#$ -l cputype=*
+#$ -l cputype=intel
 #$ -cwd -V
 #$ -m be
 
