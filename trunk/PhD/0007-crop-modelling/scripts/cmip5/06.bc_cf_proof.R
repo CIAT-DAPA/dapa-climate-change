@@ -51,8 +51,8 @@ gcmList <- gcmList_his[gcmList_his %in% gcmList_rcp]
 #mean maximum and mean minimum temperature
 
 #variable selection
-obs_vn <- "cru_tmn"
-gcm_vn <- "tasmin"
+obs_vn <- "cru_tmx"
+gcm_vn <- "tasmax"
 
 #### functions
 #calculate monthly totals in model
@@ -83,7 +83,7 @@ for (gcm_ens in gcmList) {
   gcm_oDir <- paste(outDir,"/",gcm_ens,"/",gcm_vn,sep="")
   if (!file.exists(gcm_oDir)) {dir.create(gcm_oDir,recursive=T)}
   
-  if (!file.exists(paste(gcm_oDir,"/tasmin_CF_2020-2039.tif",sep=""))) {
+  if (!file.exists(paste(gcm_oDir,"/",gcm_vn,"_CF_2020-2039.tif",sep=""))) {
     #calculate mean temperatures for JJA period in GCM and in obs for both periods
     outDat <- data.frame()
     for (i in 1:nrow(cells)) {
@@ -127,45 +127,45 @@ for (gcm_ens in gcmList) {
     
     #write all rasters in there
     rs1_gcm <- rsdum; rs1_gcm[outDat$CELL] <- outDat$GCM.P1
-    rs1_gcm <- writeRaster(rs1_gcm,paste(gcm_oDir,"/tasmin_GCM_1961-1980.tif",sep=""),format="GTiff")
+    rs1_gcm <- writeRaster(rs1_gcm,paste(gcm_oDir,"/",gcm_vn,"_GCM_1961-1980.tif",sep=""),format="GTiff")
     
     rs2_gcm <- rsdum; rs2_gcm[outDat$CELL] <- outDat$GCM.P2
-    rs2_gcm <- writeRaster(rs2_gcm,paste(gcm_oDir,"/tasmin_GCM_1981-2000.tif",sep=""),format="GTiff")
+    rs2_gcm <- writeRaster(rs2_gcm,paste(gcm_oDir,"/",gcm_vn,"_GCM_1981-2000.tif",sep=""),format="GTiff")
     
     rs3_gcm <- rsdum; rs3_gcm[outDat$CELL] <- outDat$GCM.P3
-    rs3_gcm <- writeRaster(rs3_gcm,paste(gcm_oDir,"/tasmin_GCM_2020-2039.tif",sep=""),format="GTiff")
+    rs3_gcm <- writeRaster(rs3_gcm,paste(gcm_oDir,"/",gcm_vn,"_GCM_2020-2039.tif",sep=""),format="GTiff")
     
     rs1_obs <- rsdum; rs1_obs[outDat$CELL] <- outDat$OBS.P1
-    rs1_obs <- writeRaster(rs1_obs,paste(gcm_oDir,"/tasmin_OBS_1961-1980.tif",sep=""),format="GTiff")
+    rs1_obs <- writeRaster(rs1_obs,paste(gcm_oDir,"/",gcm_vn,"_OBS_1961-1980.tif",sep=""),format="GTiff")
     
     rs2_obs <- rsdum; rs2_obs[outDat$CELL] <- outDat$OBS.P2
-    rs2_obs <- writeRaster(rs2_obs,paste(gcm_oDir,"/tasmin_OBS_1981-2000.tif",sep=""),format="GTiff")
+    rs2_obs <- writeRaster(rs2_obs,paste(gcm_oDir,"/",gcm_vn,"_OBS_1981-2000.tif",sep=""),format="GTiff")
     
     rs2_bc <- rsdum; rs2_bc[outDat$CELL] <- outDat$BC.P2
-    rs2_bc <- writeRaster(rs2_bc,paste(gcm_oDir,"/tasmin_BC_1981-2000.tif",sep=""),format="GTiff")
+    rs2_bc <- writeRaster(rs2_bc,paste(gcm_oDir,"/",gcm_vn,"_BC_1981-2000.tif",sep=""),format="GTiff")
     
     rs3_bc <- rsdum; rs3_bc[outDat$CELL] <- outDat$BC.P3
-    rs3_bc <- writeRaster(rs3_bc,paste(gcm_oDir,"/tasmin_BC_2020-2039.tif",sep=""),format="GTiff")
+    rs3_bc <- writeRaster(rs3_bc,paste(gcm_oDir,"/",gcm_vn,"_BC_2020-2039.tif",sep=""),format="GTiff")
     
-    rs2_cf <- rsdum; rs2_cf[outDat$CELL] <- outDat$BC.P2
-    rs2_cf <- writeRaster(rs2_cf,paste(gcm_oDir,"/tasmin_CF_1981-2000.tif",sep=""),format="GTiff")
+    rs2_cf <- rsdum; rs2_cf[outDat$CELL] <- outDat$CF.P2
+    rs2_cf <- writeRaster(rs2_cf,paste(gcm_oDir,"/",gcm_vn,"_CF_1981-2000.tif",sep=""),format="GTiff")
     
-    rs3_cf <- rsdum; rs3_cf[outDat$CELL] <- outDat$BC.P3
-    rs3_cf <- writeRaster(rs3_cf,paste(gcm_oDir,"/tasmin_CF_2020-2039.tif",sep=""),format="GTiff")
+    rs3_cf <- rsdum; rs3_cf[outDat$CELL] <- outDat$CF.P3
+    rs3_cf <- writeRaster(rs3_cf,paste(gcm_oDir,"/",gcm_vn,"_CF_2020-2039.tif",sep=""),format="GTiff")
   } else {
-    rs1_gcm <- raster(paste(gcm_oDir,"/tasmin_GCM_1961-1980.tif",sep=""))
-    rs2_gcm <- raster(paste(gcm_oDir,"/tasmin_GCM_1981-2000.tif",sep=""))
-    rs3_gcm <- raster(paste(gcm_oDir,"/tasmin_GCM_2020-2039.tif",sep=""))
-    rs1_obs <- raster(paste(gcm_oDir,"/tasmin_OBS_1961-1980.tif",sep=""))
-    rs2_obs <- raster(paste(gcm_oDir,"/tasmin_OBS_1981-2000.tif",sep=""))
-    rs2_bc <- raster(paste(gcm_oDir,"/tasmin_BC_1981-2000.tif",sep=""))
-    rs3_bc <- raster(paste(gcm_oDir,"/tasmin_BC_2020-2039.tif",sep=""))
-    rs2_cf <- raster(paste(gcm_oDir,"/tasmin_CF_1981-2000.tif",sep=""))
-    rs3_cf <- raster(paste(gcm_oDir,"/tasmin_CF_2020-2039.tif",sep=""))
+    rs1_gcm <- raster(paste(gcm_oDir,"/",gcm_vn,"_GCM_1961-1980.tif",sep=""))
+    rs2_gcm <- raster(paste(gcm_oDir,"/",gcm_vn,"_GCM_1981-2000.tif",sep=""))
+    rs3_gcm <- raster(paste(gcm_oDir,"/",gcm_vn,"_GCM_2020-2039.tif",sep=""))
+    rs1_obs <- raster(paste(gcm_oDir,"/",gcm_vn,"_OBS_1961-1980.tif",sep=""))
+    rs2_obs <- raster(paste(gcm_oDir,"/",gcm_vn,"_OBS_1981-2000.tif",sep=""))
+    rs2_bc <- raster(paste(gcm_oDir,"/",gcm_vn,"_BC_1981-2000.tif",sep=""))
+    rs3_bc <- raster(paste(gcm_oDir,"/",gcm_vn,"_BC_2020-2039.tif",sep=""))
+    rs2_cf <- raster(paste(gcm_oDir,"/",gcm_vn,"_CF_1981-2000.tif",sep=""))
+    rs3_cf <- raster(paste(gcm_oDir,"/",gcm_vn,"_CF_2020-2039.tif",sep=""))
   }
   
   #make figures
-  if (!file.exists(paste(gcm_oDir,"/fig_tasmin.tif",sep=""))) {
+  if (!file.exists(paste(gcm_oDir,"/fig_",gcm_vn,".tif",sep=""))) {
     #plot characteristics  
     ht <- 2000
     #fct <- (rsdum@extent@xmin-rsdum@extent@xmax)/(rsdum@extent@ymin-rsdum@extent@ymax)
@@ -185,7 +185,7 @@ for (gcm_ens in gcmList) {
     cols <- c(colorRampPalette(c("yellow","orange","red","purple"))(length(brks)))
     layt <- list(wld,grli)
     
-    tiffName <- paste(gcm_oDir,"/fig_tasmin.tif",sep="")
+    tiffName <- paste(gcm_oDir,"/fig_",gcm_vn,".tif",sep="")
     trellis.device("tiff",file=tiffName,res=300,compression="lzw",height=ht,width=wt) 
     rp1_gcm <- spplot(rs1_gcm,sp.layout=layt,col.regions=cols,par.settings=list(fontsize=list(text=8)),at=brks,colorkey=F,pretty=brks.lab)
     rp2_gcm <- spplot(rs2_gcm,sp.layout=layt,col.regions=cols,par.settings=list(fontsize=list(text=8)),at=brks,colorkey=F,pretty=brks.lab)
@@ -203,9 +203,9 @@ for (gcm_ens in gcmList) {
     print(rp1_obs,split=c(2,1,4,3),more=T)
     print(rp2_obs,split=c(2,2,4,3),more=T)
     print(rp2_bc,split=c(3,2,4,3),more=T)
-    print(rp2_bc,split=c(3,3,4,3),more=T)
+    print(rp3_bc,split=c(3,3,4,3),more=T)
     print(rp2_cf,split=c(4,2,4,3),more=T)
-    print(rp2_cf,split=c(4,3,4,3),more=F)
+    print(rp3_cf,split=c(4,3,4,3),more=F)
     
     dev.off()
   }

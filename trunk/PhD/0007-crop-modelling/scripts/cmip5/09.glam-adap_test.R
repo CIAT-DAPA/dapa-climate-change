@@ -8,8 +8,6 @@ library(raster)
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
-source(paste(src.dir,"/cmip5/08.glam-summarise_cmip5_runs-functions.R",sep=""))
-
 #configuration details
 cropName <- "gnut"
 ver <- "v6"
@@ -28,8 +26,9 @@ runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 
 #experimental set up
-expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain")
-expList_rcp <- c("rcp_allin","rcp_bcrain")
+#expList_his <- c("his_allin","his_bcrain")
+#expList_rcp <- c("rcp_allin","rcp_bcrain")
+inList <- c("allin","bcrain")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 sdList <- c(-7:7)
 
@@ -45,24 +44,17 @@ varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
               "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD")
 
 i <- 1
+gcm <- gcmList[i]
+htyp <- paste("his_",inList[1],sep="")
+rtyp <- paste("rcp_",inList[1],sep="")
+cpar <- CO2ExpList[1]
 
-#summarise everything in here
-#maybe parallelise stuff
-##########################################################################
-######### BASELINE DATA
-for (n in 1:length(expList_his)) {
-  stat <- collate_his(cells,runsDir,gcm=gcmList[i],intype=expList_his[n],varNames,expSel)
-}
+load(paste(runsDir,"/_outputs/HIS-",htyp,"-",gcm,".RData",sep=""))
+his_data <- out_his_data; rm(out_his_data); g=gc(); rm(g)
 
+load(paste(runsDir,"/_outputs/RCP-",rtyp,"-",cpar,"-",gcm,".RData",sep=""))
+rcp_data <- out_rcp_data; rm(out_rcp_data); g=gc(); rm(g)
 
-##########################################################################
-######### PROJECTION DATA
-for (n in 1:length(expList_rcp)) {
-  for (z in 1:length(CO2ExpList)) {
-    stat <- collate_rcp(cells,runsDir,gcm=gcmList[i],intype=expList_rcp[n],co2=CO2ExpList[z],
-                        varNames,expSel,sdList)
-  }
-}
 
 
 ##########################################################################
@@ -217,6 +209,5 @@ for (n in 1:length(expList_rcp)) {
 # 
 # polygon(x=c(data_rcp$CO2_P4$XVAL,rev(data_rcp$CO2_P4$XVAL)),y=c(polup,rev(poldw)),col="#32FA3232",border=NA)
 # lines(data_rcp$CO2_P4$XVAL,data_rcp$CO2_P4$MEAN,col="purple")
-
 
 
