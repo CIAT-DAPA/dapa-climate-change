@@ -168,6 +168,9 @@ wrapper_gcm_bc_cf <- function(gcm_id) {
                               RCP=as.numeric(colMeans(rcpMth,na.rm=T)))
         
         if (vn_cht == "rel") {
+          corr_df$HIS <- sapply(corr_df$HIS,FUN=function(x) {round(x,3)})
+          corr_df$RCP <- sapply(corr_df$RCP,FUN=function(x) {round(x,3)})
+          corr_df$OBS <- sapply(corr_df$OBS,FUN=function(x) {round(x,3)})
           corr_df$HIS <- sapply(corr_df$HIS,FUN=function(x) {if (x == 0) {x <- 1}; return(x)})
           corr_df$CF <- (corr_df$RCP-corr_df$HIS)/(corr_df$HIS)
           corr_df$BC <- (corr_df$OBS-corr_df$HIS)/(corr_df$HIS)

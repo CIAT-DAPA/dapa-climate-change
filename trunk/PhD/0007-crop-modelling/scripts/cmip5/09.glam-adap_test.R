@@ -8,6 +8,8 @@ library(raster)
 src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
+source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
+
 #configuration details
 cropName <- "gnut"
 ver <- "v6"
@@ -21,13 +23,12 @@ glamDir <- paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
 runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
+adapDir <- paste(cropDir,"/adapt",sep="")
 
 #load grid cells
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 
 #experimental set up
-#expList_his <- c("his_allin","his_bcrain")
-#expList_rcp <- c("rcp_allin","rcp_bcrain")
 inList <- c("allin","bcrain")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 sdList <- c(-7:7)
@@ -39,175 +40,124 @@ expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 #list of GCMs
 gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
 
-#list of variables of interest
-varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
-              "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD")
+###########
+### details of runs
+gcm_id <- 1
+gcm <- gcmList[gcm_id]
 
-i <- 1
-gcm <- gcmList[i]
-htyp <- paste("his_",inList[1],sep="")
-rtyp <- paste("rcp_",inList[1],sep="")
-cpar <- CO2ExpList[1]
+typ_id <- 1
+htyp <- paste("his_",inList[typ_id],sep="")
+rtyp <- paste("rcp_",inList[typ_id],sep="")
 
-load(paste(runsDir,"/_outputs/HIS-",htyp,"-",gcm,".RData",sep=""))
-his_data <- out_his_data; rm(out_his_data); g=gc(); rm(g)
+co2_id <- 1
+cpar <- CO2ExpList[co2_id]
 
-load(paste(runsDir,"/_outputs/RCP-",rtyp,"-",cpar,"-",gcm,".RData",sep=""))
-rcp_data <- out_rcp_data; rm(out_rcp_data); g=gc(); rm(g)
-
-
-
-##########################################################################
-##########################################################################
-##########################################################################
-###
-#do some testing / plotting / data analysis
+exp_id <- 1
+exp <- expSel[exp_id]
 ###
 
-# load(paste(runsDir,"/_outputs/HIS-his_bcrain-bcc_csm1_1_ENS_r1i1p1.RData",sep=""))
-# his_data <- out_his_data; rm(out_his_data); g=gc(); rm(g)
-# 
-# load(paste(runsDir,"/_outputs/RCP-rcp_bcrain-CO2_p1-bcc_csm1_1_ENS_r1i1p1.RData",sep=""))
-# rcp_c1 <- out_rcp_data; rm(out_rcp_data); g=gc(); rm(g)
-# 
-# load(paste(runsDir,"/_outputs/RCP-rcp_bcrain-CO2_p2-bcc_csm1_1_ENS_r1i1p1.RData",sep=""))
-# rcp_c2 <- out_rcp_data; rm(out_rcp_data); g=gc(); rm(g)
-# 
-# load(paste(runsDir,"/_outputs/RCP-rcp_bcrain-CO2_p3-bcc_csm1_1_ENS_r1i1p1.RData",sep=""))
-# rcp_c3 <- out_rcp_data; rm(out_rcp_data); g=gc(); rm(g)
-# 
-# load(paste(runsDir,"/_outputs/RCP-rcp_bcrain-CO2_p4-bcc_csm1_1_ENS_r1i1p1.RData",sep=""))
-# rcp_c4 <- out_rcp_data; rm(out_rcp_data); g=gc(); rm(g)
-# 
-# #analyse rainfed
-# #construct pdf for each GLAM member and for each CO2 param
-# #1. baseline and future absolute yields
-# #2. change in yields
-# 
-# #**use only those runs which did not run out of wth data #STG != 99
-# #**use only rainfed runs
-# #**average all planting dates
-# #**only get yields
-# 
-# #get maximum of all data and make breaks
-# maxval <- max(c(his_data[,,"RFD",,"YIELD"],rcp_c1[,,,"RFD",,"YIELD"]))
-# maxval <- max(c(maxval,rcp_c2[,,,"RFD",,"YIELD"],rcp_c3[,,,"RFD",,"YIELD"]))
-# maxval <- max(c(maxval,rcp_c4[,,,"RFD",,"YIELD"]))
-# brks <- c(seq(0,maxval,by=50),maxval)
-# 
-# data_his <- list()
-# data_rcp <- list()
-# for (co2 in 1:4) {
-#   #co2 <- 1
-#   this_co2 <- get(paste("rcp_c",co2,sep=""))
-#   
-#   for (exp in expSel) {
-#     #exp <- expSel[1]
-#     exp <- paste(exp)
-#     
-#     cat("processing glam member",exp,"\n")
-#     
-#     his_vals <- as.numeric(his_data[,exp,"RFD",,"YIELD"])
-#     his_stg <- as.numeric(his_data[,exp,"RFD",,"STG"])
-#     his_vals <- his_vals[which(his_stg!=99)]
-#     
-#     #average planting dates in dataset
-#     yrList <- dimnames(this_co2)$YEAR
-#     rcp_vals <- c()
-#     for (yr in yrList) {
-#       #yr <- yrList[1]
-#       yr <- paste(yr)
-#       yrvec <- as.numeric(this_co2[,exp,,"RFD",yr,"YIELD"])
-#       yrstg <- as.numeric(this_co2[,exp,,"RFD",yr,"STG"])
-#       yrvec[which(yrstg==99)] <- NA #set NA anything that failed
-#       
-#       yrvals <- this_co2[,exp,,"RFD",yr,"YIELD"]
-#       yrvals[] <- yrvec
-#       
-#       yrvals <- as.numeric(rowMeans(yrvals,na.rm=T))
-#       rcp_vals <- c(rcp_vals,yrvals)
-#     }
-#     rcp_vals <- rcp_vals[which(!is.na(rcp_vals))]
-#     
-#     #make histograms
-#     hg_his <- hist(his_vals,breaks=brks,plot=F)
-#     hhis <- hg_his$counts/sum(hg_his$counts)*100
-#     hhis <- data.frame(XVAL=hg_his$mids,VAL=hhis)
-#     names(hhis)[2] <- paste("EXP.",exp,sep="")
-#     
-#     hg_rcp <- hist(rcp_vals,breaks=brks,plot=F)
-#     hrcp <- hg_rcp$counts/sum(hg_rcp$counts)*100
-#     hrcp <- data.frame(XVAL=hg_rcp$mids,VAL=hrcp)
-#     names(hrcp)[2] <- paste("EXP.",exp,sep="")
-#     
-#     if (exp == expSel[1]) {
-#       hhis_all <- hhis
-#       hrcp_all <- hrcp
-#     } else {
-#       hhis_all <- merge(hhis_all,hhis,by="XVAL",sort=F)
-#       hrcp_all <- merge(hrcp_all,hrcp,by="XVAL",sort=F)
-#     }
-#   }
-#   
-#   hhis_m <- apply(hhis_all[,paste("EXP.",expSel,sep="")],1,mean,na.rm=T)
-#   hhis_sd <- apply(hhis_all[,paste("EXP.",expSel,sep="")],1,sd,na.rm=T)
-#   hhis_all$MEAN <- hhis_m
-#   hhis_all$SD <- hhis_sd
-#   
-#   hrcp_m <- apply(hrcp_all[,paste("EXP.",expSel,sep="")],1,mean,na.rm=T)
-#   hrcp_sd <- apply(hrcp_all[,paste("EXP.",expSel,sep="")],1,sd,na.rm=T)
-#   hrcp_all$MEAN <- hrcp_m
-#   hrcp_all$SD <- hrcp_sd
-#   
-#   data_his[[paste("CO2_P",co2,sep="")]] <- hhis_all
-#   data_rcp[[paste("CO2_P",co2,sep="")]] <- hrcp_all
-# }
-# 
-# #plot
-# #windows()
-# par(mar=c(5,5,1,1))
-# 
-# plot(data_his$CO2_P1$XVAL,data_his$CO2_P1$MEAN,ty="l",main=NA,xlab="Yield (kg/ha)",ylab="pdf (%)",
-#      xlim=c(0,2000),ylim=c(0,10))
-# polup <- data_his$CO2_P1$MEAN+data_his$CO2_P1$SD
-# poldw <- data_his$CO2_P1$MEAN-data_his$CO2_P1$SD
-# poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-# polygon(x=c(data_his$CO2_P1$XVAL,rev(data_his$CO2_P1$XVAL)),y=c(polup,rev(poldw)),col="#FF000040",border=NA)
-# lines(data_his$CO2_P1$XVAL,data_his$CO2_P1$MEAN,col="red")
-# 
-# #to set shading
-# #rgb(red=0,green=255,blue=0,alpha=50,maxColorValue=255)
-# 
-# #co2 par 1
-# polup <- data_rcp$CO2_P1$MEAN+data_rcp$CO2_P1$SD
-# poldw <- data_rcp$CO2_P1$MEAN-data_rcp$CO2_P1$SD
-# poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-# 
-# polygon(x=c(data_rcp$CO2_P1$XVAL,rev(data_rcp$CO2_P1$XVAL)),y=c(polup,rev(poldw)),col="#0000FF32",border=NA)
-# lines(data_rcp$CO2_P1$XVAL,data_rcp$CO2_P1$MEAN,col="blue")
-# 
-# #co2 par 2
-# polup <- data_rcp$CO2_P2$MEAN+data_rcp$CO2_P2$SD
-# poldw <- data_rcp$CO2_P2$MEAN-data_rcp$CO2_P2$SD
-# poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-# 
-# polygon(x=c(data_rcp$CO2_P2$XVAL,rev(data_rcp$CO2_P2$XVAL)),y=c(polup,rev(poldw)),col="#00FF0032",border=NA)
-# lines(data_rcp$CO2_P2$XVAL,data_rcp$CO2_P2$MEAN,col="green")
-# 
-# #co2 par 3
-# polup <- data_rcp$CO2_P3$MEAN+data_rcp$CO2_P3$SD
-# poldw <- data_rcp$CO2_P3$MEAN-data_rcp$CO2_P3$SD
-# poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-# 
-# polygon(x=c(data_rcp$CO2_P3$XVAL,rev(data_rcp$CO2_P3$XVAL)),y=c(polup,rev(poldw)),col="#FF323232",border=NA)
-# lines(data_rcp$CO2_P3$XVAL,data_rcp$CO2_P3$MEAN,col="orange")
-# 
-# #co2 par 4
-# polup <- data_rcp$CO2_P4$MEAN+data_rcp$CO2_P4$SD
-# poldw <- data_rcp$CO2_P4$MEAN-data_rcp$CO2_P4$SD
-# poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-# 
-# polygon(x=c(data_rcp$CO2_P4$XVAL,rev(data_rcp$CO2_P4$XVAL)),y=c(polup,rev(poldw)),col="#32FA3232",border=NA)
-# lines(data_rcp$CO2_P4$XVAL,data_rcp$CO2_P4$MEAN,col="purple")
+
+#############################################################################
+#############################################################################
+#############################################################################
+## experiments of adaptation
+
+#parameters i have to look at are:
+
+#1. TE and TEN_MAX. TEN_MAX should not exceed 7 g/kg
+#2. DHDT, without exceeding a maximum EOS HI of 0.66
+#3. SLA (in theory), but 300 cm2/g is already in the upper bound of range, so maybe unrealistic
+#4. thermal time from planting to flowering
+#   a. increases should be beneficial for well-watered
+#   b. decreases should be beneficial for water-stressed (if TT of pod fill is increased)
+#5. increase thermal time from start of pod filling to maturity (GCPFLM+GCLMPHA)
+#6. increase thermal time from flowering to LMAX (GCFLPF+GCPFLM) to get better LAI
+#7. HTS
+
+
+##
+#durations beyond 150 days not to be considered when increases in thermal time were done
+#runs with final HI values above >0.66 not to be considered
+
+#some discussion:
+#escape to terminal drought stress can be achieved through shortening crop duration
+#so the question is whether or not avoiding TDS will be more benefficial than the
+#resulting decrease in net assimilate production caused by reduction in cropping
+#cycle
+
+
+#other strategies: Reddy et al. (2003) report rainfall as the main constraint for gnut
+#production. Possible analyses.
+
+#1. fully irrigated run
+#2. targeted irrigation. Basu and Ghosh (1996) at 
+#   http://agropedialabs.iitk.ac.in/openaccess/sites/default/files/RA%2000287_0.pdf#page=39
+#   state that:
+#   a. protective irrigation (targeted to flowering and pod filling) can increase yields by 33-63%
+#   b. pre-monsoon (15-30 days advance) sowing with 1-2 times initial irrigation can 
+#      increase yields by 20%
+#
+
+#for discussion Narayanamoorthy (http://nrlp.iwmi.org/PDocs/DReports/Phase_01/12.%20Water%20Savings%20Technologies%20-%20Narayanmoorthy.pdf)
+#indicate the potential of drip and sprinkler irrigation in India
+
+#it may be worth trying:
+# a. fully irrigated run
+# b. irrigation during flowering+podfill stage (modify GLAM so that 
+#    POT=T when after flowering)
+
+
+#load experiments setup
+adapRuns <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T)
+
+#select location
+loc <- 890 #
+
+#load parameter set
+hisDir <- paste(runsDir,"/exp-",exp,"_outputs/",gcm,"/",htyp,"_",loc,sep="")
+rcpDir <- paste(runsDir,"/exp-",exp,"_outputs/",gcm,"/",rtyp,"_",cpar,"_",loc,sep="")
+
+#load baseline
+hisData <- paste(hisDir,"/output.RData",sep="")
+load(hisData)
+rm(ir_vls); rm(optimal); rm(optimised); rm(params); rm(setup)
+ybas <- out_data[[2]]$DATA$YIELD
+rm(out_data)
+
+#load future
+rcpData <- paste(rcpDir,"/output.RData",sep="")
+load(rcpData)
+yfut <- run_data$RUNS[[8]]$DATA$RFD$YIELD
+
+#get parameter set
+parset <- run_data$PARAMS
+
+#get adaptation runs configured
+adap_run <- cfg_adap_runs(runs_data=adapRuns,rcp_data=rcpData)
+
+####
+#update parameter set
+#change min/max in range of parameters in parameter set before running if value
+#being tested is larger than in pset
+#
+
+run_i <- 43
+this_run <- adap_run$RUNS[run_i,]
+run_id <- this_run$RUNID; 
+this_run$RUNID <- NULL; 
+
+parset_up <- update_params_adap(run_data=this_run,params=parset)
+
+
+#remember that ICO2=1 modifies TEN_MAX and TE
+#so just
+#1. modify B_TE and B_TEN_MAX according to adapt
+#2. 'bmass' TEN_MAX value = B_TEN_MAX
+#3. modify TE from B_TE using the CO2 parameterisation rule
+
+
+
+
+
 
 
