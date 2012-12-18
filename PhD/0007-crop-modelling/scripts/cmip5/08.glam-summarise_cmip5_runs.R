@@ -44,7 +44,7 @@ gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
 varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
               "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD")
 
-i <- 1
+i <- 11
 
 #summarise everything in here
 #maybe parallelise stuff

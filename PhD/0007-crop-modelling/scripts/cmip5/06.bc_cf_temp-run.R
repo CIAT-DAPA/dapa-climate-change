@@ -60,10 +60,11 @@ varmx <- data.frame(OBS=c("cru_tmn","cru_tmx","rain","srad_e40"),
                     BC=c(T,T,T,T),CF=c(T,T,T,T),FUN=c("mean","mean","sum","mean"),
                     CHG=c("abs","abs","rel","rel"))
 
-# #produce the grid cell csv files
-# for (k in 1:length(gcmList)) {
-#   st <- wrapper_gcm_bc_cf(k)
-# }
+#length=34
+
+#produce the grid cell csv files
+#for (k in 1:17) {st <- wrapper_gcm_bc_cf(k)} #part 1
+#for (k in 18:34) {st <- wrapper_gcm_bc_cf(k)} #part 2
 
 #from these, generate the wth files
 #permutation of gridcells and GCMs
@@ -82,17 +83,13 @@ if (!file.exists(wthDir_del)) {dir.create(wthDir_del)}
 if (!file.exists(wthDir_sh)) {dir.create(wthDir_sh)}
 
 #first test
-for (j in 5071:6630) {
+for (j in 4421:6630) {
   oaa <- make_cf_bc_wth_wrapper(j)
 }
 
-#1 1170
-#1171 2145 #killed this by mistake
-#2146 3120
-
-#3121 4095
-#4096 5070
-#5071 6630
+#1 2210
+#2211 4420
+#4421 6630
 
 
 
