@@ -14,7 +14,10 @@ source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
 cropName <- "gnut"
 ver <- "v6"
 runs_name <- "cmip5_all"
+adap_name <- "cmip5_adapt"
 maxiter <- 15 #to grab last optim values
+scratch <- "/scratch/eejarv"
+use_scratch <- T
 
 #base and data directories
 bDir <- "W:/eejarv/PhD-work/crop-modelling"
@@ -31,7 +34,6 @@ cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 #experimental set up
 inList <- c("allin","bcrain")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
-sdList <- c(-7:7)
 
 #load list of parameter sets
 expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
@@ -40,22 +42,16 @@ expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 #list of GCMs
 gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
 
+##########################
+#all processes
+all_proc <- expand.grid(LOC=cells$CELL,GCM=gcmList,PARSET=expSel,WTH_TYPE=inList,
+                        CO2_P=CO2ExpList)
+all_proc <- cbind(RUNID=1:nrow(all_proc),all_proc)
+all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
+
 ###########
 ### details of runs
-gcm_id <- 1
-gcm <- gcmList[gcm_id]
-
-typ_id <- 1
-htyp <- paste("his_",inList[typ_id],sep="")
-rtyp <- paste("rcp_",inList[typ_id],sep="")
-
-co2_id <- 1
-cpar <- CO2ExpList[co2_id]
-
-exp_id <- 1
-exp <- expSel[exp_id]
-###
-
+run_config <- get_cfg_adap(170,all_proc)
 
 #############################################################################
 #############################################################################
@@ -108,53 +104,26 @@ exp <- expSel[exp_id]
 
 
 #load experiments setup
-adapRuns <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T)
-
-#select location
-loc <- 890 #
-
-#load parameter set
-hisDir <- paste(runsDir,"/exp-",exp,"_outputs/",gcm,"/",htyp,"_",loc,sep="")
-rcpDir <- paste(runsDir,"/exp-",exp,"_outputs/",gcm,"/",rtyp,"_",cpar,"_",loc,sep="")
-
-#load baseline
-hisData <- paste(hisDir,"/output.RData",sep="")
-load(hisData)
-rm(ir_vls); rm(optimal); rm(optimised); rm(params); rm(setup)
-ybas <- out_data[[2]]$DATA$YIELD
-rm(out_data)
-
-#load future
-rcpData <- paste(rcpDir,"/output.RData",sep="")
-load(rcpData)
-yfut <- run_data$RUNS[[8]]$DATA$RFD$YIELD
-
-#get parameter set
-parset <- run_data$PARAMS
-
-#get adaptation runs configured
-adap_run <- cfg_adap_runs(runs_data=adapRuns,rcp_data=rcpData)
-
-####
-#update parameter set
-#change min/max in range of parameters in parameter set before running if value
-#being tested is larger than in pset
-#
-
-run_i <- 43
-this_run <- adap_run$RUNS[run_i,]
-run_id <- this_run$RUNID; 
-this_run$RUNID <- NULL; 
-
-parset_up <- update_params_adap(run_data=this_run,params=parset)
+adap_runs <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T)
 
 
-#remember that ICO2=1 modifies TEN_MAX and TE
-#so just
-#1. modify B_TE and B_TEN_MAX according to adapt
-#2. 'bmass' TEN_MAX value = B_TEN_MAX
-#3. modify TE from B_TE using the CO2 parameterisation rule
-
+###### configuration
+#variable ENV_CFG
+ENV_CFG <- list()
+ENV_CFG$SRC.DIR <- src.dir
+ENV_CFG$BDIR <- glamDir
+ENV_CFG$CROP_NAME <- cropName
+ENV_CFG$VER <- ver
+ENV_CFG$MAXITER <- maxiter
+ENV_CFG$RUNS_NAME <- runs_name
+ENV_CFG$ADAP_NAME <- adap_name
+ENV_CFG$SCRATCH <- paste(scratch,"/",ENV_CFG$ADAP_NAME,sep="")
+ENV_CFG$USE_SCRATCH <- use_scratch
+ENV_CFG$CELLS <- cells
+ENV_CFG$IRR_DATA <- NA
+ENV_CFG$OPT_METHOD <- NA
+ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/adapt/",ENV_CFG$ADAP_NAME,sep="")
+ENV_CFG$ADAP_RUNS <- adap_runs
 
 
 
