@@ -2,6 +2,43 @@
 #UoL / CIAT / CCAFS
 #Dec 2012
 
+run_group_adap <- function(j) {
+  #source functions of interest
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-ygp_ipdate_wrapper.R",sep=""))
+  source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
+  source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
+  source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
+  source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
+  
+  this_loc <- groupingList$LOC[j]
+  this_pst <- groupingList$PARSET[j]
+  this_gcm <- paste(groupingList$GCM[j])
+  
+  ids <- which(all_proc$LOC == this_loc & all_proc$PARSET == this_pst & all_proc$GCM == this_gcm)
+  
+  cat("\nrunning",length(ids),"ids \n")
+  cat("LOC:",this_loc,"\n")
+  cat("PARSET:",this_pst,"\n")
+  cat("GCM:",this_gcm,"\n")
+  
+  #loop ids in this group
+  timeall <- c()
+  for (i in ids) {
+    #here get initial model configuration
+    RUN_CFG <- get_cfg_adap(i,all_proc)
+    #if historical then run one wrapper else run the other
+    runtime <- system.time(glam_rcp_run_wrapper(RUN_CFG))
+    timeall <- c(timeall,as.numeric(runtime)[3])
+  }
+  return(timeall)
+}
+
+
 #rcp wrapper
 glam_adap_run_wrapper <- function(RUN_CFG) {
   #check the existence of the environment set up, before running
