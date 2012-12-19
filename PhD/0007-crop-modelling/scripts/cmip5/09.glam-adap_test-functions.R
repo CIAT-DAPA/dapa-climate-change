@@ -195,7 +195,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         arun_data$IRATIO <- ir_vls
         arun_data$YGP <- cal_ygp
         
-        save(list=c("run_data"),file=saveFile)
+        save(list=c("arun_data"),file=saveFile)
         
         #here remove everything
         setwd(setup_rcp$BDIR)
