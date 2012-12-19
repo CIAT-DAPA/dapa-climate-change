@@ -132,5 +132,8 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #run testing
 #system.time(glam_adap_run_wrapper(run_config))
 
+timall <- run_group_adap(1)
+
+
 
 
