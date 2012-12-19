@@ -106,6 +106,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         params$glam_param.ygp$YGP$Value <- run_data$YGP
         cal_ygp <- run_data$YGP
         ir_vls$YEAR <- params$glam_param.mod_mgt$ISYR:params$glam_param.mod_mgt$IEYR
+        rm(run_data)
         
         #assign directories according to input type
         if (inputType == "allin") {
@@ -140,7 +141,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
           params <- update_params_adap(run_data=this_run,params=params)
           
           #run the model!!!
-          run_data <- GLAM_run_loc(GLAM_params=params,RUN_setup=setup_rcp,
+          run_data <- GLAM_adap_run_loc(GLAM_params=params,RUN_setup=setup_rcp,
                                    iratio=ir_vls,subdir=paste("adap_",run_i,sep=""))
           
           #put results into object
@@ -673,16 +674,11 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
     #output folder
     run_dir <- create_dirs(paste(cal_dir,"/RFD_run-",subdir,sep=""))
     
-    #write the model params
-    opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep="")
-    opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
-    
     #check whether the *.out already exists
     outfile <- list.files(paste(run_dir,"/output",sep=""),pattern="\\.out")
     if (length(outfile) == 0) {
       ######################################################
       #write filenames file
-      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
       wth_row <- paste("inputs/ascii/wth/",RUN_setup$WTH_ROOT,sep="")
       soilty_row <- paste("inputs/ascii/soil/",unlist(strsplit(solFile,"/",fixed=T))[length(unlist(strsplit(solFile,"/",fixed=T)))],sep="")
       soilco_row <- paste("inputs/ascii/soil/",unlist(strsplit(solGrid,"/",fixed=T))[length(unlist(strsplit(solGrid,"/",fixed=T)))],sep="")
@@ -703,6 +699,12 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
         GLAM_params$glam_param.ygp$YGP$Value <- -99.0
       }
       
+      #write the model params
+      opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run-rfd.txt",sep="")
+      opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
+      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
+      
+      #write filenames file
       ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
       fn <- file(ofnames,"w")
       cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)
@@ -785,23 +787,23 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
     #output folder
     run_dir <- create_dirs(paste(cal_dir,"/IRR_run-",subdir,sep=""))
     
-    #write the model params
-    opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run-irr.txt",sep="")
-    opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
-    
     #check whether the *.out already exists
     outfile <- list.files(paste(run_dir,"/output",sep=""),pattern="\\.out")
     if (length(outfile) == 0) {
       ######################################################
       #write filenames file
-      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
-      
       if (sowFile_irr == "nofile") {
         sow_row <- sowFile_irr
       } else {
         sow_row <- paste("inputs/ascii/sow/",unlist(strsplit(sowFile_irr,"/",fixed=T))[length(unlist(strsplit(sowFile_irr,"/",fixed=T)))],sep="")
       }
       
+      #write the model params
+      opfil <- paste(run_dir,"/glam-r2-param-",tolower(cropName),"-run-irr.txt",sep="")
+      opfil <- GLAM_create_parfile(params=GLAM_params,outfile=opfil,base_file=NA,overwrite=T)
+      parfile <- unlist(strsplit(opfil,"/",fixed=T))[length(unlist(strsplit(opfil,"/",fixed=T)))]
+      
+      #write filenames file
       ofnames <- paste(run_dir,"/filenames-",tolower(cropName),"-run.txt",sep="")
       fn <- file(ofnames,"w")
       cat(sprintf("%-41s",parfile),"\n",sep="",file=fn)

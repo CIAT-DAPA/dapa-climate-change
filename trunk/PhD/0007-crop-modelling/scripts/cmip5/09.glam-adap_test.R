@@ -126,7 +126,7 @@ ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME)
 ENV_CFG$ADAP_RUNS <- adap_runs
 
 
-
+system.time(glam_adap_run_wrapper(run_config))
 
 
 
