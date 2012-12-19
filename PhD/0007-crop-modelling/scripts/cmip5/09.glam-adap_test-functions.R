@@ -201,12 +201,12 @@ get_cfg_adap <- function(i,all_proc) {
 ####
 update_params_adap <- function(run_data,params) {
   #grab season, remove from data.frame and update params
-  season <- paste(this_run$SEASON); this_run$SEASON <- NULL
+  season <- paste(run_data$SEASON); run_data$SEASON <- NULL
   params$glam_param.mod_mgt$SEASON <- season
   
-  for (param in names(this_run)) {
-    #param <- names(this_run)[1]
-    p_val <- this_run[,param]
+  for (param in names(run_data)) {
+    #param <- names(run_data)[1]
+    p_val <- run_data[,param]
     where <- paste(adap_run$TRAITS$section[which(adap_run$TRAITS$parameter == param)])
     if (length(where) > 1) {where <- unique(where)}
     
