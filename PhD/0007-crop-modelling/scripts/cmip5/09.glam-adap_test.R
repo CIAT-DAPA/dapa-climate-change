@@ -49,10 +49,6 @@ all_proc <- expand.grid(LOC=cells$CELL,GCM=gcmList,PARSET=expSel,WTH_TYPE=inList
 all_proc <- cbind(RUNID=1:nrow(all_proc),all_proc)
 all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 
-###########
-### details of runs
-run_config <- get_cfg_adap(170,all_proc)
-
 #############################################################################
 #############################################################################
 #############################################################################
@@ -125,8 +121,16 @@ ENV_CFG$OPT_METHOD <- NA
 ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/adapt/",ENV_CFG$ADAP_NAME,sep="")
 ENV_CFG$ADAP_RUNS <- adap_runs
 
+#grouping list
+#do some type of grouping. This is done by gridcell, parameter set and GCM
+groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
+#this is 125970 processes
 
-system.time(glam_adap_run_wrapper(run_config))
+###########
+### details of testing runs
+#run_config <- get_cfg_adap(170,all_proc)
+#run testing
+#system.time(glam_adap_run_wrapper(run_config))
 
 
 
