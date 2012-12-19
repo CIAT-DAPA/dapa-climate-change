@@ -32,7 +32,7 @@ run_group_adap <- function(j) {
     #here get initial model configuration
     RUN_CFG <- get_cfg_adap(i,all_proc)
     #if historical then run one wrapper else run the other
-    runtime <- system.time(glam_rcp_run_wrapper(RUN_CFG))
+    runtime <- system.time(glam_adap_run_wrapper(RUN_CFG))
     timeall <- c(timeall,as.numeric(runtime)[3])
   }
   return(timeall)
@@ -114,7 +114,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     #output file of his and rcp run
     saveFile <- paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/output.RData",sep="")
     rcp_dir <- paste(setup_rcp$RCP_DIR,"/",setup_rcp$SIM_NAME,sep="")
-    his_dir <- paste(setup_rcp$RCP_DIR,"/his_",inputType,"_",run_config$LOC,sep="")
+    his_dir <- paste(setup_rcp$RCP_DIR,"/his_",inputType,"_",RUN_CFG$LOC,sep="")
     
     saveFile_his <- paste(his_dir,"/output.RData",sep="")
     saveFile_rcp <- paste(rcp_dir,"/output.RData",sep="")
