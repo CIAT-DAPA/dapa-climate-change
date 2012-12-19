@@ -5,8 +5,8 @@
 library(raster)
 
 #source directories
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
 source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
 
@@ -20,8 +20,8 @@ scratch <- "/scratch/eejarv"
 use_scratch <- T
 
 #base and data directories
-bDir <- "W:/eejarv/PhD-work/crop-modelling"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 glamDir <- paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
