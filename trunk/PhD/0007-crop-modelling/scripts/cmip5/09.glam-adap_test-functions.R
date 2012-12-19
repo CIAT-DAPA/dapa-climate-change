@@ -138,7 +138,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
           cat(paste("adap run _adap ",run_i,"\n",sep=""))
           
           #call updater
-          params <- update_params_adap(run_data=this_run,params=params)
+          params <- update_params_adap(run_data=this_run,params=params,traits=adap_run$TRAITS)
           
           #run the model!!!
           run_data <- GLAM_adap_run_loc(GLAM_params=params,RUN_setup=setup_rcp,
@@ -199,7 +199,7 @@ get_cfg_adap <- function(i,all_proc) {
 #change min/max in range of parameters in parameter set before running if value
 #being tested is larger than in pset
 ####
-update_params_adap <- function(run_data,params) {
+update_params_adap <- function(run_data,params,traits) {
   #grab season, remove from data.frame and update params
   season <- paste(run_data$SEASON); run_data$SEASON <- NULL
   params$glam_param.mod_mgt$SEASON <- season
@@ -207,7 +207,7 @@ update_params_adap <- function(run_data,params) {
   for (param in names(run_data)) {
     #param <- names(run_data)[1]
     p_val <- run_data[,param]
-    where <- paste(adap_run$TRAITS$section[which(adap_run$TRAITS$parameter == param)])
+    where <- paste(traits$section[which(traits$parameter == param)])
     if (length(where) > 1) {where <- unique(where)}
     
     if (!is.na(p_val)) {
