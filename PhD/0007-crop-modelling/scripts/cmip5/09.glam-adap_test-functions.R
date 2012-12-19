@@ -135,7 +135,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
           run_id <- this_run$RUNID
           this_run$RUNID <- NULL
           
-          cat(paste("adap run _adap ",run_i,sep=""))
+          cat(paste("adap run _adap ",run_i," ",sep=""))
           
           #call updater
           params <- update_params_adap(run_data=this_run,params=params,traits=adap_run$TRAITS)
