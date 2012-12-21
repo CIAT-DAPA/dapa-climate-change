@@ -110,18 +110,32 @@ glam_rcp_run_wrapper <- function(RUN_CFG) {
     inputType <- gsub("rcp_","",RUN_CFG$WTYPE)
     setup_rcp$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,"_",setup_rcp$CELL,sep="")
     
-    #here check if baseline run has been done
-    hisType <- gsub("rcp_","his_",RUN_CFG$WTYPE)
-    his_dir <- paste(setup_rcp$CAL_DIR,"/",hisType,"_",setup_rcp$CELL,sep="")
+    #baseline run output stuff that is needed to get the optimal ygp value
+    if (inputType == "del") {
+      hisType <- "his_allin"
+    } else {
+      hisType <- gsub("rcp_","his_",RUN_CFG$WTYPE)
+    }
+    
+    #output file of his and rcp run
     saveFile <- paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/output.RData",sep="")
+    his_dir <- paste(setup_rcp$CAL_DIR,"/",hisType,"_",setup_rcp$CELL,sep="")
     saveFile_his <- paste(his_dir,"/output.RData",sep="")
     
+    #here check if baseline run has been done
     if (file.exists(saveFile_his)) {
       if (!file.exists(saveFile)) {
         #load output hist data
         load(saveFile_his)
         cal_ygp <- optimal$YGP
         rm(out_data); rm(setup); rm(optimal); rm(optimised); g=gc(); rm(g) #remove extra stuff
+        
+        if (inputType == "del") {
+          load(paste(setup_rcp$PRE_DIR,"/gridcells/fcal_",setup_rcp$CELL,"/ygp.RData",sep=""))
+          cal_ygp <- optimal$YGP
+          params$glam_param.ygp$YGP$Value <- cal_ygp
+          rm(optimal); rm(optimised); g=gc(); rm(g) #remove extra stuff
+        }
         
         #update parameter set for this run
         params$glam_param.mod_mgt$ISYR <- 2022 #start year
@@ -145,6 +159,12 @@ glam_rcp_run_wrapper <- function(RUN_CFG) {
         } else if (inputType == "bcrain") {
           setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_bc/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
           setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_bc/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
+        } else if (inputType == "del") {
+          setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_del/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_del/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
+        } else if (inputType == "sh") {
+          setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_sh/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_sh/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
         }
         
         #load and update parameter files as per sowing dates
@@ -323,6 +343,9 @@ glam_hist_run_wrapper <- function(RUN_CFG) {
     } else if (inputType == "bcrain") {
       setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist_bc/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
       setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist_bc/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
+    } else if (inputType == "sh") {
+      setup$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_hist_sh/",RUN_CFG$SCE,"/rfd_",setup$CELL,sep="")
+      setup$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_hist_sh/",RUN_CFG$SCE,"/irr_",setup$CELL,sep="")
     } else if (inputType == "norain") {
       #copy the irr_rfd data to a temporary location
       #remove data from location if needed

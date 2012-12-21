@@ -67,8 +67,11 @@ parsetList <- parsetList$EXPID
 
 #Factor 4: experiments
 #conditionals may be needed inside the final function
-expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain")
-expList_rcp <- c("rcp_allin","rcp_bcrain")
+expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain") #old one
+expList_rcp <- c("rcp_allin","rcp_bcrain") #old one
+
+#expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain", "his_sh") #new one
+#expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh") #new one
 
 #Factor 5: planting date (30 days around baseline value)
 #only relevant for rcp experiments
@@ -232,7 +235,7 @@ sfExport("ENV_CFG")
 sfExport("groupingList")
 
 #run the bias correction function in parallel
-system.time(sfSapply(as.vector(51871:71370),run_group_his_rcp))
+system.time(sfSapply(as.vector(71371:90870),run_group_his_rcp))
 
 #run the wth file generation function in parallel
 #system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
