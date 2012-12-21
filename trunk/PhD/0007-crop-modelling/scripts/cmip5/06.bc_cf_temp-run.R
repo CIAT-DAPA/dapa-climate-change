@@ -35,9 +35,11 @@ rcpDir <- paste(clmDir,"/IND_RCP45",sep="")
 #output directories
 outDir_cf <- paste(clmDir,"/IND_RCP45_DEL",sep="")
 outDir_bc <- paste(clmDir,"/IND_RCP45_SH",sep="")
+outDir_hbc <- paste(clmDir,"/IND_CMIP5_SH",sep="")
 
 if (!file.exists(outDir_cf)) {dir.create(outDir_cf)}
 if (!file.exists(outDir_bc)) {dir.create(outDir_bc)}
+if (!file.exists(outDir_hbc)) {dir.create(outDir_hbc)}
 
 #locations
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
@@ -63,8 +65,8 @@ varmx <- data.frame(OBS=c("cru_tmn","cru_tmx","rain","srad_e40"),
 #length=34
 
 #produce the grid cell csv files
-#for (k in 1:17) {st <- wrapper_gcm_bc_cf(k)} #part 1
-#for (k in 18:34) {st <- wrapper_gcm_bc_cf(k)} #part 2
+for (k in 1:17) {st <- wrapper_gcm_bc_cf(k)} #part 1
+for (k in 18:34) {st <- wrapper_gcm_bc_cf(k)} #part 2
 
 #from these, generate the wth files
 #permutation of gridcells and GCMs
@@ -78,9 +80,11 @@ ascDir <- paste(glamInDir,"/ascii",sep="")
 sowDir <- paste(ascDir,"/sow",sep="")
 wthDir_del <- paste(ascDir,"/wth-cmip5_rcp45_del",sep="") #pr is loci
 wthDir_sh <- paste(ascDir,"/wth-cmip5_rcp45_sh",sep="") #pr is loci
+wthDir_hsh <- paste(ascDir,"/wth-cmip5_hist_sh",sep="") #pr is loci
 
 if (!file.exists(wthDir_del)) {dir.create(wthDir_del)}
 if (!file.exists(wthDir_sh)) {dir.create(wthDir_sh)}
+if (!file.exists(wthDir_hsh)) {dir.create(wthDir_hsh)}
 
 #first test
 for (j in 4421:6630) {
