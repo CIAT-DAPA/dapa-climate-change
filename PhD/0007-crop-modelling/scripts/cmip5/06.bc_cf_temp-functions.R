@@ -23,6 +23,7 @@ make_cf_bc_wth_wrapper <- function(i) {
   #directories where the bias corrected data is
   oDir_cf <- paste(outDir_cf,"/",gcm,"/",ens,sep="") #folder with cf gridded data
   oDir_bc <- paste(outDir_bc,"/",gcm,"/",ens,sep="") #folder with bc gridded data
+  oDir_hbc <- paste(outDir_hbc,"/",gcm,"/",ens,sep="") #folder with bc gridded data
   
   #_del (this is: all are mean CF)
   #directories where check files are
@@ -40,7 +41,23 @@ make_cf_bc_wth_wrapper <- function(i) {
     close(ff)
   }
   
-  #_sh (this is: all are mean BC)
+  #_sh for hist (this is: all are mean BC)
+  #directories where check files are
+  checkDir <- paste(wthDir_hsh,"/_process",sep="")
+  if (!file.exists(checkDir)) {dir.create(checkDir)}
+  checkFil_hsh <- paste(checkDir,"/",sce,"_loc-",loc,".proc",sep="")
+  
+  if (!file.exists(checkFil_hsh)) {
+    outfol_his <- write_cmip5_loc(all_locs=cells,gridcell=loc,scen=sce,
+                                  year_i=2022,year_f=2049,wleap=thisLeap,
+                                  out_wth_dir=wthDir_hsh,fut_wth_dir=oDir_hbc,
+                                  sow_date_dir=sowDir)
+    ff <- file(checkFil_sh,"w")
+    cat("Processed on",date(),"\n",file=ff)
+    close(ff)
+  }
+  
+  #_sh for rcp (this is: all are mean BC)
   #directories where check files are
   checkDir <- paste(wthDir_sh,"/_process",sep="")
   if (!file.exists(checkDir)) {dir.create(checkDir)}
@@ -83,13 +100,16 @@ wrapper_gcm_bc_cf <- function(gcm_id) {
     #gcm outdir
     gcm_oDir_cf <- paste(outDir_cf,"/",gcm,"/",ens,"/",vn_gcm,sep="")
     gcm_oDir_bc <- paste(outDir_bc,"/",gcm,"/",ens,"/",vn_gcm,sep="")
+    gcm_oDir_hbc <- paste(outDir_hbc,"/",gcm,"/",ens,"/",vn_gcm,sep="")
     
     if (!file.exists(gcm_oDir_cf)) {dir.create(gcm_oDir_cf,recursive=T)}
     if (!file.exists(gcm_oDir_bc)) {dir.create(gcm_oDir_bc,recursive=T)}
+    if (!file.exists(gcm_oDir_hbc)) {dir.create(gcm_oDir_hbc,recursive=T)}
     
     nfil_cf <- length(list.files(gcm_oDir_cf,pattern="\\.csv"))
     nfil_bc <- length(list.files(gcm_oDir_bc,pattern="\\.csv"))
-    nfil <- min(c(nfil_cf,nfil_bc))
+    nfil_hbc <- length(list.files(gcm_oDir_hbc,pattern="\\.csv"))
+    nfil <- min(c(nfil_cf,nfil_bc,nfil_hbc))
     
     if (nfil < 195) {
       #loop through the gridcells
@@ -198,8 +218,10 @@ wrapper_gcm_bc_cf <- function(gcm_id) {
         if (vn_pbc) {
           if (vn_cht == "rel") {
             bcDat <- as.data.frame(t(apply(rcpDat,1,bc_cf_apply,data.frame(MONTH=corr_df$MONTH,FACT=corr_df$BC),wlp,vn_cht)))
+            hbcDat <- as.data.frame(t(apply(hisDat,1,bc_cf_apply,data.frame(MONTH=corr_df$MONTH,FACT=corr_df$BC),wlp,vn_cht)))
           } else {
             bcDat <- as.data.frame(t(apply(rcpDat,1,bc_cf_apply,data.frame(MONTH=corr_df$MONTH,FACT=corr_df$BC),wlp,vn_cht)))
+            hbcDat <- as.data.frame(t(apply(hisDat,1,bc_cf_apply,data.frame(MONTH=corr_df$MONTH,FACT=corr_df$BC),wlp,vn_cht)))
           }
           
           names(bcDat) <- paste("X",1:ncol(bcDat),sep="")
@@ -207,25 +229,33 @@ wrapper_gcm_bc_cf <- function(gcm_id) {
           if (wlp == "no") {bcDat$X366 <- NA}
           if (wlp == "all30") {bcDat$X361 <- NA; bcDat$X362 <- NA; bcDat$X363 <- NA; bcDat$X364 <- NA; bcDat$X365 <- NA; bcDat$X366 <- NA}
           write.csv(bcDat,paste(gcm_oDir_bc,"/cell-",loc,".csv",sep=""),row.names=F,quote=T)
+          
+          names(hbcDat) <- paste("X",1:ncol(hbcDat),sep="")
+          hbcDat <- cbind(YEAR=yi_f:yf_f,hbcDat)
+          if (wlp == "no") {hbcDat$X366 <- NA}
+          if (wlp == "all30") {hbcDat$X361 <- NA; hbcDat$X362 <- NA; hbcDat$X363 <- NA; hbcDat$X364 <- NA; hbcDat$X365 <- NA; hbcDat$X366 <- NA}
+          write.csv(hbcDat,paste(gcm_oDir_hbc,"/cell-",loc,".csv",sep=""),row.names=F,quote=T)
         }
       }
     }
   }
   
   
-  # #quick check on annual cycle
-  # ob_ac <- as.numeric(colMeans(obsDat[,2:ncol(obsDat)],na.rm=T))
-  # hi_ac <- as.numeric(colMeans(hisDat[,2:ncol(hisDat)],na.rm=T))
-  # rc_ac <- as.numeric(colMeans(rcpDat[,2:ncol(rcpDat)],na.rm=T))
-  # cf_ac <- as.numeric(colMeans(cfDat[,2:ncol(cfDat)],na.rm=T))
-  # bc_ac <- as.numeric(colMeans(bcDat[,2:ncol(bcDat)],na.rm=T))
-  # 
-  # windows()
-  # plot(1:366,cf_ac,ty="l",col="blue",ylim=c(5,32),lty=2)
-  # lines(1:366,bc_ac,ty="l",col="red",lty=2)
-  # lines(1:366,ob_ac,ty="l",col="black")
-  # lines(1:366,hi_ac,ty="l",col="blue")
-  # lines(1:366,rc_ac,ty="l",col="red")
+#   #quick check on annual cycle
+#   ob_ac <- as.numeric(colMeans(obsDat[,2:ncol(obsDat)],na.rm=T))
+#   hi_ac <- as.numeric(colMeans(hisDat[,2:ncol(hisDat)],na.rm=T))
+#   rc_ac <- as.numeric(colMeans(rcpDat[,2:ncol(rcpDat)],na.rm=T))
+#   cf_ac <- as.numeric(colMeans(cfDat[,2:ncol(cfDat)],na.rm=T))
+#   bc_ac <- as.numeric(colMeans(bcDat[,2:ncol(bcDat)],na.rm=T))
+#   hbc_ac <- as.numeric(colMeans(hbcDat[,2:ncol(bcDat)],na.rm=T))
+#   
+#   windows()
+#   plot(1:366,cf_ac,ty="l",col="blue",ylim=c(-10,30),lty=2)
+#   lines(1:366,bc_ac,ty="l",col="red",lty=2)
+#   lines(1:366,ob_ac,ty="l",col="black")
+#   lines(1:366,hi_ac,ty="l",col="blue")
+#   lines(1:366,rc_ac,ty="l",col="red")
+#   lines(1:366,hbc_ac,ty="l",col="purple")
   
   return("done!")
 }
