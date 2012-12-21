@@ -235,7 +235,7 @@ sfExport("ENV_CFG")
 sfExport("groupingList")
 
 #run the bias correction function in parallel
-system.time(sfSapply(as.vector(71371:90870),run_group_his_rcp))
+system.time(sfSapply(as.vector(90871:125970),run_group_his_rcp))
 
 #run the wth file generation function in parallel
 #system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
