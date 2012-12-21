@@ -344,7 +344,8 @@ cfg_adap_runs <- function(runs_data,rcp_data="output.RData") {
     #i <- 1
     param <- paste(gen_df$parameter[i])
     #for (bnd in c("low","mid","top")) {
-    for (bnd in c("low","top")) {
+    #for (bnd in c("low","top")) {
+    for (bnd in c("top")) {
       #bnd <- "low"
       out_df[rowc,param] <- c(gen_df[i,bnd])
       out_df$RUNID[rowc] <- rowc
