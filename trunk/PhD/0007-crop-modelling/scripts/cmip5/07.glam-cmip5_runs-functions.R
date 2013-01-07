@@ -1163,3 +1163,85 @@ GLAM_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   return(out_all)
 }
 
+
+################ check if a given run has been done
+check_done <- function(i,all_proc) {
+  #i <- ids[1]
+  #get config
+  run_cfg <- get_cfg(i,all_proc)
+  if (run_cfg$PERIOD == "HIS") {HIS <- T} else {HIS <- F}
+  
+  #check 1: .proc file exists
+  chk_fil <- paste(out_bdir,"/_process/exp-",run_cfg$PARSET,"_",run_cfg$SCE,"/",run_cfg$PERIOD,"_loc-",run_cfg$LOC,"_",run_cfg$WTYPE,"_",run_cfg$CO2_P,".proc",sep="")
+  chk1 <- file.exists(chk_fil)
+  
+  #check 2: output.RData file exists
+  if (HIS) {
+    rdir <- paste(out_bdir,"/exp-",run_cfg$PARSET,"_outputs/",run_cfg$SCE,"/",run_cfg$WTYPE,"_",run_cfg$LOC,sep="")
+  } else {
+    rdir <- paste(out_bdir,"/exp-",run_cfg$PARSET,"_outputs/",run_cfg$SCE,"/",run_cfg$WTYPE,"_",run_cfg$CO2_P,"_",run_cfg$LOC,sep="")
+  }
+  out_fil <- paste(rdir,"/output.RData",sep="")
+  chk2 <- file.exists(out_fil)
+  
+  #check 3: ygp != NA
+  if (!chk2) {
+    chk3 <- NA; chk4 <- NA
+  } else {
+    load(out_fil)
+    if (HIS) {
+      rm(list=c("ir_vls","setup","params"))
+      if (is.na(optimal$YGP)) {chk3 <- F} else {chk3 <- T}
+    } else {
+      if (is.na(run_data$YGP)) {chk3 <- F} else {chk3 <- T}
+    }
+  }
+  
+  #check 4: yield values != NA (calculate mean with na.rm=F and test)
+  if (chk2) {
+    if (HIS) {
+      rm(list=c("optimised","optimal"))
+      vals <- sapply(out_data,FUN=function(x) {return(mean(x$DATA$YIELD,na.rm=T))})
+      rm(out_data)
+    } else {
+      vals <- sapply(run_data$RUNS[[8]]$DATA,FUN=function(x) {return(mean(x$YIELD,na.rm=T))})
+    }
+    if (is.na(mean(vals,na.rm=F))) {chk4 <- F} else {chk4 <- T}
+  }
+  return(c(chk1,chk2,chk3,chk4))
+}
+
+
+#check each parameter set and a GCM individually
+check_group <- function(this_gcm,this_pst,all_proc) {
+  #this_pst <- groupingList$PARSET[1]
+  #this_gcm <- paste(groupingList$GCM[1])
+  subgroupList <- groupingList[which(groupingList$PARSET == this_pst & groupingList$GCM == this_gcm),]
+  
+  #check a given group
+  groupchecks <- data.frame()
+  for (j in 1:nrow(subgroupList)) {
+    #getting details
+    this_loc <- groupingList$LOC[j]
+    
+    #collating the ids
+    ids <- which(all_proc$LOC == this_loc & all_proc$PARSET == this_pst & all_proc$GCM == this_gcm)
+    
+    cat("\nrunning",length(ids),"ids \n")
+    cat("LOC:",this_loc,"\n")
+    cat("PARSET:",this_pst,"\n")
+    cat("GCM:",this_gcm,"\n")
+    
+    ####################################################
+    #loop ids in this group to check at the three levels
+    chkd <- as.data.frame(t(sapply(ids,FUN=check_done,all_proc)))
+    names(chkd) <- paste("CHECK.",1:4,sep="")
+    chkd <- cbind(RUNID=all_proc$RUNID[ids],chkd)
+    
+    #append to data.frame
+    groupchecks <- rbind(groupchecks,chkd)
+  }
+  return(groupchecks)
+}
+
+
