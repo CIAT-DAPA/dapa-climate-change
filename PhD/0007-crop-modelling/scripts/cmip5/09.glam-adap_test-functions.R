@@ -104,17 +104,15 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     inputType <- gsub("rcp_","",RUN_CFG$WTYPE)
     setup_rcp$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,"_",setup_rcp$CELL,sep="")
     
-#     #baseline run output stuff that is needed to get the optimal ygp value
-#     if (inputType == "del" | inputType == "sh") {
-#       hisType <- "his_allin"
-#     } else {
-#       hisType <- gsub("rcp_","his_",RUN_CFG$WTYPE)
-#     }
-    
     #output file of his and rcp run
     saveFile <- paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/output.RData",sep="")
     rcp_dir <- paste(setup_rcp$RCP_DIR,"/",setup_rcp$SIM_NAME,sep="")
     his_dir <- paste(setup_rcp$RCP_DIR,"/his_",inputType,"_",RUN_CFG$LOC,sep="")
+    
+#     #baseline run output stuff that is needed to get the optimal ygp value
+#     if (inputType == "del") {
+#       his_dir <- paste(setup_rcp$RCP_DIR,"/his_allin_",RUN_CFG$LOC,sep="")
+#     }
     
     saveFile_his <- paste(his_dir,"/output.RData",sep="")
     saveFile_rcp <- paste(rcp_dir,"/output.RData",sep="")
@@ -127,17 +125,18 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         ### get parameter set
         #######################################################
         #load baseline
-        load(saveFile_his)
-        rm(optimal); rm(optimised); rm(params); rm(setup)
-        # ybas <- out_data[[2]]$DATA$YIELD
-        rm(out_data)
+        #load(saveFile_his)
+        #rm(optimal); rm(optimised); rm(params); rm(setup)
+        #ybas <- out_data[[2]]$DATA$YIELD
+        #rm(out_data)
         
         #load future
         load(saveFile_rcp)
         #yfut <- run_data$RUNS[[8]]$DATA$RFD$YIELD
         
-        #get parameter set
+        #get parameter set and irrigated ratio
         params <- run_data$PARAMS
+        ir_vls <- run_data$IRATIO
         
         #ygp value and years
         params$glam_param.ygp$YGP$Value <- run_data$YGP
