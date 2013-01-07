@@ -67,11 +67,14 @@ parsetList <- parsetList$EXPID
 
 #Factor 4: experiments
 #conditionals may be needed inside the final function
-expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain") #old one
-expList_rcp <- c("rcp_allin","rcp_bcrain") #old one
+#expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain") #old one
+#expList_rcp <- c("rcp_allin","rcp_bcrain") #old one
 
-#expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain", "his_sh") #new one
-#expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh") #new one
+expList_his <- c("his_sh") #new one
+expList_rcp <- c("rcp_del","rcp_sh") #new one
+
+#expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain", "his_sh") #combined one
+#expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh") #combined one
 
 #Factor 5: planting date (30 days around baseline value)
 #only relevant for rcp experiments

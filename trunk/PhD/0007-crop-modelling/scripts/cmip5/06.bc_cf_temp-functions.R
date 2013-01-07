@@ -49,10 +49,10 @@ make_cf_bc_wth_wrapper <- function(i) {
   
   if (!file.exists(checkFil_hsh)) {
     outfol_his <- write_cmip5_loc(all_locs=cells,gridcell=loc,scen=sce,
-                                  year_i=2022,year_f=2049,wleap=thisLeap,
+                                  year_i=1966,year_f=1993,wleap=thisLeap,
                                   out_wth_dir=wthDir_hsh,fut_wth_dir=oDir_hbc,
                                   sow_date_dir=sowDir)
-    ff <- file(checkFil_sh,"w")
+    ff <- file(checkFil_hsh,"w")
     cat("Processed on",date(),"\n",file=ff)
     close(ff)
   }
@@ -231,7 +231,7 @@ wrapper_gcm_bc_cf <- function(gcm_id) {
           write.csv(bcDat,paste(gcm_oDir_bc,"/cell-",loc,".csv",sep=""),row.names=F,quote=T)
           
           names(hbcDat) <- paste("X",1:ncol(hbcDat),sep="")
-          hbcDat <- cbind(YEAR=yi_f:yf_f,hbcDat)
+          hbcDat <- cbind(YEAR=yi_h:yf_h,hbcDat)
           if (wlp == "no") {hbcDat$X366 <- NA}
           if (wlp == "all30") {hbcDat$X361 <- NA; hbcDat$X362 <- NA; hbcDat$X363 <- NA; hbcDat$X364 <- NA; hbcDat$X365 <- NA; hbcDat$X366 <- NA}
           write.csv(hbcDat,paste(gcm_oDir_hbc,"/cell-",loc,".csv",sep=""),row.names=F,quote=T)

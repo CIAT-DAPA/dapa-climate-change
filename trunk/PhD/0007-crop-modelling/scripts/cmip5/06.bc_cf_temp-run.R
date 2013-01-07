@@ -65,8 +65,8 @@ varmx <- data.frame(OBS=c("cru_tmn","cru_tmx","rain","srad_e40"),
 #length=34
 
 #produce the grid cell csv files
-for (k in 1:17) {st <- wrapper_gcm_bc_cf(k)} #part 1
-for (k in 18:34) {st <- wrapper_gcm_bc_cf(k)} #part 2
+#for (k in 1:17) {st <- wrapper_gcm_bc_cf(k)} #part 1
+#for (k in 18:34) {st <- wrapper_gcm_bc_cf(k)} #part 2
 
 #from these, generate the wth files
 #permutation of gridcells and GCMs
