@@ -240,9 +240,6 @@ sfExport("groupingList")
 #run the cmip5-run function in parallel, step is 100*195
 system.time(sfSapply(as.vector(1:19500),run_group_his_rcp))
 
-#run the wth file generation function in parallel
-#system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
-
 #stop the cluster
 sfStop()
 

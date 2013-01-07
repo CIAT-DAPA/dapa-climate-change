@@ -32,7 +32,7 @@ adapDir <- paste(cropDir,"/adapt",sep="")
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 
 #experimental set up
-inList <- c("allin","bcrain")
+inList <- c("allin","bcrain","sh","del")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 
 #load list of parameter sets
