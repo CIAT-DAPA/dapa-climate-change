@@ -93,9 +93,39 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
 
 #output directory
 out_bdir <- paste(glamDir,"/model-runs/",toupper(cropName),"/runs/",runs_name,sep="")
+out_chkdir <- paste(out_bdir,"/_outputs/checks",sep="")
+if (!file.exists(out_chkdir)) {dir.create(out_chkdir)}
 
-#output of group checking
-grp_out <- check_group("bcc_csm1_1_ENS_r1i1p1",33,all_proc)
+##########################################################
+#loop gcms for given exp
+expid <- parsetList[1] #33
+for (gcm in gcmList) {
+  #gcm <- gcmList[1] #"bcc_csm1_1_ENS_r1i1p1"
+  cat("\nProcessing GCM:",gcm,"\n")
+  
+  #output file
+  rfile <- paste(out_chkdir,"/exp-",expid,"_",gcm,".RData",sep="")
+  
+  if (!file.exists(rfile)) {
+    #output of group checking
+    grp_out <- check_group(this_gcm=gcm,this_pst=expid,all_proc,groupingList)
+    
+    #summarise
+    grp_sum <- summary_check(grp_out,all_proc)
+    
+    #write outputs on a RData file
+    save(list=c("grp_sum","grp_out"),file=rfile)
+  } else {
+    load(rfile)
+  }
+  
+  if (gcm==gcmList[1]) {
+    sum_exp <- grp_sum
+  } else {
+    sum_exp <- rbind(sum_exp,grp_sum)
+  }
+}
 
+write.csv(sum_exp,paste(out_chkdir,"/exp-",expid,"_summary.csv",sep=""),row.names=F,quote=T)
 
 

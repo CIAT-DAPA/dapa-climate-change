@@ -1206,14 +1206,14 @@ check_done <- function(i,all_proc) {
     } else {
       vals <- sapply(run_data$RUNS[[8]]$DATA,FUN=function(x) {return(mean(x$YIELD,na.rm=T))})
     }
-    if (is.na(mean(vals,na.rm=F))) {chk4 <- F} else {chk4 <- T}
+    if (is.na(mean(vals,na.rm=T))) {chk4 <- F} else {chk4 <- T}
   }
   return(c(chk1,chk2,chk3,chk4))
 }
 
 
 #check each parameter set and a GCM individually
-check_group <- function(this_gcm,this_pst,all_proc) {
+check_group <- function(this_gcm,this_pst,all_proc,groupingList) {
   #this_pst <- groupingList$PARSET[1]
   #this_gcm <- paste(groupingList$GCM[1])
   subgroupList <- groupingList[which(groupingList$PARSET == this_pst & groupingList$GCM == this_gcm),]
@@ -1227,10 +1227,7 @@ check_group <- function(this_gcm,this_pst,all_proc) {
     #collating the ids
     ids <- which(all_proc$LOC == this_loc & all_proc$PARSET == this_pst & all_proc$GCM == this_gcm)
     
-    cat("\nrunning",length(ids),"ids \n")
-    cat("LOC:",this_loc,"\n")
-    cat("PARSET:",this_pst,"\n")
-    cat("GCM:",this_gcm,"\n")
+    cat("LOC:",this_loc,"/ PARSET:",this_pst,"/ GCM:",this_gcm,"\n")
     
     ####################################################
     #loop ids in this group to check at the three levels
@@ -1244,4 +1241,31 @@ check_group <- function(this_gcm,this_pst,all_proc) {
   return(groupchecks)
 }
 
-
+#count successful runs per factor
+summary_check <- function(group_chk,all_proc) {
+  #count by factor
+  group_chk <- merge(group_chk,all_proc,by="RUNID",sort=F)
+  group_chk$PERIOD <- sapply(group_chk$RUNID,FUN= function(x) {unlist(strsplit(paste(x),"_",fixed=T))[1]})
+  group_chk$WTH_TYPE <- paste(group_chk$WTH_TYPE)
+  
+  #loop through relevant factors (others are constant)
+  summ_out <- data.frame()
+  for (per in unique(group_chk$PERIOD)) {
+    #per <- unique(group_chk$PERIOD)[1]
+    chkper <- group_chk[which(group_chk$PERIOD==per),]
+    for (wth in unique(chkper$WTH_TYPE)) {
+      #wth <- unique(chkper$WTH_TYPE)[1]
+      chkwth <- chkper[which(chkper$WTH_TYPE==wth),]
+      for (c2p in unique(chkwth$CO2_P)) {
+        #c2p <- unique(chkwth$CO2_P)[1]
+        chkdat <- chkwth[which(chkwth$CO2_P==c2p),]
+        out_row <- data.frame(PARSET=chkdat$PARSET[1],GCM=chkdat$GCM[1],PERIOD=per,
+                              WTH_TYPE=wth,CO2_P=c2p,CHECK.1=length(which(chkdat$CHECK.1)),
+                              CHECK.2=length(which(chkdat$CHECK.2)),CHECK.3=length(which(chkdat$CHECK.3)),
+                              CHECK.4=length(which(chkdat$CHECK.4)))
+        summ_out <- rbind(summ_out,out_row)
+      }
+    }
+  }
+  return(summ_out)
+}
