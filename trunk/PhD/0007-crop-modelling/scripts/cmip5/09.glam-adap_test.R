@@ -137,7 +137,7 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #run_config <- get_cfg_adap(170,all_proc)
 #run testing
 #system.time(glam_adap_run_wrapper(run_config))
-#timall <- run_group_adap(196)
+#timall <- run_group_adap(976)
 
 #############################################################################
 ## parallel processing ######################################################
