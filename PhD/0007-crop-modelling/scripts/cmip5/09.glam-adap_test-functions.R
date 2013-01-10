@@ -94,6 +94,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     setup_rcp$SIM_NAME <- NA # temporary
     setup_rcp$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
     setup_rcp$OPT_METHOD <- NA #not needed for future climate run
+    if (!is.null(setup_rcp$ALT_BIN)) {setup_rcp$ALT_BIN <- NULL} else {setup_rcp$ALT_BIN <- ENV_CFG$ALT_BIN}
     
     #if using scratch directory instead of nfs
     if (setup_rcp$USE_SCRATCH) {setup_rcp$SCRATCH <- paste(setup_rcp$SCRATCH,"/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")}
@@ -198,13 +199,12 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         
         #here remove everything
         setwd(setup_rcp$BDIR)
-        system(paste("rm -rf ",paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/",setup_rcp$SIM_NAME,sep="")))
-        
-        #write control file
-        ff <- file(ctrl_fil,"w")
-        cat("Processed on",date(),"\n",file=ff)
-        close(ff)
+        #system(paste("rm -rf ",paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/",setup_rcp$SIM_NAME,sep="")))
       }
+      #write control file
+      ff <- file(ctrl_fil,"w")
+      cat("Processed on",date(),"\n",file=ff)
+      close(ff)
     } else {
       cat("rcp experiment for this run has not yet been run \n")
     }
@@ -420,7 +420,12 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   #determine operating system and bin folder
   machine <- as.data.frame(t(Sys.info()))
   machine <- paste(machine$sysname)
-  binDir <- paste(bDir,"/model-runs/bin/glam-",tolower(machine),sep="")
+  
+  if (is.null(RUN_setup$ALT_BIN)) {
+    binDir <- paste(bDir,"/model-runs/bin/glam-",tolower(machine),sep="")
+  } else {
+    binDir <- paste(RUN_setup$ALT_BIN,"/glam-",tolower(machine),sep="")
+  }
   
   if (tolower(machine) == "windows") {
     glam_cmd <- paste(paste(execName,".exe",sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
@@ -921,7 +926,7 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   out_all$DATA$IRR <- irr_data
   
   if (RUN_setup$USE_SCRATCH) {
-    system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
+    #system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     setwd(nfs_dir)
     system(paste("rm -rf ",cal_dir,sep=""))
   }
