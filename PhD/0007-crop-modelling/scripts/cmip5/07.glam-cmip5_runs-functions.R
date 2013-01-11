@@ -227,7 +227,7 @@ glam_rcp_run_wrapper <- function(RUN_CFG) {
         
         #here remove everything
         setwd(setup_rcp$BDIR)
-        system(paste("rm -rf ",paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/",setup_rcp$SIM_NAME,sep="")))
+        #system(paste("rm -rf ",paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/",setup_rcp$SIM_NAME,sep="")))
         
         #delete folders of temporary data, if they exist
         if (exists("osow_dir")) {if (file.exists(osow_dir)) {system(paste("rm -rf ",osow_dir,sep=""))}}
@@ -1156,7 +1156,7 @@ GLAM_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   out_all$DATA$IRR <- irr_data
   
   if (RUN_setup$USE_SCRATCH) {
-    system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
+    #system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     setwd(nfs_dir)
     system(paste("rm -rf ",cal_dir,sep=""))
   }

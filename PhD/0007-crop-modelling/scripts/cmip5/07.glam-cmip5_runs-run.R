@@ -237,6 +237,9 @@ sfExport("all_proc")
 sfExport("ENV_CFG")
 sfExport("groupingList")
 
+#1:19500 for eljefe-02
+#19501:
+
 #run the cmip5-run function in parallel, step is 100*195
 system.time(sfSapply(as.vector(1:19500),run_group_his_rcp))
 
