@@ -238,11 +238,16 @@ sfExport("ENV_CFG")
 sfExport("groupingList")
 
 #sets of runs
+#batch 1
 #eljefe-02 --> 1:19500
 #eljefe-01 --> 19501:29250
 
+#batch 2
+#eljefe-02 --> 29251:48750
+#eljefe-01 --> 48751:58500
+
 #run the cmip5-run function in parallel, step is 100*195
-system.time(sfSapply(as.vector(19501:29250),run_group_his_rcp))
+system.time(sfSapply(as.vector(48751:58500),run_group_his_rcp))
 
 #stop the cluster
 sfStop()
