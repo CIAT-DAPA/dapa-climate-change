@@ -6,8 +6,8 @@ library(raster)
 
 #source directories
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
 source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
 
@@ -17,15 +17,15 @@ ver <- "v6"
 runs_name <- "cmip5_all"
 adap_name <- "cmip5_adapt"
 maxiter <- 15 #to grab last optim values
-#scratch <- "/scratch/eejarv"
-scratch <- "~/Workspace"
+scratch <- "/scratch/eejarv"
+#scratch <- "~/Workspace"
 
 use_scratch <- T
 
 #base and data directories
 #bDir <- "W:/eejarv/PhD-work/crop-modelling"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
-bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+#bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
 glamDir <- paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
@@ -123,9 +123,10 @@ ENV_CFG$USE_SCRATCH <- use_scratch
 ENV_CFG$CELLS <- cells
 ENV_CFG$IRR_DATA <- NA
 ENV_CFG$OPT_METHOD <- NA
-ENV_CFG$OUT_BDIR <- paste("~/PhD-work/crop-modelling/model-runs/",toupper(ENV_CFG$CROP_NAME),"/adapt/",ENV_CFG$ADAP_NAME,sep="")
+#ENV_CFG$OUT_BDIR <- paste("~/PhD-work/crop-modelling/model-runs/",toupper(ENV_CFG$CROP_NAME),"/adapt/",ENV_CFG$ADAP_NAME,sep="") #local L2
+ENV_CFG$OUT_BDIR <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),"/adapt/",ENV_CFG$ADAP_NAME,sep="") #eljefe
 ENV_CFG$ADAP_RUNS <- adap_runs
-ENV_CFG$ALT_BIN <- "~/PhD-work/crop-modelling/model-runs/bin"
+#ENV_CFG$ALT_BIN <- "~/PhD-work/crop-modelling/model-runs/bin" #local L2
 
 #grouping list
 #do some type of grouping. This is done by gridcell, parameter set and GCM
@@ -138,6 +139,19 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #run testing
 #system.time(glam_adap_run_wrapper(run_config))
 #timall <- run_group_adap(976)
+
+#preliminary runs while other stuff finishes up
+# lim_a <- 781
+# lim_b <- 975
+# 
+# for (k in lim_a:lim_b) {
+#   tima <- run_group_adap(k)
+#   tima <- sum(tima)/60
+#   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+#   cat("TIME ELAPSED:",tima,"\n")
+#   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+# }
+
 
 #############################################################################
 ## parallel processing ######################################################
@@ -175,9 +189,6 @@ sfExport("adap_runs")
 
 #run the bias correction function in parallel
 system.time(sfSapply(as.vector(1:19500),run_group_adap))
-
-#run the wth file generation function in parallel
-#system.time(sfSapply(as.vector(1:nrow(all_proc)),make_bc_wth_wrapper))
 
 #stop the cluster
 sfStop()
