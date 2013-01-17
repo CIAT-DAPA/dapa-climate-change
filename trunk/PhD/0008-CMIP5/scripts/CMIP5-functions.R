@@ -1744,7 +1744,7 @@ wrapper_climatology_E40 <- function(m) {
   source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
   
-  vnList <- c("prec","tasm")
+  vnList <- c("prec","tasm","wet","dtr")
   for (vn in vnList) {
     #vn <- vnList[1]
     cat("processing variable",vn,"\n")
@@ -1774,12 +1774,18 @@ wrapper_monthly_E40 <- function(year) {
   source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
   
   #loop the variables
-  vnList <- c("prec","tasm")
+  vnList <- c("prec","tasm","wet","dtr")
   for (vn in vnList) {
-    cat("processing variable",vn,"\n")
-    vnDir <- paste(e40Dir,"/daily_data_",vn,sep="")
+    cat("\nprocessing variable",vn,"\n")
     #vn <- vnList[1]
     #year <- 1961
+    
+    if (vn == "wet") {
+      vnDir <- paste(e40Dir,"/daily_data_prec",sep="")
+    } else {
+      vnDir <- paste(e40Dir,"/daily_data_",vn,sep="")
+    }
+    
     cat("\nprocessing year",year,"\n")
     yrDir <- paste(vnDir,"/",year,sep="")
     oyrDir <- paste(e40Dir,"/monthly_data_",vn,"/",year,sep="")
@@ -1796,11 +1802,19 @@ wrapper_monthly_E40 <- function(year) {
       if (!file.exists(paste(oyrDir,"/",vn,"_",m,".tif",sep=""))) {
         wdays <- dg$JD[which(dg$MTH==m)] #which days belong to this month
         
-        #load stack and calculate total
-        rstk <- stack(paste(yrDir,"/",vn,"_",wdays,".asc",sep=""))
+        #load stack and calculate total (or mean)
+        if (vn == "wet") {
+          rstk <- stack(paste(yrDir,"/prec_",wdays,".asc",sep=""))
+        } else {
+          rstk <- stack(paste(yrDir,"/",vn,"_",wdays,".asc",sep=""))
+        }
+        
+        #calculate totals/means/counts according to variable
         if (vn == "prec") {
           rs <- calc(rstk,fun = function(x) {sum(x,na.rm=T)})
-        } else if (vn == "tasm") {
+        } else if (vn == "wet") {
+          rs <- calc(rstk,fun = function(x) {return(length(which(x>0.01)))})
+        } else {
           rs <- calc(rstk,fun = function(x) {mean(x,na.rm=T)})
         }
         
@@ -1810,7 +1824,6 @@ wrapper_monthly_E40 <- function(year) {
       }
     }
     cat("\n")
-    
   }
 }
 
