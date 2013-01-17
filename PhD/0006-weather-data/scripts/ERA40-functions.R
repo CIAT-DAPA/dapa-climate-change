@@ -92,6 +92,55 @@ year_wrapper_tasm <- function(year) {
 }
 
 
+##############################################################
+### wrapper to process a given year maximum temperature data
+year_wrapper_dtr <- function(year) {
+  library(raster); library(rgdal); library(ncdf)
+  setwd(wd)
+  
+  cat("\nProcessing year",year,"\n")
+  oYrDir <- paste(oDir,"/",year,sep="")
+  if (!file.exists(oYrDir)) {dir.create(oYrDir)}
+  
+  nd <- leap(year)
+  if (year == 2002) {nd <- 243}
+  for (day in 1:nd) {
+    cat(day," ")
+    if (!file.exists(paste(oYrDir,"/dtr_",day,".asc",sep=""))) {
+      posit <- findNCPos(year,day,as.numeric(substr(dates.table$START[i],1,4)))
+      
+      if (posit == 0) {
+        posit_p <- findNCPos(year,day,as.numeric(substr(dates.table$START[i-1],1,4)))
+        rs_00 <- raster(pfName,band=posit_p)
+      } else {
+        rs_00 <- raster(fName,band=posit)
+      }
+      rs_06 <- raster(fName,band=(posit+1))
+      rs_12 <- raster(fName,band=(posit+2))
+      rs_18 <- raster(fName,band=(posit+3))
+      
+      #maximum
+      rsa <- calc(stack(rs_00,rs_06,rs_12,rs_18),fun=function(x) {max(x,na.rm=T)})
+      rsa <- rsa - 273.15
+      
+      #minimum
+      rsb <- calc(stack(rs_00,rs_06,rs_12,rs_18),fun=function(x) {min(x,na.rm=T)})
+      rsb <- rsb - 273.15
+      
+      #range
+      rs <- rsa-rsb
+      rs <- rotate(rs)
+      
+      rs <- writeRaster(rs,paste(oYrDir,"/dtr_",day,".asc",sep=""),format='ascii')
+      rm(rs); g=gc(); rm(g)
+      
+      #plot(rs,col=rainbow(100))
+      #plot(wrld_simpl,add=T)
+    }
+  }
+  cat("\n")
+}
+
 
 ##############################################################
 ### wrapper to process a given year solar radiation data
