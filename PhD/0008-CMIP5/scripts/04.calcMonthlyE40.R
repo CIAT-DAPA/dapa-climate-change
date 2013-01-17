@@ -8,15 +8,20 @@
 library(raster)
 
 #variables to be set
+
+### eljefe
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#mdDir <- "/nfs/a102/eejarv/CMIP5"
 #e40Dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/climate-data/ERA-40"
 
+#see4-75 Centos6
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0008-CMIP5"
+e40Dir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/climate-data/ERA-40"
 
+#see4-75 windows7
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#mdDir <- "V:/eejarv/CMIP5"
 #e40Dir <- "W:/eejarv/PhD-work/crop-modelling/climate-data/ERA-40"
 
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
