@@ -1,6 +1,7 @@
 #Julian Ramirez-Villegas
 #May 2012
 #UoL / CCAFS / CIAT
+stop("do not run please!")
 
 library(raster); library(rgdal); library(maptools)
 
@@ -34,28 +35,210 @@ outputDD <- paste(mdDir,"/assessment/output-data",sep="")
 #administrative areas data
 admDir <- paste(inputDD,"/adm-data",sep="")
 
-#list of gcms and countries/regions
-gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
+#list of countries/regions
 regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
 
 #variables to analyse
-vnList <- data.frame(VID=1:4,GCM=c("pr","tas","dtr","rd"),WCL=c("prec","tmean","dtr",NA),
-                     CL_CRU=c("prec","tmean","dtr","wet"),TS_CRU=c("pre","tmp","dtr","wet"),
-                     E40=c("prec","tasm","dtr","wet"),CL_WST=c("rain","tean","dtr",NA),
-                     TS_WST=c("pr","tas","dtr",NA))
+vnList <- data.frame(VID=1:3,GCM=c("prec","tmean","dtr"),WCL=c("prec","tmean","dtr"),
+                     CL_CRU=c("prec","tmean","dtr"),TS_CRU=c("pre","tmp","dtr"),
+                     E40=c("prec","tasm","dtr"),CL_WST=c("rain","tean","dtr"),
+                     TS_WST=c("pr","tas","dtr"))
 
 #scaling factors to datasets per variable
-scList <- data.frame(VID=1:4,GCM=c(1,1,1,1),WCL=c(1,1,1,NA),
-                     CL_CRU=c(1,1,1,1),TS_CRU=c(0.1,0.1,0.1,0.01),
-                     E40=c(1,1,1,1),CL_WST=c(1,1,1,NA),
-                     TS_WST=c(1,0.1,0.1,NA))
+scList <- data.frame(VID=1:3,GCM=c(1,1,1),WCL=c(1,1,1),
+                     CL_CRU=c(1,1,1),TS_CRU=c(0.1,0.1,0.1),
+                     E40=c(1,1,1),CL_WST=c(1,1,1),
+                     TS_WST=c(1,0.1,0.1))
+
+########################
+### calculate dtr for all GCMs
+########################
+gcmList <- list.files(mdDir)
+for (gcm in gcmList) {
+  #gcm <- gcmList[1]
+  gcmDir <- paste(mdDir,"/",gcm,sep="")
+  yrDir <- paste(gcmDir,"/yearly_files",sep="")
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("XXXXXXXX processing gcm", gcm,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  yri <- 1961; yrf <- 2000
+  for (yr in yri:yrf) {
+    cat("year:",yr,":")
+    #yr <- yri
+    for (m in 1:12) {
+      #m <- 1
+      cat(m,". ",sep="")
+      mth <- sprintf("%02d",m)
+      tn <- paste(yrDir,"/",yr,"/tmin_",mth,".nc",sep="")
+      tx <- paste(yrDir,"/",yr,"/tmax_",mth,".nc",sep="")
+      
+      if (file.exists(tn) & file.exists(tx)) {
+        if (!file.exists(paste(yrDir,"/",yr,"/dtr_",mth,".nc",sep=""))) {
+          rs1 <- raster(tn)
+          rs2 <- raster(tx)
+          rs <- rs2 - rs1
+          rs <- writeRaster(rs,paste(yrDir,"/",yr,"/dtr_",mth,".nc",sep=""),
+                            format="CDF",overwrite=T,varname="dtr",xname="lon",yname="lat",zname="time")
+          rm(list=c("rs1","rs2","rs")); g=gc(); rm(g)
+        }
+      }
+    }
+    cat("\n")
+  }
+}
 
 
+########################
+### calculate 1961-2000 mean for CMIP3 models
+########################
+gcmList <- list.files(mdDir)
+for (gcm in gcmList) {
+  #gcm <- gcmList[1]
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("XXXXXXXX processing gcm", gcm,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")  
+  
+  gcmDir <- paste(mdDir,"/",gcm,sep="")
+  yr_iDir <- paste(gcmDir,"/yearly_files",sep="")
+  cl_oDir <- paste(gcmDir,"/multiyr_avgs",sep="")
+  
+  yri <- 1961; yrf <- 2000
+  rs_oDir <- paste(cl_oDir,"/",yri,"_",yrf,sep="")
+  if (!file.exists(rs_oDir)) {dir.create(rs_oDir)}
+  
+  for (vn in c("prec","tmean","tmin","tmax","dtr")) {
+    #vn <- "prec"
+    cat("\nvariable:",vn,"\n")
+    for (m in 1:12) {
+      #m <- 1
+      mth <- sprintf("%02d",m)
+      fList <- paste(yr_iDir,"/",yri:yrf,"/",vn,"_",mth,".nc",sep="")
+      fList <- as.character(sapply(fList,FUN=checkExists))
+      fList <- fList[which(!is.na(fList))]
+      
+      if (length(fList)>0) {
+        if (!file.exists(paste(rs_oDir,"/",vn,"_",mth,".nc",sep=""))) {
+          rstk <- stack(fList)
+          rs <- calc(rstk,fun=function(x) {mean(x,na.rm=T)})
+          rs <- writeRaster(rs,paste(rs_oDir,"/",vn,"_",mth,".nc",sep=""),
+                            format="CDF",overwrite=T,varname=vn,xname="lon",yname="lat",zname="time")
+          rm(rstk); g=gc(); rm(g)
+        }
+      }
+    }
+  }
+}
+
+
+########################
+### calculate MMM for yearly data
+########################
+gcmList <- list.files(mdDir)
+moDir <- paste(mdDir,"/multi_model_mean/yearly_files",sep="")
+if (!file.exists(moDir)) {dir.create(moDir,recursive=T)}
+
+yri <- 1961; yrf <- 2000
+for (yr in yri:yrf) {
+  #yr <- yri
+  oyrDir <- paste(moDir,"/",yr,sep="")
+  if (!file.exists(oyrDir)) {dir.create(oyrDir)}
+  
+  #loop through variables and months
+  for (vn in c("prec","tmean","tmin","tmax","dtr")) {
+    #vn <- "prec"
+    cat("year:",yr,": var :",vn,":")
+    for (m in 1:12) {
+      #m <- 1
+      cat(m,". ",sep="")
+      mth <- sprintf("%02d",m)
+      fList <- paste(mdDir,"/",gcmList,"/yearly_files/",yr,"/",vn,"_",mth,".nc",sep="")
+      fList <- as.character(sapply(fList,FUN=checkExists))
+      fList <- fList[which(!is.na(fList))]
+      
+      if (!file.exists(paste(oyrDir,"/",vn,"_",mth,".nc",sep=""))) {
+        #load rasters of different resolution into list
+        mList <- list()
+        xr <- c(); yr <- c()
+        for (i in 1:length(fList)) {
+          rs <- raster(fList[i])
+          mList[[i]] <- rs
+          xr <- c(xr,xres(rs)); yr <- c(yr,yres(rs))
+        }
+        
+        mList_res <- list()
+        sxr <- which(xr==min(xr))[1]
+        for (i in 1:length(mList)) {
+          mList_res[[i]] <- resample(mList[[i]],mList[[sxr]],method="ngb")
+        }
+        
+        rstk <- stack(mList_res)
+        rs <- calc(rstk,fun=function(x) {mean(x,na.rm=T)})
+        rs <- writeRaster(rs,paste(oyrDir,"/",vn,"_",mth,".nc",sep=""),
+                          format="CDF",overwrite=T,varname=vn,xname="lon",yname="lat",zname="time")
+        rm(list=c("rstk","rs","mList","mList_res")); g=gc(); rm(g)
+      }
+    }
+    cat("\n")
+  }
+}
+
+
+########################
+### calculate MMM for climatological means
+########################
+moDir <- paste(mdDir,"/multi_model_mean/multiyr_avgs/1961_2000",sep="")
+if (!file.exists(moDir)) {dir.create(moDir,recursive=T)}
+
+#loop through variables and months
+for (vn in c("prec","tmean","tmin","tmax","dtr")) {
+  #vn <- "prec"
+  cat("var :",vn,":")
+  for (m in 1:12) {
+    #m <- 1
+    cat(m,". ",sep="")
+    mth <- sprintf("%02d",m)
+    fList <- paste(mdDir,"/",gcmList,"/multiyr_avgs/1961_2000/",vn,"_",mth,".nc",sep="")
+    fList <- as.character(sapply(fList,FUN=checkExists))
+    fList <- fList[which(!is.na(fList))]
+    
+    if (!file.exists(paste(moDir,"/",vn,"_",mth,".nc",sep=""))) {
+      #load rasters of different resolution into list
+      mList <- list()
+      xr <- c(); yr <- c()
+      for (i in 1:length(fList)) {
+        rs <- raster(fList[i])
+        mList[[i]] <- rs
+        xr <- c(xr,xres(rs)); yr <- c(yr,yres(rs))
+      }
+      
+      mList_res <- list()
+      sxr <- which(xr==min(xr))[1]
+      for (i in 1:length(mList)) {
+        mList_res[[i]] <- resample(mList[[i]],mList[[sxr]],method="ngb")
+      }
+      
+      rstk <- stack(mList_res)
+      rs <- calc(rstk,fun=function(x) {mean(x,na.rm=T)})
+      rs <- writeRaster(rs,paste(oyrDir,"/",vn,"_",mth,".nc",sep=""),
+                        format="CDF",overwrite=T,varname=vn,xname="lon",yname="lat",zname="time")
+      rm(list=c("rstk","rs","mList","mList_res")); g=gc(); rm(g)
+    }
+  }
+  cat("\n")
+}
+
+
+#################################################################################
+#################################################################################
 #processes to complete
-gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
-gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
+gcmList <- list.files(mdDir)
+gcmList <- c(gcmList,paste("multi_model_mean"))
 isoList <- regions$ISO
 procList <- expand.grid(GCM=gcmList,ISO=isoList)
+
 
 
 #################################################################################
