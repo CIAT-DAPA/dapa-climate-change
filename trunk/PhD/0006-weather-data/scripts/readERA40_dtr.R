@@ -41,7 +41,7 @@ for (i in 1:4) {
   }
   
   library(snowfall)
-  sfInit(parallel=T,cpus=3)
+  sfInit(parallel=T,cpus=4)
   
   sfExport("leap")
   sfExport("findNCPos")
