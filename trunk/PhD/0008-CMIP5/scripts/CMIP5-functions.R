@@ -614,7 +614,7 @@ interannual_vi_revised <- function(this_proc) {
   
   oDir <- paste(outputDD,"/",reg,"/",iso,sep="") #create output directory
   if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
-  procDir <- paste(oDir,"/z.proc",sep="") #output directory for .proc files
+  procDir <- paste(oDir,"/z_rev.proc",sep="") #output directory for .proc files
   if (!file.exists(procDir)) {dir.create(procDir)}
   
   #load shapefile
@@ -673,7 +673,7 @@ interannual_vi_revised <- function(this_proc) {
         if (length(which(!fList$PRESENT)) != length(yi:yf)) {
           vn_cru <- paste(vnList$TS_CRU[vid]) #variable name
           sc_cru <- scList$TS_CRU[vid]
-          otsCRU <- paste(oDir,"/vi-CRU",sep="") #create output folder
+          otsCRU <- paste(oDir,"/vi_rev-CRU",sep="") #create output folder
           if (!file.exists(otsCRU)) {dir.create(otsCRU)} #create output folder
           if (!file.exists(paste(otsCRU,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
             cru_data <- stack(paste(tsCRU,"/cru_ts_3_10.1901.2009.",vn_cru,"_",yi:yf,"_",m,".tif",sep="")) #load all cru data
@@ -705,7 +705,7 @@ interannual_vi_revised <- function(this_proc) {
         if (length(which(!fList$PRESENT)) != length(yi:yf)) {
           vn_e40 <- paste(vnList$E40[vid]) #variable name
           sc_e40 <- scList$E40[vid]
-          otsE40 <- paste(oDir,"/vi-E40",sep="") #create output folder
+          otsE40 <- paste(oDir,"/vi_rev-E40",sep="") #create output folder
           if (!file.exists(otsE40)) {dir.create(otsE40)} #create output folder
           if (!file.exists(paste(otsE40,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
             e40_data <- stack(paste(tsE40,"/monthly_data_",vn_e40,"/",yi:yf,"/",vn_e40,"_",m,".tif",sep="")) #load all era40 data
@@ -758,7 +758,7 @@ interannual_vi_revised <- function(this_proc) {
       vn_wst <- paste(vnList$TS_WST[vid]) #variable name
       sc_wst <- scList$TS_WST[vid]
       if (vn_wst != "NA") {
-        otsWST <- paste(oDir,"/vi-WST",sep="") #create output folder
+        otsWST <- paste(oDir,"/vi_rev-WST",sep="") #create output folder
         if (!file.exists(otsWST)) {dir.create(otsWST)} #create output folder
         if (!file.exists(paste(otsWST,"/",vn_gcm,"_",gcm,"_",ens,".csv",sep=""))) {
           vn_wst <- paste(vnList$TS_WST[vid])
