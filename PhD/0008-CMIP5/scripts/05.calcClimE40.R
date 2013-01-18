@@ -19,6 +19,12 @@ library(raster)
 #mdDir <- "V:/eejarv/CMIP5"
 #e40Dir <- "W:/eejarv/PhD-work/crop-modelling/climate-data/ERA-40"
 
+
+#dawnpatrol Centos6
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0008-CMIP5"
+e40Dir <- "/media/PhD_data_01/PhD-work/crop-modelling/climate-data/ERA-40"
+
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
 
@@ -26,7 +32,7 @@ yi <- 1961
 yf <- 2000
 
 ncpus <- length(1:12)
-if (ncpus>12) {ncpus <- 12}
+if (ncpus>4) {ncpus <- 4}
 
 #here do the parallelisation
 #load library and create cluster
@@ -36,7 +42,6 @@ sfInit(parallel=T,cpus=ncpus)
 #export functions
 sfExport("src.dir")
 sfExport("src.dir2")
-sfExport("mdDir")
 sfExport("e40Dir")
 sfExport("yi")
 sfExport("yf")
