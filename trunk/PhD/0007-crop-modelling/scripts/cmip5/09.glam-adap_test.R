@@ -141,8 +141,8 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #timall <- run_group_adap(976)
 
 #preliminary runs while other stuff finishes up
-# lim_a <- 781
-# lim_b <- 975
+# lim_a <- 601
+# lim_b <- 780
 # 
 # for (k in lim_a:lim_b) {
 #   tima <- run_group_adap(k)
