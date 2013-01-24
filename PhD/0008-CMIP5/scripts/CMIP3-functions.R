@@ -11,14 +11,13 @@ check_done <- function(procList,check_dir="x.proc") {
   for (i in 1:nrow(procList)) {
     iso <- paste(procList$ISO[i])
     reg <- paste(regions$REGION[which(regions$ISO == iso)])
-    gcm <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[1]
-    ens <- unlist(strsplit(paste(procList$GCM[i]),"_ENS_",fixed=T))[2]
+    gcm <- paste(procList$GCM[i])
     
     oDir <- paste(outputDD,"/",reg,"/",iso,sep="")
     procDir <- paste(oDir,"/",check_dir,sep="")
     for (vid in 1:3) {
       vn_gcm <- paste(vnList$GCM[vid]) #variable name
-      procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
+      procFil <- paste(procDir,"/",vn_gcm,"_",gcm,".proc",sep="") #check file
       if (!file.exists(procFil)) {
         ndList <- c(ndList,i)
       }
@@ -601,8 +600,16 @@ calc_metrics <- function(vals) {
     } else {
       lfit <- lm(vals$OBS~vals$GCM-1)
       pval <- pf(summary(lfit)$fstatistic[1],summary(lfit)$fstatistic[2],summary(lfit)$fstatistic[3],lower.tail=F)
-      ccoef2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$estimate
-      pval2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$p.value
+      
+      #calculate ccoef2 only if 3 or more observations
+      if (nrow(vals) < 3) {
+        ccoef2 <- NA
+        pval2 <- NA
+      } else {
+        ccoef2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$estimate
+        pval2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$p.value
+      }
+      
     }
     ccoef <- lfit$coefficients * sqrt(vals$GCM %*% vals$GCM) / sqrt(vals$OBS %*% vals$OBS)
     rsq <- summary(lfit)$r.squared
