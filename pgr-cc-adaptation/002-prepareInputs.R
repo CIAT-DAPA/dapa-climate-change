@@ -53,7 +53,7 @@ if (!file.exists(paste(cropDir,"/",tolower(crop_name),"_harea_glo.tif",sep="")))
 #Planting dates from Sacks et al. (2010) cut to Europe and Africa
 #Aggregated to 0.5 degree
 #Cut to harvested area
-crop_name <- "Rice"
+crop_name <- "Rice.2"
 cropDir <- paste(dataDir,"/",crop_name,".crop.calendar.fill",sep="")
 
 if (crop_name == "Rice.2") {

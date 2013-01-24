@@ -10,7 +10,8 @@ library(raster); library(rgdal); library(maptools)
 #variables to be set
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-#mdDir <- "/nfs/a102/eejarv/CMIP5"
+#mdDir <- "/nfs/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
+#cmip5Dir <- "/nfs/a102/eejarv/CMIP5"
 #e40Dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/climate-data/ERA-40"
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
