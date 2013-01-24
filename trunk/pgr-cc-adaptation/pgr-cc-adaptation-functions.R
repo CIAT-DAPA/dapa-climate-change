@@ -2,6 +2,187 @@
 #Jan 2012
 #functions for PGR paper
 
+#function to analyse a given grid cell
+analyse_gridcell <- function(loc) {
+  #details
+  cell <- gCells$LOC[loc]
+  lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
+  pl <- gCells$PL[loc]; hr <- gCells$HR[loc]
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("processing grid cell",cell,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  if (!file.exists(paste(gcm_outDir,"/loc_",loc,".RData",sep=""))) {
+    #extract GCM data for this loc
+    hisData <- get_loc_data(lon,lat,hisDir,gcm,ens,vn="tasmax",scratch,yi_h,yf_h,sce="historical")
+    rcpData1 <- get_loc_data(lon,lat,rcpDir,gcm,ens,vn="tasmax",scratch,yi_f1,yf_f1,sce="rcp45")
+    rcpData2 <- get_loc_data(lon,lat,rcpDir,gcm,ens,vn="tasmax",scratch,yi_f2,yf_f2,sce="rcp45")
+    chgData1 <- merge(hisData,rcpData1,by="MONTH",sort=F)
+    chgData2 <- merge(hisData,rcpData2,by="MONTH",sort=F)
+    names(chgData1) <- c("MONTH","HIS","RCP")
+    names(chgData2) <- c("MONTH","HIS","RCP")
+    chgData1$CHG <- chgData1$RCP - chgData1$HIS
+    chgData2$CHG <- chgData2$RCP - chgData2$HIS
+    
+    #extract CRU data for this loc
+    cruData <- get_loc_data_cru(lon,lat,cruDir,vn="tmx",scratch,yi_h,yf_h)
+    names(cruData)[5] <- "CRU"
+    
+    #calculate overlap for period 1
+    overlap_p1 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
+    overlap_p2 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    
+    #write RData as a test
+    output <- list(OVERLAP_2035=overlap_p1,OVERLAP_2075=overlap_p2)
+    save(list=c("output"),file=paste(gcm_outDir,"/loc_",loc,".RData",sep=""))
+  }
+}
+
+
+#function to calculate overlap between historical and future climates
+calc_overlap <- function(cell,lon,lat,cruData,chgData,pl,hr) {
+  #merge cruData with chgData
+  allData <- merge(cruData,chgData,by="MONTH",sort=F)
+  allData$DEL <- allData$CRU+allData$CHG
+  
+  #filter to growing season
+  if (hr > pl) {gs <- pl:hr}
+  if (hr < pl) {gs <- c(pl:12,1:hr)}
+  if (hr == pl) {gs <- pl}
+  allData <- allData[which(allData$MONTH %in% gs),]
+  
+  #calculate 5-95% pdf of current climate
+  qlims <- as.numeric(quantile(allData$CRU,probs=c(0.01,0.99)))
+  dp1 <- density(allData$CRU)
+  xy1 <- data.frame(x=dp1$x,y=dp1$y)
+  xy1_in <- xy1[which(xy1$x >= qlims[1] & xy1$x <= qlims[2]),]
+  
+  #calculate 5-95% pdf of future climate
+  #qlims <- as.numeric(quantile(allData$DEL,probs=c(0.05,0.95)))
+  dp2 <- density(allData$DEL)
+  xy2 <- data.frame(x=dp2$x,y=dp2$y)
+  ovr <- xy2[which(xy2$x <= max(xy1_in$x)),]
+  #xy2 <- xy2[which(xy2$x >= qlims[1] & xy2$x <= qlims[2]),]
+  
+  #plots
+  #plot(xy1$x,xy1$y,ty="l",xlim=c(-30,40),ylim=c(0,.05))
+  #lines(xy2$x,xy2$y,col="red")
+  #abline(v=min(xy1_in$x),lty=2); abline(v=max(xy1_in$x),lty=2)
+  #lines(ovr$x,ovr$y,col="blue")
+  
+  #areas
+  a1 <- integrate.xy(xy1$x,xy1$y)
+  a2 <- integrate.xy(xy2$x,xy2$y)
+  ao <- integrate.xy(ovr$x,ovr$y)
+  frac <- ao/a2
+  
+  #output data for this grid cell
+  out_data <- list()
+  out_data$LON <- lon
+  out_data$LAT <- lat
+  out_data$LOC <- cell
+  out_data$PLT <- pl
+  out_data$HRV <- hr
+  out_data$CRU_DATA <- cruData
+  out_data$CHG_DATA <- chgData
+  out_data$GS_DATA <- allData
+  out_data$PDF_CRU <- xy1
+  out_data$PDF_DEL <- xy2
+  out_data$INT_CRU <- a1
+  out_data$INT_DEL <- a2
+  out_data$INT_OVR <- ao
+  out_data$FRACTION <- frac
+  return(out_data)
+}
+
+
+
+#extract data from netcdf files using cdo
+get_loc_data_cru <- function(lon,lat,in_dataDir,vn="tmx",scratch,yi,yf) {
+  #load historical data of tasmax
+  fil <- paste("cru_ts_3_10.1966.2005.",vn,".dat.nc",sep="")
+  
+  #inner scratch dir
+  inScratch <- paste(scratch,"/",gsub(".dat.nc","",fil),sep="")
+  if (!file.exists(inScratch)) {dir.create(inScratch)}
+  setwd(inScratch)
+  
+  #copy files to temporary scratch folder
+  inFil <- paste(in_dataDir,"/",fil,sep="")
+  if (!file.exists(paste(inScratch,"/data.nc",sep=""))) {
+    system(paste("cp -f ",inFil," data.nc",sep=""))
+  }
+  
+  odat <- paste("data_lon-",lon,"_lat-",lat,".tab",sep="")
+  if (!file.exists(odat)) {
+    #extract values using CDO
+    system(paste("cdo -outputtab,year,month,lon,lat,value -remapnn,lon=",lon,"_lat=",lat," data.nc > ",odat,sep=""))
+  }
+  
+  #organise table
+  loc_data <- read.table(odat,header=F,sep="")
+  names(loc_data) <- c("YEAR","MONTH","LON","LAT","VALUE")
+  loc_data$VALUE <- loc_data$VALUE
+  loc_data <- loc_data[which(loc_data$YEAR %in% yi:yf),]
+  
+  #remove file
+  if (file.exists(odat)) {system(paste("rm -f ",odat,sep=""))}
+  
+  #return object
+  return(loc_data)
+}
+
+
+
+#extract data from netcdf files using cdo
+get_loc_data <- function(lon,lat,in_dataDir,gcm,ens,vn="tasmax",scratch,yi,yf,sce="historical") {
+  #load historical data of tasmax
+  gcm_dataDir <- paste(in_dataDir,"/",vn,"/",gcm,"/",ens,sep="")
+  gcmFiles <- list.files(gcm_dataDir,pattern=paste(gcm,"_",sce,"_",ens,sep=""))
+  
+  #loop through files
+  loc_hdata <- data.frame()
+  for (fil in gcmFiles) {
+    #inner scratch dir
+    inScratch <- paste(scratch,"/",gsub(".nc","",fil),sep="")
+    if (!file.exists(inScratch)) {dir.create(inScratch)}
+    setwd(inScratch)
+    
+    #copy files to temporary scratch folder
+    inFil <- paste(gcm_dataDir,"/",fil,sep="")
+    if (!file.exists(paste(inScratch,"/data.nc",sep=""))) {
+      system(paste("cp -f ",inFil," data.nc",sep=""))
+    }
+    
+    #output tabular data file
+    odat <- paste("data_lon-",lon,"_lat-",lat,".tab",sep="")
+    if (file.exists(odat)) {system(paste("rm -f ",odat,sep=""))}
+    
+    #extract values using CDO
+    system(paste("cdo -outputtab,year,month,lon,lat,value -remapnn,lon=",lon,"_lat=",lat," data.nc > ",odat,sep=""))
+    
+    #organise table
+    loc_data <- read.table(odat,header=F,sep="")
+    names(loc_data) <- c("YEAR","MONTH","LON","LAT","VALUE")
+    loc_data$VALUE <- loc_data$VALUE - 273.15
+    loc_hdata <- rbind(loc_hdata,loc_data)
+    
+    #remove file
+    if (file.exists(odat)) {system(paste("rm -f ",odat,sep=""))}
+  }
+  
+  #remove extra years and comput climatology
+  loc_hdata <- loc_hdata[which(loc_hdata$YEAR %in% yi:yf),]
+  loc_data_cl <- data.frame(VALUE=tapply(loc_hdata$VALUE,loc_hdata$MONTH,FUN=mean))
+  loc_data_cl <- cbind(MONTH=row.names(loc_data_cl),loc_data_cl)
+  
+  #return object
+  return(loc_data_cl)
+}
+
+
+
 #find month given a Julian day 
 find_month <- function(x) {
   #x <- vals[1]
