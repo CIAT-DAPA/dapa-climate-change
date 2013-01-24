@@ -2088,8 +2088,14 @@ calc_metrics_revised2 <- function(vals) {
     } else {
       lfit <- lm(vals$OBS~vals$GCM-1)
       pval <- pf(summary(lfit)$fstatistic[1],summary(lfit)$fstatistic[2],summary(lfit)$fstatistic[3],lower.tail=F)
-      ccoef2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$estimate
-      pval2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$p.value
+      
+      if (nrow(vals)<3) {
+        ccoef2 <- NA
+        pval2 <- NA
+      } else {
+        ccoef2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$estimate
+        pval2 <- cor.test(vals$OBS,vals$GCM,method="pearson")$p.value
+      }
     }
     ccoef <- lfit$coefficients * sqrt(vals$GCM %*% vals$GCM) / sqrt(vals$OBS %*% vals$OBS)
     rsq <- summary(lfit)$r.squared
