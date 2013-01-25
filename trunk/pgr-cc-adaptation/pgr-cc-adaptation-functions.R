@@ -4,13 +4,15 @@
 
 #function to analyse a given grid cell
 analyse_gridcell <- function(loc) {
+  #loc <- 1
   #details
   cell <- gCells$LOC[loc]
   lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
-  pl <- gCells$PL[loc]; hr <- gCells$HR[loc]
+  rice <- gCells$RICE[loc]; wspr <- gCells$WSPR[loc]
+  wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
   
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-  cat("processing grid cell",cell,"\n")
+  cat("processing grid cell",cell,"(",loc,"of",nrow(gCells),")\n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   if (!file.exists(paste(gcm_outDir,"/loc_",loc,".RData",sep=""))) {
@@ -29,12 +31,57 @@ analyse_gridcell <- function(loc) {
     cruData <- get_loc_data_cru(lon,lat,cruDir,vn="tmx",scratch,yi_h,yf_h)
     names(cruData)[5] <- "CRU"
     
-    #calculate overlap for period 1
-    overlap_p1 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
-    overlap_p2 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    #calculate overlap for rice
+    out_rice <- list()
+    if (rice == 1) {
+      pl <- extract(ca_rs$RICE$PL,cbind(x=lon,y=lat))
+      hr <- extract(ca_rs$RICE$HR,cbind(x=lon,y=lat))
+      out_rice$OVERLAP_2035 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
+      out_rice$OVERLAP_2075 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    } else {
+      out_rice$OVERLAP_2035 <- NA
+      out_rice$OVERLAP_2075 <- NA
+    }
+    
+    #calculate overlap for wspr
+    out_wspr <- list()
+    if (wspr == 1) {
+      pl <- extract(ca_rs$WSPR$PL,cbind(x=lon,y=lat))
+      hr <- extract(ca_rs$WSPR$HR,cbind(x=lon,y=lat))
+      out_wspr$OVERLAP_2035 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
+      out_wspr$OVERLAP_2075 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    } else {
+      out_wspr$OVERLAP_2035 <- NA
+      out_wspr$OVERLAP_2075 <- NA
+    }
+    
+    #calculate overlap for wwin
+    out_wwin <- list()
+    if (wwin == 1) {
+      pl <- extract(ca_rs$WWIN$PL,cbind(x=lon,y=lat))
+      hr <- extract(ca_rs$WWIN$HR,cbind(x=lon,y=lat))
+      out_wwin$OVERLAP_2035 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
+      out_wwin$OVERLAP_2075 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    } else {
+      out_wwin$OVERLAP_2035 <- NA
+      out_wwin$OVERLAP_2075 <- NA
+    }
+    
+    #calculate overlap for mill
+    out_mill <- list()
+    if (mill == 1) {
+      pl <- extract(ca_rs$MILL$PL,cbind(x=lon,y=lat))
+      hr <- extract(ca_rs$MILL$HR,cbind(x=lon,y=lat))
+      out_mill$OVERLAP_2035 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
+      out_mill$OVERLAP_2075 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    } else {
+      out_mill$OVERLAP_2035 <- NA
+      out_mill$OVERLAP_2075 <- NA
+    }
     
     #write RData as a test
-    output <- list(OVERLAP_2035=overlap_p1,OVERLAP_2075=overlap_p2)
+    output <- list(DATA_CRU=cruData,DATA_2035=chgData1,DATA_2075=chgData2,
+                   RICE=out_rice,WSPR=out_wspr,WWIN=out_wwin,MILL=out_mill)
     save(list=c("output"),file=paste(gcm_outDir,"/loc_",loc,".RData",sep=""))
   }
 }
@@ -82,10 +129,8 @@ calc_overlap <- function(cell,lon,lat,cruData,chgData,pl,hr) {
   out_data$LON <- lon
   out_data$LAT <- lat
   out_data$LOC <- cell
-  out_data$PLT <- pl
-  out_data$HRV <- hr
-  out_data$CRU_DATA <- cruData
-  out_data$CHG_DATA <- chgData
+  out_data$PL <- pl
+  out_data$HR <- hr
   out_data$GS_DATA <- allData
   out_data$PDF_CRU <- xy1
   out_data$PDF_DEL <- xy2
