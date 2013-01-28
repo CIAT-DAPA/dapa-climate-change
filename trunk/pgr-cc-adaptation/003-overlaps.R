@@ -79,7 +79,7 @@ gCells <- gCells[which(gCells$TOTL > 0),]
 row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
-gcm_i <- 1
+gcm_i <- 16
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 
@@ -89,12 +89,12 @@ if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
 
 #check existence
 gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done)
-gCells <- gCells[which(!gCells$STATUS),]
+gCells_u <- gCells[which(!gCells$STATUS),]
 
 ####################################################################
 ####################################################################
 #number of cpus to use
-if (nrow(gCells) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
+if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
 
 #here do the parallelisation
 #load library and create cluster
@@ -121,6 +121,7 @@ sfExport("gcmList")
 sfExport("ha_rs")
 sfExport("ca_rs")
 sfExport("gCells")
+sfExport("gCells_u")
 sfExport("gcm_i")
 sfExport("gcm")
 sfExport("ens")
@@ -128,7 +129,7 @@ sfExport("gcm_outDir")
 
 #sets of runs
 #run the function in parallel
-system.time(sfSapply(as.vector(22000:nrow(gCells)),analyse_gridcell))
+system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),analyse_gridcell))
 
 #stop the cluster
 sfStop()
@@ -140,19 +141,13 @@ sfStop()
 ###################################################################################
 ###################################################################################
 #load data into a raster
-loc <- 1
-
-all_out1 <- as.data.frame(t(sapply(1:10000,get_loc_fraction)))
-all_out2 <- as.data.frame(t(sapply(10001:20000,get_loc_fraction)))
-all_out3 <- as.data.frame(t(sapply(20001:nrow(gCells),get_loc_fraction)))
-
-all_out <- rbind(all_out1,all_out2,all_out3)
+all_out<- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
 all_out <- cbind(LOC=gCells$LOC,all_out)
 
 out_rs <- dum_rs
 out_rs[] <- NA
-out_rs[all_out$LOC] <- all_out$RICE1
-plot(out_rs,col=rainbow(10))
+out_rs[all_out$LOC] <- all_out$MILL2
+plot(out_rs,col=rainbow(10),zlim=c(0,1))
 
 
 
