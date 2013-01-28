@@ -98,10 +98,13 @@ analyse_gridcell <- function(loc) {
   
   #location of file in chunks of 10k files. File number limitation
   if (loc <= 10000) {
+    if (!file.exists(paste(gcm_outDir,"/part_1",sep=""))) {dir.create(paste(gcm_outDir,"/part_1",sep=""))}
     oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
   } else if (loc > 10000 & loc <= 20000) {
+    if (!file.exists(paste(gcm_outDir,"/part_2",sep=""))) {dir.create(paste(gcm_outDir,"/part_2",sep=""))}
     oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
   } else if (loc > 20000) {
+    if (!file.exists(paste(gcm_outDir,"/part_3",sep=""))) {dir.create(paste(gcm_outDir,"/part_3",sep=""))}
     oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
   }
   
