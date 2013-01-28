@@ -12,9 +12,9 @@ gcmDir <- "/mnt/a102/eejarv/CMIP5/Amon"
 bDir <- "/mnt/a17/eejarv/pgr-cc-adaptation"
 scratch <- "~/Workspace/pgr_analogues"
 
-#gcmDir <- "/nfs/a102/eejarv/CMIP5/Amon"
-#bDir <- "/nfs/a17/eejarv/pgr-cc-adaptation"
-#scratch <- "/scratch/eejarv/pgr_analogues"
+# gcmDir <- "/nfs/a102/eejarv/CMIP5/Amon"
+# bDir <- "/nfs/a17/eejarv/pgr-cc-adaptation"
+# scratch <- "/scratch/eejarv/pgr_analogues"
 
 #input directories
 hisDir <- paste(gcmDir,"/historical_amon",sep="")
@@ -86,9 +86,56 @@ ens <- paste(gcmList$ENS[gcm_i])
 gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
 if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
 
-#example location (later into sapply)
-for (i in 11001:14687) {
-  system.time(analyse_gridcell(i))
-}
+# #example location (later into sapply)
+# for (i in 15001:23000) {
+#   system.time(analyse_gridcell(i))
+# }
 
+#1:5000 #eljefe2
+#5001:10000 #eljefe2
+#10001:15000 #eljefe2
+#15001:23000 #local1
+#23001:30054 #local2
+
+####################################################################
+####################################################################
+#number of cpus to use
+if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("gcmDir")
+sfExport("bDir")
+sfExport("scratch")
+sfExport("hisDir")
+sfExport("rcpDir")
+sfExport("cfgDir")
+sfExport("cruDir")
+sfExport("out_bDir")
+sfExport("yi_h")
+sfExport("yf_h")
+sfExport("yi_f1")
+sfExport("yf_f1")
+sfExport("yi_f2")
+sfExport("yf_f2")
+sfExport("gcmList")
+sfExport("ha_rs")
+sfExport("ca_rs")
+sfExport("gCells")
+sfExport("gcm_i")
+sfExport("gcm")
+sfExport("ens")
+sfExport("gcm_outDir")
+
+#sets of runs
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(gCells)),analyse_gridcell))
+
+#stop the cluster
+sfStop()
 
