@@ -195,7 +195,7 @@ calc_overlap <- function(cell,lon,lat,cruData,chgData,pl,hr) {
   #areas
   a1 <- integrate.xy(xy1$x,xy1$y)
   a2 <- integrate.xy(xy2$x,xy2$y)
-  if (nrows(ao) < 2) {
+  if (nrow(ao) < 2) {
     ao <- 0
   } else {
     ao <- integrate.xy(ovr$x,ovr$y)
