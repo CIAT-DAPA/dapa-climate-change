@@ -134,7 +134,7 @@ sfExport("gcm_outDir")
 
 #sets of runs
 #run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(gCells)),analyse_gridcell))
+system.time(sfSapply(as.vector(21500:nrow(gCells)),analyse_gridcell))
 
 #stop the cluster
 sfStop()
