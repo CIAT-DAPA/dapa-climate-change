@@ -54,13 +54,30 @@ get_loc_fraction <- function(loc) {
     rm(output)
     
     #outputs
-    out_res <- data.frame(RICE1=rice1,RICE2=rice2,WSPR1=wspr1,WSPR2=wspr2,
+    out_res <- data.frame(LOC=cell,RICE1=rice1,RICE2=rice2,WSPR1=wspr1,WSPR2=wspr2,
                           WWIN1=wwin1,WWIN2=wwin2,MILL1=mill1,MILL2=mill2)
   } else {
-    out_res <- data.frame(RICE1=NA,RICE2=NA,WSPR1=NA,WSPR2=NA,
+    out_res <- data.frame(LOC=cell,RICE1=NA,RICE2=NA,WSPR1=NA,WSPR2=NA,
                           WWIN1=NA,WWIN2=NA,MILL1=NA,MILL2=NA)
   }
   return(out_res)
+}
+
+
+#check if processes are done
+check_done <- function(loc) {
+  #location of file in chunks of 10k files. File number limitation
+  cell <- gCells$LOC[loc]
+  if (loc <= 10000) {
+    oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  #add to list if not exists
+  fStatus <- file.exists(oDatFile)
+  return(fStatus)
 }
 
 
