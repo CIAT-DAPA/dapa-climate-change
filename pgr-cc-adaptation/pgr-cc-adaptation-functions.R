@@ -4,6 +4,7 @@
 
 #function to analyse a given grid cell
 analyse_gridcell <- function(loc) {
+  source(paste(src.dir,"/pgr-cc-adaptation-functions.R",sep=""))
   #loc <- 1
   #details
   cell <- gCells$LOC[loc]
@@ -15,7 +16,17 @@ analyse_gridcell <- function(loc) {
   cat("processing grid cell",cell,"(",loc,"of",nrow(gCells),")\n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
-  if (!file.exists(paste(gcm_outDir,"/loc_",loc,".RData",sep=""))) {
+  #location of file in chunks of 10k files. File number limitation
+  if (loc <= 10000) {
+    oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  
+  
+  if (!file.exists(oDatFile)) {
     #extract GCM data for this loc
     hisData <- get_loc_data(lon,lat,hisDir,gcm,ens,vn="tasmax",scratch,yi_h,yf_h,sce="historical")
     rcpData1 <- get_loc_data(lon,lat,rcpDir,gcm,ens,vn="tasmax",scratch,yi_f1,yf_f1,sce="rcp45")
@@ -82,7 +93,7 @@ analyse_gridcell <- function(loc) {
     #write RData as a test
     output <- list(DATA_CRU=cruData,DATA_2035=chgData1,DATA_2075=chgData2,
                    RICE=out_rice,WSPR=out_wspr,WWIN=out_wwin,MILL=out_mill)
-    save(list=c("output"),file=paste(gcm_outDir,"/loc_",loc,".RData",sep=""))
+    save(list=c("output"),file=oDatFile)
   }
 }
 

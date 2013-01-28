@@ -250,9 +250,10 @@ sfExport("groupingList")
 #batch 3
 #eljefe-01 --> 73126:87750
 #eljefe-02 --> 87751:107250
+#eljefe-01 --> 107251:125970
 
 #run the cmip5-run function in parallel, step is 100*195
-system.time(sfSapply(as.vector(87751:107250),run_group_his_rcp))
+system.time(sfSapply(as.vector(107251:125970),run_group_his_rcp))
 
 #stop the cluster
 sfStop()
