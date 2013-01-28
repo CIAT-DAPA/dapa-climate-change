@@ -1,7 +1,7 @@
 #Julian Ramirez-Villegas
 #Jan 2012
 
-library(raster); library(sfsmisc)
+library(raster); library(sfsmisc); library(maptools)
 
 #src.dir <- "~/Repositories/dapa-climate-change/trunk/pgr-cc-adaptation"
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/pgr-cc-adaptation"
@@ -79,7 +79,7 @@ gCells <- gCells[which(gCells$TOTL > 0),]
 row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
-gcm_i <- 16
+gcm_i <- 1 #16 is HadGEM2-AO #22 is MIROC5 #17 is HadGEM2-CC
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 
@@ -140,14 +140,100 @@ sfStop()
 ###################################################################################
 ###################################################################################
 ###################################################################################
-#load data into a raster
-all_out<- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
-all_out <- cbind(LOC=gCells$LOC,all_out)
+#grab data from individual calculations
+if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
+  all_out<- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
+  save(list=c("all_out","dum_rs"),file=paste(gcm_outDir,"/all_outputs.RData",sep=""))
+} else {
+  load(paste(gcm_outDir,"/all_outputs.RData",sep=""))
+}
 
-out_rs <- dum_rs
-out_rs[] <- NA
-out_rs[all_out$LOC] <- all_out$MILL2
-plot(out_rs,col=rainbow(10),zlim=c(0,1))
+######################################
+#load data into a raster
+if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
+  #output list
+  out_rs <- list()
+  
+  #rice
+  out_rs$RICE <- list()
+  out_rs$RICE$P_2035 <- dum_rs
+  out_rs$RICE$P_2035[] <- NA
+  out_rs$RICE$P_2035[all_out$LOC] <- all_out$RICE1
+  out_rs$RICE$P_2075 <- dum_rs
+  out_rs$RICE$P_2075[] <- NA
+  out_rs$RICE$P_2075[all_out$LOC] <- all_out$RICE2
+  
+  #wspr
+  out_rs$WSPR <- list()
+  out_rs$WSPR$P_2035 <- dum_rs
+  out_rs$WSPR$P_2035[] <- NA
+  out_rs$WSPR$P_2035[all_out$LOC] <- all_out$WSPR1
+  out_rs$WSPR$P_2075 <- dum_rs
+  out_rs$WSPR$P_2075[] <- NA
+  out_rs$WSPR$P_2075[all_out$LOC] <- all_out$WSPR2
+  
+  #wwin
+  out_rs$WWIN <- list()
+  out_rs$WWIN$P_2035 <- dum_rs
+  out_rs$WWIN$P_2035[] <- NA
+  out_rs$WWIN$P_2035[all_out$LOC] <- all_out$WWIN1
+  out_rs$WWIN$P_2075 <- dum_rs
+  out_rs$WWIN$P_2075[] <- NA
+  out_rs$WWIN$P_2075[all_out$LOC] <- all_out$WWIN2
+  
+  #whea (min of wspr and wwin)
+  out_rs$WHEA <- list()
+  out_rs$WHEA$P_2035 <- calc(stack(out_rs$WWIN$P_2035,out_rs$WSPR$P_2035),fun=function(x) {min(x,na.rm=T)})
+  out_rs$WHEA$P_2075 <- calc(stack(out_rs$WWIN$P_2075,out_rs$WSPR$P_2075),fun=function(x) {min(x,na.rm=T)})
+  #out_rs$WHEA$P_2035 <- (out_rs$WWIN$P_2035 + out_rs$WSPR$P_2035) / 2
+  #out_rs$WHEA$P_2075 <- (out_rs$WWIN$P_2075 + out_rs$WSPR$P_2075) / 2
+  
+  #mill
+  out_rs$MILL <- list()
+  out_rs$MILL$P_2035 <- dum_rs
+  out_rs$MILL$P_2035[] <- NA
+  out_rs$MILL$P_2035[all_out$LOC] <- all_out$MILL1
+  out_rs$MILL$P_2075 <- dum_rs
+  out_rs$MILL$P_2075[] <- NA
+  out_rs$MILL$P_2075[all_out$LOC] <- all_out$MILL2
+  
+  save(out_rs,file=paste(gcm_outDir,"/raster_outputs.RData",sep=""))
+} else {
+  load(paste(gcm_outDir,"/raster_outputs.RData",sep=""))
+}
+
+
+#####################################
+#GCM-specific plots
+#figDir
+fig_dir <- paste(gcm_outDir,"/figures",sep="")
+if (!file.exists(fig_dir)) {dir.create(fig_dir)}
+
+#making plots
+plot_overlap("RICE", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("RICE", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("WSPR", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("WSPR", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("WWIN", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("WWIN", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("WHEA", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("WHEA", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("MILL", "P_2035", xt=extent(-30,160,-45,75), fig_dir)
+plot_overlap("MILL", "P_2075", xt=extent(-30,160,-45,75), fig_dir)
+
+
+
+###################################################################
+#the buffer, country, and globe searcher
+#1. if in a 250 km buffer there is a location whose current climate
+#   overlaps 95% with the novel climate
+#2. if within a country there is a location whose current climate overlaps 95% with the
+#   novel climate
+#3. if within the globe there is a location whose current climate overlaps 95% with the
+#   novel climate
+
+
+
 
 
 
