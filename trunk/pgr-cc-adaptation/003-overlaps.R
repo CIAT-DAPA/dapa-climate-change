@@ -76,6 +76,7 @@ gCells$MILL[which(!is.na(gCells$MILL))] <- 1
 gCells$MILL[which(is.na(gCells$MILL))] <- 0
 gCells$TOTL <- gCells$RICE+gCells$WSPR+gCells$WWIN+gCells$MILL
 gCells <- gCells[which(gCells$TOTL > 0),]
+row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
 gcm_i <- 1
@@ -86,6 +87,9 @@ ens <- paste(gcmList$ENS[gcm_i])
 gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
 if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
 
+#check existence
+gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done)
+gCells <- gCells[which(!gCells$STATUS),]
 
 ####################################################################
 ####################################################################
