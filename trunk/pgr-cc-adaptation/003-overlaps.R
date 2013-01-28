@@ -86,16 +86,6 @@ ens <- paste(gcmList$ENS[gcm_i])
 gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
 if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
 
-# #example location (later into sapply)
-# for (i in 15001:23000) {
-#   system.time(analyse_gridcell(i))
-# }
-
-#1:5000 #eljefe2
-#5001:10000 #eljefe2
-#10001:15000 #eljefe2
-#15001:23000 #local1
-#23001:30054 #local2
 
 ####################################################################
 ####################################################################
@@ -138,4 +128,29 @@ system.time(sfSapply(as.vector(21500:nrow(gCells)),analyse_gridcell))
 
 #stop the cluster
 sfStop()
+
+
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+#load data into a raster
+loc <- 1
+
+all_out1 <- as.data.frame(t(sapply(1:10000,get_loc_fraction)))
+all_out2 <- as.data.frame(t(sapply(10001:20000,get_loc_fraction)))
+all_out3 <- as.data.frame(t(sapply(20001:nrow(gCells),get_loc_fraction)))
+
+all_out <- rbind(all_out1,all_out2,all_out3)
+all_out <- cbind(LOC=gCells$LOC,all_out)
+
+out_rs <- dum_rs
+out_rs[] <- NA
+out_rs[all_out$LOC] <- all_out$RICE1
+plot(out_rs,col=rainbow(10))
+
+
+
+
 
