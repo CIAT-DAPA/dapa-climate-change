@@ -2,6 +2,43 @@
 #Jan 2012
 #functions for PGR paper
 
+
+###plotting
+plot_overlap <- function(cropname, period, xt=extent(-130,160,-45,75), fig_dir) {
+  #load world simpl
+  require(maptools); data(wrld_simpl)
+  
+  #general plot characteristics
+  rs <- out_rs[[toupper(cropname)]][[toupper(period)]]
+  rs <- crop(rs,xt)
+  
+  ht <- 1000
+  fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
+  wt <- ht*(fct+.1)
+  wld <- list("sp.polygons",wrld_simpl,lwd=0.8,first=F)
+  grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=30), norths=seq(-90,90,by=30))
+  grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
+  
+  
+  ############################################
+  brks <- seq(0,1,by=0.025)
+  brks.lab <- round(brks,2)
+  cols <- c(colorRampPalette(c("dark red","red","orange","yellow","light blue","blue","dark blue"))(length(brks)))
+  layt <- list(wld,grli)
+  
+  #do the plot
+  figName <- paste(tolower(cropname),"_",tolower(period),sep="")
+  tiffName <- paste(fig_dir,"/",figName,".tif",sep="")
+  tiff(tiffName,res=300,compression="lzw",height=ht,width=wt)
+  x <- spplot(rs,sp.layout=layt,col.regions=cols,
+             par.settings=list(fontsize=list(text=8)),
+             at=brks,pretty=brks)
+  print(x)
+  dev.off()
+}
+
+
+
 #function to get data from RData of a given grid cell
 get_loc_fraction <- function(loc) {
   cell <- gCells$LOC[loc]
