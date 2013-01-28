@@ -2,6 +2,68 @@
 #Jan 2012
 #functions for PGR paper
 
+#function to get data from RData of a given grid cell
+get_loc_fraction <- function(loc) {
+  cell <- gCells$LOC[loc]
+  lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
+  rice <- gCells$RICE[loc]; wspr <- gCells$WSPR[loc]
+  wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
+  
+  #location of file in chunks of 10k files. File number limitation
+  if (loc <= 10000) {
+    oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  
+  if (file.exists(oDatFile)) {
+    load(oDatFile)
+    if (rice == 1) {
+      rice1 <- output$RICE$OVERLAP_2035$FRACTION
+      rice2 <- output$RICE$OVERLAP_2075$FRACTION
+    } else {
+      rice1 <- NA
+      rice2 <- NA
+    }
+    
+    if (wspr == 1) {
+      wspr1 <- output$WSPR$OVERLAP_2035$FRACTION
+      wspr2 <- output$WSPR$OVERLAP_2075$FRACTION
+    } else {
+      wspr1 <- NA
+      wspr2 <- NA
+    }
+    
+    if (wwin == 1) {
+      wwin1 <- output$WWIN$OVERLAP_2035$FRACTION
+      wwin2 <- output$WWIN$OVERLAP_2075$FRACTION
+    } else {
+      wwin1 <- NA
+      wwin2 <- NA
+    }
+    
+    if (mill == 1) {
+      mill1 <- output$MILL$OVERLAP_2035$FRACTION
+      mill2 <- output$MILL$OVERLAP_2075$FRACTION
+    } else {
+      mill1 <- NA
+      mill2 <- NA
+    }
+    rm(output)
+    
+    #outputs
+    out_res <- data.frame(RICE1=rice1,RICE2=rice2,WSPR1=wspr1,WSPR2=wspr2,
+                          WWIN1=wwin1,WWIN2=wwin2,MILL1=mill1,MILL2=mill2)
+  } else {
+    out_res <- data.frame(RICE1=NA,RICE2=NA,WSPR1=NA,WSPR2=NA,
+                          WWIN1=NA,WWIN2=NA,MILL1=NA,MILL2=NA)
+  }
+  return(out_res)
+}
+
+
 #function to analyse a given grid cell
 analyse_gridcell <- function(loc) {
   library(raster); library(sfsmisc); library(rgdal); library(sp)
@@ -133,7 +195,11 @@ calc_overlap <- function(cell,lon,lat,cruData,chgData,pl,hr) {
   #areas
   a1 <- integrate.xy(xy1$x,xy1$y)
   a2 <- integrate.xy(xy2$x,xy2$y)
-  ao <- integrate.xy(ovr$x,ovr$y)
+  if (nrows(ao) < 2) {
+    ao <- 0
+  } else {
+    ao <- integrate.xy(ovr$x,ovr$y)
+  }
   frac <- ao/a2
   
   #output data for this grid cell
