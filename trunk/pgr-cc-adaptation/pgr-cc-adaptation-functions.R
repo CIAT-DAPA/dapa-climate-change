@@ -4,6 +4,7 @@
 
 #function to analyse a given grid cell
 analyse_gridcell <- function(loc) {
+  library(raster); library(sfsmisc)
   source(paste(src.dir,"/pgr-cc-adaptation-functions.R",sep=""))
   #loc <- 1
   #details

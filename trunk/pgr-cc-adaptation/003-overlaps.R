@@ -3,18 +3,18 @@
 
 library(raster); library(sfsmisc)
 
-src.dir <- "~/Repositories/dapa-climate-change/trunk/pgr-cc-adaptation"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/pgr-cc-adaptation"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/pgr-cc-adaptation"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/pgr-cc-adaptation"
 source(paste(src.dir,"/pgr-cc-adaptation-functions.R",sep=""))
 
-#base directories
-gcmDir <- "/mnt/a102/eejarv/CMIP5/Amon"
-bDir <- "/mnt/a17/eejarv/pgr-cc-adaptation"
-scratch <- "~/Workspace/pgr_analogues"
+# #base directories
+# gcmDir <- "/mnt/a102/eejarv/CMIP5/Amon"
+# bDir <- "/mnt/a17/eejarv/pgr-cc-adaptation"
+# scratch <- "~/Workspace/pgr_analogues"
 
-# gcmDir <- "/nfs/a102/eejarv/CMIP5/Amon"
-# bDir <- "/nfs/a17/eejarv/pgr-cc-adaptation"
-# scratch <- "/scratch/eejarv/pgr_analogues"
+gcmDir <- "/nfs/a102/eejarv/CMIP5/Amon"
+bDir <- "/nfs/a17/eejarv/pgr-cc-adaptation"
+scratch <- "/scratch/eejarv/pgr_analogues"
 
 #input directories
 hisDir <- paste(gcmDir,"/historical_amon",sep="")
@@ -100,7 +100,7 @@ if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
 ####################################################################
 ####################################################################
 #number of cpus to use
-if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
+if (nrow(gCells) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
 
 #here do the parallelisation
 #load library and create cluster
