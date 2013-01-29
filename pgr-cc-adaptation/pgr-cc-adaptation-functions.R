@@ -45,6 +45,7 @@ get_loc_fraction <- function(loc) {
   lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
   rice <- gCells$RICE[loc]; wspr <- gCells$WSPR[loc]
   wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
+  sorg <- gCells$SORG[loc]
   
   #location of file in chunks of 10k files. File number limitation
   if (loc <= 10000) {
@@ -88,14 +89,23 @@ get_loc_fraction <- function(loc) {
       mill1 <- NA
       mill2 <- NA
     }
+    
+    if (sorg == 1) {
+      sorg1 <- output$SORG$OVERLAP_2035$FRACTION
+      sorg2 <- output$SORG$OVERLAP_2075$FRACTION
+    } else {
+      sorg1 <- NA
+      sorg2 <- NA
+    }
     rm(output)
     
     #outputs
     out_res <- data.frame(LOC=cell,RICE1=rice1,RICE2=rice2,WSPR1=wspr1,WSPR2=wspr2,
-                          WWIN1=wwin1,WWIN2=wwin2,MILL1=mill1,MILL2=mill2)
+                          WWIN1=wwin1,WWIN2=wwin2,MILL1=mill1,MILL2=mill2,SORG1=sorg1,
+                          SORG2=sorg2)
   } else {
     out_res <- data.frame(LOC=cell,RICE1=NA,RICE2=NA,WSPR1=NA,WSPR2=NA,
-                          WWIN1=NA,WWIN2=NA,MILL1=NA,MILL2=NA)
+                          WWIN1=NA,WWIN2=NA,MILL1=NA,MILL2=NA,SORG1=NA,SORG2=NA)
   }
   return(out_res)
 }
