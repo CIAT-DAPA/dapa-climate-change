@@ -8,6 +8,7 @@ src.dir <- "~/Repositories/dapa-climate-change/trunk/pgr-cc-adaptation"
 src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
 
 source(paste(src.dir2,"/GHCND-GSOD-functions.R",sep=""))
+source(paste(src.dir,"/pgr-cc-adaptation-functions.R",sep=""))
 
 #####################
 #Harvested area
@@ -24,7 +25,7 @@ bDir <- "/mnt/a17/eejarv/pgr-cc-adaptation"
 dataDir <- paste(bDir,"/crop-data",sep="")
 
 #here process crop
-crop_name <- "Rice"
+crop_name <- "Sorghum"
 cropDir <- paste(dataDir,"/",crop_name,".harea",sep="")
 
 if (!file.exists(paste(cropDir,"/",tolower(crop_name),"_harea_glo.tif",sep=""))) {
@@ -53,13 +54,15 @@ if (!file.exists(paste(cropDir,"/",tolower(crop_name),"_harea_glo.tif",sep="")))
 #Planting dates from Sacks et al. (2010) cut to Europe and Africa
 #Aggregated to 0.5 degree
 #Cut to harvested area
-crop_name <- "Wheat.Winter"
+crop_name <- "Sorghum.2"
 cropDir <- paste(dataDir,"/",crop_name,".crop.calendar.fill",sep="")
 
 if (crop_name == "Rice.2") {
   ha_name <- "Rice"
 } else if (crop_name == "Wheat.Winter") {
   ha_name <- "Wheat"
+} else if (crop_name == "Sorghum.2") {
+  ha_name <- "Sorghum"
 } else {
   ha_name <- crop_name
 }
