@@ -128,6 +128,7 @@ analyse_gridcell <- function(loc) {
   lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
   rice <- gCells$RICE[loc]; wspr <- gCells$WSPR[loc]
   wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
+  sorg <- gCells$SORG[loc]
   
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   cat("processing grid cell",cell,"(",loc,"of",nrow(gCells),")\n")
@@ -137,12 +138,15 @@ analyse_gridcell <- function(loc) {
   if (loc <= 10000) {
     if (!file.exists(paste(gcm_outDir,"/part_1",sep=""))) {dir.create(paste(gcm_outDir,"/part_1",sep=""))}
     oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+    bDatFile <- paste(out_bDir,"/bcc-csm1-1-m_ENS_r1i1p1/part_1/loc_",loc,".RData",sep="")
   } else if (loc > 10000 & loc <= 20000) {
     if (!file.exists(paste(gcm_outDir,"/part_2",sep=""))) {dir.create(paste(gcm_outDir,"/part_2",sep=""))}
     oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+    bDatFile <- paste(out_bDir,"/bcc-csm1-1-m_ENS_r1i1p1/part_2/loc_",loc,".RData",sep="")
   } else if (loc > 20000) {
     if (!file.exists(paste(gcm_outDir,"/part_3",sep=""))) {dir.create(paste(gcm_outDir,"/part_3",sep=""))}
     oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+    bDatFile <- paste(out_bDir,"/bcc-csm1-1-m_ENS_r1i1p1/part_3/loc_",loc,".RData",sep="")
   }
   
   
@@ -159,8 +163,15 @@ analyse_gridcell <- function(loc) {
     chgData2$CHG <- chgData2$RCP - chgData2$HIS
     
     #extract CRU data for this loc
-    cruData <- get_loc_data_cru(lon,lat,cruDir,vn="tmx",scratch,yi_h,yf_h)
-    names(cruData)[5] <- "CRU"
+    if (file.exists(bDatFile)) {
+      load(bDatFile)
+      cruData <- output$DATA_CRU
+      rm(output); g=gc(); rm(g)
+    } else {
+      cruData <- get_loc_data_cru(lon,lat,cruDir,vn="tmx",scratch,yi_h,yf_h)
+      names(cruData)[5] <- "CRU"
+    }
+    
     
     #calculate overlap for rice
     out_rice <- list()
@@ -210,9 +221,22 @@ analyse_gridcell <- function(loc) {
       out_mill$OVERLAP_2075 <- NA
     }
     
+    #calculate overlap for mill
+    out_sorg <- list()
+    if (sorg == 1) {
+      pl <- extract(ca_rs$SORG$PL,cbind(x=lon,y=lat))
+      hr <- extract(ca_rs$SORG$HR,cbind(x=lon,y=lat))
+      out_sorg$OVERLAP_2035 <- calc_overlap(cell,lon,lat,cruData,chgData1,pl,hr)
+      out_sorg$OVERLAP_2075 <- calc_overlap(cell,lon,lat,cruData,chgData2,pl,hr)
+    } else {
+      out_sorg$OVERLAP_2035 <- NA
+      out_sorg$OVERLAP_2075 <- NA
+    }
+    
     #write RData as a test
     output <- list(DATA_CRU=cruData,DATA_2035=chgData1,DATA_2075=chgData2,
-                   RICE=out_rice,WSPR=out_wspr,WWIN=out_wwin,MILL=out_mill)
+                   RICE=out_rice,WSPR=out_wspr,WWIN=out_wwin,MILL=out_mill,
+                   SORG=out_sorg)
     save(list=c("output"),file=oDatFile)
   }
 }

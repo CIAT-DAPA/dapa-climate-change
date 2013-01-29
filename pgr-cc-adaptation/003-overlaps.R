@@ -39,6 +39,7 @@ ha_rs$RICE <- raster(paste(bDir,"/crop-data/Rice.harea/rice_harea_glo.tif",sep="
 ha_rs$WSPR <- raster(paste(bDir,"/crop-data/Wheat.harea/wheat_harea_glo.tif",sep=""))
 ha_rs$WWIN <- raster(paste(bDir,"/crop-data/Wheat.harea/wheat_harea_glo.tif",sep=""))
 ha_rs$MILL <- raster(paste(bDir,"/crop-data/Millet.harea/millet_harea_glo.tif",sep=""))
+ha_rs$SORG <- raster(paste(bDir,"/crop-data/Sorghum.harea/sorghum_harea_glo.tif",sep=""))
 
 #sowing and harvest date rasters
 ca_rs <- list()
@@ -54,6 +55,9 @@ ca_rs$WWIN$HR <- raster(paste(bDir,"/crop-data/Wheat.Winter.crop.calendar.fill/h
 ca_rs$MILL <- list()
 ca_rs$MILL$PL <- raster(paste(bDir,"/crop-data/Millet.crop.calendar.fill/plant_month.tif",sep=""))
 ca_rs$MILL$HR <- raster(paste(bDir,"/crop-data/Millet.crop.calendar.fill/harvest_month.tif",sep=""))
+ca_rs$SORG <- list()
+ca_rs$SORG$PL <- raster(paste(bDir,"/crop-data/Sorghum.crop.calendar.fill/plant_month.tif",sep=""))
+ca_rs$SORG$HR <- raster(paste(bDir,"/crop-data/Sorghum.crop.calendar.fill/harvest_month.tif",sep=""))
 
 #cru raster to filter out NAs
 dum_rs <- raster(paste(cruDir,"/cru_ts_3_10.1966.2005.tmx.dat.nc",sep=""),band=0)
@@ -74,7 +78,10 @@ gCells$WWIN[which(is.na(gCells$WWIN))] <- 0
 gCells$MILL <- extract(ha_rs$MILL,cbind(x=gCells$LON,y=gCells$LAT))
 gCells$MILL[which(!is.na(gCells$MILL))] <- 1
 gCells$MILL[which(is.na(gCells$MILL))] <- 0
-gCells$TOTL <- gCells$RICE+gCells$WSPR+gCells$WWIN+gCells$MILL
+gCells$SORG <- extract(ha_rs$SORG,cbind(x=gCells$LON,y=gCells$LAT))
+gCells$SORG[which(!is.na(gCells$SORG))] <- 1
+gCells$SORG[which(is.na(gCells$SORG))] <- 0
+gCells$TOTL <- gCells$RICE+gCells$WSPR+gCells$WWIN+gCells$MILL+gCells$SORG
 gCells <- gCells[which(gCells$TOTL > 0),]
 row.names(gCells) <- 1:nrow(gCells)
 
