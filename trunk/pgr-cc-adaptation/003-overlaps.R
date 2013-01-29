@@ -204,6 +204,15 @@ if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
   out_rs$MILL$P_2075[] <- NA
   out_rs$MILL$P_2075[all_out$LOC] <- all_out$MILL2
   
+#   #sorg
+#   out_rs$SORG <- list()
+#   out_rs$SORG$P_2035 <- dum_rs
+#   out_rs$SORG$P_2035[] <- NA
+#   out_rs$SORG$P_2035[all_out$LOC] <- all_out$SORG1
+#   out_rs$SORG$P_2075 <- dum_rs
+#   out_rs$SORG$P_2075[] <- NA
+#   out_rs$SORG$P_2075[all_out$LOC] <- all_out$SORG2
+  
   save(out_rs,file=paste(gcm_outDir,"/raster_outputs.RData",sep=""))
 } else {
   load(paste(gcm_outDir,"/raster_outputs.RData",sep=""))
