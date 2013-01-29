@@ -24,7 +24,7 @@ cruDir <- paste(bDir,"/cru-data",sep="")
 if (!file.exists(scratch)) {dir.create(scratch)}
 
 #output directories
-out_bDir <- paste(bDir,"/outputs",sep="")
+out_bDir <- paste(bDir,"/outputs.old",sep="")
 if (!file.exists(out_bDir)) {dir.create(out_bDir)}
 
 #configuration details and initial data
@@ -86,61 +86,62 @@ gCells <- gCells[which(gCells$TOTL > 0),]
 row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
-gcm_i <- 1 #16 is HadGEM2-AO #22 is MIROC5 #17 is HadGEM2-CC
-gcm <- paste(gcmList$GCM[gcm_i])
-ens <- paste(gcmList$ENS[gcm_i])
-
-#output GCM-specific directory
-gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
-if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
-
-#check existence
-gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done)
-gCells_u <- gCells[which(!gCells$STATUS),]
-
-####################################################################
-####################################################################
-#number of cpus to use
-if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
-
-#here do the parallelisation
-#load library and create cluster
-library(snowfall)
-sfInit(parallel=T,cpus=ncpus)
-
-#export variables
-sfExport("src.dir")
-sfExport("gcmDir")
-sfExport("bDir")
-sfExport("scratch")
-sfExport("hisDir")
-sfExport("rcpDir")
-sfExport("cfgDir")
-sfExport("cruDir")
-sfExport("out_bDir")
-sfExport("yi_h")
-sfExport("yf_h")
-sfExport("yi_f1")
-sfExport("yf_f1")
-sfExport("yi_f2")
-sfExport("yf_f2")
-sfExport("gcmList")
-sfExport("ha_rs")
-sfExport("ca_rs")
-sfExport("gCells")
-sfExport("gCells_u")
-sfExport("gcm_i")
-sfExport("gcm")
-sfExport("ens")
-sfExport("gcm_outDir")
-
-#sets of runs
-#run the function in parallel
-system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),analyse_gridcell))
-
-#stop the cluster
-sfStop()
-
+#gcm_i <- 1 #16 is HadGEM2-AO #22 is MIROC5 #17 is HadGEM2-CC
+for (gcm_i in c(1,16,22,17)) {
+  gcm <- paste(gcmList$GCM[gcm_i])
+  ens <- paste(gcmList$ENS[gcm_i])
+  
+  #output GCM-specific directory
+  gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
+  if (!file.exists(gcm_outDir)) {dir.create(gcm_outDir)}
+  
+  #check existence
+  gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done)
+  gCells_u <- gCells[which(!gCells$STATUS),]
+  
+  ####################################################################
+  ####################################################################
+  #number of cpus to use
+  if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
+  
+  #here do the parallelisation
+  #load library and create cluster
+  library(snowfall)
+  sfInit(parallel=T,cpus=ncpus)
+  
+  #export variables
+  sfExport("src.dir")
+  sfExport("gcmDir")
+  sfExport("bDir")
+  sfExport("scratch")
+  sfExport("hisDir")
+  sfExport("rcpDir")
+  sfExport("cfgDir")
+  sfExport("cruDir")
+  sfExport("out_bDir")
+  sfExport("yi_h")
+  sfExport("yf_h")
+  sfExport("yi_f1")
+  sfExport("yf_f1")
+  sfExport("yi_f2")
+  sfExport("yf_f2")
+  sfExport("gcmList")
+  sfExport("ha_rs")
+  sfExport("ca_rs")
+  sfExport("gCells")
+  sfExport("gCells_u")
+  sfExport("gcm_i")
+  sfExport("gcm")
+  sfExport("ens")
+  sfExport("gcm_outDir")
+  
+  #sets of runs
+  #run the function in parallel
+  system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),analyse_gridcell))
+  
+  #stop the cluster
+  sfStop()
+}
 
 
 
@@ -149,7 +150,13 @@ sfStop()
 ###################################################################################
 #grab data from individual calculations
 if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
-  all_out<- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
+  all_out <- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
+  all_out$LOC <- unlist(all_out$LOC)
+  all_out$RICE1 <- unlist(all_out$RICE1); all_out$RICE2 <- unlist(all_out$RICE2)
+  all_out$WSPR1 <- unlist(all_out$WSPR1); all_out$WSPR2 <- unlist(all_out$WSPR2)
+  all_out$WWIN1 <- unlist(all_out$WWIN1); all_out$WWIN2 <- unlist(all_out$WWIN2)
+  all_out$MILL1 <- unlist(all_out$MILL1); all_out$MILL2 <- unlist(all_out$MILL2)
+  all_out$SORG1 <- unlist(all_out$SORG1); all_out$SORG2 <- unlist(all_out$SORG2)
   save(list=c("all_out","dum_rs"),file=paste(gcm_outDir,"/all_outputs.RData",sep=""))
 } else {
   load(paste(gcm_outDir,"/all_outputs.RData",sep=""))
@@ -204,14 +211,14 @@ if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
   out_rs$MILL$P_2075[] <- NA
   out_rs$MILL$P_2075[all_out$LOC] <- all_out$MILL2
   
-#   #sorg
-#   out_rs$SORG <- list()
-#   out_rs$SORG$P_2035 <- dum_rs
-#   out_rs$SORG$P_2035[] <- NA
-#   out_rs$SORG$P_2035[all_out$LOC] <- all_out$SORG1
-#   out_rs$SORG$P_2075 <- dum_rs
-#   out_rs$SORG$P_2075[] <- NA
-#   out_rs$SORG$P_2075[all_out$LOC] <- all_out$SORG2
+  #sorg
+  out_rs$SORG <- list()
+  out_rs$SORG$P_2035 <- dum_rs
+  out_rs$SORG$P_2035[] <- NA
+  out_rs$SORG$P_2035[all_out$LOC] <- all_out$SORG1
+  out_rs$SORG$P_2075 <- dum_rs
+  out_rs$SORG$P_2075[] <- NA
+  out_rs$SORG$P_2075[all_out$LOC] <- all_out$SORG2
   
   save(out_rs,file=paste(gcm_outDir,"/raster_outputs.RData",sep=""))
 } else {
@@ -236,17 +243,8 @@ plot_overlap("WHEA", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
 plot_overlap("WHEA", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
 plot_overlap("MILL", "P_2035", xt=extent(-30,160,-45,75), fig_dir)
 plot_overlap("MILL", "P_2075", xt=extent(-30,160,-45,75), fig_dir)
-
-
-
-###################################################################
-#the buffer, country, and globe searcher
-#1. if in a 250 km buffer there is a location whose current climate
-#   overlaps 95% with the novel climate
-#2. if within a country there is a location whose current climate overlaps 95% with the
-#   novel climate
-#3. if within the globe there is a location whose current climate overlaps 95% with the
-#   novel climate
+plot_overlap("SORG", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("SORG", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
 
 
 
