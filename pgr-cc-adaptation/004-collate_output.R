@@ -21,7 +21,6 @@ hisDir <- paste(gcmDir,"/historical_amon",sep="")
 rcpDir <- paste(gcmDir,"/rcp45_amon",sep="")
 cfgDir <- paste(bDir,"/config",sep="")
 cruDir <- paste(bDir,"/cru-data",sep="")
-if (!file.exists(scratch)) {dir.create(scratch)}
 
 #output directories
 out_bDir <- paste(bDir,"/outputs",sep="")
@@ -69,7 +68,7 @@ row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
 #batch 1 --> c(1,16,22,17)
-gcm_i <- 16
+gcm_i <- 4
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 

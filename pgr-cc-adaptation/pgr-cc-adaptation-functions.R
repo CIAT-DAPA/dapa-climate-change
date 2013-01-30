@@ -2,13 +2,182 @@
 #Jan 2012
 #functions for PGR paper
 
+
+#calculate adaptation ranges for a grid cell
+calc_adapt_gridcell <- function(loc) {
+  #get details
+  allCells <- gCells
+  cell <- gCells$LOC[loc]; cid <- gCells$CID[loc]
+  lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
+  rice <- gCells$RICE[loc]; wspr <- gCells$WSPR[loc]
+  wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
+  sorg <- gCells$SORG[loc]
+  
+  #update RData file
+  if (loc <= 10000) {
+    datFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    datFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    datFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  load(datFile)
+  
+  if (is.null(output$ADAPTATION)) {
+    rm(output)
+    if (wspr == 1) {
+      out_wspr1 <- search_overlaps_novel(loc,cid,allCells,crop_name="WSPR",2035,gcm_outDir)
+      out_wspr2 <- search_overlaps_novel(loc,cid,allCells,crop_name="WSPR",2075,gcm_outDir)
+    } else {
+      out_wspr1 <- NA
+      out_wspr2 <- NA
+    }
+    
+    if (wwin == 1) {
+      out_wwin1 <- search_overlaps_novel(loc,cid,allCells,crop_name="WWIN",2035,gcm_outDir)
+      out_wwin2 <- search_overlaps_novel(loc,cid,allCells,crop_name="WWIN",2075,gcm_outDir)
+    } else {
+      out_wwin1 <- NA
+      out_wwin2 <- NA
+    }
+    
+    if (rice == 1) {
+      out_rice1 <- search_overlaps_novel(loc,cid,allCells,crop_name="RICE",2035,gcm_outDir)
+      out_rice2 <- search_overlaps_novel(loc,cid,allCells,crop_name="RICE",2075,gcm_outDir)
+    } else {
+      out_rice1 <- NA
+      out_rice2 <- NA
+    }
+    
+    if (sorg == 1) {
+      out_sorg1 <- search_overlaps_novel(loc,cid,allCells,crop_name="SORG",2035,gcm_outDir)
+      out_sorg2 <- search_overlaps_novel(loc,cid,allCells,crop_name="SORG",2075,gcm_outDir)
+    } else {
+      out_sorg1 <- NA
+      out_sorg2 <- NA
+    }
+    
+    if (mill == 1) {
+      out_mill1 <- search_overlaps_novel(loc,cid,allCells,crop_name="MILL",2035,gcm_outDir)
+      out_mill2 <- search_overlaps_novel(loc,cid,allCells,crop_name="MILL",2075,gcm_outDir)
+    } else {
+      out_mill1 <- NA
+      out_mill2 <- NA
+    }
+    
+    #load previous output
+    load(datFile)
+    
+    #append adaptation results to previous output
+    output$RICE$ADAPTATION_2035 <- out_rice1
+    output$RICE$ADAPTATION_2075 <- out_rice2
+    output$WSPR$ADAPTATION_2035 <- out_wspr1
+    output$WSPR$ADAPTATION_2075 <- out_wspr2
+    output$WWIN$ADAPTATION_2035 <- out_wwin1
+    output$WWIN$ADAPTATION_2075 <- out_wwin2
+    output$MILL$ADAPTATION_2035 <- out_mill1
+    output$MILL$ADAPTATION_2075 <- out_mill2
+    output$SORG$ADAPTATION_2035 <- out_mill1
+    output$SORG$ADAPTATION_2075 <- out_mill2
+    
+    #switch adaptation is done
+    output$ADAPTATION <- T
+    
+    #update RData file
+    save(output,file=datFile)
+    rm(output)
+  } else {
+    rm(output)
+  }
+}
+
+
+#search within the three neighborhoods for similarity in climates
+search_overlaps_novel <- function(loc,cid,llCells,crop_name,period,gcm_outDir) {
+  #location of file in chunks of 10k files. File number limitation
+  if (loc <= 10000) {
+    datFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    datFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    datFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  
+  #load the future non-overlapped distribution
+  load(datFile)
+  gsData <- output[[crop_name]][[paste("OVERLAP_",period,sep="")]]$GS_DATA
+  qlims <- as.numeric(quantile(gsData$CRU,probs=c(0.01,0.99)))
+  cru_in <- output[[crop_name]][[paste("OVERLAP_",period,sep="")]]$PDF_CRU
+  cru_in <- cru_in[which(cru_in$x >= qlims[1] & cru_in$x <= qlims[2]),]
+  
+  del_ot <- output[[crop_name]][[paste("OVERLAP_",period,sep="")]]$PDF_DEL
+  del_ot <- del_ot[which(del_ot$x > max(cru_in$x)),]
+  rm(output)
+  
+  #test plotting
+  #plot(cru_in$x,cru_in$y,ty="l",xlim=c(0,35))
+  #lines(del_ot$x,del_ot$y,ty="l",col="blue")
+  #abline(v=min(del_ot$x))
+  #lines(t_cru_in$x,t_cru_in$y,col="red")
+  
+  if (nrow(del_ot) > 0) {
+    #remove testing location
+    allCells <- allCells[-loc,]
+    
+    #choose locations within 250 km
+    allCells$DIST <- pointDistance(c(lon,lat),cbind(x=allCells$LON,y=allCells$LAT),longlat=T)/1000
+    this_cells <- allCells[which(allCells$DIST <= 250 & allCells[,crop_name] == 1),]
+    if (nrow(this_cells) == 0) {
+      xval_buf <- 0
+    } else {
+      #here test for location how much overlap there is
+      a_loc <- as.numeric(row.names(this_cells))
+      xval_buf <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period)
+      xval_buf <- max(xval_buf,na.rm=T)
+    }
+    
+    #choose locations within country
+    this_cells <- allCells[which(allCells$CID == cid & allCells[,crop_name] == 1),]
+    if (nrow(this_cells) == 0) {
+      xval_ctr <- 0
+    } else {
+      #here test for location how much overlap there is
+      a_loc <- as.numeric(row.names(this_cells))
+      if (length(a_loc)>100) {a_loc <- sample(a_loc,100)}
+      xval_ctr <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period)
+      xval_ctr <- max(xval_ctr,na.rm=T)
+    }
+    
+    #choose locations within globe for crop
+    this_cells <- allCells[which(allCells[,crop_name] == 1),]
+    if (nrow(this_cells) == 0) {
+      xval_glo <- 0
+    } else {
+      #here test for location how much overlap there is
+      a_loc <- as.numeric(row.names(this_cells))
+      #test use random sample to reduce computing time
+      a_loc <- sample(a_loc,round(length(a_loc)*.005,0))
+      
+      xval_glo <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period)
+      xval_glo <- max(xval_glo,na.rm=T)
+    }
+  } else {
+    xval_buf <- 1
+    xval_ctr <- 1
+    xval_glo <- 1
+  }
+  r_df <- data.frame(BUF=xval_buf,CTR=xval_ctr,GLO=xval_glo)
+  return(r_df)
+}
+
+
 #calculate overlap between novel part of a distribution and another distribution
 calc_novel_overlap <- function(this_loc,novel_pdf,gcm_outDir,crop_name,period) {
   #1. load output of location
   #location of file in chunks of 10k files. File number limitation
   if (this_loc <= 10000) {
     tl_datFile <- paste(gcm_outDir,"/part_1/loc_",this_loc,".RData",sep="")
-  } else if (this_loc > 10000 & loc <= 20000) {
+  } else if (this_loc > 10000 & this_loc <= 20000) {
     tl_datFile <- paste(gcm_outDir,"/part_2/loc_",this_loc,".RData",sep="")
   } else if (this_loc > 20000) {
     tl_datFile <- paste(gcm_outDir,"/part_3/loc_",this_loc,".RData",sep="")
@@ -26,7 +195,7 @@ calc_novel_overlap <- function(this_loc,novel_pdf,gcm_outDir,crop_name,period) {
   t_ovr <- novel_pdf[which(novel_pdf$x <= max(t_cru_in$x) & novel_pdf$x >= min(t_cru_in$x)),]
   
   #4. return overlap value
-  if (nrow(t_ovr) > 0) {
+  if (nrow(t_ovr) > 1) {
     t_oa <- integrate.xy(t_ovr$x,t_ovr$y)
   } else {
     t_oa <- 0
