@@ -2,6 +2,40 @@
 #Jan 2012
 #functions for PGR paper
 
+#calculate overlap between novel part of a distribution and another distribution
+calc_novel_overlap <- function(this_loc,novel_pdf,gcm_outDir,crop_name,period) {
+  #1. load output of location
+  #location of file in chunks of 10k files. File number limitation
+  if (this_loc <= 10000) {
+    tl_datFile <- paste(gcm_outDir,"/part_1/loc_",this_loc,".RData",sep="")
+  } else if (this_loc > 10000 & loc <= 20000) {
+    tl_datFile <- paste(gcm_outDir,"/part_2/loc_",this_loc,".RData",sep="")
+  } else if (this_loc > 20000) {
+    tl_datFile <- paste(gcm_outDir,"/part_3/loc_",this_loc,".RData",sep="")
+  }
+  load(tl_datFile)
+  
+  #2. calculate 1-99% CRU PDF
+  t_gsData <- output[[crop_name]][[paste("OVERLAP_",period,sep="")]]$GS_DATA
+  t_qlims <- as.numeric(quantile(t_gsData$CRU,probs=c(0.01,0.99)))
+  t_cru_in <- output[[crop_name]][[paste("OVERLAP_",period,sep="")]]$PDF_CRU
+  t_cru_in <- t_cru_in[which(t_cru_in$x >= t_qlims[1] & t_cru_in$x <= t_qlims[2]),]
+  rm(output)
+  
+  #3. overlap with novel_pdf
+  t_ovr <- novel_pdf[which(novel_pdf$x <= max(t_cru_in$x) & novel_pdf$x >= min(t_cru_in$x)),]
+  
+  #4. return overlap value
+  if (nrow(t_ovr) > 0) {
+    t_oa <- integrate.xy(t_ovr$x,t_ovr$y)
+  } else {
+    t_oa <- 0
+  }
+  novel_a <- integrate.xy(novel_pdf$x,novel_pdf$y)
+  t_frac <- t_oa/novel_a
+  return(t_frac)
+}
+
 
 ###plotting
 plot_overlap <- function(cropname, period, xt=extent(-130,160,-45,75), fig_dir) {
