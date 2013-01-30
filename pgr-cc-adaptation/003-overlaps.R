@@ -24,7 +24,7 @@ cruDir <- paste(bDir,"/cru-data",sep="")
 if (!file.exists(scratch)) {dir.create(scratch)}
 
 #output directories
-out_bDir <- paste(bDir,"/outputs.old",sep="")
+out_bDir <- paste(bDir,"/outputs",sep="")
 if (!file.exists(out_bDir)) {dir.create(out_bDir)}
 
 #configuration details and initial data
@@ -87,7 +87,9 @@ row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
 #gcm_i <- 1 #16 is HadGEM2-AO #22 is MIROC5 #17 is HadGEM2-CC
-for (gcm_i in c(1,16,22,17)) {
+#batch 1 --> c(1,16,22,17)
+#batch 2 --> c(2:15,17:21,23)
+for (gcm_i in c(2:15,18:21,23)) {
   gcm <- paste(gcmList$GCM[gcm_i])
   ens <- paste(gcmList$ENS[gcm_i])
   
@@ -142,114 +144,6 @@ for (gcm_i in c(1,16,22,17)) {
   #stop the cluster
   sfStop()
 }
-
-
-
-###################################################################################
-###################################################################################
-###################################################################################
-#grab data from individual calculations
-if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
-  all_out <- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
-  all_out$LOC <- unlist(all_out$LOC)
-  all_out$RICE1 <- unlist(all_out$RICE1); all_out$RICE2 <- unlist(all_out$RICE2)
-  all_out$WSPR1 <- unlist(all_out$WSPR1); all_out$WSPR2 <- unlist(all_out$WSPR2)
-  all_out$WWIN1 <- unlist(all_out$WWIN1); all_out$WWIN2 <- unlist(all_out$WWIN2)
-  all_out$MILL1 <- unlist(all_out$MILL1); all_out$MILL2 <- unlist(all_out$MILL2)
-  all_out$SORG1 <- unlist(all_out$SORG1); all_out$SORG2 <- unlist(all_out$SORG2)
-  save(list=c("all_out","dum_rs"),file=paste(gcm_outDir,"/all_outputs.RData",sep=""))
-} else {
-  load(paste(gcm_outDir,"/all_outputs.RData",sep=""))
-}
-
-######################################
-#load data into a raster
-if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
-  #output list
-  out_rs <- list()
-  
-  #rice
-  out_rs$RICE <- list()
-  out_rs$RICE$P_2035 <- dum_rs
-  out_rs$RICE$P_2035[] <- NA
-  out_rs$RICE$P_2035[all_out$LOC] <- all_out$RICE1
-  out_rs$RICE$P_2075 <- dum_rs
-  out_rs$RICE$P_2075[] <- NA
-  out_rs$RICE$P_2075[all_out$LOC] <- all_out$RICE2
-  
-  #wspr
-  out_rs$WSPR <- list()
-  out_rs$WSPR$P_2035 <- dum_rs
-  out_rs$WSPR$P_2035[] <- NA
-  out_rs$WSPR$P_2035[all_out$LOC] <- all_out$WSPR1
-  out_rs$WSPR$P_2075 <- dum_rs
-  out_rs$WSPR$P_2075[] <- NA
-  out_rs$WSPR$P_2075[all_out$LOC] <- all_out$WSPR2
-  
-  #wwin
-  out_rs$WWIN <- list()
-  out_rs$WWIN$P_2035 <- dum_rs
-  out_rs$WWIN$P_2035[] <- NA
-  out_rs$WWIN$P_2035[all_out$LOC] <- all_out$WWIN1
-  out_rs$WWIN$P_2075 <- dum_rs
-  out_rs$WWIN$P_2075[] <- NA
-  out_rs$WWIN$P_2075[all_out$LOC] <- all_out$WWIN2
-  
-  #whea (min of wspr and wwin)
-  out_rs$WHEA <- list()
-  out_rs$WHEA$P_2035 <- calc(stack(out_rs$WWIN$P_2035,out_rs$WSPR$P_2035),fun=function(x) {min(x,na.rm=T)})
-  out_rs$WHEA$P_2075 <- calc(stack(out_rs$WWIN$P_2075,out_rs$WSPR$P_2075),fun=function(x) {min(x,na.rm=T)})
-  #out_rs$WHEA$P_2035 <- (out_rs$WWIN$P_2035 + out_rs$WSPR$P_2035) / 2
-  #out_rs$WHEA$P_2075 <- (out_rs$WWIN$P_2075 + out_rs$WSPR$P_2075) / 2
-  
-  #mill
-  out_rs$MILL <- list()
-  out_rs$MILL$P_2035 <- dum_rs
-  out_rs$MILL$P_2035[] <- NA
-  out_rs$MILL$P_2035[all_out$LOC] <- all_out$MILL1
-  out_rs$MILL$P_2075 <- dum_rs
-  out_rs$MILL$P_2075[] <- NA
-  out_rs$MILL$P_2075[all_out$LOC] <- all_out$MILL2
-  
-  #sorg
-  out_rs$SORG <- list()
-  out_rs$SORG$P_2035 <- dum_rs
-  out_rs$SORG$P_2035[] <- NA
-  out_rs$SORG$P_2035[all_out$LOC] <- all_out$SORG1
-  out_rs$SORG$P_2075 <- dum_rs
-  out_rs$SORG$P_2075[] <- NA
-  out_rs$SORG$P_2075[all_out$LOC] <- all_out$SORG2
-  
-  save(out_rs,file=paste(gcm_outDir,"/raster_outputs.RData",sep=""))
-} else {
-  load(paste(gcm_outDir,"/raster_outputs.RData",sep=""))
-}
-
-
-#####################################
-#GCM-specific plots
-#figDir
-fig_dir <- paste(gcm_outDir,"/figures",sep="")
-if (!file.exists(fig_dir)) {dir.create(fig_dir)}
-
-#making plots
-plot_overlap("RICE", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("RICE", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("WSPR", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("WSPR", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("WWIN", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("WWIN", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("WHEA", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("WHEA", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("MILL", "P_2035", xt=extent(-30,160,-45,75), fig_dir)
-plot_overlap("MILL", "P_2075", xt=extent(-30,160,-45,75), fig_dir)
-plot_overlap("SORG", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("SORG", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
-
-
-
-
-
 
 
 
