@@ -83,19 +83,19 @@ if (!file.exists(paste(oDir,"/cl-summary.csv",sep=""))) {
   load(file=paste(oDir,"/cl-summary_final.RData",sep=""))
 }
 
-#divide the percent of error by 3 or 12 accordingly, in order to account that
-#it was initially divided by the mean, and should be divided by the total
-all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")]/3
-all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")]/3
-all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")]/3
-all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")]/3
-all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")]/12
-
-all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")]/3
-all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")]/3
-all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")]/3
-all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")]/3
-all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")]/12
+# #divide the percent of error by 3 or 12 accordingly, in order to account that
+# #it was initially divided by the mean, and should be divided by the total
+# all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")]/3
+# all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")]/3
+# all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")]/3
+# all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")]/3
+# all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")] <- all_mets$PRMSE1[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")]/12
+# 
+# all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "DJF")]/3
+# all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "MAM")]/3
+# all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "JJA")]/3
+# all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "SON")]/3
+# all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")] <- all_mets$PRMSE2[which(all_mets$VAR == "pr" & all_mets$SEASON == "ANN")]/12
 
 #make PRMSE1 and PRMSE2 positive. Negative values will indicate only that the
 #mean temp is negative, thus not valid
@@ -107,7 +107,7 @@ figDir <- paste(oDir,"/figures",sep="")
 if (!file.exists(figDir)) {dir.create(figDir)}
 
 #list of things to plot
-all_plots <- expand.grid(VAR=vnList,REGION=unique(regions$REGION),PAR=c("RMSE","CCOEF","PRMSE1"))
+all_plots <- expand.grid(VAR=vnList,REGION=unique(regions$REGION),PAR=c("RMSE","CCOEF","PRMSE1","PRMSE3"))
 
 #get limits of x axis for plots for RMSE
 pr_lims <- all_mets[which(all_mets$VAR == "pr"),]
@@ -116,6 +116,8 @@ tas_lims <- all_mets[which(all_mets$VAR == "tas"),]
 tas_lims <- c(min(tas_lims$RMSE,na.rm=T),max(tas_lims$RMSE,na.rm=T))
 dtr_lims <- all_mets[which(all_mets$VAR == "dtr"),]
 dtr_lims <- c(min(dtr_lims$RMSE,na.rm=T),max(dtr_lims$RMSE,na.rm=T))
+rd_lims <- all_mets[which(all_mets$VAR == "rd"),]
+rd_lims <- c(min(rd_lims$RMSE,na.rm=T),max(rd_lims$RMSE,na.rm=T))
 
 pr_lims1 <- all_mets[which(all_mets$VAR == "pr"),]
 pr_lims1 <- c(min(pr_lims1$PRMSE1,na.rm=T),max(pr_lims1$PRMSE1,na.rm=T))
@@ -123,6 +125,17 @@ tas_lims1 <- all_mets[which(all_mets$VAR == "tas"),]
 tas_lims1 <- c(min(tas_lims1$PRMSE1,na.rm=T),max(tas_lims1$PRMSE1,na.rm=T))
 dtr_lims1 <- all_mets[which(all_mets$VAR == "dtr"),]
 dtr_lims1 <- c(min(dtr_lims1$PRMSE1,na.rm=T),max(dtr_lims1$PRMSE1,na.rm=T))
+rd_lims1 <- all_mets[which(all_mets$VAR == "rd"),]
+rd_lims1 <- c(min(rd_lims1$PRMSE1,na.rm=T),max(rd_lims1$PRMSE1,na.rm=T))
+
+pr_lims2 <- all_mets[which(all_mets$VAR == "pr"),]
+pr_lims2 <- c(min(pr_lims2$PRMSE3,na.rm=T),max(pr_lims2$PRMSE3,na.rm=T))
+tas_lims2 <- all_mets[which(all_mets$VAR == "tas"),]
+tas_lims2 <- c(min(tas_lims2$PRMSE3,na.rm=T),max(tas_lims2$PRMSE3,na.rm=T))
+dtr_lims2 <- all_mets[which(all_mets$VAR == "dtr"),]
+dtr_lims2 <- c(min(dtr_lims2$PRMSE3,na.rm=T),max(dtr_lims2$PRMSE3,na.rm=T))
+rd_lims2 <- all_mets[which(all_mets$VAR == "rd"),]
+rd_lims2 <- c(min(rd_lims2$PRMSE3,na.rm=T),max(rd_lims2$PRMSE3,na.rm=T))
 
 
 all_plots$LL <- NA; all_plots$UL <- NA
@@ -134,18 +147,35 @@ all_plots$LL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "tas")] <- tas_lim
 all_plots$UL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "tas")] <- tas_lims[2]
 all_plots$LL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "dtr")] <- dtr_lims[1]
 all_plots$UL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "dtr")] <- dtr_lims[2]
+all_plots$LL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "rd")] <- rd_lims[1]
+all_plots$UL[which(all_plots$PAR == "RMSE" & all_plots$VAR == "rd")] <- rd_lims[2]
 all_plots$LL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "pr")] <- 0 #pr_lims1[1]
-all_plots$UL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "pr")] <- 300 #pr_lims1[2]
+all_plots$UL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "pr")] <- 750 #pr_lims1[2]
 all_plots$LL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "tas")] <- 0 #tas_lims1[1]
 all_plots$UL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "tas")] <- 100 #tas_lims1[2]
 all_plots$LL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "dtr")] <- 0 #dtr_lims1[1]
 all_plots$UL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "dtr")] <- 100 #dtr_lims1[2]
+all_plots$LL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "rd")] <- 0 #rd_lims1[1]
+all_plots$UL[which(all_plots$PAR == "PRMSE1" & all_plots$VAR == "rd")] <- 1500 #rd_lims1[2]
+all_plots$LL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "pr")] <- 0 #pr_lims1[1]
+all_plots$UL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "pr")] <- 750 #pr_lims1[2]
+all_plots$LL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "tas")] <- 0 #tas_lims1[1]
+all_plots$UL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "tas")] <- 750 #tas_lims1[2]
+all_plots$LL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "dtr")] <- 0 #dtr_lims1[1]
+all_plots$UL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "dtr")] <- 750 #dtr_lims1[2]
+all_plots$LL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "rd")] <- 0 #rd_lims1[1]
+all_plots$UL[which(all_plots$PAR == "PRMSE3" & all_plots$VAR == "rd")] <- 3500 #rd_lims1[2]
+
+
 
 all_plots$XLAB <- NA
 all_plots$XLAB[which(all_plots$PAR == "CCOEF")] <- "Correlation coefficient"
 all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR == "pr")] <- "RMSE (mm/season or mm/year)"
-all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR != "pr")] <- "RMSE (Celsius/month)"
+all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR == "rd")] <- "RMSE (days/season or days/year)"
+all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR == "dtr")] <- "RMSE (Celsius/month)"
+all_plots$XLAB[which(all_plots$PAR == "RMSE" & all_plots$VAR == "tas")] <- "RMSE (Celsius/month)"
 all_plots$XLAB[which(all_plots$PAR == "PRMSE1")] <- "RMSE (%)"
+all_plots$XLAB[which(all_plots$PAR == "PRMSE3")] <- "RMSE (%)"
 
 ####
 #loop and plot the boxplots
@@ -161,7 +191,7 @@ for (i in 1:nrow(all_plots)) {
   #select data
   pdata <- all_mets[which(all_mets$REG == reg & all_mets$VAR == vn),]
   pdata$ISO <- paste(pdata$ISO)
-  pdata <- pdata[which(pdata$OBS != paste("cl_rev-E40")),]
+  pdata <- pdata[which(pdata$OBS != paste("cl_rev2-E40")),] #dont include ERA40 data
   
   #fix levels in ISO to avoid problems in ordering stuff vs. automatic order of boxplot
   pdata$ISO <- as.factor(pdata$ISO)
@@ -177,13 +207,14 @@ for (i in 1:nrow(all_plots)) {
           xlab=xlb,ylab=NA,main=NA)
   plotpoints(pdata,param=param)
   abline(v=seq(ylims[1],ylims[2],by=(ylims[2]-ylims[1])/10),lty=2,col="gray 80",lwd=0.5)
-  if (param == "PRMSE1") abline(v=c(15,30),col="red",lty=2,lwd=0.75)
+  if (param == "PRMSE1") abline(v=c(30,50),col="red",lty=2,lwd=0.75)
+  if (param == "PRMSE3") abline(v=c(30,50),col="red",lty=2,lwd=0.75)
   text(y=length(unique(pdata$ISO))+0.5,x=((ylims[2]-ylims[1])*0.075),labels=c(reg),cex=1.25)
   dev.off()
-  
 }
 
 
+################## TAYLOR DIAGRAM?
 
 ######################################################################
 ######################################################################
@@ -196,7 +227,7 @@ for (i in 1:nrow(all_plots)) {
 #heatmap(x, Rowv = NA, Colv = NA, scale="column",main = "heatmap")
 
 #first need to average ensembles
-obs_data <- all_mets[which(all_mets$OBS != "cl_rev-E40"),]
+obs_data <- all_mets[which(all_mets$OBS != "cl_rev-E40"),] #exclude ERA40
 obs_data$GCM <- paste(obs_data$GCM)
 gcm <- as.character(sapply(as.character(obs_data$GCM),FUN= function(x) {unlist(strsplit(x,"_ENS_",fixed=T))[1]}))
 obs_data$GCM <- gcm
