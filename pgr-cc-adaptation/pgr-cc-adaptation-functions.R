@@ -93,7 +93,7 @@ calc_adapt_gridcell <- function(loc) {
 
 
 #search within the three neighborhoods for similarity in climates
-search_overlaps_novel <- function(loc,cid,llCells,crop_name,period,gcm_outDir) {
+search_overlaps_novel <- function(loc,cid,allCells,crop_name,period,gcm_outDir) {
   #location of file in chunks of 10k files. File number limitation
   if (loc <= 10000) {
     datFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")

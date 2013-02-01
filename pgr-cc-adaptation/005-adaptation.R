@@ -108,15 +108,15 @@ gCells$CID <- extract(wld_rs,cbind(x=gCells$LON,y=gCells$LAT))
 #check existence
 gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done_adapt)
 gCells_u <- gCells[which(!gCells$STATUS),]
-analyse_gridcell(as.numeric(row.names(gCells_u))[1])
+calc_adapt_gridcell(as.numeric(row.names(gCells_u))[1])
 
 #location
-calc_adapt_gridcell(1)
+#calc_adapt_gridcell(1)
 
 ####################################################################
 ####################################################################
 #number of cpus to use
-if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
+if (nrow(gCells_u) > 12) {ncpus <- 12} else {ncpus <- nrow(gCells)}
 
 #here do the parallelisation
 #load library and create cluster
@@ -133,15 +133,9 @@ sfExport("rcpDir")
 sfExport("cfgDir")
 sfExport("cruDir")
 sfExport("out_bDir")
-sfExport("yi_h")
-sfExport("yf_h")
-sfExport("yi_f1")
-sfExport("yf_f1")
-sfExport("yi_f2")
-sfExport("yf_f2")
 sfExport("gcmList")
 sfExport("ha_rs")
-sfExport("ca_rs")
+sfExport("wld_rs")
 sfExport("gCells")
 sfExport("gCells_u")
 sfExport("gcm_i")
@@ -151,7 +145,7 @@ sfExport("gcm_outDir")
 
 #sets of runs
 #run the function in parallel
-system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),analyse_gridcell))
+system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),calc_adapt_gridcell))
 
 #stop the cluster
 sfStop()
