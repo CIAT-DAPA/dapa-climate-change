@@ -3,18 +3,18 @@
 
 library(raster); library(sfsmisc); library(maptools)
 
-src.dir <- "~/Repositories/dapa-climate-change/trunk/pgr-cc-adaptation"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/pgr-cc-adaptation"
+# src.dir <- "~/Repositories/dapa-climate-change/trunk/pgr-cc-adaptation"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/pgr-cc-adaptation"
 source(paste(src.dir,"/pgr-cc-adaptation-functions.R",sep=""))
 
-#base directories
-gcmDir <- "/mnt/a102/eejarv/CMIP5/Amon"
-bDir <- "/mnt/a17/eejarv/pgr-cc-adaptation"
-scratch <- "~/Workspace/pgr_analogues"
+# #base directories
+# gcmDir <- "/mnt/a102/eejarv/CMIP5/Amon"
+# bDir <- "/mnt/a17/eejarv/pgr-cc-adaptation"
+# scratch <- "~/Workspace/pgr_analogues"
 
-# gcmDir <- "/nfs/a102/eejarv/CMIP5/Amon"
-# bDir <- "/nfs/a17/eejarv/pgr-cc-adaptation"
-# scratch <- "/scratch/eejarv/pgr_analogues"
+gcmDir <- "/nfs/a102/eejarv/CMIP5/Amon"
+bDir <- "/nfs/a17/eejarv/pgr-cc-adaptation"
+scratch <- "/scratch/eejarv/pgr_analogues"
 
 #input directories
 hisDir <- paste(gcmDir,"/historical_amon",sep="")
@@ -83,6 +83,8 @@ if (!file.exists(paste(cfgDir,"/gCells.RData",sep=""))) {
 #3. if within the globe there is a location whose current climate overlaps 95% with the
 #   novel climate
 
+#gcms must be c(1:6,9,16,19,22)
+
 #gcm
 gcm_i <- 1
 gcm <- paste(gcmList$GCM[gcm_i])
@@ -103,7 +105,57 @@ if (!file.exists(paste(cfgDir,"/wld_rs.RData",sep=""))) {
 #extract country IDs
 gCells$CID <- extract(wld_rs,cbind(x=gCells$LON,y=gCells$LAT))
 
+#check existence
+gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done_adapt)
+gCells_u <- gCells[which(!gCells$STATUS),]
+analyse_gridcell(as.numeric(row.names(gCells_u))[1])
+
 #location
 calc_adapt_gridcell(1)
+
+####################################################################
+####################################################################
+#number of cpus to use
+if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir")
+sfExport("gcmDir")
+sfExport("bDir")
+sfExport("scratch")
+sfExport("hisDir")
+sfExport("rcpDir")
+sfExport("cfgDir")
+sfExport("cruDir")
+sfExport("out_bDir")
+sfExport("yi_h")
+sfExport("yf_h")
+sfExport("yi_f1")
+sfExport("yf_f1")
+sfExport("yi_f2")
+sfExport("yf_f2")
+sfExport("gcmList")
+sfExport("ha_rs")
+sfExport("ca_rs")
+sfExport("gCells")
+sfExport("gCells_u")
+sfExport("gcm_i")
+sfExport("gcm")
+sfExport("ens")
+sfExport("gcm_outDir")
+
+#sets of runs
+#run the function in parallel
+system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),analyse_gridcell))
+
+#stop the cluster
+sfStop()
+
+
 
 

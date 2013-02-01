@@ -89,7 +89,7 @@ row.names(gCells) <- 1:nrow(gCells)
 #gcm_i <- 1 #16 is HadGEM2-AO #22 is MIROC5 #17 is HadGEM2-CC
 #batch 1 --> c(1,16,22,17)
 #batch 2 --> c(2:15,17:21,23)
-for (gcm_i in c(9:15,18:21,23)) {
+for (gcm_i in c(1:6,9,16,19,22)) {
   gcm <- paste(gcmList$GCM[gcm_i])
   ens <- paste(gcmList$ENS[gcm_i])
   

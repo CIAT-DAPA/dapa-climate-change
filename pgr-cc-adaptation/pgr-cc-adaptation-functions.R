@@ -314,6 +314,28 @@ get_loc_fraction <- function(loc) {
 }
 
 
+#check if adaptation processes are done
+check_done_adapt <- function(loc) {
+  #location of file in chunks of 10k files. File number limitation
+  cell <- gCells$LOC[loc]
+  if (loc <= 10000) {
+    oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  #add to list if not exists
+  load(oDatFile)
+  if (is.null(output$ADAPTATION)) {
+    fStatus <- F
+  } else {
+    fStatus <- output$ADAPTATION
+  }
+  return(fStatus)
+}
+
+
 #check if processes are done
 check_done <- function(loc) {
   #location of file in chunks of 10k files. File number limitation

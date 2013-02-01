@@ -67,7 +67,7 @@ gCells <- gCells[which(gCells$TOTL > 0),]
 row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
-#batch 1 --> c(1,16,22,17)
+#gcms must be c(1:6,9,16,19,22)
 gcm_i <- 5
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
