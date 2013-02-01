@@ -68,7 +68,7 @@ row.names(gCells) <- 1:nrow(gCells)
 
 #gcm
 #batch 1 --> c(1,16,22,17)
-gcm_i <- 4
+gcm_i <- 5
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 

@@ -140,7 +140,7 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #system.time(glam_adap_run_wrapper(run_config))
 #timall <- run_group_adap(976)
 
-#preliminary runs while other stuff finishes up
+# preliminary runs while other stuff finishes up
 # lim_a <- 1366
 # lim_b <- 1560
 # 
