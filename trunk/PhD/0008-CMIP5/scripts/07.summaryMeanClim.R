@@ -15,6 +15,12 @@
 #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
 #mdDir <- "V:/eejarv/CMIP5"
 
+
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0008-CMIP5"
+mdDir <- "/mnt/a102/eejarv/CMIP5"
+
+
 #source functions
 source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
 
@@ -24,16 +30,16 @@ gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep
 regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
 
 #variables to analyse
-vnList <- data.frame(VID=1:3,GCM=c("pr","tas","dtr"),WCL=c("prec","tmean","dtr"),
-                     CL_CRU=c("prec","tmean","dtr"),TS_CRU=c("pre","tmp","dtr"),
-                     E40=c("prec","tasm",NA),CL_WST=c("rain","tean","dtr"),
-                     TS_WST=c("pr","tas","dtr"))
+vnList <- data.frame(VID=1:4,GCM=c("pr","tas","dtr","rd"),WCL=c("prec","tmean","dtr",NA),
+                     CL_CRU=c("prec","tmean","dtr","wet"),TS_CRU=c("pre","tmp","dtr","wet"),
+                     E40=c("prec","tasm","dtr","wet"),CL_WST=c("rain","tean","dtr",NA),
+                     TS_WST=c("pr","tas","dtr",NA))
 
 #scaling factors to datasets per variable
-scList <- data.frame(VID=1:3,GCM=c(1,1,1),WCL=c(1,1,1),
-                     CL_CRU=c(1,1,1),TS_CRU=c(0.1,0.1,0.1),
-                     E40=c(1,1,NA),CL_WST=c(1,1,1),
-                     TS_WST=c(1,0.1,0.1))
+scList <- data.frame(VID=1:4,GCM=c(1,1,1,1),WCL=c(1,1,1,NA),
+                     CL_CRU=c(1,1,1,1),TS_CRU=c(0.1,0.1,0.1,0.01),
+                     E40=c(1,1,1,1),CL_WST=c(1,1,1,NA),
+                     TS_WST=c(1,0.1,0.1,NA))
 
 
 #processes to complete
@@ -45,22 +51,28 @@ isoList <- regions$ISO
 #dsetList <- c("cl-CRU","cl-E40","cl-WCL","cl-WST")
 
 #### the below line was introduced for NCC revised version
-dsetList <- c("cl_rev-CRU","cl_rev-E40","cl_rev-WCL","cl_rev-WST")
+#dsetList <- c("cl_rev-CRU","cl_rev-E40","cl_rev-WCL","cl_rev-WST")
 
-vnList <- c("pr","tas","dtr")
+#### the below line was introduced for ERL resubmission
+dsetList <- c("cl_rev2-CRU","cl_rev2-E40","cl_rev2-WCL","cl_rev2-WST")
+
+vnList <- c("pr","tas","dtr","rd")
 procList <- expand.grid(GCM=gcmList,ISO=isoList,OBS=dsetList,VAR=vnList)
 procList$GCM <- paste(procList$GCM); procList$ISO <- paste(procList$ISO)
 procList$OBS <- paste(procList$OBS); procList$VAR <- paste(procList$VAR)
 
 #create output folder
 #oDir <- paste(mdDir,"/assessment/output-data/_summary",sep="") #original
-oDir <- paste(mdDir,"/assessment/output-data/_summary_revised",sep="") #NCC revision
+#oDir <- paste(mdDir,"/assessment/output-data/_summary_revised",sep="") #NCC revision
+oDir <- paste(mdDir,"/assessment/output-data/_summary_revised2",sep="") #ERL revision
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 #get all metrics
 if (!file.exists(paste(oDir,"/cl-summary.csv",sep=""))) {
   #all_mets <- apply(procList,1,get_mean_climate_metrics,mdDir,regions)
-  all_mets <- apply(procList,1,get_mean_climate_metrics_revised,mdDir,regions)
+  #all_mets <- apply(procList,1,get_mean_climate_metrics_revised,mdDir,regions)
+  all_mets <- apply(procList,1,get_mean_climate_metrics_revised2,mdDir,regions)
+  
   #write outputs
   save(list=c("all_mets"),file=paste(oDir,"/cl-summary_raw.RData",sep=""))
   all_mets <- do.call("rbind", all_mets)
