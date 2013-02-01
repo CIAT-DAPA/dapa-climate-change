@@ -116,7 +116,7 @@ calc_adapt_gridcell(as.numeric(row.names(gCells_u))[1])
 ####################################################################
 ####################################################################
 #number of cpus to use
-if (nrow(gCells_u) > 12) {ncpus <- 12} else {ncpus <- nrow(gCells)}
+if (nrow(gCells_u) > 13) {ncpus <- 13} else {ncpus <- nrow(gCells)}
 
 #here do the parallelisation
 #load library and create cluster
@@ -134,7 +134,6 @@ sfExport("cfgDir")
 sfExport("cruDir")
 sfExport("out_bDir")
 sfExport("gcmList")
-sfExport("ha_rs")
 sfExport("wld_rs")
 sfExport("gCells")
 sfExport("gCells_u")
