@@ -5,6 +5,9 @@
 
 #calculate adaptation ranges for a grid cell
 calc_adapt_gridcell <- function(loc) {
+  library(raster); library(sfsmisc); library(maptools)
+  source(paste(src.dir,"/pgr-cc-adaptation-functions.R",sep=""))
+  
   #get details
   allCells <- gCells
   cell <- gCells$LOC[loc]; cid <- gCells$CID[loc]
