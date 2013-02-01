@@ -26,40 +26,40 @@ calc_adapt_gridcell <- function(loc) {
   if (is.null(output$ADAPTATION)) {
     rm(output)
     if (wspr == 1) {
-      out_wspr1 <- search_overlaps_novel(loc,cid,allCells,crop_name="WSPR",2035,gcm_outDir)
-      out_wspr2 <- search_overlaps_novel(loc,cid,allCells,crop_name="WSPR",2075,gcm_outDir)
+      out_wspr1 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="WSPR",2035,gcm_outDir)
+      out_wspr2 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="WSPR",2075,gcm_outDir)
     } else {
       out_wspr1 <- NA
       out_wspr2 <- NA
     }
     
     if (wwin == 1) {
-      out_wwin1 <- search_overlaps_novel(loc,cid,allCells,crop_name="WWIN",2035,gcm_outDir)
-      out_wwin2 <- search_overlaps_novel(loc,cid,allCells,crop_name="WWIN",2075,gcm_outDir)
+      out_wwin1 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="WWIN",2035,gcm_outDir)
+      out_wwin2 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="WWIN",2075,gcm_outDir)
     } else {
       out_wwin1 <- NA
       out_wwin2 <- NA
     }
     
     if (rice == 1) {
-      out_rice1 <- search_overlaps_novel(loc,cid,allCells,crop_name="RICE",2035,gcm_outDir)
-      out_rice2 <- search_overlaps_novel(loc,cid,allCells,crop_name="RICE",2075,gcm_outDir)
+      out_rice1 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="RICE",2035,gcm_outDir)
+      out_rice2 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="RICE",2075,gcm_outDir)
     } else {
       out_rice1 <- NA
       out_rice2 <- NA
     }
     
     if (sorg == 1) {
-      out_sorg1 <- search_overlaps_novel(loc,cid,allCells,crop_name="SORG",2035,gcm_outDir)
-      out_sorg2 <- search_overlaps_novel(loc,cid,allCells,crop_name="SORG",2075,gcm_outDir)
+      out_sorg1 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="SORG",2035,gcm_outDir)
+      out_sorg2 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="SORG",2075,gcm_outDir)
     } else {
       out_sorg1 <- NA
       out_sorg2 <- NA
     }
     
     if (mill == 1) {
-      out_mill1 <- search_overlaps_novel(loc,cid,allCells,crop_name="MILL",2035,gcm_outDir)
-      out_mill2 <- search_overlaps_novel(loc,cid,allCells,crop_name="MILL",2075,gcm_outDir)
+      out_mill1 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="MILL",2035,gcm_outDir)
+      out_mill2 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="MILL",2075,gcm_outDir)
     } else {
       out_mill1 <- NA
       out_mill2 <- NA
@@ -93,7 +93,7 @@ calc_adapt_gridcell <- function(loc) {
 
 
 #search within the three neighborhoods for similarity in climates
-search_overlaps_novel <- function(loc,cid,allCells,crop_name,period,gcm_outDir) {
+search_overlaps_novel <- function(loc,lon,lat,cid,allCells,crop_name,period,gcm_outDir) {
   #location of file in chunks of 10k files. File number limitation
   if (loc <= 10000) {
     datFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
