@@ -21,3 +21,12 @@ src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0008-CMIP5"
 mdDir <- "/mnt/a102/eejarv/CMIP5"
 
 
+#load CMIP3
+
+#load CMIP5
+
+#construct Taylor diagram using averages of regions and input datasets
+
+
+
+
