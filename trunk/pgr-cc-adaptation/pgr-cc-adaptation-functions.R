@@ -16,6 +16,8 @@ calc_adapt_gridcell <- function(loc) {
   wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
   sorg <- gCells$SORG[loc]
   
+  cat("processing loc",loc,"cell=",cell,"\n")
+  
   #update RData file
   if (loc <= 10000) {
     datFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
