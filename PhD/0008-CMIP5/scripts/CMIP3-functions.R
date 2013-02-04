@@ -3,6 +3,26 @@
 #UoL / CCAFS / CIAT
 
 
+#plot points of seasons on top of boxplot
+plotpoints <- function(pdata,param="CCOEF") {
+  cnames <- levels(pdata$ISO)
+  ctr <- 1
+  for (iso in cnames) {
+    djf <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "DJF"),]
+    mam <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "MAM"),]
+    jja <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "JJA"),]
+    son <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "SON"),]
+    ann <- pdata[which(pdata$ISO == paste(iso) & pdata$SEASON == "ANN"),]
+    points(djf[,param],rep(ctr+.25,times=nrow(djf)),pch=20,cex=0.65,lwd=0.1,col="red")
+    points(mam[,param],rep(ctr+.1,times=nrow(mam)),pch=20,cex=0.65,lwd=0.1,col="blue")
+    points(ann[,param],rep(ctr,times=nrow(ann)),pch=20,cex=0.65,lwd=0.1,col="black")
+    points(jja[,param],rep(ctr-.1,times=nrow(jja)),pch=20,cex=0.65,lwd=0.1,col="purple")
+    points(son[,param],rep(ctr-.25,times=nrow(son)),pch=20,cex=0.65,lwd=0.1,col="dark green")
+    ctr <- ctr+1
+  }
+}
+
+
 ##############################################################################
 # get metrics for mean climate skill assessment
 # revised version for ERL paper
