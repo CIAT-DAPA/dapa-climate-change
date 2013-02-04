@@ -86,7 +86,7 @@ if (!file.exists(paste(cfgDir,"/gCells.RData",sep=""))) {
 #gcms must be c(1:6,9,16,19,22)
 
 #gcm
-gcm_i <- 2
+gcm_i <- 6
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 
@@ -106,9 +106,15 @@ if (!file.exists(paste(cfgDir,"/wld_rs.RData",sep=""))) {
 gCells$CID <- extract(wld_rs,cbind(x=gCells$LON,y=gCells$LAT))
 
 #check existence
-gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done_adapt)
+#gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done_adapt)
+gCells$STATUS <- F
 gCells_u <- gCells[which(!gCells$STATUS),]
 calc_adapt_gridcell(as.numeric(row.names(gCells_u))[1])
+
+
+#run in serial, due to i/o problems
+#for (k in as.numeric(row.names(gCells_u))) {calc_adapt_gridcell(k)}
+
 
 #location
 #calc_adapt_gridcell(1)
