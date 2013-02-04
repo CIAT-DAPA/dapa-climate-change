@@ -149,7 +149,7 @@ search_overlaps_novel <- function(loc,lon,lat,cid,allCells,crop_name,period,gcm_
     } else {
       #here test for location how much overlap there is
       a_loc <- as.numeric(row.names(this_cells))
-      xval_buf <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period)
+      xval_buf <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period,gcmScratch)
       xval_buf <- max(xval_buf,na.rm=T)
     }
     
@@ -161,7 +161,7 @@ search_overlaps_novel <- function(loc,lon,lat,cid,allCells,crop_name,period,gcm_
       #here test for location how much overlap there is
       a_loc <- as.numeric(row.names(this_cells))
       if (length(a_loc)>100) {a_loc <- sample(a_loc,100)}
-      xval_ctr <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period)
+      xval_ctr <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period,gcmScratch)
       xval_ctr <- max(xval_ctr,na.rm=T)
     }
     
@@ -175,7 +175,7 @@ search_overlaps_novel <- function(loc,lon,lat,cid,allCells,crop_name,period,gcm_
       #test use random sample to reduce computing time
       a_loc <- sample(a_loc,round(length(a_loc)*.005,0))
       
-      xval_glo <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period)
+      xval_glo <- sapply(a_loc,calc_novel_overlap,del_ot,gcm_outDir,crop_name,period,gcmScratch)
       xval_glo <- max(xval_glo,na.rm=T)
     }
   } else {
@@ -189,15 +189,15 @@ search_overlaps_novel <- function(loc,lon,lat,cid,allCells,crop_name,period,gcm_
 
 
 #calculate overlap between novel part of a distribution and another distribution
-calc_novel_overlap <- function(this_loc,novel_pdf,gcm_outDir,crop_name,period) {
+calc_novel_overlap <- function(this_loc,novel_pdf,gcm_outDir,crop_name,period,gcmScratch) {
   #1. load output of location
   #location of file in chunks of 10k files. File number limitation
   if (this_loc <= 10000) {
-    tl_datFile <- paste(gcm_outDir,"/part_1/loc_",this_loc,".RData",sep="")
+    tl_datFile <- paste(,gcmScratch,"/part_1/loc_",this_loc,".RData",sep="")
   } else if (this_loc > 10000 & this_loc <= 20000) {
-    tl_datFile <- paste(gcm_outDir,"/part_2/loc_",this_loc,".RData",sep="")
+    tl_datFile <- paste(,gcmScratch,"/part_2/loc_",this_loc,".RData",sep="")
   } else if (this_loc > 20000) {
-    tl_datFile <- paste(gcm_outDir,"/part_3/loc_",this_loc,".RData",sep="")
+    tl_datFile <- paste(,gcmScratch,"/part_3/loc_",this_loc,".RData",sep="")
   }
   load(tl_datFile)
   
