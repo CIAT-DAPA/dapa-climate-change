@@ -606,7 +606,7 @@ check_done <- function(procList,check_dir="x.proc") {
     
     oDir <- paste(outputDD,"/",reg,"/",iso,sep="")
     procDir <- paste(oDir,"/",check_dir,sep="")
-    for (vid in 1:3) {
+    for (vid in 1:4) {
       vn_gcm <- paste(vnList$GCM[vid]) #variable name
       procFil <- paste(procDir,"/",vn_gcm,"_",gcm,"_",ens,".proc",sep="") #check file
       if (!file.exists(procFil)) {
