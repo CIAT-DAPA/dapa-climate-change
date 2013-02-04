@@ -193,11 +193,11 @@ calc_novel_overlap <- function(this_loc,novel_pdf,gcm_outDir,crop_name,period,gc
   #1. load output of location
   #location of file in chunks of 10k files. File number limitation
   if (this_loc <= 10000) {
-    tl_datFile <- paste(,gcmScratch,"/part_1/loc_",this_loc,".RData",sep="")
+    tl_datFile <- paste(gcmScratch,"/part_1/loc_",this_loc,".RData",sep="")
   } else if (this_loc > 10000 & this_loc <= 20000) {
-    tl_datFile <- paste(,gcmScratch,"/part_2/loc_",this_loc,".RData",sep="")
+    tl_datFile <- paste(gcmScratch,"/part_2/loc_",this_loc,".RData",sep="")
   } else if (this_loc > 20000) {
-    tl_datFile <- paste(,gcmScratch,"/part_3/loc_",this_loc,".RData",sep="")
+    tl_datFile <- paste(gcmScratch,"/part_3/loc_",this_loc,".RData",sep="")
   }
   load(tl_datFile)
   
