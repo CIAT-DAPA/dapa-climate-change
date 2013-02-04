@@ -259,7 +259,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -312,7 +312,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -371,7 +371,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF2))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF2,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -424,7 +424,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF2))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$CCOEF2,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -489,7 +489,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE1))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE1,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -541,7 +541,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE1))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE1,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -607,7 +607,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE3))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE3,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
@@ -659,7 +659,7 @@ for (vn in unique(obs_data$VAR)) {
         gcm_data$VAR <- NULL; gcm_data$ISO <- NULL; gcm_data$REG <- NULL
         gcm_data$SEASON <- NULL; gcm_data$OBS <- NULL
         
-        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE3))
+        gcm_odf <- data.frame(GCM=paste(gcm),VAL=mean(gcm_data$PRMSE3,na.rm=T))
         names(gcm_odf) <- c("GCM",paste(reg,".",ssn,sep=""))
         odf <- rbind(odf,gcm_odf)
       }
