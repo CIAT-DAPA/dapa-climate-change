@@ -86,7 +86,7 @@ if (!file.exists(paste(cfgDir,"/gCells.RData",sep=""))) {
 #gcms must be c(1:6,9,16,19,22)
 
 #gcm
-gcm_i <- 1
+gcm_i <- 2
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 
