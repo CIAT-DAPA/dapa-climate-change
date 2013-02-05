@@ -28,7 +28,7 @@ cmip5Dir <- "/mnt/a102/eejarv/CMIP5"
 
 
 #source functions
-source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+source(paste(src.dir2,"/scripts/CMIP3-functions.R",sep=""))
 
 
 #list of gcms and countries/regions
