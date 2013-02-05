@@ -130,7 +130,7 @@ procList <- check_done(procList,"z_rev.proc")
 
 #determine number of CPUs
 ncpus <- nrow(procList)
-if (ncpus>12) {ncpus <- 12}
+if (ncpus>20) {ncpus <- 20}
 
 #here do the parallelisation
 #load library and create cluster

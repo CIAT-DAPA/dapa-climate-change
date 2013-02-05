@@ -86,7 +86,7 @@ if (!file.exists(paste(cfgDir,"/gCells.RData",sep=""))) {
 #gcms must be c(1:6,9,16,19,22)
 
 #gcm
-gcm_i <- 3
+gcm_i <- 5
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 
@@ -122,7 +122,7 @@ calc_adapt_gridcell(as.numeric(row.names(gCells_u))[1])
 ####################################################################
 ####################################################################
 #number of cpus to use
-if (nrow(gCells_u) > 14) {ncpus <- 14} else {ncpus <- nrow(gCells)}
+if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
 
 #here do the parallelisation
 #load library and create cluster
