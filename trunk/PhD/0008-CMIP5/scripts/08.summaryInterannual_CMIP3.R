@@ -52,14 +52,14 @@ procList$OBS <- paste(procList$OBS); procList$VAR <- paste(procList$VAR)
 #procList <- procList[-which(procList$OBS == "vi-E40" & procList$VAR == "dtr"),]
 
 #create output folder
-oDir <- paste(mdDir,"/assessment/output-data/_summary",sep="")
+oDir <- paste(cmip5Dir,"/assessment/output-data-cmip3/_summary",sep="")
 if (!file.exists(oDir)) {dir.create(oDir,recursive=T)}
 
 odir_rs <- paste(oDir,"/interannual-skill-vi",sep="")
 if (!file.exists(odir_rs)) {dir.create(odir_rs)}
 
 #this_proc <- 1
-#summarise_interannual(144)
+for (i in 1:50) {summarise_interannual_vi(i)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
@@ -97,10 +97,10 @@ sfStop()
 #calculate average of all climate models for each metric
 #interannual variability index (vi)
 
-vnList <- c("pr","tas","dtr")
+vnList <- c("prec","tmean","dtr")
 metList <- c("vi")
 sList <- c("DJF","MAM","JJA","SON","ANN")
-gcmList <- unique(paste(gcmChars$GCM,"_",gcmChars$Ensemble,sep=""))
+gcmList <- list.files(mdDir)
 
 procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
 #this_proc <- 1

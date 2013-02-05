@@ -2,6 +2,128 @@
 #May 2012
 #UoL / CCAFS / CIAT
 
+################################################################################
+#calculate average of all vi summaries, per variable, metric and season (ERA-40)
+################################################################################
+mean_summary_interannual_vi_e40 <- function(this_proc) {
+  
+  library(raster)
+  source(paste(src.dir2,"/scripts/CMIP3-functions.R",sep=""))
+  
+  met <- paste(procList$MET[this_proc])
+  vn <- paste(procList$VAR[this_proc])
+  seas <- paste(procList$SEAS[this_proc])
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("summarise for",vn,":",met,"-",seas,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  s_dir <- paste(odir_rs,"/",seas,sep="")
+  oDir <- paste(s_dir,"/summary_e40",sep="")
+  if (!file.exists(oDir)) {dir.create(oDir)}
+  
+  if (!file.exists(paste(oDir,"/",met,"-",seas,"-",vn,"-min_all_models.tif",sep=""))) {
+    #load all models (except MMM) and all datasets (ts-CRU and ts-WST)
+    fList <- paste(s_dir,"/",met,"-",vn,"-vi-E40-",gcmList,".tif",sep="")
+    fPres <- as.character(sapply(fList,checkExists))
+    fPres <- fPres[which(!is.na(fPres))]
+    
+    mList <- lapply(fPres,FUN= function(x) {raster(x)})
+    xr <- as.numeric(unlist(lapply(mList,FUN= function(x) {xres(x)})))
+    yr <- as.numeric(unlist(lapply(mList,FUN= function(x) {yres(x)})))
+    
+    #pick lowest cellsize
+    sxr <- which(xr==min(xr))[1]
+    res_base <- mList[[sxr]]
+    
+    #resample to the lowest cellsize
+    mList_res <- lapply(mList,FUN= function(x,y) {resample(x,y,method="ngb")},res_base)
+    
+    #cope with any missing data
+    mList_cor <- lapply(mList_res,FUN= function(x) {y <- x; y[which(x[] > 10000)] <- NA; return(y)})
+    
+    #a rasterstack is created and then use calc() to get the mean, and just write it
+    rstk <- stack(mList_cor)
+    
+    #calculating stats
+    rsm <- calc(rstk,fun= function(x) {mean(x,na.rm=T)})
+    rsm <- writeRaster(rsm,paste(oDir,"/",met,"-",seas,"-",vn,"-mean_all_models.tif",sep=""),format="GTiff",overwrite=T)
+    
+    rse <- calc(rstk,fun= function(x) {median(x,na.rm=T)})
+    rse <- writeRaster(rse,paste(oDir,"/",met,"-",seas,"-",vn,"-median_all_models.tif",sep=""),format="GTiff",overwrite=T)
+    
+    rsx <- calc(rstk,fun= function(x) {max(x,na.rm=T)})
+    rsx <- writeRaster(rsx,paste(oDir,"/",met,"-",seas,"-",vn,"-max_all_models.tif",sep=""),format="GTiff",overwrite=T)
+    
+    rsn <- calc(rstk,fun= function(x) {min(x,na.rm=T)})
+    rsn <- writeRaster(rsn,paste(oDir,"/",met,"-",seas,"-",vn,"-min_all_models.tif",sep=""),format="GTiff")
+    
+  }
+}
+
+
+################################################################################
+#calculate average of all vi summaries, per variable, metric and season (observed)
+################################################################################
+mean_summary_interannual_vi <- function(this_proc) {
+  
+  library(raster)
+  source(paste(src.dir2,"/scripts/CMIP3-functions.R",sep=""))
+  
+  met <- paste(procList$MET[this_proc])
+  vn <- paste(procList$VAR[this_proc])
+  seas <- paste(procList$SEAS[this_proc])
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("summarise for",vn,":",met,"-",seas,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  s_dir <- paste(odir_rs,"/",seas,sep="")
+  oDir <- paste(s_dir,"/summary",sep="")
+  if (!file.exists(oDir)) {dir.create(oDir)}
+  
+  if (!file.exists(paste(oDir,"/",met,"-",seas,"-",vn,"-min_all_models.tif",sep=""))) {
+    #load all models (except MMM) and all datasets (ts-CRU and ts-WST)
+    cruList <- paste(s_dir,"/",met,"-",vn,"-vi-CRU-",gcmList,".tif",sep="")
+    wstList <- paste(s_dir,"/",met,"-",vn,"-vi-WST-",gcmList,".tif",sep="")
+    fList <- c(cruList,wstList)
+    fPres <- as.character(sapply(fList,checkExists))
+    fPres <- fPres[which(!is.na(fPres))]
+    
+    mList <- lapply(fPres,FUN= function(x) {raster(x)})
+    xr <- as.numeric(unlist(lapply(mList,FUN= function(x) {xres(x)})))
+    yr <- as.numeric(unlist(lapply(mList,FUN= function(x) {yres(x)})))
+    
+    #pick lowest cellsize
+    sxr <- which(xr==min(xr))[1]
+    res_base <- mList[[sxr]]
+    
+    #resample to the lowest cellsize
+    mList_res <- lapply(mList,FUN= function(x,y) {resample(x,y,method="ngb")},res_base)
+    
+    #cope with any missing data
+    mList_cor <- lapply(mList_res,FUN= function(x) {y <- x; y[which(x[] > 10000)] <- NA; return(y)})
+    
+    #a rasterstack is created and then use calc() to get the mean, and just write it
+    rstk <- stack(mList_cor)
+    
+    #calculating stats
+    rsm <- calc(rstk,fun= function(x) {mean(x,na.rm=T)})
+    rsm <- writeRaster(rsm,paste(oDir,"/",met,"-",seas,"-",vn,"-mean_all_models.tif",sep=""),format="GTiff",overwrite=T)
+    
+    rse <- calc(rstk,fun= function(x) {median(x,na.rm=T)})
+    rse <- writeRaster(rse,paste(oDir,"/",met,"-",seas,"-",vn,"-median_all_models.tif",sep=""),format="GTiff",overwrite=T)
+    
+    rsx <- calc(rstk,fun= function(x) {max(x,na.rm=T)})
+    rsx <- writeRaster(rsx,paste(oDir,"/",met,"-",seas,"-",vn,"-max_all_models.tif",sep=""),format="GTiff",overwrite=T)
+    
+    rsn <- calc(rstk,fun= function(x) {min(x,na.rm=T)})
+    rsn <- writeRaster(rsn,paste(oDir,"/",met,"-",seas,"-",vn,"-min_all_models.tif",sep=""),format="GTiff")
+    
+  }
+}
+
+
 
 ##############################################################################
 # get metrics for interannual variability (vi) skill assessment
@@ -9,21 +131,19 @@
 summarise_interannual_vi <- function(this_proc) {
   
   library(raster)
-  source(paste(src.dir2,"/scripts/CMIP5-functions.R",sep=""))
+  source(paste(src.dir2,"/scripts/CMIP3-functions.R",sep=""))
   
   #get gcm, ensemble, dataset and variable
-  gcm_ens <- paste(procList$GCM[this_proc])
-  gcm <- unlist(strsplit(gcm_ens,"_ENS_",fixed=T))[1]
-  ens <- unlist(strsplit(gcm_ens,"_ENS_",fixed=T))[2]
+  gcm <- paste(procList$GCM[this_proc])
   dset <- paste(procList$OBS[this_proc])
   vn <- paste(procList$VAR[this_proc])
   
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-  cat("summarise for",vn,":",gcm,"-",ens,"-",dset,"\n")
+  cat("summarise for",vn,":",gcm,"-",dset,"\n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   #read base raster to get characteristics
-  rs <- raster(paste(mdDir,"/baseline/",gcm,"/",ens,"_monthly/1985/pr_01.tif",sep=""))
+  rs <- raster(paste(mdDir,"/",gcm,"/yearly_files/1985/prec_01.nc",sep=""))
   rs <- rotate(rs)
   
   #list of seasons and clean raster for result
@@ -35,7 +155,7 @@ summarise_interannual_vi <- function(this_proc) {
     odir_seas <- paste(odir_rs,"/",seas,sep="")
     if (!file.exists(odir_seas)) {dir.create(odir_seas)}
     
-    if (!file.exists(paste(odir_seas,"/mbr-",vn,"-",dset,"-",gcm,"_",ens,".tif",sep=""))) {
+    if (!file.exists(paste(odir_seas,"/vi-",vn,"-",dset,"-",gcm,".tif",sep=""))) {
       #output base rasters
       vi_rs <- raster(rs)
       
@@ -44,16 +164,16 @@ summarise_interannual_vi <- function(this_proc) {
         #iso <- isoList[1]
         reg <- regions$REGION[which(regions$ISO == iso)]
         
-        sdata <- read.csv(paste(mdDir,"/assessment/output-data/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep=""))
+        sdata <- read.csv(paste(cmip5Dir,"/assessment/output-data-cmip3/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,".csv",sep=""))
         
         #put the skill data into the raster
         sel_data <- sdata[which(sdata$SEAS == seas),]
         
         wcells <- cellFromXY(rs,cbind(x=sel_data$LON,y=sel_data$LAT))
         vi_rs[wcells] <- sel_data$VI
+        vi_rs[which(is.infinite(vi_rs[]))] <- NA
       }
-      
-      vi_rs <- writeRaster(vi_rs,paste(odir_seas,"/vi-",vn,"-",dset,"-",gcm,"_",ens,".tif",sep=""),format="GTiff",overwrite=T)
+      vi_rs <- writeRaster(vi_rs,paste(odir_seas,"/vi-",vn,"-",dset,"-",gcm,".tif",sep=""),format="GTiff",overwrite=T)
     }
   }
 }
