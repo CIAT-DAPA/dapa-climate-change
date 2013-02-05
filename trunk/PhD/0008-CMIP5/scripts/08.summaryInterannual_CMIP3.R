@@ -131,3 +131,46 @@ system.time(sfSapply(as.vector(1:nrow(procList)),mean_summary_interannual_vi))
 
 #stop the cluster
 sfStop()
+
+
+
+#######################################
+### ERA-40
+#calculate average of all climate models for each metric
+#interannual variability index (vi)
+
+vnList <- c("prec","tmean","dtr")
+metList <- c("vi")
+sList <- c("DJF","MAM","JJA","SON","ANN")
+gcmList <- list.files(mdDir)
+
+procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
+#this_proc <- 1
+
+#determine number of CPUs
+ncpus <- nrow(procList)
+if (ncpus>12) {ncpus <- 12}
+
+#here do the parallelisation
+#load library and create cluster
+library(snowfall)
+sfInit(parallel=T,cpus=ncpus)
+
+#export variables
+sfExport("src.dir2")
+sfExport("mdDir")
+sfExport("regions")
+sfExport("gcmChars")
+sfExport("gcmList")
+sfExport("vnList")
+sfExport("procList")
+sfExport("metList")
+sfExport("oDir")
+sfExport("odir_rs")
+
+#run the function in parallel
+system.time(sfSapply(as.vector(1:nrow(procList)),mean_summary_interannual_vi_e40))
+
+#stop the cluster
+sfStop()
+
