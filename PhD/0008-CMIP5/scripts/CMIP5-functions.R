@@ -851,7 +851,19 @@ interannual_vi_revised <- function(this_proc) {
         #if (length(which(!fList$PRESENT)) != length(yi:yf)) {}
         ######extract for GCM
         fPres <- fList$FILE
-        gcm_data <- stack(fPres) #load all GCM data
+        if (class(try(stack(fPres),silent=T)) != "try-error") {
+          gcm_data <- stack(fPres) #load all GCM data
+        } else {
+          gcm_data <- lapply(fPres,FUN= function(x) {raster(x)})
+          x_res <- as.numeric(unlist(lapply(gcm_data,FUN= function(x) {xres(x)})))
+          y_res <- as.numeric(unlist(lapply(gcm_data,FUN= function(x) {yres(x)})))
+          x_res_min <- which(x_res==min(x_res))[1] #pick lowest cellsize
+          res_base <- gcm_data[[x_res_min]]
+          #resample to the lowest cellsize
+          gcm_data_res <- lapply(gcm_data,FUN= function(x,y) {resample(x,y,method="ngb")},res_base)
+          gcm_data <- stack(gcm_data_res)
+        }
+        
         gcm_data <- rotate(gcm_data) #rotate the GCM data so that it matches the -180 to 180 system
         msk <- createMask(shp,gcm_data[[1]]) #create a mask with the shapefile with resolution of gcm
         gcm_data <- crop(gcm_data,msk) #cut gcm data to extent of country mask
