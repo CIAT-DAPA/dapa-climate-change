@@ -2,6 +2,8 @@
 #UoL / CCAFS / CIAT
 #June 2012
 
+library(plotrix)
+
 #CMIP5 skill analyses
 #7. Summarise the results of mean climate skill analyses
 
@@ -44,6 +46,12 @@ rm(all_mets); g=gc(); rm(g)
 c5_mets$PRMSE1 <- abs(c5_mets$PRMSE1)
 c5_mets$PRMSE2 <- abs(c5_mets$PRMSE2)
 
+
+
+#######################################################
+#### plots of seasons
+#######################################################
+
 #select ISO, variable and dataset of interest
 diag <- c3_mets[which(c3_mets$OBS == "cl-CRU"),]
 diag <- diag[which(diag$ISO == "IND"),]
@@ -62,11 +70,16 @@ for (vn in c("pr","tas","dtr","rd")) {
   if (vn == "dtr" | vn == "rd") this_diag <- this_diag[which(this_diag$VAR == vn),]
   this_diag2 <- this_diag2[which(this_diag2$VAR == vn),]
   
-  if (vn == "pr") this_maxsd <- 6
-  if (vn == "tas") this_maxsd <- 2
-  if (vn == "dtr") this_maxsd <- 4
-  if (vn == "rd") this_maxsd <- 8
+  if (vn == "rd") {
+    this_maxsd <- max(this_diag2$std_GCM/this_diag2$std_OBS,na.rm=T)
+    this_maxsd <- ceiling(this_maxsd)
+  } else {
+    this_maxsd <- max(this_diag$std_GCM/this_diag$std_OBS,na.rm=T)
+    this_maxsd <- max(c(this_maxsd,this_diag2$std_GCM/this_diag2$std_OBS),na.rm=T)
+    this_maxsd <- ceiling(this_maxsd)
+  }
   
+  #####
   ##### construct Taylor diagram
   
   tiff(paste(figDir,"/",vn,"_IND_cl-CRU.tif",sep=""),res=300,compression="lzw",
@@ -112,6 +125,115 @@ for (vn in c("pr","tas","dtr","rd")) {
     if (seas == "SON") this_col <- "green"
     if (gcm == "multi_model_mean_ENS_r1i1p1") {this_pch <- 17} else {this_pch <- 2}
     if (gcm == "multi_model_mean_ENS_r1i1p1") {this_pcex <- 1.25} else {this_pcex <- 0.75}
+    
+    if (nrow(this_diag) > 0) {
+      taylorD(R, sd.r, sd.f, add = T, col = this_col, pch = this_pch, pos.cor = T, 
+              main = NA, ref.sd = T, pcex = this_pcex, cex.axis = 1, normalize = T, 
+              mar = c(5, 4, 6, 6))
+    } else {
+      if (i == 1) {
+        taylorD(R, sd.r, sd.f, add = F, col = this_col, pch = this_pch, pos.cor = T, 
+                main = NA, ref.sd = T, pcex = this_pcex, 
+                grad.corr.lines = c(seq(0,1,by=0.2),0.9, 0.95, 0.99),
+                cex.axis = 1, normalize = T, mar = c(5, 4, 5, 6),maxsd=this_maxsd,
+                ylab="Normalised standard deviation")
+      } else {
+        taylorD(R, sd.r, sd.f, add = T, col = this_col, pch = this_pch, pos.cor = T, 
+                main = NA, ref.sd = T, pcex = this_pcex, cex.axis = 1, normalize = T, 
+                mar = c(5, 4, 6, 6))
+      }
+    }
+  }
+  dev.off()
+}
+
+
+
+
+#######################################################
+#### plots of annual total only
+#######################################################
+
+#select ISO, variable and dataset of interest
+diag <- c3_mets[which(c3_mets$OBS == "cl-CRU"),]
+diag <- diag[which(diag$ISO == "IND"),]
+diag <- diag[which(diag$SEASON == "ANN"),]
+
+diag2 <- c5_mets[which(c5_mets$OBS == "cl_rev2-CRU"),]
+diag2 <- diag2[which(diag2$ISO == "IND"),]
+diag2 <- diag2[which(diag2$SEASON == "ANN"),]
+
+for (vn in c("pr","tas","dtr","rd")) {
+  this_diag <- diag
+  this_diag2 <- diag2
+  
+  if (vn == "pr") this_diag <- this_diag[which(this_diag$VAR == "prec"),]
+  if (vn == "tas") this_diag <- this_diag[which(this_diag$VAR == "tmean"),]
+  if (vn == "dtr" | vn == "rd") this_diag <- this_diag[which(this_diag$VAR == vn),]
+  this_diag2 <- this_diag2[which(this_diag2$VAR == vn),]
+  
+  #list of gcms
+  gcmList1 <- unique(paste(this_diag$GCM))
+  gcmList1 <- gcmList1[which(gcmList1 != "multi_model_mean")]
+  gcmList2 <- unique(paste(this_diag2$GCM))
+  gcmList2 <- unique(as.character(sapply(gcmList2,FUN=function(x) {y <- unlist(strsplit(x,"_ENS_",fixed=T))[1]; return(y)})))
+  gcmList2 <- gcmList2[which(gcmList2 != "multi_model_mean")]
+  
+  if (vn == "rd") {
+    this_maxsd <- max(this_diag2$std_GCM/this_diag2$std_OBS,na.rm=T)
+    this_maxsd <- ceiling(this_maxsd)
+  } else {
+    this_maxsd <- max(this_diag$std_GCM/this_diag$std_OBS,na.rm=T)
+    this_maxsd <- max(c(this_maxsd,this_diag2$std_GCM/this_diag2$std_OBS),na.rm=T)
+    this_maxsd <- ceiling(this_maxsd)
+  }
+  
+  #####
+  ##### construct Taylor diagram
+  
+  tiff(paste(figDir,"/",vn,"_IND_cl-CRU_ann.tif",sep=""),res=300,compression="lzw",
+       pointsize=12,height=2048,width=2048)
+  #### CMIP3
+  if (nrow(this_diag) > 0) {
+    this_col <- "black"
+    for (i in 1:nrow(this_diag)) {
+      R <- this_diag$CCOEF2[i]
+      sd.r <- this_diag$std_OBS[i]
+      sd.f <- this_diag$std_GCM[i]
+      gcm <- paste(this_diag$GCM[i])
+      wgcm <- which(gcmList1 %in% gcm)
+      if (gcm == "multi_model_mean") {this_pch <- 13} else {this_pch <- letters[wgcm]}
+      if (gcm == "multi_model_mean") {this_pcex <- 2} else {this_pcex <- 1}
+      
+      if (i == 1) {
+        taylorD(R, sd.r, sd.f, add = F, col = this_col, pch = this_pch, pos.cor = T, main = NA,
+                ref.sd = T, grad.corr.lines = c(seq(0,1,by=0.1),0.95,0.99), pcex = this_pcex, 
+                cex.axis = 1, normalize = T, mar = c(5, 4, 5, 6),maxsd=this_maxsd,
+                ylab="Normalised standard deviation")
+      } else {
+        taylorD(R, sd.r, sd.f, add = T, col = this_col, pch = this_pch, pos.cor = T, 
+                main = NA, ref.sd = T, pcex = this_pcex, cex.axis = 1, normalize = T, 
+                mar = c(5, 4, 6, 6))
+      }
+    }
+  }
+  
+  #### CMIP5
+  this_col <- "red"
+  for (i in 1:nrow(this_diag2)) {
+    R <- this_diag2$CCOEF2[i]
+    sd.r <- this_diag2$std_OBS[i]
+    sd.f <- this_diag2$std_GCM[i]
+    gcm <- paste(this_diag2$GCM[i])
+    gcm <- unlist(strsplit(gcm,"_ENS_",fixed=T))[1]
+    
+    if (gcm != "multi_model_mean") {
+      if (wgcm == which(gcmList2 %in% gcm)) {this_col <- NA} else {this_col <- "red"}
+      wgcm <- which(gcmList2 %in% gcm)
+    }
+    
+    if (gcm == "multi_model_mean") {this_pch <- 13} else {this_pch <- LETTERS[wgcm]}
+    if (gcm == "multi_model_mean") {this_pcex <- 2} else {this_pcex <- 1}
     
     if (nrow(this_diag) > 0) {
       taylorD(R, sd.r, sd.f, add = T, col = this_col, pch = this_pch, pos.cor = T, 
