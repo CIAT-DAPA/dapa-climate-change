@@ -137,7 +137,7 @@ search_overlaps_novel <- function(loc,lon,lat,cid,allCells,crop_name,period,gcm_
   #abline(v=min(del_ot$x))
   #lines(t_cru_in$x,t_cru_in$y,col="red")
   
-  if (nrow(del_ot) > 0) {
+  if (nrow(del_ot) > 1) {
     #remove testing location
     allCells <- allCells[-loc,]
     
