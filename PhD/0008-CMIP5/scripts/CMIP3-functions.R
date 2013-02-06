@@ -342,11 +342,11 @@ interannual_vi <- function(this_proc) {
         }
         
         ######extract the cru data
+        vn_cru <- paste(vnList$TS_CRU[vid]) #variable name
+        sc_cru <- scList$TS_CRU[vid]
         otsCRU <- paste(oDir,"/vi-CRU",sep="") #create output folder
+        if (!file.exists(otsCRU)) {dir.create(otsCRU)} #create output folder
         if (length(which(!fList$PRESENT)) != length(yi:yf)) {
-          vn_cru <- paste(vnList$TS_CRU[vid]) #variable name
-          sc_cru <- scList$TS_CRU[vid]
-          if (!file.exists(otsCRU)) {dir.create(otsCRU)} #create output folder
           if (!file.exists(paste(otsCRU,"/",vn_gcm,"_",gcm,".csv",sep=""))) {
             cru_data <- stack(paste(tsCRU,"/cru_ts_3_10.1901.2009.",vn_cru,"_",yi:yf,"_",m,".tif",sep="")) #load all cru data
             cru_data <- crop(cru_data,msk) #cut cru data to extent of country mask
@@ -374,11 +374,11 @@ interannual_vi <- function(this_proc) {
         }
         
         ######extract the era40 data
+        vn_e40 <- paste(vnList$E40[vid]) #variable name
+        sc_e40 <- scList$E40[vid]
         otsE40 <- paste(oDir,"/vi-E40",sep="") #create output folder
+        if (!file.exists(otsE40)) {dir.create(otsE40)} #create output folder
         if (length(which(!fList$PRESENT)) != length(yi:yf)) {
-          vn_e40 <- paste(vnList$E40[vid]) #variable name
-          sc_e40 <- scList$E40[vid]
-          if (!file.exists(otsE40)) {dir.create(otsE40)} #create output folder
           if (!file.exists(paste(otsE40,"/",vn_gcm,"_",gcm,".csv",sep=""))) {
             e40_data <- stack(paste(tsE40,"/monthly_data_",vn_e40,"/",yi:yf,"/",vn_e40,"_",m,".tif",sep="")) #load all era40 data
             e40_data <- crop(e40_data,msk) #cut cru data to extent of country mask
