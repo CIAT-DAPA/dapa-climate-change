@@ -59,7 +59,7 @@ odir_rs <- paste(oDir,"/interannual-skill-vi",sep="")
 if (!file.exists(odir_rs)) {dir.create(odir_rs)}
 
 #this_proc <- 1
-#for (i in 1:50) {summarise_interannual_vi(i)}
+#for (i in 1:225) {summarise_interannual_vi(i)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
@@ -105,6 +105,7 @@ gcmList <- gcmList[which(gcmList != "multi_model_mean")]
 
 procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
 #this_proc <- 1
+#for (i in 1:15) {mean_summary_interannual_vi(i)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
