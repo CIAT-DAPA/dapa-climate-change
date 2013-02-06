@@ -7,11 +7,11 @@
 
 library(raster)
 
-#variables to be set
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
-src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
-mdDir <- "/nfs/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
-cmip5Dir <- "/nfs/a102/eejarv/CMIP5"
+# #variables to be set
+# src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
+# src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
+# mdDir <- "/nfs/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
+# cmip5Dir <- "/nfs/a102/eejarv/CMIP5"
 
 
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0006-weather-data/scripts"
@@ -101,6 +101,7 @@ vnList <- c("prec","tmean","dtr")
 metList <- c("vi")
 sList <- c("DJF","MAM","JJA","SON","ANN")
 gcmList <- list.files(mdDir)
+gcmList <- gcmList[which(gcmList != "multi_model_mean")]
 
 procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
 #this_proc <- 1
