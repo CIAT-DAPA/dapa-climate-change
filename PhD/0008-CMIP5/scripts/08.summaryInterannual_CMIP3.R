@@ -148,6 +148,7 @@ gcmList <- list.files(mdDir)
 
 procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
 #this_proc <- 1
+#for (i in 1:15) {mean_summary_interannual_vi_e40(i)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
