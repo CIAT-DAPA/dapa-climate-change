@@ -336,6 +336,8 @@ interannual_vi <- function(this_proc) {
             gcm_vals[[j]][,m] <- gcm_mvals[[j]] * 3600 * 24 * nd
           } else if (vn_gcm == "tmean") {
             gcm_vals[[j]][,m] <- gcm_mvals[[j]] - 273.15
+          } else {
+            gcm_vals[[j]][,m] <- gcm_mvals[[j]]
           }
         }
         
