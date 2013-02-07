@@ -11,6 +11,8 @@ get_loc_adapt <- function(loc) {
   wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
   sorg <- gCells$SORG[loc]
   
+  cat("loc",loc,"\n")
+  
   #location of file in chunks of 10k files. File number limitation
   if (loc <= 10000) {
     oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
