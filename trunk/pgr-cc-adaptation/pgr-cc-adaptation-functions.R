@@ -226,6 +226,16 @@ calc_adapt_gridcell <- function(loc) {
     #load previous output
     load(datFile)
     
+    #put data into list
+    output$SORG$ADAPTATION_2035 <- out_sorg1
+    output$SORG$ADAPTATION_2075 <- out_sorg2
+    
+    #switch adaptation is done
+    output$ADAPTATION_v2 <- T
+    
+    #update RData file
+    save(output,file=datFile)
+    rm(output)
   } else {
     rm(output)
   }
