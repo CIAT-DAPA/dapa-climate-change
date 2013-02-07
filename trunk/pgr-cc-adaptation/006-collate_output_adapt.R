@@ -24,51 +24,59 @@ cruDir <- paste(bDir,"/cru-data",sep="")
 
 #output directories
 out_bDir <- paste(bDir,"/outputs",sep="")
-if (!file.exists(out_bDir)) {dir.create(out_bDir)}
 
 #configuration details and initial data
-yi_h <- 1966; yf_h <- 2005
-yi_f1 <- 2016; yf_f1 <- 2055
-yi_f2 <- 2056; yf_f2 <- 2095
 gcmList <- read.csv(paste(cfgDir,"/gcm_list.csv",sep=""))
 
-#area harvested rasters
-ha_rs <- list()
-ha_rs$RICE <- raster(paste(bDir,"/crop-data/Rice.harea/rice_harea_glo.tif",sep=""))
-ha_rs$WSPR <- raster(paste(bDir,"/crop-data/Wheat.harea/wheat_harea_glo.tif",sep=""))
-ha_rs$WWIN <- raster(paste(bDir,"/crop-data/Wheat.harea/wheat_harea_glo.tif",sep=""))
-ha_rs$MILL <- raster(paste(bDir,"/crop-data/Millet.harea/millet_harea_glo.tif",sep=""))
-ha_rs$SORG <- raster(paste(bDir,"/crop-data/Sorghum.harea/sorghum_harea_glo.tif",sep=""))
-
 #cru raster to filter out NAs
-dum_rs <- raster(paste(cruDir,"/cru_ts_3_10.1966.2005.tmx.dat.nc",sep=""),band=0)
+if (!file.exists(paste(cfgDir,"/dum_rs.RData",sep=""))) {
+  dum_rs <- raster(paste(cruDir,"/cru_ts_3_10.1966.2005.tmx.dat.nc",sep=""),band=0)
+  save(dum_rs,file=paste(cfgDir,"/dum_rs.RData",sep=""))
+} else {
+  load(paste(cfgDir,"/dum_rs.RData",sep=""))
+}
 
-#data.frame of grid cells to extract
-gCells <- data.frame(LOC=which(!is.na(dum_rs[])))
-gCells$LON <- xFromCell(dum_rs,gCells$LOC)
-gCells$LAT <- yFromCell(dum_rs,gCells$LOC)
-gCells$RICE <- extract(ha_rs$RICE,cbind(x=gCells$LON,y=gCells$LAT))
-gCells$RICE[which(!is.na(gCells$RICE))] <- 1
-gCells$RICE[which(is.na(gCells$RICE))] <- 0
-gCells$WSPR <- extract(ha_rs$WSPR,cbind(x=gCells$LON,y=gCells$LAT))
-gCells$WSPR[which(!is.na(gCells$WSPR))] <- 1
-gCells$WSPR[which(is.na(gCells$WSPR))] <- 0
-gCells$WWIN <- extract(ha_rs$WWIN,cbind(x=gCells$LON,y=gCells$LAT))
-gCells$WWIN[which(!is.na(gCells$WWIN))] <- 1
-gCells$WWIN[which(is.na(gCells$WWIN))] <- 0
-gCells$MILL <- extract(ha_rs$MILL,cbind(x=gCells$LON,y=gCells$LAT))
-gCells$MILL[which(!is.na(gCells$MILL))] <- 1
-gCells$MILL[which(is.na(gCells$MILL))] <- 0
-gCells$SORG <- extract(ha_rs$SORG,cbind(x=gCells$LON,y=gCells$LAT))
-gCells$SORG[which(!is.na(gCells$SORG))] <- 1
-gCells$SORG[which(is.na(gCells$SORG))] <- 0
-gCells$TOTL <- gCells$RICE+gCells$WSPR+gCells$WWIN+gCells$MILL+gCells$SORG
-gCells <- gCells[which(gCells$TOTL > 0),]
-row.names(gCells) <- 1:nrow(gCells)
+#construct or load grid cells data.frame
+if (!file.exists(paste(cfgDir,"/gCells.RData",sep=""))) {
+  #area harvested rasters
+  ha_rs <- list()
+  ha_rs$RICE <- raster(paste(bDir,"/crop-data/Rice.harea/rice_harea_glo.tif",sep=""))
+  ha_rs$WSPR <- raster(paste(bDir,"/crop-data/Wheat.harea/wheat_harea_glo.tif",sep=""))
+  ha_rs$WWIN <- raster(paste(bDir,"/crop-data/Wheat.harea/wheat_harea_glo.tif",sep=""))
+  ha_rs$MILL <- raster(paste(bDir,"/crop-data/Millet.harea/millet_harea_glo.tif",sep=""))
+  ha_rs$SORG <- raster(paste(bDir,"/crop-data/Sorghum.harea/sorghum_harea_glo.tif",sep=""))
+  
+  #data.frame of grid cells to extract
+  gCells <- data.frame(LOC=which(!is.na(dum_rs[])))
+  gCells$LON <- xFromCell(dum_rs,gCells$LOC)
+  gCells$LAT <- yFromCell(dum_rs,gCells$LOC)
+  gCells$RICE <- extract(ha_rs$RICE,cbind(x=gCells$LON,y=gCells$LAT))
+  gCells$RICE[which(!is.na(gCells$RICE))] <- 1
+  gCells$RICE[which(is.na(gCells$RICE))] <- 0
+  gCells$WSPR <- extract(ha_rs$WSPR,cbind(x=gCells$LON,y=gCells$LAT))
+  gCells$WSPR[which(!is.na(gCells$WSPR))] <- 1
+  gCells$WSPR[which(is.na(gCells$WSPR))] <- 0
+  gCells$WWIN <- extract(ha_rs$WWIN,cbind(x=gCells$LON,y=gCells$LAT))
+  gCells$WWIN[which(!is.na(gCells$WWIN))] <- 1
+  gCells$WWIN[which(is.na(gCells$WWIN))] <- 0
+  gCells$MILL <- extract(ha_rs$MILL,cbind(x=gCells$LON,y=gCells$LAT))
+  gCells$MILL[which(!is.na(gCells$MILL))] <- 1
+  gCells$MILL[which(is.na(gCells$MILL))] <- 0
+  gCells$SORG <- extract(ha_rs$SORG,cbind(x=gCells$LON,y=gCells$LAT))
+  gCells$SORG[which(!is.na(gCells$SORG))] <- 1
+  gCells$SORG[which(is.na(gCells$SORG))] <- 0
+  gCells$TOTL <- gCells$RICE+gCells$WSPR+gCells$WWIN+gCells$MILL+gCells$SORG
+  gCells <- gCells[which(gCells$TOTL > 0),]
+  row.names(gCells) <- 1:nrow(gCells)
+  
+  save(gCells,file=paste(cfgDir,"/gCells.RData",sep=""))
+} else {
+  load(paste(cfgDir,"/gCells.RData",sep=""))
+}
 
 #gcm
 #gcms must be c(1:6,9,16,19,22)
-gcm_i <- 5
+gcm_i <- 1
 gcm <- paste(gcmList$GCM[gcm_i])
 ens <- paste(gcmList$ENS[gcm_i])
 
@@ -80,17 +88,12 @@ gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
 ###################################################################################
 ###################################################################################
 #grab data from individual calculations
-if (!file.exists(paste(gcm_outDir,"/all_outputs.RData",sep=""))) {
-  all_out <- as.data.frame(t(sapply(1:nrow(gCells),get_loc_fraction)))
-  all_out$LOC <- unlist(all_out$LOC)
-  all_out$RICE1 <- unlist(all_out$RICE1); all_out$RICE2 <- unlist(all_out$RICE2)
-  all_out$WSPR1 <- unlist(all_out$WSPR1); all_out$WSPR2 <- unlist(all_out$WSPR2)
-  all_out$WWIN1 <- unlist(all_out$WWIN1); all_out$WWIN2 <- unlist(all_out$WWIN2)
-  all_out$MILL1 <- unlist(all_out$MILL1); all_out$MILL2 <- unlist(all_out$MILL2)
-  all_out$SORG1 <- unlist(all_out$SORG1); all_out$SORG2 <- unlist(all_out$SORG2)
-  save(list=c("all_out","dum_rs"),file=paste(gcm_outDir,"/all_outputs.RData",sep=""))
+if (!file.exists(paste(gcm_outDir,"/adap_outputs.RData",sep=""))) {
+  adap_out <- as.data.frame(t(sapply(1:nrow(gCells),get_loc_adapt)))
+  for (i in 1:ncol(adap_out)) {adap_out[,i] <- unlist(adap_out[,i])}
+  save(list=c("adap_out","dum_rs"),file=paste(gcm_outDir,"/adap_outputs.RData",sep=""))
 } else {
-  load(paste(gcm_outDir,"/all_outputs.RData",sep=""))
+  load(paste(gcm_outDir,"/adap_outputs.RData",sep=""))
 }
 
 ######################################
