@@ -86,75 +86,77 @@ if (!file.exists(paste(cfgDir,"/gCells.RData",sep=""))) {
 #gcms must be c(1:6,9,16,19,22)
 
 #gcm
-gcm_i <- 22
-gcm <- paste(gcmList$GCM[gcm_i])
-ens <- paste(gcmList$ENS[gcm_i])
+#gcm_i <- 1
 
-#output GCM-specific directory
-gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
-
-#produce or load raster of countries
-if (!file.exists(paste(cfgDir,"/wld_rs.RData",sep=""))) {
-  data(wrld_simpl)
-  wld_rs <- rasterize(wrld_simpl,dum_rs)
-  save(wld_rs,file=paste(cfgDir,"/wld_rs.RData",sep=""))
-} else {
-  load(file=paste(cfgDir,"/wld_rs.RData",sep=""))
+for (gcm in c(1:6)) {
+  gcm <- paste(gcmList$GCM[gcm_i])
+  ens <- paste(gcmList$ENS[gcm_i])
+  
+  #output GCM-specific directory
+  gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
+  
+  #produce or load raster of countries
+  if (!file.exists(paste(cfgDir,"/wld_rs.RData",sep=""))) {
+    data(wrld_simpl)
+    wld_rs <- rasterize(wrld_simpl,dum_rs)
+    save(wld_rs,file=paste(cfgDir,"/wld_rs.RData",sep=""))
+  } else {
+    load(file=paste(cfgDir,"/wld_rs.RData",sep=""))
+  }
+  
+  #extract country IDs
+  gCells$CID <- extract(wld_rs,cbind(x=gCells$LON,y=gCells$LAT))
+  
+  #check existence
+  #gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done_adapt)
+  gCells$STATUS <- F
+  gCells_u <- gCells[which(!gCells$STATUS),]
+  calc_adapt_gridcell(as.numeric(row.names(gCells_u))[1])
+  
+  
+  #run in serial, due to i/o problems
+  #for (k in as.numeric(row.names(gCells_u))) {calc_adapt_gridcell(k)}
+  
+  
+  #location
+  #calc_adapt_gridcell(1)
+  
+  ####################################################################
+  ####################################################################
+  #number of cpus to use
+  if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
+  
+  #here do the parallelisation
+  #load library and create cluster
+  library(snowfall)
+  sfInit(parallel=T,cpus=ncpus)
+  
+  #export variables
+  sfExport("src.dir")
+  sfExport("gcmDir")
+  sfExport("bDir")
+  sfExport("scratch")
+  sfExport("hisDir")
+  sfExport("rcpDir")
+  sfExport("cfgDir")
+  sfExport("cruDir")
+  sfExport("out_bDir")
+  sfExport("gcmList")
+  sfExport("wld_rs")
+  sfExport("gCells")
+  sfExport("gCells_u")
+  sfExport("gcm_i")
+  sfExport("gcm")
+  sfExport("ens")
+  sfExport("gcm_outDir")
+  
+  #sets of runs
+  #run the function in parallel
+  system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),calc_adapt_gridcell))
+  
+  #stop the cluster
+  sfStop()
 }
-
-#extract country IDs
-gCells$CID <- extract(wld_rs,cbind(x=gCells$LON,y=gCells$LAT))
-
-#check existence
-gCells$STATUS <- sapply(as.numeric(row.names(gCells)),check_done_adapt)
-#gCells$STATUS <- F
-gCells_u <- gCells[which(!gCells$STATUS),]
-calc_adapt_gridcell(as.numeric(row.names(gCells_u))[1])
-
-
-#run in serial, due to i/o problems
-#for (k in as.numeric(row.names(gCells_u))) {calc_adapt_gridcell(k)}
-
-
-#location
-#calc_adapt_gridcell(1)
-
-####################################################################
-####################################################################
-#number of cpus to use
-if (nrow(gCells_u) > 15) {ncpus <- 15} else {ncpus <- nrow(gCells)}
-
-#here do the parallelisation
-#load library and create cluster
-library(snowfall)
-sfInit(parallel=T,cpus=ncpus)
-
-#export variables
-sfExport("src.dir")
-sfExport("gcmDir")
-sfExport("bDir")
-sfExport("scratch")
-sfExport("hisDir")
-sfExport("rcpDir")
-sfExport("cfgDir")
-sfExport("cruDir")
-sfExport("out_bDir")
-sfExport("gcmList")
-sfExport("wld_rs")
-sfExport("gCells")
-sfExport("gCells_u")
-sfExport("gcm_i")
-sfExport("gcm")
-sfExport("ens")
-sfExport("gcm_outDir")
-
-#sets of runs
-#run the function in parallel
-system.time(sfSapply(as.vector(as.numeric(row.names(gCells_u))),calc_adapt_gridcell))
-
-#stop the cluster
-sfStop()
-
 
 
 
