@@ -3,6 +3,114 @@
 #functions for PGR paper
 
 
+#function to get data from RData of a given grid cell
+get_loc_adapt <- function(loc) {
+  cell <- gCells$LOC[loc]
+  lon <- gCells$LON[loc]; lat <- gCells$LAT[loc]
+  rice <- gCells$RICE[loc]; wspr <- gCells$WSPR[loc]
+  wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
+  sorg <- gCells$SORG[loc]
+  
+  #location of file in chunks of 10k files. File number limitation
+  if (loc <= 10000) {
+    oDatFile <- paste(gcm_outDir,"/part_1/loc_",loc,".RData",sep="")
+  } else if (loc > 10000 & loc <= 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_2/loc_",loc,".RData",sep="")
+  } else if (loc > 20000) {
+    oDatFile <- paste(gcm_outDir,"/part_3/loc_",loc,".RData",sep="")
+  }
+  
+  if (file.exists(oDatFile)) {
+    load(oDatFile)
+    if (rice == 1) {
+      rice1_buf <- output$RICE$ADAPTATION_2035$BUF
+      rice1_ctr <- output$RICE$ADAPTATION_2035$CTR
+      rice1_glo <- output$RICE$ADAPTATION_2035$GLO
+      rice2_buf <- output$RICE$ADAPTATION_2075$BUF
+      rice2_ctr <- output$RICE$ADAPTATION_2075$CTR
+      rice2_glo <- output$RICE$ADAPTATION_2075$GLO
+    } else {
+      rice1_buf <- NA; rice1_ctr <- NA; rice1_glo <- NA
+      rice2_buf <- NA; rice2_ctr <- NA; rice2_glo <- NA
+    }
+    
+    if (wspr == 1) {
+      wspr1_buf <- output$WSPR$ADAPTATION_2035$BUF
+      wspr1_ctr <- output$WSPR$ADAPTATION_2035$CTR
+      wspr1_glo <- output$WSPR$ADAPTATION_2035$GLO
+      wspr2_buf <- output$WSPR$ADAPTATION_2075$BUF
+      wspr2_ctr <- output$WSPR$ADAPTATION_2075$CTR
+      wspr2_glo <- output$WSPR$ADAPTATION_2075$GLO
+    } else {
+      wspr1_buf <- NA; wspr1_ctr <- NA; wspr1_glo <- NA
+      wspr2_buf <- NA; wspr2_ctr <- NA; wspr2_glo <- NA
+    }
+    
+    if (wwin == 1) {
+      wwin1_buf <- output$WWIN$ADAPTATION_2035$BUF
+      wwin1_ctr <- output$WWIN$ADAPTATION_2035$CTR
+      wwin1_glo <- output$WWIN$ADAPTATION_2035$GLO
+      wwin2_buf <- output$WWIN$ADAPTATION_2075$BUF
+      wwin2_ctr <- output$WWIN$ADAPTATION_2075$CTR
+      wwin2_glo <- output$WWIN$ADAPTATION_2075$GLO
+    } else {
+      wwin1_buf <- NA; wwin1_ctr <- NA; wwin1_glo <- NA
+      wwin2_buf <- NA; wwin2_ctr <- NA; wwin2_glo <- NA
+    }
+    
+    if (mill == 1) {
+      mill1_buf <- output$MILL$ADAPTATION_2035$BUF
+      mill1_ctr <- output$MILL$ADAPTATION_2035$CTR
+      mill1_glo <- output$MILL$ADAPTATION_2035$GLO
+      mill2_buf <- output$MILL$ADAPTATION_2075$BUF
+      mill2_ctr <- output$MILL$ADAPTATION_2075$CTR
+      mill2_glo <- output$MILL$ADAPTATION_2075$GLO
+    } else {
+      mill1_buf <- NA; mill1_ctr <- NA; mill1_glo <- NA
+      mill2_buf <- NA; mill2_ctr <- NA; mill2_glo <- NA
+    }
+    
+    if (sorg == 1) {
+      sorg1_buf <- output$SORG$ADAPTATION_2035$BUF
+      sorg1_ctr <- output$SORG$ADAPTATION_2035$CTR
+      sorg1_glo <- output$SORG$ADAPTATION_2035$GLO
+      sorg2_buf <- output$SORG$ADAPTATION_2075$BUF
+      sorg2_ctr <- output$SORG$ADAPTATION_2075$CTR
+      sorg2_glo <- output$SORG$ADAPTATION_2075$GLO
+    } else {
+      sorg1_buf <- NA; sorg1_ctr <- NA; sorg1_glo <- NA
+      sorg2_buf <- NA; sorg2_ctr <- NA; sorg2_glo <- NA
+    }
+    rm(output)
+    
+    #outputs
+    out_res <- data.frame(LOC=cell,RICE1_BUF=rice1_buf,RICE1_CTR=rice1_ctr,RICE1_GLO=rice1_glo,
+                          RICE2_BUF=rice2_buf,RICE2_CTR=rice2_ctr,RICE2_GLO=rice2_glo, 
+                          WSPR1_BUF=wspr1_buf,WSPR1_CTR=wspr1_ctr,WSPR1_GLO=wspr1_glo,
+                          WSPR2_BUF=wspr2_buf,WSPR2_CTR=wspr2_ctr,WSPR2_GLO=wspr2_glo,
+                          WWIN1_BUF=wwin1_buf,WWIN1_CTR=wwin1_ctr,WWIN1_GLO=wwin1_glo,
+                          WWIN2_BUF=wwin2_buf,WWIN2_CTR=wwin2_ctr,WWIN2_GLO=wwin2_glo,
+                          MILL1_BUF=mill1_buf,MILL1_CTR=mill1_ctr,MILL1_GLO=mill1_glo,
+                          MILL2_BUF=mill2_buf,MILL2_CTR=mill2_ctr,MILL2_GLO=mill2_glo,
+                          SORG1_BUF=sorg1_buf,SORG1_CTR=sorg1_ctr,SORG1_GLO=sorg1_glo,
+                          SORG2_BUF=sorg2_buf,SORG2_CTR=sorg2_ctr,SORG2_GLO=sorg2_glo)
+  } else {
+    out_res <- data.frame(LOC=cell,RICE1_BUF=NA,RICE1_CTR=NA,RICE1_GLO=NA,
+                          RICE2_BUF=NA,RICE2_CTR=NA,RICE2_GLO=NA, 
+                          WSPR1_BUF=NA,WSPR1_CTR=NA,WSPR1_GLO=NA,
+                          WSPR2_BUF=NA,WSPR2_CTR=NA,WSPR2_GLO=NA,
+                          WWIN1_BUF=NA,WWIN1_CTR=NA,WWIN1_GLO=NA,
+                          WWIN2_BUF=NA,WWIN2_CTR=NA,WWIN2_GLO=NA,
+                          MILL1_BUF=NA,MILL1_CTR=NA,MILL1_GLO=NA,
+                          MILL2_BUF=NA,MILL2_CTR=NA,MILL2_GLO=NA,
+                          SORG1_BUF=NA,SORG1_CTR=NA,SORG1_GLO=NA,
+                          SORG2_BUF=NA,SORG2_CTR=NA,SORG2_GLO=NA)
+  }
+  return(out_res)
+}
+
+
+
 #calculate adaptation ranges for a grid cell
 calc_adapt_gridcell <- function(loc) {
   library(raster); library(sfsmisc); library(maptools)
