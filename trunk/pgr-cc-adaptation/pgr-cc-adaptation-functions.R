@@ -11,7 +11,7 @@ get_loc_adapt <- function(loc) {
   wwin <- gCells$WWIN[loc]; mill <- gCells$MILL[loc]
   sorg <- gCells$SORG[loc]
   
-  cat("loc",loc,"\n")
+  #cat("loc",loc,"\n")
   
   #location of file in chunks of 10k files. File number limitation
   if (loc <= 10000) {
@@ -72,7 +72,7 @@ get_loc_adapt <- function(loc) {
       mill2_buf <- NA; mill2_ctr <- NA; mill2_glo <- NA
     }
     
-    if (mill == 1) {
+    if (sorg == 1) {
       sorg1_buf <- output$SORG$ADAPTATION_2035$BUF
       sorg1_ctr <- output$SORG$ADAPTATION_2035$CTR
       sorg1_glo <- output$SORG$ADAPTATION_2035$GLO
@@ -213,6 +213,19 @@ calc_adapt_gridcell <- function(loc) {
     #update RData file
     save(output,file=datFile)
     rm(output)
+  } else if (is.null(output$ADAPTATION_v2)) {
+    rm(output)
+    if (sorg == 1) {
+      out_sorg1 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="SORG",2035,gcm_outDir,gcmScratch)
+      out_sorg2 <- search_overlaps_novel(loc,lon,lat,cid,allCells,crop_name="SORG",2075,gcm_outDir,gcmScratch)
+    } else {
+      out_sorg1 <- NA
+      out_sorg2 <- NA
+    }
+    
+    #load previous output
+    load(datFile)
+    
   } else {
     rm(output)
   }

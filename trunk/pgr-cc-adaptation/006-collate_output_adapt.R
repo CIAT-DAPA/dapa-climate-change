@@ -98,40 +98,64 @@ if (!file.exists(paste(gcm_outDir,"/adap_outputs.RData",sep=""))) {
 
 ######################################
 #load data into a raster
-if (!file.exists(paste(gcm_outDir,"/raster_outputs.RData",sep=""))) {
+if (!file.exists(paste(gcm_outDir,"/adap_raster_outputs.RData",sep=""))) {
   #output list
   out_rs <- list()
   
-  #rice
+  #rice 2035
   out_rs$RICE <- list()
-  out_rs$RICE$P_2035 <- dum_rs
-  out_rs$RICE$P_2035[] <- NA
-  out_rs$RICE$P_2035[all_out$LOC] <- all_out$RICE1
-  out_rs$RICE$P_2075 <- dum_rs
-  out_rs$RICE$P_2075[] <- NA
-  out_rs$RICE$P_2075[all_out$LOC] <- all_out$RICE2
+  out_rs$RICE$BUF_2035 <- raster(dum_rs)
+  out_rs$RICE$BUF_2035[adap_out$LOC] <- adap_out$RICE1_BUF
+  out_rs$RICE$CTR_2035 <- raster(dum_rs)
+  out_rs$RICE$CTR_2035[adap_out$LOC] <- adap_out$RICE1_CTR
+  out_rs$RICE$GLO_2035 <- raster(dum_rs)
+  out_rs$RICE$GLO_2035[adap_out$LOC] <- adap_out$RICE1_GLO
   
-  #wspr
+  #rice 2075
+  out_rs$RICE$BUF_2075 <- raster(dum_rs)
+  out_rs$RICE$BUF_2075[adap_out$LOC] <- adap_out$RICE2_BUF
+  out_rs$RICE$CTR_2075 <- raster(dum_rs)
+  out_rs$RICE$CTR_2075[adap_out$LOC] <- adap_out$RICE2_CTR
+  out_rs$RICE$GLO_2075 <- raster(dum_rs)
+  out_rs$RICE$GLO_2075[adap_out$LOC] <- adap_out$RICE2_GLO
+  
+  #wspr 2035
   out_rs$WSPR <- list()
-  out_rs$WSPR$P_2035 <- dum_rs
-  out_rs$WSPR$P_2035[] <- NA
-  out_rs$WSPR$P_2035[all_out$LOC] <- all_out$WSPR1
-  out_rs$WSPR$P_2075 <- dum_rs
-  out_rs$WSPR$P_2075[] <- NA
-  out_rs$WSPR$P_2075[all_out$LOC] <- all_out$WSPR2
+  out_rs$WSPR$BUF_2035 <- raster(dum_rs)
+  out_rs$WSPR$BUF_2035[adap_out$LOC] <- adap_out$WSPR1_BUF
+  out_rs$WSPR$CTR_2035 <- raster(dum_rs)
+  out_rs$WSPR$CTR_2035[adap_out$LOC] <- adap_out$WSPR1_CTR
+  out_rs$WSPR$GLO_2035 <- raster(dum_rs)
+  out_rs$WSPR$GLO_2035[adap_out$LOC] <- adap_out$WSPR1_GLO
   
-  #wwin
+  #wspr 2075
+  out_rs$WSPR$BUF_2075 <- raster(dum_rs)
+  out_rs$WSPR$BUF_2075[adap_out$LOC] <- adap_out$WSPR2_BUF
+  out_rs$WSPR$CTR_2075 <- raster(dum_rs)
+  out_rs$WSPR$CTR_2075[adap_out$LOC] <- adap_out$WSPR2_CTR
+  out_rs$WSPR$GLO_2075 <- raster(dum_rs)
+  out_rs$WSPR$GLO_2075[adap_out$LOC] <- adap_out$WSPR2_GLO
+  
+  #wwin 2035
   out_rs$WWIN <- list()
-  out_rs$WWIN$P_2035 <- dum_rs
-  out_rs$WWIN$P_2035[] <- NA
-  out_rs$WWIN$P_2035[all_out$LOC] <- all_out$WWIN1
-  out_rs$WWIN$P_2075 <- dum_rs
-  out_rs$WWIN$P_2075[] <- NA
-  out_rs$WWIN$P_2075[all_out$LOC] <- all_out$WWIN2
+  out_rs$WWIN$BUF_2035 <- raster(dum_rs)
+  out_rs$WWIN$BUF_2035[adap_out$LOC] <- adap_out$WWIN1_BUF
+  out_rs$WWIN$CTR_2035 <- raster(dum_rs)
+  out_rs$WWIN$CTR_2035[adap_out$LOC] <- adap_out$WWIN1_CTR
+  out_rs$WWIN$GLO_2035 <- raster(dum_rs)
+  out_rs$WWIN$GLO_2035[adap_out$LOC] <- adap_out$WWIN1_GLO
+  
+  #wwin 2075
+  out_rs$WWIN$BUF_2075 <- raster(dum_rs)
+  out_rs$WWIN$BUF_2075[adap_out$LOC] <- adap_out$WWIN2_BUF
+  out_rs$WWIN$CTR_2075 <- raster(dum_rs)
+  out_rs$WWIN$CTR_2075[adap_out$LOC] <- adap_out$WWIN2_CTR
+  out_rs$WWIN$GLO_2075 <- raster(dum_rs)
+  out_rs$WWIN$GLO_2075[adap_out$LOC] <- adap_out$WWIN2_GLO
   
   #whea (min of wspr and wwin)
   out_rs$WHEA <- list()
-  out_rs$WHEA$P_2035 <- calc(stack(out_rs$WWIN$P_2035,out_rs$WSPR$P_2035),fun=function(x) {min(x,na.rm=T)})
+  out_rs$WHEA$BUF_2035 <- calc(stack(out_rs$WWIN$P_2035,out_rs$WSPR$P_2035),fun=function(x) {min(x,na.rm=T)})
   out_rs$WHEA$P_2075 <- calc(stack(out_rs$WWIN$P_2075,out_rs$WSPR$P_2075),fun=function(x) {min(x,na.rm=T)})
   #out_rs$WHEA$P_2035 <- (out_rs$WWIN$P_2035 + out_rs$WSPR$P_2035) / 2
   #out_rs$WHEA$P_2075 <- (out_rs$WWIN$P_2075 + out_rs$WSPR$P_2075) / 2
