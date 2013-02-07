@@ -212,7 +212,7 @@ if (!file.exists(fig_dir)) {dir.create(fig_dir)}
 
 #making plots
 plot_overlap("RICE", "BUF_2035", xt=extent(-130,160,-45,75), fig_dir)
-plot_overlap("RICE", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
+plot_overlap("RICE", "BUF_2075", xt=extent(-130,160,-45,75), fig_dir)
 plot_overlap("WSPR", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
 plot_overlap("WSPR", "P_2075", xt=extent(-130,160,-45,75), fig_dir)
 plot_overlap("WWIN", "P_2035", xt=extent(-130,160,-45,75), fig_dir)
