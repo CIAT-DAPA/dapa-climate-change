@@ -72,7 +72,7 @@ get_loc_adapt <- function(loc) {
       mill2_buf <- NA; mill2_ctr <- NA; mill2_glo <- NA
     }
     
-    if (sorg == 1) {
+    if (mill == 1) {
       sorg1_buf <- output$SORG$ADAPTATION_2035$BUF
       sorg1_ctr <- output$SORG$ADAPTATION_2035$CTR
       sorg1_glo <- output$SORG$ADAPTATION_2035$GLO
@@ -204,8 +204,8 @@ calc_adapt_gridcell <- function(loc) {
     output$WWIN$ADAPTATION_2075 <- out_wwin2
     output$MILL$ADAPTATION_2035 <- out_mill1
     output$MILL$ADAPTATION_2075 <- out_mill2
-    output$SORG$ADAPTATION_2035 <- out_mill1
-    output$SORG$ADAPTATION_2075 <- out_mill2
+    output$SORG$ADAPTATION_2035 <- out_sorg1
+    output$SORG$ADAPTATION_2075 <- out_sorg2
     
     #switch adaptation is done
     output$ADAPTATION <- T
