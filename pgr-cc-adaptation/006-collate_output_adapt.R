@@ -88,17 +88,17 @@ gcm_outDir <- paste(out_bDir,"/",gcmList$GCM_ENS[gcm_i],sep="")
 ###################################################################################
 ###################################################################################
 #grab data from individual calculations
-if (!file.exists(paste(gcm_outDir,"/adap_outputs2.RData",sep=""))) {
+if (!file.exists(paste(gcm_outDir,"/adap_outputs.RData",sep=""))) {
   adap_out <- as.data.frame(t(sapply(1:nrow(gCells),get_loc_adapt)))
   for (i in 1:ncol(adap_out)) {adap_out[,i] <- unlist(adap_out[,i])}
-  save(list=c("adap_out","dum_rs"),file=paste(gcm_outDir,"/adap_outputs2.RData",sep=""))
+  save(list=c("adap_out","dum_rs"),file=paste(gcm_outDir,"/adap_outputs.RData",sep=""))
 } else {
-  load(paste(gcm_outDir,"/adap_outputs2.RData",sep=""))
+  load(paste(gcm_outDir,"/adap_outputs.RData",sep=""))
 }
 
 ######################################
 #load data into a raster
-if (!file.exists(paste(gcm_outDir,"/adap_raster_outputs2.RData",sep=""))) {
+if (!file.exists(paste(gcm_outDir,"/adap_raster_outputs.RData",sep=""))) {
   #output list
   out_rs <- list()
   
@@ -198,9 +198,9 @@ if (!file.exists(paste(gcm_outDir,"/adap_raster_outputs2.RData",sep=""))) {
   out_rs$SORG$GLO_2075 <- raster(dum_rs)
   out_rs$SORG$GLO_2075[adap_out$LOC] <- adap_out$SORG2_GLO
   
-  save(out_rs,file=paste(gcm_outDir,"/adap_raster_outputs2.RData",sep=""))
+  save(out_rs,file=paste(gcm_outDir,"/adap_raster_outputs.RData",sep=""))
 } else {
-  load(paste(gcm_outDir,"/adap_raster_outputs2.RData",sep=""))
+  load(paste(gcm_outDir,"/adap_raster_outputs.RData",sep=""))
 }
 
 
