@@ -114,6 +114,13 @@ bf_sd <- calc(all_bf,fun=function(x) {sd(x,na.rm=T)})
 cy_mean <- calc(all_cy,fun=function(x) {mean(x,na.rm=T)})
 cy_sd <- calc(all_cy,fun=function(x) {sd(x,na.rm=T)})
 
+## save outputs
+out_resDir <- paste(out_bDir,"/_results",sep="")
+if (!file.exists(out_resDir)) {dir.create(out_resDir)}
+
+save(list=c("all_ov","all_bf","all_cy","ov_mean","ov_sd","bf_mean","bf_sd","cy_mean","cy_sd"),
+     file=paste(out_resDir,"/ensemble_",tolower(crop_name),".RData",sep=""))
+
 #totals
 crop_data <- as.data.frame(xyFromCell(ov_mean,which(!is.na(ov_mean[]))))
 crop_data$OV_M <- ov_mean[which(!is.na(ov_mean[]))]
