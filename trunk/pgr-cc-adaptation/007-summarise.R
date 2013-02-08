@@ -150,7 +150,13 @@ grli <- list("sp.lines",grat,lwd=0.5,lty=2,first=F)
 brks <- seq(0,1,by=0.025)
 brks.lab <- round(brks,2)
 cols <- c(colorRampPalette(c("dark red","red","orange","yellow","light blue","blue","dark blue"))(length(brks)))
-layt <- list(wld,grli)
+
+#points of buffer
+xybuf <- cbind(x=crop_data$x[which(crop_data$OV_M < 0.5 & crop_data$CY_M > 0.75)],
+               y=crop_data$y[which(crop_data$OV_M < 0.5 & crop_data$CY_M > 0.75)])
+xybuf <- SpatialPoints(xybuf)
+pts <- list("sp.points", xybuf, pch = 4, col = "black", cex=0.75, lwd=0.6,first=F)
+layt <- list(pts,wld,grli)
 
 #do the plot
 figName <- paste(tolower(cropname),"_",tolower(period),sep="")
