@@ -141,8 +141,8 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #timall <- run_group_adap(976)
 
 # preliminary runs while other stuff finishes up
-# lim_a <- 1951
-# lim_b <- 2145
+# lim_a <- 2146
+# lim_b <- 2340
 # 
 # for (k in lim_a:lim_b) {
 #   tima <- run_group_adap(k)
@@ -151,7 +151,7 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #   cat("TIME ELAPSED:",tima,"\n")
 #   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
 # }
-#currently eljefe1
+#currently L2
 
 #############################################################################
 ## parallel processing ######################################################
