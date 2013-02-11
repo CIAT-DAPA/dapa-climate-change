@@ -51,7 +51,8 @@ vnList <- c("pr","tas","dtr","rd")
 procList <- expand.grid(GCM=gcmList,OBS=dsetList,VAR=vnList)
 procList$GCM <- paste(procList$GCM)
 procList$OBS <- paste(procList$OBS); procList$VAR <- paste(procList$VAR)
-#procList <- procList[-which(procList$OBS == "vi-E40" & procList$VAR == "dtr"),]
+procList <- procList[-which(procList$OBS == "vi_rev-WST" & procList$VAR == "rd"),]
+#procList <- procList[-which(procList$OBS == "vi_rev-E40" & procList$VAR == "dtr"),]
 
 #create output folder
 oDir <- paste(mdDir,"/assessment/output-data/_summary_revised2",sep="")
@@ -62,10 +63,11 @@ if (!file.exists(odir_rs)) {dir.create(odir_rs)}
 
 #this_proc <- 1
 #summarise_interannual_vi_revised(1)
+#for (k in 1:nrow(procList)) {summarise_interannual_vi_revised(k)}
 
 #determine number of CPUs
 ncpus <- nrow(procList)
-if (ncpus>12) {ncpus <- 12}
+if (ncpus>20) {ncpus <- 20}
 
 #here do the parallelisation
 #load library and create cluster
@@ -93,8 +95,6 @@ sfStop()
 
 
 
-
-
 #######################################
 #calculate average of all climate models for each metric
 #interannual variability index (vi)
@@ -108,29 +108,9 @@ gcmList <- gcmList[which(gcmList != "multi_model_mean_ENS_r1i1p1")]
 procList <- expand.grid(VAR=vnList,MET=metList,SEAS=sList)
 #this_proc <- 1
 
-#determine number of CPUs
-ncpus <- nrow(procList)
-if (ncpus>12) {ncpus <- 12}
+for (k in 1:nrow(procList)) {mean_summary_interannual_vi_revised(k)}
+for (k in 1:nrow(procList) {mean_summary_interannual_vi_e40(k)}
 
-#here do the parallelisation
-#load library and create cluster
-library(snowfall)
-sfInit(parallel=T,cpus=ncpus)
 
-#export variables
-sfExport("src.dir2")
-sfExport("mdDir")
-sfExport("regions")
-sfExport("gcmChars")
-sfExport("gcmList")
-sfExport("vnList")
-sfExport("procList")
-sfExport("metList")
-sfExport("oDir")
-sfExport("odir_rs")
-
-#run the function in parallel
-system.time(sfSapply(as.vector(1:nrow(procList)),mean_summary_interannual_vi))
-
-#stop the cluster
-sfStop()
+     
+     
