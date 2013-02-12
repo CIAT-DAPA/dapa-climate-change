@@ -1168,6 +1168,7 @@ GLAM_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
 check_done <- function(i,all_proc) {
   #i <- ids[1]
   #get config
+  #cat(i,"\n")
   run_cfg <- get_cfg(i,all_proc)
   if (run_cfg$PERIOD == "HIS") {HIS <- T} else {HIS <- F}
   
@@ -1191,9 +1192,17 @@ check_done <- function(i,all_proc) {
     load(out_fil)
     if (HIS) {
       rm(list=c("ir_vls","setup","params"))
-      if (is.na(optimal$YGP)) {chk3 <- F} else {chk3 <- T}
+      if (length(optimal$YGP) > 0) {
+        if (is.na(optimal$YGP)) {chk3 <- F} else {chk3 <- T}
+      } else {
+        chk3 <- F
+      }
     } else {
-      if (is.na(run_data$YGP)) {chk3 <- F} else {chk3 <- T}
+      if (length(run_data$YGP) > 0) {
+        if (is.na(run_data$YGP)) {chk3 <- F} else {chk3 <- T}
+      } else {
+        chk3 <- F
+      }
     }
   }
   
