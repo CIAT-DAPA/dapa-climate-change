@@ -6,19 +6,10 @@ library(raster)
 
 #source directories
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
-# #source functions of interest
-# source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
-# source(paste(src.dir,"/glam/glam-optimise-ygp_ipdate_wrapper.R",sep=""))
-# source(paste(src.dir,"/glam/glam-parFile-functions.R",sep=""))
-# source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
-# source(paste(src.dir,"/glam/glam-runfiles-functions.R",sep=""))
-# source(paste(src.dir,"/glam/glam-soil-functions.R",sep=""))
-# source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
-# source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
-# source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
+#source functions of interest
 source(paste(src.dir,"/cmip5/07.glam-cmip5_runs-functions.R",sep=""))
 
 #configuration details
@@ -28,8 +19,8 @@ runs_name <- "cmip5_all"
 
 #base and data directories
 #bDir <- "W:/eejarv/PhD-work/crop-modelling"
-bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+#bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 glamDir <- paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
@@ -61,10 +52,6 @@ expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain"
 expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh") #combined one
 
 #Factor 6: values of parameters for increased CO2
-#TENFAC=0.0, SLA=SLA_B*0.9633, TE=TE_B*1.0880, TTMAX=TTMAX_B*.9377
-#TENFAC=0.0, SLA=SLA_B*0.9633, TE=TE_B*1.1467, TTMAX=TTMAX_B*.9377
-#TENFAC=0.4, SLA=SLA_B*0.9633, TE=TE_B*1.0880, TTMAX=TTMAX_B*.9377
-#TENFAC=0.4, SLA=SLA_B*0.9633, TE=TE_B*1.1467, TTMAX=TTMAX_B*.9377
 CO2Exp <- data.frame(EXP_NAME=c("CO2_p1","CO2_p2","CO2_p3","CO2_p4"),
                      TENFAC=c(0,0,0.4,0.4),SLA_INI=c(0.9633,0.9633,0.9633,0.9633),
                      TE=c(1.0880,1.1467,1.0880,1.1467),
@@ -72,7 +59,7 @@ CO2Exp <- data.frame(EXP_NAME=c("CO2_p1","CO2_p2","CO2_p3","CO2_p4"),
 CO2ExpList <- CO2Exp$EXP_NAME
 
 #define experiment
-expid <- parsetList[1] #33
+expid <- parsetList[19] #33
 
 #output directories
 out_bdir <- paste(glamDir,"/model-runs/",toupper(cropName),"/runs/",runs_name,sep="")
@@ -131,6 +118,5 @@ for (gcm in gcmList) {
   } else {
     sum_exp <- rbind(sum_exp,grp_sum)
   }
-  write.csv(sum_exp,paste(out_chkexp,"/summary.csv",sep=""),row.names=F,quote=T)
 }
-
+write.csv(sum_exp,paste(out_chkexp,"/summary.csv",sep=""),row.names=F,quote=T)
