@@ -92,12 +92,14 @@ cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 cat("\n",paste(as.vector(groupingList[lim_a,])),"\n")
 cat(paste(as.vector(groupingList[lim_b,])),"\n")
 
-# for (k in lim_a:lim_b) {
-#   tima <- run_group_adap(k)
-#   tima <- sum(tima)/60
-#   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
-#   cat("TIME ELAPSED:",tima,"\n")
-#   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
-# }
+#loop the runs
+for (k in lim_a:lim_b) {
+  tima <- run_group_adap(k)
+  tima <- sum(tima)/60
+  cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("TIME ELAPSED:",tima,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+}
 #currently L2
+
 
