@@ -98,7 +98,7 @@ for (gcm in gcmList) {
   #this is 3705 processes
   
   #output file
-  rfile <- paste(oeut_chkexp,"/",gcm,".RData",sep="")
+  rfile <- paste(out_chkexp,"/",gcm,".RData",sep="")
   
   if (!file.exists(rfile)) {
     #output of group checking
