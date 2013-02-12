@@ -59,7 +59,7 @@ CO2Exp <- data.frame(EXP_NAME=c("CO2_p1","CO2_p2","CO2_p3","CO2_p4"),
 CO2ExpList <- CO2Exp$EXP_NAME
 
 #define experiment
-expid <- parsetList[19] #33
+expid <- parsetList[6] #33
 
 #output directories
 out_bdir <- paste(glamDir,"/model-runs/",toupper(cropName),"/runs/",runs_name,sep="")
@@ -73,7 +73,7 @@ if (!file.exists(out_chkexp)) {dir.create(out_chkexp)}
 ##########################################################
 #loop gcms for given exp
 for (gcm in gcmList) {
-  #gcm <- gcmList[1]
+  #gcm <- gcmList[24]
   
   cat("\nProcessing GCM:",gcm,"\n")
   
@@ -98,7 +98,7 @@ for (gcm in gcmList) {
   #this is 3705 processes
   
   #output file
-  rfile <- paste(out_chkexp,"/",gcm,".RData",sep="")
+  rfile <- paste(oeut_chkexp,"/",gcm,".RData",sep="")
   
   if (!file.exists(rfile)) {
     #output of group checking

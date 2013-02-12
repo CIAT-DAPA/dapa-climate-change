@@ -141,56 +141,59 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #timall <- run_group_adap(976)
 
 # preliminary runs while other stuff finishes up
-# lim_a <- 2146
-# lim_b <- 2340
-# 
-# for (k in lim_a:lim_b) {
-#   tima <- run_group_adap(k)
-#   tima <- sum(tima)/60
-#   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
-#   cat("TIME ELAPSED:",tima,"\n")
-#   cat("XXXXXXXXXXXXXXXXXXXXXX\n")
-# }
+lim_a <- 3511
+lim_b <- 3705
+
+cat("\n",paste(as.vector(groupingList[lim_a,])),"\n")
+cat(paste(as.vector(groupingList[lim_b,])),"\n")
+
+for (k in lim_a:lim_b) {
+  tima <- run_group_adap(k)
+  tima <- sum(tima)/60
+  cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("TIME ELAPSED:",tima,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+}
 #currently L2
 
-#############################################################################
-## parallel processing ######################################################
-#############################################################################
-#number of cpus to use
-if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
-
-#here do the parallelisation
-#load library and create cluster
-library(snowfall)
-sfInit(parallel=T,cpus=ncpus)
-
-#export variables
-sfExport("src.dir")
-sfExport("cropName")
-sfExport("ver")
-sfExport("runs_name")
-sfExport("adap_name")
-sfExport("maxiter")
-sfExport("scratch")
-sfExport("use_scratch")
-sfExport("bDir")
-sfExport("glamDir")
-sfExport("cropDir")
-sfExport("glamInDir")
-sfExport("cells")
-sfExport("gcmList")
-sfExport("expSel")
-sfExport("inList")
-sfExport("CO2ExpList")
-sfExport("all_proc")
-sfExport("ENV_CFG")
-sfExport("groupingList")
-sfExport("adap_runs")
-
-#run the bias correction function in parallel
-system.time(sfSapply(as.vector(1:19500),run_group_adap))
-
-#stop the cluster
-sfStop()
+# #############################################################################
+# ## parallel processing ######################################################
+# #############################################################################
+# #number of cpus to use
+# if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
+# 
+# #here do the parallelisation
+# #load library and create cluster
+# library(snowfall)
+# sfInit(parallel=T,cpus=ncpus)
+# 
+# #export variables
+# sfExport("src.dir")
+# sfExport("cropName")
+# sfExport("ver")
+# sfExport("runs_name")
+# sfExport("adap_name")
+# sfExport("maxiter")
+# sfExport("scratch")
+# sfExport("use_scratch")
+# sfExport("bDir")
+# sfExport("glamDir")
+# sfExport("cropDir")
+# sfExport("glamInDir")
+# sfExport("cells")
+# sfExport("gcmList")
+# sfExport("expSel")
+# sfExport("inList")
+# sfExport("CO2ExpList")
+# sfExport("all_proc")
+# sfExport("ENV_CFG")
+# sfExport("groupingList")
+# sfExport("adap_runs")
+# 
+# #run the bias correction function in parallel
+# system.time(sfSapply(as.vector(1:19500),run_group_adap))
+# 
+# #stop the cluster
+# sfStop()
 
 
