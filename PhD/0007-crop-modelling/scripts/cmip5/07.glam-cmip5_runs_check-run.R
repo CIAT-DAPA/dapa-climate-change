@@ -5,7 +5,8 @@
 library(raster)
 
 #source directories
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
 # #source functions of interest
@@ -26,7 +27,8 @@ ver <- "v6"
 runs_name <- "cmip5_all"
 
 #base and data directories
-bDir <- "W:/eejarv/PhD-work/crop-modelling"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling"
+bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
 #bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 glamDir <- paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
@@ -69,42 +71,47 @@ CO2Exp <- data.frame(EXP_NAME=c("CO2_p1","CO2_p2","CO2_p3","CO2_p4"),
                      P_TRANS_MAX=c(0.9377,0.9377,0.9377,0.9377))
 CO2ExpList <- CO2Exp$EXP_NAME
 
+#define experiment
+expid <- parsetList[1] #33
 
-####
-#baseline experiments
-all_proc_his <- expand.grid(LOC=cells$CELL,GCM=gcmList,PARSET=parsetList,WTH_TYPE=expList_his)
-all_proc_his$CO2_P <- "1xCO2"
-all_proc_his <- cbind(RUNID=1:nrow(all_proc_his),all_proc_his)
-all_proc_his$RUNID <- paste("HIS_",all_proc_his$RUNID+1e8,sep="")
-
-#rcp experiments
-all_proc_rcp <- expand.grid(LOC=cells$CELL,GCM=gcmList,PARSET=parsetList,WTH_TYPE=expList_rcp,
-                            CO2_P=CO2ExpList)
-all_proc_rcp <- cbind(RUNID=1:nrow(all_proc_rcp),all_proc_rcp)
-all_proc_rcp$RUNID <- paste("RCP_",all_proc_rcp$RUNID+1e8,sep="")
-
-#all runs together
-all_proc <- rbind(all_proc_his,all_proc_rcp)
-
-
-#do some type of grouping. This is done by gridcell, parameter set and GCM
-groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcmList)
-#this is 125970 processes
-
-#output directory
+#output directories
 out_bdir <- paste(glamDir,"/model-runs/",toupper(cropName),"/runs/",runs_name,sep="")
 out_chkdir <- paste(out_bdir,"/_outputs/checks",sep="")
 if (!file.exists(out_chkdir)) {dir.create(out_chkdir)}
 
+out_chkexp <- paste(out_chkdir,"/exp-",expid,sep="")
+if (!file.exists(out_chkexp)) {dir.create(out_chkexp)}
+
+
 ##########################################################
 #loop gcms for given exp
-expid <- parsetList[1] #33
 for (gcm in gcmList) {
-  #gcm <- gcmList[1] #"bcc_csm1_1_ENS_r1i1p1"
+  #gcm <- gcmList[1]
+  
   cat("\nProcessing GCM:",gcm,"\n")
   
+  ####
+  #baseline experiments
+  all_proc_his <- expand.grid(LOC=cells$CELL,GCM=gcm,PARSET=parsetList,WTH_TYPE=expList_his)
+  all_proc_his$CO2_P <- "1xCO2"
+  all_proc_his <- cbind(RUNID=1:nrow(all_proc_his),all_proc_his)
+  all_proc_his$RUNID <- paste("HIS_",all_proc_his$RUNID+1e8,sep="")
+  
+  #rcp experiments
+  all_proc_rcp <- expand.grid(LOC=cells$CELL,GCM=gcm,PARSET=parsetList,WTH_TYPE=expList_rcp,
+                              CO2_P=CO2ExpList)
+  all_proc_rcp <- cbind(RUNID=1:nrow(all_proc_rcp),all_proc_rcp)
+  all_proc_rcp$RUNID <- paste("RCP_",all_proc_rcp$RUNID+1e8,sep="")
+  
+  #all runs together
+  all_proc <- rbind(all_proc_his,all_proc_rcp)
+  
+  #do some type of grouping. This is done by gridcell, parameter set and GCM
+  groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcm)
+  #this is 3705 processes
+  
   #output file
-  rfile <- paste(out_chkdir,"/exp-",expid,"_",gcm,".RData",sep="")
+  rfile <- paste(out_chkexp,"/",gcm,".RData",sep="")
   
   if (!file.exists(rfile)) {
     #output of group checking
@@ -124,8 +131,6 @@ for (gcm in gcmList) {
   } else {
     sum_exp <- rbind(sum_exp,grp_sum)
   }
+  write.csv(sum_exp,paste(out_chkexp,"/summary.csv",sep=""),row.names=F,quote=T)
 }
-
-write.csv(sum_exp,paste(out_chkdir,"/exp-",expid,"_summary.csv",sep=""),row.names=F,quote=T)
-
 
