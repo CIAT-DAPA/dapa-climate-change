@@ -284,24 +284,8 @@ if (!file.exists(paste(out_sum,"/all-final_summary.csv",sep=""))) {
   out_all2 <- read.csv(paste(out_sum,"/all-final_summary.csv",sep=""))
 }
 
-out_all3 <- aggregate(out_all2[,4:ncol(out_all2)],by=list(out_all2$GCM,out_all2$VAR),FUN=mean,na.rm=T)
+out_all3 <- aggregate(out_all2[,3:ncol(out_all2)],by=list(out_all2$GCM,out_all2$VAR),FUN=mean,na.rm=T)
 names(out_all3)[1:2] <- c("GCM","VAR")
-
-out_all_x <- aggregate(out_all2[,4:ncol(out_all2)],by=list(out_all2$GCM,out_all2$VAR),FUN=max,na.rm=T)
-out_all_n <- aggregate(out_all2[,4:ncol(out_all2)],by=list(out_all2$GCM,out_all2$VAR),FUN=min,na.rm=T)
-
-out_all3$P_CCOEF_B05_X <- out_all_x$P_CCOEF_B05
-out_all3$P_CCOEF_B05_N <- out_all_n$P_CCOEF_B05
-out_all3$P_PRMSE1_A40_X <- out_all_x$PRMSE1_A40
-out_all3$P_PRMSE1_A40_N <- out_all_n$PRMSE1_A40
-out_all3$P_PRMSE1_A90_X <- out_all_x$PRMSE1_A50
-out_all3$P_PRMSE1_A90_N <- out_all_n$PRMSE1_A50
-out_all3$P_PRMSE3_A40_X <- out_all_x$PRMSE3_A40
-out_all3$P_PRMSE3_A40_N <- out_all_n$PRMSE3_A40
-out_all3$P_PRMSE3_A90_X <- out_all_x$PRMSE3_A50
-out_all3$P_PRMSE3_A90_N <- out_all_n$PRMSE3_A50
-out_all3$P_VIA_A05_X <- out_all_x$P_VIA_A05
-out_all3$P_VIA_A05_N <- out_all_n$P_VIA_A05
 
 if (!file.exists(paste(out_sum,"/all-plot_data.csv",sep=""))) {
   write.csv(out_all3,paste(out_sum,"/all-plot_data.csv",sep=""),quote=F,row.names=F)
