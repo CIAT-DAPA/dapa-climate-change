@@ -141,8 +141,8 @@ groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 #timall <- run_group_adap(976)
 
 # preliminary runs while other stuff finishes up
-lim_a <- 3511
-lim_b <- 3705
+lim_a <- 2146
+lim_b <- 2340
 
 cat("\n",paste(as.vector(groupingList[lim_a,])),"\n")
 cat(paste(as.vector(groupingList[lim_b,])),"\n")
