@@ -23,7 +23,7 @@ cmip3Dir <- "/mnt/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
 
 #overall details
 seas <- "ANN"
-metric <- "PRMSE1"
+metric <- "PRMSE3"
 
 ######################################################################3
 ############ CMIP5
@@ -109,8 +109,10 @@ if (!file.exists(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP5.RData",sep="
     brks <- seq(-1,1,by=0.05)
   } else if (metric == "PRMSE1") {
     brks <- c(seq(0,max(alldata,na.rm=T),by=5),max(alldata,na.rm=T))
+    if (vn == "rd") {brks <- c(seq(0,max(alldata,na.rm=T),by=10),max(alldata,na.rm=T))}
   } else if (metric == "PRMSE3") {
     brks <- c(seq(0,max(alldata,na.rm=T),by=10),max(alldata,na.rm=T))
+    if (vn == "rd") {brks <- c(seq(0,max(alldata,na.rm=T),by=20),max(alldata,na.rm=T))}
   }
   
   #compute histograms for all parameter sets
@@ -278,9 +280,17 @@ par(mar=c(5,5,1,1))
 #plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
 #     xlim=c(0,800),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
 
+#PRMSE3 #rd
+plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
+     xlim=c(0,2000),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+
 #PRMSE1 #pr
 #plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
 #     xlim=c(0,270),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+
+#PRMSE1 #rd
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+#     xlim=c(0,500),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
 
 #PRMSE1 #tas #dtr
 #plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
@@ -291,8 +301,8 @@ par(mar=c(5,5,1,1))
 #     xlim=c(-1,1),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
 
 #CCOEF2 #rd
-plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
-     xlim=c(-1,1),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
+#     xlim=c(-1,1),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
 
 
 ##########
@@ -322,10 +332,12 @@ grid()
 #legend(x=400,y=20,legend=c("CMIP5","CMIP3"), #PRMSE3 pr
 #legend(x=400,y=29,legend=c("CMIP5","CMIP3"), #PRMSE3 tas
 #legend(x=400,y=10,legend=c("CMIP5","CMIP3"), #PRMSE3 dtr
+legend(x=1700,y=11,legend=c("CMIP5","CMIP3"), #PRMSE3 dtr
 #legend(x=200,y=17,legend=c("CMIP5","CMIP3"), #PRMSE1 pr
 #legend(x=80,y=75,legend=c("CMIP5","CMIP3"), #PRMSE1 tas
 #legend(x=80,y=33,legend=c("CMIP5","CMIP3"), #PRMSE1 dtr
-legend(x=-1,y=20,legend=c("CMIP5","CMIP3"), #CCOEF2 #pr #rd
+#legend(x=400,y=12.5,legend=c("CMIP5","CMIP3"), #PRMSE1 rd
+#legend(x=-1,y=20,legend=c("CMIP5","CMIP3"), #CCOEF2 #pr #rd
 #legend(x=-1,y=25,legend=c("CMIP5","CMIP3"), #CCOEF2 tas
 #legend(x=-1,y=13,legend=c("CMIP5","CMIP3"), #CCOEF2 dtr
        col=c("red","blue"),lty=c(1,1),cex=1.2,
