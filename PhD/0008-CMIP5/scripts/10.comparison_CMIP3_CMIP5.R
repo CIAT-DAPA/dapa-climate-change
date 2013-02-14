@@ -21,6 +21,10 @@ cmip3Dir <- "/mnt/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
 # cmip3Dir <- "/nfs/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
 
 
+#overall details
+seas <- "ANN"
+metric <- "PRMSE1"
+
 ######################################################################3
 ############ CMIP5
 
@@ -38,241 +42,300 @@ regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\
 isoList <- regions$ISO
 
 #process list
-vn <- "pr"
-seas <- "ANN"
-metric <- "CCOEF2"
+vn <- "rd"
 procList <- expand.grid(GCM=gcmList)
 
 #data directory
 outputDD <- paste(cmip5Dir,"/assessment/output-data",sep="")
 out_sum <- paste(outputDD,"/_summary_revised2",sep="")
 
+#output data directory
+oDir <- paste(out_sum,"/pdfs",sep="")
+if (!file.exists(oDir)) {dir.create(oDir)}
+
+rdata_dir <- paste(oDir,"/rdata_files",sep="")
+if (!file.exists(rdata_dir)) {dir.create(rdata_dir)}
+
+fig_dir <- paste(oDir,"/figures",sep="")
+if (!file.exists(fig_dir)) {dir.create(fig_dir)}
+
 #this_proc <- 1
 
-#function to do lapply
-#summarise_proc <- function(this_proc) {
-for (this_proc in 1:nrow(procList)) {
-  #details of what I need
-  #this_proc <- 2
-  gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
-  ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
-  
-  cat(gcm,"/",ens,"\n")
-  
-  #load all datasets, countries and seasons mean climate skill
-  all_iso <- data.frame()
-  for (iso in regions$ISO) {
-    #iso <- regions$ISO[1]
-    reg <- regions$REGION[which(regions$ISO == iso)]
+if (!file.exists(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP5.RData",sep=""))) {
+  #loop GCMs
+  for (this_proc in 1:nrow(procList)) {
+    #details of what I need
+    #this_proc <- 2
+    gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
+    ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
     
-    for (dset in dsetList) {
-      #dset <- dsetList[1]
-      #read file, mean climate skill (CRU)
-      infil <- paste(outputDD,"/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep="")
-      if (file.exists(infil)) {
-        indat <- read.csv(infil)
-        indat <- indat[which(indat$SEASON == seas),metric]
-        indat <- data.frame(REGION=paste(reg),ISO=paste(iso),OBS=dset,VALUE=indat)
-        #names(indat)[ncol(indat)] <- paste(gcm,"_ENS_",ens,sep="")
-      } else {
-        indat <- data.frame(REGION=paste(reg),ISO=paste(iso),OBS=dset,VALUE=NA)
+    cat(gcm,"/",ens,"\n")
+    
+    #load all datasets, countries and seasons mean climate skill
+    all_iso <- data.frame()
+    for (iso in regions$ISO) {
+      #iso <- regions$ISO[1]
+      reg <- regions$REGION[which(regions$ISO == iso)]
+      
+      for (dset in dsetList) {
+        #dset <- dsetList[1]
+        #read file, mean climate skill (CRU)
+        infil <- paste(outputDD,"/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,"_",ens,".csv",sep="")
+        if (file.exists(infil)) {
+          indat <- read.csv(infil)
+          indat <- indat[which(indat$SEASON == seas),metric]
+          indat <- data.frame(REGION=paste(reg),ISO=paste(iso),OBS=dset,VALUE=indat)
+          #names(indat)[ncol(indat)] <- paste(gcm,"_ENS_",ens,sep="")
+        } else {
+          indat <- data.frame(REGION=paste(reg),ISO=paste(iso),OBS=dset,VALUE=NA)
+        }
+        all_iso <- rbind(all_iso,indat)
       }
-      all_iso <- rbind(all_iso,indat)
+    }
+    
+    #binding data as columns
+    if (this_proc == 1) {
+      gcm_vals <- all_iso
+    } else {
+      gcm_vals <- cbind(gcm_vals,VALUE=all_iso[,ncol(all_iso)])
+    }
+    names(gcm_vals)[ncol(gcm_vals)] <- paste(gcm,"_ENS_",ens,sep="")
+  }
+  c5_vals <- gcm_vals
+  
+  #determine breaks for histogram
+  alldata <- as.numeric(unlist(c(as.vector(c5_vals[,4:ncol(c5_vals)]))))
+  if (metric == "CCOEF2" | metric == "CCOEF") {
+    brks <- seq(-1,1,by=0.05)
+  } else if (metric == "PRMSE1") {
+    brks <- c(seq(0,max(alldata,na.rm=T),by=5),max(alldata,na.rm=T))
+  } else if (metric == "PRMSE3") {
+    brks <- c(seq(0,max(alldata,na.rm=T),by=10),max(alldata,na.rm=T))
+  }
+  
+  #compute histograms for all parameter sets
+  for (this_proc in 1:nrow(procList)) {
+    #this_proc <- 1
+    gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
+    ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
+    
+    if (length(which(is.na(c5_vals[,paste(gcm,"_ENS_",ens,sep="")]))) != length(c5_vals[,paste(gcm,"_ENS_",ens,sep="")])) {
+      his_gcm <- hist(c5_vals[,paste(gcm,"_ENS_",ens,sep="")],breaks=brks,plot=F)
+      hgcm <- his_gcm$counts/sum(his_gcm$counts)*100
+      hgcm <- data.frame(XVAL=his_gcm$mids,VAL=hgcm)
+    } else {
+      hgcm <- data.frame(XVAL=hc5_all$XVAL,VAL=NA)
+    }
+    names(hgcm)[2] <- paste(gcm,"_ENS_",ens,sep="")
+    
+    if (this_proc == 1) {
+      hc5_all <- hgcm
+    } else {
+      hc5_all <- merge(hc5_all,hgcm,by="XVAL",sort=F)
     }
   }
   
-  #binding data as columns
-  if (this_proc == 1) {
-    gcm_vals <- all_iso
-  } else {
-    gcm_vals <- cbind(gcm_vals,VALUE=all_iso[,ncol(all_iso)])
-  }
-  names(gcm_vals)[ncol(gcm_vals)] <- paste(gcm,"_ENS_",ens,sep="")
+  save(list=c("c5_vals","hc5_all"),file=paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP5.RData",sep=""))
+} else {
+  load(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP5.RData",sep=""))
 }
-
-alldata <- as.numeric(unlist(c(as.vector(gcm_vals[,4:ncol(gcm_vals)]))))
-brks <- seq(-1,1,by=0.05)
-
-#compute histograms for all parameter sets
-for (this_proc in 1:nrow(procList)) {
-  #this_proc <- 1
-  gcm <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[1]
-  ens <- unlist(strsplit(paste(procList$GCM[this_proc]),"_ENS_",fixed=T))[2]
-  
-  his_gcm <- hist(gcm_vals[,paste(gcm,"_ENS_",ens,sep="")],breaks=brks,plot=F)
-  hgcm <- his_gcm$counts/sum(his_gcm$counts)*100
-  hgcm <- data.frame(XVAL=his_gcm$mids,VAL=hgcm)
-  names(hgcm)[2] <- paste(gcm,"_ENS_",ens,sep="")
-  
-  
-  if (this_proc == 1) {
-    hc5_all <- hgcm
-  } else {
-    hc5_all <- merge(hc5_all,hgcm,by="XVAL",sort=F)
-  }
-}
-
-xval <- hc5_all$XVAL
-hc5_all$XVAL <- NULL; hc3_all$XVAL <- NULL
-
-hc5_m <- apply(hc5_all[,1:(ncol(hc5_all)-1)],1,mean,na.rm=T)
-hc5_sd <- apply(hc5_all[,1:(ncol(hc5_all)-1)],1,sd,na.rm=T)
-
-hc3_m <- apply(hc3_all[,1:(ncol(hc3_all)-1)],1,mean,na.rm=T)
-hc3_sd <- apply(hc3_all[,1:(ncol(hc3_all)-1)],1,sd,na.rm=T)
-
-hsum <- data.frame(XVAL=xval,CTR.MEAN=hc5_m,CTR.SD=hc5_m)#,CON.MEAN=hcon_m,CON.SD=hcon_sd)
-
-#produce the plot
-tiff(paste(fig_dir,"/effect_plot_",const,".tif",sep=""),res=300,height=1500,width=2048,
-     compression="lzw",pointsize=8.5)
-par(mar=c(5,5,1,1))
-
-plot(hsum$XVAL,hsum$CTR.MEAN,ty="l",main=NA,xlab="Yield (kg/ha)",ylab="pdf (%)",
-     xlim=c(0,5000),ylim=c(0,15))
-polup <- hsum$CTR.MEAN+hsum$CTR.SD
-poldw <- hsum$CTR.MEAN-hsum$CTR.SD
-poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-
-polygon(x=c(hsum$XVAL,rev(hsum$XVAL)),y=c(polup,rev(poldw)),col="#FF000040",border=NA)
-lines(hsum$XVAL,hsum$CTR.MEAN,col="red")
-
-polup <- hsum$CON.MEAN+hsum$CON.SD
-poldw <- hsum$CON.MEAN-hsum$CON.SD
-poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
-
-polygon(x=c(hsum$XVAL,rev(hsum$XVAL)),y=c(polup,rev(poldw)),col="#0000FF32",border=NA)
-lines(hsum$XVAL,hsum$CON.MEAN,col="blue")
-grid()
-legend(x=3800,y=14.4,legend=c("Control","Not constrained"),
-       col=c("red","blue"),lty=c(1,1),cex=1.2,
-       box.col="black",box.lwd=1,box.lty=1,bg="white")
-dev.off()
-
 
 #####################################################################
 #### with out_all3 of CMIP5 and that of CMIP3, scattergrams need 
 #    to be constructed that compare them
 
-
-
 ######################################################################3
 ############ CMIP3
-
-#list of gcms
-gcmList <- list.files(cmip3Dir)
-vnList <- c("prec","tmean","dtr")
-procList <- expand.grid(GCM=gcmList,VAR=vnList)
-
-#list of gcms and regions
-regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
-isoList <- regions$ISO
-
-#data directory
-outputDD <- paste(cmipDir,"/assessment/output-data-cmip3",sep="")
-out_sum <- paste(outputDD,"/_summary",sep="")
-
-#this_proc <- 1
-
-#function to do lapply
-summarise_proc <- function(this_proc) {
-  #details of what I need
-  gcm <- paste(procList$GCM[this_proc])
-  vn <- procList$VAR[this_proc]
+if (vn != "rd") {
+  #list of gcms
+  gcmList <- list.files(cmip3Dir)
+  gcmList <- gcmList[gcmList != "multi_model_mean"]
+  gcmList <- c(gcmList,"multi_model_mean")
   
-  #load all datasets, countries and seasons mean climate skill
-  all_iso_cl <- data.frame()
-  all_iso_vi <- data.frame()
-  for (iso in regions$ISO) {
-    #iso <- regions$ISO[1]
-    reg <- regions$REGION[which(regions$ISO == iso)]
+  #list of variables and datasets
+  dsetList <- c("cl-CRU","cl-WST","cl-WCL")
+  
+  #list of gcms and regions
+  regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
+  isoList <- regions$ISO
+  
+  #process list
+  if (vn == "pr") vn <- "prec"
+  if (vn == "tas") vn <- "tmean"
+  procList <- expand.grid(GCM=gcmList)
+  
+  #data directory
+  outputDD <- paste(cmip5Dir,"/assessment/output-data-cmip3",sep="")
+  out_sum <- paste(outputDD,"/_summary",sep="")
+  
+  #this_proc <- 1
+  if (!file.exists(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP3.RData",sep=""))) {
+    #loop through GCMs
+    for (this_proc in 1:nrow(procList)) {
+      #details of what I need
+      #this_proc <- 1
+      gcm <- paste(procList$GCM[this_proc])
+      
+      cat(gcm,"\n")
+      
+      #load all datasets, countries and seasons mean climate skill
+      all_iso <- data.frame()
+      for (iso in regions$ISO) {
+        #iso <- regions$ISO[1]
+        reg <- regions$REGION[which(regions$ISO == iso)]
+        
+        for (dset in dsetList) {
+          #dset <- dsetList[1]
+          infil <- paste(outputDD,"/",reg,"/",iso,"/",dset,"/",vn,"_",gcm,".csv",sep="")
+          if (file.exists(infil)) {
+            indat <- read.csv(infil)
+            indat <- indat[which(indat$SEASON == seas),metric]
+            indat <- data.frame(REGION=paste(reg),ISO=paste(iso),OBS=dset,VALUE=indat)
+          } else {
+            indat <- data.frame(REGION=paste(reg),ISO=paste(iso),OBS=dset,VALUE=NA)
+          }
+          all_iso <- rbind(all_iso,indat)
+        }
+      }
+      
+      #binding data as columns
+      if (this_proc == 1) {
+        gcm_vals <- all_iso
+      } else {
+        gcm_vals <- cbind(gcm_vals,VALUE=all_iso[,ncol(all_iso)])
+      }
+      names(gcm_vals)[ncol(gcm_vals)] <- gcm
+    }
+    c3_vals <- gcm_vals
+    alldata <- as.numeric(unlist(c(as.vector(c3_vals[,4:ncol(c3_vals)]))))
+    if (max(brks)<max(alldata,na.rm=T)) {brks <- c(brks,max(alldata,na.rm=T))}
     
-    #read file, mean climate skill (CRU)
-    infil <- paste(outputDD,"/",reg,"/",iso,"/cl-CRU/",vn,"_",gcm,".csv",sep="")
-    indat <- read.csv(infil)
-    indat <- cbind(DSET="CRU",indat)
-    
-    #read file, mean climate skill (WST)
-    infil <- paste(outputDD,"/",reg,"/",iso,"/cl-WST/",vn,"_",gcm,".csv",sep="")
-    tmp_dat <- read.csv(infil)
-    indat <- rbind(indat,cbind(DSET="WST",tmp_dat))
-    
-    #read file, mean climate skill (WCL)
-    infil <- paste(outputDD,"/",reg,"/",iso,"/cl-WCL/",vn,"_",gcm,".csv",sep="")
-    tmp_dat <- read.csv(infil)
-    indat <- rbind(indat,cbind(DSET="WST",tmp_dat))
-    
-    #final dataset to calculate specific values, mean climate skill
-    indat_av <- aggregate(indat[,3:ncol(indat)],by=list(indat$SEASON),FUN=mean,na.rm=T)
-    names(indat_av)[1] <- c("SEASON")
-    indat_av <- indat_av[which(indat_av$SEASON != "ANN"),]
-    indat_av <- cbind(ISO=iso,indat_av)
-    indat_av$N <- NULL
-    
-    #binding data, mean climate skill
-    all_iso_cl <- rbind(all_iso_cl,indat_av)
-    
-    ###
-    #read file, interannual vi (CRU)
-    infil <- paste(outputDD,"/",reg,"/",iso,"/vi-CRU/",vn,"_",gcm,".csv",sep="")
-    indat <- read.csv(infil)
-    indat <- cbind(DSET="CRU",indat)
-    
-    #read file, interannual vi (WST)
-    infil <- paste(outputDD,"/",reg,"/",iso,"/vi-WST/",vn,"_",gcm,".csv",sep="")
-    indat <- rbind(indat,cbind(DSET="WST",read.csv(infil)))
-    
-    #final dataset to calculate specific values, interannual vi
-    indat$LON <- NULL; indat$LAT <- NULL
-    indat_av <- aggregate(indat[,"VI"],by=list(indat$CELL,indat$SEASON),FUN=mean,na.rm=T)
-    names(indat_av) <- c("CELL","SEASON","VI")
-    indat_av <- indat_av[which(indat_av$SEASON != "ANN"),]
-    
-    #binding data, interannual vi
-    all_iso_vi <- rbind(all_iso_vi,indat_av)
+    #compute histograms for all parameter sets
+    for (this_proc in 1:nrow(procList)) {
+      #this_proc <- 1
+      gcm <- paste(procList$GCM[this_proc])
+      
+      if (length(which(is.na(c3_vals[,gcm]))) != length(c3_vals[,gcm])) {
+        his_gcm <- hist(c3_vals[,gcm],breaks=brks,plot=F)
+        hgcm <- his_gcm$counts/sum(his_gcm$counts)*100
+        hgcm <- data.frame(XVAL=his_gcm$mids,VAL=hgcm)
+      } else {
+        hgcm <- data.frame(XVAL=hc3_all$XVAL,VAL=NA)
+      }
+      names(hgcm)[2] <- gcm
+      
+      
+      if (this_proc == 1) {
+        hc3_all <- hgcm
+      } else {
+        hc3_all <- merge(hc3_all,hgcm,by="XVAL",sort=F)
+      }
+    }
+    save(list=c("c3_vals","hc3_all"),file=paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP3.RData",sep=""))
+  } else {
+    load(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP3.RData",sep=""))
   }
-  
-  all_iso_cl <- cbind(GCM=gcm,VAR=vn,all_iso_cl)
-  all_iso_vi <- cbind(GCM=gcm,VAR=vn,all_iso_vi)
-  
-  ccoef <- all_iso_cl$CCOEF2[which(!is.na(all_iso_cl$CCOEF2))]
-  p_ccoef05 <- length(which(ccoef <= 0.5)) / length(ccoef)*100
-  
-  prmse1 <- all_iso_cl$PRMSE1[which(!is.na(all_iso_cl$PRMSE1))]
-  p_prmse140 <- length(which(prmse1 >= 40)) / length(prmse1)*100
-  p_prmse190 <- length(which(prmse1 >= 90)) / length(prmse1)*100
-  
-  prmse3 <- all_iso_cl$PRMSE3[which(!is.na(all_iso_cl$PRMSE3))]
-  p_prmse340 <- length(which(prmse3 >= 40)) / length(prmse3)*100
-  p_prmse390 <- length(which(prmse3 >= 90)) / length(prmse3)*100
-  
-  via <- all_iso_vi$VI[which(!is.na(all_iso_vi$VI))]
-  p_via05 <- length(which(via > 0.5)) / length(via)*100
-  
-  res_met <- data.frame(GCM=gcm,VAR=vn,P_CCOEF_B05=p_ccoef05,
-                        PRMSE1_A40=p_prmse140,PRMSE1_A90=p_prmse190,
-                        PRMSE3_A40=p_prmse340,PRMSE3_A90=p_prmse390)
-  
-  return(res_met)
 }
 
+###################################################
+####### plot
+xval <- hc5_all$XVAL
+if (nrow(hc5_all) < nrow(hc3_all) & vn != "rd") {
+  xval <- hc3_all$XVAL
+}
 
-if (!file.exists(paste(out_sum,"/all-final_summary.csv",sep=""))) {
-  out_all <- lapply(1:nrow(procList),summarise_proc)
-  out_all2 <- do.call("rbind",out_all)
-  write.csv(out_all2,paste(out_sum,"/all-final_summary.csv",sep=""),quote=F,row.names=F)
+hc5_all$XVAL <- NULL
+hc5_m <- apply(hc5_all[,1:(ncol(hc5_all)-1)],1,mean,na.rm=T)
+hc5_sd <- apply(hc5_all[,1:(ncol(hc5_all)-1)],1,sd,na.rm=T)
+
+if (vn != "rd") {
+  hc3_all$XVAL <- NULL
+  hc3_m <- apply(hc3_all[,1:(ncol(hc3_all)-1)],1,mean,na.rm=T)
+  hc3_sd <- apply(hc3_all[,1:(ncol(hc3_all)-1)],1,sd,na.rm=T)
 } else {
-  out_all2 <- read.csv(paste(out_sum,"/all-final_summary.csv",sep=""))
+  hc3_all <- hc5_all
+  hc3_m <- rep(NA,times=length(hc5_m))
+  hc3_sd <- hc3_m
 }
 
-out_all3 <- aggregate(out_all2[,3:ncol(out_all2)],by=list(out_all2$GCM,out_all2$VAR),FUN=mean,na.rm=T)
-names(out_all3)[1:2] <- c("GCM","VAR")
 
-if (!file.exists(paste(out_sum,"/all-plot_data.csv",sep=""))) {
-  write.csv(out_all3,paste(out_sum,"/all-plot_data.csv",sep=""),quote=F,row.names=F)
+if (nrow(hc5_all) < nrow(hc3_all)) {
+  hsum <- data.frame(XVAL=xval,C5.MEAN=c(hc5_m,0),C5.SD=c(hc5_m,0),C3.MEAN=hc3_m,C3.SD=hc3_sd)
 } else {
-  out_all3 <- read.csv(paste(out_sum,"/all-plot_data.csv",sep=""))
+  hsum <- data.frame(XVAL=xval,C5.MEAN=hc5_m,C5.SD=hc5_m,C3.MEAN=hc3_m,C3.SD=hc3_sd)
 }
+
+#produce the plot
+tiff(paste(fig_dir,"/shaded_",metric,"_",vn,".tif",sep=""),res=300,height=1500,width=2048,
+     compression="lzw",pointsize=8.5)
+par(mar=c(5,5,1,1))
+
+#PRMSE3 #pr #tas
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
+#     xlim=c(0,500),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+
+#PRMSE3 #dtr
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
+#     xlim=c(0,800),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+
+#PRMSE1 #pr
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+#     xlim=c(0,270),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+
+#PRMSE1 #tas #dtr
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+#     xlim=c(0,100),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+
+#CCOEF2 #all others
+#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
+#     xlim=c(-1,1),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+
+#CCOEF2 #rd
+plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
+     xlim=c(-1,1),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+
+
+##########
+polup <- hsum$C5.MEAN+hsum$C5.SD
+poldw <- hsum$C5.MEAN-hsum$C5.SD
+poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
+
+polygon(x=c(hsum$XVAL,rev(hsum$XVAL)),y=c(polup,rev(poldw)),col="#FF000040",border=NA)
+lines(hsum$XVAL,hsum$C5.MEAN,col="red")
+if (nrow(hc5_all) < nrow(hc3_all)) {
+  lines(hsum$XVAL,c(hc5_all$multi_model_mean_ENS_r1i1p1,0),col="red",lty=2,lwd=0.5)
+} else {
+  lines(hsum$XVAL,hc5_all$multi_model_mean_ENS_r1i1p1,col="red",lty=2,lwd=0.5)
+}
+
+#polygon 2
+if (vn != "rd") {
+  polup <- hsum$C3.MEAN+hsum$C3.SD
+  poldw <- hsum$C3.MEAN-hsum$C3.SD
+  poldw <- sapply(poldw,FUN=function(x) {max(c(0,x))})
+  
+  polygon(x=c(hsum$XVAL,rev(hsum$XVAL)),y=c(polup,rev(poldw)),col="#0000FF32",border=NA)
+  lines(hsum$XVAL,hsum$C3.MEAN,col="blue")
+  lines(hsum$XVAL,hc3_all$multi_model_mean,col="blue",lty=2,lwd=0.5)
+}
+grid()
+#legend(x=400,y=20,legend=c("CMIP5","CMIP3"), #PRMSE3 pr
+#legend(x=400,y=29,legend=c("CMIP5","CMIP3"), #PRMSE3 tas
+#legend(x=400,y=10,legend=c("CMIP5","CMIP3"), #PRMSE3 dtr
+#legend(x=200,y=17,legend=c("CMIP5","CMIP3"), #PRMSE1 pr
+#legend(x=80,y=75,legend=c("CMIP5","CMIP3"), #PRMSE1 tas
+#legend(x=80,y=33,legend=c("CMIP5","CMIP3"), #PRMSE1 dtr
+legend(x=-1,y=20,legend=c("CMIP5","CMIP3"), #CCOEF2 #pr #rd
+#legend(x=-1,y=25,legend=c("CMIP5","CMIP3"), #CCOEF2 tas
+#legend(x=-1,y=13,legend=c("CMIP5","CMIP3"), #CCOEF2 dtr
+       col=c("red","blue"),lty=c(1,1),cex=1.2,
+       box.col="black",box.lwd=1,box.lty=1,bg="white")
+dev.off()
+
+
+
+##########################################################################
+##########################################################################
 
 
 
