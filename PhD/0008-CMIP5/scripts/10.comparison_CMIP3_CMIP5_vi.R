@@ -278,7 +278,7 @@ par(mar=c(5,5,1,1))
 
 #options of plots
 plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Variability index",
-     ylab="pdf (%)",xlim=c(0,5),ylim=c(0,100))
+     ylab="pdf (%)",xlim=c(0,5),ylim=c(0,70))
 
 
 ##########
