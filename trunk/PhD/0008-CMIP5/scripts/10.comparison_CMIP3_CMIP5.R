@@ -2,7 +2,11 @@
 #UoL / CCAFS / CIAT
 #June 2012
 
-library(raster)
+
+### overall details
+seas <- "ANN"
+metric <- "PRMSE3"
+vn <- "dtr"
 
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -21,10 +25,6 @@ cmip3Dir <- "/mnt/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
 # cmip3Dir <- "/nfs/a17/eejarv/IPCC_CMIP3/20C3M/original-data"
 
 
-#overall details
-seas <- "ANN"
-metric <- "PRMSE3"
-
 ######################################################################3
 ############ CMIP5
 
@@ -34,7 +34,6 @@ gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
 gcmList <- c(gcmList,paste("multi_model_mean_ENS_r1i1p1"))
 
 #list of variables and datasets
-vnList <- c("pr","tas","dtr","rd")
 dsetList <- c("cl_rev2-CRU","cl_rev2-WST","cl_rev2-WCL")
 
 #list of gcms and regions
@@ -42,7 +41,6 @@ regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\
 isoList <- regions$ISO
 
 #process list
-vn <- "rd"
 procList <- expand.grid(GCM=gcmList)
 
 #data directory
@@ -109,10 +107,11 @@ if (!file.exists(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP5.RData",sep="
     brks <- seq(-1,1,by=0.05)
   } else if (metric == "PRMSE1") {
     brks <- c(seq(0,max(alldata,na.rm=T),by=5),max(alldata,na.rm=T))
-    if (vn == "rd") {brks <- c(seq(0,max(alldata,na.rm=T),by=10),max(alldata,na.rm=T))}
+    if (vn == "rd") {brks <- c(seq(0,max(alldata,na.rm=T),by=20),max(alldata,na.rm=T))}
   } else if (metric == "PRMSE3") {
     brks <- c(seq(0,max(alldata,na.rm=T),by=10),max(alldata,na.rm=T))
-    if (vn == "rd") {brks <- c(seq(0,max(alldata,na.rm=T),by=20),max(alldata,na.rm=T))}
+    if (vn == "rd") {brks <- c(seq(0,max(alldata,na.rm=T),by=40),max(alldata,na.rm=T))}
+    if (vn == "dtr") {brks <- c(seq(0,max(alldata,na.rm=T),by=20),max(alldata,na.rm=T))}
   }
   
   #compute histograms for all parameter sets
@@ -156,10 +155,6 @@ if (vn != "rd") {
   
   #list of variables and datasets
   dsetList <- c("cl-CRU","cl-WST","cl-WCL")
-  
-  #list of gcms and regions
-  regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
-  isoList <- regions$ISO
   
   #process list
   if (vn == "pr") vn <- "prec"
@@ -262,47 +257,48 @@ if (vn != "rd") {
 
 
 if (nrow(hc5_all) < nrow(hc3_all)) {
-  hsum <- data.frame(XVAL=xval,C5.MEAN=c(hc5_m,0),C5.SD=c(hc5_m,0),C3.MEAN=hc3_m,C3.SD=hc3_sd)
+  hsum <- data.frame(XVAL=xval,C5.MEAN=c(hc5_m,0),C5.SD=c(hc5_sd,0),C3.MEAN=hc3_m,C3.SD=hc3_sd)
 } else {
-  hsum <- data.frame(XVAL=xval,C5.MEAN=hc5_m,C5.SD=hc5_m,C3.MEAN=hc3_m,C3.SD=hc3_sd)
+  hsum <- data.frame(XVAL=xval,C5.MEAN=hc5_m,C5.SD=hc5_sd,C3.MEAN=hc3_m,C3.SD=hc3_sd)
 }
 
 #produce the plot
 tiff(paste(fig_dir,"/shaded_",metric,"_",vn,".tif",sep=""),res=300,height=1500,width=2048,
-     compression="lzw",pointsize=8.5)
+     compression="lzw",pointsize=10)
 par(mar=c(5,5,1,1))
 
-#PRMSE3 #pr #tas
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
-#     xlim=c(0,500),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-
-#PRMSE3 #dtr
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
-#     xlim=c(0,800),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-
-#PRMSE3 #rd
-plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
-     xlim=c(0,2000),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
-
-#PRMSE1 #pr
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-#     xlim=c(0,270),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-
-#PRMSE1 #rd
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-#     xlim=c(0,500),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
-
-#PRMSE1 #tas #dtr
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-#     xlim=c(0,100),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-
-#CCOEF2 #all others
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
-#     xlim=c(-1,1),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-
-#CCOEF2 #rd
-#plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
-#     xlim=c(-1,1),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+#options of plots
+if (metric == "PRMSE3") {
+  if (vn == "prec" | vn == "tmean") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",
+         ylab="pdf (%)",xlim=c(0,500),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+  } else if (vn == "dtr") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",
+         ylab="pdf (%)",xlim=c(0,800),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+  } else if (vn == "rd") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
+         xlim=c(0,2000),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+  }
+} else if (metric == "PRMSE1") {
+  if (vn == "prec") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+         xlim=c(0,270),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+  } else if (vn == "dtr" | vn == "tmean") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+         xlim=c(0,100),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+  } else if (vn == "rd") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+         xlim=c(0,500),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+  }
+} else if (metric == "CCOEF2") {
+  if (vn == "rd") {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
+         xlim=c(-1,1),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+  } else {
+    plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
+         xlim=c(-1,1),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+  }
+}
 
 
 ##########
@@ -329,19 +325,6 @@ if (vn != "rd") {
   lines(hsum$XVAL,hc3_all$multi_model_mean,col="blue",lty=2,lwd=0.5)
 }
 grid()
-#legend(x=400,y=20,legend=c("CMIP5","CMIP3"), #PRMSE3 pr
-#legend(x=400,y=29,legend=c("CMIP5","CMIP3"), #PRMSE3 tas
-#legend(x=400,y=10,legend=c("CMIP5","CMIP3"), #PRMSE3 dtr
-legend(x=1700,y=11,legend=c("CMIP5","CMIP3"), #PRMSE3 dtr
-#legend(x=200,y=17,legend=c("CMIP5","CMIP3"), #PRMSE1 pr
-#legend(x=80,y=75,legend=c("CMIP5","CMIP3"), #PRMSE1 tas
-#legend(x=80,y=33,legend=c("CMIP5","CMIP3"), #PRMSE1 dtr
-#legend(x=400,y=12.5,legend=c("CMIP5","CMIP3"), #PRMSE1 rd
-#legend(x=-1,y=20,legend=c("CMIP5","CMIP3"), #CCOEF2 #pr #rd
-#legend(x=-1,y=25,legend=c("CMIP5","CMIP3"), #CCOEF2 tas
-#legend(x=-1,y=13,legend=c("CMIP5","CMIP3"), #CCOEF2 dtr
-       col=c("red","blue"),lty=c(1,1),cex=1.2,
-       box.col="black",box.lwd=1,box.lty=1,bg="white")
 dev.off()
 
 
