@@ -5,7 +5,7 @@
 
 ### overall details
 seas <- "ANN"
-vn <- "tas"
+vn <- "rd"
 
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -139,7 +139,7 @@ if (!file.exists(paste(rdata_dir,"/vi_",seas,"_",vn,"_CMIP5.RData",sep=""))) {
   
   save(list=c("c5_vals","hc5_all"),file=paste(rdata_dir,"/vi_",seas,"_",vn,"_CMIP5.RData",sep=""))
 } else {
-  load(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP5.RData",sep=""))
+  load(paste(rdata_dir,"/vi_",seas,"_",vn,"_CMIP5.RData",sep=""))
 }
 
 #####################################################################
@@ -239,7 +239,7 @@ if (vn != "rd") {
     }
     save(list=c("c3_vals","hc3_all"),file=paste(rdata_dir,"/vi_",seas,"_",vn,"_CMIP3.RData",sep=""))
   } else {
-    load(paste(rdata_dir,"/",metric,"_",seas,"_",vn,"_CMIP3.RData",sep=""))
+    load(paste(rdata_dir,"/vi_",seas,"_",vn,"_CMIP3.RData",sep=""))
   }
 }
 
@@ -277,19 +277,8 @@ tiff(paste(fig_dir,"/shaded_vi_",vn,".tif",sep=""),res=300,height=1500,width=204
 par(mar=c(5,5,1,1))
 
 #options of plots
-if (vn == "prec") {
-  plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Variability index",
-       ylab="pdf (%)",xlim=c(0,5),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-} else if (vn == "tmean") {
-  plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Variability index",
-       ylab="pdf (%)",xlim=c(0,50),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-} else if (vn == "dtr") {
-  plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Variability index",
-       ylab="pdf (%)",xlim=c(50),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
-} else if (vn == "rd") {
-  plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Variability index",ylab="pdf (%)",
-       xlim=c(0,50),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
-}
+plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Variability index",
+     ylab="pdf (%)",xlim=c(0,5),ylim=c(0,100))
 
 
 ##########
