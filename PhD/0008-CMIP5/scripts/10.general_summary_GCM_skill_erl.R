@@ -130,7 +130,7 @@ summarise_proc <- function(this_proc) {
   
   res_met <- data.frame(GCM=gcm,ENS=ens,VAR=vn,P_CCOEF_B05=p_ccoef05,
                         PRMSE1_A40=p_prmse140,PRMSE1_A90=p_prmse190,
-                        PRMSE3_A40=p_prmse340,PRMSE3_A90=p_prmse390)
+                        PRMSE3_A40=p_prmse340,PRMSE3_A90=p_prmse390,VIA_A05=p_via05)
   
   return(res_met)
 }
