@@ -303,6 +303,9 @@ library(ggplot2)
 cmip5Dir <- paste(cmipDir,"/assessment/output-data/_summary_revised2",sep="")
 cmip3Dir <- paste(cmipDir,"/assessment/output-data-cmip3/_summary",sep="")
 
+figDir <- paste(cmip5Dir,"/summ_figs",sep="")
+if (!file.exists(figDir)) {dir.create(figDir)}
+
 #load skill metrics
 c5_mets <- read.csv(paste(cmip5Dir,"/all-plot_data.csv",sep=""))
 c3_mets <- read.csv(paste(cmip3Dir,"/all-plot_data.csv",sep=""))
@@ -333,20 +336,30 @@ c3_gcms <- c("bccr_bcm2_0","cgcm31_t47","cgcm31_t63","cnrm_cm3","csiro_mk30","cs
 pr_c5$GCM <- c5_gcms
 pr_c3$GCM <- c3_gcms
 
-x11()
-ggplot(pr_c5,aes(P_CCOEF_B05, P_CCOEF_A08)) + 
-  geom_point(aes(x=P_CCOEF_B05, y=P_CCOEF_A08, size =  P_VIA_A05),shape=20,colour="grey 50") +
-  #geom_point(aes(x=P_CCOEF_B05, y=P_CCOEF_A08, size =  P_VIA_A05, colour = PRMSE1_B25),shape=16) +
-  #scale_colour_gradient(limits = c(0, 7), low="orange", high="red", breaks= seq(0, 7, by = 1)) +
-  scale_area(range=c(2,15),name="VI>0.5 (%)") +
-  geom_errorbar(aes(ymin = P_CCOEF_A08_N, ymax = P_CCOEF_A08_X), width=0.07) +
-  geom_errorbarh(aes(xmin = P_CCOEF_B05_N, xmax = P_CCOEF_B05_X), height=0.5) +
-  scale_x_continuous("Low correlations ratio (%)", limits = c(-0.1, 7), breaks=seq(0, 7, by = 1)) + 
-  scale_y_continuous("High correlations ratio (%)", limits = c(60, 100), breaks=seq(60, 100, by = 5)) +
+ratio <- 300/72
+
+#x11()
+tiff(paste(figDir,"/pr_summary.tif",sep=""),compression="lzw",
+     units="px",width=800*ratio,height=600*ratio,res=300)
+ggplot(pr_c5,aes(P_CCOEF_B05, PRMSE1_A40)) + 
+  geom_point(aes(x=P_CCOEF_B05, y=PRMSE1_A40, size =  VIA_A05),shape=20,colour="#FF000040") +
+  geom_point(data=pr_c3,aes(x=P_CCOEF_B05, y=PRMSE1_A40, size =  VIA_A05),shape=20,colour="#0000FF32") +
+  scale_size_area(max_size=20,limits=c(1,100),breaks=seq(0, 100, by = 10), name="VI > 0.5 (%)") +
+  geom_errorbar(aes(x=P_CCOEF_B05, ymin = P_PRMSE1_A40_N, ymax = P_PRMSE1_A40_X), width=0.25,size=0.3) +
+  geom_errorbarh(aes(x=P_CCOEF_B05, xmin = P_CCOEF_B05_N, xmax = P_CCOEF_B05_X), height=0.25,size=0.3) +
+  scale_x_continuous("Cases with R < 0.5 (%)", limits = c(15, 60), breaks=seq(0, 100, by = 10)) + 
+  scale_y_continuous("Cases with RMSE_M > 40 % (%)", limits = c(70, 105), breaks=seq(0, 100, by = 10)) +
   theme_bw() +
-  opts(axis.title.x = theme_text(face="bold", size=12),
-       axis.title.y = theme_text(face="bold", size=12, angle=90),
-       legend.text = theme_text(size=12),
-       legend.key = theme_blank()) + # switch off the rectangle around symbols in the legend
+  theme(axis.title.x = element_text(face="bold", size=12),
+        axis.title.y = element_text(face="bold", size=12, angle=90),
+        legend.title = element_text(size=12),
+        legend.text = element_text(size=12),
+        legend.key = element_rect(color="white")) + # switch off the rectangle around symbols in the legend
+  geom_text(x=pr_c5$P_CCOEF_B05[1]+2.1,y=pr_c5$PRMSE1_A40[1],label=pr_c5$GCM[1],size=3) +
+  geom_text(x=pr_c5$P_CCOEF_B05[2]+1.7,y=pr_c5$PRMSE1_A40[2]-.2,label=pr_c5$GCM[2],size=3) +
+  geom_text(x=pr_c5$P_CCOEF_B05[3]-1.4,y=pr_c5$PRMSE1_A40[3]-.4,label=pr_c5$GCM[3],size=3) +
+  geom_text(x=pr_c5$P_CCOEF_B05[4]+1.5,y=pr_c5$PRMSE1_A40[4]-.4,label=pr_c5$GCM[4],size=3) +
+  geom_text(x=pr_c5$P_CCOEF_B05[5]-0.7,y=pr_c5$PRMSE1_A40[5]-0.4,label=pr_c5$GCM[5],size=3) +
+  geom_text(x=pr_c5$P_CCOEF_B05[6],y=pr_c5$PRMSE1_A40[6]+0.5,label=pr_c5$GCM[6],size=3) #+
 dev.off()
 
