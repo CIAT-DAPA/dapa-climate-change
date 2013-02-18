@@ -271,32 +271,32 @@ par(mar=c(5,5,1,1))
 if (metric == "PRMSE3") {
   if (vn == "prec" | vn == "tmean") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",
-         ylab="pdf (%)",xlim=c(0,500),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+         ylab="pdf (%)",xlim=c(0,500),ylim=c(0,50))
   } else if (vn == "dtr") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",
-         ylab="pdf (%)",xlim=c(0,800),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+         ylab="pdf (%)",xlim=c(0,800),ylim=c(0,50))
   } else if (vn == "rd") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by s.d.) (%)",ylab="pdf (%)",
-         xlim=c(0,2000),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+         xlim=c(0,2000),ylim=c(0,50))
   }
 } else if (metric == "PRMSE1") {
   if (vn == "prec") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-         xlim=c(0,270),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+         xlim=c(0,270),ylim=c(0,50))
   } else if (vn == "dtr" | vn == "tmean") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-         xlim=c(0,100),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+         xlim=c(0,100),ylim=c(0,50))
   } else if (vn == "rd") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-         xlim=c(0,500),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+         xlim=c(0,500),ylim=c(0,50))
   }
 } else if (metric == "CCOEF2") {
   if (vn == "rd") {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
-         xlim=c(-1,1),ylim=c(0,max(hsum$C5.MEAN+hsum$C5.SD)))
+         xlim=c(-1,1),ylim=c(0,50))
   } else {
     plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="Correlation coefficient",ylab="pdf (%)",
-         xlim=c(-1,1),ylim=c(0,max(c(hsum$C5.MEAN+hsum$C5.SD,hsum$C3.MEAN+hsum$C3.SD))))
+         xlim=c(-1,1),ylim=c(0,50))
   }
 }
 
