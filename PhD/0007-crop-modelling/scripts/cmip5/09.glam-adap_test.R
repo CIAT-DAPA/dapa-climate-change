@@ -45,7 +45,7 @@ expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 
 #list of GCMs
 gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
-gcmList <- gcmList[1]
+gcmList <- gcmList[4]
 
 ##########################
 #all processes
