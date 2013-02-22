@@ -67,11 +67,11 @@ parsetList <- parsetList$EXPID
 
 #Factor 4: experiments
 #conditionals may be needed inside the final function
-#expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain") #old one
-#expList_rcp <- c("rcp_allin","rcp_bcrain") #old one
+expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain") #old one
+expList_rcp <- c("rcp_allin","rcp_bcrain") #old one
 
-expList_his <- c("his_sh") #new one
-expList_rcp <- c("rcp_del","rcp_sh") #new one
+#expList_his <- c("his_sh") #new one
+#expList_rcp <- c("rcp_del","rcp_sh") #new one
 
 #expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain", "his_sh") #combined one
 #expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh") #combined one
@@ -194,7 +194,7 @@ if (!file.exists(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))) {
 #}
 
 #number of cpus to use
-if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
+if (nrow(groupingList) > 16) {ncpus <- 16} else {ncpus <- nrow(groupingList)}
 
 #here do the parallelisation
 #load library and create cluster
@@ -253,7 +253,7 @@ sfExport("groupingList")
 #eljefe-01 --> 107251:125970
 
 #run the cmip5-run function in parallel, step is 100*195
-system.time(sfSapply(as.vector(107251:125970),run_group_his_rcp))
+system.time(sfSapply(as.vector(92626:96330),run_group_his_rcp))
 
 #stop the cluster
 sfStop()
