@@ -161,7 +161,7 @@ p <- ggplot(ggplotdf, aes(x = ABR, y = RMSE, fill = CMIP)) +
         legend.key = element_rect(color="white")) 
 
 p <- p + geom_vline(xintercept=c(2.5,5.5,7.5,10.5,14.5,18.5,20.5,22.5), 
-                                      colour="grey 50",size=1.5)
+                    colour="grey 50",size=1.5)
 
 ratio <- 300/72
 ### make plot
@@ -300,7 +300,6 @@ tiff(paste(figDir,"/",vn,"_gcm_regional_improvement.tif",sep=""),compression="lz
      units="px",width=1000*ratio,height=600*ratio,res=300)
 print(p2)
 dev.off()
-
 
 
 
