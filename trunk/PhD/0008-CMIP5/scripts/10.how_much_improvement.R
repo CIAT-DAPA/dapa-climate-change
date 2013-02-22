@@ -198,3 +198,26 @@ dev.off()
 
 
 
+
+#############################################################
+#############################################################
+
+regs <- paste(unique(c5_mets$REG))
+vn <- "pr"
+vn2 <- vn
+if (vn == "pr") {vn2 <- "prec"}
+if (vn == "tas") {vn2 <- "tmean"}
+
+this_c5m <- c5_mets[which(c5_mets$VAR == vn),]
+this_c3m <- c3_mets[which(c3_mets$VAR == vn2),]
+
+for (rg in regs) {
+  #rg <- regs[1]
+  rg_data <- 
+  
+}
+
+
+
+
+
