@@ -209,7 +209,7 @@ dev.off()
 #############################################################
 
 regs <- paste(unique(c5_mets$REG))
-vn <- "dtr"
+vn <- "pr"
 vn2 <- vn
 if (vn == "pr") {vn2 <- "prec"}
 if (vn == "tas") {vn2 <- "tmean"}
