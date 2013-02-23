@@ -4,9 +4,9 @@
 
 
 ### overall details
-seas <- "ANN"
-metric <- "PRMSE3"
-vn <- "dtr"
+seas <- "DJF"
+metric <- "CCOEF2"
+vn <- "tas"
 
 #local
 #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -263,7 +263,7 @@ if (nrow(hc5_all) < nrow(hc3_all)) {
 }
 
 #produce the plot
-tiff(paste(fig_dir,"/shaded_",metric,"_",vn,".tif",sep=""),res=300,height=1500,width=2048,
+tiff(paste(fig_dir,"/",seas,"_shaded_",metric,"_",vn,".tif",sep=""),res=300,height=1500,width=2048,
      compression="lzw",pointsize=10)
 par(mar=c(5,5,1,1))
 
