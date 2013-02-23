@@ -30,6 +30,11 @@ source(paste(src.dir2,"/scripts/10.how_much_improvement-functions.R",sep=""))
 cmip5Dir <- paste(mdDir,"/assessment/output-data/_summary_revised2",sep="") #ERL revision
 cmip3Dir <- paste(mdDir,"/assessment/output-data-cmip3/_summary",sep="") #ERL revision
 
+#output directory
+outputDir_c5 <- paste(mdDir,"/assessment/output-data",sep="")
+outputDir_c3 <- paste(mdDir,"/assessment/output-data-cmip3",sep="")
+
+
 #list of gcms
 gcmChars <- read.table(paste(src.dir2,"/data/CMIP5gcms.tab",sep=""),header=T,sep="\t")
 gcmList <- unique(paste(gcmChars$GCM,"_ENS_",gcmChars$Ensemble,sep=""))
@@ -40,11 +45,6 @@ procList <- expand.grid(GCM=gcmList,VAR=vnList)
 #list regions
 regions <- read.table(paste(src.dir2,"/data/regions.tab",sep=""),header=T,sep="\t")
 isoList <- regions$ISO
-
-#output directory
-outputDir_c5 <- paste(mdDir,"/assessment/output-data",sep="")
-outputDir_c3 <- paste(mdDir,"/assessment/output-data-cmip3",sep="")
-
 
 #get the data
 if (!file.exists(paste(cmip5Dir,"/vi-summary_final.RData",sep=""))) {
@@ -97,7 +97,7 @@ rm(all_mets)
 
 #####
 #####
-vn <- "pr"
+vn <- "dtr"
 vn2 <- vn
 if (vn == "pr") {vn2 <- "prec"}
 if (vn == "tas") {vn2 <- "tmean"}
@@ -175,7 +175,7 @@ p <- ggplot(ggplotdf, aes(x = ABR, y = VI, fill = CMIP)) +
                       labels=c("CMIP3", "CMIP5")) +
   scale_x_discrete("Climate model") + 
   scale_y_continuous("Variability Index", limits = c(0, 5), breaks=seq(0, 20, by = 2)) + 
-  #scale_y_continuous("RMSE (Celsius)", limits = c(0, 600), breaks=seq(0, 10, by = 200)) + 
+  #scale_y_continuous("Variability Index", limits = c(0, 10), breaks=seq(0, 20, by = 2)) + 
   theme_bw() +
   theme(axis.text.x=element_text(angle=90,hjust = 1,size=18),
         axis.text.y=element_text(size=18),
@@ -226,6 +226,109 @@ tiff(paste(figDir,"/vi_",vn,"_gcm_improvement_cases.tif",sep=""),compression="lz
      units="px",width=1000*ratio,height=600*ratio,res=300)
 print(p)
 dev.off()
+
+
+
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+
+regs <- paste(unique(c5_mets$REG))
+vn <- "dtr"
+vn2 <- vn
+if (vn == "pr") {vn2 <- "prec"}
+if (vn == "tas") {vn2 <- "tmean"}
+
+this_c5m <- c5_mets[which(c5_mets$VAR == vn),]
+this_c3m <- c3_mets[which(c3_mets$VAR == vn2),]
+
+#loop regions and gcms
+summ_c5 <- data.frame()
+summ_c3 <- data.frame()
+
+for (rg in regs) {
+  #rg <- regs[1]
+  rg5_data <- this_c5m[which(this_c5m$REG == rg),]
+  for (tgcm in unique(rg5_data$GCM)) {
+    #tgcm <- unique(rg5_data$GCM)[1]
+    gcm_data <- rg5_data[which(rg5_data$GCM == tgcm),]
+    gcm_data <- gcm_data[which(!is.na(gcm_data$VI)),]
+    gcm_data <- gcm_data[which(gcm_data$VI < 10000),]
+    nthresh <- length(which(gcm_data$VI > 0.5))/nrow(gcm_data)*100
+    thrdf <- data.frame(REG=rg,CMIP="CMIP5",GCM=tgcm,VI_A05=nthresh)
+    summ_c5 <- rbind(summ_c5,thrdf)
+  }
+  
+  rg3_data <- this_c3m[which(this_c3m$REG == rg),]
+  for (tgcm in unique(rg3_data$GCM)) {
+    #tgcm <- unique(rg3_data$GCM)[1]
+    gcm_data <- rg3_data[which(rg3_data$GCM == tgcm),]
+    gcm_data <- gcm_data[which(!is.na(gcm_data$VI)),]
+    gcm_data <- gcm_data[which(gcm_data$VI < 10000),]
+    nthresh <- length(which(gcm_data$VI > 0.5))/nrow(gcm_data)*100
+    thrdf <- data.frame(REG=rg,CMIP="CMIP3",GCM=tgcm,VI_A05=nthresh)
+    summ_c3 <- rbind(summ_c3,thrdf)
+  }
+}
+
+
+#summary CMIP5
+allsum_c5 <- aggregate(summ_c5$VI_A05,by=list(summ_c5$REG),FUN=mean,na.rm=T)
+names(allsum_c5)[1:2] <- c("REG","VI_A05.MEAN")
+allsum_c5 <- cbind(CMIP="CMIP5",allsum_c5)
+
+allsum_c5_x <- aggregate(summ_c5$VI_A05,by=list(summ_c5$REG),FUN=max,na.rm=T)
+allsum_c5_n <- aggregate(summ_c5$VI_A05,by=list(summ_c5$REG),FUN=min,na.rm=T)
+allsum_c5$VI_A05.MIN <- allsum_c5_n[,2]
+allsum_c5$VI_A05.MAX <- allsum_c5_x[,2]
+
+#summary CMIP3
+allsum_c3 <- aggregate(summ_c3$VI_A05,by=list(summ_c3$REG),FUN=mean,na.rm=T)
+names(allsum_c3)[1:2] <- c("REG","VI_A05.MEAN")
+allsum_c3 <- cbind(CMIP="CMIP3",allsum_c3)
+
+allsum_c3_x <- aggregate(summ_c3$VI_A05,by=list(summ_c3$REG),FUN=max,na.rm=T)
+allsum_c3_n <- aggregate(summ_c3$VI_A05,by=list(summ_c3$REG),FUN=min,na.rm=T)
+allsum_c3$VI_A05.MIN <- allsum_c3_n[,2]
+allsum_c3$VI_A05.MAX <- allsum_c3_x[,2]
+
+
+ggplotdf <- rbind(allsum_c3,allsum_c5)
+ggplotdf <- cbind(REG.CMIP=paste(ggplotdf$REG,ggplotdf$CMIP,sep="."),ggplotdf)
+ggplotdf$CMIP <- factor(ggplotdf$CMIP)
+p <- ggplot(ggplotdf, aes(x = REG.CMIP, y = VI_A05.MEAN, fill = CMIP)) + 
+  geom_bar(width=0.75,stat="identity",size=0.5) + 
+  scale_fill_discrete(name="CMIP\nEnsemble",
+                      breaks=c("CMIP3", "CMIP5"),
+                      labels=c("CMIP3", "CMIP5")) +
+  geom_errorbar(aes(x=REG.CMIP, ymin = VI_A05.MIN, ymax = VI_A05.MAX), width=0.1,size=0.5) +
+  scale_x_discrete("Region") + 
+  scale_y_continuous("Cases with VI > 0.5 (%)", limits = c(0, 100), breaks=seq(0, 100, by = 20)) + 
+  theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_text(size=15),
+        axis.title.x=element_text(size=18),
+        axis.title.y=element_text(size=18),
+        legend.position="right",
+        legend.title = element_text(size=15),
+        legend.text = element_text(size=15),
+        legend.key = element_rect(color="white")) 
+
+p <- p + geom_vline(xintercept=seq(2.5,8.5,length.out=4), 
+                    colour="grey 50",size=1.5)
+p2 <- p + annotate("text",x=1.5,y=100,label="AND",size=8)
+p2 <- p2 + annotate("text",x=3.5,y=100,label="EAF",size=8)
+p2 <- p2 + annotate("text",x=5.5,y=100,label="SAF",size=8)
+p2 <- p2 + annotate("text",x=7.5,y=100,label="SAS",size=8)
+p2 <- p2 + annotate("text",x=9.5,y=100,label="WAF",size=8)
+
+ratio <- 300/72
+tiff(paste(figDir,"/vi_",vn,"_gcm_regional_improvement.tif",sep=""),compression="lzw",
+     units="px",width=1000*ratio,height=600*ratio,res=300)
+print(p2)
+dev.off()
+
 
 
 
