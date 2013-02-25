@@ -194,7 +194,7 @@ if (!file.exists(paste(ENV_CFG$OUT_BDIR,"/_config/config.RData",sep=""))) {
 #}
 
 #number of cpus to use
-if (nrow(groupingList) > 16) {ncpus <- 16} else {ncpus <- nrow(groupingList)}
+if (nrow(groupingList) > 15) {ncpus <- 15} else {ncpus <- nrow(groupingList)}
 
 #here do the parallelisation
 #load library and create cluster
