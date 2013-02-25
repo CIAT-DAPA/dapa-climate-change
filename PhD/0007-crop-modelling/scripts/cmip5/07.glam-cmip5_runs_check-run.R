@@ -59,64 +59,67 @@ CO2Exp <- data.frame(EXP_NAME=c("CO2_p1","CO2_p2","CO2_p3","CO2_p4"),
 CO2ExpList <- CO2Exp$EXP_NAME
 
 #define experiment
-expid <- parsetList[6] #33
+expid <- parsetList[1] #33
 
-#output directories
-out_bdir <- paste(glamDir,"/model-runs/",toupper(cropName),"/runs/",runs_name,sep="")
-out_chkdir <- paste(out_bdir,"/_outputs/checks",sep="")
-if (!file.exists(out_chkdir)) {dir.create(out_chkdir)}
-
-out_chkexp <- paste(out_chkdir,"/exp-",expid,sep="")
-if (!file.exists(out_chkexp)) {dir.create(out_chkexp)}
-
-
-##########################################################
-#loop gcms for given exp
-for (gcm in gcmList) {
-  #gcm <- gcmList[24]
+for (expid in parsetList) {
+  #output directories
+  out_bdir <- paste(glamDir,"/model-runs/",toupper(cropName),"/runs/",runs_name,sep="")
+  out_chkdir <- paste(out_bdir,"/_outputs/checks",sep="")
+  if (!file.exists(out_chkdir)) {dir.create(out_chkdir)}
   
-  cat("\nProcessing GCM:",gcm,"\n")
+  out_chkexp <- paste(out_chkdir,"/exp-",expid,sep="")
+  if (!file.exists(out_chkexp)) {dir.create(out_chkexp)}
   
-  ####
-  #baseline experiments
-  all_proc_his <- expand.grid(LOC=cells$CELL,GCM=gcm,PARSET=parsetList,WTH_TYPE=expList_his)
-  all_proc_his$CO2_P <- "1xCO2"
-  all_proc_his <- cbind(RUNID=1:nrow(all_proc_his),all_proc_his)
-  all_proc_his$RUNID <- paste("HIS_",all_proc_his$RUNID+1e8,sep="")
   
-  #rcp experiments
-  all_proc_rcp <- expand.grid(LOC=cells$CELL,GCM=gcm,PARSET=parsetList,WTH_TYPE=expList_rcp,
-                              CO2_P=CO2ExpList)
-  all_proc_rcp <- cbind(RUNID=1:nrow(all_proc_rcp),all_proc_rcp)
-  all_proc_rcp$RUNID <- paste("RCP_",all_proc_rcp$RUNID+1e8,sep="")
-  
-  #all runs together
-  all_proc <- rbind(all_proc_his,all_proc_rcp)
-  
-  #do some type of grouping. This is done by gridcell, parameter set and GCM
-  groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcm)
-  #this is 3705 processes
-  
-  #output file
-  rfile <- paste(out_chkexp,"/",gcm,".RData",sep="")
-  
-  if (!file.exists(rfile)) {
-    #output of group checking
-    grp_out <- check_group(this_gcm=gcm,this_pst=expid,all_proc,groupingList)
+  ##########################################################
+  #loop gcms for given exp
+  for (gcm in gcmList) {
+    #gcm <- gcmList[24]
     
-    #summarise
-    grp_sum <- summary_check(grp_out,all_proc)
+    cat("\nProcessing GCM:",gcm,"\n")
     
-    #write outputs on a RData file
-    save(list=c("grp_sum","grp_out"),file=rfile)
-  } else {
-    load(rfile)
+    ####
+    #baseline experiments
+    all_proc_his <- expand.grid(LOC=cells$CELL,GCM=gcm,PARSET=parsetList,WTH_TYPE=expList_his)
+    all_proc_his$CO2_P <- "1xCO2"
+    all_proc_his <- cbind(RUNID=1:nrow(all_proc_his),all_proc_his)
+    all_proc_his$RUNID <- paste("HIS_",all_proc_his$RUNID+1e8,sep="")
+    
+    #rcp experiments
+    all_proc_rcp <- expand.grid(LOC=cells$CELL,GCM=gcm,PARSET=parsetList,WTH_TYPE=expList_rcp,
+                                CO2_P=CO2ExpList)
+    all_proc_rcp <- cbind(RUNID=1:nrow(all_proc_rcp),all_proc_rcp)
+    all_proc_rcp$RUNID <- paste("RCP_",all_proc_rcp$RUNID+1e8,sep="")
+    
+    #all runs together
+    all_proc <- rbind(all_proc_his,all_proc_rcp)
+    
+    #do some type of grouping. This is done by gridcell, parameter set and GCM
+    groupingList <- expand.grid(LOC=cells$CELL,PARSET=parsetList,GCM=gcm)
+    #this is 3705 processes
+    
+    #output file
+    rfile <- paste(out_chkexp,"/",gcm,".RData",sep="")
+    
+    if (!file.exists(rfile)) {
+      #output of group checking
+      grp_out <- check_group(this_gcm=gcm,this_pst=expid,all_proc,groupingList)
+      
+      #summarise
+      grp_sum <- summary_check(grp_out,all_proc)
+      
+      #write outputs on a RData file
+      save(list=c("grp_sum","grp_out"),file=rfile)
+    } else {
+      load(rfile)
+    }
+    
+    if (gcm==gcmList[1]) {
+      sum_exp <- grp_sum
+    } else {
+      sum_exp <- rbind(sum_exp,grp_sum)
+    }
   }
-  
-  if (gcm==gcmList[1]) {
-    sum_exp <- grp_sum
-  } else {
-    sum_exp <- rbind(sum_exp,grp_sum)
-  }
+  write.csv(sum_exp,paste(out_chkexp,"/summary.csv",sep=""),row.names=F,quote=T)
 }
-write.csv(sum_exp,paste(out_chkexp,"/summary.csv",sep=""),row.names=F,quote=T)
+
