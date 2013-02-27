@@ -8,7 +8,7 @@
 #metric <- "PRMSE1"
 for (seas in c("DJF","MAM","JJA","SON")) {
   for (metric in c("CCOEF2","PRMSE1","PRMSE3")) {
-    vn <- "dtr"
+    vn <- "rd"
     #local
     #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
     #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"

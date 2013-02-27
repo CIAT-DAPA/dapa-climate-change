@@ -6,7 +6,7 @@
 ### overall details
 seas <- "ANN"
 for (seas in c("DJF","MAM","JJA","SON")) {
-  vn <- "dtr"
+  vn <- "rd"
   
   #local
   #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
@@ -247,8 +247,10 @@ for (seas in c("DJF","MAM","JJA","SON")) {
   ###################################################
   ####### plot
   xval <- hc5_all$XVAL
-  if (nrow(hc5_all) < nrow(hc3_all) & vn != "rd") {
-    xval <- hc3_all$XVAL
+  if (vn != "rd") {
+    if (nrow(hc5_all) < nrow(hc3_all)) {
+      xval <- hc3_all$XVAL
+    }
   }
   
   hc5_all$XVAL <- NULL
