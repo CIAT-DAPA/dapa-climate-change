@@ -8,7 +8,7 @@
 #metric <- "PRMSE1"
 for (seas in c("DJF","MAM","JJA","SON")) {
   for (metric in c("CCOEF2","PRMSE1","PRMSE3")) {
-    vn <- "rd"
+    vn <- "pr"
     #local
     #src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
     #src.dir2 <- "D:/_tools/dapa-climate-change/trunk/PhD/0008-CMIP5"
@@ -283,13 +283,16 @@ for (seas in c("DJF","MAM","JJA","SON")) {
     } else if (metric == "PRMSE1") {
       if (vn == "prec") {
         plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-             xlim=c(0,270),ylim=c(0,50))
-      } else if (vn == "dtr" | vn == "tmean") {
+             xlim=c(0,270),ylim=c(0,15))
+      } else if (vn == "dtr") {
+        plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
+             xlim=c(0,100),ylim=c(0,35))
+      } else if (vn == "tmean") {
         plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
              xlim=c(0,100),ylim=c(0,50))
       } else if (vn == "rd") {
         plot(hsum$XVAL,hsum$C5.MEAN,ty="l",main=NA,xlab="RMSE (normalized by mean) (%)",ylab="pdf (%)",
-             xlim=c(0,500),ylim=c(0,50))
+             xlim=c(0,500),ylim=c(0,20))
       }
     } else if (metric == "CCOEF2") {
       if (vn == "rd") {
