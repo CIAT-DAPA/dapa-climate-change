@@ -79,7 +79,7 @@ rm(all_mets)
 #others C5: bcc_csm1_1, cccma_cancm4, cccma_canesm2, miroc_miroc_esm, miroc_miroc_esm_chem
 
 
-vn <- "rd"
+vn <- "pr"
 vn2 <- vn
 if (vn == "pr") {vn2 <- "prec"}
 if (vn == "tas") {vn2 <- "tmean"}
@@ -89,19 +89,22 @@ this_c3m <- c3_mets[which(c3_mets$VAR == vn2),]
 
 #list of cases where models have changed
 cGCM <- data.frame(CMIP="CMIP5",RES="high",GCM="miroc_miroc4h",ABR="miroc4h")
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="high",GCM="ichec_ec_earth",ABR="ichec_ec_earth"))
+#cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="high",GCM="ichec_ec_earth",ABR="ichec_ec_earth"))
 cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="high",GCM="mri_mri_cgcm3",ABR="mri_cgcm3"))
 cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="high",GCM="ncar_ccsm4",ABR="ncar_ccsm4"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="low",GCM="mohc_hadcm3",ABR="hadcm3"))
+#cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="low",GCM="mohc_hadcm3",ABR="hadcm3"))
 cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="low",GCM="ipsl_ipsl_cm5a_lr",ABR="ipsl_cm5a_lr"))
 cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="low",GCM="ipsl_ipsl_cm5b_lr",ABR="ipsl_cm5b_lr"))
 cGCM <- rbind(cGCM,data.frame(CMIP="CMIP5",RES="low",GCM="bnu_esm",ABR="bnu_esm"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="high",GCM="ingv_echam4",ABR="ingv_echam4"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="high",GCM="miroc3_2_hires",ABR="miroc32_hires"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="high",GCM="ncar_ccsm3_0",ABR="ncar_ccsm3"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="low",GCM="inm_cm3_0",ABR="inm_cm3"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="low",GCM="giss_model_er",ABR="giss_model_er"))
-cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="low",GCM="giss_model_eh",ABR="giss_model_eh"))
+
+if (vn != "rd") {
+  cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="high",GCM="ingv_echam4",ABR="ingv_echam4"))
+  cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="high",GCM="miroc3_2_hires",ABR="miroc32_hires"))
+  cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="high",GCM="ncar_ccsm3_0",ABR="ncar_ccsm3"))
+  cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="low",GCM="inm_cm3_0",ABR="inm_cm3"))
+  cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="low",GCM="giss_model_er",ABR="giss_model_er"))
+  cGCM <- rbind(cGCM,data.frame(CMIP="CMIP3",RES="low",GCM="giss_model_eh",ABR="giss_model_eh"))
+}
 
 #loop through cases to build data for plot
 sub_rawMets <- data.frame()
@@ -136,17 +139,12 @@ ggplotdf <- sub_rawMets
 ggplotdf$CMIP <- factor(ggplotdf$CMIP)
 ggplotdf$RES <- factor(ggplotdf$RES)
 ggplotdf$CMIP_RES <- interaction(ggplotdf$RES, ggplotdf$CMIP)
-p <- ggplot(ggplotdf, aes(x = CMIP_RES, y = RMSE, fill = CMIP)) + 
+p <- ggplot(ggplotdf, aes(x = CMIP_RES, y = RMSE, fill = RES)) + 
   geom_boxplot(outlier.shape=20,outlier.size=0.5,size=0.5) + 
-  scale_fill_discrete(name="CMIP\nEnsemble",
-                      breaks=c("CMIP3", "CMIP5"),
-                      labels=c("CMIP3", "CMIP5")) +
+  scale_fill_discrete(name="Resolution") +
   scale_x_discrete("Ensemble.Resolution") + 
-  #scale_y_continuous("RMSE (Celsius)", limits = c(0, 9.5), breaks=seq(0, 20, by = 2)) + #tas, dtr
-  #scale_y_continuous("RMSE (mm/season)", limits = c(0, 600), breaks=seq(0, 1000, by = 200)) + #pr
-  #scale_y_continuous("RMSE (days/season)", limits = c(0, 80), breaks=seq(0, 100, by = 20)) + #rd
   theme_bw() +
-  theme(axis.text.x=element_text(angle=90,hjust = 1,size=18),
+  theme(axis.text.x=element_blank(),
         axis.text.y=element_text(size=18),
         axis.title.x=element_blank(),
         axis.title.y=element_text(size=18),
@@ -155,7 +153,19 @@ p <- ggplot(ggplotdf, aes(x = CMIP_RES, y = RMSE, fill = CMIP)) +
         legend.text = element_text(size=18),
         legend.key = element_rect(color="white")) 
 
-p <- p + geom_vline(xintercept=c(2.5), colour="grey 50",size=1.5)
+if (vn == "pr") {
+  p <- p + scale_y_continuous("RMSE (mm/season)", limits = c(0, 600), breaks=seq(0, 1000, by = 200))
+  p <- p + geom_vline(xintercept=c(2.5), colour="grey 50",size=1.5)
+  p <- p + annotate("text",x=1.5,y=550,label="CMIP5",size=8)
+  p <- p + annotate("text",x=3.5,y=550,label="CMIP3",size=8)
+} else if (vn == "tas" | vn == "dtr") {
+  p <- p + scale_y_continuous("RMSE (Celsius)", limits = c(0, 9.5), breaks=seq(0, 20, by = 2))
+  p <- p + geom_vline(xintercept=c(2.5), colour="grey 50",size=1.5)
+  p <- p + annotate("text",x=1.5,y=9,label="CMIP5",size=8)
+  p <- p + annotate("text",x=3.5,y=9,label="CMIP3",size=8)
+} else {
+  p <- p + scale_y_continuous("RMSE (days/season)", limits = c(0, 80), breaks=seq(0, 100, by = 20))
+}
 
 ratio <- 300/72
 ### make plot
@@ -187,29 +197,34 @@ ggplotdf <- ggplotdf_m
 ggplotdf$CMIP_RES <- factor(ggplotdf$CMIP_RES)
 if (vn == "rd") {
   ggplotdf$CMIP <- c("CMIP5","CMIP5")
+  ggplotdf$RES <- c("high","low")
 } else {
   ggplotdf$CMIP <- c("CMIP5","CMIP5","CMIP3","CMIP3")
+  ggplotdf$RES <- c("high","low","high","low")
 }
 ggplotdf$CMIP <- factor(ggplotdf$CMIP)
-p <- ggplot(ggplotdf, aes(x = CMIP_RES, y = PRMSE1_A40.MEAN, fill = CMIP)) + 
+ggplotdf$RES <- factor(ggplotdf$RES)
+p <- ggplot(ggplotdf, aes(x = CMIP_RES, y = PRMSE1_A40.MEAN, fill = RES)) + 
   geom_bar(width=0.75,stat="identity",size=0.5) + 
-  scale_fill_discrete(name="CMIP\nEnsemble",
-                      breaks=c("CMIP3", "CMIP5"),
-                      labels=c("CMIP3", "CMIP5")) +
+  scale_fill_discrete(name="Resolution") +
   geom_errorbar(aes(x=CMIP_RES, ymin = PRMSE1_A40.MIN, ymax = PRMSE1_A40.MAX), width=0.1,size=0.5) +
-  scale_x_discrete("Region") + 
+  scale_x_discrete("Ensemble.Resolution") + 
   scale_y_continuous("Cases with RMSE_M > 40 % (%)", limits = c(0, 100), breaks=seq(0, 100, by = 20)) + 
   theme_bw() +
-  theme(axis.text.x=element_text(angle=90,hjust = 1,size=18),
+  theme(axis.text.x=element_blank(),
         axis.text.y=element_text(size=15),
-        axis.title.x=element_text(size=18),
+        axis.title.x=element_blank(),
         axis.title.y=element_text(size=18),
         legend.position="right",
         legend.title = element_text(size=15),
         legend.text = element_text(size=15),
         legend.key = element_rect(color="white")) 
 
-p <- p + geom_vline(xintercept=c(2.5), colour="grey 50",size=1.5)
+if (vn != "rd") {
+  p <- p + geom_vline(xintercept=c(2.5), colour="grey 50",size=1.5)
+  p <- p + annotate("text",x=1.5,y=100,label="CMIP5",size=8)
+  p <- p + annotate("text",x=3.5,y=100,label="CMIP3",size=8)
+}
 
 ratio <- 300/72
 tiff(paste(figDir,"/",vn,"_high_vs_low_cases.tif",sep=""),compression="lzw",
@@ -219,7 +234,79 @@ dev.off()
 
 
 
+#########################################################################
+#########################################################################
+#########################################################################
+#curve of number of cases above threshold
 
+cGCM <- cbind(ID=1:nrow(cGCM),cGCM)
+for (i in cGCM$ID) {
+  #i <- cGCM$ID[1]
+  tgcm <- paste(cGCM$GCM[i])
+  cmip <- paste(cGCM$CMIP[i])
+  tabr <- paste(cGCM$ABR[i])
+  tres <- paste(cGCM$RES[i])
+  
+  if (cmip == "CMIP3") {
+    rawm <- this_c3m[which(this_c3m$GCM == tgcm),]
+  } else {
+    rawm <- this_c5m[which(this_c5m$GCM == tgcm),]
+  }
+  rawm <- cbind(rawm,ABR=tabr,RES=tres)
+  rawm <- rawm[which(!is.na(rawm$PRMSE1)),]
+  
+  this_thdf <- data.frame()
+  for (thresh in seq(0,200,by=5)) {
+    #thresh <- seq(0,100,by=5)[1]
+    nthresh <- length(which(rawm$PRMSE1 > thresh))/nrow(rawm)*100
+    thrdf <- data.frame(THRESH=thresh,VALUE=nthresh)
+    this_thdf <- rbind(this_thdf,thrdf)
+  }
+  names(this_thdf)[2] <- tabr
+  
+  #append result
+  if (i == 1) {
+    threshCurv <- this_thdf
+  } else {
+    threshCurv <- merge(threshCurv,this_thdf,by="THRESH",sort=F)
+  }
+}
+
+
+ratio <- 300/72
+tiff(paste(figDir,"/",vn,"_high_vs_low_curve.tif",sep=""),compression="lzw",
+     units="px",width=1000*ratio,height=800*ratio,res=300,pointsize=18)
+par(mar=c(5,5,1,1),lwd=1.5)
+
+if (vn == "tas") {
+  plot(threshCurv$THRESH,threshCurv$miroc4h,ty="l",xlim=c(0,80),ylim=c(0,100),lwd=1.5,
+       xlab="Threshold of RMSE_M used to discriminate cases (%)",
+       ylab="Cases with RMSE_M above threshold (%)")
+} else if (vn == "dtr") {
+  plot(threshCurv$THRESH,threshCurv$miroc4h,ty="l",xlim=c(0,100),ylim=c(0,100),lwd=2.5,
+       xlab="Threshold of RMSE_M used to discriminate cases (%)",
+       ylab="Cases with RMSE_M above threshold (%)")
+} else if (vn == "pr" | vn == "rd") {
+  plot(threshCurv$THRESH,threshCurv$miroc4h,ty="l",xlim=c(0,200),ylim=c(0,100),lwd=2.5,
+       xlab="Threshold of RMSE_M used to discriminate cases (%)",
+       ylab="Cases with RMSE_M above threshold (%)")
+}
+lines(threshCurv$THRESH,threshCurv$mri_cgcm3,col="black",lwd=2.5)
+lines(threshCurv$THRESH,threshCurv$ncar_ccsm4,col="black",lwd=2.5)
+lines(threshCurv$THRESH,threshCurv$ipsl_cm5a_lr,col="red",lwd=2.5)
+lines(threshCurv$THRESH,threshCurv$ipsl_cm5b_lr,col="red",lwd=2.5)
+lines(threshCurv$THRESH,threshCurv$bnu_esm,col="red",lwd=2.5)
+
+if (vn != "rd") {
+  lines(threshCurv$THRESH,threshCurv$ingv_echam4,col="black",lty=2,lwd=2.5)
+  lines(threshCurv$THRESH,threshCurv$miroc32_hires,col="black",lty=2,lwd=2.5)
+  lines(threshCurv$THRESH,threshCurv$ncar_ccsm3,col="black",lty=2,lwd=2.5)
+  lines(threshCurv$THRESH,threshCurv$inm_cm3,col="red",lty=2,lwd=2.5)
+  lines(threshCurv$THRESH,threshCurv$giss_model_er,col="red",lty=2,lwd=2.5)
+  lines(threshCurv$THRESH,threshCurv$giss_model_eh,col="red",lty=2,lwd=2.5)
+}
+grid()
+dev.off()
 
 
 
