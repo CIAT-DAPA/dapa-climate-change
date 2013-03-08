@@ -5,8 +5,8 @@
 library(raster)
 
 #source directories
-src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+#src.dir <- "D:/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
 source(paste(src.dir,"/cmip5/08.glam-summarise_cmip5_runs-functions.R",sep=""))
 
@@ -17,8 +17,8 @@ runs_name <- "cmip5_all"
 maxiter <- 15 #to grab last optim values
 
 #base and data directories
-bDir <- "W:/eejarv/PhD-work/crop-modelling"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
+#bDir <- "W:/eejarv/PhD-work/crop-modelling"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 glamDir <- paste(bDir,"/GLAM",sep="")
 cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
@@ -29,7 +29,7 @@ cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 
 #experimental set up
 expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain")
-expList_rcp <- c("rcp_allin","rcp_bcrain")
+expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 sdList <- c(-7:7)
 
