@@ -11,10 +11,10 @@ collate_rcp <- function(cells,runsDir,gcm,intype,co2,varNames,expSel,sdList) {
   outDir <- paste(runsDir,"/_outputs/raw_output/",gcm,sep="")
   if (!file.exists(outDir)) {dir.create(outDir,sep="")}
   
-  if (!file.exists(paste(outDir,"/RCP-",intype,"-",co2,"-",gcm,".RData",sep=""))) {
+  if (!file.exists(paste(outDir,"/RCP-",intype,"-",co2,".RData",sep=""))) {
     #output directory
-    outDir <- paste(runsDir,"/_outputs",sep="")
-    if (!file.exists(outDir)) {dir.create(outDir)}
+    #outDir <- paste(runsDir,"/_outputs",sep="")
+    #if (!file.exists(outDir)) {dir.create(outDir)}
     
     #an array for each GCM, co2 parameterisation and input type
     #create an empty array to hold all the information
@@ -30,7 +30,7 @@ collate_rcp <- function(cells,runsDir,gcm,intype,co2,varNames,expSel,sdList) {
                                   cells,rcp_array=out_rcp_data)
     }
     
-    save(list=c("out_rcp_data"),file=paste(outDir,"/RCP-",intype,"-",co2,"-",gcm,".RData",sep=""))
+    save(list=c("out_rcp_data"),file=paste(outDir,"/RCP-",intype,"-",co2,".RData",sep=""))
   }
   return("done!")
 }
