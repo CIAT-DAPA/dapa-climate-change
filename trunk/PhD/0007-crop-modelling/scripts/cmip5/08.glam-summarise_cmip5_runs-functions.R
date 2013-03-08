@@ -106,10 +106,10 @@ collate_his <- function(cells,runsDir,gcm,intype,varNames,expSel) {
   cat("collating",gcm,"and",intype,"\n")
   
   #output directory
-  outDir <- paste(runsDir,"/_outputs",sep="")
-  if (!file.exists(outDir)) {dir.create(outDir)}
+  outDir <- paste(runsDir,"/_outputs/raw_output/",gcm,sep="")
+  if (!file.exists(outDir)) {dir.create(outDir,sep="")}
   
-  if (!file.exists(paste(outDir,"/HIS-",intype,"-",gcm,".RData",sep=""))) {
+  if (!file.exists(paste(outDir,"/HIS-",intype,".RData",sep=""))) {
     #create an empty array to hold all the information
     out_his_data <- array(data=NA,
                           dim=c(nrow(cells),length(expSel),2,28,length(varNames)),
@@ -122,7 +122,7 @@ collate_his <- function(cells,runsDir,gcm,intype,varNames,expSel) {
                                   inputType=intype,cells,his_array=out_his_data)
     }
     
-    save(list=c("out_his_data"),file=paste(outDir,"/HIS-",intype,"-",gcm,".RData",sep=""))
+    save(list=c("out_his_data"),file=paste(outDir,"/HIS-",intype,".RData",sep=""))
   }
   return("done!")
 }
