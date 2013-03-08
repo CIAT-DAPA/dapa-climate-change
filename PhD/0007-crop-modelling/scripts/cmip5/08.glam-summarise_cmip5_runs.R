@@ -28,7 +28,7 @@ runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
 cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 
 #experimental set up
-expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain")
+expList_his <- c("his_allin","his_norain","his_notemp","his_nosrad","his_bcrain","his_sh")
 expList_rcp <- c("rcp_allin","rcp_bcrain","rcp_del","rcp_sh")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 sdList <- c(-7:7)
@@ -39,12 +39,13 @@ expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 
 #list of GCMs
 gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
+gcmList <- gcmList[-c(24,25)] #remove miroc models with failed simulations
 
 #list of variables of interest
 varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
               "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD")
 
-i <- 1
+i <- 4
 
 #summarise everything in here
 #maybe parallelise stuff
