@@ -8,7 +8,7 @@ collate_rcp <- function(cells,runsDir,gcm,intype,co2,varNames,expSel,sdList) {
   cat("collating",gcm,"and",intype,"and",co2,"\n")
   
   #output directory
-  outDir <- paste(runsDir,"/_outputs/raw_output",sep="")
+  outDir <- paste(runsDir,"/_outputs/raw_output/",gcm,sep="")
   if (!file.exists(outDir)) {dir.create(outDir,sep="")}
   
   if (!file.exists(paste(outDir,"/RCP-",intype,"-",co2,"-",gcm,".RData",sep=""))) {
