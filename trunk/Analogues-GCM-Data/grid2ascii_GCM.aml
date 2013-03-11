@@ -33,7 +33,7 @@
 		&amlpath .
 		&s basedir [show &amlpath]
 
-		&s outfolder %outputfolder%
+		&s outfolder %outputfolder%\_asciis
 		&if not [exists %outfolder% -dir] &then &sys md %outfolder%
 
 		
@@ -41,7 +41,7 @@
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		
-		&s gridlist [listfile %inputfolder%\* -grid %outfolder%\listgrids.list]
+		&s gridlist [listfile %inputfolder%\prec_12* -grid %outfolder%\listgrids.list]
 		&s openlist [OPEN %outfolder%\listgrids.list OPENSTATUS -READ]
 		
 		&if %OPENSTATUS% NE 0 &then
@@ -66,7 +66,7 @@
 					
 					&if [locase %switch%] EQ yes &then
 						&do
-							&sys 7za a %outfolder%\cccma_cgcm3_1_t47_sres_a1b_2020s_%vartype%_2_5min_no_tile_asc.zip %outfolder%\%gridname%.asc
+							&sys 7za a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 						&end
