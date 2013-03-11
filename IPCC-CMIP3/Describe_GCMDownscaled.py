@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Describe_GCMDownscaled.py M:\climate_change\IPCC_CMIP3\ F:\climate_change\IPCC_CMIP3\ 30s disaggregated YES"
+	print "   - ie: python Describe_GCMDownscaled.py M:\climate_change\IPCC_CMIP3\ A1B F:\climate_change\IPCC_CMIP3\ 30s disaggregated YES"
 	print "   Syntax	: <code.py>, <dirbase>, <scenario>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"
@@ -23,7 +23,7 @@ if len(sys.argv) < 6:
 
 #Set variables 
 dirbase = sys.argv[1]
-#scenario = sys.argv[2]
+scenario = sys.argv[2]
 dirout = sys.argv[2]
 resolution = sys.argv[3]
 type = sys.argv[4]
@@ -39,60 +39,60 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 #Get lists of scenarios and models
 periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
-scenariolist = "A1B", "A2", "B1"
+
 
 #Creation out describe txt file
-
 diroutDescribe = dirout + "\\_describes"
 if not os.path.exists(diroutDescribe):
     os.system('mkdir ' + diroutDescribe)
 
-for scenario in scenariolist:
+txtDescribe = diroutDescribe + "\\SRES_" + scenario + "_" + type + "_" + str(resolution) + ".txt"
+if os.path.isfile(txtDescribe):
+	outFile = open(txtDescribe, "a")
+else:
+	outFile = open(txtDescribe, "w")
+outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
 
-	txtDescribe = diroutDescribe + "\\SRES_" + scenario + "_" + type + "_" + str(resolution) + ".txt"
-	if os.path.isfile(txtDescribe):
-		outFile = open(txtDescribe, "a")
-	else:
-		outFile = open(txtDescribe, "w")
-	outFile.write("SCENARIO" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "CELLSIZE" + "\n")
+modellist = sorted(os.listdir(dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
 
-	modellist = sorted(os.listdir(dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
-	
-	for model in modellist:
+for model in modellist:
 
-		for period in periodlist:
+	for period in periodlist:
 
-			if not os.path.exists(diroutDescribe + "\\"	+ "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period):
-				#Set workspace
-				gp.workspace = dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-				print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\n"
+		if not os.path.exists(diroutDescribe + "\\"	+ "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period):
+			#Set workspace
+			gp.workspace = dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+			print "\n---> Processing: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\n"
 
-				#Get a list of raster into the workspace
-				rasters = sorted(gp.ListRasters("", "GRID"))
-				for raster in rasters:
-					print "  Describing " + raster
-					MIN = gp.GetRasterProperties_management(raster, "MINIMUM")
-					MAX = gp.GetRasterProperties_management(raster, "MAXIMUM")
-					MEA = gp.GetRasterProperties_management(raster, "MEAN")
-					STD = gp.GetRasterProperties_management(raster, "STD")
-					CEX = gp.GetRasterProperties_management(raster, "CELLSIZEX")
-					#Write txt describe file
-					outFile = open(txtDescribe, "a")
-					outFile.write(scenario + "\t" + model + "\t" + period + "\t" + raster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
+			#Get a list of raster into the workspace
+			rasters = sorted(gp.ListRasters("", "GRID"))
+			for raster in rasters:
+				
+				print "  Describing " + raster
+				MIN = gp.GetRasterProperties_management(raster, "MINIMUM")
+				MAX = gp.GetRasterProperties_management(raster, "MAXIMUM")
+				MEA = gp.GetRasterProperties_management(raster, "MEAN")
+				STD = gp.GetRasterProperties_management(raster, "STD")
+				CEX = gp.GetRasterProperties_management(raster, "CELLSIZEX")
+				
+				#Write txt describe file
+				outFile = open(txtDescribe, "a")
+				outFile.write(scenario + "\t" + model + "\t" + period + "\t" + raster + "\t" + MIN.getoutput(0) + "\t" + MAX.getoutput(0) + "\t" + MEA.getoutput(0) + "\t" + STD.getoutput(0) + "\t" + CEX.getoutput(0) + "\n")
 
-					if graph == "YES":
-						#Creating Graph of rater dataset
+				if graph == "YES":
+					
+					#Creating Graph of rater dataset
+					print "  Creating graph for " + raster
+					diroutGraph = diroutDescribe + "\\"	+ "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+					if not os.path.exists(diroutGraph):
+						os.system('mkdir ' + diroutGraph)
 
-						print "  Creating graph for " + raster
-						diroutGraph = diroutDescribe + "\\"	+ "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-						if not os.path.exists(diroutGraph):
-							os.system('mkdir ' + diroutGraph)
+					graphOut =  diroutGraph + "\\" + raster + ".jpeg"
+					os.system("gdal_translate -of JPEG -outsize 2% 2% " + gp.workspace + "\\" + raster + " " + graphOut )
 
-						graphOut =  diroutGraph + "\\" + raster + ".jpeg"
-						os.system("gdal_translate -of JPEG -outsize 2% 2% " + gp.workspace + "\\" + raster + " " + graphOut )
-
-			else:
-				print "\n---> Procesed: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
+		else:
+			
+			print "\n---> Procesed: " + dirbase + "SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
 outFile.close()
 
