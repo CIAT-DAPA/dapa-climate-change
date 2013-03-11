@@ -45,26 +45,25 @@ gcmList <- gcmList[-c(24,25)] #remove miroc models with failed simulations
 varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
               "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD")
 
-i <- 4
-
-#summarise everything in here
-#maybe parallelise stuff
-##########################################################################
-######### BASELINE DATA
-for (n in 1:length(expList_his)) {
-  stat <- collate_his(cells,runsDir,gcm=gcmList[i],intype=expList_his[n],varNames,expSel)
-}
-
-
-##########################################################################
-######### PROJECTION DATA
-for (n in 1:length(expList_rcp)) {
-  for (z in 1:length(CO2ExpList)) {
-    stat <- collate_rcp(cells,runsDir,gcm=gcmList[i],intype=expList_rcp[n],co2=CO2ExpList[z],
-                        varNames,expSel,sdList)
+for (i in 21:32) {
+  #summarise everything in here
+  #maybe parallelise stuff
+  ##########################################################################
+  ######### BASELINE DATA
+  for (n in 1:length(expList_his)) {
+    stat <- collate_his(cells,runsDir,gcm=gcmList[i],intype=expList_his[n],varNames,expSel)
+  }
+  
+  
+  ##########################################################################
+  ######### PROJECTION DATA
+  for (n in 1:length(expList_rcp)) {
+    for (z in 1:length(CO2ExpList)) {
+      stat <- collate_rcp(cells,runsDir,gcm=gcmList[i],intype=expList_rcp[n],co2=CO2ExpList[z],
+                          varNames,expSel,sdList)
+    }
   }
 }
-
 
 ##########################################################################
 ##########################################################################
