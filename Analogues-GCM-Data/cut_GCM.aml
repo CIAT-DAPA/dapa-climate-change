@@ -1,3 +1,7 @@
+/* &r cut_GCM.aml S:\data\gcm\cmip3\downscaled\sres_a2\Global_30s\ncar_pcm1\2020_2049 S:\data\portals\analogues-gcm-data\ExtractByCountry\SRES_A2\arm_30s\ncar_pcm1\2020_2049 S:\data\admin_boundaries\GRID_files\arm_adm\arm0 NO
+/* &r cut_GCM.aml S:\data\gcm\cmip3\downscaled\sres_a2\Global_30s\csiro_mk3_5\2020_2049 S:\data\portals\analogues-gcm-data\ExtractByCountry\SRES_A2\rwa_30s\csiro_mk3_5\2020_2049 S:\data\admin_boundaries\GRID_files\rwa_adm\rwa0 NO
+/* &r cut_GCM.aml S:\data\gcm\cmip3\downscaled\sres_a2\Global_30s\\cnrm_cm3\2020_2049 S:\data\portals\analogues-gcm-data\ExtractByCountry\SRES_A2\ton_30s\\cnrm_cm3\2020_2049 S:\data\admin_boundaries\GRID_files\ton_adm\ton0 NO
+
 /* &r cut_GCM.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_30s\bccr_bcm2_0\2020_2049 F:\Analogues_GCM_data\ExtractByCountry\SRES_A1B\downscaled\esh_30s\bccr_bcm2_0\2020_2049 F:\Analogues_GCM_data\Administrative_boundaries\GRID_files\esh_adm\esh0 NO
 &args inputfolder outputfolder mask switch 
 &terminal 9999

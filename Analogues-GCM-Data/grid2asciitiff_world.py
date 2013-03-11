@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 # if len(sys.argv) < 1:
 	# os.system('cls')
 	# print "\n Too few args"
-	# print "   - ie: python grid2ascii-tiff.py E:\workspace\Analogues_GCM_data\ExtractWorld_tiles E:\workspace\Analogues_GCM_data\ExtractWorld_tiles Global a2 2020_2049 2_5min YES"
+	# print "   - ie: python grid2asciitiff_world.py G:\jtarapues\Global\tile_global G:\jtarapues\tile_global Global a2 2020_2049 2_5min YES"
 	# sys.exit(1)
 
 #Set variables
@@ -48,7 +48,7 @@ for model in modellist:
 			
 			gp.workspace = dirbase + "\\SRES_" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + period + "\\" + var
 			
-			print "\n --> Processing: " + country,sres,model,period,var,"\n"
+			print "\n --> Processing: " + gp.workspace, country,sres,model,period,var,"\n"
 			
 			diroutAscii = dirout + "\\SRES_" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + period + "\\" + var + "_asciis"
 			if not os.path.exists(diroutAscii):
@@ -59,8 +59,10 @@ for model in modellist:
 				os.system('mkdir ' + diroutTiff)
 			
 			if var == "bio":
-				rasters = gp.ListRasters("*", "GRID")
+				
+				rasters = gp.ListRasters("bio*", "GRID")
 				for raster in rasters:
+					print raster
 					
 					if model == "current":
 						OutAscii = diroutAscii + "\\" + model + "_" + raster + "_1.asc"
@@ -74,7 +76,7 @@ for model in modellist:
 						gp.RasterToASCII_conversion(raster, OutAscii)
 					if not gp.Exists(OutTiff):
 						os.system("gdal_translate -of GTiff -ot Int32 -co COMPRESS=lzw -quiet " + gp.workspace + "\\" + raster + " " + OutTiff)
-						gp.delete_management(raster)
+						# gp.delete_management(raster)
 
 				trashList = sorted(glob.glob(diroutAscii + "\\*.prj"))
 				for trashfile in trashList:

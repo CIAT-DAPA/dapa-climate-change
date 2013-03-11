@@ -1,0 +1,54 @@
+/* &r dtr_calc_GCM.aml S:\data\portals\analogues-gcm-data\ExtractByCountry\SRES_A1B
+&args rootdir 
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&messages &off
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+&if [show program] NE GRID &then GRID
+
+
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+&ty          /\/\/\/\/\/\/DTR CALC GCM/\/\/\/\/\/\
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	
+&s countrylist [listfile %rootdir%\* -dir %rootdir%\listcountries_1.list]
+&s openlist [OPEN %rootdir%\listcountries_1.list OPENSTATUS -READ]
+
+&if %OPENSTATUS% NE 0 &then
+	&do
+		&ty The file %outputdir%\listcountries.list does not exist or cannot be opened
+		&return
+	&end
+&else
+
+	&do nc = 1 &to %countrylist%
+		
+		&s countryname [READ %openlist% READSTATUS]
+		&s modellist [listfile %rootdir%\%countryname%\* -dir]
+		&s nmodels [token %modellist% -count]
+				
+		&do md = 1 &to %nmodels%
+			
+			&s modname [extract %md% %modellist%]
+			&if %modname% EQ current &then &s inputdir %rootdir%\%countryname%\%modname%
+			&else &s inputdir %rootdir%\%countryname%\%modname%\2020_2049
+			
+			&ty
+			&ty Calculating %modname% %countryname%
+			
+			&do month = 1 &to 12
+				
+				&ty
+				&ty   -> .Processing dtr_%month%
+				
+				&if not [exists %inputdir%\dtr_%month% -grid] &then %inputdir%\dtr_%month% = %inputdir%\tmax_%month% - %inputdir%\tmin_%month% 
+			&end
+		&end
+	&end
+	&if [exists %rootdir%\listcountries_1.list -file] &then &sys del %rootdir%\listcountries_1.list
+
+&ty
+&ty Process done!

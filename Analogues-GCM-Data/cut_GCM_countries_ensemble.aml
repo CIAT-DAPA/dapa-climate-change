@@ -1,0 +1,76 @@
+/* &r cut_GCM_countries_ensemble.aml S:\data\gcm\cmip3\downscaled\ensemble\sres_a2 S:\data\admin_boundaries\grid_files G:\jtarapues\data 30s NO
+&args rootdir admdir outputdir resol switch
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&if %resol% EQ 30s &then &s inputdir %rootdir%\Global_30s
+&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\Global_2_5min
+&else &if %resol% EQ 5min &then &s inputdir %rootdir%\Global_5min
+&else &s inputdir %rootdir%\Global_10min
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+&ty          /\/\/\/\/\/CUT GCM ANALOGUES/\/\/\/\/
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	
+&s modellist [listfile %inputdir%\* -dir]
+&s nmodels [token %modellist% -count]
+
+&if not [exists %outputdir% -dir] &then &sys md %outputdir%
+	
+&s countrylist [listfile %outputdir%\* -dir %outputdir%\listcountries_2.list]
+
+
+&s openlist [OPEN %outputdir%\listcountries_2.list OPENSTATUS -READ]
+
+&if %OPENSTATUS% NE 0 &then
+	&do
+		&ty
+		&ty The file %outputdir%\listcountries_2.list does not exist or cannot be opened
+		&return
+	&end
+&else
+
+	&do nc = 1 &to %countrylist%
+
+		&s countryname [READ %openlist% READSTATUS]
+		&s country [before %countryname% _]
+		
+		&s mask %admdir%\%country%_adm\%country%0
+		
+		&if %resol% EQ 30s &then &s outdir %outputdir%\%country%_30s
+		&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\%country%_2_5min
+		&else &if %resol% EQ 5min &then &s outdir %outputdir%\%country%_5min
+		&else &s outdir %outputdir%\%country%_10min
+		
+		&if not [exists %outdir% -dir] &then &sys md %outdir%
+		
+		/* &do md = 1 &to %nmodels%
+		/* &s modname [extract %md% %modellist%]
+		&s modname = ensemble
+			&do year &list 2020_2049 /* 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+				
+				&ty
+				&ty Extracting %modname% %country% (%year%, %resol%)
+				
+				&if not [exists %outdir%\%modname%\%year% -dir] &then &sys md %outdir%\%modname%\%year%
+				
+				/* &if not [exists %outputdir%\%country%_CutGridGCMCountries_done.txt -file] &then
+				&do
+					&r cut_GCM.aml %inputdir%\%year% %outdir%\%modname%\%year% %mask% %switch%
+					&if [exists %outdir%\%modname%\%year%\listgrids.list -file] &then &sys del %outdir%\%modname%\%year%\listgrids.list
+				&end
+			&end			
+		/* &end
+		/* &s verfile [listfile %outdir%\%modname%\%year%\* -grid %outputdir%\%country%_CutGridGCMCountries_done.txt]
+	&end
+
+
+&ty
+&ty Process done!
