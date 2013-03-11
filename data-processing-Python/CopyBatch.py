@@ -1,57 +1,43 @@
 import os, sys, glob, string, shutil
-#python copy.py O:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled\Global_2_5min H:\Downscaled_2_5min_A1B_2050s_allmodels_global
+# # python CopyBatch.py N:\climate_change\IPCC_CMIP3\SRES_B1\downscaled\Global_30s S:\data\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat\sres_b1
+
+# # periodDc = {"2010_2039": "2020s", "2020_2049": "2030s", "2030_2059": "2040s", "2040_2069": "2050s", "2050_2079": "2060s", "2060_2089": "2070s", "2070_2099": "2080s"}
+# # dirbase = sys.argv[1]
+# # dirout = sys.argv[2]
+# # modellist = "inm_cm3_0", "ipsl_cm4", "miroc3_2_hires", "miroc3_2_medres", "miub_echo_g", "mpi_echam5", "mri_cgcm2_3_2a", "ncar_ccsm3_0", "ukmo_hadcm3"
+
+# # for model in modellist:
+	# # for period in periodDc:
+		# # indir = dirbase + "\\" + model + "\\" + period + "\\_asciis"
+		# # if os.path.exists(indir):
+			# # outdir = dirout + "\\" + periodDc[period] + "\\" + model + "\\30s" 
+			# # print indir, outdir
+			# # os.system("robocopy " + indir + " " + outdir + " /z /e")
+		
+		
+	
+	
+# Para renombrar los archivos
+#python CopyBatch.py S:\data\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat 
 
 dirbase = sys.argv[1]
-dirout = sys.argv[2]
-
-# dirbase = sys.argv[1]
-# dirout = sys.argv[2]
-# modellist = "ncar_ccsm3_0", "miroc3_2_hires", "mpi_echam5", "ukmo_hadgem1", "gfdl_cm2_0"
-# periodlist = "2010_2039", "2040_2069", "2070_2099"
 # sreslist = sorted(os.listdir(dirbase))
 # for sres in sreslist:
-	# # modellist = sorted(os.listdir(dirbase + "\\" + sres + "\\downscaled\\Global_10min"))
-	# for model in modellist:
-		# for period in periodlist:
-			# indir = dirbase + "\\" + sres + "\\downscaled\\Global_5min\\" + model + "\\" + period + "\\_asciis"
-			# outdir = dirout + "\\" + sres + "\\" + model + "\\" + period
-			# if not os.path.exists(outdir):
-				# os.system('mkdir ' + outdir)
-			# os.system("robocopy " + indir + " " + outdir + " /Z /E /XF *_asc.zip*")
-
-
-modellist = sorted(os.listdir(dirbase))
-for model in modellist:
-	print dirbase + "\\" + str(model) + "\n"
-	if not os.path.exists(dirout + "\\" + str(model) + "\\2040_2069\\_asciis"):
-		os.system('mkdir ' + dirout + "\\" + str(model) + "\\2040_2069\\_asciis")
-		os.system("robocopy " +  dirbase + "\\" + str(model) + "\\2040_2069\\_asciis " + dirout + "\\" + str(model)+ "\\2040_2069\\_asciis /Z /E /XF *grd.zip*")
-	# # periodlist = sorted(os.listdir(dirbase + "\\" + str(model)))
-	# # for period in periodlist:
-		# # print dirbase + "\\" + str(model) + "\\" + str(period) + "\n"
-		# # shutil.copytree(dirbase + "\\" + str(model) + "\\" + str(period), dirout + "\\" + str(model) + "\\" + str(period))
-		# # # variablelist = sorted(os.listdir(dirbase + "\\" + str(model) + "\\" + str(period)))
-		# # for variable in variablelist:
-			# # if not variable == "_asciis" and not str(variable) == "*.aux":
-				# # shutil.copytree(dirbase + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable), dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable))
-				
-				# # # filelist = sorted(glob.glob(dirbase + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\*"))
-				# # # if not os.path.exists(dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable)):
-					# # # os.system('mkdir ' + dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable))
-					# # # for file in filelist:
-						# # # if not os.path.exists(dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\" + os.path.basename(file)):
-							# # # print file + " ---> " + dirout + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\" + os.path.basename(file)
-							# # # shutil.copyfile(file, dirout + "\\" + "\\" + str(model) + "\\" + str(period) + "\\" + str(variable) + "\\" + os.path.basename(file))
-							
-
-							
-# python copy.py K:\CCAFS\climate-data-assessment\comparisons\input-data\gsod-weather-stations D:\Workspace\Jagath\gsod_daily_stations
-
-# dirbase = sys.argv[1]
-# dirout = sys.argv[2]
-
-# for year in range(1975, 1990 + 1, 1):
-	# for file in filelist:
-		# if os.path.exists(dirbase + "\\" + str(year) + "\\formatted\\stations\\" + str(file) + "-99999-" + str(year) + ".op.gz.csv"):
-			# print "Copying " + str(year) + " " + file
-			# shutil.copyfile(dirbase + "\\" + str(year) + "\\formatted\\stations\\" + str(file) + "-99999-" + str(year) + ".op.gz.csv", dirout + "\\" + str(year) + "_GSOD" + str(file) + ".csv")
+sres = "sres_b1"
+periodlist = sorted(os.listdir(dirbase + "\\" + sres))
+for period in periodlist:
+	# modelist = sorted(os.listdir(dirbase + "\\" + sres + "\\" + period))
+	modellist = "ipsl_cm4", "miroc3_2_hires", "miroc3_2_medres", "miub_echo_g", "mpi_echam5", "mri_cgcm2_3_2a", "ncar_ccsm3_0", "ukmo_hadcm3"
+	for model in modellist:
+		# resolutions = sorted(os.listdir(dirbase + "\\" + sres + "\\" + period + "\\" + model))
+		# for res in resolutions:
+		res = "30s"
+		indir = dirbase + "\\" + sres + "\\" + period + "\\" + model + "\\" + res
+		filelist = sorted(glob.glob(indir + "\\*"))
+		for file in filelist:
+			var = os.path.basename(file).split("_")[0]
+			format = os.path.basename(file).split("_")[1]
+			filenamemod = model + "_" + sres + "_" + period + "_" + var + "_" + res + "_no_tile_" + format
+			
+			print "Renaming ", filenamemod
+			os.rename(file, dirbase + "\\" + sres + "\\" + period + "\\" + model + "\\" + res + "\\" + filenamemod)
