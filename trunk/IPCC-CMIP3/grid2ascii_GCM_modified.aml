@@ -66,7 +66,7 @@
 					
 					&if [locase %switch%] EQ yes &then
 						&do
-							&sys 7za a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
+							&sys 7za a -mmt8 %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 						&end
@@ -94,29 +94,32 @@
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
 
 &s finalfolder %outcopyfolder%\_asciis
-&if not [exists %finalfolder% -dir] &then &sys md %finalfolder%
+/* &if not [exists %finalfolder% -dir] &then &sys md %finalfolder%
 
 &ty
 &ty   -> .Now copying...
 
-&s copystat [COPY %outfolder%\bio_asc.zip %finalfolder%\bio_asc.zip]
-&s copystat [COPY %outfolder%\cons_asc.zip %finalfolder%\cons_asc.zip]
-&s copystat [COPY %outfolder%\prec_asc.zip %finalfolder%\prec_asc.zip]
-&s copystat [COPY %outfolder%\tmax_asc.zip %finalfolder%\tmax_asc.zip]
-&s copystat [COPY %outfolder%\tmean_asc.zip %finalfolder%\tmean_asc.zip]
-&s copystat [COPY %outfolder%\tmin_asc.zip %finalfolder%\tmin_asc.zip]
+&sys robocopy %outfolder% %finalfolder% /z /e
+/* &s copystat [COPY %outfolder%\bio_asc.zip %finalfolder%\bio_asc.zip]
+/* &s copystat [COPY %outfolder%\cons_asc.zip %finalfolder%\cons_asc.zip]
+/* &s copystat [COPY %outfolder%\prec_asc.zip %finalfolder%\prec_asc.zip]
+/* &s copystat [COPY %outfolder%\tmax_asc.zip %finalfolder%\tmax_asc.zip]
+/* &s copystat [COPY %outfolder%\tmean_asc.zip %finalfolder%\tmean_asc.zip]
+/* &s copystat [COPY %outfolder%\tmin_asc.zip %finalfolder%\tmin_asc.zip]
 
-&if %copystat% EQ 0 &then 
-	&do
-		&ty
-		&ty   -> .Successfully copy!
-		&s delstat [DELETE %outputfolder% -DIRECTORY]
-	&end
-&else
-	&do
-		&ty   An error occurred during calculations, bailing out...
-		&return
-	&end
+&s delstat [DELETE %outputfolder% -DIRECTORY]
+
+/* &if %copystat% EQ 0 &then 
+	/* &do
+		/* &ty
+		/* &ty   -> .Successfully copy!
+		/* &s delstat [DELETE %outputfolder% -DIRECTORY]
+	/* &end
+/* &else
+	/* &do
+		/* &ty   An error occurred during calculations, bailing out...
+		/* &return
+	/* &end
 
 &ty
 &ty Process done!

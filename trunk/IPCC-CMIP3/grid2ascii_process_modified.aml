@@ -1,3 +1,4 @@
+/* &r grid2ascii_process_modified.aml S:\gcm\cmip3\disaggregated\sres_a1b F:\cenavarro\climate_change\grid2ascii_disaggregated_process\sres_a1b  S:\gcm\cmip3\disaggregated\sres_a1b 30s
 &args rootdir outputdir copyfolder resol
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
