@@ -245,7 +245,7 @@ suitFun_sowVar <- function(dataPixel,params) {
       end.month <- i + Gdur - 1
       
       ecotf <- rep(NA, 12)
-      ecot <- rep(NA, Gavg)
+      ecot <- rep(NA, 12)
       ecot[1] <- 1
       ecopf <- rep(NA, 12)
       mthCounter <- 1
