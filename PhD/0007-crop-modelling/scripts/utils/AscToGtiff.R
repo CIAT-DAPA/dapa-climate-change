@@ -145,6 +145,32 @@ for (method in c("fou","lin","loe","qua","raw")) {
 }
 
 
+
+###################################
+#### WHEATQUMP
+###################################
+cropName <- "wheatqump"
+cropDir <- paste(bDir,"/GLAM/climate-signals-yield/",toupper(cropName),sep="")
+
+#compressing base grids
+bgDir <- paste(cropDir,"/0_base_grids",sep="")
+AsctoGTiff(bgDir)
+
+#Sacks et al. (2010) crop calendar
+calDir <- paste(cropDir,"/calendar/wwin",sep=""); AsctoGTiff(calDir)
+calDir <- paste(cropDir,"/calendar/wunk",sep=""); AsctoGTiff(calDir)
+
+#Areas, yields and production summaries
+smDir <- paste(cropDir,"/raster/summaries",sep="")
+AsctoGTiff(smDir)
+
+#yearly detrended high-resolution yield rasters
+for (method in c("fou","lin","loe","qua","raw")) {
+  yyDir <- paste(cropDir,"/raster/yearly/",method,sep="")
+  AsctoGTiff(yyDir)
+}
+
+
 ##############################################################################
 ##############################################################################
 #Function to process everything into a folder
