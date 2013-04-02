@@ -7,15 +7,16 @@ import os, sys, string, csv
 from csv import writer as csvwriter, reader as cvsreader
 
 #Syntax 
-if len(sys.argv) < 2:
+if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python read-ideam-daily.py S:\observed\weather_station\ideam-col\raw-daily\Meta2-Diarios.txt S:\observed\weather_station\ideam-col\organized-data-daily"
+	print "   - ie: python read-ideam-daily.py S:\data\observed\weather_station\ideam-col\raw-daily\Meta2-Diarios.txt S:\data\observed\weather_station\ideam-col\organized-data-daily ideam_stations"
 	sys.exit(1)
 
 #Set variables 
 infile = sys.argv[1]
 dirout = sys.argv[2]
+summary = sys.argv[3]
 if not os.path.exists(dirout):
     os.system('mkdir ' + dirout)
 
@@ -105,10 +106,13 @@ for line in file:
 					data = line[initcol:endcol]
 			
 					## NA data
-					if data == "     " or data == "  +  " or data is None or len(data) == 0:
+					if data == "     " or data == "  +  " or data[0:3] == "  +" or data is None or len(data) == 0:
 						val = "NA"
 					else:
-						val = float(data)
+						if var == "wsmean":
+							val = str(data)
+						else:
+							val = float(data)
 					
 					## Include leap-year
 					if int(year) % 400 == 0 or int(year) % 4 == 0:
@@ -129,18 +133,26 @@ for line in file:
 		wFile.close()
 	
 		## Write catalog file
-		catFile = dirout + "\\ideam_" + var + "_stations.txt"
-		infoSta = stNumber + "\t" + stName[:-1] + "\t" + lat + "\t" + lon + "\t" + elev + "\t" + stType + "\t" + dept + "\t" + mun + "\t" + insDate + "\t" + susDate + "\n"
+		catFile = dirout + "\\" + summary + ".txt"
+		infoSta = stNumber + "\t" + stName[:-1] + "\t" + lat + "\t" + lon + "\t" + elev + "\t" + stType + "\t" + var + "\t" + dept + "\t" + mun + "\t" + insDate + "\t" + susDate + "\n"
 		
 		if not os.path.isfile(catFile):
 			cFile = open(catFile, "w")
-			cFile.write("StationNumber" + "\t" + "StationName" + "\t" + "Latitude" + "\t" + "Longitude" + "\t" + "Elevation" + "\t" + "StationType" + "\t" + "Departamente" + "\t" + "Municipality" + "\t" + "InstalationDate" + "\t" + "SuspensionDate " + "\n")
+			cFile.write("StationNumber" + "\t" + "StationName" + "\t" + "Latitude" + "\t" + "Longitude" + "\t" + "Elevation" + "\t" + "StationType" + "\t" + "Variable" + "\t" + "Departament" + "\t" + "Municipality" + "\t" + "InstalationDate" + "\t" + "SuspensionDate " + "\n")
 			cFile.write(infoSta)
 			cFile.close()
 		else:
-			cFile = open(catFile, "a")
-			cFile.write(infoSta)
+			cFile = open(catFile, "r")
+			lst = cFile.readlines()
+			lastline = lst[len(lst)-1]
+			if not lastline == infoSta:
+				cFile.close()
+				cFile = open(catFile, "a")
+				cFile.write(infoSta)
 			cFile.close()
 
 ## Close input txt file
 file.close()
+
+
+### Sort 
