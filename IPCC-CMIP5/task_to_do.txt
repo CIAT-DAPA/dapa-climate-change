@@ -6,3 +6,29 @@
 3. Limpiar servers. 
 4. Calcular espacios y orden de procesamiento en server. 
 
+
+
+cmip5-downscaling
+
+Procedimiento
+
+1. Mensuales --> asegurar el max # de gcm posible (revisar el website)
+2a. Unir previamente los archivos no consecutivos con cdo
+2b. Split month
+2c. Promedio del baseline y futuro
+	cdo runavg python D:\CIAT\_tools\dapa-climate-change\IPCC-CMIP3\ProcessIPCCDATA.py
+	**** probar el desfase calculando la anomalia (calcular promedio) 1975s-fut, y 1985s-fut. 
+	**** colocar en diferente carpeta (baseline 1971-2000 mp 1985 /futuro)
+
+2d. Depende de 2c.
+3. Usar R (rotate + convertir unidades + resample 1deg)
+4. Calcular anomalias
+5. Splines
+... proceso similar a cmip3
+
+
+
+NOtas
+*** 2030, 2050, 2070, 2090
+- Probar con otros tipos de correccion de sesgo. 
+- Procesar solo r1i1p1
