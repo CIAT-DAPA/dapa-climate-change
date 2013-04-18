@@ -1,25 +1,27 @@
-# ----------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Author: Carlos Navarro
-# Date: September 13th, 2010
-# Purpose: Cut by mask, anomalies, disaggregated, interpolated or downscaled surfaces
-# -----------------------------------------------------------------------------------
+# Date: 14/12/2011
+# Purpose: Resample anomalies, disaggregated, interpolated or downscaled surfaces
+# -------------------------------------------------------------------------------
 
-import arcgisscripting, os, sys, string,glob
+import arcgisscripting, os, sys, string
 gp = arcgisscripting.create(9.3)
 
 #Syntax
 if len(sys.argv) < 8:
 	os.system('cls')
 	print "\n Too few args"
-	print "   Syntax	: CutGCM_CMIP3.py <dirbase> <dirout> <scenario> <resolution> <period> <mask> <switch>"
-	print "	  - ie: python CutGCM_CMIP3.py \\dapadfs\data_cluster_4\gcm\cmip3\downscaled D:\Workspace a1b 30s 2010_2039 D:\Workspace\mask\mask YES"
+	print "   Syntax	: ResampleGCM_CMIP3.py <dirbase> <dirout> <scenario> <out resolution> <period> <method>"
+	print "	  - ie: python ResampleGCM_CMIP3.py \\dapadfs\data_cluster_4\gcm\cmip3\downscaled D:\Workspace a1b 60 2010_2039 NEAREST"
 	print "   dirbase	: Root folder where are storaged GCM data"
 	print "   dirout	: Output folder of averaged data"
 	print "   sres		: IPCC Emission Escenario"
-	print "   resolution: The possibilities are 2_5 min 5min 10min 30s"
+	print "   res		: Units Resolution in arcminutes"
 	print "   period	: Future 30yr interval"	
-	print "   mask		: This grid limites calculated to a specific region"
-	print "   switch	: Set YES to convert outputs in ESRI-Ascii files"
+	print "   method	: NEAREST Nearest neighbor assignment This is the default"
+	print "			      BILINEAR Bilinear interpolation"
+	print "				  CUBIC Cubic convolution"
+	print "				  MAJORITY Majority resampling"
 	sys.exit(1)
 
 # Set variables
@@ -56,7 +58,7 @@ for period in periodlist:
 		gp.workspace = dirbase + "\\sres_" + sres + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 		
 		# Define check file
-		checkFile = dirout + "\\sres_" + sres + "\\" + model + "-" + period + "-extract-done.txt"
+		checkFile = dirout + "\\sres_" + sres + "\\" + model + "-" + period + "-resample-done.txt"
 		if not os.path.exists(checkFile):
 			
 			print "\n Processing: ", sres, period, model + "\n"
@@ -76,34 +78,9 @@ for period in periodlist:
 				if not gp.Exists(outGrd):
 					
 					# Cut function
-					gp.ExtractByMask_sa(gp.workspace + "\\" + raster, mask, outGrd)
+					gp.Resample_management(gp.workspace + "\\" + raster, outGrd, res / 60, '"' + method + '"')	
 					print "\t", raster, period, model "cutted"
-					
-					# Convert outputs to ESRI-Asciis
-					diroutAsc = dirout + "\\sres_" + sres + "\\Global" + model + "\\" + period + "\\_asciis"
-					outAsc = diroutAsc + "\\" + os.path.basename(raster) + ".asc"
-					
-					if switch == "YES" and not os.path.exists(outAsc):
-						
-						# Create ascii output directory 
-						if not os.path.exists(diroutAsc):
-							os.system('mkdir ' + diroutAsc)
-						
-						# Raster to ascii function
-						gp.RasterToASCII_conversion(raster, outAsc)
-						
-						# Compress ESRI-asciis files
-						inZip = diroutAsc + "\\" + os.path.basename(raster).split("_")[0] + "_asc.zip"
-						os.system('7za a ' + inZip + " " + outAsc)
-						os.remove(outAsc)
-						gp.delete_management(raster)
-						print "\t", os.path.basename(raster), period, model "grd2asc converted"
-
-						# Remove trash files
-						pjrList = sorted(glob.glob(diroutAsc + "\\*.pjr"))
-						for pjr in pjrList:
-							os.remove(pjr)
-				
+									
 			checkFile = open(checkFile, "w")
 			checkFile.close()
 			print "\n " + sres + " " + period + " " + model + " processed\n"
