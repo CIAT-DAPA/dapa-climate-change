@@ -1,38 +1,54 @@
 # ---------------------------------------------------------
-# Autor: Carlos Navarro
-# Proposito: Copy rasters to another location
+# Author: Carlos Navarro
+# Purpouse: Copy rasters to another location
 # ---------------------------------------------------------
 
 import arcgisscripting, os, sys, glob
 gp = arcgisscripting.create(9.3)
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python CopyRasters.py S:\tiles_by_countries\aus_30s\bccr_bcm2_0\2020_2049 S:\tiles_by_countries\aus_30s\bccr_bcm2_0\2020_2049\bio"
+	print " Syntaxis python CopyRasters.py <dirbase> <dirout> <wildcard> <switch>"
+	print "   - ex: python CopyRasters.py D:\Workspace D:\Workspace ALL NO"
 	sys.exit(1)
 
 # Arguments
 dirbase = sys.argv[1]
 dirout = sys.argv[2]
-
-# Check out Spatial Analyst extension license
-os.system('cls')
+wildcard = sys.argv[3]
 
 print "\n~~~~ COPY RASTERS ~~~~\n"
 
+# Clear screen
+os.system('cls')
+
+# Set workspace
 gp.workspace = dirbase 
 
-# Get a list of grids in the workspace of each folder
-print "\t ..listing grids into " + gp.workspace
+# Create output folder
+if not os.path.exists(dirout):
+    os.system('mkdir ' + dirout)
 
-# for month in range(1, 12 + 1, 1):
-	# raster = gp.workspace + "\\tean_" + str(month)
-	# gp.copy_management(raster, dirout + "\\tmean_" + str(month))
+# Get a list of grids in the workspace
+print "\t ..listing grids into " + dirbase
+if wildcard == "ALL":
+	rasters = sorted(gp.ListRasters("*", "GRID"))
+else:	
+	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
 	
-rasters = sorted(gp.ListRasters("bio*", "GRID"))
+# Lopping around the grids
+print "\t ..copying grids \n"
 for raster in rasters:
-	print raster
-	gp.copy_management(raster, dirout + "\\" + raster)
 	
-print "\t ..done!!"
+	if not gp.Exists(dirout + "\\" + raster):
+	
+		# Copy function
+		gp.copy_management(raster, dirout + "\\" + raster)
+		print "\t", raster, "copied"
+	
+		# Remove asciis
+		if switch == "YES":
+			gp.delete_management(raster)
+		
+print "\n \t Process done!!"

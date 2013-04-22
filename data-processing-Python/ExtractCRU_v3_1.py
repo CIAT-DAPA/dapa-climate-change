@@ -18,8 +18,8 @@ print "\n"
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ExtractCRU_v3_1.py \\dapadfs\data_cluster_4\observed\gridded_products\cru-ts-v3-1\monthly_grids D:\Workspace\_mask\mask D:\Workspace 2005 2009 1"
-	print " 	Syntaxis python ExtractCRU_v3_1.py <dirbase> <mask> <dirout> <start year> <end year> <mode>"
+	print " Syntaxis python ExtractCRU_v3_1.py <dirbase> <mask> <dirout> <start year> <end year> <mode>"
+	print "   - ex: python ExtractCRU_v3_1.py \\dapadfs\data_cluster_4\observed\gridded_products\cru-ts-v3-1\monthly_grids D:\Workspace\_mask\mask D:\Workspace 2005 2009 1"
 	sys.exit(1)
 
 # Arguments
@@ -66,7 +66,7 @@ if mode == "1":
 				
 				# Sample Process
 				gp.Sample_sa(InRaster, mask, OutPoints, "")
-				print InRaster, "extracted"
+				print "\t", InRaster, "extracted"
 		
 	# Join dbfs files extracted
 	print "\n .. Joining outputs"
@@ -114,7 +114,7 @@ if mode == "2":
 
 				# Extract by mask process
 				gp.ExtractByMask_sa(gp.workspace + "\\" + InRaster, mask, OutRaster)
-				print InRaster, "extracted"
+				print "\t", InRaster, "extracted"
 				
 if mode == "3":
 
@@ -133,8 +133,8 @@ if mode == "3":
 				InRaster = variable + "_" + str(year) + "_" + str(month)		
 				OutPoints = dirout + "\\" + variable + "_" + str(year) + "_" + str(month) + ".dbf"
 				
-				#Process: Cell Statistics...
-				print InRaster, mask, OutPoints
+				# Sample function
+				print "\t", InRaster, "extracted"
 				gp.Sample_sa(InRaster, mask, OutPoints, "")
 
 		# Join dbfs files extracted
