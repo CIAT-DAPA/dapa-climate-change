@@ -77,7 +77,7 @@ for period in periodlist:
 					
 					# Cut function
 					gp.ExtractByMask_sa(gp.workspace + "\\" + raster, mask, outGrd)
-					print "\t", raster, period, model "cutted"
+					print "\t", raster, period, model, "cutted"
 					
 					# Convert outputs to ESRI-Asciis
 					diroutAsc = dirout + "\\sres_" + sres + "\\Global" + model + "\\" + period + "\\_asciis"

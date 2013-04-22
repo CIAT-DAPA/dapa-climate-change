@@ -1,7 +1,7 @@
 # -------------------------------------------------------------------------------------------------------------------------------
 # Author: Carlos Navarro
 # Date: June 16th 2011
-# Purpose: Get an average and the standar variation surfaces from Donwscaled, dissaggregated, anomalies  or interpolated GCM data
+# Purpose: Get an average and the standar variation surfaces from Donwscaled, dissaggregated, anomalies or interpolated GCM data
 # -------------------------------------------------------------------------------------------------------------------------------
 
 import arcgisscripting, os, sys, string
