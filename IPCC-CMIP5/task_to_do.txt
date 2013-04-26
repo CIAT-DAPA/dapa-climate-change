@@ -13,7 +13,7 @@ cmip5-downscaling
 Procedimiento
 
 1. Mensuales --> asegurar el max # de gcm posible (revisar el website)
-2a. Unir previamente los archivos no consecutivos con cdo
+2a. Unir previamente los archivos no consecutivos con cdo (mergetime command)
 2b. Split month
 2c. Promedio del baseline y futuro
 	cdo runavg python D:\CIAT\_tools\dapa-climate-change\IPCC-CMIP3\ProcessIPCCDATA.py
