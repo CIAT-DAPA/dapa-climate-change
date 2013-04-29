@@ -129,13 +129,13 @@ for model in modelList:
 				
 				# Write check txt file (one per model-ensemble)
 				checkFile = open(checkFile, "w")
-				checkFile.write(ncList)
+				checkFile.write(str(ncList))
 				checkFile.close()
 			
-				print "\tProcess done for ", rcp, model, ens
+				print "\tProcess done for ", rcp, model, ens, "\n"
 			
 			else:
 			
-				print "\tProcess done for ", rcp, model, ens
+				print "\tProcess done for ", rcp, model, ens, "\n"
 		
 print "Process done!"
