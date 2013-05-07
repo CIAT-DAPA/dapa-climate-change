@@ -10,7 +10,6 @@ require(ncdf)
 
 GCMTmpCalc <- function(rcp='historical') {
   
-  rcp <- "historical"
   baseDir <- "T:/gcm/cmip5/raw/monthly"
   gcmStats <- read.table(paste(baseDir, "/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
   monthList <- c("01","02","03","04","05","06","07","08","09","10","11","12")
@@ -35,7 +34,7 @@ GCMTmpCalc <- function(rcp='historical') {
           tmeanRaster <- raster(paste(yearDir, "/tmean_", mth, ".nc", sep=""))
           tmaxRaster <- (2 * tmeanRaster) - tminRaster
           tmaxRaster <- writeRaster(tmaxRaster, paste(yearDir, "/tmax_", mth, ".nc", sep=""), format="CDF", overwrite=T)
-          cat(paste("\n\t\t ->. ", paste(basename(yearDir)), " tmax_", mth, ".nc", sep=""))
+          cat(paste("\n\t\t ->. ", rcp, " ", paste(basename(yearDir)), " tmax_", mth, ".nc", sep=""))
           
         }
       }    
@@ -59,7 +58,7 @@ GCMTmpCalc <- function(rcp='historical') {
           tmeanRaster <- raster(paste(yearDir, "/tmean_", mth, ".nc", sep=""))
           tminRaster <- (2 * tmeanRaster) - tmaxRaster
           tminRaster <- writeRaster(tminRaster, paste(yearDir, "/tmin_", mth, ".nc", sep=""), format="CDF", overwrite=T)
-          cat(paste("\n\t\t ->. ", paste(basename(yearDir)), " tmin_", mth, ".nc", sep=""))
+          cat(paste("\n\t\t ->. ", rcp, " ", paste(basename(yearDir)), " tmin_", mth, ".nc", sep=""))
           
         }
       }    
