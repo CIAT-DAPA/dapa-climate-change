@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------
-# Description: This script is to prepare the CMIP5 raw monhtly climate data
+# Description: This script is to prepare the CMIP5 raw monhtly climate data. 
 # Author: Carlos Navarro
 # Date: 25/04/13
 # Notes: This python script is to be run under Windows or Linux or with the proper software (cdo) available
@@ -171,10 +171,5 @@ for model in modelList:
 
 				sumFile = open(sumFile, "a")
 				sumFile.write(rcp + "\t" + model + "\t" + ens + "\t" + precCheck + "\t" + tmaxCheck + "\t" + tmeanCheck + "\t" + tminCheck + "\n" )
-					
-					
-					
-					
-					
 					
 print "Process done!"
