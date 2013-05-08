@@ -8,7 +8,7 @@ collate_rcp <- function(cells,runsDir,gcm,intype,co2,varNames,expSel,sdList) {
   cat("collating",gcm,"and",intype,"and",co2,"\n")
   
   #output directory
-  outDir <- paste(runsDir,"/_outputs/raw_output/",gcm,sep="")
+  outDir <- paste(runsDir,"/_outputs/raw_output_v2/",gcm,sep="")
   if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
   
   if (!file.exists(paste(outDir,"/RCP-",intype,"-",co2,".RData",sep=""))) {
@@ -110,7 +110,7 @@ collate_his <- function(cells,runsDir,gcm,intype,varNames,expSel) {
   cat("collating",gcm,"and",intype,"\n")
   
   #output directory
-  outDir <- paste(runsDir,"/_outputs/raw_output/",gcm,sep="")
+  outDir <- paste(runsDir,"/_outputs/raw_output_v2/",gcm,sep="")
   if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
   
   if (!file.exists(paste(outDir,"/HIS-",intype,".RData",sep=""))) {
