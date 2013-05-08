@@ -43,9 +43,9 @@ gcmList <- gcmList[-c(24,25)] #remove miroc models with failed simulations
 
 #list of variables of interest
 varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
-              "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD")
+              "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD","T_RAIN","TBARTOT")
 
-for (i in 21:32) {
+for (i in 1:32) {
   #summarise everything in here
   #maybe parallelise stuff
   ##########################################################################

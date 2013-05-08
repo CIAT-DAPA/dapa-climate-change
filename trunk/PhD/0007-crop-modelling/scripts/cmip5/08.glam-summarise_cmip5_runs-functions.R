@@ -77,6 +77,8 @@ get_proj_data <- function(runsDir, glam_ens, gcm_ens, input_type, co2_par, loc, 
     data_array[loc,glam_ens,sow_offset,"RFD",,"HI"] <- rfd_data$HI
     data_array[loc,glam_ens,sow_offset,"RFD",,"BMASS"] <- rfd_data$BMASS
     data_array[loc,glam_ens,sow_offset,"RFD",,"YIELD"] <- rfd_data$YIELD
+    data_array[loc,glam_ens,sow_offset,"RFD",,"T_RAIN"] <- rfd_data$T_RAIN
+    data_array[loc,glam_ens,sow_offset,"RFD",,"TBARTOT"] <- rfd_data$TBARTOT
     
     irr_data <- run_data$RUNS[[j]]$DATA$IRR
     data_array[loc,glam_ens,sow_offset,"IRR",,"STG"] <- irr_data$STG
@@ -92,6 +94,8 @@ get_proj_data <- function(runsDir, glam_ens, gcm_ens, input_type, co2_par, loc, 
     data_array[loc,glam_ens,sow_offset,"IRR",,"HI"] <- irr_data$HI
     data_array[loc,glam_ens,sow_offset,"IRR",,"BMASS"] <- irr_data$BMASS
     data_array[loc,glam_ens,sow_offset,"IRR",,"YIELD"] <- irr_data$YIELD
+    data_array[loc,glam_ens,sow_offset,"IRR",,"T_RAIN"] <- irr_data$T_RAIN
+    data_array[loc,glam_ens,sow_offset,"IRR",,"TBARTOT"] <- irr_data$TBARTOT
   }
   rm(run_data)
   
@@ -195,6 +199,8 @@ get_pres_data <- function(runsDir, glam_ens, gcm_ens, input_type, loc, data_arra
   data_array[loc,glam_ens,"RFD",,"HI"] <- rfd_data$HI
   data_array[loc,glam_ens,"RFD",,"BMASS"] <- rfd_data$BMASS
   data_array[loc,glam_ens,"RFD",,"YIELD"] <- rfd_data$YIELD
+  data_array[loc,glam_ens,"RFD",,"T_RAIN"] <- rfd_data$T_RAIN
+  data_array[loc,glam_ens,"RFD",,"TBARTOT"] <- rfd_data$TBARTOT
   
   #put in irrigated data
   data_array[loc,glam_ens,"IRR",,"YGP"] <- irr_data$YGP
@@ -211,6 +217,8 @@ get_pres_data <- function(runsDir, glam_ens, gcm_ens, input_type, loc, data_arra
   data_array[loc,glam_ens,"IRR",,"HI"] <- irr_data$HI
   data_array[loc,glam_ens,"IRR",,"BMASS"] <- irr_data$BMASS
   data_array[loc,glam_ens,"IRR",,"YIELD"] <- irr_data$YIELD
+  data_array[loc,glam_ens,"IRR",,"T_RAIN"] <- irr_data$T_RAIN
+  data_array[loc,glam_ens,"IRR",,"TBARTOT"] <- irr_data$TBARTOT
   
   #return result
   return(data_array)
