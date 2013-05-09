@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------
-# Description: This script is to prepare the CMIP5 raw monhtly climate data. 
+# Description: This script is to prepare the CMIP5 raw climate data, spliting in monthly files. 
 # Author: Carlos Navarro
 # Date: 25/04/13
 # Notes: This python script is to be run under Windows or Linux or with the proper software (cdo) available
@@ -8,7 +8,6 @@
 #      	 -/usr/local/bin/
 #      	 -/USERNAME/bin/
 # 		 cdo is required to merge raw files, separate years and then months. 
-# 		 GDAL is required to the final transformation from NETCDF to Arc/Info ESRI ASCII (can be omitted)
 #---------------------------------------------------------------------------------------------------------
 
 # Import system modules
@@ -18,7 +17,7 @@ import os, sys, string, glob, shutil
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 00-prepare-cmip5-monthly-raw-data.py T:\data\gcm\cmip5\raw\monthly historical"
+	print "   - ie: python 00-split-monthly-raw-data.py T:\data\gcm\cmip5\raw\monthly historical"
 	sys.exit(1)
 
 # Define arguments
