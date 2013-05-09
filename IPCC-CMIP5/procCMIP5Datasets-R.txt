@@ -1,0 +1,7 @@
+source("01-calculate-missing-monthly-files-cmip5.R")
+rcp <- "historical" 
+rcp <- "rcp60" 
+rcp <- "rcp85" 
+
+baseDir <- "T:/data/gcm/cmip5/raw/monthly"
+otp <- GCMTmpCalc(rcp, baseDir)
