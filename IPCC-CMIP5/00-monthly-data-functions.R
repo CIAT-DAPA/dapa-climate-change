@@ -91,7 +91,7 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
 #####################################################################################################
 
 
-GCMAverage <- function(rcp='historical', baseDir <- "T:/gcm/cmip5/raw/monthly") {
+GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -118,65 +118,56 @@ GCMAverage <- function(rcp='historical', baseDir <- "T:/gcm/cmip5/raw/monthly") 
 
       if (rcp == "historical"){
         
-        periodList <- c("1960", "1970")
+        periodList <- c("1961", "1971")
+      
+      } else {
         
-        for (period in periodList) {
-          
-          staYear <- period
-          endYear <- period + 29
-          
-          cat("Average over ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear)," \n"))
+        periodList <- c("2020", "2040", "2060", "2080")
+        
+      }
+        
+      for (period in periodList) {
+        
+        staYear <- as.integer(period)
+        endYear <- as.integer(period) + 29
+        
+        cat("\nAverage over ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
 
-          for (var in varList) {
+        for (var in varList) {
+          
+          for (mth in monthList) {
             
-            for (mth in monthList) {
-              
-              if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
-              {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
+            if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
+            {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
+            
+            if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mth, ".nc", sep=""))){
               
               mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
-              mthNcAvg <- rotate(mean(stack(mthNc)))
-              mthNcAvg <- writeRaster(mthNcAvg, paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mth, ".nc", sep=""), format='CDF', overwrite=T)
               
-              cat("\t", gcm, "\t", ens, "\t", paste(staYear, "_", endYear), "\t", var, "_", mth," \n"))
+              if (var == "prec"){
               
-              }
-            }
-          } 
-
-        } else {
-
-          periodList <- c("2020", "2040", "2060", "2080")
-          
-          for (period in periodList) {
-
-            staYear <- period
-            endYear <- period + 29
-            
-            cat("Average over ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear)," \n"))
-            
-            for (var in varList) {
-              
-              for (mth in monthList) {
+                mthNcAvg <- rotate(mean(stack(mthNc))) 
                 
-                if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
-                  {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
+              } else {
                 
-                mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
                 mthNcAvg <- rotate(mean(stack(mthNc)))
-                mthNcAvg <- writeRaster(mthNcAvg, paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mth, ".nc", sep=""), format='CDF', overwrite=T)
-                
-                cat("\t", gcm, "\t", ens, "\t", paste(staYear, "_", endYear), "\t", var, "_", mth," done\n"))
               }
+              
+              mthNcAvg <- writeRaster(mthNcAvg, paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mth, ".nc", sep=""), format='CDF', overwrite=T)
+            
+              cat("\t", paste(staYear, "_", endYear, sep=""), "\tdone!\n")
+            
+            } else {cat("\t", paste(staYear, "_", endYear, sep=""), "\tdone!\n")}
+            
             }
-          }        
+          }
         }
       }
     }
 
   return("GCM Average Process Done!")
   
-  } 
+  }
 
 
 GCMResample <- function(rcp='historical', baseDir <- "T:/gcm/cmip5/raw/monthly") {
