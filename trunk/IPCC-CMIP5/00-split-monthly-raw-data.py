@@ -138,37 +138,37 @@ for model in modelList:
 			else:
 			
 				print "\tProcess done for ", rcp, model, ens, "\n"
-				sumFile = dirbase + "\\cmip5-" + rcp + "monthly-data-summary.txt"
+				sumFile = dirbase + "\\cmip5-" + rcp + "-monthly-data-summary.txt"
 				if not os.path.isfile(sumFile):
 					sumFile = open(sumFile, "w")
 					sumFile.write("rcp" + "\t" + "gcm" + "\t" + "ensemble" + "\t" + "prec" + "\t" + "tmax" + "\t" + "tmean" + "\t" + "tmin" + "\n")
 					sumFile.close()
 				
-				precList = sorted(glob.glob(ensDir + "\\original-data\\prec.*.nc"))
-				if not len(precList) == 0:
-					precCheck = os.path.basename(precList[0]).split(".")[1]
-				else:
-					precCheck = "no"
+					precList = sorted(glob.glob(ensDir + "\\original-data\\prec.*.nc"))
+					if not len(precList) == 0:
+						precCheck = os.path.basename(precList[0]).split(".")[1]
+					else:
+						precCheck = "no"
+						
+					tmaxList = sorted(glob.glob(ensDir + "\\original-data\\tmax.*.nc"))
+					if not len(tmaxList) == 0:
+						tmaxCheck = os.path.basename(tmaxList[0]).split(".")[1]
+					else:
+						tmaxCheck = "no"
 					
-				tmaxList = sorted(glob.glob(ensDir + "\\original-data\\tmax.*.nc"))
-				if not len(tmaxList) == 0:
-					tmaxCheck = os.path.basename(tmaxList[0]).split(".")[1]
-				else:
-					tmaxCheck = "no"
-				
-				tmeanList = sorted(glob.glob(ensDir + "\\original-data\\tmean.*.nc"))
-				if not len(tmeanList) == 0:
-					tmeanCheck = os.path.basename(tmeanList[0]).split(".")[1]
-				else:
-					tmeanCheck = "no"
-				
-				tminList = sorted(glob.glob(ensDir + "\\original-data\\tmin.*.nc"))
-				if not len(tminList) == 0:
-					tminCheck = os.path.basename(tminList[0]).split(".")[1]
-				else:
-					tminCheck = "no"
+					tmeanList = sorted(glob.glob(ensDir + "\\original-data\\tmean.*.nc"))
+					if not len(tmeanList) == 0:
+						tmeanCheck = os.path.basename(tmeanList[0]).split(".")[1]
+					else:
+						tmeanCheck = "no"
+					
+					tminList = sorted(glob.glob(ensDir + "\\original-data\\tmin.*.nc"))
+					if not len(tminList) == 0:
+						tminCheck = os.path.basename(tminList[0]).split(".")[1]
+					else:
+						tminCheck = "no"
 
-				sumFile = open(sumFile, "a")
-				sumFile.write(rcp + "\t" + model + "\t" + ens + "\t" + precCheck + "\t" + tmaxCheck + "\t" + tmeanCheck + "\t" + tminCheck + "\n" )
+					sumFile = open(sumFile, "a")
+					sumFile.write(rcp + "\t" + model + "\t" + ens + "\t" + precCheck + "\t" + tmaxCheck + "\t" + tmeanCheck + "\t" + tminCheck + "\n" )
 					
 print "Process done!"
