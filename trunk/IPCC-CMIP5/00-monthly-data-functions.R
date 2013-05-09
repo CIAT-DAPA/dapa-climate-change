@@ -143,7 +143,7 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
       
       } else {
         
-        periodList <- c("2020", "2040", "2060", "2080")
+        periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
         
       }
       
@@ -188,9 +188,9 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
               # Write output average NetCDF file
               mthNcAvg <- writeRaster(mthNcAvg, outNcAvg, format='CDF', overwrite=T)
             
-              cat("\t.> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
+              cat(" .> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
             
-            } else {cat("\t.>", paste(staYear, "_", endYear, " ", var, "_", mthMod, sep=""), "\tdone!\n")}
+            } else {cat(" .>", paste(staYear, "_", endYear, " ", var, "_", mthMod, sep=""), "\tdone!\n")}
             
             }
           }
@@ -203,7 +203,7 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
   }
 
 
-GCMResample <- function(rcp='historical', baseDir <- "T:/gcm/cmip5/raw/monthly") {
+GCMResample <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
   
   rs <- raster(inFile)
   rs <- readAll(rs)
