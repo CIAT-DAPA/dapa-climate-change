@@ -99,23 +99,44 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
   cat(" \n")
   
+  # Read gcm characteristics table
   gcmStats <- read.table(paste(baseDir, "/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
-  monthList <- c("01","02","03","04","05","06","07","08","09","10","11","12")
+  
+  # Get a list of month with and withour 0 in one digit numbers
+  monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+  monthListMod <- c(1:12)
+  
+  # Set number of days by month
+  ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+  
+  # Combirn number of month and days in one single data frame
+  ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
+  names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
+
+  # List of variables to average
   varList <- c("prec", "tmax", "tmin")
   
+  # Loop around gcms and ensembles
   for (i in 1:nrow(gcmStats)){
-    
+  
+    # Don't include variables without all three variables
     if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var") {
       
+      # Get gcm and ensemble names
       gcm <- paste(as.matrix(gcmStats)[i,2])
       ens <- paste(as.matrix(gcmStats)[i,3])
+      
+      # Path of each ensemble
       ensDir <- paste(baseDir, "/", rcp, "/", gcm, "/", ens, sep="")
+      
+      # Directory with monthly splitted files
       mthDir <- paste(ensDir, "/monthly-files", sep="")
       
+      # Create output average directory
       avgDir <- paste(ensDir, "/average", sep="")
       if (!file.exists(avgDir)) {dir.create(avgDir)}
       
-
+      # Period list for historical and future pathways
       if (rcp == "historical"){
         
         periodList <- c("1961", "1971")
@@ -125,46 +146,58 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
         periodList <- c("2020", "2040", "2060", "2080")
         
       }
-        
+      
+      # Loop around periods
       for (period in periodList) {
         
+        # Define start and end year
         staYear <- as.integer(period)
         endYear <- as.integer(period) + 29
         
-        cat("\nAverage over ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
+        cat("\nAverage over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
 
+        # Loop around variables
         for (var in varList) {
           
+          # Loop around months
           for (mth in monthList) {
             
             if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
             {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
             
-            if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mth, ".nc", sep=""))){
+            # Define month without 0 in one digit number
+            mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+            outNcAvg <- paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mthMod, ".nc", sep="")
+            
+            if (!file.exists(outNcAvg)){
               
+              # List of NetCDF files by month for all 30yr period
               mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
               
+              # Create a stack of list of NC, rotate and convert units in mm/monnth and deg celsious
               if (var == "prec"){
-              
-                mthNcAvg <- rotate(mean(stack(mthNc))) 
+                
+                daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
+                mthNcAvg <- rotate(mean(stack(mthNc))) * 86400 * (daysmth)
                 
               } else {
                 
-                mthNcAvg <- rotate(mean(stack(mthNc)))
+                mthNcAvg <- rotate(mean(stack(mthNc))) - 272.15
               }
               
-              mthNcAvg <- writeRaster(mthNcAvg, paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mth, ".nc", sep=""), format='CDF', overwrite=T)
+              # Write output average NetCDF file
+              mthNcAvg <- writeRaster(mthNcAvg, outNcAvg, format='CDF', overwrite=T)
             
-              cat("\t", paste(staYear, "_", endYear, sep=""), "\tdone!\n")
+              cat("\t.> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
             
-            } else {cat("\t", paste(staYear, "_", endYear, sep=""), "\tdone!\n")}
+            } else {cat("\t.>", paste(staYear, "_", endYear, " ", var, "_", mthMod, sep=""), "\tdone!\n")}
             
             }
           }
         }
       }
     }
-
+  
   return("GCM Average Process Done!")
   
   }
