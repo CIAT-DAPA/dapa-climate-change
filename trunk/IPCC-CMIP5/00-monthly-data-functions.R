@@ -31,6 +31,7 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
       cat(paste("\n ->. Processing ", rcp, " ", gcm, " ", ens,  sep=""))
       
       yearDirs <- list.dirs(mthDir, recursive = FALSE, full.names = FALSE)
+      
       for (yearDir in yearDirs) {
         
         if (paste(basename(yearDir)) < 2100) {
@@ -41,7 +42,9 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
             
               tminRaster <- raster(paste(yearDir, "/tmin_", mth, ".nc", sep=""))
               tmeanRaster <- raster(paste(yearDir, "/tmean_", mth, ".nc", sep=""))
+              
               tmaxRaster <- (2 * tmeanRaster) - tminRaster
+              
               tmaxRaster <- writeRaster(tmaxRaster, paste(yearDir, "/tmax_", mth, ".nc", sep=""), format="CDF", overwrite=T)
               cat(paste("\n\t\t ->. ", rcp, " ", paste(basename(yearDir)), " tmax_", mth, ".nc", sep=""))
             
@@ -61,6 +64,7 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
       cat(paste("\n ->. Processing ", rcp, " ", gcm, " ", ens,  sep=""))
       
       yearDirs <- list.dirs(mthDir, recursive = FALSE, full.names = FALSE)
+      
       for (yearDir in yearDirs) {
         
         if (paste(basename(yearDir)) < 2100) {
@@ -71,7 +75,9 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
               
               tmaxRaster <- raster(paste(yearDir, "/tmax_", mth, ".nc", sep=""))
               tmeanRaster <- raster(paste(yearDir, "/tmean_", mth, ".nc", sep=""))
+              
               tminRaster <- (2 * tmeanRaster) - tmaxRaster
+              
               tminRaster <- writeRaster(tminRaster, paste(yearDir, "/tmin_", mth, ".nc", sep=""), format="CDF", overwrite=T)
               cat(paste("\n\t\t ->. ", rcp, " ", paste(basename(yearDir)), " tmin_", mth, ".nc", sep=""))
             
@@ -122,141 +128,149 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
     # Don't include variables without all three variables
     if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var") {
       
-      # Get gcm and ensemble names
-      gcm <- paste(as.matrix(gcmStats)[i,2])
-      ens <- paste(as.matrix(gcmStats)[i,3])
-      
-      # Path of each ensemble
-      ensDir <- paste(baseDir, "/", rcp, "/", gcm, "/", ens, sep="")
-      
-      # Directory with monthly splitted files
-      mthDir <- paste(ensDir, "/monthly-files", sep="")
-      
-      # Create output average directory
-      avgDir <- paste(ensDir, "/average", sep="")
-      if (!file.exists(avgDir)) {dir.create(avgDir)}
-      
-      # Period list for historical and future pathways
-      if (rcp == "historical"){
+      if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
         
-        periodList <- c("1961", "1971")
-      
-      } else {
+        # Get gcm and ensemble names
+        gcm <- paste(as.matrix(gcmStats)[i,2])
+        ens <- paste(as.matrix(gcmStats)[i,3])
         
-        periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+        # Path of each ensemble
+        ensDir <- paste(baseDir, "/", rcp, "/", gcm, "/", ens, sep="")
         
-      }
-      
-      # Loop around periods
-      for (period in periodList) {
+        # Directory with monthly splitted files
+        mthDir <- paste(ensDir, "/monthly-files", sep="")
         
-        # Define start and end year
-        staYear <- as.integer(period)
-        endYear <- as.integer(period) + 29
+        # Create output average directory
+        avgDir <- paste(ensDir, "/average", sep="")
+        if (!file.exists(avgDir)) {dir.create(avgDir)}
         
-        cat("\nAverage over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
-
-        # Loop around variables
-        for (var in varList) {
+        # Period list for historical and future pathways
+        if (rcp == "historical"){
           
-          # Loop around months
-          for (mth in monthList) {
+          periodList <- c("1961", "1971")
+        
+        } else {
+          
+          periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+          
+        }
+        
+        # Loop around periods
+        for (period in periodList) {
+          
+          # Define start and end year
+          staYear <- as.integer(period)
+          endYear <- as.integer(period) + 29
+          
+          cat("\nAverage over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
+  
+          # Loop around variables
+          for (var in varList) {
             
-            if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
-            {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
-            
-            # Define month without 0 in one digit number
-            mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
-            outNcAvg <- paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mthMod, ".nc", sep="")
-            
-            if (!file.exists(outNcAvg)){
+            # Loop around months
+            for (mth in monthList) {
               
-              # List of NetCDF files by month for all 30yr period
-              mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
+              if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
+              {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
               
-              # Create a stack of list of NC, rotate and convert units in mm/monnth and deg celsious
-              if (var == "prec"){
+              # Define month without 0 in one digit number
+              mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+              outNcAvg <- paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mthMod, ".nc", sep="")
+              
+              if (!file.exists(outNcAvg)){
                 
-                daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
-                mthNcAvg <- rotate(mean(stack(mthNc))) * 86400 * (daysmth)
+                # List of NetCDF files by month for all 30yr period
+                mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
                 
-              } else {
+                # Create a stack of list of NC, rotate and convert units in mm/monnth and deg celsious
+                if (var == "prec"){
+                  
+                  daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
+                  mthNcAvg <- rotate(mean(stack(mthNc))) * 86400 * (daysmth)
+                  
+                } else {
+                  
+                  mthNcAvg <- rotate(mean(stack(mthNc))) - 272.15
+                }
                 
-                mthNcAvg <- rotate(mean(stack(mthNc))) - 272.15
+                # Write output average NetCDF file
+                mthNcAvg <- writeRaster(mthNcAvg, outNcAvg, format='CDF', overwrite=T)
+              
+                cat(" .> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
+              
+              } else {cat(" .>", paste(staYear, "_", endYear, " ", var, "_", mthMod, sep=""), "\tdone!\n")}
+              
               }
-              
-              # Write output average NetCDF file
-              mthNcAvg <- writeRaster(mthNcAvg, outNcAvg, format='CDF', overwrite=T)
-            
-              cat(" .> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
-            
-            } else {cat(" .>", paste(staYear, "_", endYear, " ", var, "_", mthMod, sep=""), "\tdone!\n")}
-            
             }
           }
         }
       }
+    
+      
     }
   
-  return("GCM Average Process Done!")
+  cat("GCM Average Process Done!")
   
   }
 
 
-GCMResample <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
-  
-  rs <- raster(inFile)
-  rs <- readAll(rs)
-  
-  if (xres(rs) == xres(rsum)) {
-    cat("\n", "Not resampling ", "\n")
-    
-    rsum <- rsum + rs
-    m <- m+1
-  
-  } else {
-    
-    dfr <- data.frame(raster=c("rs", "rsum"), resol=c(xres(rs), xres(rsum)))
-    mnResRaster <- trim(dfr[which(dfr[,2] == min(dfr[,2])),1])
-    mxResRaster <- trim(dfr[which(dfr[,2] == max(dfr[,2])),1])
-    
-    nCols <- ncol(get(paste(mnResRaster)))
-    nRows <- nrow(get(paste(mnResRaster)))
-    
-    xMin <- xmin(get(paste(mnResRaster)))
-    xMax <- xmax(get(paste(mnResRaster)))
-    yMin <- ymin(get(paste(mnResRaster)))
-    yMax <- ymax(get(paste(mnResRaster)))
-    
-    nwrs <- raster(get(paste(mnResRaster)))
-    
-    cat(ncol(get(paste(mnResRaster))), nrow(get(paste(mnResRaster))),"\n")
-    cat(ncol(get(paste(mxResRaster))), nrow(get(paste(mxResRaster))),"\n")
-    cat(ncol(nwrs), nrow(nwrs), "\n")
-    
-    rm(dfr)
-    
-    cat("\n", "Resampling ", mxResRaster, " with ", mnResRaster, "\n")
-    
-    nwrs <- resample(get(paste(mxResRaster)), nwrs, method='ngb')
-    rsum <- rsum + nwrs
-    rm(nwrs)
-    
-    m <- m+1
-  
-  }
-
-  cat("Average over ", m, " models", "\n")
-  
-  rsum <- rsum / m
-  rsum <- writeRaster(rsum, outFile, format='ascii', overwrite=TRUE)
-  
-  return("GCM Resample Process Done!")
-  
-  }
-
-
-
-
-
-
+#######################################################################################################
+# Description: This function is to get a resmple of averaged surfaces of the CMIP5 monhtly climate data
+#######################################################################################################
+# GCMResample <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
+#   
+#   rs <- raster(inFile)
+#   rs <- readAll(rs)
+#   
+#   if (xres(rs) == xres(rsum)) {
+#     cat("\n", "Not resampling ", "\n")
+#     
+#     rsum <- rsum + rs
+#     m <- m+1
+#   
+#   } else {
+#     
+#     dfr <- data.frame(raster=c("rs", "rsum"), resol=c(xres(rs), xres(rsum)))
+#     mnResRaster <- trim(dfr[which(dfr[,2] == min(dfr[,2])),1])
+#     mxResRaster <- trim(dfr[which(dfr[,2] == max(dfr[,2])),1])
+#     
+#     nCols <- ncol(get(paste(mnResRaster)))
+#     nRows <- nrow(get(paste(mnResRaster)))
+#     
+#     xMin <- xmin(get(paste(mnResRaster)))
+#     xMax <- xmax(get(paste(mnResRaster)))
+#     yMin <- ymin(get(paste(mnResRaster)))
+#     yMax <- ymax(get(paste(mnResRaster)))
+#     
+#     nwrs <- raster(get(paste(mnResRaster)))
+#     
+#     cat(ncol(get(paste(mnResRaster))), nrow(get(paste(mnResRaster))),"\n")
+#     cat(ncol(get(paste(mxResRaster))), nrow(get(paste(mxResRaster))),"\n")
+#     cat(ncol(nwrs), nrow(nwrs), "\n")
+#     
+#     rm(dfr)
+#     
+#     cat("\n", "Resampling ", mxResRaster, " with ", mnResRaster, "\n")
+#     
+#     nwrs <- resample(get(paste(mxResRaster)), nwrs, method='ngb')
+#     rsum <- rsum + nwrs
+#     rm(nwrs)
+#     
+#     m <- m+1
+#   
+#   }
+# 
+#   cat("Average over ", m, " models", "\n")
+#   
+#   rsum <- rsum / m
+#   rsum <- writeRaster(rsum, outFile, format='ascii', overwrite=TRUE)
+#   
+#   return("GCM Resample Process Done!")
+#   
+#   }
+# 
+# 
+# 
+# 
+# 
+# 
