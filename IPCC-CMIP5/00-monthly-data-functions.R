@@ -97,7 +97,7 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
 #####################################################################################################
 
 
-GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
+GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -121,6 +121,9 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
 
   # List of variables to average
   varList <- c("prec", "tmax", "tmin")
+  
+  # Get gcm statistics
+  dataMatrix <- c("rcp", "model", "xRes", "yRes", "nCols", "nRows", "xMin", "xMax", "yMin", "yMax")
   
   # Loop around gcms and ensembles
   for (i in 1:nrow(gcmStats)){
@@ -198,9 +201,29 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
               
                 cat(" .> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
               
-              } else {cat(" .>", paste(staYear, "_", endYear, " ", var, "_", mthMod, sep=""), "\tdone!\n")}
+              } else {cat(" .>", paste(var, "_", mthMod, sep=""), "\tdone!\n")}
               
               }
+            }
+          
+          if(ens == "r1i1p1") {
+          
+            # Get a table with resolution and extent by model
+            exNc <- raster(paste(avgDir, "/", staYear, "_", endYear, "/prec_1.nc", sep=""))
+            
+            xRes <- xres(exNc)
+            yRes <- yres(exNc)
+            nCols <- ncol(exNc)
+            nRows <- nrow(exNc)
+            xMin <- xmin(exNc)
+            xMax <- xmax(exNc)
+            yMin <- ymin(exNc)
+            yMax <- ymax(exNc)
+            
+#             gcmChart <- cbind(rcp, gcm, xRes, yRes, nCols, nRows, xMin, xMax, yMin, yMax)
+            
+            dataMatrix <- rbind(dataMatrix,c(rcp, gcm, xRes, yRes, nCols, nRows, xMin, xMax, yMin, yMax))
+            
             }
           }
         }
@@ -209,68 +232,69 @@ GCMAverage <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
       
     }
   
+  write.csv(dataMatrix, paste(baseDir, "/", rcp, "-gcm-chart.csv", sep=""), row.names=F)
   cat("GCM Average Process Done!")
   
   }
 
 
-#######################################################################################################
-# Description: This function is to get a resmple of averaged surfaces of the CMIP5 monhtly climate data
-#######################################################################################################
-# GCMResample <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
-#   
-#   rs <- raster(inFile)
-#   rs <- readAll(rs)
-#   
-#   if (xres(rs) == xres(rsum)) {
-#     cat("\n", "Not resampling ", "\n")
-#     
-#     rsum <- rsum + rs
-#     m <- m+1
-#   
-#   } else {
-#     
-#     dfr <- data.frame(raster=c("rs", "rsum"), resol=c(xres(rs), xres(rsum)))
-#     mnResRaster <- trim(dfr[which(dfr[,2] == min(dfr[,2])),1])
-#     mxResRaster <- trim(dfr[which(dfr[,2] == max(dfr[,2])),1])
-#     
-#     nCols <- ncol(get(paste(mnResRaster)))
-#     nRows <- nrow(get(paste(mnResRaster)))
-#     
-#     xMin <- xmin(get(paste(mnResRaster)))
-#     xMax <- xmax(get(paste(mnResRaster)))
-#     yMin <- ymin(get(paste(mnResRaster)))
-#     yMax <- ymax(get(paste(mnResRaster)))
-#     
-#     nwrs <- raster(get(paste(mnResRaster)))
-#     
-#     cat(ncol(get(paste(mnResRaster))), nrow(get(paste(mnResRaster))),"\n")
-#     cat(ncol(get(paste(mxResRaster))), nrow(get(paste(mxResRaster))),"\n")
-#     cat(ncol(nwrs), nrow(nwrs), "\n")
-#     
-#     rm(dfr)
-#     
-#     cat("\n", "Resampling ", mxResRaster, " with ", mnResRaster, "\n")
-#     
-#     nwrs <- resample(get(paste(mxResRaster)), nwrs, method='ngb')
-#     rsum <- rsum + nwrs
-#     rm(nwrs)
-#     
-#     m <- m+1
-#   
-#   }
-# 
-#   cat("Average over ", m, " models", "\n")
-#   
-#   rsum <- rsum / m
-#   rsum <- writeRaster(rsum, outFile, format='ascii', overwrite=TRUE)
-#   
-#   return("GCM Resample Process Done!")
-#   
-#   }
-# 
-# 
-# 
-# 
-# 
-# 
+#################################################################################################################
+# Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
+#################################################################################################################
+GCMAnomalies <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
+  
+  rs <- raster(inFile)
+  rs <- readAll(rs)
+  
+  if (xres(rs) == xres(rsum)) {
+    cat("\n", "Not resampling ", "\n")
+    
+    rsum <- rsum + rs
+    m <- m+1
+  
+  } else {
+    
+    dfr <- data.frame(raster=c("rs", "rsum"), resol=c(xres(rs), xres(rsum)))
+    mnResRaster <- trim(dfr[which(dfr[,2] == min(dfr[,2])),1])
+    mxResRaster <- trim(dfr[which(dfr[,2] == max(dfr[,2])),1])
+    
+    nCols <- ncol(get(paste(mnResRaster)))
+    nRows <- nrow(get(paste(mnResRaster)))
+    
+    xMin <- xmin(get(paste(mnResRaster)))
+    xMax <- xmax(get(paste(mnResRaster)))
+    yMin <- ymin(get(paste(mnResRaster)))
+    yMax <- ymax(get(paste(mnResRaster)))
+    
+    nwrs <- raster(get(paste(mnResRaster)))
+    
+    cat(ncol(get(paste(mnResRaster))), nrow(get(paste(mnResRaster))),"\n")
+    cat(ncol(get(paste(mxResRaster))), nrow(get(paste(mxResRaster))),"\n")
+    cat(ncol(nwrs), nrow(nwrs), "\n")
+    
+    rm(dfr)
+    
+    cat("\n", "Resampling ", mxResRaster, " with ", mnResRaster, "\n")
+    
+    nwrs <- resample(get(paste(mxResRaster)), nwrs, method='ngb')
+    rsum <- rsum + nwrs
+    rm(nwrs)
+    
+    m <- m+1
+  
+  }
+
+  cat("Average over ", m, " models", "\n")
+  
+  rsum <- rsum / m
+  rsum <- writeRaster(rsum, outFile, format='ascii', overwrite=TRUE)
+  
+  return("GCM Resample Process Done!")
+  
+  }
+
+
+
+
+
+
