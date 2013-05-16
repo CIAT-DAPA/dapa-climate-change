@@ -241,7 +241,7 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
-GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", resol="1") {
+GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990") {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")

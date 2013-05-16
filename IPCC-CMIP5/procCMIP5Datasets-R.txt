@@ -6,6 +6,8 @@ rcp <- "rcp45"
 rcp <- "rcp60"
 rcp <- "rcp85"
 baseDir <- "T:/data/gcm/cmip5/raw/monthly"
+basePer <- "1961_1990"
 
 otp <- GCMTmpCalc(rcp, baseDir)
 otp <- GCMAverage(rcp, baseDir)
+otp <- GCMAnomalies(rcp, baseDir, basePer)
