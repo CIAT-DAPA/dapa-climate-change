@@ -283,20 +283,23 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
         
         if (file.exists(curAvgDir)){
           
-          cat("\Anomalies over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
+          cat("\t Anomalies over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
           
           # Create anomalies output directory 
           if (basePer == "1961_1990"){
 
-            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", staYear, "_", endYear, sep="")  
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s", sep="")
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", staYear, "_", endYear, sep="")  
             
           } else if (basePer == "1971_2000") {
             
-            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")  
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s", sep="")
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
             
           }
           
           if (!file.exists(anomDir)) {dir.create(anomDir)}
+          if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
           
           # Loop around variables
           for (var in varList) {
@@ -305,18 +308,17 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             for (mth in monthList) {
               
               curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
-              futAvgNc <- paste(futAvgDir, "/", var, "_", mth, ".nc", sep="")
+              futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
               
               anomNc <- futAvgNc - curAvgNc
+              # resAnomNc  <- resample(anomNc, rs, method='ngb')
               
               rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
-              # anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=FALSE)
-              # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
-              
-              resAnomNc  <- resample(anomNc, rs, method='ngb')
+              anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=FALSE)
+              resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
 
-              outNc <- paste(anomDir, "/", var, "_", mth, ".nc", sep="")
-              anomNc <- writeRaster(resAnomNc, outNc, format='ascii', overwrite=TRUE)
+              outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
+              anomNc <- writeRaster(resAnomNcExt, outNc, format='ascii', overwrite=TRUE)
               
               cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
               
@@ -326,4 +328,5 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
       }  
     }
   }
+  cat("GCM Anomalies Process Done!")
 }
