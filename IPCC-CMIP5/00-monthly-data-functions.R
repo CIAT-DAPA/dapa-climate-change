@@ -241,60 +241,89 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
-GCMAnomalies <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly") {
+GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", resol="1") {
   
-  rs <- raster(inFile)
-  rs <- readAll(rs)
+  cat(" \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat("XXXXXXXXX GCM ANOMALIES CALCULATION XXXXXXXX \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat(" \n")
+
+  # List of variables and months
+  varList <- c("prec", "tmax", "tmin")
+  monthList <- c(1:12)
   
-  if (xres(rs) == xres(rsum)) {
-    cat("\n", "Not resampling ", "\n")
-    
-    rsum <- rsum + rs
-    m <- m+1
+  curDir <- paste(baseDir, "/historical", sep="")
+  futDir <- paste(baseDir, "/", rcp, sep="")
   
-  } else {
-    
-    dfr <- data.frame(raster=c("rs", "rsum"), resol=c(xres(rs), xres(rsum)))
-    mnResRaster <- trim(dfr[which(dfr[,2] == min(dfr[,2])),1])
-    mxResRaster <- trim(dfr[which(dfr[,2] == max(dfr[,2])),1])
-    
-    nCols <- ncol(get(paste(mnResRaster)))
-    nRows <- nrow(get(paste(mnResRaster)))
-    
-    xMin <- xmin(get(paste(mnResRaster)))
-    xMax <- xmax(get(paste(mnResRaster)))
-    yMin <- ymin(get(paste(mnResRaster)))
-    yMax <- ymax(get(paste(mnResRaster)))
-    
-    nwrs <- raster(get(paste(mnResRaster)))
-    
-    cat(ncol(get(paste(mnResRaster))), nrow(get(paste(mnResRaster))),"\n")
-    cat(ncol(get(paste(mxResRaster))), nrow(get(paste(mxResRaster))),"\n")
-    cat(ncol(nwrs), nrow(nwrs), "\n")
-    
-    rm(dfr)
-    
-    cat("\n", "Resampling ", mxResRaster, " with ", mnResRaster, "\n")
-    
-    nwrs <- resample(get(paste(mxResRaster)), nwrs, method='ngb')
-    rsum <- rsum + nwrs
-    rm(nwrs)
-    
-    m <- m+1
+  gcmList <- list.dirs(curDir, recursive = FALSE, full.names = FALSE)
   
+  for (gcm in gcmList) {
+    
+    # Get gcm names    
+    gcm <- basename(gcm)
+
+    # Path of each ensemble
+    curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
+    
+    # Average directory
+    curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
+    
+    periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+    
+    for (period in periodList) {
+      
+      # Define start and end year
+      staYear <- as.integer(period)
+      endYear <- as.integer(period) + 29
+    
+      futAvgDir <- paste(futDir, "/", gcm, "/", ens, "/average/", staYear, "_", endYear, sep="")
+        
+      if (file.exists(futAvgDir)){
+        
+        if (file.exists(curAvgDir)){
+          
+          cat("\Anomalies over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
+          
+          # Create anomalies output directory 
+          if (basePer == "1961_1990"){
+
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", staYear, "_", endYear, sep="")  
+            
+          } else if (basePer == "1971_2000") {
+            
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")  
+            
+          }
+          
+          if (!file.exists(anomDir)) {dir.create(anomDir)}
+          
+          # Loop around variables
+          for (var in varList) {
+            
+            # Loop around months
+            for (mth in monthList) {
+              
+              curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
+              futAvgNc <- paste(futAvgDir, "/", var, "_", mth, ".nc", sep="")
+              
+              anomNc <- futAvgNc - curAvgNc
+              
+              rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
+              # anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=FALSE)
+              # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
+              
+              resAnomNc  <- resample(anomNc, rs, method='ngb')
+
+              outNc <- paste(anomDir, "/", var, "_", mth, ".nc", sep="")
+              anomNc <- writeRaster(resAnomNc, outNc, format='ascii', overwrite=TRUE)
+              
+              cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+              
+            }    
+          } 
+        }  
+      }  
+    }
   }
-
-  cat("Average over ", m, " models", "\n")
-  
-  rsum <- rsum / m
-  rsum <- writeRaster(rsum, outFile, format='ascii', overwrite=TRUE)
-  
-  return("GCM Resample Process Done!")
-  
-  }
-
-
-
-
-
-
+}
