@@ -307,20 +307,26 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             # Loop around months
             for (mth in monthList) {
               
-              curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
-              futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
+              outAsc <- paste(anomPerDir, "/", var, "_", mth, ".asc", sep="")
               
-              anomNc <- futAvgNc - curAvgNc
-              # resAnomNc  <- resample(anomNc, rs, method='ngb')
-              
-              rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
-              anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=FALSE)
-              resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
-
-              outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
-              anomNc <- writeRaster(resAnomNcExt, outNc, format='ascii', overwrite=TRUE)
-              
-              cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+              if (!file.exists(outAsc)) {
+                
+                curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                
+                anomNc <- futAvgNc - curAvgNc
+                # resAnomNc  <- resample(anomNc, rs, method='ngb')
+                
+                rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
+                anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=FALSE)
+                resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
+  
+                
+                anomNc <- writeRaster(resAnomNcExt, outAsc, format='ascii', overwrite=FALSE)
+                
+                cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+                
+              } else {cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
               
             }    
           } 
@@ -329,4 +335,37 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
     }
   }
   cat("GCM Anomalies Process Done!")
+}
+
+
+
+###########################################################
+# Description: Summary of availables GCMs for downscaling 
+###########################################################
+GCMSummary <- function(baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1") {
+  
+  dataMatrix <- c("model", "ens", "rcp")
+  rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+  
+  for (rcp in rcpList) {
+      
+    futDir <- paste(baseDir, "/", rcp, sep="")
+    
+    gcmList <- list.dirs(futDir, recursive = FALSE, full.names = FALSE)
+    
+    for (gcm in gcmList) {
+      
+      gcm <- basename(gcm)
+      futAnomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s", sep="")
+        
+        if (file.exists(futAnomDir)){
+          
+          dataMatrix <- rbind(dataMatrix,c(gcm, ens, rcp))
+          
+        }  
+      }
+    }
+  
+  write.csv(dataMatrix, paste(baseDir, "/availability-gcm.csv", sep=""), row.names=F)
+  cat("GCM Summary Done!")
 }
