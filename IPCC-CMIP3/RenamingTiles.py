@@ -1,6 +1,6 @@
 import os, sys, glob, string
 
-#python RenamingTiles.py \\dapadfs\data_cluster_4\gcm\cmip3\downscaled_tiled \\dapadfs\data_cluster_4\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_tiled
+# python RenamingTiles.py \\dapadfs\data_cluster_4\gcm\cmip3\downscaled_tiled \\dapadfs\data_cluster_4\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_tiled
 # Examples
 # bccr_bcm2_0_A1B_2020s_bio_ZoneA1_asc.zip
 # bccr_bcm2_0_sres_a1b_2020s_bio_30s_no_tile_asc.zip
@@ -19,7 +19,11 @@ for sres in sreslist:
 		periodlist = sorted(os.listdir(dirbase + "\\" + sres + "\\global_30s\\" + model))
 		for period in periodlist:
 			indir = dirbase + "\\" + sres + "\\global_30s\\" + model + "\\" + period + "\\_tiles"
-			outdir = dirout + "\\" + sres + "\\" + model + "\\" + periodDc[period] + "\\" + model + "\\30s"	
+			outdir = dirout + "\\" + sres + "\\" + periodDc[period] + "\\" + model + "\\30s"	
+			
+			if not os.path.exists(outdir):
+				os.system('mkdir ' + outdir)
+				
 			for var in varlist:
 				# var = os.path.basename(file).split("_")[0]
 				
@@ -28,7 +32,7 @@ for sres in sreslist:
 					outfilename = model + "_" + sres + "_" + periodDc[period] + "_" + var + "_30s_tile_" + zone.lower() + "_asc.zip"
 					
 					if os.path.exists(indir + "\\" + infilename):
-						print "Renaming ", infilename, outfilename
-						# os.rename(indir + "\\" + infilename, outdir + "\\" + outfilename)
+						print "Renaming ", indir + "\\" + infilename, outdir + "\\" + outfilename
+						os.rename(indir + "\\" + infilename, outdir + "\\" + outfilename)
 					
 print "Moving process done!"
