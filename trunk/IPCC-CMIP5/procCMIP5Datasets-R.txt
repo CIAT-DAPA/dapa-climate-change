@@ -18,3 +18,5 @@ basePer <- "1961_1990"
 basePer <- "1971_2000"
 
 otp <- GCMAnomalies(rcp, baseDir, ens, basePer)
+
+otp <- GCMSummary(baseDir, ens)
