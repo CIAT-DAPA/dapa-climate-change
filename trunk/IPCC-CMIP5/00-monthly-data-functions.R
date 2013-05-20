@@ -6,6 +6,7 @@
 
 require(raster)
 require(ncdf)
+require(rgdal)
 # rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
 
 
@@ -366,6 +367,87 @@ GCMSummary <- function(baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1") {
       }
     }
   
-  write.csv(dataMatrix, paste(baseDir, "/availability-gcm.csv", sep=""), row.names=F)
+  write.csv(dataMatrix, paste(baseDir, "/availability-gcm-", ens,".csv", sep=""), row.names=F)
   cat("GCM Summary Done!")
+}
+
+#####################################################################
+# Description: This function is to calculate an ensemble of anomalies
+#####################################################################
+GCMEnsembleAnom <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1975s") {
+  mdAvail <- (paste(sourceDir, "/model_to_run.csv", sep=""))[1:2]
+
+  # List of variables and months
+  varList <- c("prec", "tmax", "tmin")
+  mthList <- c(1:12)
+  
+  gcmSum <- data.frame(read.csv(paste(baseDir, "/availability-gcm-", ens,".csv", sep="")))
+  gcmSum <- gcmSum[gcmSum$rcp == rcp, ]
+  gcmList <- gcmSum$model
+  
+  futDir <- paste(baseDir, "/", rcp, sep="")
+  periodList <- c("2020", "2040", "2060")
+  
+  ensDir <- paste(baseDir, "/ensemble_anomalies", "/", basePer, sep="")
+  if (!file.exists(ensDir)) {
+    dir.create(paste(baseDir, "/ensemble_anomalies", sep=""))
+    dir.create(ensDir)
+  }
+  
+  for (period in periodList) {
+    
+    # Define start and end year
+    staYear <- as.integer(period)
+    endYear <- as.integer(period) + 29
+    
+    gcmMatrix <- matrix(ncol=0, nrow=length(gcmList))
+    varNames <- c()
+    
+    ensDirPer <- paste(ensDir, "/", staYear, "_", endYear, sep="")
+    if (!file.exists(ensDirPer)) {dir.create(ensDirPer)}
+    
+    for (var in varList){
+      
+      for (mth in mthList){
+         
+        for (gcm in gcmList){
+          
+          futAnomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_", basePer, "/", staYear, "_", endYear, sep="")
+          futAnomPath <- paste(futAnomDir, "/", var, "_", mth, ".asc", sep="")
+          
+          # futAnomDir <- paste("T:/gcm/cmip5/raw/monthly/rcp26/", gcm ,"/r1i1p1/anomalies_1975s/2020_2049", sep="")
+          # futAnomPath <- paste(futAnomDir, "/prec_1.asc", sep="")
+          fileList <- c(fileList, futAnomPath)
+        }
+      
+        gcmStack <- stack(lapply(fileList, FUN=raster))
+        
+        fun <- function(x) { sd(x) }
+        
+        gcmMean <- mean(gcmStack)
+        gcmStd <- calc(gcmStack, fun)
+        gcmRange <- range(gcmStack, na.rm = TRUE)
+        
+        
+        gcmMean <- writeRaster(gcmMean, paste(ensDirPer, "/", var, "_", mth, ".asc", sep=""), format='ascii', overwrite=FALSE)
+        gcmStd <- writeRaster(gcmStd, paste(ensDirPer, "/", var, "_", mth, "_sd.asc", sep=""), format='ascii', overwrite=FALSE)
+        gcmRange <- writeRaster(gcmRange, paste(ensDirPer, "/", var, "_", mth, "_ran.asc", sep=""), format='ascii', overwrite=FALSE)
+        
+        stat <- cellStats(gcmStack, mean)
+        
+        gcmMatrix <- data.frame(cbind(as.data.frame(gcmMatrix), as.numeric(stat)))
+        varNames <- cbind((varNames), paste(var, "_", mth, sep=""))
+        
+      }
+    }  
+    
+    colnames(gcmMatrix) <- varNames
+    gcmMatrix <- cbind(as.data.frame(gcmList), gcmMatrix)
+    colnames(gcmMatrix)[1] <- "model"
+    
+    write.csv(dataMatrix, paste(baseDir, "/anomalies-", basePer, "-", rcp, "-", ens, "-", staYear, "_", endYear, sep=""), row.names=F)
+    
+  }
+  
+  cat("GCM Ensemble Anomalies Process Done!")
 }
