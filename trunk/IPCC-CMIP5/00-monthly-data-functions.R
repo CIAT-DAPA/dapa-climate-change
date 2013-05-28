@@ -479,3 +479,67 @@ GCMEnsembleAnom <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1
     cat("GCM Ensemble Anomalies Process Done!")
   }
 }
+
+
+
+
+############################################################################################
+# Description: Script to create images of the differences of ensembles anomalies of GCM data
+############################################################################################
+GCMEnsembleAnomDiff <- function(baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1") {
+  
+  rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+  for (rcp in rcpList){
+    
+    # List of variables and months
+    varList <- c("prec", "tmax", "tmin")
+    mthList <- c(1:12)
+    
+    periodList <- c("2020", "2040", "2060")
+    for (period in periodList) {
+      
+      # Define start and end year
+      staYear <- as.integer(period)
+      endYear <- as.integer(period) + 29
+      
+      ensDir1975s <- paste(baseDir, "/ensemble_anomalies", "/1975s/", rcp, "/", staYear, "_", endYear, sep="")
+      ensDir1985s <- paste(baseDir, "/ensemble_anomalies", "/1985s/", rcp, "/", staYear, "_", endYear, sep="")
+      endDirDiff <- paste(baseDir, "/ensemble_anomalies/diff/", rcp, "/", staYear, "_", endYear, sep="")
+      
+      if (!file.exists(endDirDiff)) {
+        dir.create(paste(baseDir, "/ensemble_anomalies", "/diff", sep=""))
+        dir.create(paste(baseDir, "/ensemble_anomalies", "/diff/", rcp, sep=""))
+        dir.create(endDirDiff)
+      }
+      
+      cat("Ensemble Difference over: ", rcp, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
+      
+      for (var in varList){
+        
+        for (mth in mthList){
+          
+          if (!file.exists(paste(endDirDiff, "/", var, "_", mth, ".jpg", sep=""))){
+            
+            cat(" .> Calculating..  ", paste("\t ", var, "_", mth, sep=""))
+            
+            asc1975 <- raster(paste(ensDir1975s, "/", var, "_", mth, ".asc", sep=""))
+            asc1985 <- raster(paste(ensDir1985s, "/", var, "_", mth, ".asc", sep=""))
+            
+            diffAsc <- asc1975 - asc1985
+            
+            jpeg(paste(endDirDiff, "/", var, "_", mth, ".jpg", sep=""))
+            plot(diffAsc)
+            dev.off()
+            
+            # diffAsc <- writeRaster(diffAsc, paste(endDirDiff, "/", var, "_", mth, ".asc", sep=""), format='ascii', overwrite=FALSE)
+            
+            cat(" .. done!\n")
+            
+          } else { cat(" .> Calculating..  ", paste("\t ", var, "_", mth, " .. done!\n", sep="")) }    
+        }
+      }
+    }
+    
+    cat("GCM Ensemble Differences Anomalies Process Done!")
+  }
+}  
