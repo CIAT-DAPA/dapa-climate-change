@@ -4,7 +4,7 @@
 
 ##########################################################################
 ######### PROJECTION DATA
-collate_adap <- function(cells,runsDir,gcm,intype,co2,varNames,expSel,sdList) {
+collate_adap <- function(cells,runsDir,gcm,intype,co2,varNames,expSel,sdList,boutDir) {
   cat("collating",gcm,"and",intype,"and",co2,"\n")
   
   #output directory
