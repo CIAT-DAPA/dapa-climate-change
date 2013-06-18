@@ -71,9 +71,9 @@ get_adap_data <- function(runsDir, glam_ens, gcm_ens, input_type, co2_par, loc, 
     data_array[loc,glam_ens,"RFD",,"DUR",paste(j)] <- rfd_data$DUR
     data_array[loc,glam_ens,"RFD",,"TRADABS",paste(j)] <- rfd_data$TRADABS
     data_array[loc,glam_ens,"RFD",,"TP_UP",paste(j)] <- rfd_data$TP_UP
-    data_array[loc,glam_ens,"RFD",,"T_TRANS",paste(j)] <- rfd_data$T_TRANS
-    data_array[loc,glam_ens,"RFD",,"TP_TRANS",paste(j)] <- rfd_data$TP_TRANS
-    data_array[loc,glam_ens,"RFD",,"TOTPP",paste(j)] <- rfd_data$TOTPP
+    #data_array[loc,glam_ens,"RFD",,"T_TRANS",paste(j)] <- rfd_data$T_TRANS
+    #data_array[loc,glam_ens,"RFD",,"TP_TRANS",paste(j)] <- rfd_data$TP_TRANS
+    #data_array[loc,glam_ens,"RFD",,"TOTPP",paste(j)] <- rfd_data$TOTPP
     data_array[loc,glam_ens,"RFD",,"TOTPP_HIT",paste(j)] <- rfd_data$TOTPP_HIT
     data_array[loc,glam_ens,"RFD",,"TOTPP_WAT",paste(j)] <- rfd_data$TOTPP_WAT
     data_array[loc,glam_ens,"RFD",,"LAI",paste(j)] <- rfd_data$LAI
@@ -89,9 +89,9 @@ get_adap_data <- function(runsDir, glam_ens, gcm_ens, input_type, co2_par, loc, 
     data_array[loc,glam_ens,"IRR",,"DUR",paste(j)] <- irr_data$DUR
     data_array[loc,glam_ens,"IRR",,"TRADABS",paste(j)] <- irr_data$TRADABS
     data_array[loc,glam_ens,"IRR",,"TP_UP",paste(j)] <- irr_data$TP_UP
-    data_array[loc,glam_ens,"IRR",,"T_TRANS",paste(j)] <- irr_data$T_TRANS
-    data_array[loc,glam_ens,"IRR",,"TP_TRANS",paste(j)] <- irr_data$TP_TRANS
-    data_array[loc,glam_ens,"IRR",,"TOTPP",paste(j)] <- irr_data$TOTPP
+    #data_array[loc,glam_ens,"IRR",,"T_TRANS",paste(j)] <- irr_data$T_TRANS
+    #data_array[loc,glam_ens,"IRR",,"TP_TRANS",paste(j)] <- irr_data$TP_TRANS
+    #data_array[loc,glam_ens,"IRR",,"TOTPP",paste(j)] <- irr_data$TOTPP
     data_array[loc,glam_ens,"IRR",,"TOTPP_HIT",paste(j)] <- irr_data$TOTPP_HIT
     data_array[loc,glam_ens,"IRR",,"TOTPP_WAT",paste(j)] <- irr_data$TOTPP_WAT
     data_array[loc,glam_ens,"IRR",,"LAI",paste(j)] <- irr_data$LAI

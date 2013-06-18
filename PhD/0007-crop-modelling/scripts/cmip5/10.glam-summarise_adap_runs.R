@@ -45,29 +45,40 @@ gcmList_p2 <- list.files(paste(runsDir_p2,"/exp-33_outputs",sep=""),pattern="_EN
 gcmList <- data.frame(GCM=c(gcmList_p1,gcmList_p2),RDIR=c(rep(runsDir_p1,times=length(gcmList_p1)),rep(runsDir_p2,times=length(gcmList_p2))))
 
 #list of variables of interest
-varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
-              "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD","T_RAIN","TBARTOT","VPDTOT")
+#varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","T_TRANS","TP_TRANS","TOTPP",
+#              "TOTPP_HIT","TOTPP_WAT","LAI","HI","BMASS","YIELD","T_RAIN","TBARTOT","VPDTOT")
+
+varNames <- c("YGP","STG","DUR","TRADABS","TP_UP","TOTPP_HIT","TOTPP_WAT",
+              "LAI","HI","BMASS","YIELD","T_RAIN","TBARTOT","VPDTOT")
 
 #load experiments setup
 adap_runs <- read.table(paste(cropDir,"/adapt/data/adapt.tab",sep=""),sep="\t",header=T)
 
 
-for (i in 1:nrow(gcmList)) {
-  #i <- 1
-  #summarise everything in here
-  #maybe parallelise stuff
-  
+#for (gcm_i in 1:nrow(gcmList)) {
+collate_this <- function(gcm_i) {
+  #gcm_i <- 1
   for (n in 1:length(expList_rcp)) {
     #n <- 1
     for (z in 1:length(CO2ExpList)) {
       #z <- 1
-      stat <- collate_adap(cells,runsDir=paste(gcmList$RDIR[i]),gcm=paste(gcmList$GCM[i]),
+      stat <- collate_adap(cells,runsDir=paste(gcmList$RDIR[gcm_i]),gcm=paste(gcmList$GCM[gcm_i]),
                            intype=expList_rcp[n],co2=CO2ExpList[z],varNames,expSel,sdList,
                            boutDir=runsDir_p2)
     }
   }
 }
 
+
+collate_this(1) #1 to 14
+
+# xt = x / (x+z)
+# z <- 50
+# x <- seq(0.5,1000,by=0.1)
+# xt <- x / (x+z)
+# yt <- (x-min(x)) / (max(x)-min(x))
+# plot(x,xt,ty="l",ylim=c(0,1))
+# plot(x,yt,ty="l",ylim=c(0,1))
 
 
 
