@@ -8,7 +8,7 @@
 apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun) {
   #determine maximum processing load
   bs <- blockSize(clm_stk, n=20, minblocks=2)
-  cat("\nprocessing in:", bs$n, " chunks \n", sep="")
+  cat("\nprocessing in: ", bs$n, " chunks \n", sep="")
   
   #output raster
   outraster <- raster(clm_stk)

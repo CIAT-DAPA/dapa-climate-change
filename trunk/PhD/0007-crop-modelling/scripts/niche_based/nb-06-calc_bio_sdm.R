@@ -24,10 +24,6 @@ clmDir <- paste(envDir,"/climate",sep="")
 outDir <- paste(clmDir,"/bio_ind_30s",sep="")
 if (!file.exists(outDir)) {dir.create(outDir)}
 
-
-#####################################
-#### 1. Feng's seasonality index
-#####################################
 #load monthly rainfall
 rain_stk <- stack(paste(clmDir,"/wcl_ind_30s/prec_",1:12,".tif",sep=""))
 if (!file.exists(paste(outDir,"/totrain.tif",sep=""))) {
@@ -42,25 +38,15 @@ sowd <- raster(paste(calDir,"/plant_ind.tif",sep=""))
 hard <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
 
 
-
-
-
-
-
-
-
-
+#####################################
+#### 1. Total seasonal rainfall
+#####################################
 #calculate total seasonal rainfall and write raster
 if (!file.exists(paste(outDir,"/seasrain.tif",sep=""))) {
   #calculate
-  seasrain <- apply(xy,1,calc_totrain)
-  
-  #get into raster
-  srain_rs <- raster(totrain)
-  srain_rs[xy$cell] <- seasrain
-  
+  seasrain <- apply_by_blocks(rain_stk,sowd,hard,calc_totrain)
   #write seasonal rainfall total raster
-  writeRaster(srain_rs,paste(outDir,"/seasrain.tif",sep=""),format="GTiff")
+  writeRaster(seasrain,paste(outDir,"/seasrain.tif",sep=""),format="GTiff")
 } else {
   srain_rs <- raster(paste(outDir,"/seasrain.tif",sep=""))
 }
