@@ -126,7 +126,7 @@ calc_minrain <- function(x) {
 
 
 #####
-#function to calculate minimum seasonal rainfall
+#function to calculate mean, maximum and minimum growing season temperature
 calc_meantemp <- function(x,...) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
@@ -155,7 +155,7 @@ calc_meantemp <- function(x,...) {
 
 
 #####
-#function to calculate minimum seasonal rainfall
+#function to calculate number of days with Tmax > 34 C
 calc_tcdays <- function(x) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
@@ -177,6 +177,42 @@ calc_tcdays <- function(x) {
   return(tcritdays)
 }
 #####
+
+
+#####
+#function to calculate growing degree days (Tb=10, To=28, Tm=50)
+calc_gdd <- function(x) {
+  monclim <- x[1:12]
+  sow <- x[13]; har <- x[14] #sowing and harvest dates
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
+  
+  #growing season start and end
+  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  
+  monclim <- c(monclim[12],monclim,monclim[1])
+  dayclim <- linearise(monclim)[16:(365+15)]
+  
+  for (gday in gs) {
+   if (tmean < tbase) {
+      gdd <- gdd+0
+    } else  if (tmean >= tbase & tmean <= topt) {
+      gdd <- gdd + (tmean-tbase)
+    } else if (tmean > topt) {
+      gdd <- gdd + (topt-tbase)
+    }
+  }
+  
+  #extract daily climate
+  dayclim <- dayclim[gs]
+  
+  #calculate and return
+  tcritdays <- length(which(dayclim > 340))
+  return(tcritdays)
+}
+#####
+
 
 
 #to linearise monthly data
