@@ -43,10 +43,7 @@ hard <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
 #####################################
 #calculate total seasonal rainfall and write raster
 if (!file.exists(paste(outDir,"/seasrain.tif",sep=""))) {
-  #calculate
   seasrain <- apply_by_blocks(rain_stk,sowd,hard,calc_totrain)
-  
-  #write seasonal rainfall total raster
   writeRaster(seasrain,paste(outDir,"/seasrain.tif",sep=""),format="GTiff")
 } else {
   seasrain <- raster(paste(outDir,"/seasrain.tif",sep=""))
@@ -55,66 +52,55 @@ if (!file.exists(paste(outDir,"/seasrain.tif",sep=""))) {
 #get maximum rainfall for normalising
 rx <- seasrain@data@max
 
-
 #####################################
 #### 2. Feng et al. (2013)'s seasonality index
 #####################################
 #run the calculation
 if (!file.exists(paste(outDir,"/sindex.tif",sep=""))) {
-  #calculate
   sindex <- apply_by_blocks(rain_stk,sowd,hard,calc_sfeng,rx)
-  
-  #write seasonal rainfall total raster
   writeRaster(sindex,paste(outDir,"/sindex.tif",sep=""),format="GTiff")
 } else {
   sindex <- raster(paste(outDir,"/sindex.tif",sep=""))
 }
 
 
-test_function("test",r_max)
-
 
 #####################################
 #### 3. minimum rainfall during growing season
 #####################################
-
-#function to calculate total seasonal rainfall
-calc_minrain <- function(x) {
-  cell <- x[1]
-  lon <- x[2]; lat <- x[3] #longitude
-  sow <- x[4]; har <- x[5] #sowing and harvest dates
-  
-  #growing season start and end
-  Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
-  Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
-  if (Gf < Gi) {rs_list <- c(Gf:12,1:Gi)} else {rs_list <- c(Gi:Gf)}
-  
-  #extract monthly climate
-  monclim <- rain_stk[cell]
-  monclim <- as.numeric(monclim[,rs_list])
-  
-  #calculate and return
-  minrain <- sum(monclim)
-  return(minrain)
+#run the calculation
+if (!file.exists(paste(outDir,"/minrain.tif",sep=""))) {
+  sminrain <- apply_by_blocks(rain_stk,sowd,hard,calc_minrain)
+  writeRaster(sminrain,paste(outDir,"/minrain.tif",sep=""),format="GTiff")
+} else {
+  sminrain <- raster(paste(outDir,"/minrain.tif",sep=""))
 }
-#####
+
+
+#####################################
+#### 4. mean/min/max temperature growing season
+#####################################
+tmen_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
+tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
+tmax_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
 
 #calculate total seasonal rainfall and write raster
-if (!file.exists(paste(outDir,"/minrain.tif",sep=""))) {
+if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
   #calculate
-  sminrain <- apply(xy,1,calc_minrain)
+  smeantemp <- apply_by_blocks(rain_stk,sowd,hard,calc_meantemp,"mean")
+  writeRaster(smeantemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
   
-  #get into raster
-  minrain_rs <- raster(totrain)
-  minrain_rs[xy$cell] <- sminrain
+  smintemp <- apply_by_blocks(rain_stk,sowd,hard,calc_meantemp,"min")
+  writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
   
-  #write seasonal rainfall total raster
-  writeRaster(minrain_rs,paste(outDir,"/minrain.tif",sep=""),format="GTiff")
+  smintemp <- apply_by_blocks(rain_stk,sowd,hard,calc_meantemp,"min")
+  writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
+  
+  
+  
 } else {
-  minrain_rs <- raster(paste(outDir,"/minrain.tif",sep=""))
+  sminrain <- raster(paste(outDir,"/minrain.tif",sep=""))
 }
-
-
 
 
 

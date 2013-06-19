@@ -99,3 +99,58 @@ calc_sfeng <- function(x,...) {
   return(s_ind)
 }
 #####
+
+
+#####
+#function to calculate minimum seasonal rainfall
+calc_minrain <- function(x) {
+  monclim <- x[1:12]
+  sow <- x[13]; har <- x[14] #sowing and harvest dates
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
+  
+  #growing season start and end
+  Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
+  Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
+  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  
+  #extract monthly climate
+  monclim <- monclim[gs]
+  
+  #calculate and return
+  minrain <- min(monclim)
+  return(minrain)
+}
+#####
+
+
+#####
+#function to calculate minimum seasonal rainfall
+calc_meantemp <- function(x,...) {
+  monclim <- x[1:12]
+  sow <- x[13]; har <- x[14] #sowing and harvest dates
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
+  
+  #growing season start and end
+  Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
+  Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
+  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  
+  wfunc <- list(...)[[1]]
+  
+  #extract monthly climate
+  monclim <- monclim[gs]
+  
+  #calculate and return
+  if (wfunc == "mean") {meantemp <- mean(monclim)}
+  if (wfunc == "min") {meantemp <- min(monclim)}
+  if (wfunc == "max") {meantemp <- max(monclim)}
+  
+  return(meantemp)
+}
+#####
+
+
