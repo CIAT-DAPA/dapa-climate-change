@@ -3,9 +3,10 @@
 
 ###
 #various functions that are needed
+###
 
 #apply a function by blocks to enhance memory use
-apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun) {
+apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun,...) {
   #determine maximum processing load
   bs <- blockSize(clm_stk, n=20, minblocks=2)
   cat("\nprocessing in: ", bs$n, " chunks \n", sep="")
@@ -15,7 +16,7 @@ apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun) {
   
   for (b in 1:bs$n) {
     #b <- 1
-    cat("\t",round(b/bs$n*100,2),"%",sep="")
+    cat(" ",round(b/bs$n*100,2),"%",sep="")
     
     iniCell <- 1+(bs$row[b]-1)*ncol(outraster)
     finCell <- (bs$row[b]+bs$nrow[b]-1)*ncol(outraster)
@@ -27,7 +28,7 @@ apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun) {
       rowVals <- extract(clm_stk,validCells)
       rowVals <- cbind(rowVals,sow=extract(sow_date,validXY))
       rowVals <- cbind(rowVals,har=extract(har_date,validXY))
-      rasVals <- apply(rowVals, 1, this_fun)
+      rasVals <- apply(rowVals, 1, this_fun, ...)
     } else {
       rasVals <- NA
     }
@@ -62,3 +63,39 @@ calc_totrain <- function(x) {
 #####
 
 
+#####
+#function to calculate seasonality index
+calc_sfeng <- function(x,...) {
+  monclim <- x[1:12]
+  sow <- x[13]; har <- x[14] #sowing and harvest dates
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
+  
+  #growing season start and end
+  Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
+  Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
+  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  
+  #extract monthly climate
+  monclim <- monclim[gs]
+  
+  r_max <- list(...)[[1]]
+  cat("r_max=",r_max,"\n")
+  
+  #monclim is the monthly climate that is used to calculate the relative entropy distribution
+  if (length(which(is.na(monclim)))!=0) {
+    s_ind <- NA
+  } else {
+    r_bar <- sum(monclim) #mean rainfall
+    pm <- monclim / r_bar; pm <- pm[which(pm > 0)]; qm <- 1 / 12 #prob. distributions
+    if (length(pm) >= 1) {
+      d_ent <- pm / qm ; d_ent <- sum(pm * log(d_ent,base=2)) #rel. entropy [D=sum(pm*log2(pm/qm))]
+      s_ind <- d_ent * (r_bar / r_max) #seasonality index
+    } else {
+      s_ind <- NA
+    }
+  }
+  return(s_ind)
+}
+#####
