@@ -45,64 +45,33 @@ hard <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
 if (!file.exists(paste(outDir,"/seasrain.tif",sep=""))) {
   #calculate
   seasrain <- apply_by_blocks(rain_stk,sowd,hard,calc_totrain)
+  
   #write seasonal rainfall total raster
   writeRaster(seasrain,paste(outDir,"/seasrain.tif",sep=""),format="GTiff")
 } else {
-  srain_rs <- raster(paste(outDir,"/seasrain.tif",sep=""))
+  seasrain <- raster(paste(outDir,"/seasrain.tif",sep=""))
 }
 
 #get maximum rainfall for normalising
-r_max <- srain_rs@data@max
+rx <- seasrain@data@max
 
 
-#####
-#function to calculate seasonality index
-calc_sfeng <- function(x) {
-  cell <- x[1]
-  lon <- x[2]; lat <- x[3] #longitude
-  sow <- x[4]; har <- x[5] #sowing and harvest dates
-  
-  #growing season start and end
-  Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
-  Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
-  if (Gf < Gi) {rs_list <- c(Gf:12,1:Gi)} else {rs_list <- c(Gi:Gf)}
-  
-  #extract monthly climate
-  monclim <- rain_stk[cell]
-  monclim <- as.numeric(monclim[,rs_list])
-  
-  #monclim is the monthly climate that is used to calculate the relative entropy distribution
-  if (length(which(is.na(monclim)))!=0) {
-    s_ind <- NA
-  } else {
-    r_bar <- sum(monclim) #mean rainfall
-    pm <- monclim / r_bar; pm <- pm[which(pm > 0)]; qm <- 1 / 12 #prob. distributions
-    if (length(pm) >= 1) {
-      d_ent <- pm / qm ; d_ent <- sum(pm * log(d_ent,base=2)) #rel. entropy [D=sum(pm*log2(pm/qm))]
-      s_ind <- d_ent * (r_bar / r_max) #seasonality index
-    } else {
-      s_ind <- NA
-    }
-  }
-  return(s_ind)
-}
-#####
-
-
+#####################################
+#### 2. Feng et al. (2013)'s seasonality index
+#####################################
 #run the calculation
 if (!file.exists(paste(outDir,"/sindex.tif",sep=""))) {
   #calculate
-  sindex <- apply(xy,1,calc_sfeng)
-  
-  #get into raster
-  sindex_rs <- raster(totrain)
-  sindex_rs[xy$cell] <- sindex*10000
+  sindex <- apply_by_blocks(rain_stk,sowd,hard,calc_sfeng,rx)
   
   #write seasonal rainfall total raster
-  writeRaster(sindex_rs,paste(outDir,"/sindex.tif",sep=""),format="GTiff")
+  writeRaster(sindex,paste(outDir,"/sindex.tif",sep=""),format="GTiff")
 } else {
-  sindex_rs <- raster(paste(outDir,"/sindex.tif",sep=""))
+  sindex <- raster(paste(outDir,"/sindex.tif",sep=""))
 }
+
+
+test_function("test",r_max)
 
 
 #####################################
