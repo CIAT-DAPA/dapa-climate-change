@@ -70,15 +70,16 @@ collate_this <- function(gcm_i) {
 }
 
 
-collate_this(1) #1 to 14
+collate_this(7) #1 to 14
 
 # xt = x / (x+z)
 # z <- 50
 # x <- seq(0.5,1000,by=0.1)
 # xt <- x / (x+z)
 # yt <- (x-min(x)) / (max(x)-min(x))
+# zt <- (max(x)-x) / (max(x)-min(x))
 # plot(x,xt,ty="l",ylim=c(0,1))
 # plot(x,yt,ty="l",ylim=c(0,1))
-
+# plot(x,zt,ty="l",ylim=c(0,1))
 
 
