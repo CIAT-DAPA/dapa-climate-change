@@ -81,7 +81,7 @@ calc_sfeng <- function(x,...) {
   monclim <- monclim[gs]
   
   r_max <- list(...)[[1]]
-  cat("r_max=",r_max,"\n")
+  #cat("r_max=",r_max,"\n")
   
   #monclim is the monthly climate that is used to calculate the relative entropy distribution
   if (length(which(is.na(monclim)))!=0) {
