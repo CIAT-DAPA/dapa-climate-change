@@ -154,3 +154,42 @@ calc_meantemp <- function(x,...) {
 #####
 
 
+#####
+#function to calculate minimum seasonal rainfall
+calc_tcdays <- function(x) {
+  monclim <- x[1:12]
+  sow <- x[13]; har <- x[14] #sowing and harvest dates
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
+  
+  #growing season start and end
+  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  
+  monclim <- c(monclim[12],monclim,monclim[1])
+  dayclim <- linearise(monclim)[16:(365+15)]
+  
+  #extract daily climate
+  dayclim <- dayclim[gs]
+  
+  #calculate and return
+  tcritdays <- length(which(dayclim > 340))
+  return(tcritdays)
+}
+#####
+
+
+#to linearise monthly data
+linearise <- function(input_vals) {
+  day_mid <- c(-15,16,45,75,106,136,167,197,228,259,289,320,350,381)
+  daily_vals <- rep(NA,times=(day_mid[14]-day_mid[1]+1))
+  for (mth in 1:13) {
+    deltawth <- (input_vals[mth+1]-input_vals[mth]) / (day_mid[mth+1]-day_mid[mth])
+    
+    for (d in day_mid[mth]:day_mid[mth+1]) {
+      daily_vals[d+16] <- input_vals[mth] + deltawth*(d-day_mid[mth])
+    }
+  }
+  return(daily_vals)
+}
+

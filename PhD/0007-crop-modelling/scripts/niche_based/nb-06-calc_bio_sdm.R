@@ -81,27 +81,32 @@ if (!file.exists(paste(outDir,"/minrain.tif",sep=""))) {
 #### 4. mean/min/max temperature growing season
 #####################################
 tmen_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
-tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
-tmax_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
+tmax_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep=""))
+tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""))
 
 #calculate total seasonal rainfall and write raster
 if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
   #calculate
-  smeantemp <- apply_by_blocks(rain_stk,sowd,hard,calc_meantemp,"mean")
-  writeRaster(smeantemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
+  smeantemp <- apply_by_blocks(tmen_stk,sowd,hard,calc_meantemp,"mean")
+  writeRaster(smeantemp,paste(outDir,"/meantemp.tif",sep=""),format="GTiff")
   
-  smintemp <- apply_by_blocks(rain_stk,sowd,hard,calc_meantemp,"min")
+  smaxtemp <- apply_by_blocks(tmax_stk,sowd,hard,calc_meantemp,"max")
+  writeRaster(smintemp,paste(outDir,"/maxtemp.tif",sep=""),format="GTiff")
+  
+  smintemp <- apply_by_blocks(tmin_stk,sowd,hard,calc_meantemp,"min")
   writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
-  
-  smintemp <- apply_by_blocks(rain_stk,sowd,hard,calc_meantemp,"min")
-  writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
-  
-  
-  
-} else {
-  sminrain <- raster(paste(outDir,"/minrain.tif",sep=""))
-}
+} 
 
 
+#####################################
+#### 5. number of days with Tmax > 34C
+#####################################
+
+#calculate total seasonal rainfall and write raster
+if (!file.exists(paste(outDir,"/daystcrit.tif",sep=""))) {
+  #calculate
+  daystcrit <- apply_by_blocks(tmax_stk,sowd,hard,calc_tcdays)
+  writeRaster(daystcrit,paste(outDir,"/daystcrit.tif",sep=""),format="GTiff")
+} 
 
 
