@@ -95,7 +95,11 @@ if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
   
   smintemp <- apply_by_blocks(tmin_stk,sowd,hard,calc_meantemp,"min")
   writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
-} 
+} else {
+  smeantemp <- raster(paste(outDir,"/meantemp.tif",sep=""))
+  smaxtemp <- raster(paste(outDir,"/maxtemp.tif",sep=""))
+  smintemp <- raster(paste(outDir,"/mintemp.tif",sep=""))
+}
 
 
 #####################################
@@ -106,7 +110,9 @@ if (!file.exists(paste(outDir,"/daystcrit.tif",sep=""))) {
   #calculate
   daystcrit <- apply_by_blocks(tmax_stk,sowd,hard,calc_tcdays)
   writeRaster(daystcrit,paste(outDir,"/daystcrit.tif",sep=""),format="GTiff")
-} 
+} else {
+  daystcrit <- raster(paste(outDir,"/daystcrit.tif",sep=""))
+}
 
 
 #####################################
@@ -117,7 +123,9 @@ if (!file.exists(paste(outDir,"/totgdd.tif",sep=""))) {
   #calculate
   totgdd <- apply_by_blocks(tmen_stk,sowd,hard,calc_gdd)
   writeRaster(totgdd,paste(outDir,"/totgdd.tif",sep=""),format="GTiff")
-} 
+} else {
+  totgdd <- raster(paste(outDir,"/totgdd.tif",sep=""))
+}
 
 
 #####################################
@@ -130,6 +138,6 @@ if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
   #calculate
   totvpd <- apply_by_blocks(tnx_stk,sowd,hard,calc_vdp)
   writeRaster(totvpd,paste(outDir,"/totvpd.tif",sep=""),format="GTiff")
-} 
+}
 
 
