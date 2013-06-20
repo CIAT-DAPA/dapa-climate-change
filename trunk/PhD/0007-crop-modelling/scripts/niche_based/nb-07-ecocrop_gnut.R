@@ -4,7 +4,7 @@
 stop("not to run yet")
 
 #### LIBRARIES: raster, maptools, rgdal, sp
-library(raster); library(rgdal); library(maptools); library(MASS)
+library(raster); library(rgdal); library(maptools); library(MASS); library(sfsmisc)
 data(wrld_simpl)
 
 #sources dir
@@ -18,8 +18,10 @@ src.dir3 <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source the model and other functions
 source(paste(src.dir3,"/scripts/niche_based/EcoCrop-model.R",sep=""))
+source(paste(src.dir3,"/scripts/niche_based/nb-07-ecocrop_gnut-fun.R",sep=""))
 source(paste(src.dir1,"/src/randomSplit.R",sep=""))
 source(paste(src.dir1,"/src/extractClimateData.R",sep=""))
+source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #basic information
 crop_name <- "gnut"
@@ -36,8 +38,13 @@ ecoDir <- paste(modDir,"/EcoCrop",sep="")
 
 dataDir <- paste(ecoDir,"/data",sep="")
 imgDir <- paste(ecoDir,"/img",sep="")
+runDir <- paste(ecoDir,"/runs",sep="")
+pdfDir <- paste(imgDir,"/pdf_runs",sep="")
 if (!file.exists(dataDir)) {dir.create(dataDir)}
 if (!file.exists(imgDir)) {dir.create(imgDir)}
+if (!file.exists(runDir)) {dir.create(runDir)}
+if (!file.exists(pdfDir)) {dir.create(pdfDir)}
+
 
 ######################################################################
 #Getting unique coordinates
@@ -106,62 +113,158 @@ pdate <- raster(paste(calDir,"/plant_ind.tif",sep=""))
 hdate <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
 
 #using these data select the growing season for each of the points
-rs$SOW_DATE <- round(extract(pdate,cbind(x=rs$longitude,y=rs$latitude)),0)
-rs$HAR_DATE <- round(extract(hdate,cbind(x=rs$longitude,y=rs$latitude)),0)
+loc_clim$SOW_DATE <- round(extract(pdate,cbind(x=loc_clim$LON,y=loc_clim$LAT)),0)
+loc_clim$HAR_DATE <- round(extract(hdate,cbind(x=loc_clim$LON,y=loc_clim$LAT)),0)
+loc_clim$SOW_DATE[which(is.na(loc_clim$SOW_DATE) & is.na(loc_clim$HAR_DATE))] <- 152
+loc_clim$HAR_DATE[which(is.na(loc_clim$HAR_DATE))] <- loc_clim$SOW_DATE[which(is.na(loc_clim$HAR_DATE))]+122
+loc_clim$HAR_DATE[which(loc_clim$HAR_DATE > 365)] <- loc_clim$HAR_DATE[which(loc_clim$HAR_DATE > 365)] - 365
 
 dg <- createDateGrid(2005)
 dg$MTH <- as.numeric(substr(dg$MTH.DAY,2,3))
 dg$DAY <- as.numeric(substr(dg$MTH.DAY,5,6))
 dg$MTH.DAY <- NULL
 
-rs$SOW_MTH <- round(sapply(rs$SOW_DATE,FUN=find_month,dg),0)
-rs$HAR_MTH <- round(sapply(rs$HAR_DATE,FUN=find_month,dg),0)
-rs$DUR <- NA
-rs$DUR[which(rs$HAR_MTH < rs$SOW_MTH)] <- (365-rs$HAR_MTH[which(rs$HAR_MTH < rs$SOW_MTH)]) + rs$SOW_MTH[which(rs$HAR_MTH < rs$SOW_MTH)]
-rs$DUR[which(rs$HAR_MTH > rs$SOW_MTH)] <- rs$HAR_MTH[which(rs$HAR_MTH > rs$SOW_MTH)] - rs$SOW_MTH[which(rs$HAR_MTH > rs$SOW_MTH)]
+loc_clim$SOW_MTH <- round(sapply(loc_clim$SOW_DATE,FUN=find_month,dg),0)
+loc_clim$HAR_MTH <- round(sapply(loc_clim$HAR_DATE,FUN=find_month,dg),0)
+loc_clim$DUR <- NA
+loc_clim$DUR[which(loc_clim$HAR_MTH < loc_clim$SOW_MTH)] <- (365-loc_clim$HAR_MTH[which(loc_clim$HAR_MTH < loc_clim$SOW_MTH)]) + loc_clim$SOW_MTH[which(loc_clim$HAR_MTH < loc_clim$SOW_MTH)] + 1
+loc_clim$DUR[which(loc_clim$HAR_MTH > loc_clim$SOW_MTH)] <- loc_clim$HAR_MTH[which(loc_clim$HAR_MTH > loc_clim$SOW_MTH)] - loc_clim$SOW_MTH[which(loc_clim$HAR_MTH > loc_clim$SOW_MTH)]
 
 #produce growing season parameters based on sowing date and duration
-rs_out <- lapply(1:nrow(rs),FUN=get_gs_data,rs)
-rs_out <- do.call("rbind",rs_out)
-write.csv(rs_out, paste(ec_dir,"/analyses/data/calibration.csv",sep=""), row.names=F, quote=T)
+loc_calib <- lapply(1:nrow(loc_clim),FUN=get_gs_data,loc_clim)
+loc_calib <- do.call("rbind",loc_calib)
+write.csv(loc_calib, paste(dataDir,"/calib_input_clim.csv",sep=""), row.names=F, quote=T)
 
 
 ######################################################################
-#Get calibration parameters
-dataset <- read.csv(paste(ec_dir,"/analyses/data/calibration.csv",sep=""))
-gs <- 1
-plotdata <- dataset[,grep(paste("GS", gs, "_", sep=""), names(dataset))]
-varList <- c("prec", "tmean", "tmin", "tmax")
-v <- 1
-for (varn in varList) {
-  calPar <- getParameters(plotdata[,v], nb=200, plotit=T, 
-                          plotdir=paste(ec_dir,"/analyses/img",sep=""), 
-                          gs=gs, varname=varn)
-  if (v == 1) {finalTable <- calPar} else {finalTable <- rbind(finalTable, calPar)}
-  v <- v+1
+#Load dataset for model calibration
+dataset <- read.csv(paste(dataDir,"/calib_input_clim.csv",sep=""))
+dataset <- dataset[which(dataset$TEST_TRAIN == "TRAIN"),]
+dataset <- dataset[,grep("GS_",names(dataset))]
+
+
+######################################################################
+#Plot pdfs of all temperatures together for comparison / reference
+col.sym <- expand.grid(COL=c("black","blue","red"),SYM=c(1,2,3))
+for (vid in 2:length(names(dataset))) {
+  #vid <- 2
+  vn <- names(dataset)[vid]
+  tpdf <- density(dataset[,vn])
+  if (vid == 2) {
+    jpeg(paste(imgDir, "/pdf_temperature.jpg", sep=""), 
+         quality=100, height=1024, width=1024,pointsize=7,res=300)
+    par(mar=c(4,4,1,1))
+    plot(tpdf,main=NA,xlab="Seasonal temperatures (Celsius)",col=paste(col.sym$COL)[vid-1],
+         lty=col.sym$SYM[vid-1],xlim=c(100,400),ylim=c(0,0.03))
+    grid()
+  } else {
+    lines(tpdf,col=paste(col.sym$COL)[vid-1],lty=col.sym$SYM[vid-1])
+  }
 }
-write.csv(finalTable, paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""), row.names=F)
+dev.off()
+
+#plot of all temperatures
+all_temp <- as.numeric(as.matrix(dataset[,c("GS_TN","GS_TX","GS_XN","GS_XX","GS_NN","GS_NX")]))
+tpdf <- density(all_temp)
+jpeg(paste(imgDir, "/pdf_temperature_all.jpg", sep=""), 
+     quality=100, height=1024, width=1024,pointsize=7,res=300)
+par(mar=c(4,4,1,1))
+plot(tpdf,main=NA,xlab="Seasonal temperatures (Celsius)",col="black",
+     lty=1)
+grid()
+dev.off()
+
+
+######################################################################
+#creating a perturbed parameter ensemble that will be assessed
+#parameters (that can be perturbed)
+#carry out 25 perturbations
+min_list <- max_list <- c(0.9,0.925,0.95,0.975,0.99,1)
+opmin_list <- opmax_list <- c(0.4,0.45,0.5,0.55,0.6)
+runs <- expand.grid(ABS=min_list,OPT=opmin_list)
+
+#precipitation and temperature vectors (only one temperature vector is allowed)
+all_temp <- as.numeric(as.matrix(dataset[,c("GS_TN","GS_TX","GS_XN","GS_XX","GS_NN","GS_NX")]))
+all_prec <- dataset$GS_P
+
+#create parameter sets
+all_pset <- data.frame()
+for (ri in 1:nrow(runs)) {
+  #ri <- 1
+  cat("making parameter set for run:",ri,"\n")
+  tpar <- list(kill=1,min=runs$ABS[ri],opmin=runs$OPT[ri],opmax=runs$OPT[ri],max=runs$ABS[ri])
+  pr_par <- getParameters(all_prec, tpar, stat="mode", plotit=T, plotdir=pdfDir, 
+                          xlabel="Seasonal precipitation",
+                          filename=paste("calib_pdf_prec_run-",ri,".jpg",sep=""))
+  pr_par <- cbind(RUN=ri,VARIABLE="PREC",pr_par)
+  
+  tm_par <- getParameters(all_temp, tpar, stat="mean", plotit=T, plotdir=pdfDir, 
+                          xlabel="Seasonal mean temperature",
+                          filename=paste("calib_pdf_tmean_run-",ri,".jpg",sep=""))
+  tm_par <- cbind(RUN=ri,VARIABLE="TMEAN",tm_par)
+  
+  all_pset <- rbind(all_pset,pr_par,tm_par)
+}
+write.csv(all_pset, paste(dataDir,"/parameter_sets.csv",sep=""), row.names=F)
 
 
 ######################################################################
 #Running the model
-gs <- 1
-p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
-p <- p[which(p$GS==gs),]
-vl <- c("tmean","tmin","tmax")
-for (rw in 2:4) {
-  if (!file.exists(paste(ec_dir,"/analyses/runs/", gs, "-",crop_name,"-",vl[rw-1],"-suitability.jpg",sep=""))) {
-    eco <- suitCalc(climPath=paste(ec_dir,"/climate/ind_2_5min",sep=""), 
-                    Gmin=120,Gmax=120,Tkmp=p$KILL[rw],Tmin=p$MIN[rw],Topmin=p$OPMIN[rw],
-                    Topmax=p$OPMAX[rw],Tmax=p$MAX[rw],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
-                    Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
-                    outfolder=paste(ec_dir,"/analyses/runs",sep=""), 
-                    cropname=paste(gs,"-",crop_name,"-",vl[rw-1],sep=""),ext=".tif")
-    jpeg(paste(ec_dir,"/analyses/runs/", gs, "-",crop_name,"-",vl[rw-1],"-suitability.jpg",sep=""), quality=100)
-    plot(eco)
-    dev.off()
-  }
+
+#loading parameter sets
+p <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+
+#looping through parameter sets
+for (rw in 1:(nrow(p)/2)) {
+  #rw <- 1
+  cat("running model (run: ",rw,")\n",sep="")
+  tpset <- p[which(p$RUN == rw),]
+  
+  #output directory
+  outf <- paste(runDir,"/run_",rw,sep="")
+  
+  #parameter values
+  tkill <- tpset$KILL[2] - 40
+  tmin <- tpset$MIN[2]; tmax <- tpset$MAX[2]
+  topmin <- tpset$OPMIN[2]; topmax <- tpset$OPMAX[2]
+  rmin <- tpset$MIN[1]; rmax <- tpset$MAX[1]
+  ropmin <- tpset$OPMIN[1]; ropmax <- tpset$OPMAX[1]
+  
+  #run the model
+  eco <- suitCalc(climPath=paste(clmDir,"/wcl_ind_2_5min",sep=""), 
+                  sowDat=paste(calDir,"/plant_ind.tif",sep=""),
+                  harDat=paste(calDir,"/harvest_ind.tif",sep=""),
+                  Gmin=NA,Gmax=NA,Tkmp=tkill,Tmin=tmin,Topmin=topmin,
+                  Topmax=topmax,Tmax=tmax,Rmin=rmin,Ropmin=ropmin,
+                  Ropmax=ropmax,Rmax=rmax, 
+                  outfolder=outf,
+                  cropname=crop_name,ext=".tif",cropClimate=F)
+  
+  #plot the results
+  png(paste(outf,"/out_psuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+  par(mar=c(3,3,1,2))
+  rsx <- eco[[1]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+  plot(wrld_simpl,add=T)
+  grid(lwd=1.5)
+  dev.off()
+  
+  png(paste(outf,"/out_tsuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+  par(mar=c(3,3,1,2))
+  rsx <- eco[[2]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+  plot(wrld_simpl,add=T)
+  grid(lwd=1.5)
+  dev.off()
+  
+  png(paste(outf,"/out_suit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+  par(mar=c(3,3,1,2))
+  rsx <- eco[[3]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+  plot(wrld_simpl,add=T)
+  grid(lwd=1.5)
+  dev.off()
+  
+  rm(eco); gc(T)
 }
+
 
 
 ######################################################################
