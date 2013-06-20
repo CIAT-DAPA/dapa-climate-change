@@ -141,3 +141,11 @@ if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
 }
 
 
+
+#solar radiation
+
+
+
+
+
+
