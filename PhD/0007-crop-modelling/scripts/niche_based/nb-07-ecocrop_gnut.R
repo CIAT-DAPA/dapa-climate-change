@@ -8,7 +8,7 @@ library(raster); library(rgdal); library(maptools); library(MASS)
 data(wrld_simpl)
 
 #sources dir
-src.dir <- "~/Repositories/dapa-climate-change/trunk/EcoCrop" #local
+src.dir1 <- "~/Repositories/dapa-climate-change/trunk/EcoCrop" #local
 src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data"
 src.dir3 <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
@@ -16,76 +16,94 @@ src.dir3 <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
 #src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
-#source the model
+#source the model and other functions
 source(paste(src.dir3,"/scripts/niche_based/EcoCrop-model.R",sep=""))
+source(paste(src.dir1,"/src/randomSplit.R",sep=""))
+source(paste(src.dir1,"/src/extractClimateData.R",sep=""))
 
 #basic information
 crop_name <- "gnut"
-vnames <- read.table(paste(src.dir3,"/data/GLAM-varnames.tab",sep=""),sep="\t",header=T)
-r_dir <- "W:/eejarv/PhD-work/crop-modelling"
-#r_dir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
-b_dir <- paste(r_dir,"/GLAM",sep="")
-crop_dir <- paste(b_dir,"/model-runs/",toupper(crop_name),sep="")
-ec_dir <- paste(crop_dir,"/ecg_analyses/ecocrop-",tolower(crop_name),sep="")
-glam_dir <- paste(crop_dir,"/ecg_analyses/glam_output",sep="")
+
+#i/o directories
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
+bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
+occDir <- paste(bDir,"/occurrences",sep="")
+calDir <- paste(bDir,"/calendar",sep="")
+envDir <- paste(bDir,"/env-data",sep="")
+clmDir <- paste(envDir,"/climate",sep="")
+modDir <- paste(bDir,"/models",sep="")
+ecoDir <- paste(modDir,"/EcoCrop",sep="")
+
+dataDir <- paste(ecoDir,"/data",sep="")
+imgDir <- paste(ecoDir,"/img",sep="")
+if (!file.exists(dataDir)) {dir.create(dataDir)}
+if (!file.exists(imgDir)) {dir.create(imgDir)}
 
 ######################################################################
 #Getting unique coordinates
-rs <- read.csv(paste(ec_dir,"/analyses/data/gnut-india.csv",sep="")) #load the data
-rs <- getUniqueCoord(rs, fields=c(24,23), resol=2.5/60) #running the function
+loc_data <- read.csv(paste(occDir,"/gnut-india_final.csv",sep="")) #load the data
 
+#load mask
+msk <- raster(paste(clmDir,"/wcl_ind_30s/prec_1.tif",sep=""))
+msk[which(!is.na(msk[]))] <- which(!is.na(msk[]))
 
-######################################################################
-#Dummy part of unloading and re-loading the data
-write.csv(rs, paste(ec_dir,"/analyses/data/dataset2_5m.csv",sep=""), row.names=F, quote=T) #write outcome into new file
-rs <- rs[which(rs$IS_UNIQUE == TRUE),] #selecting unique records
-write.csv(rs, paste(ec_dir,"/analyses/data/unique2_5m.csv",sep=""), row.names=F, quote=T) #write new dataset only containing unique records
-rs <- read.csv(paste(ec_dir,"/analyses/data/unique2_5m.csv",sep="")) #re-loading the data
+#labelling unique or not
+loc_data$CELL <- extract(msk,loc_data[,c("LON","LAT")])
+loc_data$IS_UNIQUE <- !duplicated(loc_data$CELL)
+
+#selecting unique records
+loc_unique <- loc_data[which(loc_data$IS_UNIQUE),] 
+rownames(loc_unique) <- 1:nrow(loc_unique)
+
+#write data with labels of whether unique or not
+write.csv(loc_data, paste(dataDir,"/dataset_30s.csv",sep=""), row.names=F, quote=T) #write outcome into new file
+write.csv(loc_unique, paste(dataDir,"/unique_30s.csv",sep=""), row.names=F, quote=T) #write new dataset only containing unique records
 
 
 ######################################################################
 #Splitting in test/train datasets
-rs <- randomSplit(rs, 20) #20 is percentage of data to be taken out
+loc_split <- randomSplit(loc_unique, 20, seed=3819) #20 is percentage of data to be taken out
 
 #Plot & write test and train datasets separately
-jpeg(paste(ec_dir,"/analyses/img/test_train.jpg",sep=""), quality=100, height=800, width=600)
-plot(cbind(rs$longitude[which(rs$TEST_TRAIN == "TEST")], rs$latitude[which(rs$TEST_TRAIN == "TEST")]), 
-     pch="+", col="red", xlim=c(min(rs$longitude),max(rs$longitude)), cex=1.5,
-     ylim=c(min(rs$latitude),max(rs$latitude)), xlab="", ylab="")
+jpeg(paste(imgDir,"/test_train.jpg",sep=""), quality=100, height=1024, width=900)
+plot(cbind(loc_split$LON[which(loc_split$TEST_TRAIN == "TEST")], loc_split$LAT[which(loc_split$TEST_TRAIN == "TEST")]), 
+     pch="+", col="red", xlim=c(min(loc_split$LON),max(loc_split$LON)), cex=2.5,
+     ylim=c(min(loc_split$LAT),max(loc_split$LAT)), xlab="", ylab="")
 plot(wrld_simpl, add=T)
-points(cbind(rs$longitude[which(rs$TEST_TRAIN == "TRAIN")], 
-             rs$latitude[which(rs$TEST_TRAIN == "TRAIN")]), pch=20, col="blue", cex=1.5)
+points(cbind(loc_split$LON[which(loc_split$TEST_TRAIN == "TRAIN")], 
+             loc_split$LAT[which(loc_split$TEST_TRAIN == "TRAIN")]), 
+       pch=20, col="blue", cex=2.5)
+points(cbind(loc_split$LON[which(loc_split$TEST_TRAIN == "TEST")], 
+             loc_split$LAT[which(loc_split$TEST_TRAIN == "TEST")]), 
+       pch="+", col="red", cex=2.5)
+grid()
 dev.off()
 
 #writing the test and training data
-write.csv(rs, paste(ec_dir,"/analyses/data/unique.csv",sep=""), row.names=F, quote=T) #write unique records with new field TRAIN/TEST
-write.csv(rs[which(rs$TEST_TRAIN == "TEST"),], paste(ec_dir,"/analyses/data/test.csv",sep=""), row.names=F, quote=T) #reselect and store test data
-write.csv(rs[which(rs$TEST_TRAIN == "TRAIN"),], paste(ec_dir,"/analyses/data/train.csv",sep=""), row.names=F, quote=T) #reselect and store train data
+write.csv(loc_split, paste(dataDir,"/splitted.csv",sep=""), row.names=F, quote=T) #write unique records with new field TRAIN/TEST
+write.csv(loc_split[which(loc_split$TEST_TRAIN == "TEST"),], paste(dataDir,"/test.csv",sep=""), row.names=F, quote=T) #reselect and store test data
+write.csv(loc_split[which(loc_split$TEST_TRAIN == "TRAIN"),], paste(dataDir,"/train.csv",sep=""), row.names=F, quote=T) #reselect and store train data
 
 
 ######################################################################
 #Extracting climate data
-rs <- read.csv(paste(ec_dir,"/analyses/data/unique.csv",sep="")) #load unique records
+loc_split <- read.csv(paste(dataDir,"/splitted.csv",sep="")) #load unique records
+loc_clim <- loc_split
 for (v in c("prec", "tmin", "tmean", "tmax")) {
-  rs <- extractMonthlyData(wd=paste(ec_dir,"/climate/ind_2_5min",sep=""), 
-                           variable=v, ext=".tif", rs, fields=c(24,23), verbose=T)
+  loc_clim <- extractMonthlyData(wd=paste(clmDir,"/wcl_ind_30s",sep=""), 
+                           variable=v, ext=".tif", loc_clim, fields=c(2,3), verbose=T)
 }
-write.csv(rs, paste(ec_dir,"/analyses/data/climates.csv",sep=""), row.names=F, quote=T)
+write.csv(loc_clim, paste(dataDir,"/climates.csv",sep=""), row.names=F, quote=T)
 
 
 ######################################################################
 #Calculating gs parameters for calibration
-rs <- read.csv(paste(ec_dir,"/analyses/data/climates.csv",sep=""))
+loc_clim <- read.csv(paste(dataDir,"/climates.csv",sep=""))
 
 #here use Sacks et al. (2010) planting dates to get an approximation of when each
 #of these points is sown. Use the average sowing and harvest date
-pdate_dir <- paste(b_dir,"/climate-signals-yield/",toupper(crop_name),"/calendar/",tolower(crop_name),sep="")
-pdate <- raster(paste(pdate_dir,"/plant.tif",sep=""))
-xt <- extent(raster(paste(pdate_dir,"/plant_lr.tif",sep="")))
-pdate <- crop(pdate,xt)
-
-hdate <- raster(paste(pdate_dir,"/harvest.tif",sep=""))
-hdate <- crop(hdate,xt)
+pdate <- raster(paste(calDir,"/plant_ind.tif",sep=""))
+hdate <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
 
 #using these data select the growing season for each of the points
 rs$SOW_DATE <- round(extract(pdate,cbind(x=rs$longitude,y=rs$latitude)),0)
