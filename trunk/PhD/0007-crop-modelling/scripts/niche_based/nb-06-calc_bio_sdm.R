@@ -86,13 +86,15 @@ tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""))
 
 #calculate total seasonal rainfall and write raster
 if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
-  #calculate
+  #average of monthly mean temperatures
   smeantemp <- apply_by_blocks(tmen_stk,sowd,hard,calc_meantemp,"mean")
   writeRaster(smeantemp,paste(outDir,"/meantemp.tif",sep=""),format="GTiff")
   
+  #maximum of monthly maximum temperatures
   smaxtemp <- apply_by_blocks(tmax_stk,sowd,hard,calc_meantemp,"max")
   writeRaster(smaxtemp,paste(outDir,"/maxtemp.tif",sep=""),format="GTiff")
   
+  #minimum of monthly minimum temperatures
   smintemp <- apply_by_blocks(tmin_stk,sowd,hard,calc_meantemp,"min")
   writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
 } else {
@@ -131,11 +133,9 @@ if (!file.exists(paste(outDir,"/totgdd.tif",sep=""))) {
 #####################################
 #### 7. calculate growing season total VPD
 #####################################
-#calculate total seasonal rainfall and write raster
 tnx_stk <- stack(c(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""),
                    paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep="")))
 if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
-  #calculate
   totvpd <- apply_by_blocks(tnx_stk,sowd,hard,calc_vdp)
   writeRaster(totvpd,paste(outDir,"/totvpd.tif",sep=""),format="GTiff")
 } else {
@@ -144,8 +144,14 @@ if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
 
 
 #####################################
-#### 8. calculate potential evapotranspiration
+#### 8. calculate total potential evapotranspiration
 #####################################
+if (!file.exists(paste(outDir,"/setmax.tif",sep=""))) {
+  totetmax <- apply_by_blocks(tnx_stk,sowd,hard,calc_etmax)
+  writeRaster(totetmax,paste(outDir,"/setmax.tif",sep=""),format="GTiff")
+} else {
+  totetmax <- raster(paste(outDir,"/setmax.tif",sep=""))
+}
 
 
 
