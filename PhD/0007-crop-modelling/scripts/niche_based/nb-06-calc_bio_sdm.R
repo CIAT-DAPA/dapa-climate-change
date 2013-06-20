@@ -91,7 +91,7 @@ if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
   writeRaster(smeantemp,paste(outDir,"/meantemp.tif",sep=""),format="GTiff")
   
   smaxtemp <- apply_by_blocks(tmax_stk,sowd,hard,calc_meantemp,"max")
-  writeRaster(smintemp,paste(outDir,"/maxtemp.tif",sep=""),format="GTiff")
+  writeRaster(smaxtemp,paste(outDir,"/maxtemp.tif",sep=""),format="GTiff")
   
   smintemp <- apply_by_blocks(tmin_stk,sowd,hard,calc_meantemp,"min")
   writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
@@ -101,12 +101,35 @@ if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
 #####################################
 #### 5. number of days with Tmax > 34C
 #####################################
-
 #calculate total seasonal rainfall and write raster
 if (!file.exists(paste(outDir,"/daystcrit.tif",sep=""))) {
   #calculate
   daystcrit <- apply_by_blocks(tmax_stk,sowd,hard,calc_tcdays)
   writeRaster(daystcrit,paste(outDir,"/daystcrit.tif",sep=""),format="GTiff")
+} 
+
+
+#####################################
+#### 6. calculate growing season GDD
+#####################################
+#calculate total seasonal rainfall and write raster
+if (!file.exists(paste(outDir,"/totgdd.tif",sep=""))) {
+  #calculate
+  totgdd <- apply_by_blocks(tmen_stk,sowd,hard,calc_gdd)
+  writeRaster(totgdd,paste(outDir,"/totgdd.tif",sep=""),format="GTiff")
+} 
+
+
+#####################################
+#### 7. calculate growing season total VPD
+#####################################
+#calculate total seasonal rainfall and write raster
+tnx_stk <- stack(c(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""),
+                   paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep="")))
+if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
+  #calculate
+  totvpd <- apply_by_blocks(tnx_stk,sowd,hard,calc_vdp)
+  writeRaster(totvpd,paste(outDir,"/totvpd.tif",sep=""),format="GTiff")
 } 
 
 
