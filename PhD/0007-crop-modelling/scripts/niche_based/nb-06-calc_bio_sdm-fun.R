@@ -241,6 +241,45 @@ calc_vdp <- function(x) {
 #####
 
 
+#### calculate ETp using Priestley-Taylor
+calc_vdp <- function(x) {
+  montmin <- x[1:12]
+  montmax <- x[13:24]
+  sow <- x[25]; har <- x[26] #sowing and harvest dates
+  lat <- x[27] #latitude of site
+  
+  #fix sowing date if missing
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
+  
+  #growing season start and end
+  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  
+  #linearise monthly values
+  montmin <- c(montmin[12],montmin,montmin[1])
+  daytmin <- linearise(montmin)[16:(365+15)]*.1
+  
+  montmax <- c(montmax[12],montmax,montmax[1])
+  daytmax <- linearise(montmax)[16:(365+15)]*.1
+  
+  #calculate solar radiation
+  daysrad <- bc(dates=createDateGrid(1985), lat, BCb=0.11, extraT = NULL, daytmax, daytmin, BCc=2, tal=0.76)
+  
+  
+  
+  
+  
+  #calculate
+  esat_min=0.61120*exp((17.67*daytmin)/(daytmin+243.5))
+  esat_max=0.61120*exp((17.67*daytmax)/(daytmax+243.5))
+  vpd <- 0.7*(esat_max-esat_min) # kPa
+  vpd <- sum(vpd[gs])
+  
+  #return
+  return(vpd)
+}
+#####
 
 #to linearise monthly data
 linearise <- function(input_vals) {
@@ -255,4 +294,101 @@ linearise <- function(input_vals) {
   }
   return(daily_vals)
 }
+
+#Bristow-Campbell (1984) solar radiation model
+bc <- function(dates, lat, BCb=0.11, extraT = NULL, Tmax, Tmin, BCc=2, tal=0.76) {
+  days <- as.Date(dates$DATE,"%m-%d-%Y")
+  i <- dates$DOY
+  if (is.null(extraT)) extraT <- extrat(i = i, lat = radians(lat))$ExtraTerrestrialSolarRadiationDaily
+  le <- length(Tmax)
+  dtemp <- c(Tmax[-le] - (Tmin[-le] + Tmin[-1])/2, Tmax[le] - (Tmin[le - 1] + Tmin[le])/2)
+  Zdtemp <- zoo(Tmax - Tmin, order.by = days) #Tmax - Tmin
+  dtempM <- mean(as.numeric(aggregate(Zdtemp, by = format(time(Zdtemp), "%m"), FUN = mean, na.rm = TRUE)), na.rm = T)
+  bc <- extraT * tal * (1 - exp(-BCb * (dtemp^BCc)/dtempM))
+  return(bc)
+}
+
+#create date grid
+createDateGrid <- function(year) {
+  #Date grid (accounting to leap years). This is for merging with the station data to avoid gaps
+  if (year%%4 == 0 & year%%100 != 0) { #This is a leap year
+    date.grid <- data.frame(MONTH=c(rep(1,31),rep(2,29),rep(3,31),rep(4,30),rep(5,31),rep(6,30),rep(7,31),rep(8,31),rep(9,30),rep(10,31),rep(11,30),rep(12,31)),DAY=c(1:31,1:29,1:31,1:30,1:31,1:30,1:31,1:31,1:30,1:31,1:30,1:31))
+    date.grid$MTH.STR <- paste(date.grid$MONTH)
+    date.grid$MTH.STR[which(date.grid$MONTH<10)] <- paste(0,date.grid$MONTH[which(date.grid$MONTH<10)],sep="")
+    date.grid$DAY.STR <- paste(date.grid$DAY)
+    date.grid$DAY.STR[which(date.grid$DAY<10)] <- paste(0,date.grid$DAY[which(date.grid$DAY<10)],sep="")
+    date.grid$DATE <- paste(date.grid$MTH.STR,"-",date.grid$DAY.STR,"-",year,sep="")
+    date.grid$MONTH <- NULL; date.grid$DAY <- NULL; date.grid$MTH.STR <- NULL; date.grid$DAY.STR <- NULL
+  } else { #This is a non-leap year
+    date.grid <- data.frame(MONTH=c(rep(1,31),rep(2,28),rep(3,31),rep(4,30),rep(5,31),rep(6,30),rep(7,31),rep(8,31),rep(9,30),rep(10,31),rep(11,30),rep(12,31)),DAY=c(1:31,1:28,1:31,1:30,1:31,1:30,1:31,1:31,1:30,1:31,1:30,1:31))
+    date.grid$MTH.STR <- paste(date.grid$MONTH)
+    date.grid$MTH.STR[which(date.grid$MONTH<10)] <- paste(0,date.grid$MONTH[which(date.grid$MONTH<10)],sep="")
+    date.grid$DAY.STR <- paste(date.grid$DAY)
+    date.grid$DAY.STR[which(date.grid$DAY<10)] <- paste(0,date.grid$DAY[which(date.grid$DAY<10)],sep="")
+    date.grid$DATE <- paste(date.grid$MTH.STR,"-",date.grid$DAY.STR,"-",year,sep="")
+    date.grid$MONTH <- NULL; date.grid$DAY <- NULL; date.grid$MTH.STR <- NULL; date.grid$DAY.STR <- NULL
+  }
+  date.grid$DOY <- 1:nrow(date.grid) #Adding the Julian day
+  return(date.grid)
+}
+
+
+extrat <- function (i, lat) {
+  rval <- list()
+  rval$ExtraTerrestrialSolarRadiationDaily <- exd(i = i, lat = lat)
+  rval$DayLength <- dayLength(i = i, lat = lat)
+  return(rval)
+}
+
+exd <- function(i, lat, Con = 4.921) {
+  if (abs(degrees(lat)) < 66.5) {
+    Sd <- Con * 24/pi * corrEarthSunDist(i) * (sin(lat) * sin(solarDecl(i)) * daylightTimeFactor(lat = lat, i = i) + cos(lat) * cos(solarDecl(i)) * sin(daylightTimeFactor(lat = lat, i = i)))
+  }
+  if (abs(degrees(lat)) >= 66.5) {
+    Sd <- vector()
+    for (ii in 1:length(i)) {
+      sdi <- sum(exh(i = i[ii], lat = lat)[exh(i = i[ii], lat = lat) > 0])
+      Sd <- c(Sd, sdi)
+    }
+  }
+  Sd
+}
+
+solarDecl <- function(i) {
+  rod <- 0.4093 * sin((2 * pi * (284 + i))/365)
+  return(rod)
+}
+
+dayLength <- function(lat, i) {
+  if (abs(degrees(lat)) < 66.5) {DL <- 24 * daylightTimeFactor(lat, i)/pi}
+  if (abs(degrees(lat)) >= 66.5) {
+    DL <- c()
+    for (ii in 1:length(i)) {
+      DLi <- length(which(exh(i = i[ii], lat = lat) > 0))
+      DL <- c(DL, DLi)
+    }
+  }
+  return(DL)
+}
+
+corrEarthSunDist <- function (i) {
+  d <- 1 + 0.0334 * cos(0.01721 * i - 0.0552)
+  return(d)
+}
+
+daylightTimeFactor <- function(lat, i) {
+  ws <- acos(-tan(lat) * tan(solarDecl(i)))
+  return(ws)
+}
+
+degrees <- function(radians) {
+  deg <- radians * 180/pi
+  return(deg)
+}
+
+radians <- function(degrees) {
+  rad <- degrees * pi/180
+  return(rad)
+}
+
 
