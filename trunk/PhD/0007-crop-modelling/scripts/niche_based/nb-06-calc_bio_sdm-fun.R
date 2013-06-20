@@ -88,7 +88,7 @@ calc_sfeng <- function(x,...) {
     s_ind <- NA
   } else {
     r_bar <- sum(monclim) #mean rainfall
-    pm <- monclim / r_bar; pm <- pm[which(pm > 0)]; qm <- 1 / 12 #prob. distributions
+    pm <- monclim / r_bar; pm <- pm[which(pm > 0)]; qm <- 1 / length(gs) #prob. distributions
     if (length(pm) >= 1) {
       d_ent <- pm / qm ; d_ent <- sum(pm * log(d_ent,base=2)) #rel. entropy [D=sum(pm*log2(pm/qm))]
       s_ind <- d_ent * (r_bar / r_max) #seasonality index
@@ -192,24 +192,51 @@ calc_gdd <- function(x) {
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
   
   monclim <- c(monclim[12],monclim,monclim[1])
-  dayclim <- linearise(monclim)[16:(365+15)]
+  dayclim <- linearise(monclim)[16:(365+15)]*.1
   
-  for (gday in gs) {
-   if (tmean < tbase) {
-      gdd <- gdd+0
-    } else  if (tmean >= tbase & tmean <= topt) {
-      gdd <- gdd + (tmean-tbase)
-    } else if (tmean > topt) {
-      gdd <- gdd + (topt-tbase)
-    }
-  }
+  #calculate
+  gdd <- rep(0,times=length(dayclim))
+  gdd[which(dayclim >= 10 & dayclim <= 28)] <- dayclim[which(dayclim >= 10 & dayclim <= 28)] - 10
+  gdd[which(dayclim > 28 & dayclim < 50)] <- 28 - ((dayclim[which(dayclim > 28 & dayclim < 50)] - 28) / (50-28)) - 10
+  gdd <- sum(gdd[gs])
   
-  #extract daily climate
-  dayclim <- dayclim[gs]
+  #return
+  return(gdd)
+}
+#####
+
+
+#### calculate vpd
+#ESAT_MIN=0.61120*EXP((17.67*TMIN(IDAP))/(TMIN(IDAP)+243.5))     
+#ESAT_MAX=0.61120*EXP((17.67*TMAX(IDAP))/(TMAX(IDAP)+243.5))     
+#VPD=VPD_CTE*(ESAT_MAX-ESAT_MIN) !kPa
+
+#vpd_cte <- 0.7
+calc_vdp <- function(x) {
+  montmin <- x[1:12]
+  montmax <- x[13:24]
+  sow <- x[25]; har <- x[26] #sowing and harvest dates
+  if (is.na(sow) & is.na(har)) {sow <- 152}
+  if (is.na(har)) {har <- sow+122}
+  if (har > 365) {har <- har - 365}
   
-  #calculate and return
-  tcritdays <- length(which(dayclim > 340))
-  return(tcritdays)
+  #growing season start and end
+  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  
+  montmin <- c(montmin[12],montmin,montmin[1])
+  daytmin <- linearise(montmin)[16:(365+15)]*.1
+  
+  montmax <- c(montmax[12],montmax,montmax[1])
+  daytmax <- linearise(montmax)[16:(365+15)]*.1
+  
+  #calculate
+  esat_min=0.61120*exp((17.67*daytmin)/(daytmin+243.5))
+  esat_max=0.61120*exp((17.67*daytmax)/(daytmax+243.5))
+  vpd <- 0.7*(esat_max-esat_min) # kPa
+  vpd <- sum(vpd[gs])
+  
+  #return
+  return(vpd)
 }
 #####
 
