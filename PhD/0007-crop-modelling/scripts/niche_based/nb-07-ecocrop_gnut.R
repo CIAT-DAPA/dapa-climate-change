@@ -4,7 +4,8 @@
 stop("not to run yet")
 
 #### LIBRARIES: raster, maptools, rgdal, sp
-library(raster); library(rgdal); library(maptools); library(MASS); library(sfsmisc)
+library(raster); library(rgdal); library(maptools); library(MASS)
+library(sfsmisc); library(dismo)
 data(wrld_simpl)
 
 #sources dir
@@ -21,6 +22,7 @@ source(paste(src.dir3,"/scripts/niche_based/EcoCrop-model.R",sep=""))
 source(paste(src.dir3,"/scripts/niche_based/nb-07-ecocrop_gnut-fun.R",sep=""))
 source(paste(src.dir1,"/src/randomSplit.R",sep=""))
 source(paste(src.dir1,"/src/extractClimateData.R",sep=""))
+source(paste(src.dir1,"/src/accuracy.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #basic information
@@ -40,10 +42,19 @@ dataDir <- paste(ecoDir,"/data",sep="")
 imgDir <- paste(ecoDir,"/img",sep="")
 runDir <- paste(ecoDir,"/runs",sep="")
 pdfDir <- paste(imgDir,"/pdf_runs",sep="")
+mskDir <- paste(envDir,"/mask",sep="")
 if (!file.exists(dataDir)) {dir.create(dataDir)}
 if (!file.exists(imgDir)) {dir.create(imgDir)}
 if (!file.exists(runDir)) {dir.create(runDir)}
 if (!file.exists(pdfDir)) {dir.create(pdfDir)}
+if (!file.exists(mskDir)) {dir.create(mskDir)}
+
+
+#here load Sacks et al. (2010) planting dates to get an approximation of when each
+#of these points is sown. Use the average sowing and harvest date
+#JRV changed to Jones and Thornton methodology
+pdate <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
+hdate <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
 
 
 ######################################################################
@@ -107,17 +118,19 @@ write.csv(loc_clim, paste(dataDir,"/climates.csv",sep=""), row.names=F, quote=T)
 #Calculating gs parameters for calibration
 loc_clim <- read.csv(paste(dataDir,"/climates.csv",sep=""))
 
-#here use Sacks et al. (2010) planting dates to get an approximation of when each
-#of these points is sown. Use the average sowing and harvest date
-pdate <- raster(paste(calDir,"/plant_ind.tif",sep=""))
-hdate <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
-
 #using these data select the growing season for each of the points
 loc_clim$SOW_DATE <- round(extract(pdate,cbind(x=loc_clim$LON,y=loc_clim$LAT)),0)
 loc_clim$HAR_DATE <- round(extract(hdate,cbind(x=loc_clim$LON,y=loc_clim$LAT)),0)
-loc_clim$SOW_DATE[which(is.na(loc_clim$SOW_DATE) & is.na(loc_clim$HAR_DATE))] <- 152
-loc_clim$HAR_DATE[which(is.na(loc_clim$HAR_DATE))] <- loc_clim$SOW_DATE[which(is.na(loc_clim$HAR_DATE))]+122
-loc_clim$HAR_DATE[which(loc_clim$HAR_DATE > 365)] <- loc_clim$HAR_DATE[which(loc_clim$HAR_DATE > 365)] - 365
+
+#remove those points that do not have sow date or harvest date
+loc_clim <- loc_clim[which(!is.na(loc_clim$SOW_DATE)),]
+loc_clim <- loc_clim[which(!is.na(loc_clim$HAR_DATE)),]
+rownames(loc_clim) <- 1:nrow(loc_clim)
+
+#alternatively, set the default JJAS period
+#loc_clim$SOW_DATE[which(is.na(loc_clim$SOW_DATE) & is.na(loc_clim$HAR_DATE))] <- 152
+#loc_clim$HAR_DATE[which(is.na(loc_clim$HAR_DATE))] <- loc_clim$SOW_DATE[which(is.na(loc_clim$HAR_DATE))]+122
+#loc_clim$HAR_DATE[which(loc_clim$HAR_DATE > 365)] <- loc_clim$HAR_DATE[which(loc_clim$HAR_DATE > 365)] - 365
 
 dg <- createDateGrid(2005)
 dg$MTH <- as.numeric(substr(dg$MTH.DAY,2,3))
@@ -126,6 +139,8 @@ dg$MTH.DAY <- NULL
 
 loc_clim$SOW_MTH <- round(sapply(loc_clim$SOW_DATE,FUN=find_month,dg),0)
 loc_clim$HAR_MTH <- round(sapply(loc_clim$HAR_DATE,FUN=find_month,dg),0)
+loc_clim$HAR_MTH[which(loc_clim$HAR_MTH > 12)] <- loc_clim$HAR_MTH[which(loc_clim$HAR_MTH > 12)] - 12
+
 loc_clim$DUR <- NA
 loc_clim$DUR[which(loc_clim$HAR_MTH < loc_clim$SOW_MTH)] <- (365-loc_clim$HAR_MTH[which(loc_clim$HAR_MTH < loc_clim$SOW_MTH)]) + loc_clim$SOW_MTH[which(loc_clim$HAR_MTH < loc_clim$SOW_MTH)] + 1
 loc_clim$DUR[which(loc_clim$HAR_MTH > loc_clim$SOW_MTH)] <- loc_clim$HAR_MTH[which(loc_clim$HAR_MTH > loc_clim$SOW_MTH)] - loc_clim$SOW_MTH[which(loc_clim$HAR_MTH > loc_clim$SOW_MTH)]
@@ -217,7 +232,7 @@ p <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
 #looping through parameter sets
 for (rw in 1:(nrow(p)/2)) {
   #rw <- 1
-  cat("running model (run: ",rw,")\n",sep="")
+  cat("\nrunning model (run: ",rw,")\n",sep="")
   tpset <- p[which(p$RUN == rw),]
   
   #output directory
@@ -230,97 +245,145 @@ for (rw in 1:(nrow(p)/2)) {
   rmin <- tpset$MIN[1]; rmax <- tpset$MAX[1]
   ropmin <- tpset$OPMIN[1]; ropmax <- tpset$OPMAX[1]
   
-  #run the model
-  eco <- suitCalc(climPath=paste(clmDir,"/wcl_ind_2_5min",sep=""), 
-                  sowDat=paste(calDir,"/plant_ind.tif",sep=""),
-                  harDat=paste(calDir,"/harvest_ind.tif",sep=""),
-                  Gmin=NA,Gmax=NA,Tkmp=tkill,Tmin=tmin,Topmin=topmin,
-                  Topmax=topmax,Tmax=tmax,Rmin=rmin,Ropmin=ropmin,
-                  Ropmax=ropmax,Rmax=rmax, 
-                  outfolder=outf,
-                  cropname=crop_name,ext=".tif",cropClimate=F)
-  
-  #plot the results
-  png(paste(outf,"/out_psuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
-  par(mar=c(3,3,1,2))
-  rsx <- eco[[1]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
-  plot(wrld_simpl,add=T)
-  grid(lwd=1.5)
-  dev.off()
-  
-  png(paste(outf,"/out_tsuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
-  par(mar=c(3,3,1,2))
-  rsx <- eco[[2]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
-  plot(wrld_simpl,add=T)
-  grid(lwd=1.5)
-  dev.off()
-  
-  png(paste(outf,"/out_suit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
-  par(mar=c(3,3,1,2))
-  rsx <- eco[[3]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
-  plot(wrld_simpl,add=T)
-  grid(lwd=1.5)
-  dev.off()
-  
-  rm(eco); gc(T)
+  if (!file.exists(paste(outf,"/out_suit.png",sep=""))) {
+    #run the model
+    eco <- suitCalc(climPath=paste(clmDir,"/wcl_ind_2_5min",sep=""), 
+                    sowDat=pdate@file@name,
+                    harDat=hdate@file@name,
+                    Gmin=NA,Gmax=NA,Tkmp=tkill,Tmin=tmin,Topmin=topmin,
+                    Topmax=topmax,Tmax=tmax,Rmin=rmin,Ropmin=ropmin,
+                    Ropmax=ropmax,Rmax=rmax, 
+                    outfolder=outf,
+                    cropname=crop_name,ext=".tif",cropClimate=F)
+    
+    #plot the results
+    png(paste(outf,"/out_psuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+    par(mar=c(3,3,1,2))
+    rsx <- eco[[1]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+    plot(wrld_simpl,add=T)
+    grid(lwd=1.5)
+    dev.off()
+    
+    png(paste(outf,"/out_tsuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+    par(mar=c(3,3,1,2))
+    rsx <- eco[[2]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+    plot(wrld_simpl,add=T)
+    grid(lwd=1.5)
+    dev.off()
+    
+    png(paste(outf,"/out_suit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+    par(mar=c(3,3,1,2))
+    rsx <- eco[[3]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+    plot(wrld_simpl,add=T)
+    grid(lwd=1.5)
+    dev.off()
+    
+    rm(eco); gc(T)
+  }
 }
 
 
 
 ######################################################################
-#Assess accuracy of each growing season and each parameter tuning
-test <- read.csv(paste(ec_dir,"/analyses/data/test.csv",sep=""))
-test <- cbind(test[,"longitude"], test[,"latitude"])
+#Assess accuracy of each parameter set
+test <- read.csv(paste(dataDir,"/test.csv",sep=""))
+test <- cbind(test[,"LON"], test[,"LAT"])
 
-train <- read.csv(paste(ec_dir,"/analyses/data/train.csv",sep=""))
-train <- cbind(train[,"longitude"], train[,"latitude"])
+train <- read.csv(paste(dataDir,"/train.csv",sep=""))
+train <- cbind(train[,"LON"], train[,"LAT"])
 
-parList <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
-gsList <- unique(parList$GS)
-for (gs in gsList) {
-  pList <- parList[which(parList$GS==gs),][2:4,]
-  for (vr in pList$VARIABLE) {
-    for (suf in c("_p","_t","_")) {
-      cat("GS:", gs, "- VAR:", vr, "- SUF:", suf, "\n")
-      rs <- raster(paste(ec_dir,"/analyses/runs/", gs, "-",crop_name,"-", vr, suf, "suitability.asc", sep=""))
-      tem <- accMetrics(rs, test) #doing with test data
-      trm <- accMetrics(rs, train) #doing with training data
-      resrow <- data.frame(GS=gs, VARIABLE=vr, TYPE=paste(suf, "suitability", sep=""), TEST.AV.SUIT=tem$METRICS$SUIT, TEST.SD.SUIT=tem$METRICS$SUITSD, TEST.MAX.SUIT=tem$METRICS$SUITX, TEST.MIN.SUIT=tem$METRICS$SUITN, TEST.OMISSION.RATE=tem$METRICS$OMISSION_RATE, TEST.ERROR=tem$METRICS$RMSQE, TEST.ERR.DIST=tem$METRICS$ERR_DIST, TEST.MXE=tem$METRICS$MAX_ENT, TEST.SLOPE=tem$METRICS$SLOPE, TRAIN.AV.SUIT=trm$METRICS$SUIT, TRAIN.SD.SUIT=trm$METRICS$SUITSD, TRAIN.MAX.SUIT=trm$METRICS$SUITX, TRAIN.MIN.SUIT=trm$METRICS$SUITN, TRAIN.OMISSION.RATE=trm$METRICS$OMISSION_RATE, TRAIN.ERROR=trm$METRICS$RMSQE, TRAIN.ERR.DIST=trm$METRICS$ERR_DIST, TRAIN.MXE=trm$METRICS$MAX_ENT, TRAIN.SLOPE=trm$METRICS$SLOPE)
-      rescol <- data.frame(tem$MXE_CURVE, trm$MXE_CURVE)
-      names(rescol) <- c(paste("TEST.GS.",gs,sep=""), paste("TRAIN.GS.",gs,sep=""))
-      if (gs == gsList[1] & vr == pList$VARIABLE[1] & suf == "_p") {
-        rres <- resrow
-        cres <- cbind(SUIT=c(1:100), rescol)
-      } else {
-        rres <- rbind(rres, resrow)
-        cres <- cbind(cres, rescol)
-      }
+parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+rwList <- unique(parList$RUN)
+for (rw in rwList[1:26]) {
+  #rw <- rwList[1]
+  #pList <- parList[which(parList$RUN==rw),]
+  for (suf in c("_p","_t","_")) {
+    #suf <- "_p"
+    cat("RUN:", rw, "- SUF:", suf, "\n")
+    s_rs <- raster(paste(runDir,"/run_",rw,"/", crop_name, suf, "suitability.tif", sep=""))
+    tem <- accMetrics(s_rs, test) #doing with test data
+    trm <- accMetrics(s_rs, train) #doing with training data
+    
+    #make data frame with this raster's results
+    #removed the entropy stuff, as it seemed useless (JRV)
+    resrow <- data.frame(RUN=rw, TYPE=paste(suf, "suitability", sep=""), 
+                         TEST.AV.SUIT=tem$METRICS$SUIT, TEST.SD.SUIT=tem$METRICS$SUITSD, 
+                         TEST.MAX.SUIT=tem$METRICS$SUITX, TEST.MIN.SUIT=tem$METRICS$SUITN, 
+                         TEST.OMISSION.RATE=tem$METRICS$OMISSION_RATE, 
+                         TEST.ERROR=tem$METRICS$RMSQE, TEST.ERR.DIST=tem$METRICS$ERR_DIST,
+                         TRAIN.AV.SUIT=trm$METRICS$SUIT, TRAIN.SD.SUIT=trm$METRICS$SUITSD,
+                         TRAIN.MAX.SUIT=trm$METRICS$SUITX, TRAIN.MIN.SUIT=trm$METRICS$SUITN, 
+                         TRAIN.OMISSION.RATE=trm$METRICS$OMISSION_RATE, 
+                         TRAIN.ERROR=trm$METRICS$RMSQE, TRAIN.ERR.DIST=trm$METRICS$ERR_DIST) 
+    
+    #append results to single data frame
+    if (rw == rwList[1] & suf == "_p") {
+      rres <- resrow
+    } else {
+      rres <- rbind(rres, resrow)
     }
   }
 }
-write.csv(rres, paste(ec_dir,"/analyses/data/accuracy-metrics.csv",sep=""), row.names=F)
-write.csv(cres, paste(ec_dir,"/analyses/data/entropy-curves.csv",sep=""), row.names=F)
+#write result
+write.csv(rres, paste(dataDir,"/skill.csv",sep=""), row.names=F)
 
 #plot accuracy metrics here
 plot.acc <- rres[which(rres$TYPE=="_suitability"),]
-tiff(paste(ec_dir,"/analyses/img/accuracy.tiff",sep=""),res=300,pointsize=10,
+tiff(paste(imgDir,"/skill.tiff",sep=""),res=300,pointsize=10,
      width=1500,height=1300,units="px",compression="lzw")
 par(mar=c(4.5,4,1,1),cex=1)
-plot(plot.acc$TEST.OMISSION.RATE[which(plot.acc$VARIABLE=="tmean")],
-     plot.acc$TEST.ERROR[which(plot.acc$VARIABLE=="tmean")],
-     xlim=c(0,1),ylim=c(0,1),pch=21,
-     xlab="OR",ylab="RMSE")
-points(plot.acc$TEST.OMISSION.RATE[which(plot.acc$VARIABLE=="tmin")],
-       plot.acc$TEST.ERROR[which(plot.acc$VARIABLE=="tmin")],
-       pch=22)
-points(plot.acc$TEST.OMISSION.RATE[which(plot.acc$VARIABLE=="tmax")],
-       plot.acc$TEST.ERROR[which(plot.acc$VARIABLE=="tmax")],
-       pch=24)
+plot(plot.acc$TEST.OMISSION.RATE,plot.acc$TEST.ERROR,
+     xlim=c(0,1),ylim=c(0,1),pch=21,xlab="OR",ylab="RMSE")
 abline(h=0.5,lwd=1.2,lty=2)
 abline(v=0.1,lwd=1.2,lty=2)
 grid()
-legend(0.6,1,cex=0.8,pch=c(21,22,24),legend=c("Tmean-based","Tmin-based","Tmax-based"))
 dev.off()
+
+
+######################################################################
+#Assess accuracy of each parameter set using AUC
+#draw some pseudo absences from the whole analysis domain
+if (!file.exists(paste(mskDir,"/mask_30s.tif",sep=""))) {
+  ind_msk <- readShapePoly("/nfs/a102/eejarv/CMIP5/assessment/input-data/adm-data/SAS/IND_adm/IND3.shp")
+  ind_msk <- rasterize(ind_msk,msk,field=1)
+  writeRaster(ind_msk,paste(mskDir,"/mask_30s.tif",sep=""),format="GTiff")
+} else {
+  ind_msk <- raster(paste(mskDir,"/mask_30s.tif",sep=""))
+}
+
+ind_xy <- as.data.frame(xyFromCell(ind_msk,which(!is.na(ind_msk[]))))
+npa <- 10000
+set.seed(1234)
+pab <- as.matrix(ind_xy[sample(1:nrow(ind_xy),npa),])
+rownames(pab) <- 1:nrow(pab)
+
+#looping the model outputs
+for (rw in rwList) {
+  #rw <- rwList[1]
+  #pList <- parList[which(parList$RUN==rw),]
+  for (suf in c("_p","_t","_")) {
+    #suf <- "_"
+    cat("RUN:", rw, "- SUF:", suf, "\n")
+    s_rs <- raster(paste(runDir,"/run_",rw,"/", crop_name, suf, "suitability.tif", sep=""))
+    
+    #calculating auc
+    auc <- eco_roc_eval(s_rs,test,train,pab)
+    auc <- cbind(RUN=rw, TYPE=paste(suf, "suitability", sep=""),auc)
+    
+    #append results to single data frame
+    if (rw == rwList[1] & suf == "_p") {
+      all_auc <- auc
+    } else {
+      all_auc <- rbind(all_auc, auc)
+    }
+  }
+}
+write.csv(all_auc, paste(dataDir,"/auc_evaluation.csv",sep=""), row.names=F)
+
+
+
+
+
 
 
 ######################################################################

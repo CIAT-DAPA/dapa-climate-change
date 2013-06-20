@@ -1128,6 +1128,46 @@ getParameters <- function(x.real, params=NULL, stat="mode", plotit=T, plotdir=".
 }
 
 
-
+#function to evaluate an ecocrop model using the ROC AUC
+eco_roc_eval <- function(rs,te,tr,pa) {
+  cat("evaluating model accuracy\n")
+  #correct spatial sorting bias
+  sb <- ssb(p=te, a=pa, reference=tr)
+  cat("spatial sorting bias is:",sb[,1] / sb[,2],"\n")
+  
+  i <- pwdSample(te, pab, tr, n=1, tr=0.33, warn=F)
+  te_ssb <- te[!is.na(i[,1]),]
+  pa_ssb <- pa[na.omit(as.vector(i)),]
+  
+  sb2 <- ssb(te_ssb, pa_ssb, tr)
+  cat("corrected spatial sorting bias is:",sb2[1]/ sb2[2],"\n")
+  
+  #evaluation of non-ssb corrected
+  vte <- extract(s_rs,te)*0.01; vte <- vte[which(!is.na(vte))] #prediction on test data
+  vpa <- extract(s_rs,pa)*0.01; vpa <- vpa[which(!is.na(vpa))] #prediction on pseudo-absence data
+  eval_te <- evaluate(p=vte, a=vpa)
+  #plot(eval_te,"ROC")
+  
+  #evaluation of ssb corrected
+  vte_ssb <- extract(s_rs,te_ssb)*0.01; vte_ssb <- vte_ssb[which(!is.na(vte_ssb))] #prediction on test data
+  vpa_ssb <- extract(s_rs,pa_ssb)*0.01; vpa_ssb <- vpa_ssb[which(!is.na(vpa_ssb))] #prediction on pseudo-absence data
+  eval_ssb <- evaluate(p=vte_ssb, a=vpa_ssb)
+  
+  #evaluation on train data
+  vtr <- extract(s_rs,tr)*0.01; vtr <- vtr[which(!is.na(vtr))] #prediction on test data
+  eval_tr <- evaluate(p=vtr, a=vpa)
+  
+  #correct test auc
+  c_auc <- eval_te@auc + .5 - max(c(0.5,eval_ssb@auc))
+  
+  cat("training AUC is",eval_tr@auc,"\n")
+  cat("test AUC is",eval_te@auc,"\n")
+  cat("test AUC (ssb corrected) is",c_auc,"\n")
+  
+  #final results data frame
+  out_list <- data.frame(AUC_TRAIN=eval_tr@auc,AUC_TEST=eval_te@auc,
+                         AUC_SSB=eval_ssb@auc,AUC_C=c_auc)
+  return(out_list)
+}
 
 

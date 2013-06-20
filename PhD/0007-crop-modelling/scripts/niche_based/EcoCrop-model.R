@@ -130,9 +130,10 @@ suitCalc <- function(climPath='', sowDat='', harDat='', Gmin=90,Gmax=90,Tkmp=0,T
   meanTRaster <- raster(climateStack, 0) #filename(fSuitRaster) <- fSuitName
   
   bs <- blockSize(climateStack, n=41, minblocks=2)
-  cat("(", bs$n, " chunks) \n", sep="")
-  pb <- pbCreate(bs$n, type='text', style=3)
+  cat("processing in: ", bs$n, " chunks \n", sep="")
+  #pb <- pbCreate(bs$n, type='text', style=3)
   for (b in 1:bs$n) {
+    cat(" ",round(b/bs$n*100,2),"%",sep="")
     iniCell <- 1+(bs$row[b]-1)*ncol(pSuitRaster)
     finCell <- (bs$row[b]+bs$nrow[b]-1)*ncol(pSuitRaster)
     allCells <- iniCell:finCell
@@ -169,9 +170,10 @@ suitCalc <- function(climPath='', sowDat='', harDat='', Gmin=90,Gmax=90,Tkmp=0,T
     cumPptRaster[validCells] <- cumPptVec
     meanTRaster[validCells] <- meanTVec
     
-    pbStep(pb, b)
+    #pbStep(pb, b)
   }
-  pbClose(pb)
+  cat("\n")
+  #pbClose(pb)
   pSuitRaster <- writeRaster(pSuitRaster, pSuitName, format='GTiff', overwrite=TRUE)
   tSuitRaster <- writeRaster(tSuitRaster, tSuitName, format='GTiff', overwrite=TRUE)
   fSuitRaster <- writeRaster(fSuitRaster, fSuitName, format='GTiff', overwrite=TRUE)
