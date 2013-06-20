@@ -28,6 +28,7 @@ apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun,...) {
       rowVals <- extract(clm_stk,validCells)
       rowVals <- cbind(rowVals,sow=extract(sow_date,validXY))
       rowVals <- cbind(rowVals,har=extract(har_date,validXY))
+      rowVals <- cbind(rowVals,validXY[,2])
       rasVals <- apply(rowVals, 1, this_fun, ...)
     } else {
       rasVals <- NA
@@ -210,8 +211,6 @@ calc_gdd <- function(x) {
 #ESAT_MIN=0.61120*EXP((17.67*TMIN(IDAP))/(TMIN(IDAP)+243.5))     
 #ESAT_MAX=0.61120*EXP((17.67*TMAX(IDAP))/(TMAX(IDAP)+243.5))     
 #VPD=VPD_CTE*(ESAT_MAX-ESAT_MIN) !kPa
-
-#vpd_cte <- 0.7
 calc_vdp <- function(x) {
   montmin <- x[1:12]
   montmax <- x[13:24]
@@ -230,9 +229,10 @@ calc_vdp <- function(x) {
   daytmax <- linearise(montmax)[16:(365+15)]*.1
   
   #calculate
+  vpd_cte <- 0.7
   esat_min=0.61120*exp((17.67*daytmin)/(daytmin+243.5))
   esat_max=0.61120*exp((17.67*daytmax)/(daytmax+243.5))
-  vpd <- 0.7*(esat_max-esat_min) # kPa
+  vpd <- vpd_cte*(esat_max-esat_min) # kPa
   vpd <- sum(vpd[gs])
   
   #return
@@ -242,11 +242,28 @@ calc_vdp <- function(x) {
 
 
 #### calculate ETp using Priestley-Taylor
-calc_vdp <- function(x) {
+calc_etmax <- function(x) {
   montmin <- x[1:12]
   montmax <- x[13:24]
   sow <- x[25]; har <- x[26] #sowing and harvest dates
   lat <- x[27] #latitude of site
+  
+  #calculation constants
+  albedo <- 0.2
+  vpd_cte <- 0.7
+  
+  #soil heat flux parameters
+  a_eslope=611.2
+  b_eslope=17.67
+  c_eslope=243.5
+  
+  #Priestley-Taylor constants
+  pt_const=1.26
+  pt_fact=1
+  vpd_ref=1
+  psycho=62
+  rho_w=997
+  rlat_ht=2.26E6
   
   #fix sowing date if missing
   if (is.na(sow) & is.na(har)) {sow <- 152}
@@ -263,21 +280,33 @@ calc_vdp <- function(x) {
   montmax <- c(montmax[12],montmax,montmax[1])
   daytmax <- linearise(montmax)[16:(365+15)]*.1
   
-  #calculate solar radiation
-  daysrad <- bc(dates=createDateGrid(1985), lat, BCb=0.11, extraT = NULL, daytmax, daytmin, BCc=2, tal=0.76)
-  
-  
-  
-  
+  #calculate solar radiation (in MJ m-2)
+  daysrad <- bc(dates=createDateGrid(1985), lat, BCb=0.115, extraT = NULL, daytmax, daytmin, BCc=2, tal=0.76)
   
   #calculate
-  esat_min=0.61120*exp((17.67*daytmin)/(daytmin+243.5))
-  esat_max=0.61120*exp((17.67*daytmax)/(daytmax+243.5))
-  vpd <- 0.7*(esat_max-esat_min) # kPa
-  vpd <- sum(vpd[gs])
+  daytmean <- (daytmin+daytmax)/2 #mean temperature
+  dayrn = (1-albedo) * daysrad #net radiation (MJ m-2 is ok!)
+  
+  #soil heat flux
+  eslope=a_eslope*b_eslope*c_eslope/(daytmean+c_eslope)^2*exp(b_eslope*daytmean/(daytmean+c_eslope))
+  
+  #estimate vpd
+  esat_min=0.61120*exp((17.67*daytmin)/(daytmin+243.5))     
+  esat_max=0.61120*exp((17.67*daytmax)/(daytmax+243.5))     
+  vpd=vpd_cte*(esat_max-esat_min) #kPa
+  
+  pt_coef=pt_fact*pt_const
+  pt_coef = 1 + (pt_coef-1) * vpd / vpd_ref
+  
+  #*10^6? To convert fluxes MJ to J
+  #rlat_ht? Latent heat flux to water flux
+  #100/rho_w? Kg/m^2 to cm
+  #the last *10 is for mm (instead of cm)
+  et_max=(pt_coef * dayrn * eslope/(eslope+psycho) * 10^6 / rlat_ht * 100/rho_w)*10 #in mm/day
+  et_max <- sum(et_max[gs])
   
   #return
-  return(vpd)
+  return(et_max)
 }
 #####
 
