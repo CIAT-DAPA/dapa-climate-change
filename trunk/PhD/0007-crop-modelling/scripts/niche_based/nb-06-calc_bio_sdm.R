@@ -7,7 +7,7 @@ stop("!")
 ### this is to be done for the 30s fitting data
 
 #load libraries
-library(raster); library(rgdal)
+library(raster); library(rgdal); library(zoo)
 
 #source directory
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
@@ -138,11 +138,14 @@ if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
   #calculate
   totvpd <- apply_by_blocks(tnx_stk,sowd,hard,calc_vdp)
   writeRaster(totvpd,paste(outDir,"/totvpd.tif",sep=""),format="GTiff")
+} else {
+  totvpd <- raster(paste(outDir,"/totvpd.tif",sep=""))
 }
 
 
-
-#solar radiation
+#####################################
+#### 8. calculate potential evapotranspiration
+#####################################
 
 
 
