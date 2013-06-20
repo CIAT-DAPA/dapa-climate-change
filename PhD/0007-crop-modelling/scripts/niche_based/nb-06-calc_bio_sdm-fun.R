@@ -290,7 +290,7 @@ calc_etmax <- function(x) {
   #soil heat flux
   eslope=a_eslope*b_eslope*c_eslope/(daytmean+c_eslope)^2*exp(b_eslope*daytmean/(daytmean+c_eslope))
   
-  #estimate vpd
+  #estimate vpd (in kPa)
   esat_min=0.61120*exp((17.67*daytmin)/(daytmin+243.5))     
   esat_max=0.61120*exp((17.67*daytmax)/(daytmax+243.5))     
   vpd=vpd_cte*(esat_max-esat_min) #kPa
