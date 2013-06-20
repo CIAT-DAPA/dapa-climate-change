@@ -5,7 +5,7 @@
 #Description: separate an input dataset into training and test datasets. Will simply add a column with "Test" for test points and
 #"Train" for training datapoints. This is done only using those 
 
-randomSplit <- function(dataset, per=20) {
+randomSplit <- function(dataset, per=20, seed=1234) {
 	if (per < 5 | per > 50) {
 		stop("Please change your test percentage, it should be between 5 and 50%")
 	}
@@ -17,6 +17,7 @@ randomSplit <- function(dataset, per=20) {
 	ntest <- round(nrow(dataset)*per/100, 0)
 	ntrain <- nrow(dataset) - ntest
 	
+  set.seed(seed)
 	test <- sample(1:nrow(dataset), ntest)
 	train <- c(1:nrow(dataset))[-test]
 	
