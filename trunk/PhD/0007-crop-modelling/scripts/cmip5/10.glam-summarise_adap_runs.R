@@ -70,7 +70,7 @@ collate_this <- function(gcm_i) {
 }
 
 
-collate_this(7) #1 to 14
+collate_this(14) #1 to 14
 
 # xt = x / (x+z)
 # z <- 50
