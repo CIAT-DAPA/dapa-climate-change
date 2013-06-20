@@ -1011,12 +1011,24 @@ copy_clim_data <- function(clm_type,iitm_dir,cru_dir,oclm_dir,cru_prefix=NA) {
 #produce growing season parameters based on sowing date and duration
 get_gs_data <- function(i,rs) {
   x <- rs[i,] #get that row
-  x2 <- calibrationParameters(x, gs=x$DUR, verbose=F) #get growing season data for that duration
-  this_gs <- x$SOW_MTH #which month the crop was planted
-  fields <- c(paste("GS",this_gs,"_P",sep=""),paste("GS",this_gs,"_T",sep=""),
-              paste("GS",this_gs,"_N",sep=""),paste("GS",this_gs,"_X",sep=""))
-  gs_data <- x2[,fields] #get only data for the growing season when crop was planted
-  names(gs_data) <- c("GS1_P","GS1_T","GS1_N","GS1_X") #assign new names to fields for final merging
+  monprec <- as.numeric(x[,grep("PREC",names(x))])
+  montmen <- as.numeric(x[,grep("TMEAN",names(x))])
+  montmin <- as.numeric(x[,grep("TMIN",names(x))])
+  montmax <- as.numeric(x[,grep("TMAX",names(x))])
+  sow <- x$SOW_MTH #sowing date (in months)
+  har <- x$HAR_MTH #harvest date (in months)
+  if (har < sow) {gs <- c(har:12,1:sow)} else {gs <- c(sow:har)}
+  
+  #calculate growing season metrics
+  pr_total <- sum(monprec[gs])
+  tm_mean <- mean(montmen[gs]); tm_min <- min(montmen[gs]); tm_max <- max(montmen[gs])
+  tx_mean <- mean(montmax[gs]); tx_min <- min(montmax[gs]); tx_max <- max(montmax[gs])
+  tn_mean <- mean(montmin[gs]); tn_min <- min(montmin[gs]); tn_max <- max(montmin[gs])
+  
+  gs_data <- data.frame(GS_P=pr_total,
+                        GS_TM=tm_mean,GS_TN=tm_min,GS_TX=tm_max,
+                        GS_XM=tx_mean,GS_XN=tx_min,GS_XX=tx_max,
+                        GS_NM=tn_mean,GS_NN=tn_min,GS_NX=tn_max)
   x <- cbind(x,gs_data) #merge with original input data
   return(x)
 }
@@ -1029,3 +1041,93 @@ find_month <- function(jd,dg) {
   mth <- mth+day
   return(mth)
 }
+
+#Find fitting parameters using the mode of the data and specified areas around
+#the mode distanced classes from the mode-class
+#a parameter named 'stat' was introduced in the case the distributions are not skewed
+#(in that case the mean or the median can be usefully used)
+
+getParameters <- function(x.real, params=NULL, stat="mode", plotit=T, plotdir="./img", xlabel="Value (units)", filename="test.jpg") {
+  require(sfsmisc)
+  if (is.null(params)) {warning("PDF parameters not provided, using defaults \n"); params <- list(kill=1,min=0.99,opmin=0.5,opmax=0.5,max=0.99)}
+  
+  #getting parameters from params object
+  akill <- params$kill
+  amin <- params$min
+  aopmin <- params$opmin
+  aopmax <- params$opmax
+  amax <- params$max
+  
+  #remove NA from x.real
+  x.real <- x.real[which(!is.na(x.real))]
+  if (length(x.real) < 50) {warning("Unreliable results could come out when using less than 50 calibration data points")}
+  
+  #commented out (JRV)
+  #removing outliers from x.real
+  #qincl <- quantile(x.real,probs=c(0.005,0.995))
+  #x.real <- x.real[which(x.real >= qincl[1] & x.real <= qincl[2])]
+  x.lims <- c(min(x.real,na.rm=T),max(x.real,na.rm=T))
+  
+  #calculate pdf, mode, and mode position
+  dp <- density(x.real,from=x.lims[1],to=x.lims[2])
+  if (stat == "mode") {
+    mode.y <- max(dp$y)
+    mode.x <- max(dp$x[which(dp$y == mode.y)])
+  } else if (stat == "mean") {
+    mode.x <- mean(x.real)
+  } else if (stat == "median") {
+    mode.x <- median(x.real)
+  }
+  
+  #split pdf and calculate areas
+  all_pdf <- data.frame(x=dp$x,y=dp$y)
+  l.side <- all_pdf[which(all_pdf$x <= mode.x),]
+  r.side <- all_pdf[which(all_pdf$x >= mode.x),]
+  
+  aa <- integrate.xy(all_pdf$x,all_pdf$y) #total area
+  al <- integrate.xy(l.side$x,l.side$y) #area to left of mode / mean / median
+  ar <- integrate.xy(r.side$x,r.side$y) #area to right of mode / mean / median
+  
+  #cumulate areas
+  ata <- 0
+  for (rw in 2:nrow(l.side)) {ta <- integrate.xy(l.side$x[1:rw],l.side$y[1:rw]); ata <- c(ata,ta)}
+  l.side$area <- al-ata
+  l.side$frac <- l.side$area / al
+  
+  ata <- 0
+  for (rw in 2:nrow(r.side)) {ta <- integrate.xy(r.side$x[1:rw],r.side$y[1:rw]); ata <- c(ata,ta)}
+  r.side$area <- ata
+  r.side$frac <- r.side$area / ar
+  
+  #get thresholds
+  v.kill <- abs(akill - l.side$frac); v.kill <- l.side$x[min(which(v.kill == min(v.kill)))]
+  v.min <- abs(amin - l.side$frac); v.min <- l.side$x[min(which(v.min == min(v.min)))]
+  v.opmin <- abs(aopmin - l.side$frac); v.opmin <- l.side$x[min(which(v.opmin == min(v.opmin)))]
+  v.opmax <- abs(aopmax - r.side$frac); v.opmax <- r.side$x[min(which(v.opmax == min(v.opmax)))]
+  v.max <- abs(amax - r.side$frac); v.max <- r.side$x[min(which(v.max == min(v.max)))]
+  
+  #the plotting
+  if (plotit) {
+    if (!file.exists(plotdir)) {stop("Check your plotting directory as it doesnt seem to exist")}
+    jpeg(paste(plotdir,"/",filename,sep=""), quality=100, height=1024, width=1024,pointsize=8,res=300)
+    par(mar=c(4,4,1,1))
+    plot(dp,main=NA,xlab=xlabel)
+    grid()
+    abline(v=mode.x,col="red")
+    abline(v=v.kill,col="darkgreen",lty=1)
+    abline(v=v.min,col="darkgreen",lty=2)
+    abline(v=v.opmin,col="darkgreen",lty=3)
+    abline(v=v.opmax,col="darkgreen",lty=3)
+    abline(v=v.max,col="darkgreen",lty=2)
+    dev.off()
+  }
+  
+  #final object and return
+  cal.par <- data.frame(KILL=v.kill, MIN=v.min, OPMIN=v.opmin, OPMAX=v.opmax, MAX=v.max)
+  return(cal.par)
+}
+
+
+
+
+

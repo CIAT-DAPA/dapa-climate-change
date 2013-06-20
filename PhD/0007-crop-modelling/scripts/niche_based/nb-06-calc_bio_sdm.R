@@ -34,8 +34,8 @@ if (!file.exists(paste(outDir,"/totrain.tif",sep=""))) {
 }
 
 #load sowing and harvest dates
-sowd <- raster(paste(calDir,"/plant_ind.tif",sep=""))
-hard <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
+sowd <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
+hard <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
 
 
 #####################################
