@@ -4,7 +4,7 @@
 stop("not to run yet")
 
 #### LIBRARIES: raster, maptools, rgdal, sp
-library(raster); library(rgdal); library(maptools); library(MASS)
+library(raster); library(rgdal); library(maptools)
 library(sfsmisc); library(dismo)
 data(wrld_simpl)
 
@@ -24,6 +24,7 @@ source(paste(src.dir1,"/src/randomSplit.R",sep=""))
 source(paste(src.dir1,"/src/extractClimateData.R",sep=""))
 source(paste(src.dir1,"/src/accuracy.R",sep=""))
 source(paste(src.dir1,"/src/validation.R",sep=""))
+source(paste(src.dir1,"/src/createMask.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #basic information
@@ -416,26 +417,32 @@ write.csv(auc_all, paste(dataDir,"/auc_evaluation.csv",sep=""), row.names=F)
 
 
 ######################################################################
-#Validation stuff...
-rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
-shp.icrisat <- paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep="")
-oblist <- ls(pattern="shp")
-for (ob in oblist) {
-  cat("Processing", ob, "\n")
-  shp <- readShapePoly(get(ob))
+#(Independent) validation using the crop's district-level distribution
+#load parameter sets
+parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+rwList <- unique(parList$RUN)
+
+for (rw in rwList) {
+  #rw <- rwList[1]
+  rsl <- raster(paste(runDir,"/run_",rw,"/",crop_name,"_suitability.tif",sep=""))
+  shp.icrisat <- paste(ecoDir,"/dis_eval/IND2-gnut.shp",sep="")
+  cat("Processing", shp.icrisat, "\n")
+  shp <- readShapePoly(shp.icrisat)
   field <- "H_ISPRES"
+  
+  #calculate district-level metrics
   res <- extractFromShape(shp, field, naValue=-9999, rsl)
-  write.csv(res, paste(ec_dir,"/analyses/evaluation/", ob, ".csv", sep=""),row.names=F)
-  res <- read.csv(paste(ec_dir,"/analyses/evaluation/", ob, ".csv", sep=""))
+  write.csv(res, paste(runDir,"/run_",rw,"/dis_eval_raw.csv", sep=""),row.names=F)
+  
+  #calculate overall metrics
   mets <- valMetrics(res, pres.field=field,thresh=0)
-  if (ob == oblist[1]) {
-    rr <- cbind(SHP=ob, mets)
-  } else {
-    rr <- rbind(rr, cbind(SHP=ob, mets))
-  }
+  
+  #final object preparation
+  rr <- cbind(SHP=ob, mets)
   rm(res); rm(shp); rm(mets); gc()
+  write.csv(rr, paste(runDir,"/run_",rw,"/dis_eval_rates.csv", sep=""),quote=F, row.names=F)
 }
-write.csv(rr, paste(ec_dir,"/analyses/evaluation/rates.csv", sep=""),quote=F, row.names=F)
+
 
 
 ######################################################################
