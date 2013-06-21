@@ -46,7 +46,10 @@ calc_totrain <- function(x) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -69,7 +72,10 @@ calc_sfeng <- function(x,...) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -106,7 +112,10 @@ calc_minrain <- function(x) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -129,7 +138,10 @@ calc_meantemp <- function(x,...) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -157,7 +169,10 @@ calc_tcdays <- function(x) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
@@ -181,7 +196,10 @@ calc_gdd <- function(x) {
   monclim <- x[1:12]
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
@@ -210,7 +228,10 @@ calc_vdp <- function(x) {
   montmax <- x[13:24]
   sow <- x[25]; har <- x[26] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
-  if (is.na(har)) {har <- sow+122}
+  if (is.na(har)) {
+    har <- sow+122
+    if (har > 365) {har <- har - 365}
+  }
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
