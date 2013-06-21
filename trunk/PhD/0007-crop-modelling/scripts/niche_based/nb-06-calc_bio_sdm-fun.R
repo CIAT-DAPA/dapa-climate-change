@@ -54,7 +54,7 @@ calc_totrain <- function(x) {
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
   Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
-  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  if (Gf < Gi) {gs <- c(Gi:12,1:Gf)} else {gs <- c(Gi:Gf)}
   
   #extract monthly climate
   monclim <- monclim[gs]
@@ -80,7 +80,7 @@ calc_sfeng <- function(x,...) {
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
   Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
-  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  if (Gf < Gi) {gs <- c(Gi:12,1:Gf)} else {gs <- c(Gi:Gf)}
   
   #extract monthly climate
   monclim <- monclim[gs]
@@ -120,7 +120,7 @@ calc_minrain <- function(x) {
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
   Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
-  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  if (Gf < Gi) {gs <- c(Gi:12,1:Gf)} else {gs <- c(Gi:Gf)}
   
   #extract monthly climate
   monclim <- monclim[gs]
@@ -146,7 +146,7 @@ calc_meantemp <- function(x,...) {
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
   Gf <- ceiling(har/30); if (Gf>12) {Gf <- Gf-12}
-  if (Gf < Gi) {gs <- c(Gf:12,1:Gi)} else {gs <- c(Gi:Gf)}
+  if (Gf < Gi) {gs <- c(Gi:12,1:Gf)} else {gs <- c(Gi:Gf)}
   
   wfunc <- list(...)[[1]]
   
@@ -175,7 +175,7 @@ calc_tcdays <- function(x) {
   }
   
   #growing season start and end
-  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  if (har < sow) {gs <- c(sow:365,1:har)} else {gs <- c(sow:har)}
   
   monclim <- c(monclim[12],monclim,monclim[1])
   dayclim <- linearise(monclim)[16:(365+15)]
@@ -202,7 +202,7 @@ calc_gdd <- function(x) {
   }
   
   #growing season start and end
-  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  if (har < sow) {gs <- c(sow:365,1:har)} else {gs <- c(sow:har)}
   
   monclim <- c(monclim[12],monclim,monclim[1])
   dayclim <- linearise(monclim)[16:(365+15)]*.1
@@ -234,7 +234,7 @@ calc_vdp <- function(x) {
   }
   
   #growing season start and end
-  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  if (har < sow) {gs <- c(sow:365,1:har)} else {gs <- c(sow:har)}
   
   montmin <- c(montmin[12],montmin,montmin[1])
   daytmin <- linearise(montmin)[16:(365+15)]*.1
@@ -284,7 +284,7 @@ calc_etmax <- function(x) {
   if (is.na(har)) {har <- sow+122}
   
   #growing season start and end
-  if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
+  if (har < sow) {gs <- c(sow:365,1:har)} else {gs <- c(sow:har)}
   
   #linearise monthly values
   montmin <- c(montmin[12],montmin,montmin[1])
