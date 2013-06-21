@@ -43,15 +43,19 @@ ecoDir <- paste(modDir,"/EcoCrop",sep="")
 dataDir <- paste(ecoDir,"/data",sep="")
 imgDir <- paste(ecoDir,"/img",sep="")
 runDir <- paste(ecoDir,"/runs",sep="")
+prjDir <- paste(ecoDir,"/proj",sep="")
 pdfDir <- paste(imgDir,"/pdf_runs",sep="")
 rocDir <- paste(imgDir,"/roc_plots",sep="")
 mskDir <- paste(envDir,"/mask",sep="")
+omet_dir <- paste(prjDir,"/baseline/evaluation",sep="")
 if (!file.exists(dataDir)) {dir.create(dataDir)}
 if (!file.exists(imgDir)) {dir.create(imgDir)}
 if (!file.exists(runDir)) {dir.create(runDir)}
+if (!file.exists(prjDir)) {dir.create(prjDir)}
 if (!file.exists(pdfDir)) {dir.create(pdfDir)}
 if (!file.exists(rocDir)) {dir.create(rocDir)}
 if (!file.exists(mskDir)) {dir.create(mskDir)}
+if (!file.exists(omet_dir)) {dir.create(omet_dir,recursive=T)}
 
 
 #here load Sacks et al. (2010) planting dates to get an approximation of when each
@@ -422,25 +426,33 @@ write.csv(auc_all, paste(dataDir,"/auc_evaluation.csv",sep=""), row.names=F)
 parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
 rwList <- unique(parList$RUN)
 
+shp.icrisat <- paste(ecoDir,"/dis_eval/IND2-gnut.shp",sep="")
+cat("Processing", shp.icrisat, "\n")
+shp <- readShapePoly(shp.icrisat)
 for (rw in rwList) {
   #rw <- rwList[1]
-  rsl <- raster(paste(runDir,"/run_",rw,"/",crop_name,"_suitability.tif",sep=""))
-  shp.icrisat <- paste(ecoDir,"/dis_eval/IND2-gnut.shp",sep="")
-  cat("Processing", shp.icrisat, "\n")
-  shp <- readShapePoly(shp.icrisat)
-  field <- "H_ISPRES"
+  cat("\nmodel run:",rw,"\n")
   
-  #calculate district-level metrics
-  res <- extractFromShape(shp, field, naValue=-9999, rsl)
-  write.csv(res, paste(runDir,"/run_",rw,"/dis_eval_raw.csv", sep=""),row.names=F)
+  if (!file.exists(paste(runDir,"/run_",rw,"/dis_eval_raw.csv", sep=""))) {
+    rsl <- raster(paste(runDir,"/run_",rw,"/",crop_name,"_suitability.tif",sep=""))
+    field <- "H_ISPRES"
+    
+    #calculate district-level metrics
+    res <- extractFromShape(shp, field, naValue=-9999, rsl)
+    write.csv(res, paste(runDir,"/run_",rw,"/dis_eval_raw.csv", sep=""),row.names=F)
+  } else {
+    res <- read.csv(paste(runDir,"/run_",rw,"/dis_eval_raw.csv", sep=""))
+  }
   
-  #calculate overall metrics
-  mets <- valMetrics(res, pres.field=field,thresh=0)
-  
-  #final object preparation
-  rr <- cbind(SHP=ob, mets)
-  rm(res); rm(shp); rm(mets); gc()
-  write.csv(rr, paste(runDir,"/run_",rw,"/dis_eval_rates.csv", sep=""),quote=F, row.names=F)
+  if (!file.exists(paste(runDir,"/run_",rw,"/dis_eval_rates.csv", sep=""))) {
+    #calculate overall metrics
+    mets <- valMetrics(res, pres.field=field,thresh=0)
+    
+    #final object preparation
+    rr <- cbind(RUN=rw, SHP="shp.icrisat",mets)
+    write.csv(rr, paste(runDir,"/run_",rw,"/dis_eval_rates.csv", sep=""),quote=F, row.names=F)
+  }
+  rm(res); rm(mets); gc()
 }
 
 
@@ -450,8 +462,8 @@ for (rw in rwList) {
 dres <- 1 #desired resolution, in degree
 fct <- round(dres/2.5*60,0) #aggregating factor
 
-rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
-shp <- readShapePoly(paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep=""))
+rsl <- raster(paste(runDir,"/run_1/",crop_name,"_suitability.tif",sep=""))
+shp <- readShapePoly(paste(ecoDir,"/dis_eval/IND2-gnut.shp",sep=""))
 naValue <- -9999
 
 #Extract data from shapefile
@@ -460,7 +472,7 @@ pafield <- "H_ISPRES"
 
 #create raster
 rs <- raster(rsl)
-pars <- raster:::.polygonsToRaster(shp,rs,field=pafield)
+pars <- rasterize(shp,rs,field=pafield)
 pars[which(pars[]==naValue)] <- NA
 
 #aggregate raster
@@ -470,166 +482,215 @@ pars.agg[which(pars.agg[]>=0.75)] <- 1 #set anything below 25%
 
 #plot the presence-absence surface
 aspect <- (pars@extent@xmax-pars@extent@xmin)/(pars@extent@ymax-pars@extent@ymin)+0.15
-tiff(paste(ec_dir,"/analyses/img/crop-presence-aggr.tiff",sep=""),
+tiff(paste(imgDir,"/crop-presence-aggr.tiff",sep=""),
      res=300,pointsize=10,width=1500,height=1500*aspect,units="px",compression="lzw")
 par(mar=c(2.5,2.5,1,1),cex=0.8)
-plot(pars.agg,useRaster=F,
-     col=c("red","green"),
-     breaks=c(0,0.5,1),
-     lab.breaks=c("Absent",NA,"Present"),
-     horizontal=T,
-     legend.width=1.5,
-     legend.shrink=0.8,
-     nlevel=100)
-#plot(wrld_simpl,add=T,lwd=0.6)
+plot(pars.agg,col=c("red","green"),breaks=c(0,0.5,1),lab.breaks=c("Absent",NA,"Present"),
+     horizontal=T,legend.width=1.5,legend.shrink=0.8)
+plot(shp,add=T,border="black")
+grid()
+dev.off()
+
+tiff(paste(imgDir,"/crop-presence-orig.tiff",sep=""),
+     res=300,pointsize=10,width=1500,height=1500*aspect,units="px",compression="lzw")
+par(mar=c(2.5,2.5,1,1),cex=0.8)
+plot(pars,col=c("red","green"),breaks=c(0,0.5,1),lab.breaks=c("Absent",NA,"Present"),
+     horizontal=T,legend.width=1.5,legend.shrink=0.8)
 plot(shp,add=T,border="black")
 grid()
 dev.off()
 
 #store the evaluation datasets
-pars.agg <- writeRaster(pars.agg,paste(ec_dir,"/analyses/evaluation/pa_coarse.asc",sep=""),format="ascii")
-pars <- writeRaster(pars,paste(ec_dir,"/analyses/evaluation/pa_fine.asc",sep=""),format="ascii")
+pars.agg <- writeRaster(pars.agg,paste(ecoDir,"/dis_eval/pa_coarse.tif",sep=""),format="GTiff")
+pars <- writeRaster(pars,paste(ecoDir,"/dis_eval/pa_fine.tif",sep=""),format="GTiff")
+
+
+######################################################################
+##### evaluate the model using AUC on true absence data 
+
+#load parameter sets
+parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+rwList <- unique(parList$RUN)
+
+#get the whole analysis domain into a x,y data.frame
+ind_msk <- raster(paste(ecoDir,"/dis_eval/pa_fine.tif",sep=""))
+
+#directory to save files
+realrocDir <- paste(imgDir,"/realroc_plots",sep="")
+if (!file.exists(realrocDir)) {dir.create(realrocDir)}
+
+#looping the model outputs
+eval_all <- data.frame()
+for (rw in rwList) {
+  #rw <- rwList[1]
+  for (suf in c("_p","_t","_")) {
+    #suf <- "_"
+    cat("\nRUN:", rw, "- SUF:", suf)
+    
+    if (!file.exists(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs.RData",sep=""))) {
+      s_rs <- raster(paste(runDir,"/run_",rw,"/", crop_name, suf, "suitability.tif", sep=""))
+      
+      #evaluating
+      eco_eval <- eval_ecocrop(rsl=s_rs,eval_rs=ind_msk,rocplot=T,plotdir=realrocDir,
+                               filename=paste("roc_run-",rw,suf,"suitability.jpg",sep=""))
+      
+      #saving
+      save(list=c("eco_eval"),file=paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs.RData",sep=""))
+    } else {
+      load(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs.RData",sep=""))
+    }
+    met_table <- cbind(RUN=rw, TYPE=paste(suf, "suitability", sep=""), eco_eval$METRICS)
+    rm(eco_eval); g=gc(); rm(g) #cleanup
+    eval_all <- rbind(eval_all,met_table)
+  }
+}
+write.csv(eval_all, paste(dataDir,"/realabs_evaluation.csv",sep=""), row.names=F)
+
 
 
 ######################################################################
 #1. run & assess EcoCrop with IITM/CRU data, climatological means
 
-#a. copy the data to a folder for further runs
-iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_clm",sep="")
-cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data",sep="")
-clm_dir <- paste(ec_dir,"/climate/climatology",sep="")
-
-clm_type <- "1966_1993"
-oclm_dir <- copy_clim_data(clm_type=clm_type,
-                           iitm_dir=paste(iitm_dir,"/climatology_",clm_type,sep=""),
-                           cru_dir=paste(cru_dir,"/climatology_",clm_type,sep=""),
-                           oclm_dir=clm_dir,cru_prefix=NA)
-
-clm_type <- "1960_2000"
-oclm_dir <- copy_clim_data(clm_type=clm_type,
-                           iitm_dir=paste(iitm_dir,"/climatology_",clm_type,sep=""),
-                           cru_dir=paste(cru_dir,"/climatology_",clm_type,sep=""),
-                           oclm_dir=clm_dir,cru_prefix=NA)
-
-#b. run EcoCrop with these two datasets
 #run details (parameters)
-gs <- 1
-p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
-p <- p[which(p$GS==gs),]
-gs_type <- "tmean"
-gs_loc <- which(p$VARIABLE == gs_type)
+parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+rwList <- unique(parList$RUN)
 
-#model run
-period <- "1966_1993"
-eco <- suitCalc(climPath=paste(clm_dir,"/",period,sep=""), 
-                Gmin=120,Gmax=120,Tkmp=p$KILL[gs_loc],Tmin=p$MIN[gs_loc],Topmin=p$OPMIN[gs_loc],
-                Topmax=p$OPMAX[gs_loc],Tmax=p$MAX[gs_loc],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
-                Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
-                outfolder=paste(ec_dir,"/analyses/runs_eg/clm_",period,sep=""), 
-                cropname=paste(gs,"-",crop_name,"-",gs_type,sep=""),ext=".tif")
-
-#model run, second period
-period <- "1960_2000"
-eco <- suitCalc(climPath=paste(clm_dir,"/",period,sep=""), 
-                Gmin=120,Gmax=120,Tkmp=p$KILL[gs_loc],Tmin=p$MIN[gs_loc],Topmin=p$OPMIN[gs_loc],
-                Topmax=p$OPMAX[gs_loc],Tmax=p$MAX[gs_loc],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
-                Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
-                outfolder=paste(ec_dir,"/analyses/runs_eg/clm_",period,sep=""), 
-                cropname=paste(gs,"-",crop_name,"-",gs_type,sep=""),ext=".tif")
-
-#c. assess EcoCrop using the presence-absence surface (low resolution)
-pa_rs <- raster(paste(ec_dir,"/analyses/evaluation/pa_coarse.asc",sep=""))
-pred_p1 <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1966_1993/",gs,"-",crop_name,"-",gs_type,"_suitability.asc",sep=""))
-pred_p2 <- raster(paste(ec_dir,"/analyses/runs_eg/clm_1960_2000/",gs,"-",crop_name,"-",gs_type,"_suitability.asc",sep=""))
-
-met_p1 <- eval_ecocrop(rsl=pred_p1,eval_rs=pa_rs)
-met_p1 <- cbind(PERIOD="1966_1993",met_p1)
-
-met_p2 <- eval_ecocrop(rsl=pred_p2,eval_rs=pa_rs)
-met_p2 <- cbind(PERIOD="1960_2000",met_p2)
-
-met <- rbind(met_p1,met_p2)
-
-#write evaluation metrics
-omet_dir <- paste(ec_dir,"/analyses/runs_eg/evaluation",sep="")
-if (!file.exists(omet_dir)) {dir.create(omet_dir,recursive=T)}
-write.csv(met,paste(omet_dir,"/clm_metrics.csv",sep=""),quote=T,row.names=F)
-
-
-######################################################################
-######################################################################
-#2. run historical simulations of EcoCrop (1966-1993)
-iitm_dir <- paste(r_dir,"/climate-data/IND-TropMet_mon",sep="")
-cru_dir <- paste(r_dir,"/climate-data/CRU_TS_v3-1_data",sep="")
-clm_dir <- paste(ec_dir,"/climate/yearly",sep="")
-
-#loop years to produce the datasets for running the model
-for (yr in 1966:1993) {
-  cat("processing year",yr,"\n")
-  oclim_dir <- copy_clim_data(clm_type=yr,
-                              iitm_dir=paste(iitm_dir,"/",yr,sep=""),
-                              cru_dir=paste(cru_dir,"/monthly_grids",sep=""),
-                              oclm_dir=clm_dir,cru_prefix=yr)
+eval_all <- data.frame()
+#start of run loop
+for (rw in rwList) {
+  #rw <- rwList[1]
+  #starting
+  cat("\nrunning model (run: ",rw,")\n",sep="")
+  tpset <- parList[which(parList$RUN == rw),]
+  
+  #parameter values
+  tkill <- tpset$KILL[2] - 40
+  tmin <- tpset$MIN[2]; tmax <- tpset$MAX[2]
+  topmin <- tpset$OPMIN[2]; topmax <- tpset$OPMAX[2]
+  rmin <- tpset$MIN[1]; rmax <- tpset$MAX[1]
+  ropmin <- tpset$OPMIN[1]; ropmax <- tpset$OPMAX[1]
+  
+  #loop the periods
+  for (period in c("1966_1993","1960_2000")) {
+    #period <- "1966_1993"
+    cat("calculating period:",period,"\n")
+    
+    #output directory
+    outf <- paste(prjDir,"/baseline/clm_",period,"/run_",rw,sep="")
+    
+    #a. model run
+    if (!file.exists(paste(outf,"/",crop_name,"_suitability.tif",sep=""))) {
+      cat("running the model...\n")
+      eco <- suitCalc(climPath=paste(clmDir,"/imd_cru_climatology_1dd/",period,sep=""), 
+                      sowDat=paste(calDir,"/plant_doy_ind_jt_1dd.tif",sep=""),
+                      harDat=paste(calDir,"/harvest_doy_ind_jt_1dd.tif",sep=""),
+                      Gmin=NA,Gmax=NA,Tkmp=tkill,Tmin=tmin,Topmin=topmin,
+                      Topmax=topmax,Tmax=tmax,Rmin=rmin,Ropmin=ropmin,
+                      Ropmax=ropmax,Rmax=rmax, 
+                      outfolder=outf,
+                      cropname=crop_name,ext=".tif",cropClimate=F)
+      
+      #b. plot the results
+      png(paste(outf,"/out_psuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+      par(mar=c(3,3,1,2))
+      rsx <- eco[[1]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+      plot(wrld_simpl,add=T); grid(lwd=1.5); dev.off()
+      
+      png(paste(outf,"/out_tsuit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+      par(mar=c(3,3,1,2))
+      rsx <- eco[[2]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+      plot(wrld_simpl,add=T); grid(lwd=1.5); dev.off()
+      
+      png(paste(outf,"/out_suit.png",sep=""), height=1000,width=1500,units="px",pointsize=22)
+      par(mar=c(3,3,1,2))
+      rsx <- eco[[3]]; rsx[which(rsx[]==0)] <- NA; plot(rsx,col=rev(terrain.colors(20)))
+      plot(wrld_simpl,add=T); grid(lwd=1.5); dev.off()
+      
+      #remove objects
+      rm(eco); g=gc(); rm(g)
+    }
+    
+    #b. assess EcoCrop using the presence-absence surface (low resolution)
+    cat("evaluating the model...\n")
+    pa_rs <- raster(paste(ecoDir,"/dis_eval/pa_coarse.tif",sep=""))
+    pred <- raster(paste(outf,"/",crop_name,"_suitability.tif",sep=""))
+    met <- eval_ecocrop(rsl=pred,eval_rs=pa_rs)
+    met <- cbind(RUN=rw,PERIOD=period,met$METRICS)
+    
+    #c. write evaluation of this run
+    write.csv(met,paste(outf,"/evaluation.csv",sep=""),quote=T,row.names=F)
+    
+    #d. append into single object
+    eval_all <- rbind(eval_all,met)
+  }
 }
+#write all metrics
+write.csv(eval_all,paste(omet_dir,"/clm_metrics.csv",sep=""),quote=T,row.names=F)
 
+
+######################################################################
+######################################################################
+#2. run historical simulations of EcoCrop (1966-1993) (and evaluate on yearly basis)
+
+#run details (parameters)
+parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+rwList <- unique(parList$RUN)
 
 #run the model using each year's climate data
 #run details (1966-1993 climatology)
-gs <- 1
-p <- read.csv(paste(ec_dir,"/analyses/data/calibration-parameters.csv",sep=""))
-p <- p[which(p$GS==gs),]
-gs_type <- "tmean"
-gs_loc <- which(p$VARIABLE == gs_type)
-
-#loop through years and calculate suitability
-met_all <- data.frame()
-for (yr in 1966:1993) {
-  cat("processing year",yr,"\n")
-  eco <- suitCalc(climPath=paste(clm_dir,"/",yr,sep=""), 
-                  Gmin=120,Gmax=120,Tkmp=p$KILL[gs_loc],Tmin=p$MIN[gs_loc],Topmin=p$OPMIN[gs_loc],
-                  Topmax=p$OPMAX[gs_loc],Tmax=p$MAX[gs_loc],Rmin=p$MIN[1],Ropmin=p$OPMIN[1],
-                  Ropmax=p$OPMAX[1],Rmax=p$MAX[1], 
-                  outfolder=paste(ec_dir,"/analyses/runs_eg/yearly/",yr,sep=""), 
-                  cropname=paste(gs,"-",crop_name,"-",gs_type,sep=""),ext=".tif")
+met_runs <- data.frame()
+for (rw in rwList) {
+  #rw <- rwList[1]
+  cat("\nrunning model (run: ",rw,")\n",sep="")
+  tpset <- parList[which(parList$RUN == rw),]
   
-  #use yearly harv. area data to assess EcoCrop
-  aha_dir <- paste(crop_dir,"/harvested_area/raster/gridded",sep="")
-  aha_rs <- raster(paste(aha_dir,"/raw-",yr,".asc",sep=""))
-  aha_rs[which(aha_rs[] > 0)] <- 1
+  #parameter values
+  tkill <- tpset$KILL[2] - 40
+  tmin <- tpset$MIN[2]; tmax <- tpset$MAX[2]
+  topmin <- tpset$OPMIN[2]; topmax <- tpset$OPMAX[2]
+  rmin <- tpset$MIN[1]; rmax <- tpset$MAX[1]
+  ropmin <- tpset$OPMIN[1]; ropmax <- tpset$OPMAX[1]
   
-  met_yr <- eval_ecocrop(rsl=eco[[5]],eval_rs=aha_rs)
-  met_yr <- cbind(YEAR=yr,met_yr)
-  met_all <- rbind(met_all,met_yr)
+  #loop through years and calculate suitability
+  met_all <- data.frame()
+  for (yr in 1966:1993) {
+    #yr <- c(1966:1993)[1]
+    cat("processing year",yr,"\n")
+    
+    #output directory
+    outf <- paste(prjDir,"/baseline/yearly/run_",rw,"/",yr,sep="")
+    
+    if (!file.exists(paste(outf,"/",crop_name,"_suitability.tif",sep=""))) {
+      cat("running the model...\n")
+      eco <- suitCalc(climPath=paste(clmDir,"/imd_cru_yearly_1dd/",yr,sep=""), 
+                      sowDat=paste(calDir,"/plant_doy_ind_jt_1dd.tif",sep=""),
+                      harDat=paste(calDir,"/harvest_doy_ind_jt_1dd.tif",sep=""),
+                      Gmin=NA,Gmax=NA,Tkmp=tkill,Tmin=tmin,Topmin=topmin,
+                      Topmax=topmax,Tmax=tmax,Rmin=rmin,Ropmin=ropmin,
+                      Ropmax=ropmax,Rmax=rmax, 
+                      outfolder=outf,
+                      cropname=crop_name,ext=".tif",cropClimate=F)
+    } else {
+      eco <- stack(paste(outf,"/",crop_name,c("_p","_t","_"),"suitability.tif",sep=""))
+    }
+    
+    #use yearly harv. area data to assess EcoCrop
+    aha_dir <- paste(bDir,"/../GLAM/model-runs/GNUT/harvested_area/raster/gridded",sep="")
+    aha_rs <- raster(paste(aha_dir,"/raw-",yr,".asc",sep=""))
+    aha_rs[which(aha_rs[] > 0)] <- 1
+    
+    #evaluate model
+    met_yr <- eval_ecocrop(rsl=eco[[3]],eval_rs=aha_rs)
+    met_yr <- cbind(RUN=rw,YEAR=yr,met_yr$METRICS)
+    met_all <- rbind(met_all,met_yr)
+  }
+  #write run's yearly metrics
+  write.csv(met_all,paste(prjDir,"/baseline/yearly/run_",rw,"/yearly_metrics.csv",sep=""),quote=T,row.names=F)
+  
+  #append to general object
+  met_runs <- rbind(met_runs,met_all)
 }
 write.csv(met_all,paste(omet_dir,"/yearly_metrics.csv",sep=""),quote=T,row.names=F)
-
-#plot accuracy metrics here
-#true positive rate
-tiff(paste(ec_dir,"/analyses/img/historical_TPR.tiff",sep=""),res=300,pointsize=10,
-     width=1500,height=1300,units="px",compression="lzw")
-par(mar=c(3,5,1,1),cex=1)
-plot(met_all$YEAR,met_all$TPR,ylim=c(0.75,1),pch=20,ty="l",xlab=NA,ylab="TPR")
-abline(h=met$TPR[1],lwd=1.2,lty=2,col="red")
-grid()
-dev.off()
-
-#false positive rate
-tiff(paste(ec_dir,"/analyses/img/historical_FPR.tiff",sep=""),res=300,pointsize=10,
-     width=1500,height=1300,units="px",compression="lzw")
-par(mar=c(3,5,1,1),cex=1)
-plot(met_all$YEAR,met_all$FPR,ylim=c(0,0.3),pch=20,ty="l",xlab=NA,ylab="FPR")
-abline(h=met$FPR[1],lwd=1.2,lty=2,col="red")
-grid()
-dev.off()
-
-#true negative rate
-tiff(paste(ec_dir,"/analyses/img/historical_TNR.tiff",sep=""),res=300,pointsize=10,
-     width=1500,height=1300,units="px",compression="lzw")
-par(mar=c(3,5,1,1),cex=1)
-plot(met_all$YEAR,met_all$TNR,ylim=c(0.5,0.90),pch=20,ty="l",xlab=NA,ylab="TNR")
-abline(h=met$TNR[1],lwd=1.2,lty=2,col="red")
-grid()
-dev.off()
 
 
 

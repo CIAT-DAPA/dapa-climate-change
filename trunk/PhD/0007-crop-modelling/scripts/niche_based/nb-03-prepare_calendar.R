@@ -149,7 +149,53 @@ writeRaster(end_mth,paste(calDir,"/harvest_mth_ind_jt.tif",sep=""),format="GTiff
 writeRaster(sta_doy,paste(calDir,"/plant_doy_ind_jt.tif",sep=""),format="GTiff")
 writeRaster(end_doy,paste(calDir,"/harvest_doy_ind_jt.tif",sep=""),format="GTiff")
 
+######
+###### make 1dd versions of these
+#load 1dd indian mask
+msk <- raster(paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/prec_1.tif",sep=""))
 
+#load sow / harvest dates (Jones & Thornton)
+sta_jot <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
+end_jot <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
+
+#load sow / harvest dates (Sacks et al.)
+sta_sck <- raster(paste(calDir,"/plant_ind.tif",sep=""))
+end_sck <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
+
+#resample
+sta_jot <- aggregate(sta_jot,fact=(xres(msk)/xres(sta_jot)),FUN=function(x) {mean(x,na.rm=T)})
+sta_jot <- resample(sta_jot,msk,method="ngb")
+
+end_jot <- aggregate(end_jot,fact=(xres(msk)/xres(end_jot)),FUN=function(x) {mean(x,na.rm=T)})
+end_jot <- resample(end_jot,msk,method="ngb")
+
+sta_sck <- aggregate(sta_sck,fact=(xres(msk)/xres(sta_sck)),FUN=function(x) {mean(x,na.rm=T)})
+sta_sck <- resample(sta_sck,msk,method="ngb")
+
+end_sck <- aggregate(end_sck,fact=(xres(msk)/xres(end_sck)),FUN=function(x) {mean(x,na.rm=T)})
+end_sck <- resample(end_sck,msk,method="ngb")
+
+
+#xy object
+xy <- as.data.frame(xyFromCell(msk,which(!is.na(msk[]))))
+xy <- cbind(cell=which(!is.na(msk[])),xy)
+xy$sta_jot <- extract(sta_jot,xy[,c("x","y")])
+xy$end_jot <- extract(end_jot,xy[,c("x","y")])
+xy$sta_sck <- extract(sta_sck,xy[,c("x","y")])
+xy$end_sck <- extract(end_sck,xy[,c("x","y")])
+
+#final objects
+sta_jot <- raster(msk); sta_jot[xy$cell] <- xy$sta_jot
+end_jot <- raster(msk); end_jot[xy$cell] <- xy$end_jot
+
+sta_sck <- raster(msk); sta_sck[xy$cell] <- xy$sta_sck
+end_sck <- raster(msk); end_sck[xy$cell] <- xy$end_sck
+
+#write rasters
+writeRaster(sta_jot,paste(calDir,"/plant_doy_ind_jt_1dd.tif",sep=""),format="GTiff")
+writeRaster(end_jot,paste(calDir,"/harvest_doy_ind_jt_1dd.tif",sep=""),format="GTiff")
+writeRaster(sta_sck,paste(calDir,"/plant_ind_1dd.tif",sep=""),format="GTiff")
+writeRaster(end_sck,paste(calDir,"/harvest_ind_1dd.tif",sep=""),format="GTiff")
 
 
 

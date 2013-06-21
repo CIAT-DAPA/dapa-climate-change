@@ -938,12 +938,14 @@ get_cell_data <- function(cell,xy,glam_data,eco_data) {
 
 #assess the accuracy of EcoCrop's spatial prediction using a gridded dataset
 #of presence and absence
-eval_ecocrop <- function(rsl,eval_rs) {
+eval_ecocrop <- function(rsl,eval_rs,rocplot=F,plotdir="./img",filename="test.jpg") {
   pa_rsl <- rsl; pa_rsl[which(rsl[]>0)] <- 1 #bin the prediction
   
   met <- xyFromCell(eval_rs,1:ncell(eval_rs))
-  met <- cbind(met,PRE=extract(pa_rsl,met))
-  met <- cbind(met,OBS=extract(eval_rs,1:ncell(eval_rs))); met <- as.data.frame(met)
+  met <- cbind(met,PRE=extract(pa_rsl,met[,1:2]))
+  met <- cbind(met,OBS=extract(eval_rs,met[,1:2]))
+  met <- cbind(met,PRE_VAL=extract(rsl,met[,1:2]))
+  met <- as.data.frame(met)
   met <- met[which(!is.na(met$PRE)),]; met <- met[which(!is.na(met$OBS)),] #get rid of NAs
   
   #get the values *1 is observed and 2 is prediction
@@ -958,9 +960,31 @@ eval_ecocrop <- function(rsl,eval_rs) {
     tnr <- ntn / length(which(met$OBS == 0))
   } else {tnr <- NA}
   
+  #calculate the auc
+  #to prevent integer overflow in AUC calculation
+  if (nrow(met) > 50000) {
+    set.seed(1234); met <- met[sample(1:nrow(met),20000,),]
+  }
+  ab_p <- met$PRE_VAL[which(met$OBS == 0)]
+  pr_p <- met$PRE_VAL[which(met$PRE == 1)]
+  deval <- evaluate(p=pr_p,a=ab_p)
   rm(met); g=gc(); rm(g)
-  met.final <- data.frame(TPR=tpr, FPR=fpr, TNR=tnr)
-  return(met.final)
+  
+  if (rocplot) {
+    if (!file.exists(plotdir)) {stop("Check your plotting directory as it doesnt seem to exist")}
+    jpeg(paste(plotdir,"/",filename,sep=""), quality=100, height=1024, width=1024,pointsize=8,res=300)
+    par(mar=c(4,4,1,1))
+    plot(deval@FPR,deval@TPR,main=NA,ty="l",lty=1,lwd=1.5,col="black",
+         xlim=c(0,1),ylim=c(0,1),xlab="False positive rate",ylab="True positive rate")
+    abline(0,1,col="grey 50",)
+    grid()
+    text(0,1,paste("AUC=",round(deval@auc,4),sep=""),col="black",adj=c(0,1))
+    dev.off()
+  }
+  
+  met.final <- data.frame(TPR=tpr, FPR=fpr, TNR=tnr, AUC=deval@auc, KAPPA=max(deval@kappa))
+  retobj <- list(EVAL=deval,METRICS=met.final)
+  return(retobj)
 }
 
 
