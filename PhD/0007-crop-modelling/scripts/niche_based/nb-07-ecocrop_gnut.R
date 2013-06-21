@@ -13,9 +13,9 @@ src.dir1 <- "~/Repositories/dapa-climate-change/trunk/EcoCrop" #local
 src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data"
 src.dir3 <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
-#src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
-#src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
+src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
+src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source the model and other functions
 source(paste(src.dir3,"/scripts/niche_based/EcoCrop-model.R",sep=""))
@@ -23,6 +23,7 @@ source(paste(src.dir3,"/scripts/niche_based/nb-07-ecocrop_gnut-fun.R",sep=""))
 source(paste(src.dir1,"/src/randomSplit.R",sep=""))
 source(paste(src.dir1,"/src/extractClimateData.R",sep=""))
 source(paste(src.dir1,"/src/accuracy.R",sep=""))
+source(paste(src.dir1,"/src/validation.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #basic information
@@ -42,11 +43,13 @@ dataDir <- paste(ecoDir,"/data",sep="")
 imgDir <- paste(ecoDir,"/img",sep="")
 runDir <- paste(ecoDir,"/runs",sep="")
 pdfDir <- paste(imgDir,"/pdf_runs",sep="")
+rocDir <- paste(imgDir,"/roc_plots",sep="")
 mskDir <- paste(envDir,"/mask",sep="")
 if (!file.exists(dataDir)) {dir.create(dataDir)}
 if (!file.exists(imgDir)) {dir.create(imgDir)}
 if (!file.exists(runDir)) {dir.create(runDir)}
 if (!file.exists(pdfDir)) {dir.create(pdfDir)}
+if (!file.exists(rocDir)) {dir.create(rocDir)}
 if (!file.exists(mskDir)) {dir.create(mskDir)}
 
 
@@ -298,7 +301,7 @@ train <- cbind(train[,"LON"], train[,"LAT"])
 
 parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
 rwList <- unique(parList$RUN)
-for (rw in rwList[1:26]) {
+for (rw in rwList) {
   #rw <- rwList[1]
   for (suf in c("_p","_t","_")) {
     #suf <- "_p"
@@ -336,7 +339,8 @@ tiff(paste(imgDir,"/skill.tiff",sep=""),res=300,pointsize=10,
      width=1500,height=1300,units="px",compression="lzw")
 par(mar=c(4.5,4,1,1),cex=1)
 plot(plot.acc$TEST.OMISSION.RATE,plot.acc$TEST.ERROR,
-     xlim=c(0,1),ylim=c(0,1),pch=21,xlab="OR",ylab="RMSE")
+     xlim=c(0,1),ylim=c(0,1),pch=21,col="black",xlab="OR",ylab="RMSE")
+#text(plot.acc$TEST.OMISSION.RATE,plot.acc$TEST.ERROR,paste(plot.acc$RUN),cex=0.5)
 abline(h=0.5,lwd=1.2,lty=2)
 abline(v=0.1,lwd=1.2,lty=2)
 grid()
@@ -345,43 +349,72 @@ dev.off()
 
 ######################################################################
 #Assess accuracy of each parameter set using AUC
-#draw some pseudo absences from the whole analysis domain
+#load train/test data
+test <- read.csv(paste(dataDir,"/test.csv",sep="")); test <- cbind(test[,"LON"], test[,"LAT"])
+train <- read.csv(paste(dataDir,"/train.csv",sep="")); train <- cbind(train[,"LON"], train[,"LAT"])
+
+#load parameter sets
+parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
+rwList <- unique(parList$RUN)
+
+#get the whole analysis domain into a x,y data.frame
 if (!file.exists(paste(mskDir,"/mask_30s.tif",sep=""))) {
   ind_msk <- readShapePoly("/nfs/a102/eejarv/CMIP5/assessment/input-data/adm-data/SAS/IND_adm/IND3.shp")
   ind_msk <- rasterize(ind_msk,msk,field=1)
   writeRaster(ind_msk,paste(mskDir,"/mask_30s.tif",sep=""),format="GTiff")
 } else {
   ind_msk <- raster(paste(mskDir,"/mask_30s.tif",sep=""))
+  ind_xy <- as.data.frame(xyFromCell(ind_msk,which(!is.na(ind_msk[]))))
+  rm(ind_msk); g=gc(); rm(g)
 }
 
-ind_xy <- as.data.frame(xyFromCell(ind_msk,which(!is.na(ind_msk[]))))
+#number of pseudo absences
 npa <- 10000
-set.seed(1234)
-pab <- as.matrix(ind_xy[sample(1:nrow(ind_xy),npa),])
-rownames(pab) <- 1:nrow(pab)
+
+#list of seeds (repetitions of pseudo-absence selection)
+seed_ls <- c(1929,5840,3834,8302,4811,5778,1299,5682,9871,9821)
 
 #looping the model outputs
+auc_all <- data.frame()
 for (rw in rwList) {
   #rw <- rwList[1]
-  #pList <- parList[which(parList$RUN==rw),]
   for (suf in c("_p","_t","_")) {
     #suf <- "_"
-    cat("RUN:", rw, "- SUF:", suf, "\n")
-    s_rs <- raster(paste(runDir,"/run_",rw,"/", crop_name, suf, "suitability.tif", sep=""))
+    cat("\nRUN:", rw, "- SUF:", suf)
     
-    #calculating auc
-    auc <- eco_roc_eval(s_rs,test,train,pab)
-    auc <- cbind(RUN=rw, TYPE=paste(suf, "suitability", sep=""),auc)
-    
-    #append results to single data frame
-    if (rw == rwList[1] & suf == "_p") {
-      all_auc <- auc
+    if (!file.exists(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability.RData",sep=""))) {
+      s_rs <- raster(paste(runDir,"/run_",rw,"/", crop_name, suf, "suitability.tif", sep=""))
+      
+      #loop the seeds
+      run_eval <- list()
+      auc_suf <- data.frame()
+      for (seed in seed_ls) {
+        #seed <- seed_ls[1]
+        cat("\nseed: ",which(seed_ls == seed)," (",seed,")","\n",sep="")
+        #selecting pseudo-absences
+        set.seed(seed)
+        pab <- as.matrix(ind_xy[sample(1:nrow(ind_xy),npa),])
+        rownames(pab) <- 1:nrow(pab)
+        
+        #calculating auc
+        eco_eval <- eco_roc_eval(s_rs,test,train,pab,rocplot=T,plotdir=rocDir,
+                                 filename=paste("roc_run-",rw,suf,"suitability","_sd-",seed,".jpg",sep=""))
+        auc <- cbind(RUN=rw, SEED=seed, TYPE=paste(suf, "suitability", sep=""), eco_eval$auc_table)
+        run_eval[[paste("SEED_",seed,sep="")]] <- eco_eval
+        auc_suf <- rbind(auc_suf, auc)
+      }
+      save(list=c("run_eval","auc_suf"),file=paste(runDir,"/run_",rw,"/evaluation",suf,"suitability.RData",sep=""))
     } else {
-      all_auc <- rbind(all_auc, auc)
+      load(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability.RData",sep=""))
     }
+    rm(run_eval); g=gc(); rm(g) #cleanup
+    auc_all <- rbind(auc_all,auc_suf)
   }
 }
-write.csv(all_auc, paste(dataDir,"/auc_evaluation.csv",sep=""), row.names=F)
+write.csv(auc_all, paste(dataDir,"/auc_evaluation.csv",sep=""), row.names=F)
+
+
+
 
 
 

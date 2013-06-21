@@ -1131,7 +1131,7 @@ getParameters <- function(x.real, params=NULL, stat="mode", outlier.rm=F, plotit
 
 
 #function to evaluate an ecocrop model using the ROC AUC
-eco_roc_eval <- function(rs,te,tr,pa) {
+eco_roc_eval <- function(rs,te,tr,pa,rocplot=T,plotdir="./img",filename="test.jpg") {
   cat("evaluating model accuracy\n")
   #correct spatial sorting bias
   sb <- ssb(p=te, a=pa, reference=tr)
@@ -1166,9 +1166,27 @@ eco_roc_eval <- function(rs,te,tr,pa) {
   cat("test AUC is",eval_te@auc,"\n")
   cat("test AUC (ssb corrected) is",c_auc,"\n")
   
+  #rocplot with both test and train data
+  if (rocplot) {
+    cat("plotting...\n")
+    if (!file.exists(plotdir)) {stop("Check your plotting directory as it doesnt seem to exist")}
+    jpeg(paste(plotdir,"/",filename,sep=""), quality=100, height=1024, width=1024,pointsize=8,res=300)
+    par(mar=c(4,4,1,1))
+    plot(eval_tr@FPR,eval_tr@TPR,main=NA,ty="l",lty=1,lwd=1.5,col="black",
+         xlim=c(0,1),ylim=c(0,1),xlab="False positive rate",ylab="True positive rate")
+    lines(eval_te@FPR,eval_te@TPR,main=NA,lty=1,lwd=1.5,col="red")
+    abline(0,1,col="grey 50",)
+    grid()
+    text(0,1,paste("AUC_train=",round(eval_tr@auc,4),sep=""),col="black",adj=c(0,1))
+    text(0,0.95,paste("AUC_test=",round(eval_te@auc,4),sep=""),col="red",adj=c(0,1))
+    text(0,0.9,paste("AUC_ssb=",round(c_auc,4),sep=""),col="blue",adj=c(0,1))
+    dev.off()
+  }
+  
   #final results data frame
-  out_list <- data.frame(AUC_TRAIN=eval_tr@auc,AUC_TEST=eval_te@auc,
-                         AUC_SSB=eval_ssb@auc,AUC_C=c_auc)
+  out_df <- data.frame(AUC_TRAIN=eval_tr@auc,AUC_TEST=eval_te@auc,AUC_SSB=eval_ssb@auc,
+                       AUC_C=c_auc)
+  out_list <- list(auc_table=out_df,EVAL_TRAIN=eval_tr,EVAL_TEST=eval_te,EVAL_SSB=eval_ssb)
   return(out_list)
 }
 
