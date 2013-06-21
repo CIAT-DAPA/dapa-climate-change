@@ -1017,7 +1017,7 @@ get_gs_data <- function(i,rs) {
   montmax <- as.numeric(x[,grep("TMAX",names(x))])
   sow <- x$SOW_MTH #sowing date (in months)
   har <- x$HAR_MTH #harvest date (in months)
-  if (har < sow) {gs <- c(har:12,1:sow)} else {gs <- c(sow:har)}
+  if (har < sow) {gs <- c(sow:12,1:har)} else {gs <- c(sow:har)}
   
   #calculate growing season metrics
   pr_total <- sum(monprec[gs])
@@ -1047,7 +1047,7 @@ find_month <- function(jd,dg) {
 #a parameter named 'stat' was introduced in the case the distributions are not skewed
 #(in that case the mean or the median can be usefully used)
 
-getParameters <- function(x.real, params=NULL, stat="mode", plotit=T, plotdir="./img", xlabel="Value (units)", filename="test.jpg") {
+getParameters <- function(x.real, params=NULL, stat="mode", outlier.rm=F, plotit=T, plotdir="./img", xlabel="Value (units)", filename="test.jpg") {
   require(sfsmisc)
   if (is.null(params)) {warning("PDF parameters not provided, using defaults \n"); params <- list(kill=1,min=0.99,opmin=0.5,opmax=0.5,max=0.99)}
   
@@ -1062,10 +1062,12 @@ getParameters <- function(x.real, params=NULL, stat="mode", plotit=T, plotdir=".
   x.real <- x.real[which(!is.na(x.real))]
   if (length(x.real) < 50) {warning("Unreliable results could come out when using less than 50 calibration data points")}
   
-  #commented out (JRV)
-  #removing outliers from x.real
-  #qincl <- quantile(x.real,probs=c(0.005,0.995))
-  #x.real <- x.real[which(x.real >= qincl[1] & x.real <= qincl[2])]
+  #removing outliers from x.real (only if desired, default is FALSE)
+  #only keep 0.05 - 99.5 of the distribution
+  if (outlier.rm) {
+    qincl <- quantile(x.real,probs=c(0.005,0.995))
+    x.real <- x.real[which(x.real >= qincl[1] & x.real <= qincl[2])]
+  }
   x.lims <- c(min(x.real,na.rm=T),max(x.real,na.rm=T))
   
   #calculate pdf, mode, and mode position

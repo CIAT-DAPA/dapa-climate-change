@@ -10,13 +10,13 @@ stop("!")
 library(raster); library(rgdal); library(zoo)
 
 #source directory
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
-#src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
 source(paste(src.dir,"/nb-06-calc_bio_sdm-fun.R",sep=""))
 
 #i/o directories
-bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
-#bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
+bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
 calDir <- paste(bDir,"/calendar",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
 clmDir <- paste(envDir,"/climate",sep="")
