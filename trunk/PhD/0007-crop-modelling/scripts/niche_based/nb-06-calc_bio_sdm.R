@@ -26,11 +26,11 @@ if (!file.exists(outDir)) {dir.create(outDir)}
 
 #load monthly rainfall
 rain_stk <- stack(paste(clmDir,"/wcl_ind_30s/prec_",1:12,".tif",sep=""))
-if (!file.exists(paste(outDir,"/totrain.tif",sep=""))) {
+if (!file.exists(paste(outDir,"/annrain.tif",sep=""))) {
   totrain <- calc(rain_stk,fun=sum)
-  writeRaster(totrain,paste(outDir,"/totrain.tif",sep=""),format="GTiff")
+  writeRaster(totrain,paste(outDir,"/annrain.tif",sep=""),format="GTiff")
 } else {
-  totrain <- raster(paste(outDir,"/totrain.tif",sep=""))
+  totrain <- raster(paste(outDir,"/annrain.tif",sep=""))
 }
 
 #load sowing and harvest dates
@@ -85,22 +85,22 @@ tmax_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep=""))
 tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""))
 
 #calculate total seasonal rainfall and write raster
-if (!file.exists(paste(outDir,"/mintemp.tif",sep=""))) {
+if (!file.exists(paste(outDir,"/minmintemp.tif",sep=""))) {
   #average of monthly mean temperatures
   smeantemp <- apply_by_blocks(tmen_stk,sowd,hard,calc_meantemp,"mean")
-  writeRaster(smeantemp,paste(outDir,"/meantemp.tif",sep=""),format="GTiff")
+  writeRaster(smeantemp,paste(outDir,"/meanmeantemp.tif",sep=""),format="GTiff")
   
   #maximum of monthly maximum temperatures
   smaxtemp <- apply_by_blocks(tmax_stk,sowd,hard,calc_meantemp,"max")
-  writeRaster(smaxtemp,paste(outDir,"/maxtemp.tif",sep=""),format="GTiff")
+  writeRaster(smaxtemp,paste(outDir,"/maxmaxtemp.tif",sep=""),format="GTiff")
   
   #minimum of monthly minimum temperatures
   smintemp <- apply_by_blocks(tmin_stk,sowd,hard,calc_meantemp,"min")
-  writeRaster(smintemp,paste(outDir,"/mintemp.tif",sep=""),format="GTiff")
+  writeRaster(smintemp,paste(outDir,"/minmintemp.tif",sep=""),format="GTiff")
 } else {
-  smeantemp <- raster(paste(outDir,"/meantemp.tif",sep=""))
-  smaxtemp <- raster(paste(outDir,"/maxtemp.tif",sep=""))
-  smintemp <- raster(paste(outDir,"/mintemp.tif",sep=""))
+  smeantemp <- raster(paste(outDir,"/meanmeantemp.tif",sep=""))
+  smaxtemp <- raster(paste(outDir,"/maxmaxtemp.tif",sep=""))
+  smintemp <- raster(paste(outDir,"/minmintemp.tif",sep=""))
 }
 
 

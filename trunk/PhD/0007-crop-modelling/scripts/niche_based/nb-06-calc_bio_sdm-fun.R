@@ -47,7 +47,6 @@ calc_totrain <- function(x) {
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -71,7 +70,6 @@ calc_sfeng <- function(x,...) {
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -109,7 +107,6 @@ calc_minrain <- function(x) {
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -133,7 +130,6 @@ calc_meantemp <- function(x,...) {
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   Gi <- ceiling(sow/30); if (Gi > 12) {Gi <- 12}
@@ -162,7 +158,6 @@ calc_tcdays <- function(x) {
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
@@ -187,7 +182,6 @@ calc_gdd <- function(x) {
   sow <- x[13]; har <- x[14] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
@@ -217,7 +211,6 @@ calc_vdp <- function(x) {
   sow <- x[25]; har <- x[26] #sowing and harvest dates
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
@@ -268,7 +261,6 @@ calc_etmax <- function(x) {
   #fix sowing date if missing
   if (is.na(sow) & is.na(har)) {sow <- 152}
   if (is.na(har)) {har <- sow+122}
-  if (har > 365) {har <- har - 365}
   
   #growing season start and end
   if (har < sow) {gs <- c(har:365,1:sow)} else {gs <- c(sow:har)}
@@ -361,7 +353,7 @@ createDateGrid <- function(year) {
   return(date.grid)
 }
 
-
+#extraterrestral daily radiation
 extrat <- function (i, lat) {
   rval <- list()
   rval$ExtraTerrestrialSolarRadiationDaily <- exd(i = i, lat = lat)
@@ -369,6 +361,7 @@ extrat <- function (i, lat) {
   return(rval)
 }
 
+#extraterrestrial daily radiation
 exd <- function(i, lat, Con = 4.921) {
   if (abs(degrees(lat)) < 66.5) {
     Sd <- Con * 24/pi * corrEarthSunDist(i) * (sin(lat) * sin(solarDecl(i)) * daylightTimeFactor(lat = lat, i = i) + cos(lat) * cos(solarDecl(i)) * sin(daylightTimeFactor(lat = lat, i = i)))
@@ -383,6 +376,7 @@ exd <- function(i, lat, Con = 4.921) {
   Sd
 }
 
+#solar declination
 solarDecl <- function(i) {
   rod <- 0.4093 * sin((2 * pi * (284 + i))/365)
   return(rod)
@@ -400,24 +394,22 @@ dayLength <- function(lat, i) {
   return(DL)
 }
 
+#earth-sun distance for a day
 corrEarthSunDist <- function (i) {
   d <- 1 + 0.0334 * cos(0.01721 * i - 0.0552)
   return(d)
 }
 
+#daylight factor
 daylightTimeFactor <- function(lat, i) {
   ws <- acos(-tan(lat) * tan(solarDecl(i)))
   return(ws)
 }
 
-degrees <- function(radians) {
-  deg <- radians * 180/pi
-  return(deg)
-}
+#radians to degrees
+degrees <- function(radians) {deg <- radians * 180/pi; return(deg)}
 
-radians <- function(degrees) {
-  rad <- degrees * pi/180
-  return(rad)
-}
+#degrees to radians
+radians <- function(degrees) {rad <- degrees * pi/180; return(rad)}
 
 
