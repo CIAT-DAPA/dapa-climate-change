@@ -10,7 +10,7 @@ stop("dont run")
 #2. load species data
 #3. load background data.frame (create from shapefile if doesn't exist)
 #4. using seed select training species data AND training pseudo absences
-#   number of PA = a given number (100, 250, 500, 1000, 2500, 5000, 7500, 10000)
+#   number of PA = a given number ()
 #5. select particular combination of variables
 #   a. subset climate
 #   b. subset climate + soils
@@ -50,7 +50,7 @@ varList <- data.frame(SET_ID=1:8,CLIM=c(rep("full",times=4),rep("subset",times=4
 seedList <- c(3379,5728,3781,3590,3266,9121,3441,11667,4484,9559)
 
 #list of number of PA selections
-npaList <- c(100, 250, 500, 750, 1000, 2000, 4000, 6000, 8000, 10000)
+npaList <- seq(10000,14000,by=1000)
 
 #list of models
 modList <- c('GLM','GAM','GBM','ANN','MAXENT')
