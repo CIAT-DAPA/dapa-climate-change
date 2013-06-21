@@ -48,7 +48,8 @@ extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 	#Process each polygon as a raster to extract suitability values
 	nPol <- length(shp@polygons)
 	for (p in 1:nPol) {
-		cat("Pol", p, "\n")
+	  cat(" ",round(p/nPol*100,2),"%",sep="")
+		#cat("Pol", p, "\n")
 		pol <- shp@polygons[p] #extract single polygon
 		sh <- SpatialPolygons(pol) #create SP object from extracted feature
 		rs <- createMask(sh, res) #create a raster from the SP object
@@ -74,6 +75,7 @@ extractFromShape <- function(shp, field, naValue=-9999, rsl) {
 			}
 		}
 	}
+  cat("\n")
 	outmx.final <- cbind(outmx,shpData)
 	rm(shpData); rm(a); rm(rsl); gc()
 	return(outmx.final)
