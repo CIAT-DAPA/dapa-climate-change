@@ -10,13 +10,13 @@ stop("!")
 library(raster); library(rgdal); library(zoo)
 
 #source directory
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
-src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/niche_based"
 source(paste(src.dir,"/nb-06-calc_bio_sdm-fun.R",sep=""))
 
 #i/o directories
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
-bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
+#bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
 calDir <- paste(bDir,"/calendar",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
 clmDir <- paste(envDir,"/climate",sep="")
@@ -24,18 +24,22 @@ clmDir <- paste(envDir,"/climate",sep="")
 outDir <- paste(clmDir,"/bio_ind_30s",sep="")
 if (!file.exists(outDir)) {dir.create(outDir)}
 
+#load sowing and harvest dates
+sowd <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
+hard <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
+
 #load monthly rainfall
 rain_stk <- stack(paste(clmDir,"/wcl_ind_30s/prec_",1:12,".tif",sep=""))
+
+#####################################
+#### 0. Total annual rainfall
+#####################################
 if (!file.exists(paste(outDir,"/annrain.tif",sep=""))) {
   totrain <- calc(rain_stk,fun=sum)
   writeRaster(totrain,paste(outDir,"/annrain.tif",sep=""),format="GTiff")
 } else {
   totrain <- raster(paste(outDir,"/annrain.tif",sep=""))
 }
-
-#load sowing and harvest dates
-sowd <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
-hard <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
 
 
 #####################################
@@ -62,8 +66,6 @@ if (!file.exists(paste(outDir,"/sindex.tif",sep=""))) {
 } else {
   sindex <- raster(paste(outDir,"/sindex.tif",sep=""))
 }
-
-
 
 #####################################
 #### 3. minimum rainfall during growing season
