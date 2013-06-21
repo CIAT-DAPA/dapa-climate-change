@@ -58,6 +58,10 @@ hdate <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
 
 
 ######################################################################
+######################################################################
+#### starting the calculations
+######################################################################
+######################################################################
 #Getting unique coordinates
 loc_data <- read.csv(paste(occDir,"/gnut-india_final.csv",sep="")) #load the data
 
@@ -170,7 +174,7 @@ for (vid in 2:length(names(dataset))) {
          quality=100, height=1024, width=1024,pointsize=7,res=300)
     par(mar=c(4,4,1,1))
     plot(tpdf,main=NA,xlab="Seasonal temperatures (Celsius)",col=paste(col.sym$COL)[vid-1],
-         lty=col.sym$SYM[vid-1],xlim=c(100,400),ylim=c(0,0.03))
+         lty=col.sym$SYM[vid-1],xlim=c(50,400),ylim=c(0,0.035))
     grid()
   } else {
     lines(tpdf,col=paste(col.sym$COL)[vid-1],lty=col.sym$SYM[vid-1])
@@ -208,12 +212,12 @@ for (ri in 1:nrow(runs)) {
   #ri <- 1
   cat("making parameter set for run:",ri,"\n")
   tpar <- list(kill=1,min=runs$ABS[ri],opmin=runs$OPT[ri],opmax=runs$OPT[ri],max=runs$ABS[ri])
-  pr_par <- getParameters(all_prec, tpar, stat="mode", plotit=T, plotdir=pdfDir, 
+  pr_par <- getParameters(all_prec, tpar, stat="mode", outlier.rm=T, plotit=T, plotdir=pdfDir, 
                           xlabel="Seasonal precipitation",
                           filename=paste("calib_pdf_prec_run-",ri,".jpg",sep=""))
   pr_par <- cbind(RUN=ri,VARIABLE="PREC",pr_par)
   
-  tm_par <- getParameters(all_temp, tpar, stat="mean", plotit=T, plotdir=pdfDir, 
+  tm_par <- getParameters(all_temp, tpar, stat="mean", outlier.rm=F, plotit=T, plotdir=pdfDir, 
                           xlabel="Seasonal mean temperature",
                           filename=paste("calib_pdf_tmean_run-",ri,".jpg",sep=""))
   tm_par <- cbind(RUN=ri,VARIABLE="TMEAN",tm_par)
@@ -296,7 +300,6 @@ parList <- read.csv(paste(dataDir,"/parameter_sets.csv",sep=""))
 rwList <- unique(parList$RUN)
 for (rw in rwList[1:26]) {
   #rw <- rwList[1]
-  #pList <- parList[which(parList$RUN==rw),]
   for (suf in c("_p","_t","_")) {
     #suf <- "_p"
     cat("RUN:", rw, "- SUF:", suf, "\n")
