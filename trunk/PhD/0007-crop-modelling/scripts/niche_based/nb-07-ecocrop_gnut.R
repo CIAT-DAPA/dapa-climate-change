@@ -13,9 +13,9 @@ src.dir1 <- "~/Repositories/dapa-climate-change/trunk/EcoCrop" #local
 src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data"
 src.dir3 <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
-src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
-src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+# src.dir1 <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
+# src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
+# src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source the model and other functions
 source(paste(src.dir3,"/scripts/niche_based/EcoCrop-model.R",sep=""))
@@ -415,15 +415,8 @@ write.csv(auc_all, paste(dataDir,"/auc_evaluation.csv",sep=""), row.names=F)
 
 
 
-
-
-
-
-
-
-
 ######################################################################
-#Validation stuff... got to validate 1(!),2(!),3(!),4(!),5(!),6(!),7(!),ME(!),MO,MX
+#Validation stuff...
 rsl <- raster(paste(ec_dir,"/analyses/runs/1-",crop_name,"-tmean_suitability.asc",sep=""))
 shp.icrisat <- paste(ec_dir,"/analyses/evaluation/IND2-gnut.shp",sep="")
 oblist <- ls(pattern="shp")
