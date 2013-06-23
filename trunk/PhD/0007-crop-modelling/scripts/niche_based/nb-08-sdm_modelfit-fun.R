@@ -131,31 +131,32 @@ run_null_model <- function(bDir,sppName,seed,npa) {
 
 
 #function to run a model with provided configuration
-run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
+run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="model_fit") {
   require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
   
   #i/o dirs
-  maxDir <- paste(bDir,"/bin",sep="")
-  dataDir <- paste(bDir,"/vif-analysis",sep="")
-  modDir <- paste(bDir,"/models",sep="")
-  bgDir <- paste(bDir,"/bg-areas",sep="")
-  envDir <- paste(bDir,"/env-data",sep="")
-  bioDir <- paste(envDir,"/bioclim_gtiff",sep="")
-  solDir <- paste(envDir,"/soil",sep="")
-  topDir <- paste(envDir,"/topography",sep="")
+  max_dir <- paste(base_dir,"/bin",sep="")
+  data_dir <- paste(base_dir,"/input-samples",sep="")
+  mod_dir <- paste(base_dir,"/fitting",sep="")
+  bg_dir <- paste(base_dir,"/pseudo-absences",sep="")
+  bio_dir <- paste(env_dir,"/climate/bio_ind_30s",sep="")
+  sol_dir <- paste(env_dir,"/soil",sep="")
+  int_dir <- paste(env_dir,"/crop_intensity",sep="")
+  msk_dir <- paste(env_dir,"/mask",sep="")
   
   #1. output model and config directory
   cat("loading presence and pseudo-absence data\n")
-  outDir <- paste(modDir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
+  outDir <- paste(mod_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
   if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
   
   #2. load species data (from VIF analysis output)
-  spp_data <- read.csv(paste(dataDir,"/",sppName,"/",sppName,"_",varList$CLIM[vset],".csv",sep=""))
+  spp_data <- read.csv(paste(data_dir,"/",spp_name,"/",spp_name,"_",varList$CLIM[vset],".csv",sep=""))
   
   #3. load background data / create if needs be
-  pab_data <- get_pa(spp_name=sppName,
-                     spp_data=read.csv(paste(dataDir,"/",sppName,"/",sppName,"_full.csv",sep="")),
-                     n_pa=npa,bg_dir=bgDir,bio_dir=bioDir,soil_dir=solDir,topo_dir=topDir)
+  pab_data <- get_pa(spp_name=spp_name,
+                     spp_data=read.csv(paste(data_dir,"/",spp_name,"/",spp_name,"_full.csv",sep="")),
+                     n_pa=npa,bg_dir=bg_dir,msk_dir=msk_dir,int_dir=int_dir,
+                     bio_dir=bio_dir,soil_dir=sol_dir)
   pab_data <- pab_data[,names(spp_data)] #remove extra variables
   
   #run only if final stored objects do not exist
@@ -351,21 +352,55 @@ getEvalMetric <- function(fit_vals,obs_vals,tstat='TSS') {
 
 
 ### function to get a given number of pseudo-absences (with env data)
-get_pa <- function(spp_name,spp_data,n_pa,bg_dir,bio_dir,soil_dir,topo_dir) {
+get_pa <- function(spp_name,spp_data,n_pa,bg_dir,msk_dir,int_dir,bio_dir,soil_dir) {
+  if (!file.exists(bg_dir)) {dir.create(bg_dir)}
+  
   #check existence
   if (!file.exists(paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))) {
     cat("pseudo-absences don't exist yet, drawing...",n_pa," pseudo absences\n")
     #background area loading / creation
-    bg_df <- load_bg(spp_name,bg_dir,bio_dir,soil_dir,topo_dir)
+    bg_df <- load_bg(spp_name,bg_dir,msk_dir,bio_dir,soil_dir)
     
     #select PA from bg_df (without defining seed)
     cat("sampling\n")
-    pa_sel <- sample(1:nrow(bg_df),n_pa*1.5)
+    set.seed(n_pa); pa_sel <- sample(1:nrow(bg_df),13000)
     bg_sel <- bg_df[pa_sel,]; rm(bg_df); g=gc(); rm(g)
     rownames(bg_sel) <- 1:nrow(bg_sel)
     
     #5. extract climate data for pseudo absences
     cat("extracting climate\n")
+    
+    #list all predictors
+    pred_list <- list.files(bio_dir,pattern="\\.tif")
+    
+    #extract climate for location data ### here i am!!!
+    cat("extracting climate predictors for",nrow(bg_sel),"pseudo-absences \n")
+    bio_data <- loc_data
+    for (pred in pred_list) {
+      #pred <- pred_list[1]
+      pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
+      bio_data <- cbind(bio_data,value=as.data.frame(extract(pred_rs,loc_data)))
+      names(bio_data)[ncol(bio_data)] <- paste(gsub("\\.tif","",pred))
+      rm(pred_rs); g=gc(); rm(g)
+    }
+    
+    soil_rs <- raster(paste(sol_dir,"/dul_ind.tif",sep=""))
+    bio_data <- cbind(bio_data,val=as.data.frame(extract(soil_rs,loc_data)))
+    names(bio_data)[ncol(bio_data)] <- "soildul"
+    
+    #check for NAs
+    bio_data$NAs <- apply(bio_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
+    bio_data <- bio_data[which(bio_data$NAs == 0),]
+    bio_data$NAs <- NULL
+    
+    #sind * 10000 for formatting reasons
+    bio_data$sindex <- bio_data$sindex * 10000
+    bio_data$soildul <- bio_data$soildul * 100
+    bio_data$annrain <- NULL #remove annual rainfall
+    
+    
+    
+    
     bio_stk <- stack(c(paste(bio_dir,"/",names(spp_data)[3:(ncol(spp_data)-3)],".tif",sep="")))
     bg_data <- as.data.frame(extract(bio_stk,bg_sel))
     bg_data <- cbind(bg_sel,bg_data)
@@ -403,46 +438,22 @@ get_pa <- function(spp_name,spp_data,n_pa,bg_dir,bio_dir,soil_dir,topo_dir) {
 
 
 #### load background area / create if doesnt exist
-load_bg <- function(spp_name,back_dir,bio_dir,soil_dir,topo_dir) {
+load_bg <- function(spp_name,back_dir,msk_dir,bio_dir,soil_dir) {
   #filename
-  bg_file <- paste(back_dir,"/",spp_name,"/",spp_name,"_bg.RData",sep="")
+  bg_file <- paste(back_dir,"/",spp_name,"_bg.RData",sep="")
   if (!file.exists(bg_file)) {
     cat("creating background area as it didn't exist\n")
     
     #load verification files
-    msk <- raster(paste(bio_dir,"/bio_1.tif",sep=""))
-    other_rs <- c(paste(soil_dir,"/soildrain_final.tif",sep=""), 
-                  paste(topo_dir,"/aspect.tif",sep=""),
-                  paste(topo_dir,"/slope.tif",sep=""))
-    
-    #rasterize the shapefile
-    if (!file.exists(paste(back_dir,"/",spp_name,"/",spp_name,".tif",sep=""))) {
-      cat("rasterize\n")
-      #check existence of shapefile
-      bg_sh <- paste(back_dir,"/",spp_name,"/",spp_name,".shp",sep="")
-      if (!file.exists(bg_sh)) {stop("shapefile does not exist, please check")}
-      #load input shapefile and mask
-      bg_sh <- readShapePoly(bg_sh)
-      #rasterize
-      bg_rs <- rasterize(bg_sh,msk,silent=T,filename=paste(back_dir,"/",spp_name,"/",spp_name,".tif",sep=""),format="GTiff")
-    } else {
-      cat("load raster\n")
-      bg_rs <- raster(paste(back_dir,"/",spp_name,"/",spp_name,".tif",sep=""))
-    }
+    msk <- raster(paste(msk_dir,"/mask_30s.tif",sep=""))
+    other_rs <- c(paste(soil_dir,"/dul_ind.tif",sep=""),
+                  paste(bio_dir,"/seasrain.tif",sep=""))
     
     #get xy from bg
     cat("make data frame\n")
-    bg_rs[which(!is.na(bg_rs[]))] <- 1
-    bg_df <- as.data.frame(xyFromCell(bg_rs,which(!is.na(bg_rs[]))))
+    bg_df <- as.data.frame(xyFromCell(msk,which(!is.na(msk[]))))
     
     #removing grid cells that are NA
-    cat("remove NAs from climate\n")
-    msk <- readAll(msk); rm(bg_rs); g=gc(); rm(g)
-    bg_df$value <- extract(msk,cbind(x=bg_df$x,y=bg_df$y))
-    bg_df <- bg_df[which(!is.na(bg_df$value)),]
-    rm(msk); g=gc(); rm(g)
-    bg_df$value <- NULL
-    
     for (ors in other_rs) {
       cat("remove NAs from",ors,"\n")
       msk <- raster(ors); msk <- readAll(msk)
@@ -460,6 +471,83 @@ load_bg <- function(spp_name,back_dir,bio_dir,soil_dir,topo_dir) {
     load(bg_file)
   }
   return(bg_df)
+}
+
+
+######################################
+#declare function for analysis of VIF (variance inflation factor)
+vif_analysis <- function(spp_name,occ_file,bio_dir,vif_dir,sol_dir) {
+  if (!file.exists(vif_dir)) {dir.create(vif_dir,recursive=T)}
+  
+  spp_dir <- paste(vif_dir,"/",spp_name,sep="")
+  if (!file.exists(spp_dir)) {dir.create(spp_dir)}
+  
+  if (!file.exists(paste(spp_dir,"/",spp_name,"_samples.RData",sep=""))) {
+    cat("\nprocessing species",spp_name,"\n")
+    
+    #load occurrences
+    #note names of x,y fields HAVE to be LON and LAT (respectively)
+    spp <- read.csv(occ_file)
+    loc_data <- data.frame(x=spp$LON,y=spp$LAT)
+    
+    #keep only unique occurrences
+    loc_data <- unique(loc_data)
+    
+    #list all predictors
+    pred_list <- list.files(bio_dir,pattern="\\.tif")
+    
+    #extract climate for location data
+    cat("extracting climate predictors for",nrow(loc_data),"occurrences \n")
+    bio_data <- loc_data
+    for (pred in pred_list) {
+      #pred <- pred_list[1]
+      pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
+      bio_data <- cbind(bio_data,value=as.data.frame(extract(pred_rs,loc_data)))
+      names(bio_data)[ncol(bio_data)] <- paste(gsub("\\.tif","",pred))
+      rm(pred_rs); g=gc(); rm(g)
+    }
+    
+    soil_rs <- raster(paste(sol_dir,"/dul_ind.tif",sep=""))
+    bio_data <- cbind(bio_data,val=as.data.frame(extract(soil_rs,loc_data)))
+    names(bio_data)[ncol(bio_data)] <- "soildul"
+    
+    #check for NAs
+    bio_data$NAs <- apply(bio_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
+    bio_data <- bio_data[which(bio_data$NAs == 0),]
+    bio_data$NAs <- NULL
+    
+    #sind * 10000 for formatting reasons
+    bio_data$sindex <- bio_data$sindex * 10000
+    bio_data$soildul <- bio_data$soildul * 100
+    bio_data$annrain <- NULL #remove annual rainfall
+    
+    #write data file (full climate)
+    write.csv(bio_data,paste(spp_dir,"/",spp_name,"_full.csv",sep=""),row.names=F,quote=T)
+    
+    #vif analysis
+    vif_res <- bio_data[,3:ncol(bio_data)]
+    vif_res <- vifstep(vif_res,th=5) #threshold could be changed
+    
+    #listing predictors
+    sel_var <- paste(vif_res@results$Variables)
+    
+    #filtering out useless variables in bio_data
+    #!Remember sind has been scaled * 10000
+    #(so the projection raster has to be scaled * 10000 before projecting)
+    bio_sel <- bio_data[,c("x","y",sel_var)]
+    
+    #write sub-selected file (this is subset model)
+    write.csv(bio_sel,paste(spp_dir,"/",spp_name,"_subset.csv",sep=""),row.names=F,quote=T)
+    
+    #output object (to be stored as RData)
+    out_obj <- list(SPP=spp_name,RAW_OCC=spp,LOC_DATA=loc_data,ENV_FULL=bio_data,ENV_SUBSET=bio_sel,VIF_OUTPUT=vif_res)
+    save(list=c("out_obj"),file=paste(spp_dir,"/",spp_name,"_samples.RData",sep=""))
+    cat("done!, check object",paste(spp_name,"_samples.RData",sep=""),"\n")
+  } else {
+    cat("\nspecies",spp_name,"existed. Loading... \n")
+    load(paste(spp_dir,"/",spp_name,"_samples.RData",sep=""))
+  }
+  return(out_obj)
 }
 
 
