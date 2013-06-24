@@ -156,21 +156,6 @@ if (!file.exists(paste(outDir,"/setmax.tif",sep=""))) {
 }
 
 
-#####################################
-#### 9. calculate drought index using etmax and seasrain
-#####################################
-if (!file.exists(paste(outDir,"/dindex.tif",sep=""))) {
-  totetmax <- raster(paste(outDir,"/setmax.tif",sep=""))
-  seasrain <- raster(paste(outDir,"/seasrain.tif",sep=""))
-  if (totetmax@data@min == 0) {
-    dindex <- (totetmax-seasrain)/(totetmax+1) * 100
-  } else {
-    dindex <- (totetmax-seasrain)/totetmax * 100
-  }
-  writeRaster(dindex,paste(outDir,"/dindex.tif",sep=""),format="GTiff")
-} else {
-  dindex <- raster(paste(outDir,"/dindex.tif",sep=""))
-}
 
 
 
