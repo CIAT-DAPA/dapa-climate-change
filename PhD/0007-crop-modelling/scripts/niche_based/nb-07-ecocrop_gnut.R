@@ -690,7 +690,7 @@ for (rw in rwList) {
   #append to general object
   met_runs <- rbind(met_runs,met_all)
 }
-write.csv(met_all,paste(omet_dir,"/yearly_metrics.csv",sep=""),quote=T,row.names=F)
+write.csv(met_runs,paste(omet_dir,"/yearly_metrics.csv",sep=""),quote=T,row.names=F)
 
 
 
