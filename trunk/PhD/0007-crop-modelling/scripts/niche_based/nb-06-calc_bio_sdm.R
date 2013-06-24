@@ -156,6 +156,18 @@ if (!file.exists(paste(outDir,"/setmax.tif",sep=""))) {
 }
 
 
+#####################################
+#### 9. calculate drought index
+#####################################
+if (!file.exists(paste(outDir,"/dindex.tif",sep=""))) {
+  totetmax <- raster(paste(outDir,"/setmax.tif",sep=""))
+  seasrain <- raster(paste(outDir,"/seasrain.tif",sep=""))
+  dindex <- (totetmax-seasrain) / totetmax * 100
+  writeRaster(dindex,paste(outDir,"/setmax.tif",sep=""),format="GTiff")
+} else {
+  dindex <- raster(paste(outDir,"/dindex.tif",sep=""))
+}
+
 
 
 
