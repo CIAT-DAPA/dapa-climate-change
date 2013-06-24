@@ -33,6 +33,7 @@ library(maptools); library(dismo); library(usdm)
 
 #source dir
 src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source functions
 source(paste(src.dir,"/scripts/niche_based/nb-08-sdm_modelfit-fun.R",sep=""))
@@ -76,6 +77,10 @@ all_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList,VSET=varList$SET_I
 this_sppName <- "gnut" #species name
 occFile <- paste(occDir,"/",this_sppName,"-india_final.csv",sep="")
 
+#create variable sets
+samples <- vif_analysis(spp_name=this_sppName,occ_file=occFile,bio_dir=bioDir,
+                        vif_dir=vifDir,sol_dir=solDir)
+
 #some testing runs
 for (run_i in 1:5) {
   #run_i <- 1 #23
@@ -84,23 +89,11 @@ for (run_i in 1:5) {
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   this_vset <- as.numeric(paste(all_runs$VSET[run_i])) #set of variables to use
   
-  #create variable sets
-  samples <- vif_analysis(spp_name=this_sppName,occ_file=occFile,bio_dir=bioDir,
-                          vif_dir=vifDir,sol_dir=solDir)
-  
   #run model
   odir <- run_model(base_dir=sdmDir,env_dir=envDir,spp_name=this_sppName,
                     seed=this_seed,npa=this_npa,alg=this_alg,vset=this_vset)
+  
 }
 
-#changes introduced:
-#------------------
-#threshold in pwdSampling() to .33 #from Hijmans 2012 Ecology #done
-#sp_mOpt@GLM$control$maxit <- 100 #because sometimes it shows warning of not-convergence #done
-#sp_mOpt@GBM$n.trees <- 2000 #Braunisch et al. 2013 #done
 
-#pending changes:
-#----------------
-#add a background size of 13333 so that training background is 10000 (Maxent's default) #pending
-#70/30 instead of 75/25 for training/testing #pending
 
