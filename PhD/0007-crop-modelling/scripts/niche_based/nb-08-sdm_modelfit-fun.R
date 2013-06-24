@@ -171,8 +171,10 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     
     #here create the necessary variable interactions!!
     #create additional predictors using interactions
-    spp_data <- make_interactions(spp_data)
-    pab_data <- make_interactions(pab_data)
+    if (alg != "GAM") {
+      spp_data <- make_interactions(spp_data)
+      pab_data <- make_interactions(pab_data)
+    }
     
     #4. select 20 % test data using a given seed 
     cat("selecting train/test data using given seed\n")
