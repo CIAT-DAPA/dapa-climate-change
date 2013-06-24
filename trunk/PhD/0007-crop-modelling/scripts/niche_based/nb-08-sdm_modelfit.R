@@ -33,14 +33,14 @@ library(maptools); library(dismo); library(usdm)
 
 #source dir
 src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source functions
 source(paste(src.dir,"/scripts/niche_based/nb-08-sdm_modelfit-fun.R",sep=""))
 
 #i/o directories
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
 occDir <- paste(bDir,"/occurrences",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
 clmDir <- paste(envDir,"/climate",sep="")
