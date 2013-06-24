@@ -216,7 +216,7 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@GAM$algo <- "GAM_gam"
-    sp_mOpt@GAM$k <- 2
+    sp_mOpt@GAM$k <- 1
     sp_mOpt@ANN$maxit <- 500
     
     #perform the modelling
