@@ -153,38 +153,31 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
   spp_data <- read.csv(paste(data_dir,"/",spp_name,"/",spp_name,"_",varList$CLIM[vset],".csv",sep=""))
   
   #3. load background data / create if needs be
-  pab_data <- get_pa(spp_name=spp_name,
-                     spp_data=read.csv(paste(data_dir,"/",spp_name,"/",spp_name,"_full.csv",sep="")),
-                     n_pa=npa,bg_dir=bg_dir,msk_dir=msk_dir,int_dir=int_dir,
-                     bio_dir=bio_dir,soil_dir=sol_dir)
+  pab_data <- get_pa(spp_name=spp_name,n_pa=npa,bg_dir=bg_dir,msk_dir=msk_dir,int_dir=int_dir,
+                     bio_dir=bio_dir,soil_dir=sol_dir,size=12500)
   pab_data <- pab_data[,names(spp_data)] #remove extra variables
   
   #run only if final stored objects do not exist
-  if (!file.exists(paste(outDir,"/",gsub("\\_","\\.",sppName),"/fitting.RData",sep=""))) {
+  if (!file.exists(paste(outDir,"/",gsub("\\_","\\.",spp_name),"/fitted_model.RData",sep=""))) {
     cat("\n-------------------------------------------------------\n")
-    cat("---- processing species", sppName,"\n")
+    cat("---- processing species", spp_name,"\n")
     cat("-------------------------------------------------------\n")
     
     #if soil is within variables to be modelled then make factor else remove from data.frame
-    if (varList$SOIL[vset]) {
-      #commented out JRV because ordinal variables are treated as continuous
-      #spp_data$soildrain_final <- as.factor(spp_data$soildrain_final)
-      #pab_data$soildrain_final <- as.factor(pab_data$soildrain_final)
-    } else {
-      spp_data$soildrain_final <- NULL
-      pab_data$soildrain_final <- NULL
+    if (!varList$SOIL[vset]) {
+      spp_data$soildul <- NULL
+      pab_data$soildul <- NULL
     }
     
-    #if topo is _not_ within variables to be modelled then remove from data.frame
-    if (!varList$TOPO[vset]) {
-      spp_data$aspect <- NULL; spp_data$slope <- NULL
-      pab_data$aspect <- NULL; pab_data$slope <- NULL
-    }
+    #here create the necessary variable interactions!!
+    #create additional predictors using interactions
+    spp_data <- make_interactions(spp_data)
+    pab_data <- make_interactions(pab_data)
     
-    #4. select 25 % test data using a given seed 
+    #4. select 20 % test data using a given seed 
     cat("selecting train/test data using given seed\n")
-    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.25),0))
-    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.25),0))
+    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.20),0))
+    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.20),0))
     
     spp_tr <- spp_data[-sp_sel,]; rownames(spp_tr) <- 1:nrow(spp_tr)
     spp_te <- spp_data[sp_sel,]; rownames(spp_te) <- 1:nrow(spp_te)
@@ -207,18 +200,21 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     #formatting data
     sp_bData <- BIOMOD_FormatingData(resp.var = resp_var,expl.var = expl_var, 
                                      resp.xy=coordinates(expl_var),
-                                     resp.name = sppName, 
+                                     resp.name = spp_name, 
                                      PA.strategy="random",
-                                     PA.nb.rep=1,PA.nb.absences=npa)
+                                     PA.nb.rep=1,PA.nb.absences=nrow(pab_tr))
     
     #selecting model features (!change features as needed)
     sp_mOpt <- BIOMOD_ModelingOptions()
-    sp_mOpt@MAXENT$path_to_maxent.jar <- maxDir
+    sp_mOpt@MAXENT$path_to_maxent.jar <- max_dir
     sp_mOpt@MAXENT$maximumiterations <- 500
+    sp_mOpt@MAXENT$quadratic <- F
+    sp_mOpt@MAXENT$product <- F
+    sp_mOpt@MAXENT$threshold <- F
+    sp_mOpt@MAXENT$hinge <- F
     sp_mOpt@GBM$n.trees <- 2000
     sp_mOpt@GLM$control$maxit <- 100
-    #sp_mOpt@GLM$interaction.level <- 1 #removed: JRV Jun 9 (interaction takes too long)
-    #sp_mOpt@GLM$type <- "quadratic" #simple | quadratic | polynomial
+    sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@ANN$maxit <- 500
     
     #perform the modelling
@@ -233,7 +229,7 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
                                  NbRunEval=1,
                                  DataSplit=100,
                                  Prevalence=0.5,
-                                 VarImport=5,
+                                 VarImport=10,
                                  models.eval.meth = c('KAPPA','TSS','ROC'),
                                  SaveObj = TRUE,
                                  rescal.all.models = TRUE,
@@ -315,10 +311,10 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     
     #save object with all necessary details
     cat("saving final objects\n")
-    save(list=c("sp_bData","sp_mEval","sp_mOut"),file=paste(outDir,"/",sp_bData@sp.name,"/fitting.RData",sep=""))
+    save(list=c("sp_bData","sp_mEval","sp_mOut"),file=paste(outDir,"/",sp_bData@sp.name,"/fitted_model.RData",sep=""))
     
     #go back to base directory
-    setwd(bDir)
+    setwd(base_dir)
   }
   
   #return object
@@ -350,88 +346,180 @@ getEvalMetric <- function(fit_vals,obs_vals,tstat='TSS') {
   return(bestStat)
 }
 
+#make interactions before constructing models
+#only daystcrit is linear only
+make_interactions <- function(input_data) {
+  modvar <- names(input_data)
+  
+  #daystcrit: minrain seasrain
+  if ("daystcrit" %in% modvar) {
+    if ("minrain" %in% modvar) {input_data$minrain_daystcrit <- input_data$daystcrit * input_data$minrain}
+    if ("seasrain" %in% modvar) {input_data$seasrain_daystcrit <- input_data$daystcrit * input_data$seasrain}
+  }
+  
+  #dindex: sindex totgdd
+  if ("dindex" %in% modvar) {
+    input_data$dindex2 <- input_data$dindex^2
+    if ("sindex" %in% modvar) {input_data$sindex_dindex <- input_data$dindex * input_data$sindex}
+    if ("totgdd" %in% modvar) {input_data$totgdd_dindex <- input_data$dindex * input_data$totgdd}
+    if ("soildul" %in% modvar) {input_data$soildul_daystcrit <- input_data$daystcrit * input_data$soildul}
+  }
+  
+  #meantemp: sindex
+  if ("meanmeantemp" %in% modvar) {
+    input_data$meanmeantemp2 <- input_data$meanmeantemp^2
+    if ("sindex" %in% modvar) {input_data$sindex_meanmeantemp <- input_data$meanmeantemp * input_data$sindex}
+    if ("minrain" %in% modvar) {input_data$minrain_meanmeantemp <- input_data$meanmeantemp * input_data$minrain}
+    if ("seasrain" %in% modvar) {input_data$seasrain_meanmeantemp <- input_data$meanmeantemp * input_data$seasrain}
+  }
+  
+  #maxtemp: sindex
+  if ("maxmaxtemp" %in% modvar) {
+    input_data$maxmaxtemp2 <- input_data$maxmaxtemp^2
+    if ("sindex" %in% modvar) {input_data$sindex_maxmaxtemp <- input_data$maxmaxtemp * input_data$sindex}
+    if ("minrain" %in% modvar) {input_data$minrain_maxmaxtemp <- input_data$maxmaxtemp * input_data$minrain}
+    if ("seasrain" %in% modvar) {input_data$seasrain_maxmaxtemp <- input_data$maxmaxtemp * input_data$seasrain}
+  }
+  
+  #mintemp: sindex
+  if ("minmintemp" %in% modvar) {
+    input_data$minmintemp2 <- input_data$minmintemp^2
+    if ("sindex" %in% modvar) {input_data$sindex_minmintemp <- input_data$minmintemp * input_data$sindex}
+    if ("minrain" %in% modvar) {input_data$minrain_minmintemp <- input_data$minmintemp * input_data$minrain}
+    if ("seasrain" %in% modvar) {input_data$seasrain_minmintemp <- input_data$minmintemp * input_data$seasrain}
+  }
+  
+  #minrain: daystcrit mintemp maxtemp meantemp
+  if ("minrain" %in% modvar) {
+    input_data$minrain2 <- input_data$minrain^2
+    if ("totvpd" %in% modvar) {input_data$totvpd_minrain <- input_data$minrain * input_data$totvpd}
+    if ("totgdd" %in% modvar) {input_data$totgdd_minrain <- input_data$minrain * input_data$totgdd}
+    if ("soildul" %in% modvar) {input_data$soildul_minrain <- input_data$minrain * input_data$soildul}
+  }
+  
+  #seasrain: daystcrit mintemp maxtemp meantemp
+  if ("seasrain" %in% modvar) {
+    input_data$seasrain2 <- input_data$seasrain^2
+    if ("totvpd" %in% modvar) {input_data$totvpd_seasrain <- input_data$seasrain * input_data$totvpd}
+    if ("totgdd" %in% modvar) {input_data$totgdd_seasrain <- input_data$seasrain * input_data$totgdd}
+    if ("soildul" %in% modvar) {input_data$soildul_seasrain <- input_data$seasrain * input_data$soildul}
+  }
+  
+  if ("setmax" %in% modvar) {
+    input_data$setmax2 <- input_data$setmax^2
+    if ("sindex" %in% modvar) {input_data$sindex_setmax <- input_data$setmax * input_data$sindex}
+    if ("totgdd" %in% modvar) {input_data$totgdd_setmax <- input_data$setmax * input_data$totgdd}
+    if ("totvpd" %in% modvar) {input_data$totvpd_setmax <- input_data$setmax * input_data$totvpd}
+    if ("soildul" %in% modvar) {input_data$soildul_setmax <- input_data$setmax * input_data$soildul}
+  }
+  
+  #rest of quadratic terms
+  if ("sindex" %in% modvar) {
+    input_data$sindex2 <- input_data$sindex^2
+    #dindex: above
+    #maxtemp, meantemp, mintemp: above
+    #setmax: above
+    if ("totgdd" %in% modvar) {input_data$totgdd_sindex <- input_data$sindex * input_data$totgdd}
+    if ("totvpd" %in% modvar) {input_data$totvpd_sindex <- input_data$sindex * input_data$totvpd}
+    if ("soildul" %in% modvar) {input_data$soildul_sindex <- input_data$sindex * input_data$soildul}
+  }
+  
+  
+  #totgdd: sindex vpd etmax seasrain dindex
+  if ("totgdd" %in% modvar) {
+    input_data$totgdd2 <- input_data$totgdd^2
+    #dindex: above
+    #minrain seasrain: above
+    #sindex: above
+    #setmax: above
+    #sindex: above
+    if ("totvpd" %in% modvar) {input_data$totvpd_totgdd <- input_data$totgdd * input_data$totvpd}
+  }
+  
+  #totvpd: seasrain sindex minrain
+  if ("totvpd" %in% modvar) {
+    input_data$totvpd2 <- input_data$totvpd^2
+    #minrain seasrain: above
+    #sindex: above
+    #totgdd: above
+    if ("soildul" %in% modvar) {input_data$soildul_totvpd <- input_data$totvpd * input_data$soildul}
+  }
+  
+  #soildul: seasrain, minrain, setmax, totvpd (all above)
+  if ("soildul" %in% modvar) {input_data$soildul2 <- input_data$soildul^2}
+  
+  #return object
+  return(input_data)
+}
+
+
 
 ### function to get a given number of pseudo-absences (with env data)
-get_pa <- function(spp_name,spp_data,n_pa,bg_dir,msk_dir,int_dir,bio_dir,soil_dir) {
+get_pa <- function(spp_name,n_pa,bg_dir,msk_dir,int_dir,bio_dir,soil_dir,size=12500) {
   if (!file.exists(bg_dir)) {dir.create(bg_dir)}
   
   #check existence
-  if (!file.exists(paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))) {
-    cat("pseudo-absences don't exist yet, drawing...",n_pa," pseudo absences\n")
+  if (!file.exists(paste(bg_dir,"/",spp_name,"_bg-",n_pa,".RData",sep=""))) {
+    cat("pseudo-absences don't exist yet, drawing pseudo absences, seed:",n_pa,"\n")
     #background area loading / creation
     bg_df <- load_bg(spp_name,bg_dir,msk_dir,bio_dir,soil_dir)
     
-    #select PA from bg_df (without defining seed)
-    cat("sampling\n")
-    set.seed(n_pa); pa_sel <- sample(1:nrow(bg_df),13000)
+    #select PA from bg_df (using given seed). 
+    #Sample according to where there is more harvested area
+    cat("sampling with likelihood\n")
+    int_rs <- raster(paste(int_dir,"/ci_ind.tif",sep=""))
+    bg_df$prob <- extract(int_rs,bg_df)
+    bg_df <- bg_df[which(!is.na(bg_df$prob)),]
+    bg_df$prob <- bg_df$prob / sum(bg_df$prob)
+    rm(int_rs); g=gc(); rm(g)
+    
+    set.seed(n_pa); pa_sel <- sample(1:nrow(bg_df),size,prob=bg_df$prob)
     bg_sel <- bg_df[pa_sel,]; rm(bg_df); g=gc(); rm(g)
     rownames(bg_sel) <- 1:nrow(bg_sel)
+    bg_sel$prob <- NULL
     
     #5. extract climate data for pseudo absences
-    cat("extracting climate\n")
-    
     #list all predictors
     pred_list <- list.files(bio_dir,pattern="\\.tif")
+    pred_list <- pred_list[which(pred_list != "annrain.tif")]
     
     #extract climate for location data ### here i am!!!
     cat("extracting climate predictors for",nrow(bg_sel),"pseudo-absences \n")
-    bio_data <- loc_data
+    bg_data <- bg_sel
     for (pred in pred_list) {
       #pred <- pred_list[1]
+      cat(pred,"...\n")
       pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
-      bio_data <- cbind(bio_data,value=as.data.frame(extract(pred_rs,loc_data)))
-      names(bio_data)[ncol(bio_data)] <- paste(gsub("\\.tif","",pred))
+      bg_data <- cbind(bg_data,value=as.data.frame(extract(pred_rs,bg_sel)))
+      names(bg_data)[ncol(bg_data)] <- paste(gsub("\\.tif","",pred))
       rm(pred_rs); g=gc(); rm(g)
     }
     
-    soil_rs <- raster(paste(sol_dir,"/dul_ind.tif",sep=""))
-    bio_data <- cbind(bio_data,val=as.data.frame(extract(soil_rs,loc_data)))
-    names(bio_data)[ncol(bio_data)] <- "soildul"
-    
-    #check for NAs
-    bio_data$NAs <- apply(bio_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
-    bio_data <- bio_data[which(bio_data$NAs == 0),]
-    bio_data$NAs <- NULL
-    
-    #sind * 10000 for formatting reasons
-    bio_data$sindex <- bio_data$sindex * 10000
-    bio_data$soildul <- bio_data$soildul * 100
-    bio_data$annrain <- NULL #remove annual rainfall
-    
-    
-    
-    
-    bio_stk <- stack(c(paste(bio_dir,"/",names(spp_data)[3:(ncol(spp_data)-3)],".tif",sep="")))
-    bg_data <- as.data.frame(extract(bio_stk,bg_sel))
-    bg_data <- cbind(bg_sel,bg_data)
-    bg_data$sind <- bg_data$sind * 10000
-    
     #extract soil data
     cat("extracting soil\n")
-    soil_rs <- stack(paste(soil_dir,"/soildrain_final.tif",sep=""))
-    bg_data <- cbind(bg_data,as.data.frame(extract(soil_rs,bg_sel))) #for background
-    
-    #extract topography data
-    cat("extracting topography\n")
-    top_stk <- stack(paste(topo_dir,"/",c("aspect.tif","slope.tif"),sep=""))
-    bg_data <- cbind(bg_data,as.data.frame(extract(top_stk,bg_sel))) #for pa
-    bg_data$slope <- bg_data$slope * 100
+    soil_rs <- raster(paste(soil_dir,"/dul_ind.tif",sep=""))
+    bg_data <- cbind(bg_data,val=as.data.frame(extract(soil_rs,bg_sel)))
+    names(bg_data)[ncol(bg_data)] <- "soildul"
     
     #check missing
     cat("final checks\n")
     bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
     bg_data <- bg_data[which(bg_data$NAs == 0),]
     bg_data$NAs <- NULL
-    bg_data <- bg_data[1:n_pa,]
     rownames(bg_data) <- 1:nrow(bg_data)
+    
+    #sind * 10000 for formatting reasons
+    bg_data$sindex <- bg_data$sindex * 10000
+    bg_data$soildul <- bg_data$soildul * 100
+    bg_data$annrain <- NULL #remove annual rainfall
     
     #write both objects into RData file
     cat("saving...\n")
-    write.csv(bg_data,paste(bg_dir,"/",spp_name,"/bg_",n_pa,".csv",sep=""),row.names=F,quote=T)
-    save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))
+    write.csv(bg_data,paste(bg_dir,"/",spp_name,"_bg-",n_pa,".csv",sep=""),row.names=F,quote=T)
+    save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"_bg-",n_pa,".RData",sep=""))
   } else {
     cat("pseudo-absences did exist, loading...\n")
-    load(file=paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))
+    load(file=paste(bg_dir,"/",spp_name,"_bg-",n_pa,".RData",sep=""))
   }
   return(bg_data)
 }
@@ -501,6 +589,7 @@ vif_analysis <- function(spp_name,occ_file,bio_dir,vif_dir,sol_dir) {
     bio_data <- loc_data
     for (pred in pred_list) {
       #pred <- pred_list[1]
+      cat(pred,"...\n")
       pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
       bio_data <- cbind(bio_data,value=as.data.frame(extract(pred_rs,loc_data)))
       names(bio_data)[ncol(bio_data)] <- paste(gsub("\\.tif","",pred))

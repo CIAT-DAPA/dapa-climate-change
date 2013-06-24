@@ -23,28 +23,6 @@ stop("dont run")
 #models (for each technique), weighted by AUC ranking and not weighted.
 ###
 
-#
-#1. species name
-#2. load species data
-#3. load background data.frame (create from shapefile if doesn't exist)
-#4. using seed select training species data AND training pseudo absences
-#   number of PA = a given number ()
-#5. select particular combination of variables
-#   a. subset climate
-#   b. subset climate + soils
-#   c. subset climate + topography
-#   d. subset climate + soils + topography
-#   e. full climate
-#   f. full climate + soils
-#   g. full climate + topography
-#   h. full climate + soils + topography
-
-#loop cross-val 1:10 (with specified seed)
-#5. run without cross-validation (but do the cross validation independently so as
-#   to be able to use Hijmans 2012 Ecology ssb AUC correction)
-#6. run a particular algorithm, evaluate, store eval output
-#   configuration in Maxent: probably 10k PA)
-#end loop cross-val
 
 ##############################
 ##############################
@@ -61,7 +39,7 @@ source(paste(src.dir,"/scripts/niche_based/nb-08-sdm_modelfit-fun.R",sep=""))
 
 #i/o directories
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
-#bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
 occDir <- paste(bDir,"/occurrences",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
 clmDir <- paste(envDir,"/climate",sep="")
