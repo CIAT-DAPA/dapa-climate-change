@@ -66,7 +66,8 @@ tnx_stk <- stack(c(paste(clmDir,"/wcl_ind_2_5min/tmin_",1:12,".tif",sep=""),
 ###################################################################
 ###################################################################
 #### for 1dd version
-outDir <- paste(clmDir,"/imd_cru_climatology_1dd/1966_1993_bio",sep="") #change to 1966_1993_bio
+#change to 1960_2000_bio 1966_1993_bio
+outDir <- paste(clmDir,"/imd_cru_climatology_1dd/1960_2000_bio",sep="") 
 if (!file.exists(outDir)) {dir.create(outDir)}
 
 #load sowing and harvest dates
@@ -74,12 +75,12 @@ sowd <- raster(paste(calDir,"/plant_doy_ind_jt_1dd.tif",sep=""))
 hard <- raster(paste(calDir,"/harvest_doy_ind_jt_1dd.tif",sep=""))
 
 #load monthly stacks
-rain_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/prec_",1:12,".tif",sep=""))
-tmen_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmean_",1:12,".tif",sep=""))
-tmax_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmax_",1:12,".tif",sep=""))
-tmin_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmin_",1:12,".tif",sep=""))
-tnx_stk <- stack(c(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmin_",1:12,".tif",sep=""),
-                   paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmax_",1:12,".tif",sep="")))
+rain_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/prec_",1:12,".tif",sep=""))
+tmen_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/tmean_",1:12,".tif",sep=""))
+tmax_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/tmax_",1:12,".tif",sep=""))
+tmin_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/tmin_",1:12,".tif",sep=""))
+tnx_stk <- stack(c(paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/tmin_",1:12,".tif",sep=""),
+                   paste(clmDir,"/imd_cru_climatology_1dd/1960_2000/tmax_",1:12,".tif",sep="")))
 ###################################################################
 ###################################################################
 

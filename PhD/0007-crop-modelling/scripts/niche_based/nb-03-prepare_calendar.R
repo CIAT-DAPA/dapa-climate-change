@@ -163,26 +163,41 @@ sta_sck <- raster(paste(calDir,"/plant_ind.tif",sep=""))
 end_sck <- raster(paste(calDir,"/harvest_ind.tif",sep=""))
 
 #resample
-sta_jot <- aggregate(sta_jot,fact=(xres(msk)/xres(sta_jot)),FUN=function(x) {mean(x,na.rm=T)})
-sta_jot <- resample(sta_jot,msk,method="ngb")
+sta_jota <- aggregate(sta_jot,fact=(xres(msk)/xres(sta_jot)),FUN=function(x) {modal(x,na.rm=T)})
+sta_jotb <- resample(sta_jot,msk,method="bilinear")
 
-end_jot <- aggregate(end_jot,fact=(xres(msk)/xres(end_jot)),FUN=function(x) {mean(x,na.rm=T)})
-end_jot <- resample(end_jot,msk,method="ngb")
+end_jota <- aggregate(end_jot,fact=(xres(msk)/xres(end_jot)),FUN=function(x) {modal(x,na.rm=T)})
+end_jotb <- resample(end_jot,msk,method="bilinear")
 
-sta_sck <- aggregate(sta_sck,fact=(xres(msk)/xres(sta_sck)),FUN=function(x) {mean(x,na.rm=T)})
-sta_sck <- resample(sta_sck,msk,method="ngb")
+sta_scka <- aggregate(sta_sck,fact=(xres(msk)/xres(sta_sck)),FUN=function(x) {modal(x,na.rm=T)})
+sta_sckb <- resample(sta_sck,msk,method="bilinear")
 
-end_sck <- aggregate(end_sck,fact=(xres(msk)/xres(end_sck)),FUN=function(x) {mean(x,na.rm=T)})
-end_sck <- resample(end_sck,msk,method="ngb")
+end_scka <- aggregate(end_sck,fact=(xres(msk)/xres(end_sck)),FUN=function(x) {modal(x,na.rm=T)})
+end_sckb <- resample(end_sck,msk,method="bilinear")
 
 
 #xy object
 xy <- as.data.frame(xyFromCell(msk,which(!is.na(msk[]))))
 xy <- cbind(cell=which(!is.na(msk[])),xy)
-xy$sta_jot <- extract(sta_jot,xy[,c("x","y")])
-xy$end_jot <- extract(end_jot,xy[,c("x","y")])
-xy$sta_sck <- extract(sta_sck,xy[,c("x","y")])
-xy$end_sck <- extract(end_sck,xy[,c("x","y")])
+xy$sta_jota <- extract(sta_jota,xy[,c("x","y")])
+xy$sta_jotb <- extract(sta_jotb,xy[,c("x","y")])
+
+xy$end_jota <- extract(end_jota,xy[,c("x","y")])
+xy$end_jotb <- extract(end_jotb,xy[,c("x","y")])
+
+xy$sta_scka <- extract(sta_scka,xy[,c("x","y")])
+xy$sta_sckb <- extract(sta_sckb,xy[,c("x","y")])
+
+xy$end_scka <- extract(end_scka,xy[,c("x","y")])
+xy$end_sckb <- extract(end_sckb,xy[,c("x","y")])
+
+#final values
+xy$sta_jot <- xy$sta_jotb; xy$sta_jot[which(is.na(xy$sta_jotb))] <- xy$sta_jota[which(is.na(xy$sta_jotb))]
+xy$end_jot <- xy$end_jotb; xy$end_jot[which(is.na(xy$end_jotb))] <- xy$end_jota[which(is.na(xy$end_jotb))]
+xy$sta_sck <- xy$sta_sckb; xy$sta_sck[which(is.na(xy$sta_sckb))] <- xy$sta_scka[which(is.na(xy$sta_sckb))]
+xy$end_sck <- xy$end_sckb; xy$end_sck[which(is.na(xy$end_sckb))] <- xy$end_scka[which(is.na(xy$end_sckb))]
+
+
 
 #final objects
 sta_jot <- raster(msk); sta_jot[xy$cell] <- xy$sta_jot
