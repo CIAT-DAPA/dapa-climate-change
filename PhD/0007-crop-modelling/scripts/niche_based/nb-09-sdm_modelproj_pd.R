@@ -28,7 +28,7 @@ src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source functions
-source(paste(src.dir,"/scripts/niche_based/nb-08-sdm_modelfit-fun.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/nb-09-sdm_modelproj-fun.R",sep=""))
 
 #i/o directories
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
