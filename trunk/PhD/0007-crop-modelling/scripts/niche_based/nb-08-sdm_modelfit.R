@@ -82,7 +82,7 @@ samples <- vif_analysis(spp_name=this_sppName,occ_file=occFile,bio_dir=bioDir,
                         vif_dir=vifDir,sol_dir=solDir)
 
 #some testing runs
-for (run_i in 1:100) {
+for (run_i in 101:500) {
   #run_i <- 1 #23
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
