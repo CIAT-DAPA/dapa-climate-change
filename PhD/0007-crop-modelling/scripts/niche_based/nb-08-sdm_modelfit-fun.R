@@ -145,7 +145,7 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
   msk_dir <- paste(env_dir,"/mask",sep="")
   
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-  cat("\nfitting a",alg,"model, with tr_seed=",seed,", pa_seed=",npa,", vset=",vset,"\n")
+  cat("fitting a",alg,"model, with tr_seed=",seed,", pa_seed=",npa,", vset=",vset,"\n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   #1. output model and config directory
