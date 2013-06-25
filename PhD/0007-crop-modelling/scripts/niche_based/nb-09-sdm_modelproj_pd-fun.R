@@ -10,14 +10,14 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
   
   ## temporary: during development
-  base_dir=sdmDir
-  env_dir=envDir
-  spp_name=this_sppName
-  seed=this_seed
-  npa=this_npa
-  alg=this_alg
-  vset=this_vset
-  model_class="model_fit"
+  #base_dir=sdmDir
+  #env_dir=envDir
+  #spp_name=this_sppName
+  #seed=this_seed
+  #npa=this_npa
+  #alg=this_alg
+  #vset=this_vset
+  #model_class="model_fit"
   ###
   
   #i/o dirs
@@ -29,273 +29,310 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   sol_dir <- paste(env_dir,"/soil",sep="")
   msk_dir <- paste(env_dir,"/mask",sep="")
   
-  #2. load model object
   out_dir <- paste(mod_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
-  fit_file <- paste(out_dir,"/",gsub("\\_","\\.",spp_name),"/",gsub("\\_","\\.",spp_name),".",model_class,".models.out",sep="")
-  setwd(out_dir)
-  sp_mOut <- get(load(fit_file)) #load model outputs
-  tmodel <- get(BIOMOD_LoadModels(sp_mOut,models=alg)) #load specific model
-  
-  #3. load 2.5min mask and create data.frame from it
-  msk <- raster(paste(msk_dir,"/mask_2_5min.tif",sep=""))
-  if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_2_5min.RData",sep=""))) {
-    bg_df <- as.data.frame(xyFromCell(msk,which(!is.na(msk[]))))
-    save(list=c("bg_df"),file=paste(bg_dir,"/",spp_name,"_bg_2_5min.RData",sep=""))
-  } else {
-    load(paste(bg_dir,"/",spp_name,"_bg_2_5min.RData",sep=""))
-  }
-  
-  #4. extract all data that is in the model
-  varmodel <- tmodel@expl_var_names
-  if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_env_2_5min.RData",sep=""))) {
-    pred_list <- c(list.files(bio_dir,pattern="\\.tif"),"dul_ind.tif")
-    pred_list <- pred_list[which(pred_list != "annrain.tif")]
-    bg_data <- bg_df
-    for (pred in pred_list) {
-      #pred <- pred_list[1]
-      cat(pred,"...\n")
-      if (pred == "dul_ind.tif") {
-        pred_rs <- raster(paste(sol_dir,"/",pred,sep=""))
-      } else {
-        pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
-      }
-      bg_data <- cbind(bg_data,value=as.data.frame(extract(pred_rs,bg_df)))
-      
-      if (pred == "dul_ind.tif") {
-        names(bg_data)[ncol(bg_data)] <- "soildul"
-      } else {
-        names(bg_data)[ncol(bg_data)] <- gsub("\\.tif","",pred)
-      }
-      rm(pred_rs); g=gc(); rm(g)
-    }
-    #check missing
-    cat("final checks\n")
-    bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
-    bg_data <- bg_data[which(bg_data$NAs == 0),]
-    bg_data$NAs <- NULL
-    rownames(bg_data) <- 1:nrow(bg_data)
-    
-    #scale other variables
-    bg_data$sindex <- bg_data$sindex * 10000
-    bg_data$soildul <- bg_data$soildul * 100
-    
-    #write object
-    cat("write object\n")
-    save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"_bg_env_2_5min.RData",sep=""))
-  } else {
-    cat("loading env_mask data\n")
-    load(paste(bg_dir,"/",spp_name,"_bg_env_2_5min.RData",sep=""))
-  }
-  
-  ### remove unnecessary predictors in projection data.frame
-  uniqvar <- unique(gsub("2","",varmodel))
-  uniqvar <- unique(unlist(strsplit(uniqvar,"_",fixed=T)))
-  remvar <- uniqvar[!uniqvar %in% names(bg_data)]
-  if (length(remvar) > 0) {
-    for (pred in remvar) {
-      #pred <- remvar[1]
-      bg_data[,pred] <- NULL
-    }
-  }
-  
-  ### make required interaction terms
-  for (pred in varmodel) {
-    #pred <- varmodel[12]
-    if (!pred %in% names(bg_data)) {
-      cat("making additional predictor",pred,"...\n")
-      if (length(grep("_",pred)) > 0) {
-        pred1 <- unlist(strsplit(pred,"_",fixed=T))[1]
-        pred2 <- unlist(strsplit(pred,"_",fixed=T))[2]
-        bg_data$value <- bg_data[,pred1] * bg_data[,pred2]
-      } else {
-        predlin <- gsub("2","",pred)
-        bg_data$value <- bg_data[,predlin] ^ 2
-      }
-      names(bg_data)[ncol(bg_data)] <- pred
-    }
-  }
-  
-  #5. project the model
-  cat("predicting over the whole area\n")
-  if (alg == "MAXENT") {
-    tmodel@model_options$path_to_maxent.jar <- max_dir
-    #for some reason biomod will treat -9999 as nodata for maxent
-    bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(x == -9999)); return(nac)})
-    if (length(which(bg_data$NAs > 0)) > 0) {
-      for (i in which(bg_data$NAs > 0)) {
-        bg_data[i,which(bg_data[i,] == -9999)] <- -9999.05
-      }
-    }
-    bg_data$NAs <- NULL
-  }
-  prj_data <- predict(tmodel,bg_data[,3:ncol(bg_data)])
-  
-  #6. assess the model in the same way that ecocrop was assessed
-  #a. load mask to make a raster
-  tcells <- cellFromXY(msk,bg_data[,c("x","y")])
-  out_rs <- raster(msk)
-  out_rs[tcells] <- prj_data
-  
-  #b. assess the model
-  cat("evaluating the 2.5min prediction\n")
   eval_dir <- paste(out_dir,"/dis_eval",sep="")
+  proj_dir <- paste(out_dir,"/proj/baseline",sep="")
   if (!file.exists(eval_dir)) {dir.create(eval_dir)}
-  evrs <- raster(paste(base_dir,"/eval-msk/pa_fine.tif",sep=""))
+  if (!file.exists(proj_dir)) {dir.create(proj_dir,recursive=T)}
   
-  #ath: thresholds (SSS: maximum sensitivity and specificity)
-  ath <- sp_mOut@models.evaluation@val["ROC","Cutoff",1,1,1] * 0.001 #SSS
-  eval_sss <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=T,plotdir=eval_dir,
-                      filename="rocplot_sss.jpg",thresh=ath)
-  evtable <- cbind(THRESH="SSS",TVAL=ath,eval_sss$METRICS)
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("fitting a",alg,"model, with tr_seed=",seed,", pa_seed=",npa,", vset=",vset,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
-  #predict over presence points and evaluate over prevalence threshold
-  locdata <- get(load(sp_mOut@formated.input.data@link))
-  locdata <- locdata@data.env.var[which(locdata@data.species == 1),]
-  locdata <- as.numeric(predict(tmodel,locdata))
-  ath <- mean(locdata,na.rm=T)
-  eval_pre <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=T,plotdir=eval_dir,
-                       filename="rocplot_pre.jpg",thresh=ath)
-  evtable <- rbind(evtable,cbind(THRESH="PRE",TVAL=ath,eval_pre$METRICS))
-  
-  #evaluate over 10% (of prediction) threshold
-  ath <- as.numeric(quantile(prj_data,probs=0.1))
-  eval_fix <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=T,plotdir=eval_dir,
-                       filename="rocplot_ten.jpg",thresh=ath)
-  evtable <- rbind(evtable,cbind(THRESH="TEN",TVAL=ath,eval_fix$METRICS))
-  
-  ####
-  ### 1dd analyses
-  #7. load the imd_cru_climatology_1dd
-  #load mask and data.frame with locations
-  msk1d <- raster(paste(msk_dir,"/mask_1dd.tif",sep=""))
-  if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_1dd.RData",sep=""))) {
-    bg_df1d <- as.data.frame(xyFromCell(msk1d,which(!is.na(msk1d[]))))
-    save(list=c("bg_df1d"),file=paste(bg_dir,"/",spp_name,"_bg_1dd.RData",sep=""))
-  } else {
-    load(paste(bg_dir,"/",spp_name,"_bg_1dd.RData",sep=""))
-  }
-  
-  #extract env data
-  if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_env_1dd.RData",sep=""))) {
-    pred_list <- c(list.files(paste(env_dir,"/climate/imd_cru_climatology_1dd/1960_2000_bio",sep=""),
-                              pattern="\\.tif"),"dul_ind_1dd.tif")
-    pred_list <- pred_list[which(pred_list != "annrain.tif")]
-    bg_data1d <- bg_df1d
-    for (pred in pred_list) {
-      #pred <- pred_list[1]
-      cat(pred,"...\n")
-      if (pred == "dul_ind_1dd.tif") {
-        pred_rs <- raster(paste(sol_dir,"/",pred,sep=""))
+  if (!file.exists(paste(eval_dir,"/evaluation.RData",sep=""))) {
+    #2. load model object
+    cat("load model objects\n")
+    fit_file <- paste(out_dir,"/",gsub("\\_","\\.",spp_name),"/",gsub("\\_","\\.",spp_name),".",model_class,".models.out",sep="")
+    setwd(out_dir)
+    sp_mOut <- get(load(fit_file)) #load model outputs
+    tmodel <- get(BIOMOD_LoadModels(sp_mOut,models=alg)) #load specific model
+    
+    #3. load 2.5min mask and create data.frame from it
+    cat("load 2.5 arc-min mask\n")
+    msk <- raster(paste(msk_dir,"/mask_2_5min.tif",sep=""))
+    
+    #4. extract all data that is in the model
+    varmodel <- tmodel@expl_var_names
+    if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_env_2_5min.RData",sep=""))) {
+      cat("extract env data for mask\n")
+      if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_2_5min.RData",sep=""))) {
+        bg_df <- as.data.frame(xyFromCell(msk,which(!is.na(msk[]))))
+        save(list=c("bg_df"),file=paste(bg_dir,"/",spp_name,"_bg_2_5min.RData",sep=""))
       } else {
-        pred_rs <- raster(paste(env_dir,"/climate/imd_cru_climatology_1dd/1960_2000_bio/",pred,sep=""))
+        load(paste(bg_dir,"/",spp_name,"_bg_2_5min.RData",sep=""))
       }
-      bg_data1d <- cbind(bg_data1d,value=as.data.frame(extract(pred_rs,bg_df1d)))
       
-      if (pred == "dul_ind_1dd.tif") {
-        names(bg_data1d)[ncol(bg_data1d)] <- "soildul"
-      } else {
-        names(bg_data1d)[ncol(bg_data1d)] <- gsub("\\.tif","",pred)
+      pred_list <- c(list.files(bio_dir,pattern="\\.tif"),"dul_ind.tif")
+      pred_list <- pred_list[which(pred_list != "annrain.tif")]
+      bg_data <- bg_df
+      for (pred in pred_list) {
+        #pred <- pred_list[1]
+        cat(pred,"...\n")
+        if (pred == "dul_ind.tif") {
+          pred_rs <- raster(paste(sol_dir,"/",pred,sep=""))
+        } else {
+          pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
+        }
+        bg_data <- cbind(bg_data,value=as.data.frame(extract(pred_rs,bg_df)))
+        
+        if (pred == "dul_ind.tif") {
+          names(bg_data)[ncol(bg_data)] <- "soildul"
+        } else {
+          names(bg_data)[ncol(bg_data)] <- gsub("\\.tif","",pred)
+        }
+        rm(pred_rs); g=gc(); rm(g)
       }
-      rm(pred_rs); g=gc(); rm(g)
+      #check missing
+      cat("final checks\n")
+      bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
+      bg_data <- bg_data[which(bg_data$NAs == 0),]
+      bg_data$NAs <- NULL
+      rownames(bg_data) <- 1:nrow(bg_data)
+      
+      #scale other variables
+      bg_data$sindex <- bg_data$sindex * 10000
+      bg_data$soildul <- bg_data$soildul * 100
+      
+      #write object
+      cat("write object\n")
+      save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"_bg_env_2_5min.RData",sep=""))
+    } else {
+      cat("loading pre-existing env mask data\n")
+      load(paste(bg_dir,"/",spp_name,"_bg_env_2_5min.RData",sep=""))
     }
-    #check missing
-    cat("final checks\n")
-    bg_data1d$NAs <- apply(bg_data1d,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
-    bg_data1d <- bg_data1d[which(bg_data1d$NAs == 0),]
-    bg_data1d$NAs <- NULL
-    rownames(bg_data1d) <- 1:nrow(bg_data1d)
     
-    #scale other variables
-    bg_data1d$sindex <- bg_data1d$sindex * 10000
-    bg_data1d$soildul <- bg_data1d$soildul * 100
+    ### remove unnecessary predictors in projection data.frame
+    cat("drop unnecessary predictors\n")
+    uniqvar <- unique(gsub("2","",varmodel))
+    uniqvar <- unique(unlist(strsplit(uniqvar,"_",fixed=T)))
+    remvar <- uniqvar[!uniqvar %in% names(bg_data)]
+    if (length(remvar) > 0) {
+      for (pred in remvar) {
+        #pred <- remvar[1]
+        bg_data[,pred] <- NULL
+      }
+    }
     
-    #write object
-    cat("write object\n")
-    save(list=c("bg_data1d"),file=paste(bg_dir,"/",spp_name,"_bg_env_1dd.RData",sep=""))
-  } else {
-    cat("loading mask data\n")
-    load(paste(bg_dir,"/",spp_name,"_bg_env_1dd.RData",sep=""))
-  }
-  
-  ### remove unnecessary predictors in projection data.frame
-  uniqvar <- unique(gsub("2","",varmodel))
-  uniqvar <- unique(unlist(strsplit(uniqvar,"_",fixed=T)))
-  remvar <- uniqvar[!uniqvar %in% names(bg_data)]
-  if (length(remvar) > 0) {for (pred in remvar) {bg_data1d[,pred] <- NULL}}
-  
-  ### make required interaction terms
-  for (pred in varmodel) {
-    #pred <- varmodel[12]
-    if (!pred %in% names(bg_data1d)) {
-      cat("making additional predictor",pred,"...\n")
-      if (length(grep("_",pred)) > 0) {
-        pred1 <- unlist(strsplit(pred,"_",fixed=T))[1]
-        pred2 <- unlist(strsplit(pred,"_",fixed=T))[2]
-        bg_data1d$value <- bg_data1d[,pred1] * bg_data1d[,pred2]
+    ### make required interaction terms
+    cat("make needed interaction terms\n")
+    for (pred in varmodel) {
+      #pred <- varmodel[12]
+      if (!pred %in% names(bg_data)) {
+        cat("   making additional predictor",pred,"...\n")
+        if (length(grep("_",pred)) > 0) {
+          pred1 <- unlist(strsplit(pred,"_",fixed=T))[1]
+          pred2 <- unlist(strsplit(pred,"_",fixed=T))[2]
+          bg_data$value <- bg_data[,pred1] * bg_data[,pred2]
+        } else {
+          predlin <- gsub("2","",pred)
+          bg_data$value <- bg_data[,predlin] ^ 2
+        }
+        names(bg_data)[ncol(bg_data)] <- pred
+      }
+    }
+    
+    #5. project the model
+    cat("predicting over the whole area (2.5 arc-min)\n")
+    if (alg == "MAXENT") {
+      cat("   few changes because maxent...\n")
+      tmodel@model_options$path_to_maxent.jar <- max_dir
+      #for some reason biomod will treat -9999 as nodata for maxent
+      bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(x == -9999)); return(nac)})
+      if (length(which(bg_data$NAs > 0)) > 0) {
+        for (i in which(bg_data$NAs > 0)) {
+          bg_data[i,which(bg_data[i,] == -9999)] <- -9999.05
+        }
+      }
+      bg_data$NAs <- NULL
+    }
+    prj_data <- predict(tmodel,bg_data[,3:ncol(bg_data)])
+    
+    #6. assess the model in the same way that ecocrop was assessed
+    #a. load mask to make a raster
+    cat("create 2.5 arc-min raster\n")
+    tcells <- cellFromXY(msk,bg_data[,c("x","y")])
+    out_rs <- raster(msk)
+    out_rs[tcells] <- prj_data
+    
+    #b. assess the model
+    cat("evaluating the 2.5 arc-min prediction\n")
+    evrs <- raster(paste(base_dir,"/eval-msk/pa_fine.tif",sep=""))
+    
+    #ath: thresholds (SSS: maximum sensitivity and specificity)
+    cat("   sss threshold\n")
+    ath_sss <- sp_mOut@models.evaluation@val["ROC","Cutoff",1,1,1] * 0.001 #SSS
+    eval_sss <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=T,plotdir=eval_dir,
+                        filename="rocplot_2_5min.jpg",thresh=ath_sss)
+    evtable <- cbind(THRESH="SSS",TVAL=ath_sss,eval_sss$METRICS)
+    
+    #predict over presence points and evaluate over prevalence threshold
+    cat("   prevalence threshold\n")
+    locdata <- get(load(sp_mOut@formated.input.data@link))
+    locdata <- locdata@data.env.var[which(locdata@data.species == 1),]
+    locdata <- as.numeric(predict(tmodel,locdata))
+    ath_pre <- mean(locdata,na.rm=T)
+    eval_pre <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=F,thresh=ath_pre)
+    evtable <- rbind(evtable,cbind(THRESH="PRE",TVAL=ath_pre,eval_pre$METRICS))
+    
+    #evaluate over 10% (of prediction) threshold
+    cat("   ten per cent\n")
+    ath_ten <- as.numeric(quantile(prj_data,probs=0.1))
+    eval_fix <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=F,thresh=ath_ten)
+    evtable <- rbind(evtable,cbind(THRESH="TEN",TVAL=ath_ten,eval_fix$METRICS))
+    
+    ### 1dd projections and evaluations
+    #7. load the imd_cru_climatology_1dd
+    #load mask and data.frame with locations
+    cat("load 1dd mask\n")
+    msk1d <- raster(paste(msk_dir,"/mask_1dd.tif",sep=""))
+    
+    #extract env data
+    if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_env_1dd.RData",sep=""))) {
+      cat("extract env data for 1dd mask\n")
+      if (!file.exists(paste(bg_dir,"/",spp_name,"_bg_1dd.RData",sep=""))) {
+        bg_df1d <- as.data.frame(xyFromCell(msk1d,which(!is.na(msk1d[]))))
+        save(list=c("bg_df1d"),file=paste(bg_dir,"/",spp_name,"_bg_1dd.RData",sep=""))
       } else {
-        predlin <- gsub("2","",pred)
-        bg_data1d$value <- bg_data1d[,predlin] ^ 2
+        load(paste(bg_dir,"/",spp_name,"_bg_1dd.RData",sep=""))
       }
-      names(bg_data1d)[ncol(bg_data1d)] <- pred
+      
+      pred_list <- c(list.files(paste(env_dir,"/climate/imd_cru_climatology_1dd/1960_2000_bio",sep=""),
+                                pattern="\\.tif"),"dul_ind_1dd.tif")
+      pred_list <- pred_list[which(pred_list != "annrain.tif")]
+      bg_data1d <- bg_df1d
+      for (pred in pred_list) {
+        #pred <- pred_list[1]
+        cat(pred,"...\n")
+        if (pred == "dul_ind_1dd.tif") {
+          pred_rs <- raster(paste(sol_dir,"/",pred,sep=""))
+        } else {
+          pred_rs <- raster(paste(env_dir,"/climate/imd_cru_climatology_1dd/1966_1993_bio/",pred,sep=""))
+        }
+        bg_data1d <- cbind(bg_data1d,value=as.data.frame(extract(pred_rs,bg_df1d)))
+        
+        if (pred == "dul_ind_1dd.tif") {
+          names(bg_data1d)[ncol(bg_data1d)] <- "soildul"
+        } else {
+          names(bg_data1d)[ncol(bg_data1d)] <- gsub("\\.tif","",pred)
+        }
+        rm(pred_rs); g=gc(); rm(g)
+      }
+      #check missing
+      cat("final checks\n")
+      bg_data1d$NAs <- apply(bg_data1d,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
+      bg_data1d <- bg_data1d[which(bg_data1d$NAs == 0),]
+      bg_data1d$NAs <- NULL
+      rownames(bg_data1d) <- 1:nrow(bg_data1d)
+      
+      #scale other variables
+      bg_data1d$sindex <- bg_data1d$sindex * 10000
+      bg_data1d$soildul <- bg_data1d$soildul * 100
+      
+      #write object
+      cat("write object\n")
+      save(list=c("bg_data1d"),file=paste(bg_dir,"/",spp_name,"_bg_env_1dd.RData",sep=""))
+    } else {
+      cat("loading env data for 1dd mask\n")
+      load(paste(bg_dir,"/",spp_name,"_bg_env_1dd.RData",sep=""))
     }
-  }
-  
-  #5. project the model
-  cat("predicting over the whole area\n")
-  if (alg == "MAXENT") {
-    #for some reason biomod will treat -9999 as nodata for maxent
-    bg_data1d$NAs <- apply(bg_data1d,1,FUN=function(x) {nac <- length(which(x == -9999)); return(nac)})
-    if (length(which(bg_data1d$NAs > 0)) > 0) {
-      for (i in which(bg_data1d$NAs > 0)) {
-        bg_data1d[i,which(bg_data1d[i,] == -9999)] <- -9999.05
+    
+    ### remove unnecessary predictors in projection data.frame
+    cat("remove unnecesary predictors\n")
+    uniqvar <- unique(gsub("2","",varmodel))
+    uniqvar <- unique(unlist(strsplit(uniqvar,"_",fixed=T)))
+    remvar <- uniqvar[!uniqvar %in% names(bg_data)]
+    if (length(remvar) > 0) {for (pred in remvar) {bg_data1d[,pred] <- NULL}}
+    
+    ### make required interaction terms
+    cat("make needed interaction terms\n")
+    for (pred in varmodel) {
+      #pred <- varmodel[12]
+      if (!pred %in% names(bg_data1d)) {
+        cat("   making additional predictor",pred,"...\n")
+        if (length(grep("_",pred)) > 0) {
+          pred1 <- unlist(strsplit(pred,"_",fixed=T))[1]
+          pred2 <- unlist(strsplit(pred,"_",fixed=T))[2]
+          bg_data1d$value <- bg_data1d[,pred1] * bg_data1d[,pred2]
+        } else {
+          predlin <- gsub("2","",pred)
+          bg_data1d$value <- bg_data1d[,predlin] ^ 2
+        }
+        names(bg_data1d)[ncol(bg_data1d)] <- pred
       }
     }
-    bg_data1d$NAs <- NULL
+    
+    #5. project the model
+    cat("predicting over the whole area at 1dd\n")
+    if (alg == "MAXENT") {
+      cat("   few changes because maxent...\n")
+      #for some reason biomod will treat -9999 as nodata for maxent
+      bg_data1d$NAs <- apply(bg_data1d,1,FUN=function(x) {nac <- length(which(x == -9999)); return(nac)})
+      if (length(which(bg_data1d$NAs > 0)) > 0) {
+        for (i in which(bg_data1d$NAs > 0)) {
+          bg_data1d[i,which(bg_data1d[i,] == -9999)] <- -9999.05
+        }
+      }
+      bg_data1d$NAs <- NULL
+    }
+    prj_data1d <- as.numeric(predict(tmodel,bg_data1d[,3:ncol(bg_data1d)]))
+    
+    #6. assess the model in the same way that ecocrop was assessed
+    #a. load mask to make a raster
+    cat("make 1dd prediction raster \n")
+    tcells <- cellFromXY(msk1d,bg_data1d[,c("x","y")])
+    out_rs1d <- raster(msk1d)
+    out_rs1d[tcells] <- prj_data1d
+    
+    #b. assess the model
+    cat("evaluating the 1dd prediction\n")
+    evrs1d <- raster(paste(base_dir,"/eval-msk/pa_coarse.tif",sep=""))
+    
+    #ath: thresholds (SSS: maximum sensitivity and specificity)
+    cat("   sss threshold\n")
+    eval_sss1d <- eval_sdm(rsl=out_rs1d,eval_rs=evrs1d,rocplot=T,plotdir=eval_dir,
+                         filename="rocplot_1dd.jpg",thresh=ath_sss)
+    evtable1d <- cbind(THRESH="SSS",TVAL=ath_sss,eval_sss1d$METRICS)
+    
+    #predict over presence points and evaluate over prevalence threshold
+    cat("   prevalence threshold\n")
+    eval_pre1d <- eval_sdm(rsl=out_rs1d,eval_rs=evrs1d,rocplot=F,thresh=ath_pre)
+    evtable1d <- rbind(evtable1d,cbind(THRESH="PRE",TVAL=ath_pre,eval_pre1d$METRICS))
+    
+    #evaluate over 10% (of prediction) threshold
+    cat("   ten per cent\n")
+    ath_ten1d <- as.numeric(quantile(prj_data1d,probs=0.1))
+    eval_fix1d <- eval_sdm(rsl=out_rs1d,eval_rs=evrs1d,rocplot=F,thresh=ath_ten1d)
+    evtable1d <- rbind(evtable1d,cbind(THRESH="TEN",TVAL=ath_ten1d,eval_fix1d$METRICS))
+    
+    #here save evaluation object, 2.5min object, and 1dd object
+    cat("making final objects\n")
+    prj_2_5min <- out_rs; prj_1dd <- out_rs1d
+    evaluation <- rbind(cbind(RESOL="2_5min",evtable),cbind(RESOL="1dd",evtable1d))
+    details_2_5min <- list(SSS=eval_sss,PRE=eval_pre,TEN=eval_fix)
+    details_1dd <- list(SSS=eval_sss1d,PRE=eval_pre1d,TEN=eval_fix1d)
+    
+    #write rasters
+    cat("write rasters\n")
+    prj_2_5min <- writeRaster(prj_2_5min,paste(proj_dir,"/proj_pd_2_5min.tif",sep=""),format="GTiff")
+    prj_1dd <- writeRaster(prj_1dd,paste(proj_dir,"/proj_pd_1dd.tif",sep=""),format="GTiff")
+    
+    #write table
+    cat("write evaluation table\n")
+    write.csv(evaluation,paste(eval_dir,"/evaluation.csv",sep=""),row.names=F,quote=T)
+    
+    #save objects
+    cat("write objects in RData files\n")
+    save(list=c("prj_2_5min","prj_1dd"),file=paste(proj_dir,"/",spp_name,"_proj_pd.RData",sep=""))
+    save(list=c("evaluation","details_2_5min","details_1dd"),
+         file=paste(eval_dir,"/evaluation.RData",sep=""))
   }
-  prj_data1d <- as.numeric(predict(tmodel,bg_data1d[,3:ncol(bg_data1d)]))
-  
-  #6. assess the model in the same way that ecocrop was assessed
-  #a. load mask to make a raster
-  tcells <- cellFromXY(msk1d,bg_data1d[,c("x","y")])
-  out_rs1d <- raster(msk1d)
-  out_rs1d[tcells] <- prj_data1d
-  
-  #b. assess the model
-  cat("evaluating the 1dd prediction\n")
-  evrs1d <- raster(paste(base_dir,"/eval-msk/pa_coarse.tif",sep=""))
-  
-  #ath: thresholds (SSS: maximum sensitivity and specificity)
-  ath <- sp_mOut@models.evaluation@val["ROC","Cutoff",1,1,1] * 0.001 #SSS
-  eval_sss1d <- eval_sdm(rsl=out_rs1d,eval_rs=evrs1d,rocplot=T,plotdir=eval_dir,
-                       filename="rocplot_sss1d.jpg",thresh=ath)
-  evtable1d <- cbind(THRESH="SSS",TVAL=ath,eval_sss1d$METRICS)
-  
-  #predict over presence points and evaluate over prevalence threshold
-  locdata <- get(load(sp_mOut@formated.input.data@link))
-  locdata <- locdata@data.env.var[which(locdata@data.species == 1),]
-  locdata <- as.numeric(predict(tmodel,locdata))
-  ath <- mean(locdata,na.rm=T)
-  eval_pre1d <- eval_sdm(rsl=out_rs1d,eval_rs=evrs1d,rocplot=T,plotdir=eval_dir,
-                       filename="rocplot_pre1d.jpg",thresh=ath)
-  evtable1d <- rbind(evtable1d,cbind(THRESH="PRE",TVAL=ath,eval_pre1d$METRICS))
-  
-  #evaluate over 10% (of prediction) threshold
-  ath <- as.numeric(quantile(prj_data1d,probs=0.1))
-  eval_fix1d <- eval_sdm(rsl=out_rs1d,eval_rs=evrs1d,rocplot=T,plotdir=eval_dir,
-                       filename="rocplot_ten1d.jpg",thresh=ath)
-  evtable1d <- rbind(evtable1d,cbind(THRESH="TEN",TVAL=ath,eval_fix1d$METRICS))
-  
-  
-  #here save evaluation object, 2.5min object, and 1dd object
-  
-  
 }
 
 
 #assess the accuracy of EcoCrop's spatial prediction using a gridded dataset
 #of presence and absence
 eval_sdm <- function(rsl,eval_rs,rocplot=F,plotdir="./img",filename="test.jpg",thresh=0) {
-  pa_rsl <- rsl; pa_rsl[which(rsl[]>thresh)] <- 1 #bin the prediction
+  pa_rsl <- rsl; pa_rsl[which(rsl[]>=thresh)] <- 1 #bin the prediction
   
   met <- xyFromCell(eval_rs,1:ncell(eval_rs))
   met <- cbind(met,PRE=extract(pa_rsl,met[,1:2]))
@@ -321,8 +358,8 @@ eval_sdm <- function(rsl,eval_rs,rocplot=F,plotdir="./img",filename="test.jpg",t
   if (nrow(met) > 50000) {
     set.seed(1234); met <- met[sample(1:nrow(met),20000,),]
   }
-  ab_p <- met$PRE_VAL[which(met$OBS == 0)]
-  pr_p <- met$PRE_VAL[which(met$PRE == 1)]
+  ab_p <- met$PRE_VAL[which(met$OBS == 0)] #model predictions at absence points
+  pr_p <- met$PRE_VAL[which(met$OBS == 1)] #model predictions at presence points
   deval <- evaluate(p=pr_p,a=ab_p)
   rm(met); g=gc(); rm(g)
   
@@ -369,297 +406,6 @@ getEvalMetric <- function(fit_vals,obs_vals,tstat='TSS') {
   return(bestStat)
 }
 
-#make interactions before constructing models
-#only daystcrit is linear only
-make_interactions <- function(input_data) {
-  modvar <- names(input_data)
-  
-  #daystcrit: minrain seasrain
-  if ("daystcrit" %in% modvar) {
-    if ("minrain" %in% modvar) {input_data$minrain_daystcrit <- input_data$daystcrit * input_data$minrain}
-    if ("seasrain" %in% modvar) {input_data$seasrain_daystcrit <- input_data$daystcrit * input_data$seasrain}
-  }
-  
-  #dindex: sindex totgdd
-  if ("dindex" %in% modvar) {
-    input_data$dindex2 <- input_data$dindex^2
-    if ("sindex" %in% modvar) {input_data$sindex_dindex <- input_data$dindex * input_data$sindex}
-    if ("totgdd" %in% modvar) {input_data$totgdd_dindex <- input_data$dindex * input_data$totgdd}
-    if ("soildul" %in% modvar) {input_data$soildul_daystcrit <- input_data$daystcrit * input_data$soildul}
-  }
-  
-  #meantemp: sindex
-  if ("meanmeantemp" %in% modvar) {
-    input_data$meanmeantemp2 <- input_data$meanmeantemp^2
-    if ("sindex" %in% modvar) {input_data$sindex_meanmeantemp <- input_data$meanmeantemp * input_data$sindex}
-    if ("minrain" %in% modvar) {input_data$minrain_meanmeantemp <- input_data$meanmeantemp * input_data$minrain}
-    if ("seasrain" %in% modvar) {input_data$seasrain_meanmeantemp <- input_data$meanmeantemp * input_data$seasrain}
-  }
-  
-  #maxtemp: sindex
-  if ("maxmaxtemp" %in% modvar) {
-    input_data$maxmaxtemp2 <- input_data$maxmaxtemp^2
-    if ("sindex" %in% modvar) {input_data$sindex_maxmaxtemp <- input_data$maxmaxtemp * input_data$sindex}
-    if ("minrain" %in% modvar) {input_data$minrain_maxmaxtemp <- input_data$maxmaxtemp * input_data$minrain}
-    if ("seasrain" %in% modvar) {input_data$seasrain_maxmaxtemp <- input_data$maxmaxtemp * input_data$seasrain}
-  }
-  
-  #mintemp: sindex
-  if ("minmintemp" %in% modvar) {
-    input_data$minmintemp2 <- input_data$minmintemp^2
-    if ("sindex" %in% modvar) {input_data$sindex_minmintemp <- input_data$minmintemp * input_data$sindex}
-    if ("minrain" %in% modvar) {input_data$minrain_minmintemp <- input_data$minmintemp * input_data$minrain}
-    if ("seasrain" %in% modvar) {input_data$seasrain_minmintemp <- input_data$minmintemp * input_data$seasrain}
-  }
-  
-  #minrain: daystcrit mintemp maxtemp meantemp
-  if ("minrain" %in% modvar) {
-    input_data$minrain2 <- input_data$minrain^2
-    if ("totvpd" %in% modvar) {input_data$totvpd_minrain <- input_data$minrain * input_data$totvpd}
-    if ("totgdd" %in% modvar) {input_data$totgdd_minrain <- input_data$minrain * input_data$totgdd}
-    if ("soildul" %in% modvar) {input_data$soildul_minrain <- input_data$minrain * input_data$soildul}
-  }
-  
-  #seasrain: daystcrit mintemp maxtemp meantemp
-  if ("seasrain" %in% modvar) {
-    input_data$seasrain2 <- input_data$seasrain^2
-    if ("totvpd" %in% modvar) {input_data$totvpd_seasrain <- input_data$seasrain * input_data$totvpd}
-    if ("totgdd" %in% modvar) {input_data$totgdd_seasrain <- input_data$seasrain * input_data$totgdd}
-    if ("soildul" %in% modvar) {input_data$soildul_seasrain <- input_data$seasrain * input_data$soildul}
-  }
-  
-  if ("setmax" %in% modvar) {
-    input_data$setmax2 <- input_data$setmax^2
-    if ("sindex" %in% modvar) {input_data$sindex_setmax <- input_data$setmax * input_data$sindex}
-    if ("totgdd" %in% modvar) {input_data$totgdd_setmax <- input_data$setmax * input_data$totgdd}
-    if ("totvpd" %in% modvar) {input_data$totvpd_setmax <- input_data$setmax * input_data$totvpd}
-    if ("soildul" %in% modvar) {input_data$soildul_setmax <- input_data$setmax * input_data$soildul}
-  }
-  
-  #rest of quadratic terms
-  if ("sindex" %in% modvar) {
-    input_data$sindex2 <- input_data$sindex^2
-    #dindex: above
-    #maxtemp, meantemp, mintemp: above
-    #setmax: above
-    if ("totgdd" %in% modvar) {input_data$totgdd_sindex <- input_data$sindex * input_data$totgdd}
-    if ("totvpd" %in% modvar) {input_data$totvpd_sindex <- input_data$sindex * input_data$totvpd}
-    if ("soildul" %in% modvar) {input_data$soildul_sindex <- input_data$sindex * input_data$soildul}
-  }
-  
-  
-  #totgdd: sindex vpd etmax seasrain dindex
-  if ("totgdd" %in% modvar) {
-    input_data$totgdd2 <- input_data$totgdd^2
-    #dindex: above
-    #minrain seasrain: above
-    #sindex: above
-    #setmax: above
-    #sindex: above
-    if ("totvpd" %in% modvar) {input_data$totvpd_totgdd <- input_data$totgdd * input_data$totvpd}
-  }
-  
-  #totvpd: seasrain sindex minrain
-  if ("totvpd" %in% modvar) {
-    input_data$totvpd2 <- input_data$totvpd^2
-    #minrain seasrain: above
-    #sindex: above
-    #totgdd: above
-    if ("soildul" %in% modvar) {input_data$soildul_totvpd <- input_data$totvpd * input_data$soildul}
-  }
-  
-  #soildul: seasrain, minrain, setmax, totvpd (all above)
-  if ("soildul" %in% modvar) {input_data$soildul2 <- input_data$soildul^2}
-  
-  #return object
-  return(input_data)
-}
 
-
-
-### function to get a given number of pseudo-absences (with env data)
-get_pa <- function(spp_name,n_pa,bg_dir,msk_dir,int_dir,bio_dir,soil_dir,size=12500) {
-  if (!file.exists(bg_dir)) {dir.create(bg_dir)}
-  
-  #check existence
-  if (!file.exists(paste(bg_dir,"/",spp_name,"_bg-",n_pa,".RData",sep=""))) {
-    cat("pseudo-absences don't exist yet, drawing pseudo absences, seed:",n_pa,"\n")
-    #background area loading / creation
-    bg_df <- load_bg(spp_name,bg_dir,msk_dir,bio_dir,soil_dir)
-    
-    #select PA from bg_df (using given seed). 
-    #Sample according to where there is more harvested area
-    cat("sampling with likelihood\n")
-    int_rs <- raster(paste(int_dir,"/ci_ind.tif",sep=""))
-    bg_df$prob <- extract(int_rs,bg_df)
-    bg_df <- bg_df[which(!is.na(bg_df$prob)),]
-    bg_df$prob <- bg_df$prob / sum(bg_df$prob)
-    rm(int_rs); g=gc(); rm(g)
-    
-    set.seed(n_pa); pa_sel <- sample(1:nrow(bg_df),size,prob=bg_df$prob)
-    bg_sel <- bg_df[pa_sel,]; rm(bg_df); g=gc(); rm(g)
-    rownames(bg_sel) <- 1:nrow(bg_sel)
-    bg_sel$prob <- NULL
-    
-    #5. extract climate data for pseudo absences
-    #list all predictors
-    pred_list <- list.files(bio_dir,pattern="\\.tif")
-    pred_list <- pred_list[which(pred_list != "annrain.tif")]
-    
-    #extract climate for location data ### here i am!!!
-    cat("extracting climate predictors for",nrow(bg_sel),"pseudo-absences \n")
-    bg_data <- bg_sel
-    for (pred in pred_list) {
-      #pred <- pred_list[1]
-      cat(pred,"...\n")
-      pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
-      bg_data <- cbind(bg_data,value=as.data.frame(extract(pred_rs,bg_sel)))
-      names(bg_data)[ncol(bg_data)] <- paste(gsub("\\.tif","",pred))
-      rm(pred_rs); g=gc(); rm(g)
-    }
-    
-    #extract soil data
-    cat("extracting soil\n")
-    soil_rs <- raster(paste(soil_dir,"/dul_ind.tif",sep=""))
-    bg_data <- cbind(bg_data,val=as.data.frame(extract(soil_rs,bg_sel)))
-    names(bg_data)[ncol(bg_data)] <- "soildul"
-    
-    #check missing
-    cat("final checks\n")
-    bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
-    bg_data <- bg_data[which(bg_data$NAs == 0),]
-    bg_data$NAs <- NULL
-    rownames(bg_data) <- 1:nrow(bg_data)
-    
-    #sind * 10000 for formatting reasons
-    bg_data$sindex <- bg_data$sindex * 10000
-    bg_data$soildul <- bg_data$soildul * 100
-    bg_data$annrain <- NULL #remove annual rainfall
-    
-    #write both objects into RData file
-    cat("saving...\n")
-    write.csv(bg_data,paste(bg_dir,"/",spp_name,"_bg-",n_pa,".csv",sep=""),row.names=F,quote=T)
-    save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"_bg-",n_pa,".RData",sep=""))
-  } else {
-    cat("pseudo-absences did exist, loading...\n")
-    load(file=paste(bg_dir,"/",spp_name,"_bg-",n_pa,".RData",sep=""))
-  }
-  return(bg_data)
-}
-
-
-#### load background area / create if doesnt exist
-load_bg <- function(spp_name,back_dir,msk_dir,bio_dir,soil_dir) {
-  #filename
-  bg_file <- paste(back_dir,"/",spp_name,"_bg.RData",sep="")
-  if (!file.exists(bg_file)) {
-    cat("creating background area as it didn't exist\n")
-    
-    #load verification files
-    msk <- raster(paste(msk_dir,"/mask_30s.tif",sep=""))
-    other_rs <- c(paste(soil_dir,"/dul_ind.tif",sep=""),
-                  paste(bio_dir,"/seasrain.tif",sep=""))
-    
-    #get xy from bg
-    cat("make data frame\n")
-    bg_df <- as.data.frame(xyFromCell(msk,which(!is.na(msk[]))))
-    
-    #removing grid cells that are NA
-    for (ors in other_rs) {
-      cat("remove NAs from",ors,"\n")
-      msk <- raster(ors); msk <- readAll(msk)
-      bg_df$value <- extract(msk,cbind(x=bg_df$x,y=bg_df$y))
-      bg_df <- bg_df[which(!is.na(bg_df$value)),]
-      bg_df$value <- NULL
-      rm(msk); g=gc(); rm(g)
-    }
-    
-    #save object
-    cat("saving...\n")
-    save(list=c("bg_df"),file=bg_file)
-  } else {
-    cat("loading background area as it did exist\n")
-    load(bg_file)
-  }
-  return(bg_df)
-}
-
-
-######################################
-#declare function for analysis of VIF (variance inflation factor)
-vif_analysis <- function(spp_name,occ_file,bio_dir,vif_dir,sol_dir) {
-  if (!file.exists(vif_dir)) {dir.create(vif_dir,recursive=T)}
-  
-  spp_dir <- paste(vif_dir,"/",spp_name,sep="")
-  if (!file.exists(spp_dir)) {dir.create(spp_dir)}
-  
-  if (!file.exists(paste(spp_dir,"/",spp_name,"_samples.RData",sep=""))) {
-    cat("\nprocessing species",spp_name,"\n")
-    
-    #load occurrences
-    #note names of x,y fields HAVE to be LON and LAT (respectively)
-    spp <- read.csv(occ_file)
-    loc_data <- data.frame(x=spp$LON,y=spp$LAT)
-    
-    #keep only unique occurrences
-    loc_data <- unique(loc_data)
-    
-    #list all predictors
-    pred_list <- list.files(bio_dir,pattern="\\.tif")
-    
-    #extract climate for location data
-    cat("extracting climate predictors for",nrow(loc_data),"occurrences \n")
-    bio_data <- loc_data
-    for (pred in pred_list) {
-      #pred <- pred_list[1]
-      cat(pred,"...\n")
-      pred_rs <- raster(paste(bio_dir,"/",pred,sep=""))
-      bio_data <- cbind(bio_data,value=as.data.frame(extract(pred_rs,loc_data)))
-      names(bio_data)[ncol(bio_data)] <- paste(gsub("\\.tif","",pred))
-      rm(pred_rs); g=gc(); rm(g)
-    }
-    
-    soil_rs <- raster(paste(sol_dir,"/dul_ind.tif",sep=""))
-    bio_data <- cbind(bio_data,val=as.data.frame(extract(soil_rs,loc_data)))
-    names(bio_data)[ncol(bio_data)] <- "soildul"
-    
-    #check for NAs
-    bio_data$NAs <- apply(bio_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
-    bio_data <- bio_data[which(bio_data$NAs == 0),]
-    bio_data$NAs <- NULL
-    
-    #sind * 10000 for formatting reasons
-    bio_data$sindex <- bio_data$sindex * 10000
-    bio_data$soildul <- bio_data$soildul * 100
-    bio_data$annrain <- NULL #remove annual rainfall
-    
-    #write data file (full climate)
-    write.csv(bio_data,paste(spp_dir,"/",spp_name,"_full.csv",sep=""),row.names=F,quote=T)
-    
-    #vif analysis
-    vif_res <- bio_data[,3:ncol(bio_data)]
-    vif_res <- vifstep(vif_res,th=5) #threshold could be changed
-    
-    #listing predictors
-    sel_var <- paste(vif_res@results$Variables)
-    
-    #filtering out useless variables in bio_data
-    #!Remember sind has been scaled * 10000
-    #(so the projection raster has to be scaled * 10000 before projecting)
-    bio_sel <- bio_data[,c("x","y",sel_var)]
-    
-    #write sub-selected file (this is subset model)
-    write.csv(bio_sel,paste(spp_dir,"/",spp_name,"_subset.csv",sep=""),row.names=F,quote=T)
-    
-    #output object (to be stored as RData)
-    out_obj <- list(SPP=spp_name,RAW_OCC=spp,LOC_DATA=loc_data,ENV_FULL=bio_data,ENV_SUBSET=bio_sel,VIF_OUTPUT=vif_res)
-    save(list=c("out_obj"),file=paste(spp_dir,"/",spp_name,"_samples.RData",sep=""))
-    cat("done!, check object",paste(spp_name,"_samples.RData",sep=""),"\n")
-  } else {
-    cat("\nspecies",spp_name,"existed. Loading... \n")
-    load(paste(spp_dir,"/",spp_name,"_samples.RData",sep=""))
-  }
-  return(out_obj)
-}
 
 

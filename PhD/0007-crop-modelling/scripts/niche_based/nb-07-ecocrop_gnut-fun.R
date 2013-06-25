@@ -966,7 +966,7 @@ eval_ecocrop <- function(rsl,eval_rs,rocplot=F,plotdir="./img",filename="test.jp
     set.seed(1234); met <- met[sample(1:nrow(met),20000,),]
   }
   ab_p <- met$PRE_VAL[which(met$OBS == 0)]
-  pr_p <- met$PRE_VAL[which(met$PRE == 1)]
+  pr_p <- met$PRE_VAL[which(met$OBS == 1)]
   deval <- evaluate(p=pr_p,a=ab_p)
   rm(met); g=gc(); rm(g)
   
