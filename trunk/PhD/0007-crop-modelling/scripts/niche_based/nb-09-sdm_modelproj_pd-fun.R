@@ -16,6 +16,7 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   bg_dir <- paste(base_dir,"/pseudo-absences",sep="")
   bio_dir <- paste(env_dir,"/climate/bio_ind_30s",sep="")
   sol_dir <- paste(env_dir,"/soil",sep="")
+  msk_dir <- paste(env_dir,"/mask",sep="")
   
   #2. load model object
   out_dir <- paste(mod_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
@@ -65,6 +66,7 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
     cat("write object\n")
     save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"_bg_env.RData",sep=""))
   } else {
+    cat("loading mask data\n")
     load(paste(bg_dir,"/",spp_name,"_bg_env.RData",sep=""))
   }
   
@@ -97,7 +99,36 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   }
   
   #5. project the model
+  prj_data <- as.numeric(predict(tmodel,bg_data[,3:ncol(bg_data)]))
   
+  #6. assess the model in the same way that ecocrop was assessed
+  #aa. load mask to make a raster
+  msk <- raster(paste(msk_dir,"/mask_30s.tif",sep=""))
+  tcells <- cellFromXY(msk,bg_data[,c("x","y")])
+  out_rs <- raster(msk)
+  out_rs[tcells] <- prj_data
+  
+  #b. assess the model
+  eval_dir <- paste(out_dir,"/dis_eval",sep="")
+  if (!file.exists(eval_dir)) {dir.create(eval_dir)}
+  evrs <- raster(paste(base_dir,"/eval-msk/pa_fine.tif",sep=""))
+  
+  #ath: thresholds (prevalence and SSS)
+  ath <- sp_mOut@models.evaluation@val["ROC","Cutoff",1,1,1] * 0.001 #SSS
+  eval_sss <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=T,plotdir=eval_dir,
+                      filename="rocplot_sss.jpg",thresh=ath)
+  evtable <- cbind(THRESH="SSS",TVAL=ath,eval_sss$METRICS)
+  
+  #predict over presence points and evaluate over prevalence threshold
+  locdata <- get(load(sp_mOut@formated.input.data@link))
+  locdata <- locdata@data.env.var[which(locdata@data.species == 1),]
+  locdata <- as.numeric(predict(tmodel,locdata))
+  ath <- mean(locdata,na.rm=T)
+  eval_pre <- eval_sdm(rsl=out_rs,eval_rs=evrs,rocplot=T,plotdir=eval_dir,
+                       filename="rocplot_pre.jpg",thresh=ath)
+  evtable <- rbind(evtable,cbind(THRESH="PREV",TVAL=ath,eval_pre$METRICS))
+  
+  #here i am!!!
   
   
   ########################################################################
@@ -148,6 +179,59 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   #return object
   return(outDir)
 }
+
+
+#assess the accuracy of EcoCrop's spatial prediction using a gridded dataset
+#of presence and absence
+eval_sdm <- function(rsl,eval_rs,rocplot=F,plotdir="./img",filename="test.jpg",thresh=0) {
+  pa_rsl <- rsl; pa_rsl[which(rsl[]>thresh)] <- 1 #bin the prediction
+  
+  met <- xyFromCell(eval_rs,1:ncell(eval_rs))
+  met <- cbind(met,PRE=extract(pa_rsl,met[,1:2]))
+  met <- cbind(met,OBS=extract(eval_rs,met[,1:2]))
+  met <- cbind(met,PRE_VAL=extract(rsl,met[,1:2]))
+  met <- as.data.frame(met)
+  met <- met[which(!is.na(met$PRE)),]; met <- met[which(!is.na(met$OBS)),] #get rid of NAs
+  
+  #get the values *1 is observed and 2 is prediction
+  ntp <- length(which(met$PRE > 0 & met$OBS == 1))
+  tpr <- ntp/length(which(met$OBS == 1))
+  #false negative rate
+  nfp <- length(which(met$PRE == 0 & met$OBS == 1))
+  fpr <- nfp/length(which(met$OBS == 1))
+  #true negative rate (if absences are available)
+  if (length(which(met$OBS == 0)) != 0) {
+    ntn <- length(which(met$PRE > 0 & met$OBS == 0))
+    tnr <- ntn / length(which(met$OBS == 0))
+  } else {tnr <- NA}
+  
+  #calculate the auc
+  #to prevent integer overflow in AUC calculation
+  if (nrow(met) > 50000) {
+    set.seed(1234); met <- met[sample(1:nrow(met),20000,),]
+  }
+  ab_p <- met$PRE_VAL[which(met$OBS == 0)]
+  pr_p <- met$PRE_VAL[which(met$PRE == 1)]
+  deval <- evaluate(p=pr_p,a=ab_p)
+  rm(met); g=gc(); rm(g)
+  
+  if (rocplot) {
+    if (!file.exists(plotdir)) {stop("Check your plotting directory as it doesnt seem to exist")}
+    jpeg(paste(plotdir,"/",filename,sep=""), quality=100, height=1024, width=1024,pointsize=8,res=300)
+    par(mar=c(4,4,1,1))
+    plot(deval@FPR,deval@TPR,main=NA,ty="l",lty=1,lwd=1.5,col="black",
+         xlim=c(0,1),ylim=c(0,1),xlab="False positive rate",ylab="True positive rate")
+    abline(0,1,col="grey 50",)
+    grid()
+    text(0,1,paste("AUC=",round(deval@auc,4),sep=""),col="black",adj=c(0,1))
+    dev.off()
+  }
+  
+  met.final <- data.frame(TPR=tpr, FPR=fpr, TNR=tnr, AUC=deval@auc, KAPPA=max(deval@kappa))
+  retobj <- list(EVAL=deval,METRICS=met.final)
+  return(retobj)
+}
+
 
 
 #adaptation of biomod2 function Find.Optim.Stat
