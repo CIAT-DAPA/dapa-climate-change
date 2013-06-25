@@ -8,7 +8,7 @@ stop("dont run")
 
 #1. use the all_runs data.frame to select a given run
 #2. load model object
-#3. load data frame (*_bg.RData) in pseudo-absences folder
+#3. load data frame (*_bg_2_5min.RData) in pseudo-absences folder
 #4. extract all data that is in the model
 #5. project the model (beware of interactions)
 #6. assess the model in the same way that ecocrop was assessed
