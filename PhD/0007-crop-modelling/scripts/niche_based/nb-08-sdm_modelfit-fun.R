@@ -144,6 +144,10 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
   int_dir <- paste(env_dir,"/crop_intensity",sep="")
   msk_dir <- paste(env_dir,"/mask",sep="")
   
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("\nfitting a",alg,"model, with tr_seed=",seed,", pa_seed=",npa,", vset=",vset,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
   #1. output model and config directory
   cat("loading presence and pseudo-absence data\n")
   outDir <- paste(mod_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")

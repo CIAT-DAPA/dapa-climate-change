@@ -21,6 +21,11 @@ calDir <- paste(bDir,"/calendar",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
 clmDir <- paste(envDir,"/climate",sep="")
 
+
+
+###################################################################
+###################################################################
+#### for 30s version
 outDir <- paste(clmDir,"/bio_ind_30s",sep="")
 if (!file.exists(outDir)) {dir.create(outDir)}
 
@@ -28,8 +33,59 @@ if (!file.exists(outDir)) {dir.create(outDir)}
 sowd <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
 hard <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
 
-#load monthly rainfall
+#load monthly stacks
 rain_stk <- stack(paste(clmDir,"/wcl_ind_30s/prec_",1:12,".tif",sep=""))
+tmen_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
+tmax_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep=""))
+tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""))
+tnx_stk <- stack(c(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""),
+                   paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep="")))
+###################################################################
+###################################################################
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###################################################################
+###################################################################
+#### for 2.5min version
+outDir <- paste(clmDir,"/bio_ind_2_5min",sep="")
+if (!file.exists(outDir)) {dir.create(outDir)}
+
+#load sowing and harvest dates
+sowd <- raster(paste(calDir,"/plant_doy_ind_jt.tif",sep=""))
+hard <- raster(paste(calDir,"/harvest_doy_ind_jt.tif",sep=""))
+
+#load monthly stacks
+rain_stk <- stack(paste(clmDir,"/wcl_ind_2_5min/prec_",1:12,".tif",sep=""))
+tmen_stk <- stack(paste(clmDir,"/wcl_ind_2_5min/tmean_",1:12,".tif",sep=""))
+tmax_stk <- stack(paste(clmDir,"/wcl_ind_2_5min/tmax_",1:12,".tif",sep=""))
+tmin_stk <- stack(paste(clmDir,"/wcl_ind_2_5min/tmin_",1:12,".tif",sep=""))
+tnx_stk <- stack(c(paste(clmDir,"/wcl_ind_2_5min/tmin_",1:12,".tif",sep=""),
+                   paste(clmDir,"/wcl_ind_2_5min/tmax_",1:12,".tif",sep="")))
+###################################################################
+###################################################################
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###################################################################
+###################################################################
+#### for 1dd version
+outDir <- paste(clmDir,"/imd_cru_climatology_1dd/1966_1993_bio",sep="") #change to 1966_1993_bio
+if (!file.exists(outDir)) {dir.create(outDir)}
+
+#load sowing and harvest dates
+sowd <- raster(paste(calDir,"/plant_doy_ind_jt_1dd.tif",sep=""))
+hard <- raster(paste(calDir,"/harvest_doy_ind_jt_1dd.tif",sep=""))
+
+#load monthly stacks
+rain_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/prec_",1:12,".tif",sep=""))
+tmen_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmean_",1:12,".tif",sep=""))
+tmax_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmax_",1:12,".tif",sep=""))
+tmin_stk <- stack(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmin_",1:12,".tif",sep=""))
+tnx_stk <- stack(c(paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmin_",1:12,".tif",sep=""),
+                   paste(clmDir,"/imd_cru_climatology_1dd/1966_1993/tmax_",1:12,".tif",sep="")))
+###################################################################
+###################################################################
+
+
+
+
 
 #####################################
 #### 0. Total annual rainfall
@@ -82,10 +138,6 @@ if (!file.exists(paste(outDir,"/minrain.tif",sep=""))) {
 #####################################
 #### 4. mean/min/max temperature growing season
 #####################################
-tmen_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmean_",1:12,".tif",sep=""))
-tmax_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep=""))
-tmin_stk <- stack(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""))
-
 #calculate total seasonal rainfall and write raster
 if (!file.exists(paste(outDir,"/minmintemp.tif",sep=""))) {
   #average of monthly mean temperatures
@@ -135,8 +187,6 @@ if (!file.exists(paste(outDir,"/totgdd.tif",sep=""))) {
 #####################################
 #### 7. calculate growing season total VPD
 #####################################
-tnx_stk <- stack(c(paste(clmDir,"/wcl_ind_30s/tmin_",1:12,".tif",sep=""),
-                   paste(clmDir,"/wcl_ind_30s/tmax_",1:12,".tif",sep="")))
 if (!file.exists(paste(outDir,"/totvpd.tif",sep=""))) {
   totvpd <- apply_by_blocks(tnx_stk,sowd,hard,calc_vdp)
   writeRaster(totvpd,paste(outDir,"/totvpd.tif",sep=""),format="GTiff")
@@ -163,7 +213,7 @@ if (!file.exists(paste(outDir,"/dindex.tif",sep=""))) {
   totetmax <- raster(paste(outDir,"/setmax.tif",sep=""))
   seasrain <- raster(paste(outDir,"/seasrain.tif",sep=""))
   dindex <- (totetmax-seasrain) / totetmax * 100
-  writeRaster(dindex,paste(outDir,"/setmax.tif",sep=""),format="GTiff")
+  writeRaster(dindex,paste(outDir,"/dindex.tif",sep=""),format="GTiff")
 } else {
   dindex <- raster(paste(outDir,"/dindex.tif",sep=""))
 }

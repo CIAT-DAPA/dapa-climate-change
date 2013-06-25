@@ -99,10 +99,11 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   }
   
   #5. project the model
+  cat("predicting over the whole area\n")
   prj_data <- as.numeric(predict(tmodel,bg_data[,3:ncol(bg_data)]))
   
   #6. assess the model in the same way that ecocrop was assessed
-  #aa. load mask to make a raster
+  #a. load mask to make a raster
   msk <- raster(paste(msk_dir,"/mask_30s.tif",sep=""))
   tcells <- cellFromXY(msk,bg_data[,c("x","y")])
   out_rs <- raster(msk)
