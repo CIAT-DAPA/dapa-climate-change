@@ -28,7 +28,7 @@ src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source functions
-source(paste(src.dir,"/scripts/niche_based/nb-09-sdm_modelproj_pd-fun.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/nb-09-sdm_modelproj-fun.R",sep=""))
 
 #i/o directories
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
@@ -63,8 +63,8 @@ all_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList,VSET=varList$SET_I
 this_sppName <- "gnut" #species name
 
 #some testing runs
-for (run_i in 1:100) {
-  #run_i <- 5 #23
+for (run_i in 1:nrow(all_runs)) {
+  #run_i <- 1 #23
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
