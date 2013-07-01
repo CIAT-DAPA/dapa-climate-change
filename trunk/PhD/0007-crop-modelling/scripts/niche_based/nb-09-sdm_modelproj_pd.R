@@ -28,7 +28,7 @@ src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source functions
-source(paste(src.dir,"/scripts/niche_based/nb-09-sdm_modelproj-fun.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/nb-09-sdm_modelproj_pd-fun.R",sep=""))
 
 #i/o directories
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
@@ -70,7 +70,7 @@ for (run_i in 1:nrow(all_runs)) {
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   this_vset <- as.numeric(paste(all_runs$VSET[run_i])) #set of variables to use
   
-  #run model
+  #project model
   odir <- proj_model(base_dir=sdmDir,env_dir=envDir,spp_name=this_sppName,
                     seed=this_seed,npa=this_npa,alg=this_alg,vset=this_vset)
   
