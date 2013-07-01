@@ -24,26 +24,29 @@ proj_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="
   max_dir <- paste(base_dir,"/bin",sep="")
   data_dir <- paste(base_dir,"/input-samples",sep="")
   mod_dir <- paste(base_dir,"/fitting",sep="")
+  oprj_dir <- paste(base_dir,"/projection",sep="")
   bg_dir <- paste(base_dir,"/pseudo-absences",sep="")
   bio_dir <- paste(env_dir,"/climate/bio_ind_2_5min",sep="")
   sol_dir <- paste(env_dir,"/soil",sep="")
   msk_dir <- paste(env_dir,"/mask",sep="")
   
-  out_dir <- paste(mod_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
+  inp_dir <- paste(mod_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
+  out_dir <- paste(oprj_dir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")
   eval_dir <- paste(out_dir,"/dis_eval",sep="")
-  proj_dir <- paste(out_dir,"/proj/baseline",sep="")
+  proj_dir <- paste(out_dir,"/baseline",sep="")
+  if (!file.exists(out_dir)) {dir.create(out_dir,recursive=T)}
   if (!file.exists(eval_dir)) {dir.create(eval_dir)}
   if (!file.exists(proj_dir)) {dir.create(proj_dir,recursive=T)}
   
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-  cat("fitting a",alg,"model, with tr_seed=",seed,", pa_seed=",npa,", vset=",vset,"\n")
+  cat("projecting (b) a",alg,"model, with tr_seed=",seed,", pa_seed=",npa,", vset=",vset,"\n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   if (!file.exists(paste(eval_dir,"/evaluation.RData",sep=""))) {
     #2. load model object
     cat("load model objects\n")
-    fit_file <- paste(out_dir,"/",gsub("\\_","\\.",spp_name),"/",gsub("\\_","\\.",spp_name),".",model_class,".models.out",sep="")
-    setwd(out_dir)
+    fit_file <- paste(inp_dir,"/",gsub("\\_","\\.",spp_name),"/",gsub("\\_","\\.",spp_name),".",model_class,".models.out",sep="")
+    setwd(inp_dir)
     sp_mOut <- get(load(fit_file)) #load model outputs
     tmodel <- get(BIOMOD_LoadModels(sp_mOut,models=alg)) #load specific model
     
