@@ -29,7 +29,8 @@ src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 #src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source functions
-source(paste(src.dir,"/scripts/niche_based/nb-10-sdm_downscale_cmip5-fun.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/nb-10-downscale_cmip5-fun.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/nb-06-calc_bio_sdm-fun.R",sep=""))
 
 #i/o directories
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
@@ -88,54 +89,58 @@ if (!file.exists(ogcmraw_p)) {dir.create(ogcmraw_p)}
 
 
 #2. for each variable: load the 1966_1993 data (obs, hist, rcp)
-vn <- "prec"
-msk <- raster(paste(envDir,"/mask/mask_1dd.tif",sep=""))
-
-#observed
-obs_stk <- stack(paste(mthDir,"/",vn,"_",1:12,".tif",sep=""))
-
-#historical GCM
-if (vn == "prec") {
-  his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/pr_",sprintf("%02d",x),".tif",sep=""))})
-} else if (vn == "tmax") {
-  his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmax_",sprintf("%02d",x),".tif",sep=""))})
-} else if (vn == "tmin") {
-  his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmin_",sprintf("%02d",x),".tif",sep=""))})
-} else if (vn == "tmean") {
-  his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tas_",sprintf("%02d",x),".tif",sep=""))})
-}
-
-his_stk <- lapply(his_stk,FUN=function(x) {calc(x,fun=function(y) {mean(y,na.rm=T)})})
-his_stk <- lapply(his_stk,FUN=function(x) {rotate(x)})
-his_stk <- lapply(his_stk,FUN=function(x,y) {resample(x,y,method="ngb")},msk)
-his_stk <- stack(his_stk)
-if (vn != "prec") {his_stk <- his_stk * 10} #to make temperatures comparable
-
-#rcp45 GCM
-if (vn == "prec") {
-  rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/pr_",sprintf("%02d",x),".tif",sep=""))})
-} else if (vn == "tmax") {
-  rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/tasmax_",sprintf("%02d",x),".tif",sep=""))})
-} else if (vn == "tmin") {
-  rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/tasmin_",sprintf("%02d",x),".tif",sep=""))})
-} else if (vn == "tmean") {
-  rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/tas_",sprintf("%02d",x),".tif",sep=""))})
-}
-
-#load and crop
-rcp_stk <- lapply(rcp_stk,FUN=function(x) {calc(x,fun=function(y) {mean(y,na.rm=T)})})
-rcp_stk <- lapply(rcp_stk,FUN=function(x) {rotate(x)})
-rcp_stk <- lapply(rcp_stk,FUN=function(x,y) {resample(x,y,method="ngb")},msk)
-rcp_stk <- stack(rcp_stk)
-if (vn != "prec") {rcp_stk <- rcp_stk * 10} #to make temperatures comparable
-
-#3. write baseline for: 
-#   loci (bc but only for rain, i.e., replace obs temperature)
-#   no need to write other baselines because that == obs
-if (vn == "prec") {wrtstk <- obs_stk} else {wrtstk <- his_stk}
-for (m in 1:12) {
-  if (!file.exists(paste(ogcmLOCI_b,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(wrtstk[[m]],paste(ogcmLOCI_b,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
-  if (!file.exists(paste(ogcmraw_b,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(his_stk[[m]],paste(ogcmraw_b,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
+for (vn in c("prec","tmin","tmax","tmean")) {
+  #vn <- "prec"
+  cat("processing variable:",vn,"\n")
+  
+  #load mask
+  msk <- raster(paste(envDir,"/mask/mask_1dd.tif",sep=""))
+  
+  #observed
+  obs_stk <- stack(paste(mthDir,"/",vn,"_",1:12,".tif",sep=""))
+  
+  #historical GCM
+  if (vn == "prec") {
+    his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/pr_",sprintf("%02d",x),".tif",sep=""))})
+  } else if (vn == "tmax") {
+    his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmax_",sprintf("%02d",x),".tif",sep=""))})
+  } else if (vn == "tmin") {
+    his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmin_",sprintf("%02d",x),".tif",sep=""))})
+  } else if (vn == "tmean") {
+    his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tas_",sprintf("%02d",x),".tif",sep=""))})
+  }
+  
+  his_stk <- lapply(his_stk,FUN=function(x) {calc(x,fun=function(y) {mean(y,na.rm=T)})})
+  his_stk <- lapply(his_stk,FUN=function(x) {rotate(x)})
+  his_stk <- lapply(his_stk,FUN=function(x,y) {resample(x,y,method="ngb")},msk)
+  his_stk <- stack(his_stk)
+  if (vn != "prec") {his_stk <- his_stk * 10} #to make temperatures comparable
+  
+  #rcp45 GCM
+  if (vn == "prec") {
+    rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/pr_",sprintf("%02d",x),".tif",sep=""))})
+  } else if (vn == "tmax") {
+    rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/tasmax_",sprintf("%02d",x),".tif",sep=""))})
+  } else if (vn == "tmin") {
+    rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/tasmin_",sprintf("%02d",x),".tif",sep=""))})
+  } else if (vn == "tmean") {
+    rcp_stk <- lapply(1:12,FUN=function(x) {stack(paste(rcpgcmDir,"/",2022:2049,"/tas_",sprintf("%02d",x),".tif",sep=""))})
+  }
+  
+  #load and crop
+  rcp_stk <- lapply(rcp_stk,FUN=function(x) {calc(x,fun=function(y) {mean(y,na.rm=T)})})
+  rcp_stk <- lapply(rcp_stk,FUN=function(x) {rotate(x)})
+  rcp_stk <- lapply(rcp_stk,FUN=function(x,y) {resample(x,y,method="ngb")},msk)
+  rcp_stk <- stack(rcp_stk)
+  if (vn != "prec") {rcp_stk <- rcp_stk * 10} #to make temperatures comparable
+  
+  #3. write baseline for: 
+  #   loci (bc but only for rain, i.e., replace obs temperature)
+  #   no need to write other baselines because that == obs
+  if (vn == "prec") {wrtstk <- obs_stk} else {wrtstk <- his_stk}
+  for (m in 1:12) {
+    if (!file.exists(paste(ogcmLOCI_b,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(wrtstk[[m]],paste(ogcmLOCI_b,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
+    if (!file.exists(paste(ogcmraw_b,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(his_stk[[m]],paste(ogcmraw_b,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
 }
 rm(wrtstk)
 
@@ -147,14 +152,23 @@ for (m in 1:12) {del_stk[[m]] <- biasfun(obs_stk[[m]],his_stk[[m]],rcp_stk[[m]],
 
 
 #5. write everything put the 'raw' in there as well (but running this may not be necessary)
+#if variable is precip then i write delta stuff in LOCI, otherwise i write raw (rcp_stk)
 if (vn == "prec") {wrtstk <- del_stk} else {wrtstk <- rcp_stk}
+#loop months
 for (m in 1:12) {
   if (!file.exists(paste(ogcmLOCI_p,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(wrtstk[[m]],paste(ogcmLOCI_p,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
   if (!file.exists(paste(ogcmdel_p,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(del_stk[[m]],paste(ogcmdel_p,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
   if (!file.exists(paste(ogcmraw_p,"/",vn,"_",m,".tif",sep=""))) {aa <- writeRaster(rcp_stk[[m]],paste(ogcmraw_p,"/",vn,"_",m,".tif",sep=""),format="GTiff"); rm(aa)}
 }
+}
 
-#6. calculate the 'bio' variables for each one
+#6. calculate the 'bio' variables for each one: 
+#   baseline_loci, baseline_raw, rcp_loci, rcp_raw, rcp_del
+dirtoproc <- c("ogcmLOCI_b","ogcmraw_b","ogcmLOCI_p","ogcmraw_p","ogcmdel_p")
+for (dtp in dirtoproc) {
+  this_dir <- 
+  
+}
 
 
 
