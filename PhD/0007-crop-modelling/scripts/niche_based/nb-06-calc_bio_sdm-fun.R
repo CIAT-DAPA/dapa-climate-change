@@ -5,6 +5,8 @@
 #various functions that are needed
 ###
 
+require(zoo); require(raster); require(rgdal)
+
 #apply a function by blocks to enhance memory use
 apply_by_blocks <- function(clm_stk,sow_date,har_date,this_fun,...) {
   #determine maximum processing load
