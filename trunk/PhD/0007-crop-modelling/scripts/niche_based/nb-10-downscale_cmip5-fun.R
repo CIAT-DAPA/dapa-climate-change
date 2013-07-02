@@ -54,7 +54,17 @@ gcm_downscale <- function(gcm_i) {
       } else if (vn == "tmin") {
         his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmin_",sprintf("%02d",x),".tif",sep=""))})
       } else if (vn == "tmean") {
-        his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tas_",sprintf("%02d",x),".tif",sep=""))})
+        his_stk <- lapply(1:12,FUN=function(x) {file.exists(paste(hisgcmDir,"/",1966:1993,"/tas_",sprintf("%02d",x),".tif",sep=""))})
+        his_stk <- unlist(his_stk)
+        
+        #if there is any missing data then just use tasmin and tasmax
+        if (length(which(!his_stk)) > 0) {
+          his_stk1 <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmin_",sprintf("%02d",x),".tif",sep=""))})
+          his_stk2 <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tasmax_",sprintf("%02d",x),".tif",sep=""))})
+          his_stk <- mapply(FUN=function(x,y) {(x+y)*.5},his_stk1,his_stk2)
+        } else {
+          his_stk <- lapply(1:12,FUN=function(x) {stack(paste(hisgcmDir,"/",1966:1993,"/tas_",sprintf("%02d",x),".tif",sep=""))})
+        }
       }
       
       his_stk <- lapply(his_stk,FUN=function(x) {calc(x,fun=function(y) {mean(y,na.rm=T)})})

@@ -42,6 +42,7 @@ mthDir <- paste(clmDir,"/1966_1993",sep="")
 bioDir <- paste(clmDir,"/1966_1993_bio",sep="")
 
 gcmDir <- "/mnt/a102/eejarv/CMIP5"
+#gcmDir <- "/nfs/a102/eejarv/CMIP5"
 hisDir <- paste(gcmDir,"/baseline",sep="")
 rcpDir <- paste(gcmDir,"/rcp45",sep="")
 
@@ -67,11 +68,8 @@ gcm_list <- data.frame(GCM_ENS=gcm_list)
 gcm_list$GCM <- sapply(gcm_list$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),"_ENS_",fixed=T))[1]})
 gcm_list$ENS <- sapply(gcm_list$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),"_ENS_",fixed=T))[2]})
 
-#select gcm
-m_i <- 1
-
 #run wrapper
-dst <- gcm_downscale(3)
+for (m_i in 4:20) {dst <- gcm_downscale(m_i)}
 
 
 
