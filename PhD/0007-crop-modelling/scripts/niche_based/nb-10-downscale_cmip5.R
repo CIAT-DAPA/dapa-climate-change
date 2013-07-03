@@ -69,7 +69,7 @@ gcm_list$GCM <- sapply(gcm_list$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x
 gcm_list$ENS <- sapply(gcm_list$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),"_ENS_",fixed=T))[2]})
 
 #run wrapper
-for (m_i in 4:20) {dst <- gcm_downscale(m_i)}
+for (m_i in 8:20) {dst <- gcm_downscale(m_i)}
 
 
 
