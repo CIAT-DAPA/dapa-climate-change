@@ -386,7 +386,6 @@ suitFun_sowVar <- function(dataPixel,params) {
         }
         ecotf[1:12] <- min(ecot,na.rm=T)
         ecopf[1:12] <- pSuit #max(ecop,na.rm=T) #PM 0704 in the loop of annual crop?
-
       }
       precFinSuit <- round(max(ecopf * 100))
       tempFinSuit <- round(max(ecotf * 100))
