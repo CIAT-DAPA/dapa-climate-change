@@ -11,7 +11,7 @@ from arcpy import env
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python tiles_countries.py F:\Analogues_GCM_data\ExtractByCountry a1b F:\Analogues_GCM_data\TilesByCountry 30s 2020_2049"
+	print "   - ie: python 005-tiles_countries.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry b1 D:\cenavarro\Analogues_GCM_data\TilesByCountry 30s 2020_2049"
 	sys.exit(1)
 
 #Set variables
@@ -22,16 +22,21 @@ resolution = sys.argv[4]
 period = sys.argv[5]
 
 os.system('cls')
-
-countrytilelist = "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
-					"cub", "deu", "dnk", "dza", "ecu", "egy", "eri", "esh", "esp", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
-					"guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
-					"mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nic", "nga", "nor", "npl",  "omn",\
-					"pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
-					"syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
-					"zmb", "zwe", "nzl", "rus", "usa" #"eth", "tza", "ken", "uga" revisar nombres de archivos de estos
-					## descomentar estos paises y volver a correr para a2
-countryDic = {"bfa": "2 2 ", "bgd": "2 2 ", "bhs": "2 2 ", "blr": "2 2 ", "bwa": "2 2 ", "civ": "2 2 ", "cmr": "2 2 ", "cog": "2 2 ", "cub": "2 2 ",\
+if resolution == "30s":
+	countrytilelist = "cod", "fji", "nzl", "ssd"
+elif resolution == "2_5min":
+	countrytilelist = "arg", "aus", "bra", "can", "chl", "chn", "grl", "idn", "ind", "jpn", "kaz", "rus", "usa"
+	
+# countrytilelist = "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
+					# "cub", "deu", "dnk", "dza", "ecu", "egy", "eri", "esh", "esp", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
+					# "guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
+					# "mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nic", "nga", "nor", "npl",  "omn",\
+					# "pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
+					# "syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
+					# "zmb", "zwe", "nzl", "rus", "usa", "eth", "tza", "ken", "uga"
+				
+countryDic = {"cod": "6 6 ", "kna": "1 1 ", "mne": "1 1 ", "nru": "1 1 ", "plw": "1 1 ", "pse": "1 1 ", "srb": "1 1 ", "ssd": "3 3 ", "tls": "1 1 ", "tto": "1 1 ", "tuv": "1 1 ",\
+			"bfa": "2 2 ", "bgd": "2 2 ", "bhs": "2 2 ", "blr": "2 2 ", "bwa": "2 2 ", "civ": "2 2 ", "cmr": "2 2 ", "cog": "2 2 ", "cub": "2 2 ",\
 			"deu": "2 2 ", "dnk": "2 2 ", "eri": "2 2 ", "esh": "2 2 ", "gab": "2 2 ", "gha": "2 2 ", "gin": "2 2 ", "gnq": "2 2 ", "grc": "2 2 ", "guy": "2 2 ",\
 			"hrv": "2 2 ", "irq": "2 2 ", "isl": "2 2 ", "ken": "2 2 ", "kgz": "2 2 ", "khm": "2 2 ", "kir": "2 2 ", "kor": "2 2 ", "lao": "2 2 ", "mus": "2 2 ",\
 			"mwi": "2 2 ", "ncl": "2 2 ", "nic": "2 2 ", "npl": "2 2 ", "omn": "2 2 ", "pol": "2 2 ", "prk": "2 2 ", "pry": "2 2 ", "pyf": "2 2 ", "rom": "2 2 ",\
@@ -42,21 +47,8 @@ countryDic = {"bfa": "2 2 ", "bgd": "2 2 ", "bhs": "2 2 ", "blr": "2 2 ", "bwa":
 			"som": "3 3 ", "swe": "3 3 ", "tcd": "3 3 ", "tha": "3 3 ", "tkm": "3 3 ", "tur": "3 3 ", "tza": "3 3 ", "ukr": "3 3 ", "uzb": "3 3 ",\
 			"ven": "3 3 ", "vnm": "3 3 ", "zmb": "3 3 ", "col": "4 4 ", "esp": "4 4 ", "irn": "4 4 ", "lby": "4 4 ", "mli": "4 4 ", "mlt": "4 4 ",\
 			"mng": "4 4 ", "nor": "4 4 ", "pak": "4 4 ", "per": "4 4 ", "prt": "4 4 ", "sau": "4 4 ", "sdn": "4 4 ", "dza": "5 5 ", "mex": "5 5 ", "sjm": "5 5 ",\
-			"zaf": "5 5 ", "arg": "6 6 ", "idn": "6 6 ", "jpn": "6 6 ", "kaz": "6 6 ", "ind": "7 7 ", "bra": "9 9 ", "chl": "9 9 ",\
-			"grl": "9 9 ", "aus": "10 10 ", "chn": "10 10 ", "fji": "11 11 ", "can": "13 13 ", "nzl": "13 13 ", "rus": "13 13 ", "usa": "13 13 "}
-checkDic = {"bfa": "3", "bgd": "3", "bhs": "3", "blr": "3", "bwa": "3", "civ": "3", "cmr": "3", "cog": "3", "cub": "3",\
-			"deu": "3", "dnk": "3", "eri": "3", "esh": "3", "gab": "3", "gha": "3", "gin": "3", "gnq": "3", "grc": "3", "guy": "3",\
-			"hrv": "3", "irq": "3", "isl": "3", "ken": "3", "kgz": "3", "khm": "3", "kir": "3", "kor": "3", "lao": "3", "mus": "3",\
-			"mwi": "3", "ncl": "3", "nic": "3", "npl": "3", "omn": "3", "pol": "3", "prk": "3", "pry": "3", "pyf": "3", "rom": "3",\
-			"sen": "3", "sgp": "3", "slb": "3", "syr": "3", "tca": "3", "tjk": "3", "tun": "3", "uga": "3", "ury": "3",\
-			"vut": "3", "yem": "3", "zwe": "3", "afg": "8", "ago": "8", "bol": "8", "caf": "8", "ecu": "8", "egy": "8",\
-			"eth": "8", "fin": "8", "fra": "8", "gbr": "8", "ita": "8", "mar": "8", "mdg": "8", "mdv": "8",\
-			"mmr": "8", "moz": "8", "mrt": "8", "mys": "8", "nam": "8", "ner": "8", "nga": "8", "phl": "8", "png": "8",\
-			"som": "8", "swe": "8", "tcd": "8", "tha": "8", "tkm": "8", "tur": "8", "tza": "8", "ukr": "8", "uzb": "8",\
-			"ven": "8", "vnm": "8", "zmb": "8", "col": "15", "esp": "15", "irn": "15", "lby": "15", "mli": "15", "mlt": "15",\
-			"mng": "15", "nor": "15", "pak": "15", "per": "15", "prt": "15", "sau": "15", "sdn": "15", "dza": "24", "mex": "24", "sjm": "24",\
-			"zaf": "24", "arg": "35", "idn": "35", "jpn": "35", "kaz": "35", "ind": "48", "bra": "80", "chl": "80",\
-			"grl": "80", "aus": "99", "chn": "99", "fji": "120", "can": "168", "nzl": "168", "rus": "168", "usa": "168"}
+			"zaf": "5 5 ", "arg": "2 2 ", "idn": "2 2 ", "jpn": "1 1 ", "kaz": "2 2 ", "ind": "2 2 ", "bra": "3 3 ", "chl": "3 3 ",\
+			"grl": "3 3 ", "aus": "3 3 ", "chn": "3 3 ", "fji": "1 1 ", "can": "4 4 ", "nzl": "5 5 ", "rus": "7 7 ", "usa": "8 8 "}
 
 for country in countrytilelist:
 
@@ -86,8 +78,8 @@ for country in countrytilelist:
 					diroutGridsVar = diroutGrids + "\\" + os.path.basename(raster).split("_")[0]
 					if not os.path.exists(diroutGridsVar):
 						os.system('mkdir ' + diroutGridsVar)
-
-					if not arcpy.Exists(diroutGridsVar + "\\" + raster + "_" + str(checkDic [country])):
+					
+					if not arcpy.Exists(diroutGridsVar + "\\" + raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)):
 						
 						trashList = sorted(glob.glob(diroutGridsVar + "\\" + raster + "*.*"))
 						for trashfile in trashList:

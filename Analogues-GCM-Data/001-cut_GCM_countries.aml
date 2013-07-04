@@ -1,5 +1,5 @@
-/* &r cut_GCM_countries.aml R:\climate_change\IPCC_CMIP3\SRES_B1\downscaled F:\Analogues_GCM_data\Administrative_boundaries\GRID_files E:\Analogues_GCM_data\ExtractByCountry\SRES_B1\downscaled 30s NO
-/* &r cut_GCM_countries.aml M:\climate_change\IPCC_CMIP3\SRES_A2\downscaled F:\Analogues_GCM_data\Administrative_boundaries\GRID_files F:\Analogues_GCM_data\ExtractByCountry\SRES_A2\downscaled 30s NO
+/* &r 001-cut_GCM_countries.aml S:\gcm\cmip3\downscaled\sres_a1b D:\cenavarro\admin-boundaries\GRID-files-2_5min  D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_A1B\downscaled 2_5min NO
+
 &args rootdir admdir outputdir resol switch
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999

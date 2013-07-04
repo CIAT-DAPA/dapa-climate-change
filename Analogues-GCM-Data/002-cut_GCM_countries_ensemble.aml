@@ -1,4 +1,4 @@
-/* &r cut_GCM_countries_ensemble.aml Q:\IPCC_CMIP3\Ensemble\SRES_B1\downscaled F:\Analogues_GCM_data\Administrative_boundaries\GRID_files F:\Analogues_GCM_data\ExtractByCountry\SRES_B1\downscaled 30s NO
+/* &r 002-cut_GCM_countries_ensemble.aml S:\gcm\cmip3\downscaled\ensemble\sres_b1 D:\cenavarro\admin-boundaries\GRID-files-30s D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_B1\downscaled 30s NO
 &args rootdir admdir outputdir resol switch
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
@@ -49,23 +49,23 @@
 		
 		&if not [exists %outdir% -dir] &then &sys md %outdir%
 		
-		&do md = 1 &to %nmodels%
-			&s modname [extract %md% %modellist%]
+		/* &do md = 1 &to %nmodels%
+			/* &s modname [extract %md% %modellist%]
 			
 			&do year &list 2020_2049 /* 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
 				
 				&ty
-				&ty Extracting %modname% %country% (%year%, %resol%)
+				&ty Extracting %country% (%year%, %resol%)
 				
-				&if not [exists %outdir%\%modname%\%year% -dir] &then &sys md %outdir%\%modname%\%year%
+				&if not [exists %outdir%\ensemble\%year% -dir] &then &sys md %outdir%\ensemble\%year%
 				
 				/* &if not [exists %outputdir%\%country%_CutGridGCMCountries_done.txt -file] &then
 				&do
-					&r cut_GCM.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %mask% %switch%
-					&if [exists %outdir%\%modname%\%year%\listgrids.list -file] &then &sys del %outdir%\%modname%\%year%\listgrids.list
+					&r cut_GCM.aml %inputdir%\%year% %outdir%\ensemble\%year% %mask% %switch%
+					&if [exists %outdir%\ensemble\%year%\listgrids.list -file] &then &sys del %outdir%\ensemble\%year%\listgrids.list
 				&end
 			&end			
-		&end
+		/* &end
 		/* &s verfile [listfile %outdir%\%modname%\%year%\* -grid %outputdir%\%country%_CutGridGCMCountries_done.txt]
 	&end
 

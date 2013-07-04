@@ -1,4 +1,4 @@
-/* &r dtr_calc_GCM.aml F:\Analogues_GCM_data\ExtractByCountry\SRES_B1\downscaled
+/* &r dtr_calc_GCM.aml D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_A1B\downscaled
 &args rootdir 
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
