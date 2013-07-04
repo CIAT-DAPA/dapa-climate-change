@@ -136,111 +136,15 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
       sp_mOut <- get(load(out_obj)) #load model as it already exists
     }
     
-    #6. model evaluation
-    #evaluate model against left-out presences and pseudo-absences
-    #function find.optim.stat(Stat=ROC,)
-    
-    #a. calculate spatial sorting bias as the ratio of the (min) distance between
-    #testing pres. and training pres. divided by testing abs. and train pres.
-    cat("bias-correcting the AUC\n")
-    sb <- ssb(p=cbind(x=spp_te$x,y=spp_te$y), a=cbind(x=pab_te$x,y=pab_te$y), reference=cbind(x=spp_tr$x,y=spp_tr$y))
-    cat("spatial sorting bias is:",sb[,1] / sb[,2],"\n")
-    
-    #selecting a pair-wise distance sample
-    i <- pwdSample(cbind(x=spp_te$x,y=spp_te$y), cbind(x=pab_te$x,y=pab_te$y), cbind(x=spp_tr$x,y=spp_tr$y), n=1, tr=0.33, warn=F)
-    spp_te_pwd <- spp_te[!is.na(i[,1]),]
-    pab_te_pwd <- pab_te[na.omit(as.vector(i)),]
-    
-    sb2 <- ssb(cbind(x=spp_te_pwd$x,y=spp_te_pwd$y), cbind(x=pab_te_pwd$x,y=pab_te_pwd$y), cbind(x=spp_tr$x,y=spp_tr$y))
-    cat("corrected spatial sorting bias is:",sb2[1]/ sb2[2],"\n")
-    
-    #b. predict over evaluation and ssb-eval samples
-    tmodel <- get(BIOMOD_LoadModels(sp_mOut,models=alg)) #load specific model
-    
-    spp_tr_pred <- as.numeric(predict(tmodel,spp_tr[,3:ncol(spp_tr)]))
-    pab_tr_pred <- as.numeric(predict(tmodel,pab_tr[,3:ncol(pab_tr)]))
-    spp_pred <- as.numeric(predict(tmodel,spp_te[,3:ncol(spp_te)]))
-    pab_pred <- as.numeric(predict(tmodel,pab_te[,3:ncol(pab_te)]))
-    spp_pwd_pred <- as.numeric(predict(tmodel,spp_te_pwd[,3:ncol(spp_te_pwd)]))
-    pab_pwd_pred <- as.numeric(predict(tmodel,pab_te_pwd[,3:ncol(pab_te_pwd)]))
-    
-    #for spatially biased samples (normal case) the addsamplestobackground option
-    #is generally switched on! (case in biomod2), thus the AUC has to use
-    #both presences and pseudo-absences in the pseudo-absences.
-    if (alg == "MAXENT") {
-      pab_tr_pred <- c(pab_tr_pred,spp_tr_pred)
-      pab_pred <- c(pab_pred,spp_pred)
-      pab_pwd_pred <- c(pab_pwd_pred,spp_pwd_pred)
-    }
-    
-    #c. calculate cAUC
-    #for some unknown reason the AUC reported in getModelsEvaluations() is not the same
-    #as calculated separately using dismo package functions. So I decided to stick with
-    #dismo's implementation (which gives the same result as Find.Optim.Stat, but it provides
-    #the actual ROC curve)
-    #eval_u = evaluation with all evaluation data
-    #eval_c = evaluation with bias-corrected data
-    #eval_t = evaluation with training data
-    eval_u <- evaluate(p=spp_pred, a=pab_pred)
-    eval_c <- evaluate(p=spp_pwd_pred, a=pab_pwd_pred)
-    eval_t <- evaluate(p=spp_tr_pred, a=pab_tr_pred)
-    c_auc <- eval_u@auc + .5 - max(c(0.5,eval_c@auc))
-    
-    #calculate TSS and Kappa
-    tss_u <- getEvalMetric(fit_vals=c(spp_pred,pab_pred),
-                           obs_vals=c(rep(1,length(spp_pred)),rep(0,length(pab_pred))),
-                           tstat='TSS')
-    tss_t <- getEvalMetric(fit_vals=c(spp_tr_pred,pab_tr_pred),
-                           obs_vals=c(rep(1,length(spp_tr_pred)),rep(0,length(pab_tr_pred))),
-                           tstat='TSS')
-    
-    kappa_u <- getEvalMetric(fit_vals=c(spp_pred,pab_pred),
-                             obs_vals=c(rep(1,length(spp_pred)),rep(0,length(pab_pred))),
-                             tstat='KAPPA')
-    kappa_t <- getEvalMetric(fit_vals=c(spp_tr_pred,pab_tr_pred),
-                             obs_vals=c(rep(1,length(spp_tr_pred)),rep(0,length(pab_tr_pred))),
-                             tstat='KAPPA')
-    
-    #final object of model eval
-    sp_mEval <- data.frame(NPR_FIT=nrow(spp_tr),NAB_FIT=nrow(pab_tr),NPR_TST=nrow(spp_te),NAB_TST=nrow(pab_te),
-                           SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_t@auc,AUC_TST=eval_u@auc,AUC_SSB=c_auc,
-                           TSS_FIT=tss_t,TSS_TST=tss_u,KAPPA_FIT=kappa_t,KAPPA_TST=kappa_u)
-    
     #save object with all necessary details
     cat("saving final objects\n")
-    save(list=c("sp_bData","sp_mEval","sp_mOut"),file=paste(outDir,"/",sp_bData@sp.name,"/fitting.RData",sep=""))
+    save(list=c("sp_bData","sp_mOut"),file=paste(outDir,"/",sp_bData@sp.name,"/fitting.RData",sep=""))
     
     #go back to base directory
     setwd(bDir)
   }
-  
   #return object
   return(outDir)
-}
-
-
-#adaptation of biomod2 function Find.Optim.Stat
-getEvalMetric <- function(fit_vals,obs_vals,tstat='TSS') {
-  if (length(unique(obs_vals)) == 1 | length(unique(fit_vals)) == 1) {
-    warning("\nObserved or fitted data contains a unique value. Be carefull with this model predictions\n", immediate. = T)
-  }
-  
-  #set of thresholds
-  if (length(unique(fit_vals)) == 1) {
-    valToTest <- unique(fit_vals)
-    valToTest <- c(mean(c(0, valToTest)), mean(c(1, valToTest)))
-  } else {
-    mini <- max(min(quantile(fit_vals, 0.05, na.rm = T), na.rm = T), 0)
-    maxi <- min(max(quantile(fit_vals, 0.95, na.rm = T), na.rm = T), 1)
-    valToTest <- unique(c(seq(mini, maxi, length.out = 100), mini, maxi))
-    if (length(valToTest) < 3) {
-      valToTest <- c(mean(0, mini), valToTest, mean(1, maxi))
-    }
-  }
-  calcStat <- sapply(lapply(valToTest, function(x) {return(table(fit_vals > x, obs_vals))}), calculate.stat, stat = tstat)
-  #calcStat <- 1 - abs(getStatOptimValue(tstat) - calcStat) #unsure of reasons for this (i.e. irrelevant for kappa and TSS)
-  bestStat <- max(calcStat, na.rm = T)
-  return(bestStat)
 }
 
 
