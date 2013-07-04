@@ -22,12 +22,13 @@ stop("dont run")
 library(biomod2); library(raster); library(rgdal); library(maptools); library(dismo)
 
 #base dir
-#bDir <- "/nfs/a102/eejarv/DNP-biodiversity"
-bDir <- "/mnt/a102/eejarv/DNP-biodiversity"
+bDir <- "/nfs/a102/eejarv/DNP-biodiversity"
+#bDir <- "/mnt/a102/eejarv/DNP-biodiversity"
 setwd(bDir)
 
 #source functions
-src.dir <- "~/Repositories/dapa-climate-change/trunk/dnp-sdm"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/dnp-sdm"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/dnp-sdm"
 source(paste(src.dir,"/scripts/samplingbias-fun.R",sep=""))
 
 #list of number of PA selections
@@ -42,12 +43,23 @@ all_runs <- expand.grid(ALG=modList,NPA=npaList)
 #species name and configuration of run
 this_sppName <- "Bixa_orel" #species name
 
-#some testing runs
+#this is the loop for the runs
 for (run_i in 1:nrow(all_runs)) {
-  #run_i <- 1 #23
+  #run_i <- 5 #23
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   odir <- run_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg)
 }
+
+
+#projection of models
+for (run_i in 1:nrow(all_runs)) {
+  #run_i <- 4 #23
+  this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
+  this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
+  odir <- proj_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
+}
+
+
 
 
