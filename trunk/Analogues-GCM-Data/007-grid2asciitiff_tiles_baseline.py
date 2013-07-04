@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python grid2asciitiff_tiles_baseline.py F:\Analogues_GCM_data\ExtractByCountry F:\Analogues_GCM_data\TilesByCountry baseline 1960_1990 30s YES"
+	print "   - ie: python 007-grid2asciitiff_tiles_baseline.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry D:\cenavarro\Analogues_GCM_data\TilesByCountry baseline 1960_1990 30s NO"
 	sys.exit(1)
 
 # Set variables
@@ -41,11 +41,11 @@ countrytilelist = "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol",
 				"syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "tza", "uga", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
 				"zmb", "zwe", "nzl", "rus", "usa"
 				
-countrylist = "ala", "alb", "and", "are", "arm", "ata", "atg", "aut", "aze", "bdi", "bel", "ben", "bgr", "bhr", "bih", "blz", "bmu", "brb", "brn", "btn", "che", "com",\
-			"cpv", "cri", "cyp", "cze", "dji", "dma", "dom", "est", "fro", "geo", "glp", "gmb", "gnb", "grd", "gtm", "guf", "hnd", "hti", "hun", "irl", "isr", "jam",\
-			"jor", "kwt", "lbn", "lbr", "lca", "lie", "lka", "lso", "ltu", "lux", "lva", "mac", "mco", "mda", "mkd", "mnp", "mtq", "nld", "pan", "pri", "qat", "reu",\
-			"rwa", "sle", "slv", "smr", "stp", "sur", "svk", "svn", "swz", "syc", "tgo", "ton", "twn", "vct", "wsm"
-
+# countrylist = "ala", "alb", "and", "are", "arm", "ata", "atg", "aut", "aze", "bdi", "bel", "ben", "bgr", "bhr", "bih", "blz", "bmu", "brb", "brn", "btn", "che", "com",\
+			# "cpv", "cri", "cyp", "cze", "dji", "dma", "dom", "est", "fro", "geo", "glp", "gmb", "gnb", "grd", "gtm", "guf", "hnd", "hti", "hun", "irl", "isr", "jam",\
+			# "jor", "kwt", "lbn", "lbr", "lca", "lie", "lka", "lso", "ltu", "lux", "lva", "mac", "mco", "mda", "mkd", "mnp", "mtq", "nld", "pan", "pri", "qat", "reu",\
+			# "rwa", "sle", "slv", "smr", "stp", "sur", "svk", "svn", "swz", "syc", "tgo", "ton", "twn", "vct", "wsm"
+countrylist = "cod", "kna", "mne", "nru", "plw", "pse", "srb", "ssd", "tls", "tto", "tuv"
 			
 if tiled == "NO":
 

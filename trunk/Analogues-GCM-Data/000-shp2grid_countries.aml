@@ -1,4 +1,4 @@
-/* &r shp2grid_countries.aml F:\Analogues_GCM_data\Administrative_boundaries\SHP_files F:\Analogues_GCM_data\Administrative_boundaries\GRID_files F:\Analogues_GCM_data\Administrative_boundaries\masks\mask30s
+/* &r 000-shp2grid_countries.aml D:\cenavarro\admin-boundaries\SHP-files-continents D:\cenavarro\admin-boundaries\GRID-files-continents-10min S:\gcm\cmip3\baseinfo\masks\mask10m
 &args admdir outdir maskworld
 &if [null %admdir%] &then &return Use the admdir_folder argument
 &terminal 9999
