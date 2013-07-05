@@ -60,6 +60,13 @@ for (run_i in 1:nrow(all_runs)) {
   odir <- proj_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
 }
 
-
+# set.seed(71)
+# iris2 <- iris
+# iris2$Petal.Width[which(iris$Petal.Width <= 1)] <- 1
+# iris2$Petal.Width[which(iris$Petal.Width > 1)] <- 0
+# iris.rf <- randomForest(Petal.Width ~ ., data=iris2, importance=TRUE,
+#                         proximity=TRUE)
+# print(iris.rf)
+# prd <- as.numeric(predict(iris.rf,iris))
 
 
