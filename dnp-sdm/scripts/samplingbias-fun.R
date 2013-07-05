@@ -204,18 +204,14 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     cat("configuring input data and model parameters\n")
     expl_var <- rbind(spp_tr,pab_tr)
     expl_var <- SpatialPointsDataFrame(coords=cbind(expl_var$x,expl_var$y),data=expl_var[,3:ncol(expl_var)])
-    if (alg == "RF") {
-      resp_var <- c(rep(1,times=nrow(spp_tr)),rep(0,times=nrow(pab_tr)))
-    } else {
-      resp_var <- c(rep(1,times=nrow(spp_tr)),rep(NA,times=nrow(pab_tr)))
-    }
+    resp_var <- c(rep(1,times=nrow(spp_tr)),rep(NA,times=nrow(pab_tr)))
     
     #formatting data
     sp_bData <- BIOMOD_FormatingData(resp.var = resp_var,expl.var = expl_var, 
                                      resp.xy=coordinates(expl_var),
-                                     resp.name = genName)
-                                     #PA.strategy="random",
-                                     #PA.nb.rep=1,PA.nb.absences=10000)
+                                     resp.name = genName,
+                                     PA.strategy="random",
+                                     PA.nb.rep=1,PA.nb.absences=10000)
     
     #selecting model features (!change features as needed)
     sp_mOpt <- BIOMOD_ModelingOptions()
