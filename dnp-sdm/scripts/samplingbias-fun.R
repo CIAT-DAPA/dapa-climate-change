@@ -195,7 +195,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     pab_data$access_aspect_slope <- pab_data$access * pab_data$slope * pab_data$aspect
     
     spp_tr <- spp_data; names(spp_tr)[1:2] <- c("x","y")
-    pab_tr <- pab_data[sample(1:nrow(pab_data),size=100),]
+    pab_tr <- pab_data[sample(1:nrow(pab_data),size=300),]
     
     #5. Model fitting
     #go to models directory
@@ -228,7 +228,8 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GAM$k <- 3
-    sp_mOpt@RF$ntree <- 100
+    sp_mOpt@RF$do.classif <- F
+    sp_mOpt@RF$ntree <- 50
     sp_mOpt@ANN$maxit <- 500
     
     #perform the modelling
