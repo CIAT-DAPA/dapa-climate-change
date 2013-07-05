@@ -213,9 +213,9 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     #formatting data
     sp_bData <- BIOMOD_FormatingData(resp.var = resp_var,expl.var = expl_var, 
                                      resp.xy=coordinates(expl_var),
-                                     resp.name = genName, 
-                                     PA.strategy="random",
-                                     PA.nb.rep=1,PA.nb.absences=10000)
+                                     resp.name = genName)
+                                     #PA.strategy="random",
+                                     #PA.nb.rep=1,PA.nb.absences=10000)
     
     #selecting model features (!change features as needed)
     sp_mOpt <- BIOMOD_ModelingOptions()
