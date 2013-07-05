@@ -112,8 +112,11 @@ proj_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     
     #save objects
     cat("write vector in RData files\n")
-    save(list=c("prjVect"),file=paste(out_dir,"/",genName,"_sbias_pa-",npa,".RData",sep=""))
+    save(list=c("prjVect"),file=paste(out_dir,"/",genName,"_sbias_pa-",npa,".RData",sep=""),compress=T)
   }
+  rso <- raster(msk)
+  rso[bg_data$cell] <- prjVect
+  plot(rso)
 }
 
 
@@ -192,7 +195,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     pab_data$access_aspect_slope <- pab_data$access * pab_data$slope * pab_data$aspect
     
     spp_tr <- spp_data; names(spp_tr)[1:2] <- c("x","y")
-    pab_tr <- pab_data
+    pab_tr <- pab_data[sample(1:nrow(pab_tr),size=nrow(spp_tr))]
     
     #5. Model fitting
     #go to models directory
@@ -211,7 +214,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
                                      resp.xy=coordinates(expl_var),
                                      resp.name = genName,
                                      PA.strategy="random",
-                                     PA.nb.rep=1,PA.nb.absences=10000)
+                                     PA.nb.rep=1,PA.nb.absences=nrow(pab_tr))
     
     #selecting model features (!change features as needed)
     sp_mOpt <- BIOMOD_ModelingOptions()
@@ -226,6 +229,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GAM$k <- 3
     sp_mOpt@RF$ntree <- 500
+    sp_mOpt@ANN$maxit <- 500
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
