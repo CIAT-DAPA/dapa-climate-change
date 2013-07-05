@@ -195,7 +195,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     pab_data$access_aspect_slope <- pab_data$access * pab_data$slope * pab_data$aspect
     
     spp_tr <- spp_data; names(spp_tr)[1:2] <- c("x","y")
-    pab_tr <- pab_data[sample(1:nrow(pab_tr),size=nrow(spp_tr))]
+    pab_tr <- pab_data[sample(1:nrow(pab_data),size=nrow(spp_tr)),]
     
     #5. Model fitting
     #go to models directory
