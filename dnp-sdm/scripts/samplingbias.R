@@ -35,7 +35,7 @@ source(paste(src.dir,"/scripts/samplingbias-fun.R",sep=""))
 npaList <- c(3829, 1922, 1945, 5484, 2125, 8746, 2187, 1521, 9623, 1561)
 
 #list of models
-modList <- c('GLM','GAM','GBM','RF','MAXENT')
+modList <- c('GLM','GAM','GBM','ANN','MAXENT')
 
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList)
