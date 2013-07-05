@@ -116,7 +116,7 @@ proj_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
   }
   rso <- raster(msk)
   rso[bg_data$cell] <- prjVect
-  plot(rso)
+  plot(rso,zlim=c(0,1))
 }
 
 
@@ -228,8 +228,9 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GAM$k <- 3
-    #sp_mOpt@RF$ntree <- 100
-    #sp_mOpt@RF$mtry <- 2
+    sp_mOpt@RF$ntree <- 100
+    sp_mOpt@RF$do.classif <- F
+    sp_mOpt@RF$mtry <- 2
     sp_mOpt@ANN$maxit <- 1000
     sp_mOpt@ANN$NbCV <- 10
     
@@ -254,7 +255,11 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     } else {
       sp_mOut <- get(load(out_obj)) #load model as it already exists
     }
-    
+    #biomod2:::.Biomod.Models.loop
+    #biomod2:::.Biomod.Models
+    #biomod2:::.CV.nnet
+    #biomod2:::.scaling_model
+    #biomod2:::.Models.prepare.data
     #save object with all necessary details
     cat("saving final objects\n")
     save(list=c("sp_bData","sp_mOut"),file=paste(outDir,"/",sp_bData@sp.name,"/fitting.RData",sep=""))
