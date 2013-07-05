@@ -204,7 +204,11 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     cat("configuring input data and model parameters\n")
     expl_var <- rbind(spp_tr,pab_tr)
     expl_var <- SpatialPointsDataFrame(coords=cbind(expl_var$x,expl_var$y),data=expl_var[,3:ncol(expl_var)])
-    resp_var <- c(rep(1,times=nrow(spp_tr)),rep(NA,times=nrow(pab_tr)))
+    if (alg == "RF") {
+      resp_var <- c(rep(1,times=nrow(spp_tr)),rep(0,times=nrow(pab_tr)))
+    } else {
+      resp_var <- c(rep(1,times=nrow(spp_tr)),rep(NA,times=nrow(pab_tr)))
+    }
     
     #formatting data
     sp_bData <- BIOMOD_FormatingData(resp.var = resp_var,expl.var = expl_var, 
@@ -225,7 +229,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GAM$k <- 3
-    sp_mOpt@RF$ntree <- 50
+    sp_mOpt@RF$ntree <- 500
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
