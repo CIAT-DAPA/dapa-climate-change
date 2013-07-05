@@ -45,7 +45,7 @@ this_sppName <- "Bixa_orel" #species name
 
 #this is the loop for the runs
 for (run_i in 1:nrow(all_runs)) {
-  #run_i <- 5 #23
+  #run_i <- 4 #23
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   odir <- run_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg)

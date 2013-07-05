@@ -225,7 +225,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GAM$k <- 3
-    sp_mOpt@RF$ntree <- 100
+    sp_mOpt@RF$ntree <- 1000
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
