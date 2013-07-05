@@ -230,7 +230,8 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GAM$k <- 3
     #sp_mOpt@RF$ntree <- 100
     #sp_mOpt@RF$mtry <- 2
-    sp_mOpt@ANN$maxit <- 500
+    sp_mOpt@ANN$maxit <- 1000
+    sp_mOpt@ANN$NbCV <- 100
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
