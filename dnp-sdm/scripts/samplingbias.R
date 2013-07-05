@@ -35,7 +35,7 @@ source(paste(src.dir,"/scripts/samplingbias-fun.R",sep=""))
 npaList <- c(3829, 1922, 1945, 5484, 2125, 8746, 2187, 1521, 9623, 1561)
 
 #list of models
-modList <- c('GLM','GAM','GBM','ANN','MAXENT')
+modList <- c('GLM','GAM','GBM','RF','MAXENT')
 
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList)
@@ -54,19 +54,20 @@ for (run_i in 1:nrow(all_runs)) {
 
 #projection of models
 for (run_i in 1:nrow(all_runs)) {
-  #run_i <- 4 #23
+  #run_i <- 1 #23
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   odir <- proj_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
 }
 
-# set.seed(71)
-# iris2 <- iris
-# iris2$Petal.Width[which(iris$Petal.Width <= 1)] <- 1
-# iris2$Petal.Width[which(iris$Petal.Width > 1)] <- 0
-# iris.rf <- randomForest(Petal.Width ~ ., data=iris2, importance=TRUE,
-#                         proximity=TRUE)
-# print(iris.rf)
-# prd <- as.numeric(predict(iris.rf,iris))
+set.seed(71)
+iris2 <- iris
+iris2$Petal.Width[which(iris$Petal.Width <= 1)] <- 1
+iris2$Petal.Width[which(iris$Petal.Width > 1)] <- 0
+#iris2$Petal.Width <- as.factor(iris2$Petal.Width)
+iris.rf <- randomForest(Petal.Width ~ ., data=iris2, importance=TRUE,
+                        proximity=TRUE,norm.votes = TRUE,ntree=100)
+print(iris.rf)
+prd <- as.numeric(predict(iris.rf,iris))
 
 
