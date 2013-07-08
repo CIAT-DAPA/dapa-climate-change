@@ -97,7 +97,9 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     #sp_mOpt@GAM$algo <- "GAM_gam"
     sp_mOpt@GAM$k <- 3
-    sp_mOpt@ANN$maxit <- 500
+    sp_mOpt@RF$ntree <- 1000
+    #sp_mOpt@ANN$maxit <- 500
+    
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
