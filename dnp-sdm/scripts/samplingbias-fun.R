@@ -114,11 +114,7 @@ proj_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     cat("write vector in RData files\n")
     save(list=c("prjVect"),file=paste(out_dir,"/",genName,"_sbias_pa-",npa,".RData",sep=""),compress=T)
   }
-  rso <- raster(msk)
-  rso[bg_data$cell] <- prjVect
-  plot(rso,zlim=c(0,1))
 }
-
 
 
 #function to run a model with provided configuration
