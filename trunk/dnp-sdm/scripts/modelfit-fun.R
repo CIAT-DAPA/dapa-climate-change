@@ -216,9 +216,12 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     sp_mOpt@MAXENT$maximumiterations <- 500
     sp_mOpt@GBM$n.trees <- 2000
     sp_mOpt@GLM$control$maxit <- 100
+    sp_mOpt@RF$ntree <- 1000
+    #sp_mOpt@RF$do.classif <- F
+    #sp_mOpt@RF$mtry <- 2
     #sp_mOpt@GLM$interaction.level <- 1 #removed: JRV Jun 9 (interaction takes too long)
     #sp_mOpt@GLM$type <- "quadratic" #simple | quadratic | polynomial
-    sp_mOpt@ANN$maxit <- 500
+    #sp_mOpt@ANN$maxit <- 500
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
@@ -226,11 +229,12 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     #note that the biomod output is simply a linear scaling from 0 to 1000!!
     cat("running model\n")
     if (!file.exists(out_obj)) {
+      if (alg == "RF") {dsplit <- 75} else {dsplit <- 100}
       sp_mOut <- BIOMOD_Modeling(sp_bData,
                                  models = alg,
                                  models.options = sp_mOpt,
                                  NbRunEval=1,
-                                 DataSplit=100,
+                                 DataSplit=dsplit,
                                  Prevalence=0.5,
                                  VarImport=5,
                                  models.eval.meth = c('KAPPA','TSS','ROC'),
