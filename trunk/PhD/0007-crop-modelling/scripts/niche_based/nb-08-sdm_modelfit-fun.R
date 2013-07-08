@@ -114,7 +114,7 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
                                  VarImport=10,
                                  models.eval.meth = c('KAPPA','TSS','ROC'),
                                  SaveObj = TRUE,
-                                 rescal.all.models = TRUE,
+                                 rescal.all.models = FALSE,
                                  do.full.models = FALSE,
                                  modeling.id = model_class)
     } else {
