@@ -54,7 +54,7 @@ seedList <- c(3379,5728,3781,3590,3266)
 npaList <- c(3893,2748,9121,2031,9559)
 
 #list of models
-modList <- c('GLM','GAM','GBM','ANN','MAXENT')
+modList <- c('GLM','GAM','GBM','RF','MAXENT')
 
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList,VSET=varList$SET_ID)
