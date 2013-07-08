@@ -228,11 +228,11 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
     sp_mOpt@GLM$control$maxit <- 100
     sp_mOpt@GAM$k <- 3
-    sp_mOpt@RF$ntree <- 100
-    sp_mOpt@RF$do.classif <- F
-    sp_mOpt@RF$mtry <- 2
-    sp_mOpt@ANN$maxit <- 1000
-    sp_mOpt@ANN$NbCV <- 10
+    sp_mOpt@RF$ntree <- 1000
+    #sp_mOpt@RF$do.classif <- F
+    #sp_mOpt@RF$mtry <- 2
+    #sp_mOpt@ANN$maxit <- 1000
+    #sp_mOpt@ANN$NbCV <- 10
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
@@ -240,11 +240,12 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     #note that the biomod output is simply a linear scaling from 0 to 1000!!
     cat("running model\n")
     if (!file.exists(out_obj)) {
+      if (alg == "RF") {dsplit <- 75} else {dsplit <- 100}
       sp_mOut <- BIOMOD_Modeling(sp_bData,
                                  models = alg,
                                  models.options = sp_mOpt,
                                  NbRunEval=1,
-                                 DataSplit=100,
+                                 DataSplit=dsplit,
                                  Prevalence=0.5,
                                  VarImport=10,
                                  models.eval.meth = c('KAPPA','TSS','ROC'),
