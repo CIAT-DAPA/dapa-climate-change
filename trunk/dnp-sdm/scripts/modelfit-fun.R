@@ -229,17 +229,16 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     #note that the biomod output is simply a linear scaling from 0 to 1000!!
     cat("running model\n")
     if (!file.exists(out_obj)) {
-      if (alg == "RF") {dsplit <- 75} else {dsplit <- 100}
       sp_mOut <- BIOMOD_Modeling(sp_bData,
                                  models = alg,
                                  models.options = sp_mOpt,
                                  NbRunEval=1,
-                                 DataSplit=dsplit,
+                                 DataSplit=100,
                                  Prevalence=0.5,
                                  VarImport=5,
                                  models.eval.meth = c('KAPPA','TSS','ROC'),
                                  SaveObj = TRUE,
-                                 rescal.all.models = TRUE,
+                                 rescal.all.models = FALSE,
                                  do.full.models = FALSE,
                                  modeling.id = model_class)
     } else {
