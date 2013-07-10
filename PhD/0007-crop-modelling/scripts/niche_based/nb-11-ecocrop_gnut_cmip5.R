@@ -3,23 +3,16 @@
 #CIAT / CCAFS / UoL
 stop("not to run yet")
 
-#### LIBRARIES: raster, maptools, rgdal, sp
-library(raster); library(rgdal); library(maptools)
-library(sfsmisc); library(dismo)
-data(wrld_simpl)
+#### LIBRARIES: raster, rgdal, sp
+library(sp); library(raster); library(rgdal)
 
 #sources dir
-src.dir1 <- "~/Repositories/dapa-climate-change/trunk/EcoCrop" #local
-src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data"
-src.dir3 <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-
-# src.dir1 <- "~/PhD-work/_tools/dapa-climate-change/trunk/EcoCrop" #eljefe
-# src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
-# src.dir3 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+# src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source the model and other functions
-source(paste(src.dir3,"/scripts/niche_based/EcoCrop-model.R",sep=""))
-source(paste(src.dir3,"/scripts/niche_based/nb-07-ecocrop_gnut-fun.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/EcoCrop-model.R",sep=""))
+source(paste(src.dir,"/scripts/niche_based/nb-07-ecocrop_gnut-fun.R",sep=""))
 
 #basic information
 crop_name <- "gnut"
@@ -65,8 +58,11 @@ gcmList <- list.files(paste(cmip5Dir,"/",sceList[1],sep=""))
 #full matrix of runs
 runs_all <- expand.grid(ECORUN=rwList,SCENARIO=sceList,GCM=gcmList)
 
+ini <- 1
+fin <- 500; if (fin > nrow(runs_all)) {fin <- nrow(runs_all)}
+
 #start of run loop
-for (ri in 1:nrow(runs_all)) {
+for (ri in ini:fin) {
   #ri <- 1
   #starting
   gcm <- paste(runs_all$GCM[ri])
