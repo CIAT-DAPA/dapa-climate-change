@@ -3,6 +3,7 @@
 #Oct 2010
 #Modified Mar 2013
 #Modified 3rd May 2013 for bean EAF analysis (JRV)
+#Modified July 2013 to include seasonality (LPM)
 
 #This R script computes the EcoCrop suitability index based on a set of parameters
 
@@ -61,7 +62,7 @@ suitCalc <- function(climPath='', sowDat='', harDat='', Gmin=90,Gmax=90,Tkmp=0,T
   #Checking parameters for consistency part 2
   #commented out because of 
   #if (Gmin > 365) {
-  #	stop("Gmin cannot be greater than 365")
+  #  stop("Gmin cannot be greater than 365")
   #}
   
   #Checking if outfolder does exist, and creating it if necessary
@@ -98,11 +99,12 @@ suitCalc <- function(climPath='', sowDat='', harDat='', Gmin=90,Gmax=90,Tkmp=0,T
   Tkill <- Tkmp + 40
   
   Gavg <- round(mean(c(Gmin, Gmax)) / 30)
+  
   if (is.na(Gavg)) {
     cat("Growing season taken from reported sowing and harvest dates \n")
-    #load sow and har rasters
     rsSow <- raster(sowDat)
     rsHar <- raster(harDat)
+    #load sow and har rasters
     if (cropClimate) {climateStack <- crop(climateStack,rsSow)}
   } else {
     cat("Growing season is", Gavg, "months \n")
@@ -132,6 +134,7 @@ suitCalc <- function(climPath='', sowDat='', harDat='', Gmin=90,Gmax=90,Tkmp=0,T
   bs <- blockSize(climateStack, n=41, minblocks=2)
   cat("processing in: ", bs$n, " chunks \n", sep="")
   #pb <- pbCreate(bs$n, type='text', style=3)
+  
   for (b in 1:bs$n) {
     cat(" ",round(b/bs$n*100,2),"%",sep="")
     iniCell <- 1+(bs$row[b]-1)*ncol(pSuitRaster)
@@ -142,10 +145,9 @@ suitCalc <- function(climPath='', sowDat='', harDat='', Gmin=90,Gmax=90,Tkmp=0,T
     
     if (length(validCells) > 0) {
       rowVals <- extract(climateStack,validCells)
-      rowVals <- cbind(rowVals,sow=extract(rsSow,validXY))
-      rowVals <- cbind(rowVals,har=extract(rsHar,validXY))
-      
       if (is.na(Gavg)) {
+        rowVals <- cbind(rowVals,sow=extract(rsSow,validXY))
+        rowVals <- cbind(rowVals,har=extract(rsHar,validXY))
         rasVals <- apply(rowVals, 1, suitFun_sowVar, params)
       } else {
         rasVals <- apply(rowVals, 1, suitFun_sowFix, params)
@@ -282,6 +284,7 @@ suitFun_sowVar <- function(dataPixel,params) {
         ecot <- rep(NA, 12)
         ecot[1] <- 1
         ecopf <- rep(NA, 12)
+        finSuit <- rep(NA, 12)
         mthCounter <- 1
         for (j in start.month:end.month) {
           r.end.mth <- j
@@ -298,6 +301,7 @@ suitFun_sowVar <- function(dataPixel,params) {
         }
         ecotf[1:12] <- min(ecot,na.rm=T)
         ecopf[1:12] <- pSuit #max(ecop,na.rm=T)
+        finSuit[1:12] <- pSuit * min(ecot,na.rm=T) #PM 0702: the seasonality wasn't #JRV modified
       } else {
         #for annual crop (Gdur is less than 12)
         if (Gf < Gi) {Gf_m <- Gf+12} else {Gf_m <- Gf} #where the harvest month is in next year
@@ -360,6 +364,7 @@ suitFun_sowVar <- function(dataPixel,params) {
         #Minimum cumulated temperature and rainfall suitability
         ecotf <- rep(NA, 12)
         ecopf <- rep(NA, 12)
+        finSuit <- rep(NA, 12)
         start.month <- Gi
         end.month <- Gf_m
         ecot <- rep(NA, Gdur)
@@ -379,11 +384,11 @@ suitFun_sowVar <- function(dataPixel,params) {
           mthCounter <- mthCounter + 1
         }
         ecotf[1:12] <- min(ecot,na.rm=T)
+        ecopf[1:12] <- pSuit #max(ecop,na.rm=T) 
       }
-      ecopf[1:12] <- pSuit #max(ecop,na.rm=T)
-      
       precFinSuit <- round(max(ecopf * 100))
       tempFinSuit <- round(max(ecotf * 100))
+      
       if (!is.na(Rmin)) {
         finSuit <- round((max(ecopf) * max(ecotf)) * 100)
       } else {
@@ -438,24 +443,28 @@ suitFun_sowFix <- function(dataPixel,params) {
         }
       }
       
-      #total annual rainfall
-      cumPpt <- sum(PptDataPixel[1:12])
-      
-      #Single precipitation iteration
-      if (cumPpt < Rmin) {
-        pSuit <- 0
-      } else if (cumPpt >= Rmin & cumPpt <= Ropmin) {
-        pSuit <- (rainLeftM) * cumPpt + (rainLeftB)
-      } else if (cumPpt > Ropmin & cumPpt < Ropmax) {
-        pSuit <- 1
-      } else if (cumPpt >= Ropmax &  cumPpt <= Rmax) {
-        pSuit <- (rainRightM) * cumPpt + (rainRightB)
-      } else if (cumPpt > Rmax) {
-        pSuit <- 0
+      if (!is.na(Rmin)) {
+        #total annual rainfall
+        cumPpt <- sum(PptDataPixel[1:12])
+        
+        #Single precipitation iteration
+        if (cumPpt < Rmin) {
+          pSuit <- 0
+        } else if (cumPpt >= Rmin & cumPpt <= Ropmin) {
+          pSuit <- (rainLeftM) * cumPpt + (rainLeftB)
+        } else if (cumPpt > Ropmin & cumPpt < Ropmax) {
+          pSuit <- 1
+        } else if (cumPpt >= Ropmax &  cumPpt <= Rmax) {
+          pSuit <- (rainRightM) * cumPpt + (rainRightB)
+        } else if (cumPpt > Rmax) {
+          pSuit <- 0
+        } else {
+          pSuit <- NA
+        }
       } else {
         pSuit <- NA
+        cumPpt <- NA
       }
-      
       #Minimum cumulated temperature and rainfall suitability
       i <- 1
       start.month <- i
@@ -465,6 +474,7 @@ suitFun_sowFix <- function(dataPixel,params) {
       ecot <- rep(NA, Gavg)
       ecot[1] <- 1
       ecopf <- rep(NA, 12)
+      finSuit <- rep(NA, 12)
       #ecop <- rep(NA, Gavg)
       #ecop[1] <- 0
       mthCounter <- 1
@@ -483,6 +493,7 @@ suitFun_sowFix <- function(dataPixel,params) {
       }
       ecotf[1:12] <- min(ecot,na.rm=T)
       ecopf[1:12] <- pSuit #max(ecop,na.rm=T)
+      finSuit[1:12] <- pSuit * min(ecot,na.rm=T) #PM 0702: the seasonality wasn't #JRV modified
       
     } else {
       #for annual crop (Gavg is less than 12)
@@ -504,41 +515,48 @@ suitFun_sowFix <- function(dataPixel,params) {
         } else {
           tSuit[i] <- 0
         }
-        
-        #Ppt growing season
-        end.mth.p <- end.month
-        if (end.mth.p > 12) {
-          end.mth.p <- end.mth.p - 12
-          cumPpt[i] <- sum(PptDataPixel[c(start.month:12,1:end.mth.p)])
+        if (!is.na(Rmin)) {  
+          #Ppt growing season
+          end.mth.p <- end.month
+          if (end.mth.p > 12) {
+            end.mth.p <- end.mth.p - 12
+            cumPpt[i] <- sum(PptDataPixel[c(start.month:12,1:end.mth.p)])
+          } else {
+            cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
+          }
+          
+          #Precipitation iteration
+          if (cumPpt[i] < Rmin) {
+            pSuit[i] <- 0
+          } else if (cumPpt[i] >= Rmin & cumPpt[i] <= Ropmin) {
+            pSuit[i] <- (rainLeftM) * cumPpt[i] + (rainLeftB)
+          } else if (cumPpt[i] > Ropmin & cumPpt[i] < Ropmax) {
+            pSuit[i] <- 1
+          } else if (cumPpt[i] >= Ropmax &  cumPpt[i] <= Rmax) {
+            pSuit[i] <- (rainRightM) * cumPpt[i] + (rainRightB)
+          } else if (cumPpt[i] > Rmax) {
+            pSuit[i] <- 0
+          } else {
+            pSuit[i] <- NA
+          }
         } else {
-          cumPpt[i] <- sum(PptDataPixel[start.month:end.mth.p])
-        }
-        
-        #Precipitation iteration
-        if (cumPpt[i] < Rmin) {
-          pSuit[i] <- 0
-        } else if (cumPpt[i] >= Rmin & cumPpt[i] <= Ropmin) {
-          pSuit[i] <- (rainLeftM) * cumPpt[i] + (rainLeftB)
-        } else if (cumPpt[i] > Ropmin & cumPpt[i] < Ropmax) {
-          pSuit[i] <- 1
-        } else if (cumPpt[i] >= Ropmax &  cumPpt[i] <= Rmax) {
-          pSuit[i] <- (rainRightM) * cumPpt[i] + (rainRightB)
-        } else if (cumPpt[i] > Rmax) {
-          pSuit[i] <- 0
-        } else {
-          pSuit[i] <- NA
+          pSuit <- NA
+          cumPpt <- NA
         }
       }
       
       #Minimum cumulated temperature and rainfall suitability
       ecotf <- rep(NA, 12)
       ecopf <- rep(NA, 12)
+      finSuit <- rep(NA, 12)
+      #looping potential growing seasons
       for (i in 1:12) {
         start.month <- i
         end.month <- i + Gavg - 1
         ecot <- rep(NA, Gavg)
         ecot[1] <- 1
         mthCounter <- 1
+        #looping months within the growing season
         for (j in start.month:end.month) {
           r.end.mth <- j
           if (r.end.mth > 12) {r.end.mth <- r.end.mth - 12}
@@ -553,18 +571,26 @@ suitFun_sowFix <- function(dataPixel,params) {
           mthCounter <- mthCounter + 1
         }
         ecotf[i] <- min(ecot,na.rm=T)
+        ecopf[i] <- pSuit[i] #PM 0702: different for annual crops.
+        finSuit[i] <- ecopf[i] * ecotf[i] #PM 0702: the seasonality wasn't
       }
-      ecopf[1:12] <- pSuit #max(ecop,na.rm=T)
     }
-    precFinSuit <- round(max(ecopf * 100))
-    if (precFinSuit == 0) {precFinGS <- 0} else {precFinGS <- max(which(ecopf == max(ecopf)))}
     tempFinSuit <- round(max(ecotf * 100))
-    if (tempFinSuit == 0) {tempFinGS <- 0} else {tempFinGS <- max(which(ecotf == max(ecotf)))}
-    finSuit <- round((max(ecopf) * max(ecotf)) * 100)
-    res <- c(precFinSuit, tempFinSuit, finSuit, precFinGS, tempFinGS,NA,NA)
+    if (tempFinSuit == 0) {tempFinGS <- 0} else {tempFinGS <- max(which(ecotf == max(ecotf)))} 
+    
+    if (!is.na(Rmin)) {
+      precFinSuit <- round(max(ecopf * 100))
+      if (precFinSuit == 0) {precFinGS <- 0} else {precFinGS <- max(which(ecopf == max(ecopf)))}
+      finFinSuit <- round(max(finSuit * 100)) #JRV 0703: calculate maximum suitability of all GS
+    } else {
+      precFinSuit <-NA
+      precFinGS <-NA
+      finFinSuit <- tempFinSuit
+    }
+    
+    res <- c(precFinSuit, tempFinSuit, finFinSuit, precFinGS, tempFinGS)
     return(res)
   }
 }
-
 
 
