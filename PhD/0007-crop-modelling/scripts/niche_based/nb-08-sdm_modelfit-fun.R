@@ -4,6 +4,125 @@
 ############################################################
 ### functions to fit models using BIOMOD2 library
 ############################################################
+
+#function to fit and evaluate a geographically null model with provided configuration
+run_null_model <- function(base_dir,env_dir,spp_name,seed,npa) {
+  require(biomod2); require(raster); require(dismo)
+  
+  #i/o dirs
+  data_dir <- paste(base_dir,"/input-samples",sep="")
+  mod_dir <- paste(base_dir,"/fitting",sep="")
+  bg_dir <- paste(base_dir,"/pseudo-absences",sep="")
+  bio_dir <- paste(env_dir,"/climate/bio_ind_30s",sep="")
+  sol_dir <- paste(env_dir,"/soil",sep="")
+  int_dir <- paste(env_dir,"/crop_intensity",sep="")
+  msk_dir <- paste(env_dir,"/mask",sep="")
+  
+  cat("\nanalysing sampling seed=",seed,"with seed=",npa,"for pseudo absences\n")
+  
+  #1. output model and config directory
+  cat("loading presence and pseudo-absence data\n")
+  out_dir <- paste(mod_dir,"/NULL/PA-",npa,"_SD-",seed,sep="")
+  if (!file.exists(out_dir)) {dir.create(out_dir,recursive=T)}
+  
+  if (!file.exists(paste(out_dir,"/evaluation.RData",sep=""))) {
+    #2. load species data (from VIF analysis output)
+    spp_data <- read.csv(paste(data_dir,"/",spp_name,"/",spp_name,"_full.csv",sep="")) #full set
+    spp_data <- spp_data[,c("x","y")]
+    
+    #3. load background data / create if needs be
+    pab_data <- get_pa(spp_name,n_pa=npa,bg_dir,msk_dir,int_dir,bio_dir,sol_dir)
+    pab_data <- pab_data[,c("x","y")] #remove extra variables
+    
+    #4. select train / test samples
+    cat("bootstrapped selection 25/75 % of data \n")
+    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.25),0))
+    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.25),0))
+    
+    spp_tr <- spp_data[-sp_sel,]; rownames(spp_tr) <- 1:nrow(spp_tr)
+    spp_te <- spp_data[sp_sel,]; rownames(spp_te) <- 1:nrow(spp_te)
+    
+    pab_tr <- pab_data[-pa_sel,]; rownames(pab_tr) <- 1:nrow(pab_tr)
+    pab_te <- pab_data[pa_sel,]; rownames(pab_te) <- 1:nrow(pab_te)
+    
+    #5. fit the geodist model
+    if (!file.exists(paste(out_dir,"/geodist_null_model.RData",sep=""))) {
+      cat("fitting geographically null model\n")
+      gd <- geoDist(spp_tr,lonlat=T)
+      gd_model <- list(TRAIN_P=spp_tr,TEST_P=spp_te,TRAIN_PA=pab_tr,TEST_PA=pab_te,MODEL=gd)
+      save(list=c("gd_model"),file=paste(out_dir,"/geodist_null_model.RData",sep=""))
+    } else {
+      cat("loading geographically null model\n")
+      load(file=paste(outgdDir,"/output_geodist_null_model.RData",sep=""))
+      gd <- gd_model$MODEL
+      rm(gd_model); g=gc(); rm(g)
+    }
+    
+    #6. model evaluation
+    #a. correct sampling strategy
+    cat("evaluating the model \n")
+    sb <- ssb(p=cbind(x=spp_te$x,y=spp_te$y), a=cbind(x=pab_te$x,y=pab_te$y), reference=cbind(x=spp_tr$x,y=spp_tr$y))
+    cat("spatial sorting bias is:",sb[,1] / sb[,2],"\n")
+    
+    i <- pwdSample(cbind(x=spp_te$x,y=spp_te$y), cbind(x=pab_te$x,y=pab_te$y), cbind(x=spp_tr$x,y=spp_tr$y), n=1, tr=0.1, warn=F)
+    spp_te_pwd <- spp_te[!is.na(i[,1]),]
+    pab_te_pwd <- pab_te[na.omit(as.vector(i)),]
+    
+    sb2 <- ssb(cbind(x=spp_te_pwd$x,y=spp_te_pwd$y), cbind(x=pab_te_pwd$x,y=pab_te_pwd$y), cbind(x=spp_tr$x,y=spp_tr$y))
+    cat("corrected spatial sorting bias is:",sb2[1]/ sb2[2],"\n")
+    
+    #b. predict over test and training datasets, and over ssb-corrected dataset
+    pred_spp_tr <- predict(gd,spp_tr); pred_spp_te <- predict(gd,spp_te) #presence
+    pred_pab_tr <- predict(gd,pab_tr); pred_pab_te <- predict(gd,pab_te) #pseudo-absence
+    pred_pwd_spp <- predict(gd,spp_te_pwd); pred_pwd_pab <- predict(gd,pab_te_pwd)
+    
+    #c. calculate respective AUC values
+    eval_bc <- evaluate(p=pred_pwd_spp, a=pred_pwd_pab)
+    eval_te <- evaluate(p=pred_spp_te, a=pred_pab_te)
+    eval_tr <- evaluate(p=pred_spp_tr, a=pred_pab_tr)
+    #c_auc <- eval_te@auc + .5 - max(c(0.5,eval_bc@auc))
+    
+    cat("training AUC is",eval_tr@auc,"\n")
+    cat("test AUC is",eval_te@auc,"\n")
+    cat("test AUC (bias corrected) is",eval_bc@auc,"\n")
+    
+    #d. calculate other evaluation metrics for the null model
+    tss_tr <- getEvalMetric(fit_vals=c(pred_spp_tr,pred_pab_tr),
+                            obs_vals=c(rep(1,length(pred_spp_tr)),rep(0,length(pred_pab_tr))),
+                            tstat='TSS')
+    tss_te <- getEvalMetric(fit_vals=c(pred_spp_te,pred_pab_te),
+                            obs_vals=c(rep(1,length(pred_spp_te)),rep(0,length(pred_pab_te))),
+                            tstat='TSS')
+    tss_bc <- getEvalMetric(fit_vals=c(pred_pwd_spp,pred_pwd_pab),
+                            obs_vals=c(rep(1,length(pred_pwd_spp)),rep(0,length(pred_pwd_pab))),
+                            tstat='TSS')
+    
+    kappa_tr <- getEvalMetric(fit_vals=c(pred_spp_tr,pred_pab_tr),
+                              obs_vals=c(rep(1,length(pred_spp_tr)),rep(0,length(pred_pab_tr))),
+                              tstat='KAPPA')
+    kappa_te <- getEvalMetric(fit_vals=c(pred_spp_te,pred_pab_te),
+                              obs_vals=c(rep(1,length(pred_spp_te)),rep(0,length(pred_pab_te))),
+                              tstat='KAPPA')
+    kappa_bc <- getEvalMetric(fit_vals=c(pred_pwd_spp,pred_pwd_pab),
+                              obs_vals=c(rep(1,length(pred_pwd_spp)),rep(0,length(pred_pwd_pab))),
+                              tstat='KAPPA')
+    
+    
+    #7. final object of model eval
+    null_eval <- data.frame(NPR_FIT=nrow(spp_tr),NAB_FIT=nrow(pab_tr),NPR_TST=nrow(spp_te),NAB_TST=nrow(pab_te),
+                            SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_tr@auc,AUC_TST=eval_te@auc,AUC_SSB=eval_bc@auc,
+                            TSS_FIT=tss_tr,TSS_TST=tss_te,TSS_SSB=tss_bc,KAPPA_FIT=kappa_tr,KAPPA_TST=kappa_te,KAPPA_SSB=kappa_bc)
+    
+    #8. save object
+    cat("saving final object\n")
+    save(list=c("null_eval","eval_bc","eval_te","eval_tr"),file=paste(out_dir,"/evaluation.RData",sep=""))
+  } else {
+    cat("already fitted and evaluated\n")
+  }
+  return(out_dir)
+}
+
+
 #function to run a model with provided configuration
 run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="model_fit") {
   require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
@@ -125,7 +244,6 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     
     #6. model evaluation
     #evaluate model against left-out presences and pseudo-absences
-    #function find.optim.stat(Stat=ROC,)
     
     #a. calculate spatial sorting bias as the ratio of the (min) distance between
     #testing pres. and training pres. divided by testing abs. and train pres.
@@ -168,10 +286,18 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     #eval_u = evaluation with all evaluation data
     #eval_c = evaluation with bias-corrected data
     #eval_t = evaluation with training data
+    
+    #load null model auc
+    load(paste(mod_dir,"/NULL/PA-",npa,"_SD-",seed,"/evaluation.RData",sep=""))
+    rm(eval_bc); rm(eval_te); rm(eval_tr)
+    
     eval_u <- evaluate(p=spp_pred, a=pab_pred)
     eval_c <- evaluate(p=spp_pwd_pred, a=pab_pwd_pred)
     eval_t <- evaluate(p=spp_tr_pred, a=pab_tr_pred)
-    c_auc <- eval_u@auc + .5 - max(c(0.5,eval_c@auc))
+    
+    #calculate cauc
+    c_auc <- eval_u@auc + 0.5 - max(c(0.5,null_eval$AUC_TST))
+    c_auc2 <- eval_u@auc + 0.5 - max(c(0.5,eval_c@auc))
     
     #calculate TSS and Kappa
     tss_u <- getEvalMetric(fit_vals=c(spp_pred,pab_pred),
@@ -190,7 +316,8 @@ run_model <- function(base_dir,env_dir,spp_name,seed,npa,alg,vset,model_class="m
     
     #final object of model eval
     sp_mEval <- data.frame(NPR_FIT=nrow(spp_tr),NAB_FIT=nrow(pab_tr),NPR_TST=nrow(spp_te),NAB_TST=nrow(pab_te),
-                           SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_t@auc,AUC_TST=eval_u@auc,AUC_SSB=c_auc,
+                           SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_t@auc,
+                           AUC_TST=eval_u@auc,AUC_SSB=eval_c@auc,C_AUC=c_auc,C_AUC2=c_auc2,
                            TSS_FIT=tss_t,TSS_TST=tss_u,KAPPA_FIT=kappa_t,KAPPA_TST=kappa_u)
     
     #save object with all necessary details
