@@ -1,5 +1,5 @@
 #JRV May 2013
-#process Andean occurrence data
+#process occurrence data
 stop("dont run")
 
 ##############################
@@ -70,6 +70,25 @@ npaList <- c(3893,2748,9121,2031,9559)
 #list of models
 modList <- c('GLM','GAM','GBM','RF','MAXENT')
 
+
+#######################################################
+#######################################################
+# geographically null model
+#experimental matrix
+all_runs <- expand.grid(NPA=npaList,SEED=seedList)
+
+#some testing runs
+for (run_i in 1:nrow(all_runs)) {
+  #run_i <- 1 #23
+  this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
+  this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
+  
+  #run model
+  odir <- run_null_model(base_dir=sdmDir,env_dir=envDir,spp_name=this_sppName,
+                         seed=this_seed,npa=this_npa)
+}
+
+
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList,VSET=varList$SET_ID)
 
@@ -94,6 +113,7 @@ for (run_i in 1:nrow(all_runs)) {
                     seed=this_seed,npa=this_npa,alg=this_alg,vset=this_vset)
   
 }
+
 
 
 

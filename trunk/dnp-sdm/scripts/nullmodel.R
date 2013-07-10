@@ -43,7 +43,7 @@ this_sppName <- "bixa_final" #species name
 
 #### 
 #some testing runs
-for (run_i in 1:100) {
+for (run_i in 1:nrow(all_runs)) {
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
   odir <- run_null_model(bDir,sppName=this_sppName,seed=this_seed,npa=this_npa)
