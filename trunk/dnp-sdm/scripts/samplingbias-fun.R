@@ -6,7 +6,7 @@
 ############################################################
 
 #function to run a model with provided configuration
-proj_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
+proj_bias_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
   require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
   
   #i/o dirs
@@ -227,8 +227,8 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
     sp_mOpt@RF$ntree <- 1000
     #sp_mOpt@RF$do.classif <- F
     #sp_mOpt@RF$mtry <- 2
-    #sp_mOpt@ANN$maxit <- 1000
-    #sp_mOpt@ANN$NbCV <- 10
+    sp_mOpt@ANN$maxit <- 1000
+    sp_mOpt@ANN$NbCV <- 5
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")

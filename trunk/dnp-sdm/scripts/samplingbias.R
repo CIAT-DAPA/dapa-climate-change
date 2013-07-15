@@ -35,7 +35,7 @@ source(paste(src.dir,"/scripts/samplingbias-fun.R",sep=""))
 npaList <- c(3829, 1922, 1945, 5484, 2125, 8746, 2187, 1521, 9623, 1561)
 
 #list of models
-modList <- c('GLM','GAM','GBM','RF','MAXENT')
+modList <- c('GLM','GAM','GBM','RF','ANN','MAXENT')
 
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList)
@@ -57,7 +57,7 @@ for (run_i in 1:nrow(all_runs)) {
   #run_i <- 4 #23
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
-  odir <- proj_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
+  odir <- proj_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
 }
 
 # set.seed(71)
