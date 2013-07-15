@@ -41,7 +41,7 @@ modList <- c('GLM','GAM','GBM','RF','ANN','MAXENT')
 all_runs <- expand.grid(ALG=modList,NPA=npaList)
 
 #species name and configuration of run
-this_sppName <- "Bixa_orel" #species name
+this_sppName <- "Jaca_cauc" #species name
 
 #this is the loop for the runs
 for (run_i in 1:nrow(all_runs)) {
