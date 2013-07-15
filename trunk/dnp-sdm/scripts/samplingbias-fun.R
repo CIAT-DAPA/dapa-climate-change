@@ -141,7 +141,7 @@ run_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
   
   #2. load species data (from occurrences dir)
   if (!file.exists(paste(dataDir,"/",genName,"_sbias_occ.csv",sep=""))) {
-    spp_data <- read.csv(paste(dataDir,"/",genName,".txt",sep=""))
+    spp_data <- read.csv(paste(dataDir,"/",genName,".txt",sep=""),sep="\t")
     spp_data <- spp_data[,c("ID","LONGITUDE","LATITUDE")]
     
     #extract env data for spp data
