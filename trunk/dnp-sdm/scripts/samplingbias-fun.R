@@ -6,7 +6,56 @@
 ############################################################
 
 #function to run a model with provided configuration
-proj_bias_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
+make_bias_file <- function(bDir,sppName,alg) {
+  require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
+  
+  #i/o dirs
+  prjDir <- paste(bDir,"/samplebias_prj",sep="")
+  bgDir <- paste(bDir,"/bg-areas",sep="")
+  
+  #genus name
+  genName <- unlist(strsplit(sppName,"_",fixed=T))[1]
+  out_dir <- paste(bgDir,"/",sppName,"/sampling_bias",sep="")
+  if (!file.exists(out_dir)) {dir.create(out_dir)}
+  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("averaging a",alg,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  #process only if it doesnt exist
+  if (!file.exists(paste(out_dir,"/sampling_bias_",alg,".RData",sep=""))) {
+    cat("loading pre-existing background data\n")
+    load(paste(bgDir,"/",sppName,"/",sppName,"_sbias_bg_env_30s.RData",sep=""))
+    bg_data$bias <- 0
+    
+    cat("loading bias probabilities\n")
+    for (npa in npaList) {
+      #npa <- npaList[1]
+      inp_dir <- paste(prjDir,"/",alg,"/PA-",npa,"/",genName,sep="")
+      load(paste(inp_dir,"/",genName,"_sbias_pa-",npa,".RData",sep=""))
+      bg_data$bias <- bg_data$bias + prjVect
+      rm(prjVect); g=gc(); rm(g)
+    }
+    cat("loading bias probabilities\n")
+    bg_data$bias <- bg_data$bias / length(npaList)
+    bg_bias <- bg_data[,c("cell","x","y","bias")]
+    rm(bg_data); g=gc(); rm(g)
+    
+    cat("put into raster\n")
+    msk <- raster(paste(bgDir,"/",sppName,"/",sppName,".tif",sep=""))
+    msk[] <- NA; msk[bg_bias$cell] <- bg_bias$bias
+    
+    #save objects
+    cat("write data in RData files, and raster\n")
+    msk <- writeRaster(msk,paste(out_dir,"/sampling_bias_",alg,".tif",sep=""),format="GTiff")
+    save(list=c("bg_bias"),file=paste(out_dir,"/sampling_bias_",alg,".RData",sep=""),compress=T)
+  }
+}
+
+
+
+#function to run a model with provided configuration
+proj_bias_model <- function(bDir,sppName,npa,alg,model_class="model_fit") {
   require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
   
   #i/o dirs

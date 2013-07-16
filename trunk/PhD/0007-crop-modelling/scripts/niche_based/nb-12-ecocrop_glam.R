@@ -70,7 +70,7 @@ ecoRuns <- skill$RUN[which(skill$SEL)]
 #load ecocrop data
 for (runID in ecoRuns) {
   #runID <- ecoRuns[1]
-  ecors <- raster(paste(ecoDir,"/proj/baseline/clm_1966_1993/run_",runID,"/",cropName,"_suitability.tif",sep=""))
+  ecors <- raster(paste(ecoDir,"/proj/baseline/clm_1966_1993/run_",runID,"/",cropName,"_tsuitability.tif",sep=""))
   sbar <- extract(ecors,cells[,c("X","Y")])
   sbar <- cbind(cells[,c("CELL","X","Y")],VALUE=sbar)
   names(sbar)[ncol(sbar)] <- paste("RUN.",runID,sep="")
@@ -142,7 +142,7 @@ bp <- boxplot(all_egm$value ~ all_egm$CLASS,pch=NA,ylim=c(0,1),las=2,col="grey",
               ylab="Mean normalised GLAM yield",#xlab="Suitability class",
               names=paste(ecoclass$INI[2:21]," - ",ecoclass$END[2:21],sep=""))
 grid()
-medvals <- data.frame(class=1:20,value=bp$stats[3,])
+medvals <- data.frame(class=1:ncol(bp$stats),value=bp$stats[3,])
 require(splines)
 cubic.lm <- lm(value ~ poly(class, 3),data=medvals)
 lines(medvals$class, cubic.lm$fitted.values, type="l", col="red")
@@ -198,51 +198,74 @@ dev.off()
 
 ###
 ### using yield and suitability calculate the I, and RR
-out_simil <- data.frame()
-for (runID in c(ecoRuns,"MEAN")) {
-  #runID <- ecoRuns[1]
-  sbar <- data.frame(CELL=sbar_all$CELL,SUIT=sbar_all[,paste("RUN.",runID,sep="")])
-  for (expID in c(expSel,"MEAN")) {
-    #expID <- expSel[1]
-    cat(runID,"and",expID,"\n")
-    ynorm <- data.frame(CELL=ynor_all$CELL,YNORM=ynor_all[,paste("EXP.",expID,sep="")])
-    sydata <- merge(sbar,ynorm,by="CELL")
-    sydata <- sydata[which(!is.na(sydata$SUIT)),]; sydata <- sydata[which(!is.na(sydata$YNORM)),]
-    
-    #normalise data
-    sydata$SUIT <- sydata$SUIT / sum(sydata$SUIT)
-    sydata$YNORM <- sydata$YNORM / sum(sydata$YNORM)
-    
-    #calculate I
-    ival <- 1-.5*sqrt(sum((sqrt(sydata$YNORM)-sqrt(sydata$SUIT))^2))
-    
-    #calculate RR
-    if (nrow(sydata)%%2 != 0) {sydata <- sydata[-sample(1:nrow(sydata),size=1,replace=F),]; rownames(sydata) <- 1:nrow(sydata)}
-    rr <- c()
-    for (i in 1:5) {
-      sydata$SAMPLED <- F
-      c_match <- 0; c_all <- 0
-      while (length(which(sydata$SAMPLED)) != nrow(sydata)) {
-        ssel <- sample(1:nrow(sydata),2,replace=F)
-        sydata$SAMPLED[ssel] <- T
-        sdif_e <- diff(c(sydata$SUIT[ssel[1]],sydata$SUIT[ssel[2]]))
-        sdif_g <- diff(c(sydata$YNORM[ssel[1]],sydata$YNORM[ssel[2]]))
-        if (sign(sdif_e) == sign(sdif_g)) {c_match <- c_match + 1}
-        c_all <- c_all + 1
+if (!file.exists(paste(syDir,"/model_similarity.csv",sep=""))) {
+  out_simil <- data.frame()
+  for (runID in c(ecoRuns,"MEAN")) {
+    #runID <- ecoRuns[1]
+    sbar <- data.frame(CELL=sbar_all$CELL,SUIT=sbar_all[,paste("RUN.",runID,sep="")])
+    for (expID in c(expSel,"MEAN")) {
+      #expID <- expSel[1]
+      cat(runID,"and",expID,"\n")
+      ynorm <- data.frame(CELL=ynor_all$CELL,YNORM=ynor_all[,paste("EXP.",expID,sep="")])
+      sydata <- merge(sbar,ynorm,by="CELL")
+      sydata <- sydata[which(!is.na(sydata$SUIT)),]; sydata <- sydata[which(!is.na(sydata$YNORM)),]
+      
+      #normalise data
+      sydata$SUIT <- sydata$SUIT / sum(sydata$SUIT)
+      sydata$YNORM <- sydata$YNORM / sum(sydata$YNORM)
+      
+      #calculate I
+      ival <- 1-.5*sqrt(sum((sqrt(sydata$YNORM)-sqrt(sydata$SUIT))^2))
+      
+      #calculate RR
+      if (nrow(sydata)%%2 != 0) {sydata <- sydata[-sample(1:nrow(sydata),size=1,replace=F),]; rownames(sydata) <- 1:nrow(sydata)}
+      rr <- c()
+      for (i in 1:5) {
+        sydata$SAMPLED <- F
+        c_match <- 0; c_all <- 0
+        while (length(which(sydata$SAMPLED)) != nrow(sydata)) {
+          ssel <- sample(1:nrow(sydata),2,replace=F)
+          sydata$SAMPLED[ssel] <- T
+          sdif_e <- diff(c(sydata$SUIT[ssel[1]],sydata$SUIT[ssel[2]]))
+          sdif_g <- diff(c(sydata$YNORM[ssel[1]],sydata$YNORM[ssel[2]]))
+          if (sign(sdif_e) == sign(sdif_g)) {c_match <- c_match + 1}
+          c_all <- c_all + 1
+        }
+        rr <- c(rr,c_match/c_all)
       }
-      rr <- c(rr,c_match/c_all)
+      rr <- mean(rr,na.rm=T)
+      odf <- data.frame(RUN=runID,EXP=expID,I=ival,RR=rr)
+      out_simil <- rbind(out_simil,odf)
     }
-    rr <- mean(rr,na.rm=T)
-    odf <- data.frame(RUN=runID,EXP=expID,I=ival,RR=rr)
-    out_simil <- rbind(out_simil,odf)
   }
+  write.csv(out_simil,paste(syDir,"/model_similarity.csv",sep=""),row.names=F,quote=T)
+} else {
+  out_simil <- read.csv(paste(syDir,"/model_similarity.csv",sep=""))
 }
 
+sim_mm <- out_simil[which(out_simil$RUN == "MEAN" & out_simil$EXP == "MEAN"),]
 
+#plotting niche overlap
+hd <- hist(out_simil$I,breaks=seq(0,1,by=0.05),plot=F)
+tiff(paste(syDir,"/pdf_niche_overlap.tiff",sep=""),res=300,pointsize=10,
+     width=1900,height=1700,units="px",compression="lzw")
+par(mar=c(5,4.5,1,1),cex=1)
+plot(hd$mids,(hd$counts/sum(hd$counts)*100),ty="l",xlim=c(0.5,1),ylim=c(0,50),
+     xlab="Niche overlap (I)", ylab="pdf (%)")
+abline(v=sim_mm$I,col="red",lty=2)
+grid()
+dev.off()
 
-
-
-
+#plotting relative rank score
+hd <- hist(out_simil$RR,breaks=seq(0,1,by=0.05),plot=F)
+tiff(paste(syDir,"/pdf_rank_score.tiff",sep=""),res=300,pointsize=10,
+     width=1900,height=1700,units="px",compression="lzw")
+par(mar=c(5,4.5,1,1),cex=1)
+plot(hd$mids,(hd$counts/sum(hd$counts)*100),ty="l",xlim=c(0,0.6),ylim=c(0,50),
+     xlab="Relative rank score (RR)", ylab="pdf (%)")
+abline(v=sim_mm$RR,col="red",lty=2)
+grid()
+dev.off()
 
 
 #(3) GLAM’s simulated potential yield was then regressed against suitability

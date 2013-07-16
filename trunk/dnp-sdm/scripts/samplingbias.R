@@ -60,14 +60,13 @@ for (run_i in 1:nrow(all_runs)) {
   odir <- proj_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
 }
 
-# set.seed(71)
-# iris2 <- iris
-# iris2$Petal.Width[which(iris$Petal.Width <= 1)] <- 1
-# iris2$Petal.Width[which(iris$Petal.Width > 1)] <- 0
-# #iris2$Petal.Width <- as.factor(iris2$Petal.Width)
-# iris.rf <- randomForest(Petal.Width ~ ., data=iris2, importance=TRUE,
-#                         proximity=TRUE,norm.votes = TRUE,ntree=100)
-# print(iris.rf)
-# prd <- as.numeric(predict(iris.rf,iris))
+
+#projection of models
+for (this_alg in modList) {
+  #this_alg <- modList[1] #modelling algorithm
+  make_bias_file <- proj_bias_model(bDir,sppName=this_sppName,alg=this_alg) 
+}
+
+
 
 
