@@ -40,7 +40,9 @@ bDir <- "/nfs/a102/eejarv/DNP-biodiversity"
 setwd(bDir)
 
 #source functions
-source(paste(bDir,"/scripts/modelfit-fun.R",sep=""))
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/dnp-sdm"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/dnp-sdm"
+source(paste(src.dir,"/scripts/modelfit-fun.R",sep=""))
 
 #lists of variables
 varList <- data.frame(SET_ID=1:8,CLIM=c(rep("full",times=4),rep("subset",times=4)),
@@ -63,7 +65,7 @@ null_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList)
 this_sppName <- "Jaca_cauc" #species name
 
 #null model fits
-for (run_i in 1:5) {
+for (run_i in 1:nrow(null_runs)) {
   #run_i <- 1 #23
   this_seed <- as.numeric(paste(null_runs$SEED[run_i])) #seed for the cross validation
   this_alg <- paste(null_runs$ALG[run_i]) #modelling algorithm
@@ -74,7 +76,7 @@ for (run_i in 1:5) {
 
 
 #actual model runs
-for (run_i in 1:5) {
+for (run_i in 1:6) {
   #run_i <- 1 #23
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)

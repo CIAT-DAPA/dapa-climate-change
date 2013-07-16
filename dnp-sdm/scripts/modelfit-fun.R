@@ -30,7 +30,8 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
   #3. load background data / create if needs be
   pab_data <- get_pa(spp_name=sppName,
                      spp_data=read.csv(paste(dataDir,"/",sppName,"/",sppName,"_full.csv",sep="")),
-                     n_pa=npa,bg_dir=bgDir,bio_dir=bioDir,soil_dir=solDir,topo_dir=topDir)
+                     alg=alg,n_pa=npa,bg_dir=bgDir,bio_dir=bioDir,soil_dir=solDir,
+                     topo_dir=topDir,size=14285)
   pab_data <- pab_data[,names(spp_data)] #remove extra variables
   
   #run only if final stored objects do not exist
@@ -40,11 +41,8 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     cat("-------------------------------------------------------\n")
     
     #if soil is within variables to be modelled then make factor else remove from data.frame
-    if (varList$SOIL[vset]) {
-      #commented out JRV because ordinal variables are treated as continuous
-      #spp_data$soildrain_final <- as.factor(spp_data$soildrain_final)
-      #pab_data$soildrain_final <- as.factor(pab_data$soildrain_final)
-    } else {
+    #note: soil is an "ordinal" variable, discrete scale but it's a sequence
+    if (!varList$SOIL[vset]) {
       spp_data$soildrain_final <- NULL
       pab_data$soildrain_final <- NULL
     }
@@ -55,8 +53,8 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
       pab_data$aspect <- NULL; pab_data$slope <- NULL
     }
     
-    #4. select 25 % test data using a given seed 
-    cat("selecting train/test data using given seed\n")
+    #4. select 30 % test data using a given seed 
+    cat("selecting 30/70 % train/test data using given seed\n")
     set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.30),0))
     set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.30),0))
     
@@ -88,15 +86,14 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     #selecting model features (!change features as needed)
     sp_mOpt <- BIOMOD_ModelingOptions()
     sp_mOpt@MAXENT$path_to_maxent.jar <- maxDir
-    sp_mOpt@MAXENT$maximumiterations <- 500
+    sp_mOpt@MAXENT$maximumiterations <- 1000
     sp_mOpt@GBM$n.trees <- 2000
     sp_mOpt@GLM$control$maxit <- 100
+    sp_mOpt@GLM$type <- "simple" #simple | quadratic | polynomial
+    sp_mOpt@GAM$k <- 3
     sp_mOpt@RF$ntree <- 1000
-    #sp_mOpt@RF$do.classif <- F
-    #sp_mOpt@RF$mtry <- 2
-    #sp_mOpt@GLM$interaction.level <- 1 #removed: JRV Jun 9 (interaction takes too long)
-    #sp_mOpt@GLM$type <- "quadratic" #simple | quadratic | polynomial
-    #sp_mOpt@ANN$maxit <- 500
+    sp_mOpt@ANN$maxit <- 1000
+    sp_mOpt@ANN$NbCV <- 5
     
     #perform the modelling
     out_obj <- paste(outDir,"/",sp_bData@sp.name,"/",sp_bData@sp.name,".",model_class,".models.out",sep="")
@@ -168,7 +165,10 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     eval_u <- evaluate(p=spp_pred, a=pab_pred)
     eval_c <- evaluate(p=spp_pwd_pred, a=pab_pwd_pred)
     eval_t <- evaluate(p=spp_tr_pred, a=pab_tr_pred)
-    c_auc <- eval_u@auc + .5 - max(c(0.5,eval_c@auc))
+    
+    #calculate c_auc: to do that i need to load the geographically null model
+    load(file=paste(modDir,"/",alg,"_NULL/SD-",seed,"/EVAL/",sppName,"/PA-",npa,".RData",sep=""))
+    c_auc <- eval_u@auc + .5 - max(c(0.5,null_eval$AUC_TST))
     
     #calculate TSS and Kappa
     tss_u <- getEvalMetric(fit_vals=c(spp_pred,pab_pred),
@@ -187,7 +187,8 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     
     #final object of model eval
     sp_mEval <- data.frame(NPR_FIT=nrow(spp_tr),NAB_FIT=nrow(pab_tr),NPR_TST=nrow(spp_te),NAB_TST=nrow(pab_te),
-                           SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_t@auc,AUC_TST=eval_u@auc,AUC_SSB=c_auc,
+                           SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_t@auc,AUC_TST=eval_u@auc,
+                           AUC_SSB=eval_c@auc,C_AUC=c_auc,
                            TSS_FIT=tss_t,TSS_TST=tss_u,KAPPA_FIT=kappa_t,KAPPA_TST=kappa_u)
     
     #save object with all necessary details
@@ -237,7 +238,7 @@ run_null_model <- function(bDir,sppName,alg,seed,npa) {
     
     #3. load background data / create if needs be
     pab_data <- get_pa(spp_name=sppName,spp_data=spp_data,alg=alg,n_pa=npa,bg_dir=bgDir,
-                       bio_dir=bioDir,soil_dir=solDir,topo_dir=topDir,size=12500)
+                       bio_dir=bioDir,soil_dir=solDir,topo_dir=topDir,size=14285)
     
     #remove extra variables
     spp_data <- spp_data[,c("x","y")]
