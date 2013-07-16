@@ -537,7 +537,7 @@ for (rw in rwList) {
     #suf <- "_"
     cat("\nRUN:", rw, "- SUF:", suf)
     
-    if (!file.exists(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs_upd.RData",sep=""))) {
+    if (!file.exists(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs.RData",sep=""))) {
       s_rs <- raster(paste(runDir,"/run_",rw,"/", crop_name, suf, "suitability.tif", sep=""))
       
       #evaluating
@@ -545,16 +545,16 @@ for (rw in rwList) {
                                filename=paste("roc_run-",rw,suf,"suitability.jpg",sep=""))
       
       #saving
-      save(list=c("eco_eval"),file=paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs_upd.RData",sep=""))
+      save(list=c("eco_eval"),file=paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs.RData",sep=""))
     } else {
-      load(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs_upd.RData",sep=""))
+      load(paste(runDir,"/run_",rw,"/evaluation",suf,"suitability_realabs.RData",sep=""))
     }
     met_table <- cbind(RUN=rw, TYPE=paste(suf, "suitability", sep=""), eco_eval$METRICS)
     rm(eco_eval); g=gc(); rm(g) #cleanup
     eval_all <- rbind(eval_all,met_table)
   }
 }
-write.csv(eval_all, paste(dataDir,"/realabs_evaluation_upd.csv",sep=""), row.names=F)
+write.csv(eval_all, paste(dataDir,"/realabs_evaluation.csv",sep=""), row.names=F)
 
 
 

@@ -5,131 +5,6 @@
 ### functions to fit models using BIOMOD2 library
 ############################################################
 
-#function to fit and evaluate a geographically null model with provided configuration
-run_null_model <- function(bDir,sppName,seed,npa) {
-  require(biomod2); require(raster); require(dismo)
-  
-  #i/o dirs
-  dataDir <- paste(bDir,"/vif-analysis",sep="")
-  modDir <- paste(bDir,"/models",sep="")
-  bgDir <- paste(bDir,"/bg-areas",sep="")
-  envDir <- paste(bDir,"/env-data",sep="")
-  bioDir <- paste(envDir,"/bioclim_gtiff",sep="")
-  solDir <- paste(envDir,"/soil",sep="")
-  topDir <- paste(envDir,"/topography",sep="")
-  
-  cat("\nanalysing seed=",seed,"with",npa,"pseudo absences\n")
-  
-  #1. output model and config directory
-  cat("loading presence and pseudo-absence data\n")
-  outDir <- paste(modDir,"/NULL/SD-",seed,sep="")
-  if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
-  
-  outgdDir <- paste(outDir,"/GD_MODEL/",sppName,sep="")
-  if (!file.exists(outgdDir)) {dir.create(outgdDir,recursive=T)}
-  
-  outevDir <- paste(outDir,"/EVAL/",sppName,sep="")
-  if (!file.exists(outevDir)) {dir.create(outevDir,recursive=T)}
-  
-  if (!file.exists(paste(outevDir,"/PA-",npa,".RData",sep=""))) {
-    #2. load species data (from VIF analysis output)
-    spp_data <- read.csv(paste(dataDir,"/",sppName,"/",sppName,"_full.csv",sep="")) #full set
-    spp_data <- spp_data[,c("x","y")]
-    
-    #3. load background data / create if needs be
-    pab_data <- get_pa(spp_name=sppName,spp_data=spp_data,n_pa=npa,bg_dir=bgDir,bio_dir=bioDir,soil_dir=solDir,topo_dir=topDir)
-    pab_data <- pab_data[,c("x","y")] #remove extra variables
-    
-    #4. select train / test samples
-    cat("bootstrapped selection 25/75 % of data \n")
-    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.25),0))
-    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.25),0))
-    
-    spp_tr <- spp_data[-sp_sel,]; rownames(spp_tr) <- 1:nrow(spp_tr)
-    spp_te <- spp_data[sp_sel,]; rownames(spp_te) <- 1:nrow(spp_te)
-    
-    pab_tr <- pab_data[-pa_sel,]; rownames(pab_tr) <- 1:nrow(pab_tr)
-    pab_te <- pab_data[pa_sel,]; rownames(pab_te) <- 1:nrow(pab_te)
-    
-    #5. fit the geodist model
-    if (!file.exists(paste(outgdDir,"/output_geodist_null_model.RData",sep=""))) {
-      cat("fitting geographically null model\n")
-      gd <- geoDist(spp_tr,lonlat=T)
-      gd_model <- list(TRAIN_P=spp_tr,TEST_P=spp_te,TRAIN_PA=pab_tr,TEST_PA=pab_te,MODEL=gd)
-      save(list=c("gd_model"),file=paste(outgdDir,"/output_geodist_null_model.RData",sep=""))
-    } else {
-      cat("loading geographically null model\n")
-      load(file=paste(outgdDir,"/output_geodist_null_model.RData",sep=""))
-      gd <- gd_model$MODEL
-      rm(gd_model); g=gc(); rm(g)
-    }
-    
-    #6. model evaluation
-    #a. correct sampling strategy
-    cat("evaluating the model \n")
-    sb <- ssb(p=cbind(x=spp_te$x,y=spp_te$y), a=cbind(x=pab_te$x,y=pab_te$y), reference=cbind(x=spp_tr$x,y=spp_tr$y))
-    cat("spatial sorting bias is:",sb[,1] / sb[,2],"\n")
-    
-    i <- pwdSample(cbind(x=spp_te$x,y=spp_te$y), cbind(x=pab_te$x,y=pab_te$y), cbind(x=spp_tr$x,y=spp_tr$y), n=1, tr=0.1, warn=F)
-    spp_te_pwd <- spp_te[!is.na(i[,1]),]
-    pab_te_pwd <- pab_te[na.omit(as.vector(i)),]
-    
-    sb2 <- ssb(cbind(x=spp_te_pwd$x,y=spp_te_pwd$y), cbind(x=pab_te_pwd$x,y=pab_te_pwd$y), cbind(x=spp_tr$x,y=spp_tr$y))
-    cat("corrected spatial sorting bias is:",sb2[1]/ sb2[2],"\n")
-    
-    #b. predict over test and training datasets, and over ssb-corrected dataset
-    pred_spp_tr <- predict(gd,spp_tr); pred_spp_te <- predict(gd,spp_te) #presence
-    pred_pab_tr <- predict(gd,pab_tr); pred_pab_te <- predict(gd,pab_te) #pseudo-absence
-    pred_pwd_spp <- predict(gd,spp_te_pwd); pred_pwd_pab <- predict(gd,pab_te_pwd)
-    
-    #c. calculate respective AUC values
-    eval_bc <- evaluate(p=pred_pwd_spp, a=pred_pwd_pab)
-    eval_te <- evaluate(p=pred_spp_te, a=pred_pab_te)
-    eval_tr <- evaluate(p=pred_spp_tr, a=pred_pab_tr)
-    #c_auc <- eval_te@auc + .5 - max(c(0.5,eval_bc@auc))
-    
-    cat("training AUC is",eval_tr@auc,"\n")
-    cat("test AUC is",eval_te@auc,"\n")
-    cat("test AUC (bias corrected) is",eval_bc@auc,"\n")
-    
-    #d. calculate other evaluation metrics for the null model
-    tss_tr <- getEvalMetric(fit_vals=c(pred_spp_tr,pred_pab_tr),
-                            obs_vals=c(rep(1,length(pred_spp_tr)),rep(0,length(pred_pab_tr))),
-                            tstat='TSS')
-    tss_te <- getEvalMetric(fit_vals=c(pred_spp_te,pred_pab_te),
-                            obs_vals=c(rep(1,length(pred_spp_te)),rep(0,length(pred_pab_te))),
-                            tstat='TSS')
-    tss_bc <- getEvalMetric(fit_vals=c(pred_pwd_spp,pred_pwd_pab),
-                            obs_vals=c(rep(1,length(pred_pwd_spp)),rep(0,length(pred_pwd_pab))),
-                            tstat='TSS')
-    
-    kappa_tr <- getEvalMetric(fit_vals=c(pred_spp_tr,pred_pab_tr),
-                              obs_vals=c(rep(1,length(pred_spp_tr)),rep(0,length(pred_pab_tr))),
-                              tstat='KAPPA')
-    kappa_te <- getEvalMetric(fit_vals=c(pred_spp_te,pred_pab_te),
-                              obs_vals=c(rep(1,length(pred_spp_te)),rep(0,length(pred_pab_te))),
-                              tstat='KAPPA')
-    kappa_bc <- getEvalMetric(fit_vals=c(pred_pwd_spp,pred_pwd_pab),
-                              obs_vals=c(rep(1,length(pred_pwd_spp)),rep(0,length(pred_pwd_pab))),
-                              tstat='KAPPA')
-    
-    
-    #7. final object of model eval
-    null_eval <- data.frame(NPR_FIT=nrow(spp_tr),NAB_FIT=nrow(pab_tr),NPR_TST=nrow(spp_te),NAB_TST=nrow(pab_te),
-                            SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_tr@auc,AUC_TST=eval_te@auc,AUC_SSB=eval_bc@auc,
-                            TSS_FIT=tss_tr,TSS_TST=tss_te,TSS_SSB=tss_bc,KAPPA_FIT=kappa_tr,KAPPA_TST=kappa_te,KAPPA_SSB=kappa_bc)
-    
-    #8. save object
-    cat("saving final object\n")
-    save(list=c("null_eval"),file=paste(outevDir,"/PA-",npa,".RData",sep=""))
-  } else {
-    cat("already fitted and evaluated\n")
-  }
-  return(outevDir)
-}
-
-
-
 #function to run a model with provided configuration
 run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
   require(biomod2); require(raster); require(rgdal); require(maptools); require(dismo)
@@ -182,8 +57,8 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
     
     #4. select 25 % test data using a given seed 
     cat("selecting train/test data using given seed\n")
-    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.25),0))
-    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.25),0))
+    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.30),0))
+    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.30),0))
     
     spp_tr <- spp_data[-sp_sel,]; rownames(spp_tr) <- 1:nrow(spp_tr)
     spp_te <- spp_data[sp_sel,]; rownames(spp_te) <- 1:nrow(spp_te)
@@ -328,6 +203,134 @@ run_model <- function(bDir,sppName,seed,npa,alg,vset,model_class="model_fit") {
 }
 
 
+
+#function to fit and evaluate a geographically null model with provided configuration
+run_null_model <- function(bDir,sppName,alg,seed,npa) {
+  require(biomod2); require(raster); require(dismo)
+  
+  #i/o dirs
+  dataDir <- paste(bDir,"/vif-analysis",sep="")
+  modDir <- paste(bDir,"/models",sep="")
+  bgDir <- paste(bDir,"/bg-areas",sep="")
+  envDir <- paste(bDir,"/env-data",sep="")
+  bioDir <- paste(envDir,"/bioclim_gtiff",sep="")
+  solDir <- paste(envDir,"/soil",sep="")
+  topDir <- paste(envDir,"/topography",sep="")
+  
+  cat("\nanalysing seed=",seed,"and seed=",npa,"for pseudo absences for",alg,"\n")
+  
+  #1. output model and config directory
+  cat("creating directories\n")
+  outDir <- paste(modDir,"/",alg,"_NULL/SD-",seed,sep="")
+  if (!file.exists(outDir)) {dir.create(outDir,recursive=T)}
+  
+  outgdDir <- paste(outDir,"/GD_MODEL/",sppName,sep="")
+  if (!file.exists(outgdDir)) {dir.create(outgdDir,recursive=T)}
+  
+  outevDir <- paste(outDir,"/EVAL/",sppName,sep="")
+  if (!file.exists(outevDir)) {dir.create(outevDir,recursive=T)}
+  
+  if (!file.exists(paste(outevDir,"/PA-",npa,".RData",sep=""))) {
+    cat("loading presence and pseudo-absence data\n")
+    #2. load species data (from VIF analysis output)
+    spp_data <- read.csv(paste(dataDir,"/",sppName,"/",sppName,"_full.csv",sep="")) #full set
+    
+    #3. load background data / create if needs be
+    pab_data <- get_pa(spp_name=sppName,spp_data=spp_data,alg=alg,n_pa=npa,bg_dir=bgDir,
+                       bio_dir=bioDir,soil_dir=solDir,topo_dir=topDir,size=12500)
+    
+    #remove extra variables
+    spp_data <- spp_data[,c("x","y")]
+    pab_data <- pab_data[,c("x","y")]
+    
+    #4. select train / test samples
+    cat("bootstrapped selection 30/70 % of data \n")
+    set.seed(seed); sp_sel <- sample(1:nrow(spp_data),size=round((nrow(spp_data)*.30),0))
+    set.seed(seed); pa_sel <- sample(1:nrow(pab_data),size=round((nrow(pab_data)*.30),0))
+    
+    spp_tr <- spp_data[-sp_sel,]; rownames(spp_tr) <- 1:nrow(spp_tr)
+    spp_te <- spp_data[sp_sel,]; rownames(spp_te) <- 1:nrow(spp_te)
+    
+    pab_tr <- pab_data[-pa_sel,]; rownames(pab_tr) <- 1:nrow(pab_tr)
+    pab_te <- pab_data[pa_sel,]; rownames(pab_te) <- 1:nrow(pab_te)
+    
+    #5. fit the geodist model
+    if (!file.exists(paste(outgdDir,"/output_geodist_null_model.RData",sep=""))) {
+      cat("fitting geographically null model\n")
+      gd <- geoDist(spp_tr,lonlat=T)
+      gd_model <- list(TRAIN_P=spp_tr,TEST_P=spp_te,TRAIN_PA=pab_tr,TEST_PA=pab_te,MODEL=gd)
+      save(list=c("gd_model"),file=paste(outgdDir,"/output_geodist_null_model.RData",sep=""))
+    } else {
+      cat("loading geographically null model\n")
+      load(file=paste(outgdDir,"/output_geodist_null_model.RData",sep=""))
+      gd <- gd_model$MODEL
+      rm(gd_model); g=gc(); rm(g)
+    }
+    
+    #6. model evaluation
+    #a. correct sampling strategy
+    cat("evaluating the model \n")
+    sb <- ssb(p=cbind(x=spp_te$x,y=spp_te$y), a=cbind(x=pab_te$x,y=pab_te$y), reference=cbind(x=spp_tr$x,y=spp_tr$y))
+    cat("spatial sorting bias is:",sb[,1] / sb[,2],"\n")
+    
+    i <- pwdSample(cbind(x=spp_te$x,y=spp_te$y), cbind(x=pab_te$x,y=pab_te$y), cbind(x=spp_tr$x,y=spp_tr$y), n=1, tr=0.33, warn=F)
+    spp_te_pwd <- spp_te[!is.na(i[,1]),]
+    pab_te_pwd <- pab_te[na.omit(as.vector(i)),]
+    
+    sb2 <- ssb(cbind(x=spp_te_pwd$x,y=spp_te_pwd$y), cbind(x=pab_te_pwd$x,y=pab_te_pwd$y), cbind(x=spp_tr$x,y=spp_tr$y))
+    cat("corrected spatial sorting bias is:",sb2[1]/ sb2[2],"\n")
+    
+    #b. predict over test and training datasets, and over ssb-corrected dataset
+    pred_spp_tr <- predict(gd,spp_tr); pred_spp_te <- predict(gd,spp_te) #presence
+    pred_pab_tr <- predict(gd,pab_tr); pred_pab_te <- predict(gd,pab_te) #pseudo-absence
+    pred_pwd_spp <- predict(gd,spp_te_pwd); pred_pwd_pab <- predict(gd,pab_te_pwd)
+    
+    #c. calculate respective AUC values
+    eval_bc <- evaluate(p=pred_pwd_spp, a=pred_pwd_pab)
+    eval_te <- evaluate(p=pred_spp_te, a=pred_pab_te)
+    eval_tr <- evaluate(p=pred_spp_tr, a=pred_pab_tr)
+    
+    cat("training AUC is",eval_tr@auc,"\n")
+    cat("test AUC is",eval_te@auc,"\n")
+    cat("test AUC (bias corrected) is",eval_bc@auc,"\n")
+    
+    #d. calculate other evaluation metrics for the null model
+    tss_tr <- getEvalMetric(fit_vals=c(pred_spp_tr,pred_pab_tr),
+                            obs_vals=c(rep(1,length(pred_spp_tr)),rep(0,length(pred_pab_tr))),
+                            tstat='TSS')
+    tss_te <- getEvalMetric(fit_vals=c(pred_spp_te,pred_pab_te),
+                            obs_vals=c(rep(1,length(pred_spp_te)),rep(0,length(pred_pab_te))),
+                            tstat='TSS')
+    tss_bc <- getEvalMetric(fit_vals=c(pred_pwd_spp,pred_pwd_pab),
+                            obs_vals=c(rep(1,length(pred_pwd_spp)),rep(0,length(pred_pwd_pab))),
+                            tstat='TSS')
+    
+    kappa_tr <- getEvalMetric(fit_vals=c(pred_spp_tr,pred_pab_tr),
+                              obs_vals=c(rep(1,length(pred_spp_tr)),rep(0,length(pred_pab_tr))),
+                              tstat='KAPPA')
+    kappa_te <- getEvalMetric(fit_vals=c(pred_spp_te,pred_pab_te),
+                              obs_vals=c(rep(1,length(pred_spp_te)),rep(0,length(pred_pab_te))),
+                              tstat='KAPPA')
+    kappa_bc <- getEvalMetric(fit_vals=c(pred_pwd_spp,pred_pwd_pab),
+                              obs_vals=c(rep(1,length(pred_pwd_spp)),rep(0,length(pred_pwd_pab))),
+                              tstat='KAPPA')
+    
+    
+    #7. final object of model eval
+    null_eval <- data.frame(NPR_FIT=nrow(spp_tr),NAB_FIT=nrow(pab_tr),NPR_TST=nrow(spp_te),NAB_TST=nrow(pab_te),
+                            SSB1=(sb[,1] / sb[,2]),SSB2=(sb2[,1] / sb2[,2]),AUC_FIT=eval_tr@auc,AUC_TST=eval_te@auc,AUC_SSB=eval_bc@auc,
+                            TSS_FIT=tss_tr,TSS_TST=tss_te,TSS_SSB=tss_bc,KAPPA_FIT=kappa_tr,KAPPA_TST=kappa_te,KAPPA_SSB=kappa_bc)
+    
+    #8. save object
+    cat("saving final object\n")
+    save(list=c("null_eval"),file=paste(outevDir,"/PA-",npa,".RData",sep=""))
+  } else {
+    cat("already fitted and evaluated\n")
+  }
+  return(outevDir)
+}
+
+
 #adaptation of biomod2 function Find.Optim.Stat
 getEvalMetric <- function(fit_vals,obs_vals,tstat='TSS') {
   if (length(unique(obs_vals)) == 1 | length(unique(fit_vals)) == 1) {
@@ -347,24 +350,27 @@ getEvalMetric <- function(fit_vals,obs_vals,tstat='TSS') {
     }
   }
   calcStat <- sapply(lapply(valToTest, function(x) {return(table(fit_vals > x, obs_vals))}), calculate.stat, stat = tstat)
-  #calcStat <- 1 - abs(getStatOptimValue(tstat) - calcStat) #unsure of reasons for this (i.e. irrelevant for kappa and TSS)
   bestStat <- max(calcStat, na.rm = T)
   return(bestStat)
 }
 
 
 ### function to get a given number of pseudo-absences (with env data)
-get_pa <- function(spp_name,spp_data,n_pa,bg_dir,bio_dir,soil_dir,topo_dir) {
+get_pa <- function(spp_name,spp_data,alg,n_pa,bg_dir,bio_dir,soil_dir,topo_dir,size=12500) {
   #check existence
-  if (!file.exists(paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))) {
-    cat("pseudo-absences don't exist yet, drawing...",n_pa," pseudo absences\n")
+  if (!file.exists(paste(bg_dir,"/",spp_name,"/sdm_",alg,"_bg_",n_pa,".RData",sep=""))) {
+    cat("pseudo-absences don't exist yet, drawing pseudo-absences seed=",n_pa,"\n")
+    
     #background area loading / creation
-    bg_df <- load_bg(spp_name,bg_dir,bio_dir,soil_dir,topo_dir)
+    bg_file <- paste(bg_dir,"/",spp_name,"/sampling_bias/sampling_bias_",alg,".RData",sep="")
+    load(bg_file); bg_df <- bg_bias; rm(bg_bias); g=gc(); rm(g)
+    bg_df$bias <- bg_df$bias / sum(bg_df$bias)
     
     #select PA from bg_df (without defining seed)
     cat("sampling\n")
-    pa_sel <- sample(1:nrow(bg_df),n_pa*1.5)
+    set.seed(n_pa); pa_sel <- sample(1:nrow(bg_df),size,prob=bg_df$bias)
     bg_sel <- bg_df[pa_sel,]; rm(bg_df); g=gc(); rm(g)
+    bg_sel <- bg_sel[,c("x","y")]
     rownames(bg_sel) <- 1:nrow(bg_sel)
     
     #5. extract climate data for pseudo absences
@@ -390,80 +396,19 @@ get_pa <- function(spp_name,spp_data,n_pa,bg_dir,bio_dir,soil_dir,topo_dir) {
     bg_data$NAs <- apply(bg_data,1,FUN=function(x) {nac <- length(which(is.na(x))); return(nac)})
     bg_data <- bg_data[which(bg_data$NAs == 0),]
     bg_data$NAs <- NULL
-    bg_data <- bg_data[1:n_pa,]
     rownames(bg_data) <- 1:nrow(bg_data)
     
     #write both objects into RData file
     cat("saving...\n")
-    write.csv(bg_data,paste(bg_dir,"/",spp_name,"/bg_",n_pa,".csv",sep=""),row.names=F,quote=T)
-    save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))
+    write.csv(bg_data,paste(bg_dir,"/",spp_name,"/sdm_",alg,"_bg_",n_pa,".csv",sep=""),row.names=F,quote=T)
+    save(list=c("bg_data"),file=paste(bg_dir,"/",spp_name,"/sdm_",alg,"_bg_",n_pa,".RData",sep=""))
   } else {
     cat("pseudo-absences did exist, loading...\n")
-    load(file=paste(bg_dir,"/",spp_name,"/bg_",n_pa,".RData",sep=""))
+    load(file=paste(bg_dir,"/",spp_name,"/sdm_",alg,"_bg_",n_pa,".RData",sep=""))
   }
   return(bg_data)
 }
 
-
-#### load background area / create if doesnt exist
-load_bg <- function(spp_name,back_dir,bio_dir,soil_dir,topo_dir) {
-  #filename
-  bg_file <- paste(back_dir,"/",spp_name,"/",spp_name,"_bg.RData",sep="")
-  if (!file.exists(bg_file)) {
-    cat("creating background area as it didn't exist\n")
-    
-    #load verification files
-    msk <- raster(paste(bio_dir,"/bio_1.tif",sep=""))
-    other_rs <- c(paste(soil_dir,"/soildrain_final.tif",sep=""), 
-                  paste(topo_dir,"/aspect.tif",sep=""),
-                  paste(topo_dir,"/slope.tif",sep=""))
-    
-    #rasterize the shapefile
-    if (!file.exists(paste(back_dir,"/",spp_name,"/",spp_name,".tif",sep=""))) {
-      cat("rasterize\n")
-      #check existence of shapefile
-      bg_sh <- paste(back_dir,"/",spp_name,"/",spp_name,".shp",sep="")
-      if (!file.exists(bg_sh)) {stop("shapefile does not exist, please check")}
-      #load input shapefile and mask
-      bg_sh <- readShapePoly(bg_sh)
-      #rasterize
-      bg_rs <- rasterize(bg_sh,msk,silent=T,filename=paste(back_dir,"/",spp_name,"/",spp_name,".tif",sep=""),format="GTiff")
-    } else {
-      cat("load raster\n")
-      bg_rs <- raster(paste(back_dir,"/",spp_name,"/",spp_name,".tif",sep=""))
-    }
-    
-    #get xy from bg
-    cat("make data frame\n")
-    bg_rs[which(!is.na(bg_rs[]))] <- 1
-    bg_df <- as.data.frame(xyFromCell(bg_rs,which(!is.na(bg_rs[]))))
-    
-    #removing grid cells that are NA
-    cat("remove NAs from climate\n")
-    msk <- readAll(msk); rm(bg_rs); g=gc(); rm(g)
-    bg_df$value <- extract(msk,cbind(x=bg_df$x,y=bg_df$y))
-    bg_df <- bg_df[which(!is.na(bg_df$value)),]
-    rm(msk); g=gc(); rm(g)
-    bg_df$value <- NULL
-    
-    for (ors in other_rs) {
-      cat("remove NAs from",ors,"\n")
-      msk <- raster(ors); msk <- readAll(msk)
-      bg_df$value <- extract(msk,cbind(x=bg_df$x,y=bg_df$y))
-      bg_df <- bg_df[which(!is.na(bg_df$value)),]
-      bg_df$value <- NULL
-      rm(msk); g=gc(); rm(g)
-    }
-    
-    #save object
-    cat("saving...\n")
-    save(list=c("bg_df"),file=bg_file)
-  } else {
-    cat("loading background area as it did exist\n")
-    load(bg_file)
-  }
-  return(bg_df)
-}
 
 
 

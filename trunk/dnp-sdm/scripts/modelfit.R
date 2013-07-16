@@ -47,21 +47,33 @@ varList <- data.frame(SET_ID=1:8,CLIM=c(rep("full",times=4),rep("subset",times=4
                       SOIL=c(F,T,F,T,F,T,F,T),TOPO=c(F,F,T,T,F,F,T,T))
 
 #seeds to draw presences and pseudo absences (bootstraps)
-seedList <- c(3379,5728,3781,3590,3266,9121,3441,11667,4484,9559)
+seedList <- c(3379, 5728, 3781, 3590, 3266, 9121, 3441, 11667, 4484, 9559)
 
 #list of number of PA selections
-npaList <- c(100, 250, 500, 750, 1000, 2000, 4000, 6000, 8000, 10000)
+npaList <- c(3829, 1922, 1945, 5484, 2125, 8746, 2187, 1521, 9623, 1561)
 
 #list of models
-modList <- c('GLM','GAM','GBM','ANN','MAXENT')
+modList <- c('GLM','GAM','GBM','RF','ANN','MAXENT')
 
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList,VSET=varList$SET_ID,SEED=seedList)
+null_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList)
 
 #species name and configuration of run
-this_sppName <- "bixa_orellana" #species name
+this_sppName <- "Jaca_cauc" #species name
 
-#some testing runs
+#null model fits
+for (run_i in 1:5) {
+  #run_i <- 1 #23
+  this_seed <- as.numeric(paste(null_runs$SEED[run_i])) #seed for the cross validation
+  this_alg <- paste(null_runs$ALG[run_i]) #modelling algorithm
+  this_npa <- as.numeric(paste(null_runs$NPA[run_i])) #number of pseudo absences (from list)
+  odir <- run_null_model(bDir,sppName=this_sppName,alg=this_alg,seed=this_seed,npa=this_npa)
+}
+
+
+
+#actual model runs
 for (run_i in 1:5) {
   #run_i <- 1 #23
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
@@ -126,27 +138,5 @@ for (run_i in 1:5) {
 # legend(x=0.5,y=1,legend=modList,col=cols,cex=1,pch=20)
 # dev.off()
 
-
-###################################################################
-#### some times for reference
-#GLM
-# user  system elapsed 
-# 29.380   0.200  29.669 
-
-#GAM
-# user  system elapsed 
-# 250.231   0.763 251.097
-
-#GBM
-# user  system elapsed 
-# 3.771   0.640  53.118
-
-#ANN
-# user  system elapsed 
-# 11.507   0.148  11.696
-
-#MAXENT
-# user  system elapsed 
-# 9.214   0.665   7.544 
 
 

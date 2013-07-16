@@ -36,7 +36,7 @@ make_bias_file <- function(bDir,sppName,alg) {
       bg_data$bias <- bg_data$bias + prjVect
       rm(prjVect); g=gc(); rm(g)
     }
-    cat("loading bias probabilities\n")
+    cat("calculating mean probability\n")
     bg_data$bias <- bg_data$bias / length(npaList)
     bg_bias <- bg_data[,c("cell","x","y","bias")]
     rm(bg_data); g=gc(); rm(g)
