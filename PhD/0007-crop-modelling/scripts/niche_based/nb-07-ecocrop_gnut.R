@@ -31,8 +31,8 @@ source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 crop_name <- "gnut"
 
 #i/o directories
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
 bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
+# bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
 occDir <- paste(bDir,"/occurrences",sep="")
 calDir <- paste(bDir,"/calendar",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
@@ -348,6 +348,7 @@ for (rw in rwList) {
 write.csv(rres, paste(dataDir,"/skill.csv",sep=""), row.names=F)
 
 #plot accuracy metrics here
+rres <- read.csv(paste(dataDir,"/skill.csv",sep=""))
 plot.acc <- rres[which(rres$TYPE=="_suitability"),]
 tiff(paste(imgDir,"/skill.tiff",sep=""),res=300,pointsize=10,
      width=1500,height=1300,units="px",compression="lzw")

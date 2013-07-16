@@ -61,7 +61,7 @@ for (run_i in 1:nrow(all_runs)) {
 }
 
 
-#projection of models
+#calculate final sampling bias values (average) and make a raster
 for (this_alg in modList) {
   #this_alg <- modList[1] #modelling algorithm
   make_bias_file <- proj_bias_model(bDir,sppName=this_sppName,alg=this_alg) 
