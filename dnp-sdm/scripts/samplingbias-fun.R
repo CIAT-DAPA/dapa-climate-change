@@ -50,6 +50,7 @@ make_bias_file <- function(bDir,sppName,alg) {
     msk <- writeRaster(msk,paste(out_dir,"/sampling_bias_",alg,".tif",sep=""),format="GTiff")
     save(list=c("bg_bias"),file=paste(out_dir,"/sampling_bias_",alg,".RData",sep=""),compress=T)
   }
+  return(out_dir)
 }
 
 
