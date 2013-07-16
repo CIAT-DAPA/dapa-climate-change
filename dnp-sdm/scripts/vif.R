@@ -34,7 +34,7 @@ vif_analysis <- function(sppName,bio_dir,vif_dir,soil_dir,topo_dir) {
     #directory named 'occurrences' inside the project's root directory
     
     #note names of LON,LAT fields HAVE to be LONGITUDE and LATITUDE (respectively)
-    spp <- read.csv(paste("./occurrences/",sppName,".txt",sep=""),sep=",")
+    spp <- read.csv(paste("./occurrences/",sppName,".txt",sep=""),sep="\t")
     loc_data <- data.frame(x=spp$LONGITUDE,y=spp$LATITUDE)
     
     #keep only unique occurrences
@@ -67,11 +67,11 @@ vif_analysis <- function(sppName,bio_dir,vif_dir,soil_dir,topo_dir) {
     write.csv(bio_data,paste(spp_dir,"/",sppName,"_full.csv",sep=""),row.names=F,quote=T)
     
     #vif analysis
-    vif_res <- vif(bio_data[,c(names(bio_data)[grep("bio_",names(bio_data))],"sind","drymonths")])
+    vif_res <- vifstep(bio_data[,c(names(bio_data)[grep("bio_",names(bio_data))],"sind","drymonths")],th=5)
     
-    #selecting top X predictors (8 + bio_1 + bio_12)
-    vif_res <- vif_res[order(vif_res$VIF,decreasing=F),]
-    sel_var <- unique(c(paste(vif_res$Variables[1:8]),"bio_1","bio_12"))
+    #selecting predictors (+ bio_1 + bio_12)
+    #vif_res <- vif_res[order(vif_res$VIF,decreasing=F),]
+    sel_var <- unique(c(paste(vif_res@results$Variables),"bio_1","bio_12"))
     sel_var <- sort(sel_var)
     
     #filtering out useless variables in bio_data
@@ -106,10 +106,11 @@ top_dir <- paste(wd,"/env-data/topography",sep="")
 out_dir <- paste(wd,"/vif-analysis",sep="")
 
 #spp name and dir
-spp_name <- "bixa_orellana"
+spp_name <- "Jaca_cauc"
 
 #run function
-out_data <- vif_analysis(spp_name,var_dir,out_dir,sol_dir,top_dir)
+out_data <- vif_analysis(sppName=spp_name,bio_dif=var_dir,vif_dir=out_dir,
+                         soil_dir=sol_dir,topo_dir=top_dir)
 
 
 
