@@ -205,10 +205,18 @@ dev.off()
 ######################################################################
 #creating a perturbed parameter ensemble that will be assessed
 #parameters (that can be perturbed)
-#carry out 25 perturbations
-min_list <- max_list <- c(0.9,0.925,0.95,0.975,0.99,1)
-opmin_list <- opmax_list <- c(0.4,0.45,0.5,0.55,0.6)
-runs <- expand.grid(ABS=min_list,OPT=opmin_list)
+#carry out 30 perturbations
+tmin_list <- tmax_list <- c(0.9,0.925,0.95,0.975,0.99,1)
+topmin_list <- topmax_list <- c(0.4,0.45,0.5,0.55,0.6)
+
+rmin_list <- c(0.85,0.875,0.9,0.925,0.95,0.975)
+rmax_list <- c(0.975,0.98,0.985,0.99,0.995,1)
+ropmin_list <- c(0.4,0.45,0.5,0.55,0.6)
+ropmax_list <- c(0.85,0.875,0.9,0.925,0.95)
+
+runs_tpar <- expand.grid(ABS=tmin_list,OPT=topmin_list)
+runs_rpar1 <- expand.grid(ABS=rmin_list,OPT=ropmin_list)
+runs_rpar2 <- expand.grid(ABS=rmax_list,OPT=ropmax_list)
 
 #precipitation and temperature vectors (only one temperature vector is allowed)
 all_temp <- as.numeric(as.matrix(dataset[,c("GS_TN","GS_TX","GS_XN","GS_XX","GS_NN","GS_NX")]))
@@ -219,12 +227,13 @@ all_pset <- data.frame()
 for (ri in 1:nrow(runs)) {
   #ri <- 1
   cat("making parameter set for run:",ri,"\n")
-  tpar <- list(kill=1,min=runs$ABS[ri],opmin=runs$OPT[ri],opmax=runs$OPT[ri],max=runs$ABS[ri])
-  pr_par <- getParameters(all_prec, tpar, stat="mode", outlier.rm=T, plotit=T, plotdir=pdfDir, 
+  ppar <- list(kill=1,min=runs_rpar1$ABS[ri],opmin=runs_rpar1$OPT[ri],opmax=runs_rpar2$OPT[ri],max=runs_rpar2$ABS[ri])
+  pr_par <- getParameters(all_prec, ppar, stat="mode", outlier.rm=F, plotit=T, plotdir=pdfDir, 
                           xlabel="Seasonal precipitation",
                           filename=paste("calib_pdf_prec_run-",ri,".jpg",sep=""))
   pr_par <- cbind(RUN=ri,VARIABLE="PREC",pr_par)
   
+  tpar <- list(kill=1,min=runs_tpar$ABS[ri],opmin=runs_tpar$OPT[ri],opmax=runs_tpar$OPT[ri],max=runs_tpar$ABS[ri])
   tm_par <- getParameters(all_temp, tpar, stat="mean", outlier.rm=F, plotit=T, plotdir=pdfDir, 
                           xlabel="Seasonal mean temperature",
                           filename=paste("calib_pdf_tmean_run-",ri,".jpg",sep=""))
