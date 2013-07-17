@@ -41,6 +41,7 @@ for (expID in expSel) {
   #c. calculate time-ybar, normalise using y-min/(max-min)
   ybar <- rowMeans(ydata[,paste("Y",1966:1993,sep="")],na.rm=T)
   ynorm <- (ybar-min(ybar))/(max(ybar)-min(ybar))
+  #ynorm <- ybar/(10+ybar)
   ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=ybar)
   names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
   ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
@@ -65,14 +66,12 @@ ynor_all$EXP.MEAN <- rowMeans(ynor_all[,paste("EXP.",expSel,sep="")],na.rm=T)
 #load the ecocrop runs and construct a data.frame with each of the selected ecocrop runs
 #selected runs
 skill <- read.csv(paste(ecoDir,"/data/runs_discard.csv",sep=""))
-skill$SEL <- T
-skill$SEL[which(skill$TEST.OMISSION.RATE > 0.1)] <- F; skill$SEL[which(skill$TEST.ERROR > 0.5)] <- F
 ecoRuns <- skill$RUN[which(skill$SEL)]
 
 #load ecocrop data
 for (runID in ecoRuns) {
   #runID <- ecoRuns[1]
-  ecors <- raster(paste(ecoDir,"/proj/baseline/clm_1966_1993/run_",runID,"/",cropName,"_tsuitability.tif",sep=""))
+  ecors <- raster(paste(ecoDir,"/proj/baseline/clm_1966_1993/run_",runID,"/",cropName,"_suitability.tif",sep=""))
   sbar <- extract(ecors,cells[,c("X","Y")])
   sbar <- cbind(cells[,c("CELL","X","Y")],VALUE=sbar)
   names(sbar)[ncol(sbar)] <- paste("RUN.",runID,sep="")
@@ -133,16 +132,20 @@ for (runID in c(ecoRuns,"MEAN")) {
 
 
 #make a boxplot
-all_egm <- melt(all_eg,measure.vars=names(all_eg)[2:length(names(all_eg))],id=c("CLASS"))
+all_egm <- melt(all_eg,measure.vars=names(all_eg)[2:length(names(all_eg))],id=c("CLASS"),na.rm=F)
+all_egm <- all_egm[which(!is.na(all_egm$value)),]
 all_egm <- all_egm[which(all_egm$CLASS > 1),]
-#all_egm2 <- melt(all_eg,measure.vars=names(all_eg)[grep("EXP.OBS",names(all_eg))],id=c("CLASS"))
+#all_egm2 <- melt(all_eg,measure.vars=names(all_eg)[grep("RUN.MEAN",names(all_eg))],id=c("CLASS"),na.rm=F)
 #all_egm2 <- all_egm2[which(all_egm2$CLASS > 1),]
+
+nming <- paste(ecoclass$INI[which(ecoclass$CLASS %in% unique(all_egm$CLASS))]," - ",
+               ecoclass$END[which(ecoclass$CLASS %in% unique(all_egm$CLASS))],sep="")
 tiff(paste(syDir,"/boxplot_suit_vs_yieldmean.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
 bp <- boxplot(all_egm$value ~ all_egm$CLASS,pch=NA,ylim=c(0,1),las=2,col="grey",
-              ylab="Mean normalised GLAM yield",#xlab="Suitability class",
-              names=paste(ecoclass$INI[2:21]," - ",ecoclass$END[2:21],sep=""))
+              ylab="Mean normalised GLAM yield",
+              names=nming)
 grid()
 medvals <- data.frame(class=1:ncol(bp$stats),value=bp$stats[3,])
 require(splines)
@@ -159,7 +162,7 @@ for (expID in c(expSel,"MEAN")) {
   ynorm$CLASS <- 0
   
   #classes from quantiles
-  glamclass <- as.numeric(quantile(ynorm$YNORM,probs=seq(0,1,by=0.025))) #seq(0,1,by=0.05)
+  glamclass <- as.numeric(quantile(ynorm$YNORM,probs=seq(0,1,by=0.05))) #seq(0,1,by=0.05)
   glamclass <- data.frame(CLASS=1:(length(glamclass)-1),INI=glamclass[1:(length(glamclass)-1)],
                           END=glamclass[2:length(glamclass)])
   for (cl in 1:nrow(glamclass)) {
@@ -171,6 +174,7 @@ for (expID in c(expSel,"MEAN")) {
     #runID <- ecoRuns[1]
     sbar <- data.frame(CELL=sbar_all$CELL,SUIT=sbar_all[,paste("RUN.",runID,sep="")])
     ysdata <- merge(ynorm,sbar,by="CELL")
+    ysdata <- ysdata[which(ysdata$SUIT > 0),]
     ysdata <- aggregate(ysdata$SUIT,by=list(ysdata$CLASS),FUN=function(x) {mean(x,na.rm=T)})
     names(ysdata) <- c("CLASS",paste("EXP.",expID,"_RUN.",runID,sep=""))
     if (runID == ecoRuns[1] & expID == expSel[1]) {
@@ -186,6 +190,7 @@ for (expID in c(expSel,"MEAN")) {
 all_gem <- melt(all_ge,measure.vars=names(all_ge)[2:length(names(all_ge))],id=c("CLASS"))
 #all_gem <- melt(all_ge,measure.vars=names(all_ge)[grep("EXP.MEAN_RUN.MEAN",names(all_ge))],id=c("CLASS"))
 all_gem <- all_gem[which(!is.na(all_gem$value)),]
+
 tiff(paste(syDir,"/boxplot_yield_vs_suitmean.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
@@ -211,6 +216,7 @@ if (!file.exists(paste(syDir,"/model_similarity.csv",sep=""))) {
       ynorm <- data.frame(CELL=ynor_all$CELL,YNORM=ynor_all[,paste("EXP.",expID,sep="")])
       sydata <- merge(sbar,ynorm,by="CELL")
       sydata <- sydata[which(!is.na(sydata$SUIT)),]; sydata <- sydata[which(!is.na(sydata$YNORM)),]
+      sydata <- sydata[which(sydata$SUIT > 0),]
       
       #normalise data
       sydata$SUIT <- sydata$SUIT / sum(sydata$SUIT)
@@ -252,7 +258,7 @@ hd <- hist(out_simil$I,breaks=seq(0,1,by=0.05),plot=F)
 tiff(paste(syDir,"/pdf_niche_overlap.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
-plot(hd$mids,(hd$counts/sum(hd$counts)*100),ty="l",xlim=c(0.5,1),ylim=c(0,50),
+plot(hd$mids,(hd$counts/sum(hd$counts)*100),ty="l",xlim=c(0.5,1),ylim=c(0,60),
      xlab="Niche overlap (I)", ylab="pdf (%)")
 abline(v=sim_mm$I,col="red",lty=2)
 grid()
@@ -263,7 +269,7 @@ hd <- hist(out_simil$RR,breaks=seq(0,1,by=0.05),plot=F)
 tiff(paste(syDir,"/pdf_rank_score.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
-plot(hd$mids,(hd$counts/sum(hd$counts)*100),ty="l",xlim=c(0,0.6),ylim=c(0,50),
+plot(hd$mids,(hd$counts/sum(hd$counts)*100),ty="l",xlim=c(0,0.6),ylim=c(0,60),
      xlab="Relative rank score (RR)", ylab="pdf (%)")
 abline(v=sim_mm$RR,col="red",lty=2)
 grid()
@@ -271,7 +277,7 @@ dev.off()
 
 
 #(3) GLAM’s simulated potential yield was then regressed against suitability
-#using a three types of regressions: (a) linear, (b) log-linear, where log(Y)
+#using a three types of regressions: (a) linear, (b) log-linear, where log(Yn+1)
 #is regressed against suitability, and (c) robust regression (Maronna et al., 2006).
 #Robust regression was used in order to assess the influence of outliers that may
 #arise from errors in the structure of either suitability models or GLAM so as to 
@@ -279,6 +285,86 @@ dev.off()
 #Residuals of these regressions were then regressed against climatological means 
 #and variances of 17 intra-seasonal agro-meteorological indicators (AMIs, Table 7.4) 
 #derived from GLAM’s simulated daily output.
+require(robustbase); require(MASS)
+
+#potential list of combinations
+all_calc <- expand.grid(GLAMEXP=c(expSel,"MEAN"),ECORUN=c(ecoRuns,"MEAN"))
+all_calc <- cbind(ID=1:nrow(all_calc),all_calc)
+#all_calc <- rbind(all_calc,data.frame(ID=(nrow(all_calc)+1),GLAMEXP="MEAN",ECORUN="MEAN"))
+
+#loop combinations
+model_obj <- list()
+reg_data <- data.frame()
+for (i in 1:nrow(all_calc)) {
+  #i <- 380
+  cat("working through GLAMEXP=",paste(all_calc$GLAMEXP[i]),"and ECORUN=",paste(all_calc$ECORUN[i]),"\n")
+  
+  #preparing output object
+  model_obj[[i]] <- list()
+  model_obj[[i]]$ECORUN <- all_calc$ECORUN[i]; model_obj[[i]]$GLAMEXP <- all_calc$GLAMEXP[i]
+  
+  #getting input data
+  glamexp <- paste("EXP.",all_calc$GLAMEXP[i],sep="")
+  ecorun <- paste("RUN.",all_calc$ECORUN[i],sep="")
+  x <- data.frame(CELL=ynor_all$CELL,GLAM=ynor_all[,glamexp])
+  y <- data.frame(CELL=sbar_all$CELL,SUIT=sbar_all[,ecorun])
+  xy <- merge(x,y,by="CELL")
+  #xy <- xy[which(xy$SUIT > 0),]
+  #xy <- xy[which(xy$SUIT < 100),]
+  row.names(xy) <- 1:nrow(xy)
+  xy$LGLAM <- log(xy$GLAM+1)
+  
+  #doing regressions
+  #a. linear regression
+  lin.m <- glm(GLAM ~ SUIT, data=xy)
+  lin.r <- cor.test(xy$GLAM,predict(lin.m,xy))
+  model_obj[[i]]$LINEAR <- lin.m
+  
+  #b. log-linear regression (not needed i think)
+  loglin.m <- glm(LGLAM ~ SUIT, data=xy)
+  loglin.r <- cor.test(xy$GLAM,exp(predict(loglin.m,xy))-1)
+  model_obj[[i]]$LOGLINEAR <- loglin.m
+  
+  #c. robust regression
+  roblin.m <- glmrob(GLAM ~ SUIT, data=xy, method="Mqle", family=gaussian)
+  roblin.r <- cor.test(xy$GLAM,predict(roblin.m,xy))
+  model_obj[[i]]$ROBUST1 <- roblin.m
+  
+  robw <- data.frame(PT=names(roblin.m$residuals),ROB.W=roblin.m$w.r)
+  xy <- cbind(PT=1:nrow(xy),xy)
+  xy <- merge(xy,robw,by="PT")
+  xy$PT <- NULL
+  xy2 <- xy[which(xy$ROB.W >= 0.5),]
+  xy3 <- xy[which(xy$ROB.W < 0.5),]
+  roblin.m2 <- glmrob(GLAM ~ SUIT, data=xy2, method="Mqle", family=gaussian)
+  roblin.r2 <- cor.test(xy$GLAM,predict(roblin.m2,xy))
+  model_obj[[i]]$ROBUST2 <- roblin.m2
+  model_obj[[i]]$XY <- xy
+  
+  #result data.frame
+  out_res <- data.frame(ID=i,GLAMEXP=glamexp,ECORUN=ecorun,LIN.SLOPE=lin.m$coefficients[2],
+                        LIN.CCOEF=lin.r$estimate,LIN.PVAL=lin.r$p.value,
+                        LOGLIN.SLOPE=loglin.m$coefficients[2],LOGLIN.CCOEF=loglin.r$estimate,
+                        LOGLIN.PVAL=loglin.r$p.value,ROBLIN.SLOPE=roblin.m$coefficients[2],
+                        ROBLIN.CCOEF=roblin.r$estimate,ROBLIN.PVAL=roblin.r$p.value,
+                        ROBLIN2.SLOPE=roblin.m2$coefficients[2],ROBLIN2.CCOEF=roblin.r2$estimate,
+                        ROBLIN2.PVAL=roblin.r2$p.value)
+  
+  #append result
+  reg_data <- rbind(reg_data,out_res)
+  
+  plot(xy2$GLAM,xy2$SUIT,pch=20,col="black",
+     xlab="Normalised GLAM yield",ylab="Suitability (%)")
+  points(xy3$GLAM,xy3$SUIT,pch=21,col="red")
+  grid()
+  lines(predict(roblin.m,data.frame(SUIT=1:100)),1:100, type="l", col="red", lty=1)
+  lines(predict(lin.m,data.frame(SUIT=1:100)),1:100, type="l", col="red", lty=2)
+  lines(predict(roblin.m2,data.frame(SUIT=1:100)),1:100, type="l", col="red", lty=2)
+  lines(exp(predict(loglin.m,data.frame(SUIT=1:100)))-1,1:100, type="l", col="blue")
+}
+
+
+
 
 
 
