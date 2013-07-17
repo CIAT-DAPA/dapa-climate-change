@@ -64,19 +64,19 @@ null_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList)
 #species name and configuration of run
 this_sppName <- "Jaca_cauc" #species name
 
-#null model fits
-for (run_i in 1:nrow(null_runs)) {
-  #run_i <- 1 #23
-  this_seed <- as.numeric(paste(null_runs$SEED[run_i])) #seed for the cross validation
-  this_alg <- paste(null_runs$ALG[run_i]) #modelling algorithm
-  this_npa <- as.numeric(paste(null_runs$NPA[run_i])) #number of pseudo absences (from list)
-  odir <- run_null_model(bDir,sppName=this_sppName,alg=this_alg,seed=this_seed,npa=this_npa)
-}
+# #null model fits
+# for (run_i in 1:nrow(null_runs)) {
+#   #run_i <- 1 #23
+#   this_seed <- as.numeric(paste(null_runs$SEED[run_i])) #seed for the cross validation
+#   this_alg <- paste(null_runs$ALG[run_i]) #modelling algorithm
+#   this_npa <- as.numeric(paste(null_runs$NPA[run_i])) #number of pseudo absences (from list)
+#   odir <- run_null_model(bDir,sppName=this_sppName,alg=this_alg,seed=this_seed,npa=this_npa)
+# }
 
 
 
 #actual model runs
-for (run_i in 1:6) {
+for (run_i in 1:500) {
   #run_i <- 1 #23
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
