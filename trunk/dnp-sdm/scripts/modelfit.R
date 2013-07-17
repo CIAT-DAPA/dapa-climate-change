@@ -73,10 +73,11 @@ this_sppName <- "Jaca_cauc" #species name
 #   odir <- run_null_model(bDir,sppName=this_sppName,alg=this_alg,seed=this_seed,npa=this_npa)
 # }
 
-
+mod <- "GLM"
+truns <- which(all_runs$ALG == mod)
 
 #actual model runs
-for (run_i in 1:500) {
+for (run_i in truns) {
   #run_i <- 1 #23
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
