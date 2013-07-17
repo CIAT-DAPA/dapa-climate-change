@@ -19,6 +19,8 @@ rs <- raster(paste(cropDir,"/calib/exp-33_outputs/general/calib_results_spat/y_p
 rs[cells$CELL] <- cells$CELL
 
 #ecocrop: i/o directories
+bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling"
+#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
 nbDir <- paste(bDir,"/niche-based",sep="")
 modDir <- paste(nbDir,"/models",sep="")
 ecoDir <- paste(modDir,"/EcoCrop",sep="")
@@ -62,7 +64,7 @@ ynor_all$EXP.MEAN <- rowMeans(ynor_all[,paste("EXP.",expSel,sep="")],na.rm=T)
 ###
 #load the ecocrop runs and construct a data.frame with each of the selected ecocrop runs
 #selected runs
-skill <- read.csv(paste(ecoDir,"/data/skill.csv",sep="")); skill <- skill[which(skill$TYPE == "_suitability"),]
+skill <- read.csv(paste(ecoDir,"/data/runs_discard.csv",sep=""))
 skill$SEL <- T
 skill$SEL[which(skill$TEST.OMISSION.RATE > 0.1)] <- F; skill$SEL[which(skill$TEST.ERROR > 0.5)] <- F
 ecoRuns <- skill$RUN[which(skill$SEL)]
