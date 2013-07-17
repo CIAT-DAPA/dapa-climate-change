@@ -90,11 +90,11 @@ for (run_i in 1:6) {
 #threshold in pwdSampling() to .33 #from Hijmans 2012 Ecology #done
 #sp_mOpt@GLM$control$maxit <- 100 #because sometimes it shows warning of not-convergence #done
 #sp_mOpt@GBM$n.trees <- 2000 #Braunisch et al. 2013 #done
+#70/30 instead of 75/25 for training/testing #done
+#background size of 14285 so that training background is 10000 (Maxent's default) #done
+#------------------
 
-#pending changes:
-#----------------
-#add a background size of 13333 so that training background is 10000 (Maxent's default) #pending
-#70/30 instead of 75/25 for training/testing #pending
+
 
 #########################################################################
 #########################################################################
