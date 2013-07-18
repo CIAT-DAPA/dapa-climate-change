@@ -353,14 +353,14 @@ for (i in 1:nrow(all_calc)) {
   #append result
   reg_data <- rbind(reg_data,out_res)
   
-  plot(xy2$GLAM,xy2$SUIT,pch=20,col="black",
-     xlab="Normalised GLAM yield",ylab="Suitability (%)")
-  points(xy3$GLAM,xy3$SUIT,pch=21,col="red")
+  plot(xy2$SUIT,xy2$GLAM,pch=20,col="black",
+     xlab="Suitability (%)",ylab="Normalised GLAM yield")
+  points(xy3$SUIT,xy3$GLAM,pch=21,col="red")
   grid()
-  lines(predict(roblin.m,data.frame(SUIT=1:100)),1:100, type="l", col="red", lty=1)
-  lines(predict(lin.m,data.frame(SUIT=1:100)),1:100, type="l", col="red", lty=2)
-  lines(predict(roblin.m2,data.frame(SUIT=1:100)),1:100, type="l", col="red", lty=2)
-  lines(exp(predict(loglin.m,data.frame(SUIT=1:100)))-1,1:100, type="l", col="blue")
+  lines(1:100, predict(roblin.m,data.frame(SUIT=1:100)), type="l", col="red", lty=1)
+  lines(1:100, predict(lin.m,data.frame(SUIT=1:100)), type="l", col="red", lty=2)
+  lines(1:100, predict(roblin.m2,data.frame(SUIT=1:100)), type="l", col="red", lty=2)
+  lines(1:100, exp(predict(loglin.m,data.frame(SUIT=1:100)))-1, type="l", col="blue")
 }
 
 
