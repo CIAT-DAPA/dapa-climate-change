@@ -446,8 +446,10 @@ regdata$GLAM <- NULL; regdata$SUIT <- NULL; regdata$LGLAM <- NULL; regdata$ROB.W
 set.seed(1234); seedList <- round(rnorm(100,5000,1500),0)
 
 out_models <- list()
+out_eval <- data.frame()
 for (seed in seedList) {
-  #seed <- seedList
+  #seed <- seedList[1]
+  cat("seed=",seed,"\n")
   set.seed(seed); selp <- sample(1:nrow(regdata),size=round(nrow(regdata)*.75,0))
   
   #prepare data
@@ -464,12 +466,36 @@ for (seed in seedList) {
   
   #calculat correlation
   r.fit <- cor.test(fitdata$RESIDUALS,fitpred)
-  r.pre <- cor.test(evadata$RESIDUALS,evapred)
+  r.eva <- cor.test(evadata$RESIDUALS,evapred)
   
   #output stuff
   if (is.null(out_models[[paste("SD_",seed,sep="")]])) {out_models[[paste("SD_",seed,sep="")]] <- list()}
+  out_models[[paste("SD_",seed,sep="")]]$MODEL <- m.fit
+  out_models[[paste("SD_",seed,sep="")]]$FITDATA <- fitdata
+  out_models[[paste("SD_",seed,sep="")]]$EVADATA <- evadata
+  out_models[[paste("SD_",seed,sep="")]]$FITPRED <- fitpred
+  out_models[[paste("SD_",seed,sep="")]]$EVAPRED <- evapred
+  out_models[[paste("SD_",seed,sep="")]]$CCOEF.FIT <- r.fit
+  out_models[[paste("SD_",seed,sep="")]]$CCOEF.EVA <- r.eva
   
+  odf_eval <- data.frame(SEED=seed,CCOEF.FIT=r.fit$estimate,PVAL.FIT=r.fit$p.value,
+                         CCOEF.EVA=r.eva$estimate,PVAL.FIT=r.eva$p.value)
+  out_eval <- rbind(out_eval,odf_eval)
 }
+
+#count predictors
+
+
+#make graph of frequency of use
+
+
+#subselect top predictors
+
+
+#rerun bootstrapped regressions
+
+
+
 
 
 
