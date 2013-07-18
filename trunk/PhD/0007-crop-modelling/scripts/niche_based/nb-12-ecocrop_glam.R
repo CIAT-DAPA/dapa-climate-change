@@ -482,6 +482,8 @@ for (seed in seedList) {
                          CCOEF.EVA=r.eva$estimate,PVAL.FIT=r.eva$p.value)
   out_eval <- rbind(out_eval,odf_eval)
 }
+save(list=c("out_models","ami_all","regdata","out_eval"),file=paste(syDir,"/bootstrapped_regs_01.RData",sep=""))
+write.csv(out_eval,paste(syDir,"/bootstrapped_regs_01_eval.csv",sep=""),quote=T,row.names=F)
 
 #count predictors
 
