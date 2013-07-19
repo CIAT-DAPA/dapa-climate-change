@@ -39,13 +39,26 @@ for (expID in expSel) {
   ydata <- read.csv(paste(ecgDir,"/glam_output/exp-",expID,"/tables/pot_yield_rfd.csv",sep=""))
   
   #c. calculate time-ybar, normalise using y-min/(max-min)
-  ybar <- rowMeans(ydata[,paste("Y",1966:1993,sep="")],na.rm=T)
-  ynorm <- (ybar-min(ybar))/(max(ybar)-min(ybar)) #linear normalisation
+  ybar <- rowMeans(ydata[,paste("Y",1966:1993,sep="")],na.rm=T) #in kg/ha
+  ahar <- cells$AHARV #in kha (i.e. ha * 1000)
+  tpro <- ybar*ahar/1000 #in kton (i.e. ton * 1000)
+  
+  #with yield (no relationship)
+  #ynorm <- (ybar-min(ybar))/(max(ybar)-min(ybar)) #linear normalisation
   #ynorm <- ybar/(10+ybar) #darango
   #ynorm <- ybar / max(ybar) #linear with min at 0
-  ynorm <- (ybar^0.5-1)/0.5 #box-cox
+  #ynorm <- (ybar^0.5-1)/0.5 #box-cox
+  #ynorm <- (ynorm - min(ynorm)) / (max(ynorm) - min(ynorm)) #linear to box-cox
+  #ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=ybar)
+  #names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
+  #ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
+  #names(ynorm)[ncol(ynorm)] <- paste("EXP.",expID,sep="")
+  
+  #with total production (clear relationship)
+  ynorm <- (tpro-min(tpro))/(max(tpro)-min(tpro)) #linear normalisation
+  ynorm <- (ynorm^0.5-1)/0.5 #box-cox
   ynorm <- (ynorm - min(ynorm)) / (max(ynorm) - min(ynorm)) #linear to box-cox
-  ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=ybar)
+  ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=tpro)
   names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
   ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
   names(ynorm)[ncol(ynorm)] <- paste("EXP.",expID,sep="")
@@ -59,7 +72,7 @@ for (expID in expSel) {
   }
 }
 ynor_all$EXP.MEAN <- rowMeans(ynor_all[,paste("EXP.",expSel,sep="")],na.rm=T)
-
+write.csv(ynor_all,paste(syDir,"/input_GLAM_normalised_production.csv",sep=""),quote=T,row.names=F)
 
 ###
 #load the ecocrop runs and construct a data.frame with each of the selected ecocrop runs
@@ -86,13 +99,24 @@ for (runID in ecoRuns) {
 }
 sbar_all$RUN.MEAN <- rowMeans(sbar_all[,paste("RUN.",ecoRuns,sep="")],na.rm=T)
 sbar_all$RUN.MEAN <- round(sbar_all$RUN.MEAN,0)
+write.csv(sbar_all,paste(syDir,"/input_EcoCrop_suitability.csv",sep=""),quote=T,row.names=F)
 
 ###qqplot
 tiff(paste(syDir,"/qqplot_suit_vs_yield.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 qqplot(sbar_all$RUN.MEAN,ynor_all$EXP.MEAN,xlim=c(0,100),ylim=c(0,1),
-       xlab="Suitability quantile (%)",ylab="GLAM yield quantile (normalised)")
+       xlab="Suitability quantile (%)",ylab="GLAM production quantile (normalised)")
 grid()
+abline(a=0,b=0.01)
+dev.off()
+
+###scattergram
+tiff(paste(syDir,"/xyplot_suit_vs_yield.tiff",sep=""),res=300,pointsize=10,
+     width=1900,height=1700,units="px",compression="lzw")
+plot(ynor_all$EXP.MEAN,sbar_all$RUN.MEAN,xlim=c(0,1),ylim=c(0,100),pch=20,
+       xlab="GLAM yield * area (normalised)",ylab="Suitability (%)")
+grid()
+abline(a=0,b=100)
 dev.off()
 
 ###
@@ -147,11 +171,11 @@ all_egm <- all_egm[which(all_egm$CLASS > 1),]
 
 nming <- paste(ecoclass$INI[which(ecoclass$CLASS %in% unique(all_egm$CLASS))]," - ",
                ecoclass$END[which(ecoclass$CLASS %in% unique(all_egm$CLASS))],sep="")
-tiff(paste(syDir,"/boxplot_suit_vs_yield",tolower(stat),".tiff",sep=""),res=300,pointsize=10,
+tiff(paste(syDir,"/boxplot_suit_vs_prod",tolower(stat),".tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
 bp <- boxplot(all_egm$value ~ all_egm$CLASS,pch=NA,ylim=c(0,1),las=2,col="grey",
-              ylab="Mean normalised GLAM yield",
+              ylab="Mean normalised GLAM production",
               names=nming)
 grid()
 medvals <- data.frame(class=1:ncol(bp$stats),value=bp$stats[3,])
@@ -207,11 +231,11 @@ all_gem <- melt(all_gem,measure.vars=names(all_gem)[2:length(names(all_gem))],id
 #all_gem <- melt(all_ge,measure.vars=names(all_ge)[grep("EXP.MEAN_RUN.MEAN",names(all_ge))],id=c("CLASS"))
 all_gem <- all_gem[which(!is.na(all_gem$value)),]
 
-tiff(paste(syDir,"/boxplot_yield_vs_suit",tolower(stat),".tiff",sep=""),res=300,pointsize=10,
+tiff(paste(syDir,"/boxplot_prod_vs_suit",tolower(stat),".tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
 bp <- boxplot(all_gem$value ~ all_gem$CLASS,pch=NA,ylim=c(0,100),las=2,col="grey",
-              ylab="Mean EcoCrop suitability",xlab="GLAM yield quantile")
+              ylab="Mean EcoCrop suitability",xlab="GLAM production quantile (normalised)")
 grid()
 medvals <- data.frame(class=1:ncol(bp$stats),value=bp$stats[3,])
 cubic.lm <- lm(value ~ poly(class, 4),data=medvals)
@@ -270,7 +294,7 @@ if (!file.exists(paste(syDir,"/model_similarity.csv",sep=""))) {
 sim_mm <- out_simil[which(out_simil$RUN == "MEAN" & out_simil$EXP == "MEAN"),]
 
 #plotting niche overlap
-hd <- hist(out_simil$I,breaks=seq(0,1,by=0.05),plot=F)
+hd <- hist(out_simil$I,breaks=seq(0,1,by=0.02),plot=F)
 tiff(paste(syDir,"/pdf_niche_overlap.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
 par(mar=c(5,4.5,1,1),cex=1)
@@ -390,6 +414,16 @@ load(file=paste(syDir,"/regression_output.RData",sep=""))
 
 #note: all these models passed the AIC stepwise test
 ensmean <- model_obj[[nrow(all_calc)]]
+#step(ensmean$LINEAR)
+#step(ensmean$LOGLINEAR)
+#step(ensmean$ROBUST2)
+
+#list of 100 seeds for crossval
+set.seed(1234); seedList <- round(rnorm(100,5000,1500),0)
+
+#xydata
+xydata <- cbind(PT=1:nrow(ensmean$XY),ensmean$XY)
+
 
 #load seasonal metrics and their standard deviations
 out_ami <- list()
@@ -427,96 +461,148 @@ rnames <- rownames(ami_all)
 rnames <- as.numeric(sapply(rnames,function(x) {as.numeric(gsub("CELL.","",x))}))
 ami_all <- cbind(CELL=rnames,ami_all)
 rownames(ami_all) <- 1:nrow(ami_all)
-
+  
 #get regression stuff
-regtype <- "LINEAR" #LINEAR LOGLINEAR ROBUST2
-resid <- data.frame(PT=names(ensmean[[regtype]]$residuals),RESIDUALS=ensmean[[regtype]]$residuals)
-
-#merge residuals with xy data
-xydata <- cbind(PT=1:nrow(ensmean$XY),ensmean$XY)
-xydata <- merge(xydata,resid,by="PT",all.x=T)
-
-#merge ami values with xy data
-regdata <- merge(xydata,ami_all,by="CELL")
-regdata$PT <- NULL
-regdata$GLAM <- NULL; regdata$SUIT <- NULL; regdata$LGLAM <- NULL; regdata$ROB.W <- NULL
-
-
-#list of 100 seeds for crossval
-set.seed(1234); seedList <- round(rnorm(100,5000,1500),0)
-
-out_models <- list()
-out_eval <- data.frame()
-for (seed in seedList) {
-  #seed <- seedList[1]
-  cat("seed=",seed,"\n")
-  set.seed(seed); selp <- sample(1:nrow(regdata),size=round(nrow(regdata)*.75,0))
+for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
+  #regtype <- "LINEAR" #LINEAR LOGLINEAR ROBUST2
   
-  #prepare data
-  fitdata <- regdata[selp,]; evadata <- regdata[-selp,]
-  fitdata$CELL <- NULL; evadata$CELL <- NULL
+  if (!file.exists(paste(syDir,"/bootstrapped_regs_01_",tolower(regtype),".RData",sep=""))) {
+    resid <- data.frame(PT=names(ensmean[[regtype]]$residuals),RESIDUALS=ensmean[[regtype]]$residuals)
+    
+    #merge residuals with xy data
+    xydata_n <- merge(xydata,resid,by="PT",all.x=T)
+    
+    #merge ami values with xy data
+    regdata <- merge(xydata_n,ami_all,by="CELL")
+    regdata$PT <- NULL
+    regdata$GLAM <- NULL; regdata$SUIT <- NULL; regdata$LGLAM <- NULL; regdata$ROB.W <- NULL
+    
+    out_models <- list()
+    out_eval <- data.frame()
+    for (seed in seedList) {
+      #seed <- seedList[1]
+      cat("seed=",seed,"\n")
+      set.seed(seed); selp <- sample(1:nrow(regdata),size=round(nrow(regdata)*.75,0))
+      
+      #prepare data
+      fitdata <- regdata[selp,]; evadata <- regdata[-selp,]
+      fitdata$CELL <- NULL; evadata$CELL <- NULL
+      
+      #fit model
+      frml <- makeFormula(respName="RESIDUALS",explVar=fitdata[,2:ncol(fitdata)],type="quadratic",interaction.level=0)
+      m.fit <- glm(frml,data=fitdata)
+      #m.fit <- glm(RESIDUALS ~ .,data=fitdata)
+      m.fit <- step(m.fit,trace=F)
+      
+      #predict over train & test data
+      fitpred <- predict(m.fit,fitdata)
+      evapred <- predict(m.fit,evadata)
+      
+      #calculat correlation
+      r.fit <- cor.test(fitdata$RESIDUALS,fitpred)
+      r.eva <- cor.test(evadata$RESIDUALS,evapred)
+      
+      #output stuff
+      if (is.null(out_models[[paste("SD_",seed,sep="")]])) {out_models[[paste("SD_",seed,sep="")]] <- list()}
+      out_models[[paste("SD_",seed,sep="")]]$MODEL <- m.fit
+      out_models[[paste("SD_",seed,sep="")]]$FITDATA <- fitdata
+      out_models[[paste("SD_",seed,sep="")]]$EVADATA <- evadata
+      out_models[[paste("SD_",seed,sep="")]]$FITPRED <- fitpred
+      out_models[[paste("SD_",seed,sep="")]]$EVAPRED <- evapred
+      out_models[[paste("SD_",seed,sep="")]]$CCOEF.FIT <- r.fit
+      out_models[[paste("SD_",seed,sep="")]]$CCOEF.EVA <- r.eva
+      
+      odf_eval <- data.frame(SEED=seed,CCOEF.FIT=r.fit$estimate,PVAL.FIT=r.fit$p.value,
+                             CCOEF.EVA=r.eva$estimate,PVAL.EVA=r.eva$p.value)
+      out_eval <- rbind(out_eval,odf_eval)
+    }
+    save(list=c("out_models","ami_all","regdata","out_eval"),file=paste(syDir,"/bootstrapped_regs_01_",tolower(regtype),".RData",sep=""))
+    write.csv(out_eval,paste(syDir,"/bootstrapped_regs_01_eval_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+  } else {
+    load(file=paste(syDir,"/bootstrapped_regs_01_",tolower(regtype),".RData",sep=""))
+  }
   
-  #fit model
-  m.fit <- glm(RESIDUALS ~ .,data=fitdata)
-  m.fit <- step(m.fit,trace=F)
-  
-  #predict over train & test data
-  fitpred <- predict(m.fit,fitdata)
-  evapred <- predict(m.fit,evadata)
-  
-  #calculat correlation
-  r.fit <- cor.test(fitdata$RESIDUALS,fitpred)
-  r.eva <- cor.test(evadata$RESIDUALS,evapred)
-  
-  #output stuff
-  if (is.null(out_models[[paste("SD_",seed,sep="")]])) {out_models[[paste("SD_",seed,sep="")]] <- list()}
-  out_models[[paste("SD_",seed,sep="")]]$MODEL <- m.fit
-  out_models[[paste("SD_",seed,sep="")]]$FITDATA <- fitdata
-  out_models[[paste("SD_",seed,sep="")]]$EVADATA <- evadata
-  out_models[[paste("SD_",seed,sep="")]]$FITPRED <- fitpred
-  out_models[[paste("SD_",seed,sep="")]]$EVAPRED <- evapred
-  out_models[[paste("SD_",seed,sep="")]]$CCOEF.FIT <- r.fit
-  out_models[[paste("SD_",seed,sep="")]]$CCOEF.EVA <- r.eva
-  
-  odf_eval <- data.frame(SEED=seed,CCOEF.FIT=r.fit$estimate,PVAL.FIT=r.fit$p.value,
-                         CCOEF.EVA=r.eva$estimate,PVAL.FIT=r.eva$p.value)
-  out_eval <- rbind(out_eval,odf_eval)
-}
-save(list=c("out_models","ami_all","regdata","out_eval"),file=paste(syDir,"/bootstrapped_regs_01.RData",sep=""))
-write.csv(out_eval,paste(syDir,"/bootstrapped_regs_01_eval.csv",sep=""),quote=T,row.names=F)
-
-#count predictors
-load(file=paste(syDir,"/bootstrapped_regs_01.RData",sep=""))
-
-predList <- names(regdata)[3:ncol(regdata)]
-predVals <- as.data.frame(matrix(0,ncol=(length(predList)+2),nrow=length(seedList)))
-names(predVals) <- c("SEED","Intercept",predList)
-
-for (seed in seedList) {
-  #seed <- seedList[1]
-  tmod <- out_models[[paste("SD_",seed,sep="")]]$MODEL
-  tmodcoef <- as.data.frame(t(tmod$coefficients)); rownames(tmodcoef) <- 1
-  names(tmodcoef)[1] <- "Intercept"
-  
-  #put data into predVals data.frame
-  predVals$SEED[which(seed %in% seedList)] <- seed
-  for (prd in predList) {
-    #prd <- predList[1]
-    if (prd %in% names(tmodcoef)) {predVals[,prd] <- tmodcoef[,prd]}
+  if (!file.exists(paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))) {
+    #count predictors
+    predList <- names(regdata)[3:ncol(regdata)]
+    frml_t <- terms(frml); frml_t <- attr(frml_t,"term.labels")
+    predVals <- as.data.frame(matrix(0,ncol=(length(frml_t)+2),nrow=length(seedList)))
+    names(predVals) <- c("SEED","Intercept",frml_t)
+    
+    for (seed in seedList) {
+      #seed <- seedList[1]
+      tmod <- out_models[[paste("SD_",seed,sep="")]]$MODEL
+      tmodcoef <- as.data.frame(t(tmod$coefficients)); rownames(tmodcoef) <- 1
+      names(tmodcoef)[1] <- "Intercept"
+      
+      #put data into predVals data.frame
+      predVals$SEED[which(seedList %in% seed)] <- seed
+      for (prd in frml_t) {
+        #prd <- frml_t[1]
+        if (prd %in% names(tmodcoef)) {predVals[which(seedList %in% seed),prd] <- tmodcoef[,prd]}
+      }
+    }
+    
+    #count number of times not zero
+    count_nz <- apply(predVals[,3:ncol(predVals)],2,function(x) {length(which(x>0))})
+    count_nz <- count_nz[which(count_nz > 0)]
+    count_nz <- data.frame(PREDICTOR=names(count_nz),USE=as.numeric(count_nz))
+    count_nz <- count_nz[order(count_nz$USE),]
+    rownames(count_nz) <- 1:nrow(count_nz) #dont forget to produce a plot of this
+    write.csv(count_nz,paste(syDir,"/variable_use_frequency_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+    write.csv(predVals,paste(syDir,"/bootstrapped_coefficients_01_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+    
+    selpred <- count_nz[which(count_nz$USE >= 50),]
+    final_frm <- paste("RESIDUALS ~ ",selpred$PREDICTOR[1],sep="")
+    for (pdi in 2:nrow(selpred)) {final_frm <- paste(final_frm," + ",selpred$PREDICTOR[pdi],sep="")}
+    final_frm <- as.formula(final_frm)
+    
+    #re-fit models with reduced predictors
+    out_models2 <- list()
+    out_eval2 <- data.frame()
+    for (seed in seedList) {
+      #seed <- seedList[1]
+      cat("seed=",seed,"\n")
+      set.seed(seed); selp <- sample(1:nrow(regdata),size=round(nrow(regdata)*.75,0))
+      
+      #prepare data
+      fitdata <- regdata[selp,]; evadata <- regdata[-selp,]
+      fitdata$CELL <- NULL; evadata$CELL <- NULL
+      
+      #fit model
+      m.fit <- glm(final_frm,data=fitdata)
+      m.fit <- step(m.fit,trace=F,direction="both")
+      
+      #predict over train & test data
+      fitpred <- predict(m.fit,fitdata)
+      evapred <- predict(m.fit,evadata)
+      
+      #calculat correlation
+      r.fit <- cor.test(fitdata$RESIDUALS,fitpred)
+      r.eva <- cor.test(evadata$RESIDUALS,evapred)
+      
+      #output stuff
+      if (is.null(out_models2[[paste("SD_",seed,sep="")]])) {out_models2[[paste("SD_",seed,sep="")]] <- list()}
+      out_models2[[paste("SD_",seed,sep="")]]$MODEL <- m.fit
+      out_models2[[paste("SD_",seed,sep="")]]$FITDATA <- fitdata
+      out_models2[[paste("SD_",seed,sep="")]]$EVADATA <- evadata
+      out_models2[[paste("SD_",seed,sep="")]]$FITPRED <- fitpred
+      out_models2[[paste("SD_",seed,sep="")]]$EVAPRED <- evapred
+      out_models2[[paste("SD_",seed,sep="")]]$CCOEF.FIT <- r.fit
+      out_models2[[paste("SD_",seed,sep="")]]$CCOEF.EVA <- r.eva
+      
+      odf_eval <- data.frame(SEED=seed,CCOEF.FIT=r.fit$estimate,PVAL.FIT=r.fit$p.value,
+                             CCOEF.EVA=r.eva$estimate,PVAL.EVA=r.eva$p.value)
+      out_eval2 <- rbind(out_eval2,odf_eval)
+    }
+    save(list=c("out_models2","ami_all","regdata","out_eval2"),file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
+    write.csv(out_eval2,paste(syDir,"/bootstrapped_regs_02_eval_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+  } else {
+    load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
   }
 }
 
 
-#make graph of frequency of use of predictor
-#count number of times not zero
-count_nz <- apply(predVals[,3:ncol(predVals)],2,)
-
-
-#subselect top predictors
-
-
-
-#rerun bootstrapped regressions
 
 
 
