@@ -465,7 +465,9 @@ rownames(ami_all) <- 1:nrow(ami_all)
 #get regression stuff
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #regtype <- "LINEAR" #LINEAR LOGLINEAR ROBUST2
-  
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("... working out",regtype,"regression...")
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   if (!file.exists(paste(syDir,"/bootstrapped_regs_01_",tolower(regtype),".RData",sep=""))) {
     resid <- data.frame(PT=names(ensmean[[regtype]]$residuals),RESIDUALS=ensmean[[regtype]]$residuals)
     
@@ -603,7 +605,19 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 }
 
 
+#### make a plot of count_nz
 
+
+
+#### make a plot permutation importance for each model (using fitdata)
+
+
+
+#### make a plot of predicted production at present
+
+
+
+#### make a map of predicted production
 
 
 
