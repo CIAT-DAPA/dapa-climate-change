@@ -486,12 +486,34 @@ save(list=c("out_models","ami_all","regdata","out_eval"),file=paste(syDir,"/boot
 write.csv(out_eval,paste(syDir,"/bootstrapped_regs_01_eval.csv",sep=""),quote=T,row.names=F)
 
 #count predictors
+load(file=paste(syDir,"/bootstrapped_regs_01.RData",sep=""))
+
+predList <- names(regdata)[3:ncol(regdata)]
+predVals <- as.data.frame(matrix(0,ncol=(length(predList)+2),nrow=length(seedList)))
+names(predVals) <- c("SEED","Intercept",predList)
+
+for (seed in seedList) {
+  #seed <- seedList[1]
+  tmod <- out_models[[paste("SD_",seed,sep="")]]$MODEL
+  tmodcoef <- as.data.frame(t(tmod$coefficients)); rownames(tmodcoef) <- 1
+  names(tmodcoef)[1] <- "Intercept"
+  
+  #put data into predVals data.frame
+  predVals$SEED[which(seed %in% seedList)] <- seed
+  for (prd in predList) {
+    #prd <- predList[1]
+    if (prd %in% names(tmodcoef)) {predVals[,prd] <- tmodcoef[,prd]}
+  }
+}
 
 
-#make graph of frequency of use
+#make graph of frequency of use of predictor
+#count number of times not zero
+count_nz <- apply(predVals[,3:ncol(predVals)],2,)
 
 
 #subselect top predictors
+
 
 
 #rerun bootstrapped regressions
