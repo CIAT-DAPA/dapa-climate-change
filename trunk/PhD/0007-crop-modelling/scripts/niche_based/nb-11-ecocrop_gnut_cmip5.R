@@ -7,8 +7,8 @@ stop("not to run yet")
 library(sp); library(raster); library(rgdal)
 
 #sources dir
-src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
-#src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling"
 
 #source the model and other functions
 source(paste(src.dir,"/scripts/niche_based/EcoCrop-model.R",sep=""))
@@ -18,8 +18,8 @@ source(paste(src.dir,"/scripts/niche_based/nb-07-ecocrop_gnut-fun.R",sep=""))
 crop_name <- "gnut"
 
 #i/o directories
-bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
-#bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
+#bDir <- "/mnt/a17/eejarv/PhD-work/crop-modelling/niche-based"
+bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling/niche-based"
 occDir <- paste(bDir,"/occurrences",sep="")
 calDir <- paste(bDir,"/calendar",sep="")
 envDir <- paste(bDir,"/env-data",sep="")
