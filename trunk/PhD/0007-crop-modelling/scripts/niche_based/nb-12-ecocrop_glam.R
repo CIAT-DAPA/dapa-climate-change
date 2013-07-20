@@ -614,7 +614,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 
 
 #### make a plot of count_nz
-
+regtype <- "LINEAR"
 
 
 #### make a plot permutation importance for each model (using fitdata)
