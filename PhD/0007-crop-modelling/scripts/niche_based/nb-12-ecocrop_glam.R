@@ -559,7 +559,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
     count_nz <- data.frame(PREDICTOR=names(count_nz),USE=as.numeric(count_nz))
     count_nz <- count_nz[order(count_nz$USE),]
     rownames(count_nz) <- 1:nrow(count_nz) #dont forget to produce a plot of this
-    write.csv(count_nz,paste(syDir,"/variable_use_frequency_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+    write.csv(count_nz,paste(syDir,"/variable_use_frequency_01_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
     write.csv(predVals,paste(syDir,"/bootstrapped_coefficients_01_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
     
     selpred <- count_nz[which(count_nz$USE >= 50),]
@@ -614,16 +614,139 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 
 
 #### make a plot of count_nz
+for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
+  #regtype <- "LINEAR"
+  cat("plotting variable importance",regtype,"\n")
+  count_nz <- read.csv(paste(syDir,"/variable_use_frequency_01_",tolower(regtype),".csv",sep=""))
+  count_nz <- count_nz[order(count_nz$USE,decreasing=T),]
+  
+  if (!file.exists(paste(syDir,"/parameter_importance_01_",tolower(regtype),".tiff",sep=""))) {
+    tiff(paste(syDir,"/parameter_importance_01_",tolower(regtype),".tiff",sep=""),res=300,pointsize=7,
+         width=1800,height=1100,units="px",compression="lzw")
+    par(mar=c(10,4.5,1,1),cex=1)
+    barplot(height=count_nz$USE,names.arg=count_nz$PREDICTOR,las=2,
+            ylab="Percent regressions where selected (%)",
+            xlab=NA,ylim=c(0,100))
+    grid()
+    abline(h=50,col="red",lty=2)
+    dev.off()
+  }
+}
+
+### calculate nz_count for bootstrap_02
+for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
+  #regtype <- "LINEAR"
+  cat("plotting variable importance",regtype,"\n")
+  
+  if (!file.exists(paste(syDir,"/variable_use_frequency_02_",tolower(regtype),".csv",sep=""))) {
+    #loading regression data
+    load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
+    count_nz1 <- read.csv(paste(syDir,"/variable_use_frequency_01_",tolower(regtype),".csv",sep=""))
+    
+    #select predictors and create output data.frame
+    selpred <- count_nz1[which(count_nz1$USE >= 50),]
+    predVals <- as.data.frame(matrix(0,ncol=(nrow(selpred)+2),nrow=length(seedList)))
+    names(predVals) <- c("SEED","Intercept",paste(selpred$PREDICTOR))
+    
+    for (seed in seedList) {
+      #seed <- seedList[1]
+      tmod <- out_models2[[paste("SD_",seed,sep="")]]$MODEL
+      tmodcoef <- as.data.frame(t(tmod$coefficients)); rownames(tmodcoef) <- 1
+      names(tmodcoef)[1] <- "Intercept"
+      
+      #put data into predVals data.frame
+      predVals$SEED[which(seedList %in% seed)] <- seed
+      for (prd in c("Intercept",paste(selpred$PREDICTOR))) {
+        #prd <- paste(selpred$PREDICTOR)[1]
+        if (prd %in% names(tmodcoef)) {predVals[which(seedList %in% seed),prd] <- tmodcoef[,prd]}
+      }
+    }
+    
+    #calculate number of predictors
+    count_nz2 <- apply(predVals[,3:ncol(predVals)],2,function(x) {length(which(x>0))})
+    count_nz2 <- count_nz2[which(count_nz2 > 0)]
+    count_nz2 <- data.frame(PREDICTOR=names(count_nz2),USE=as.numeric(count_nz2))
+    count_nz2 <- count_nz2[order(count_nz2$USE, decreasing=T),]
+    rownames(count_nz2) <- 1:nrow(count_nz2) #dont forget to produce a plot of this
+    write.csv(count_nz2,paste(syDir,"/variable_use_frequency_02_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+    
+    rm(list=c("out_models2","ami_all","regdata","out_eval2"))
+  } else {
+    count_nz2 <- read.csv(paste(syDir,"/variable_use_frequency_02_",tolower(regtype),".csv",sep=""))
+  }
+  
+  #plot the variable importance
+  if (!file.exists(paste(syDir,"/parameter_importance_02_",tolower(regtype),".tiff",sep=""))) {
+    tiff(paste(syDir,"/parameter_importance_02_",tolower(regtype),".tiff",sep=""),res=300,pointsize=6,
+         width=900,height=800,units="px",compression="lzw")
+    par(mar=c(10,4.5,1,1),cex=1)
+    barplot(height=count_nz2$USE,names.arg=count_nz2$PREDICTOR,las=2,
+            ylab="Percent regressions where selected (%)",
+            xlab=NA,ylim=c(0,100))
+    grid()
+    abline(h=50,col="red",lty=2)
+    dev.off()
+  }
+}
+
+
+#### plot correlation coefficient of eval data
+# for the three types of regressions (different colour)
+# for the first and second regressions (different line type)
+tiff(paste(syDir,"/bootstrapped_ccoef.tiff",sep=""),res=300,pointsize=10,
+     width=1900,height=1500,units="px",compression="lzw")
+par(mar=c(5,4.5,1,1),cex=1)
+for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
+  #regtype <- "LINEAR"
+  #load eval part 1
+  eval1 <- read.csv(paste(syDir,"/bootstrapped_regs_01_eval_",tolower(regtype),".csv",sep=""))
+  eval2 <- read.csv(paste(syDir,"/bootstrapped_regs_02_eval_",tolower(regtype),".csv",sep=""))
+  
+  #calculate histograms
+  hd1 <- hist(eval1$CCOEF.EVA,breaks=seq(0,1,by=0.05),plot=F)
+  hd2 <- hist(eval2$CCOEF.EVA,breaks=seq(0,1,by=0.05),plot=F)
+  
+  if (regtype == "LINEAR") {
+    plot(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",xlim=c(0,1),ylim=c(0,50),
+         xlab="Correlation coefficient", ylab="pdf (%)",col="red")
+    grid()
+    lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="red",lty=2)
+  } else if (regtype == "LOGLINEAR") {
+    lines(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",col="blue",lty=1)
+    lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="blue",lty=2)
+  } else {
+    lines(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",col="dark green",lty=1)
+    lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="dark green",lty=2)
+  }
+}
+abline(v=0.5,col="black",lty=1)
+dev.off()
+
+
+#### make a plot permutation importance for each model 
+#(using regdata, only for final models)
 regtype <- "LINEAR"
 
+#load the regressions
+load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
 
-#### make a plot permutation importance for each model (using fitdata)
+#use regdata
+predList <- names(regdata)[3:ncol(regdata)]
+for (mi in 1:length(out_models2)) {
+  #mi <- 1
+  orig_pred <- predict(out_models2[[mi]]$MODEL,regdata)
+  for (prd in predList) {
+    #prd <- predList[1]
+    for (ri in 1:10) {
+      regdata_r <- regdata
+      nor <- sample(1:nrow(regdata_r),size=nrow(regdata_r),replace=F)
+      
+    }
+  }
+}
 
-
-
-#### make a plot of predicted production at present
-
-
+#remove stuff
+rm(list=c("out_models2","ami_all","regdata","out_eval2"))
 
 #### make a map of predicted production
 
