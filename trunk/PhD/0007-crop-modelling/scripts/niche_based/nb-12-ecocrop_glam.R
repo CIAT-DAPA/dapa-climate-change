@@ -34,45 +34,49 @@ expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_dis
 expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 
 #b. load pot_yield_rfd.csv from ./ecg_analyses/glam_output/exp-$/tables
-for (expID in expSel) {
-  #expID <- expSel[1]
-  ydata <- read.csv(paste(ecgDir,"/glam_output/exp-",expID,"/tables/pot_yield_rfd.csv",sep=""))
-  
-  #c. calculate time-ybar, normalise using y-min/(max-min)
-  ybar <- rowMeans(ydata[,paste("Y",1966:1993,sep="")],na.rm=T) #in kg/ha
-  ahar <- cells$AHARV #in kha (i.e. ha * 1000)
-  tpro <- ybar*ahar/1000 #in kton (i.e. ton * 1000)
-  
-  #with yield (no relationship)
-  #ynorm <- (ybar-min(ybar))/(max(ybar)-min(ybar)) #linear normalisation
-  #ynorm <- ybar/(10+ybar) #darango
-  #ynorm <- ybar / max(ybar) #linear with min at 0
-  #ynorm <- (ybar^0.5-1)/0.5 #box-cox
-  #ynorm <- (ynorm - min(ynorm)) / (max(ynorm) - min(ynorm)) #linear to box-cox
-  #ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=ybar)
-  #names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
-  #ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
-  #names(ynorm)[ncol(ynorm)] <- paste("EXP.",expID,sep="")
-  
-  #with total production (clear relationship)
-  ynorm <- (tpro-min(tpro))/(max(tpro)-min(tpro)) #linear normalisation
-  ynorm <- (ynorm^0.5-1)/0.5 #box-cox
-  ynorm <- (ynorm - min(ynorm)) / (max(ynorm) - min(ynorm)) #linear to box-cox
-  ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=tpro)
-  names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
-  ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
-  names(ynorm)[ncol(ynorm)] <- paste("EXP.",expID,sep="")
-  
-  if (expID == expSel[1]) {
-    ybar_all <- ybar
-    ynor_all <- ynorm
-  } else {
-    ybar_all <- merge(ybar_all,ybar,by=c("CELL","X","Y"))
-    ynor_all <- merge(ynor_all,ynorm,by=c("CELL","X","Y"))
+if (!file.exists(paste(syDir,"/input_GLAM_normalised_production.csv",sep=""))) {
+  for (expID in expSel) {
+    #expID <- expSel[1]
+    ydata <- read.csv(paste(ecgDir,"/glam_output/exp-",expID,"/tables/pot_yield_rfd.csv",sep=""))
+    
+    #c. calculate time-ybar, normalise using y-min/(max-min)
+    ybar <- rowMeans(ydata[,paste("Y",1966:1993,sep="")],na.rm=T) #in kg/ha
+    ahar <- cells$AHARV #in kha (i.e. ha * 1000)
+    tpro <- ybar*ahar/1000 #in kton (i.e. ton * 1000)
+    
+    #with yield (no relationship)
+    #ynorm <- (ybar-min(ybar))/(max(ybar)-min(ybar)) #linear normalisation
+    #ynorm <- ybar/(10+ybar) #darango
+    #ynorm <- ybar / max(ybar) #linear with min at 0
+    #ynorm <- (ybar^0.5-1)/0.5 #box-cox
+    #ynorm <- (ynorm - min(ynorm)) / (max(ynorm) - min(ynorm)) #linear to box-cox
+    #ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=ybar)
+    #names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
+    #ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
+    #names(ynorm)[ncol(ynorm)] <- paste("EXP.",expID,sep="")
+    
+    #with total production (clear relationship)
+    ynorm <- (tpro-min(tpro))/(max(tpro)-min(tpro)) #linear normalisation
+    ynorm <- (ynorm^0.5-1)/0.5 #box-cox
+    ynorm <- (ynorm - min(ynorm)) / (max(ynorm) - min(ynorm)) #linear to box-cox
+    ybar <- cbind(ydata[,c("CELL","X","Y")],VALUE=tpro)
+    names(ybar)[ncol(ybar)] <- paste("EXP.",expID,sep="")
+    ynorm <- cbind(ydata[,c("CELL","X","Y")],VALUE=ynorm)
+    names(ynorm)[ncol(ynorm)] <- paste("EXP.",expID,sep="")
+    
+    if (expID == expSel[1]) {
+      ybar_all <- ybar
+      ynor_all <- ynorm
+    } else {
+      ybar_all <- merge(ybar_all,ybar,by=c("CELL","X","Y"))
+      ynor_all <- merge(ynor_all,ynorm,by=c("CELL","X","Y"))
+    }
   }
+  ynor_all$EXP.MEAN <- rowMeans(ynor_all[,paste("EXP.",expSel,sep="")],na.rm=T)
+  write.csv(ynor_all,paste(syDir,"/input_GLAM_normalised_production.csv",sep=""),quote=T,row.names=F)
+} else {
+  ynor_all <- read.csv(paste(syDir,"/input_GLAM_normalised_production.csv",sep=""))
 }
-ynor_all$EXP.MEAN <- rowMeans(ynor_all[,paste("EXP.",expSel,sep="")],na.rm=T)
-write.csv(ynor_all,paste(syDir,"/input_GLAM_normalised_production.csv",sep=""),quote=T,row.names=F)
 
 ###
 #load the ecocrop runs and construct a data.frame with each of the selected ecocrop runs
@@ -81,25 +85,29 @@ skill <- read.csv(paste(ecoDir,"/data/runs_discard.csv",sep=""))
 ecoRuns <- skill$RUN[which(skill$SEL)]
 
 #load ecocrop data
-for (runID in ecoRuns) {
-  #runID <- ecoRuns[1]
-  ecors <- raster(paste(ecoDir,"/proj/baseline/clm_1966_1993/run_",runID,"/",cropName,"_suitability.tif",sep=""))
-  sbar <- extract(ecors,cells[,c("X","Y")])
-  #sbar <- log(sbar/100+1) #; plot(sbar,sbar2)
-  #sbar <- (sbar-log(1))/(log(2)-log(1))
-  sbar <- (sbar^0.5-1)/0.5 #boxcox
-  sbar <- round((sbar - min(sbar,na.rm=T)) / (max(sbar,na.rm=T) - min(sbar,na.rm=T)) * 100,0) #linear on box cox
-  sbar <- cbind(cells[,c("CELL","X","Y")],VALUE=sbar)
-  names(sbar)[ncol(sbar)] <- paste("RUN.",runID,sep="")
-  if (runID == ecoRuns[1]) {
-    sbar_all <- sbar
-  } else {
-    sbar_all <- merge(sbar_all,sbar,by=c("CELL","X","Y"))
+if (!file.exists(paste(syDir,"/input_EcoCrop_suitability.csv",sep=""))) {
+  for (runID in ecoRuns) {
+    #runID <- ecoRuns[1]
+    ecors <- raster(paste(ecoDir,"/proj/baseline/clm_1966_1993/run_",runID,"/",cropName,"_suitability.tif",sep=""))
+    sbar <- extract(ecors,cells[,c("X","Y")])
+    #sbar <- log(sbar/100+1) #; plot(sbar,sbar2)
+    #sbar <- (sbar-log(1))/(log(2)-log(1))
+    sbar <- (sbar^0.5-1)/0.5 #boxcox
+    sbar <- round((sbar - min(sbar,na.rm=T)) / (max(sbar,na.rm=T) - min(sbar,na.rm=T)) * 100,0) #linear on box cox
+    sbar <- cbind(cells[,c("CELL","X","Y")],VALUE=sbar)
+    names(sbar)[ncol(sbar)] <- paste("RUN.",runID,sep="")
+    if (runID == ecoRuns[1]) {
+      sbar_all <- sbar
+    } else {
+      sbar_all <- merge(sbar_all,sbar,by=c("CELL","X","Y"))
+    }
   }
+  sbar_all$RUN.MEAN <- rowMeans(sbar_all[,paste("RUN.",ecoRuns,sep="")],na.rm=T)
+  sbar_all$RUN.MEAN <- round(sbar_all$RUN.MEAN,0)
+  write.csv(sbar_all,paste(syDir,"/input_EcoCrop_suitability.csv",sep=""),quote=T,row.names=F)
+} else {
+  sbar_all <- read.csv(paste(syDir,"/input_EcoCrop_suitability.csv",sep=""))
 }
-sbar_all$RUN.MEAN <- rowMeans(sbar_all[,paste("RUN.",ecoRuns,sep="")],na.rm=T)
-sbar_all$RUN.MEAN <- round(sbar_all$RUN.MEAN,0)
-write.csv(sbar_all,paste(syDir,"/input_EcoCrop_suitability.csv",sep=""),quote=T,row.names=F)
 
 ###qqplot
 tiff(paste(syDir,"/qqplot_suit_vs_yield.tiff",sep=""),res=300,pointsize=10,
@@ -461,7 +469,7 @@ rnames <- rownames(ami_all)
 rnames <- as.numeric(sapply(rnames,function(x) {as.numeric(gsub("CELL.","",x))}))
 ami_all <- cbind(CELL=rnames,ami_all)
 rownames(ami_all) <- 1:nrow(ami_all)
-  
+
 #get regression stuff
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #regtype <- "LINEAR" #LINEAR LOGLINEAR ROBUST2
