@@ -732,17 +732,30 @@ load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep="")
 
 #use regdata
 predList <- names(regdata)[3:ncol(regdata)]
+all_pimp <- data.frame()
 for (mi in 1:length(out_models2)) {
   #mi <- 1
+  cat("processing",names(out_models2)[mi],"\n")
   orig_pred <- predict(out_models2[[mi]]$MODEL,regdata)
+  pred_imp <- c()
   for (prd in predList) {
     #prd <- predList[1]
+    regdata_r <- regdata
+    avimp <- c()
     for (ri in 1:10) {
-      regdata_r <- regdata
       nor <- sample(1:nrow(regdata_r),size=nrow(regdata_r),replace=F)
-      
+      regdata_r[,prd] <- regdata[nor,prd]
+      new_pred <- predict(out_models2[[mi]]$MODEL,regdata_r)
+      vimp <- 1 - as.numeric(cor.test(orig_pred,new_pred,method="pearson")$estimate)
+      avimp <- c(avimp,vimp)
     }
+    avimp <- mean(avimp,na.rm=T)
+    pred_imp <- c(pred_imp,avimp)
+    names(pred_imp)[length(pred_imp)] <- prd
   }
+  pred_imp <- as.data.frame(t(pred_imp))
+  pred_imp <- cbind(ITER=mi, pred_imp)
+  all_pimp <- rbind(all_pimp, pred_imp)
 }
 
 #remove stuff
