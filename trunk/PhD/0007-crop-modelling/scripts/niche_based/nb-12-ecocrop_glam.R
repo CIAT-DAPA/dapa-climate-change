@@ -4,6 +4,7 @@
 stop("!")
 
 library(rgdal); library(raster); library(reshape2)
+require(robustbase); require(MASS)
 
 #source functions
 src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
@@ -37,6 +38,7 @@ if (!file.exists(syDir)) {dir.create(syDir)}
 expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
 expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 
+######################################################################
 #b. load pot_yield_rfd.csv from ./ecg_analyses/glam_output/exp-$/tables
 if (!file.exists(paste(syDir,"/input_GLAM_normalised_production.csv",sep=""))) {
   for (expID in expSel) {
@@ -88,6 +90,7 @@ if (!file.exists(paste(syDir,"/input_GLAM_normalised_production.csv",sep=""))) {
 skill <- read.csv(paste(ecoDir,"/data/runs_discard.csv",sep=""))
 ecoRuns <- skill$RUN[which(skill$SEL)]
 
+######################################################################
 #load ecocrop data
 if (!file.exists(paste(syDir,"/input_EcoCrop_suitability.csv",sep=""))) {
   for (runID in ecoRuns) {
@@ -131,6 +134,7 @@ grid()
 abline(a=0,b=100)
 dev.off()
 
+######################################################################
 ###
 #(1) The suitability scale was divided into 11 classes: values equal to 
 #zero and 10 equally-spaced classes (of 10 % range each class). 
@@ -197,6 +201,7 @@ lines(medvals$class, cubic.lm$fitted.values, type="l", col="red")
 dev.off()
 
 
+######################################################################
 #(2) The normalised yield scale was divided into 11 equally-spaced classes. 
 #A scatter plot with mean yield and suitability values was produced.
 for (expID in c(expSel,"MEAN")) {
@@ -255,7 +260,8 @@ lines(medvals$class, cubic.lm$fitted.values, type="l", col="red")
 dev.off()
 
 
-###
+######################################################################
+######################################################################
 ### using yield and suitability calculate the I, and RR
 if (!file.exists(paste(syDir,"/model_similarity.csv",sep=""))) {
   out_simil <- data.frame()
@@ -328,6 +334,8 @@ grid()
 dev.off()
 
 
+######################################################################
+######################################################################
 #(3) GLAM’s simulated potential yield was then regressed against suitability
 #using a three types of regressions: (a) linear, (b) log-linear, where log(Yn+1)
 #is regressed against suitability, and (c) robust regression (Maronna et al., 2006).
@@ -337,7 +345,6 @@ dev.off()
 #Residuals of these regressions were then regressed against climatological means 
 #and variances of 17 intra-seasonal agro-meteorological indicators (AMIs, Table 7.4) 
 #derived from GLAM’s simulated daily output.
-require(robustbase); require(MASS)
 
 #a. do the three fits for all possible ensemble members
 #potential list of combinations
@@ -421,6 +428,8 @@ if (!file.exists(paste(syDir,"/regression_output.csv",sep=""))) {
 }
 
 
+######################################################################
+######################################################################
 #b. load the residuals of the ensemble one and do the multiple regressions
 load(file=paste(syDir,"/regression_output.RData",sep=""))
 
@@ -624,6 +633,8 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 }
 
 
+######################################################################
+######################################################################
 #### make a plot of count_nz
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #regtype <- "LINEAR"
@@ -645,6 +656,8 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 }
 
 
+######################################################################
+######################################################################
 ### calculate nz_count for bootstrap_02
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #regtype <- "LINEAR"
@@ -703,6 +716,8 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 }
 
 
+######################################################################
+######################################################################
 #### plot correlation coefficient of eval data
 # for the three types of regressions (different colour)
 # for the first and second regressions (different line type)
@@ -738,6 +753,8 @@ if (!file.exists(paste(syDir,"/bootstrapped_ccoef.tiff",sep=""))) {
 }
 
 
+######################################################################
+######################################################################
 #### make a plot permutation importance for each model 
 #(using regdata, only for final models)
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
@@ -813,8 +830,28 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 }
 
 
+######################################################################
+######################################################################
 #### make a map of predicted production
 
+#regtype <- "LINEAR"
+cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+cat("Regression",regtype,"\n")
+cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+
+#load regression stuff
+load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
+
+for (mi in 1:length(out_models2)) {
+  if (mi %% 10 == 0) cat("processing",names(out_models2)[mi],"\n")
+  rs_pr <- raster(rs)
+  
+  
+}
+
+
+#remove stuff
+rm(list=c("out_models2","ami_all","regdata","out_eval2"))
 
 
 
