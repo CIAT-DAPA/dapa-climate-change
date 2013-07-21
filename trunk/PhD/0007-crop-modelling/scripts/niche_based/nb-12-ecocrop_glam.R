@@ -829,8 +829,3 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   }
 }
 
-
-
-
-
-
