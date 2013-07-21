@@ -830,28 +830,6 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 }
 
 
-######################################################################
-######################################################################
-#### make a map of predicted production
-
-#regtype <- "LINEAR"
-cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-cat("Regression",regtype,"\n")
-cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-
-#load regression stuff
-load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
-
-for (mi in 1:length(out_models2)) {
-  if (mi %% 10 == 0) cat("processing",names(out_models2)[mi],"\n")
-  rs_pr <- raster(rs)
-  
-  
-}
-
-
-#remove stuff
-rm(list=c("out_models2","ami_all","regdata","out_eval2"))
 
 
 
