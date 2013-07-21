@@ -747,7 +747,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   #load the regressions
-  if (!file.exists(paste(syDir,"/bootstrap_permutation_importance_",tolower(regtype),".tiff",sep=""))) {
+  if (!file.exists(paste(syDir,"/bootstrap_permutation_importance_",tolower(regtype),".csv",sep=""))) {
     load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
     
     #use regdata
@@ -763,7 +763,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
     all_pimp <- data.frame()
     for (mi in 1:length(out_models2)) {
       #mi <- 1
-      cat("processing",names(out_models2)[mi],"\n")
+      if (mi %% 10 == 0) cat("processing",names(out_models2)[mi],"\n")
       orig_pred <- predict(out_models2[[mi]]$MODEL,regdata)
       pred_imp <- c()
       for (prd in predList) {
@@ -785,16 +785,19 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
       pred_imp <- cbind(ITER=mi, pred_imp)
       all_pimp <- rbind(all_pimp, pred_imp)
     }
+    names(all_pimp)[1] <- "SEED"
+    all_pimp$SEED <- names(out_models2)
+    write.csv(all_pimp,paste(syDir,"/bootstrap_permutation_importance_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
     
     #remove stuff
     rm(list=c("out_models2","ami_all","regdata","out_eval2"))
     
     #make a boxplot with all these values
-    nz_pi <- apply(all_pimp,2,FUN=function(x) {length(which(round(x*100)==0))})
+    nz_pi <- apply(all_pimp[,2:ncol(all_pimp)],2,FUN=function(x) {length(which(round(x*100)==0))})
     nz_pi <- nz_pi[which(nz_pi != 100)]
     
-    pimp_m <- all_pimp[,names(nz_pi)]
-    pimp_m <- melt(pimp_m,varnames=names(pimp_m),id=c("ITER"))
+    pimp_m <- all_pimp[,c("SEED",names(nz_pi))]
+    pimp_m <- melt(pimp_m,varnames=names(pimp_m),id=c("SEED"))
     pimp_o <- order(as.numeric(by(pimp_m$value, pimp_m$variable, median)),decreasing=T)    
     pimp_m$variable <- ordered(pimp_m$variable, levels=levels(pimp_m$variable)[pimp_o]) 
     
