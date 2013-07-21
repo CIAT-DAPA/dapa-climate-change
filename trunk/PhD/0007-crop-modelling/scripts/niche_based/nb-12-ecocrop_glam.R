@@ -5,6 +5,10 @@ stop("!")
 
 library(rgdal); library(raster); library(reshape2)
 
+#source functions
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
+source(paste(src.dir,"/scripts/niche_based/nb-12-ecocrop_glam-fun.R",sep=""))
+
 #glam: i/o directories and details
 cropName <- "gnut"
 ver <- "v6"
@@ -432,45 +436,52 @@ set.seed(1234); seedList <- round(rnorm(100,5000,1500),0)
 #xydata
 xydata <- cbind(PT=1:nrow(ensmean$XY),ensmean$XY)
 
-
 #load seasonal metrics and their standard deviations
-out_ami <- list()
-for (expID in expSel) {
-  #expID <- expSel[1]
-  load(file=paste(ecgDir,"/results/exp-",expID,"/cell_data_wth.RData",sep=""))
-  cellid <- unlist(lapply(cell_wth_data,FUN=function(x) {x$CELL[1]}))
-  cellid <- as.data.frame(cbind(NUM=1:length(cell_wth_data),CELL=cellid))
-  
-  #grab information for particular grid cell
-  for (gi in xydata$CELL) {
-    #gi <- xydata$CELL[1]
-    cid <- cellid$NUM[which(cellid$CELL == gi)]
-    if (is.null(out_ami[[paste("CELL.",gi,sep="")]])) {out_ami[[paste("CELL.",gi,sep="")]] <- data.frame()}
-    gsdata <- cell_wth_data[[cid]]
-    gsdata <- gsdata[,c("RCOV","RD.0","RD.2","RD.5","RD.10","RD.15","RD.20","ERATIO.25","ERATIO.50","ERATIO.75","TCOV","EFF.SRAD","EFF.GD")]
-    gsd_me <- apply(gsdata,2,FUN=function(x) {mean(x,na.rm=T)})
-    gsd_sd <- apply(gsdata,2,FUN=function(x) {sd(x,na.rm=T)})
-    names(gsd_me) <- paste(names(gsd_me),".ME",sep="")
-    names(gsd_sd) <- paste(names(gsd_sd),".SD",sep="")
-    gsd <- data.frame(EXP=expID,t(gsd_me),t(gsd_sd))
-    if (gi == xydata$CELL[1] & expID == expSel[1]) {
-      out_ami[[paste("CELL.",gi,sep="")]] <- gsd
-    } else {
-      out_ami[[paste("CELL.",gi,sep="")]] <- rbind(out_ami[[paste("CELL.",gi,sep="")]],gsd)
+if (!file.exists(paste(syDir,"/input_agro_meteorological_indicators.csv",sep=""))) {
+  out_ami <- list()
+  for (expID in expSel) {
+    #expID <- expSel[1]
+    load(file=paste(ecgDir,"/results/exp-",expID,"/cell_data_wth.RData",sep=""))
+    cellid <- unlist(lapply(cell_wth_data,FUN=function(x) {x$CELL[1]}))
+    cellid <- as.data.frame(cbind(NUM=1:length(cell_wth_data),CELL=cellid))
+    
+    #grab information for particular grid cell
+    for (gi in xydata$CELL) {
+      #gi <- xydata$CELL[1]
+      cid <- cellid$NUM[which(cellid$CELL == gi)]
+      if (is.null(out_ami[[paste("CELL.",gi,sep="")]])) {out_ami[[paste("CELL.",gi,sep="")]] <- data.frame()}
+      gsdata <- cell_wth_data[[cid]]
+      gsdata <- gsdata[,c("RCOV","RD.0","RD.2","RD.5","RD.10","RD.15","RD.20","ERATIO.25","ERATIO.50","ERATIO.75","TCOV","EFF.SRAD","EFF.GD")]
+      gsd_me <- apply(gsdata,2,FUN=function(x) {mean(x,na.rm=T)})
+      gsd_sd <- apply(gsdata,2,FUN=function(x) {sd(x,na.rm=T)})
+      names(gsd_me) <- paste(names(gsd_me),".ME",sep="")
+      names(gsd_sd) <- paste(names(gsd_sd),".SD",sep="")
+      gsd <- data.frame(EXP=expID,t(gsd_me),t(gsd_sd))
+      if (gi == xydata$CELL[1] & expID == expSel[1]) {
+        out_ami[[paste("CELL.",gi,sep="")]] <- gsd
+      } else {
+        out_ami[[paste("CELL.",gi,sep="")]] <- rbind(out_ami[[paste("CELL.",gi,sep="")]],gsd)
+      }
     }
+    rm(cell_wth_data); g=gc(); rm(g)
   }
-  rm(cell_wth_data); g=gc(); rm(g)
+  
+  #calculate average ami values for each gridcell
+  ami_all <- lapply(out_ami,FUN=function(x) {apply(x[,2:ncol(x)],2,FUN=function(y) {mean(y,na.rm=T)})})
+  ami_all <- do.call("rbind",ami_all)
+  rnames <- rownames(ami_all)
+  rnames <- as.numeric(sapply(rnames,function(x) {as.numeric(gsub("CELL.","",x))}))
+  ami_all <- cbind(CELL=rnames,ami_all)
+  rownames(ami_all) <- 1:nrow(ami_all)
+  
+  #write ami data
+  write.csv(ami_all,paste(syDir,"/input_agro_meteorological_indicators.csv",sep=""),quote=T,row.names=F)
+} else {
+  ami_all <- read.csv(paste(syDir,"/input_agro_meteorological_indicators.csv",sep=""))
 }
 
-#calculate average ami values for each gridcell
-ami_all <- lapply(out_ami,FUN=function(x) {apply(x[,2:ncol(x)],2,FUN=function(y) {mean(y,na.rm=T)})})
-ami_all <- do.call("rbind",ami_all)
-rnames <- rownames(ami_all)
-rnames <- as.numeric(sapply(rnames,function(x) {as.numeric(gsub("CELL.","",x))}))
-ami_all <- cbind(CELL=rnames,ami_all)
-rownames(ami_all) <- 1:nrow(ami_all)
 
-#get regression stuff
+#perform all regressions
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #regtype <- "LINEAR" #LINEAR LOGLINEAR ROBUST2
   cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
@@ -535,6 +546,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   if (!file.exists(paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))) {
     #count predictors
     predList <- names(regdata)[3:ncol(regdata)]
+    frml <- makeFormula(respName="RESIDUALS",explVar=regdata[,3:ncol(regdata)],type="quadratic",interaction.level=0)
     frml_t <- terms(frml); frml_t <- attr(frml_t,"term.labels")
     predVals <- as.data.frame(matrix(0,ncol=(length(frml_t)+2),nrow=length(seedList)))
     names(predVals) <- c("SEED","Intercept",frml_t)
@@ -547,14 +559,14 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
       
       #put data into predVals data.frame
       predVals$SEED[which(seedList %in% seed)] <- seed
-      for (prd in frml_t) {
+      for (prd in c("Intercept",frml_t)) {
         #prd <- frml_t[1]
         if (prd %in% names(tmodcoef)) {predVals[which(seedList %in% seed),prd] <- tmodcoef[,prd]}
       }
     }
     
     #count number of times not zero
-    count_nz <- apply(predVals[,3:ncol(predVals)],2,function(x) {length(which(x>0))})
+    count_nz <- apply(predVals[,3:ncol(predVals)],2,function(x) {length(which(x!=0))})
     count_nz <- count_nz[which(count_nz > 0)]
     count_nz <- data.frame(PREDICTOR=names(count_nz),USE=as.numeric(count_nz))
     count_nz <- count_nz[order(count_nz$USE),]
@@ -607,8 +619,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
     }
     save(list=c("out_models2","ami_all","regdata","out_eval2"),file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
     write.csv(out_eval2,paste(syDir,"/bootstrapped_regs_02_eval_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
-  } else {
-    load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
+    rm(list=c("out_models2","ami_all","regdata","out_eval2"))
   }
 }
 
@@ -622,7 +633,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   
   if (!file.exists(paste(syDir,"/parameter_importance_01_",tolower(regtype),".tiff",sep=""))) {
     tiff(paste(syDir,"/parameter_importance_01_",tolower(regtype),".tiff",sep=""),res=300,pointsize=7,
-         width=1800,height=1100,units="px",compression="lzw")
+         width=1800,height=1100,units="px",compression="lzw",type="cairo")
     par(mar=c(10,4.5,1,1),cex=1)
     barplot(height=count_nz$USE,names.arg=count_nz$PREDICTOR,las=2,
             ylab="Percent regressions where selected (%)",
@@ -663,12 +674,13 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
     }
     
     #calculate number of predictors
-    count_nz2 <- apply(predVals[,3:ncol(predVals)],2,function(x) {length(which(x>0))})
+    count_nz2 <- apply(predVals[,3:ncol(predVals)],2,function(x) {length(which(x!=0))})
     count_nz2 <- count_nz2[which(count_nz2 > 0)]
     count_nz2 <- data.frame(PREDICTOR=names(count_nz2),USE=as.numeric(count_nz2))
     count_nz2 <- count_nz2[order(count_nz2$USE, decreasing=T),]
     rownames(count_nz2) <- 1:nrow(count_nz2) #dont forget to produce a plot of this
     write.csv(count_nz2,paste(syDir,"/variable_use_frequency_02_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
+    write.csv(predVals,paste(syDir,"/bootstrapped_coefficients_02_",tolower(regtype),".csv",sep=""),quote=T,row.names=F)
     
     rm(list=c("out_models2","ami_all","regdata","out_eval2"))
   } else {
@@ -678,7 +690,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #plot the variable importance
   if (!file.exists(paste(syDir,"/parameter_importance_02_",tolower(regtype),".tiff",sep=""))) {
     tiff(paste(syDir,"/parameter_importance_02_",tolower(regtype),".tiff",sep=""),res=300,pointsize=6,
-         width=900,height=800,units="px",compression="lzw")
+         width=1200,height=800,units="px",compression="lzw",type="cairo")
     par(mar=c(10,4.5,1,1),cex=1)
     barplot(height=count_nz2$USE,names.arg=count_nz2$PREDICTOR,las=2,
             ylab="Percent regressions where selected (%)",
@@ -693,73 +705,109 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
 #### plot correlation coefficient of eval data
 # for the three types of regressions (different colour)
 # for the first and second regressions (different line type)
-tiff(paste(syDir,"/bootstrapped_ccoef.tiff",sep=""),res=300,pointsize=10,
-     width=1900,height=1500,units="px",compression="lzw")
-par(mar=c(5,4.5,1,1),cex=1)
-for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
-  #regtype <- "LINEAR"
-  #load eval part 1
-  eval1 <- read.csv(paste(syDir,"/bootstrapped_regs_01_eval_",tolower(regtype),".csv",sep=""))
-  eval2 <- read.csv(paste(syDir,"/bootstrapped_regs_02_eval_",tolower(regtype),".csv",sep=""))
-  
-  #calculate histograms
-  hd1 <- hist(eval1$CCOEF.EVA,breaks=seq(0,1,by=0.05),plot=F)
-  hd2 <- hist(eval2$CCOEF.EVA,breaks=seq(0,1,by=0.05),plot=F)
-  
-  if (regtype == "LINEAR") {
-    plot(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",xlim=c(0,1),ylim=c(0,50),
-         xlab="Correlation coefficient", ylab="pdf (%)",col="red")
-    grid()
-    lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="red",lty=2)
-  } else if (regtype == "LOGLINEAR") {
-    lines(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",col="blue",lty=1)
-    lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="blue",lty=2)
-  } else {
-    lines(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",col="dark green",lty=1)
-    lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="dark green",lty=2)
+if (!file.exists(paste(syDir,"/bootstrapped_ccoef.tiff",sep=""))) {
+  tiff(paste(syDir,"/bootstrapped_ccoef.tiff",sep=""),res=300,pointsize=10,
+       width=1900,height=1500,units="px",compression="lzw",type="cairo")
+  par(mar=c(5,4.5,1,1),cex=1)
+  for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
+    #regtype <- "LINEAR"
+    #load eval part 1
+    eval1 <- read.csv(paste(syDir,"/bootstrapped_regs_01_eval_",tolower(regtype),".csv",sep=""))
+    eval2 <- read.csv(paste(syDir,"/bootstrapped_regs_02_eval_",tolower(regtype),".csv",sep=""))
+    
+    #calculate histograms
+    hd1 <- hist(eval1$CCOEF.EVA,breaks=seq(0,1,by=0.05),plot=F)
+    hd2 <- hist(eval2$CCOEF.EVA,breaks=seq(0,1,by=0.05),plot=F)
+    
+    if (regtype == "LINEAR") {
+      plot(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",xlim=c(0,1),ylim=c(0,50),
+           xlab="Correlation coefficient", ylab="pdf (%)",col="red")
+      grid()
+      lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="red",lty=2)
+    } else if (regtype == "LOGLINEAR") {
+      lines(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",col="blue",lty=1)
+      lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="blue",lty=2)
+    } else {
+      lines(hd1$mids,(hd1$counts/sum(hd1$counts)*100),ty="l",col="dark green",lty=1)
+      lines(hd2$mids,(hd2$counts/sum(hd2$counts)*100),ty="l",col="dark green",lty=2)
+    }
   }
+  abline(v=0.5,col="black",lty=1)
+  dev.off()
 }
-abline(v=0.5,col="black",lty=1)
-dev.off()
 
 
 #### make a plot permutation importance for each model 
 #(using regdata, only for final models)
-regtype <- "LINEAR"
-
-#load the regressions
-load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
-
-#use regdata
-predList <- names(regdata)[3:ncol(regdata)]
-all_pimp <- data.frame()
-for (mi in 1:length(out_models2)) {
-  #mi <- 1
-  cat("processing",names(out_models2)[mi],"\n")
-  orig_pred <- predict(out_models2[[mi]]$MODEL,regdata)
-  pred_imp <- c()
-  for (prd in predList) {
-    #prd <- predList[1]
-    regdata_r <- regdata
-    avimp <- c()
-    for (ri in 1:10) {
-      nor <- sample(1:nrow(regdata_r),size=nrow(regdata_r),replace=F)
-      regdata_r[,prd] <- regdata[nor,prd]
-      new_pred <- predict(out_models2[[mi]]$MODEL,regdata_r)
-      vimp <- 1 - as.numeric(cor.test(orig_pred,new_pred,method="pearson")$estimate)
-      avimp <- c(avimp,vimp)
+for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
+  #regtype <- "LINEAR"
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("Regression",regtype,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  
+  #load the regressions
+  if (!file.exists(paste(syDir,"/bootstrap_permutation_importance_",tolower(regtype),".tiff",sep=""))) {
+    load(file=paste(syDir,"/bootstrapped_regs_02_",tolower(regtype),".RData",sep=""))
+    
+    #use regdata
+    predList <- read.csv(paste(syDir,"/bootstrapped_coefficients_02_",tolower(regtype),".csv",sep=""))
+    predList <- apply(predList,2,FUN=function(x) {length(which(x!=0))})
+    predList <- predList[which(predList != 0)]
+    predList <- names(predList)[3:length(predList)]
+    predList <- gsub("I.","",predList)
+    predList <- gsub(".2.","",predList)
+    predList <- unique(predList)
+    
+    predList <- names(regdata)[3:ncol(regdata)]
+    all_pimp <- data.frame()
+    for (mi in 1:length(out_models2)) {
+      #mi <- 1
+      cat("processing",names(out_models2)[mi],"\n")
+      orig_pred <- predict(out_models2[[mi]]$MODEL,regdata)
+      pred_imp <- c()
+      for (prd in predList) {
+        #prd <- predList[1]
+        regdata_r <- regdata
+        avimp <- c()
+        for (ri in 1:10) {
+          nor <- sample(1:nrow(regdata_r),size=nrow(regdata_r),replace=F)
+          regdata_r[,prd] <- regdata[nor,prd]
+          new_pred <- predict(out_models2[[mi]]$MODEL,regdata_r)
+          vimp <- 1 - as.numeric(cor.test(orig_pred,new_pred,method="pearson")$estimate)
+          avimp <- c(avimp,vimp)
+        }
+        avimp <- mean(avimp,na.rm=T)
+        pred_imp <- c(pred_imp,avimp)
+        names(pred_imp)[length(pred_imp)] <- prd
+      }
+      pred_imp <- as.data.frame(t(pred_imp))
+      pred_imp <- cbind(ITER=mi, pred_imp)
+      all_pimp <- rbind(all_pimp, pred_imp)
     }
-    avimp <- mean(avimp,na.rm=T)
-    pred_imp <- c(pred_imp,avimp)
-    names(pred_imp)[length(pred_imp)] <- prd
+    
+    #remove stuff
+    rm(list=c("out_models2","ami_all","regdata","out_eval2"))
+    
+    #make a boxplot with all these values
+    nz_pi <- apply(all_pimp,2,FUN=function(x) {length(which(round(x*100)==0))})
+    nz_pi <- nz_pi[which(nz_pi != 100)]
+    
+    pimp_m <- all_pimp[,names(nz_pi)]
+    pimp_m <- melt(pimp_m,varnames=names(pimp_m),id=c("ITER"))
+    pimp_o <- order(as.numeric(by(pimp_m$value, pimp_m$variable, median)),decreasing=T)    
+    pimp_m$variable <- ordered(pimp_m$variable, levels=levels(pimp_m$variable)[pimp_o]) 
+    
+    tiff(paste(syDir,"/bootstrap_permutation_importance_",tolower(regtype),".tiff",sep=""),res=300,pointsize=10,
+         width=1900,height=1700,units="px",compression="lzw",type="cairo")
+    par(mar=c(8,4.5,1,1),cex=1)
+    boxplot(pimp_m$value ~ pimp_m$variable,pch=NA,ylim=c(0,1.2),las=2,col="grey",
+                  ylab="Permutation importance")
+    grid()
+    abline(h=0.5,col="red")
+    dev.off()
   }
-  pred_imp <- as.data.frame(t(pred_imp))
-  pred_imp <- cbind(ITER=mi, pred_imp)
-  all_pimp <- rbind(all_pimp, pred_imp)
 }
 
-#remove stuff
-rm(list=c("out_models2","ami_all","regdata","out_eval2"))
 
 #### make a map of predicted production
 
