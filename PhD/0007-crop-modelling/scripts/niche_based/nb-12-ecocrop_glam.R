@@ -644,6 +644,7 @@ for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   }
 }
 
+
 ### calculate nz_count for bootstrap_02
 for (regtype in c("LINEAR","LOGLINEAR","ROBUST2")) {
   #regtype <- "LINEAR"
