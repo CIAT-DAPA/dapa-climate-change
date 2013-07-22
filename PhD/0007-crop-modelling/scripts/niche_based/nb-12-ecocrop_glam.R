@@ -4,7 +4,7 @@
 stop("!")
 
 library(rgdal); library(raster); library(reshape2)
-require(robustbase); require(MASS)
+library(robustbase); library(MASS)
 
 #source functions
 src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling"
