@@ -23,7 +23,11 @@ ecoRuns <- skill$RUN[which(skill$SEL)]
 rcpList <- c("del","loci","raw")
 gcmList <- list.files(paste(prjDir,"/rcp_del",sep=""))
 
+all_runs <- expand.grid(RUN=ecoRuns,TYPE=rcpList,GCM=gcmList)
+
 #calculate future change in suitability for each future-baseline combination
+
+
 
 
 #calculate means and quantiles
