@@ -99,8 +99,8 @@ for (inty in inList) {
         for (wj in wList) {tstk <- c(tstk,chgList[[inty]][[wj]][[paste("RUN.",rj,sep="")]])}
         tstk <- stack(tstk)
         tstk <- calc(tstk,fun=function(x) {mean(x,na.rm=T)})
+        chg_stk[[gcm]][[paste("RUN.",rj,sep="")]] <- tstk
       }
-      chg_stk[[gcm]][[paste("RUN.",rj,sep="")]] <- tstk
     }
   }
   
