@@ -70,8 +70,12 @@ modList$ENS <- sapply(modList$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),
 
 #calculate means and quantiles
 #a. calculate means by each inty
+out_summ <- list()
 for (inty in inList) {
   #inty <- inList[1]
+  cat("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+  cat("XXXX processing",inty,"\n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
   
   #a. first average individual ensemble members
   chg_stk <- list()
@@ -89,7 +93,7 @@ for (inty in inList) {
     if (length(wList) == 1) {
       #if only one ensemble member then put directly
       cat("...ens=1, so no need for averaging\n")
-      chg_stk[[gcm]] <- chgList[[inty]][[gcm]]
+      chg_stk[[gcm]] <- chgList[[inty]][[wList]]
     } else {
       #if more than 1 ensemble member then needs to average
       cat("...ens=",wList,", so averaging\n")
@@ -103,28 +107,47 @@ for (inty in inList) {
       }
     }
   }
+  tchg_stk <- stack(unlist(chg_stk))
   
   #b. then average remaining ensemble members
-  tchg_stk <- chgList[[inty]]
-  
+  chg_m <- calc(tchg_stk,fun=function(x) {mean(x,na.rm=T)})
   
   #c. calculate sd
-  
+  chg_sd <- calc(tchg_stk,fun=function(x) {sd(x,na.rm=T)})
   
   #d. calculate q1 and q4
-  
+  chg_q1 <- calc(tchg_stk,fun=function(x) {qval <- stats:::quantile(x,probs=0.25,na.rm=T); qm <- mean(x[which(x<=qval)],na.rm=T); return(qm)})
+  chg_q4 <- calc(tchg_stk,fun=function(x) {qval <- stats:::quantile(x,probs=0.75,na.rm=T); qm <- mean(x[which(x>=qval)],na.rm=T); return(qm)})
   
   #e. calculate probability of suit change above and below certain thresholds
+  #   thresholds are: 5 %, 10 %, 25 %, 50 %
+  prob_pos05 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x > 5))/length(x); return(prob)})
+  prob_neg05 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x < -5))/length(x); return(prob)})
+  prob_pos10 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x > 10))/length(x); return(prob)})
+  prob_neg10 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x < -10))/length(x); return(prob)})
+  prob_pos25 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x > 25))/length(x); return(prob)})
+  prob_neg25 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x < -25))/length(x); return(prob)})
+  prob_pos50 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x > 50))/length(x); return(prob)})
+  prob_neg50 <- calc(tchg_stk,fun=function(x) {x <- x[which(!is.na(x))]; prob <- length(which(x < -50))/length(x); return(prob)})
   
-  
+  #put into final object
+  out_summ[[inty]] <- list()
+  out_summ[[inty]]$CHG_MEAN <- chg_m
+  out_summ[[inty]]$CHG_SD <- chg_sd
+  out_summ[[inty]]$CHG_Q1 <- chg_q1
+  out_summ[[inty]]$CHG_Q4 <- chg_q4
+  out_summ[[inty]]$PROB_POS05 <- prob_pos05
+  out_summ[[inty]]$PROB_NEG05 <- prob_neg05
+  out_summ[[inty]]$PROB_POS10 <- prob_pos10
+  out_summ[[inty]]$PROB_NEG10 <- prob_neg10
+  out_summ[[inty]]$PROB_POS25 <- prob_pos25
+  out_summ[[inty]]$PROB_NEG25 <- prob_neg25
+  out_summ[[inty]]$PROB_POS50 <- prob_pos50
+  out_summ[[inty]]$PROB_NEG50 <- prob_neg50
 }
 
-
-
-
-
-
-
+#save object
+save(list=c("out_summ"),file=paste(prjDir,"/change_summary_rasters.RData",sep=""))
 
 
 
