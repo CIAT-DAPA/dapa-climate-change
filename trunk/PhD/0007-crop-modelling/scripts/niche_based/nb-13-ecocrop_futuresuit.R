@@ -24,41 +24,78 @@ inList <- c("del","loci","raw")
 gcmList <- list.files(paste(prjDir,"/rcp_del",sep=""))
 all_runs <- expand.grid(RUN=ecoRuns,GCM=gcmList)
 
-#calculate future change in suitability for each future-baseline combination
-chgList <- list()
 
-for (inty in inList) {
-  #inty <- inList[1]
-  chgList[[inty]] <- list()
-  for (i in 1:nrow(all_runs)) {
-    #i <- 1
-    gcm <- paste(all_runs$GCM[i])
-    ecorun <- all_runs$RUN[i]
-    cat("...processing",inty," / ",gcm," / run=",ecorun,"\n")
-    
-    #configure output list
-    if (is.null(chgList[[inty]][[gcm]])) {chgList[[inty]][[gcm]] <- list()}
-    
-    #load baseline
-    if (inty == "del") {
-      rs_pd <- raster(paste(prjDir,"/baseline/clm_1966_1993/run_",ecorun,"/",tolower(cropName),"_suitability.tif",sep=""))
-    } else {
-      rs_pd <- raster(paste(prjDir,"/baseline_",inty,"/",gcm,"/run_",ecorun,"/",tolower(cropName),"_suitability.tif",sep=""))
+#calculate future change in suitability for each future-baseline combination
+if (!file.exists(paste(prjDir,"/change_rasters.RData",sep=""))) {
+  chgList <- list()
+  for (inty in inList) {
+    #inty <- inList[1]
+    chgList[[inty]] <- list()
+    for (i in 1:nrow(all_runs)) {
+      #i <- 1
+      gcm <- paste(all_runs$GCM[i])
+      ecorun <- all_runs$RUN[i]
+      cat("...processing",inty," / ",gcm," / run=",ecorun,"\n")
+      
+      #configure output list
+      if (is.null(chgList[[inty]][[gcm]])) {chgList[[inty]][[gcm]] <- list()}
+      
+      #load baseline
+      if (inty == "del") {
+        rs_pd <- raster(paste(prjDir,"/baseline/clm_1966_1993/run_",ecorun,"/",tolower(cropName),"_suitability.tif",sep=""))
+      } else {
+        rs_pd <- raster(paste(prjDir,"/baseline_",inty,"/",gcm,"/run_",ecorun,"/",tolower(cropName),"_suitability.tif",sep=""))
+      }
+      
+      #load future
+      rs_fc <- raster(paste(prjDir,"/rcp_",inty,"/",gcm,"/run_",ecorun,"/",tolower(cropName),"_suitability.tif",sep=""))
+      
+      #calculate relative change
+      rs_chg <- calc(stack(rs_pd,rs_fc),fun=function(x) {a <- x[1]; b <- x[2]; if (is.na(a) | is.na(b)) return(NA); if (a == 0) return(NA); chg <- b-a; return(chg)})
+      
+      #put into list
+      chgList[[inty]][[gcm]][[paste("RUN.",ecorun,sep="")]] <- rs_chg
     }
-    
-    #load future
-    rs_fc <- raster(paste(prjDir,"/rcp_",inty,"/",gcm,"/run_",ecorun,"/",tolower(cropName),"_suitability.tif",sep=""))
-    
-    #calculate relative change
-    rs_chg <- calc(stack(rs_pd,rs_fc),fun=function(x) {a <- x[1]; b <- x[2]; if (is.na(a) | is.na(b)) return(NA); if (a == 0) return(NA); chg <- b-a; return(chg)})
-    
-    #put into list
-    chgList[[inty]][[gcm]][[paste("RUN.",ecorun,sep="")]] <- rs_chg
   }
+  save(list=c("chgList"),file=paste(prjDir,"/change_rasters.RData",sep=""))
+} else {
+  load(file=paste(prjDir,"/change_rasters.RData",sep=""))
 }
 
 
+#modelList
+modList <- data.frame(GCM_ENS=gcmList)
+modList$GCM <- sapply(modList$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),"_ENS_",fixed=T))[1]})
+modList$ENS <- sapply(modList$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),"_ENS_",fixed=T))[2]})
+
 #calculate means and quantiles
+#a. calculate means by each inty
+for (inty in inList) {
+  #inty <- inList[1]
+  chg_stk <- list()
+  
+  #a. first average individual ensemble members
+  for (i in 1:nrow(modList)) {
+    #i <- 1
+    gcm <- paste(modList$GCM[i])
+    
+    
+    
+  }
+  
+  
+  #b. then average remaining ensemble members
+  tchg_stk <- chgList[[inty]]
+  
+  
+}
+
+#b. calculate sd by each inty
+
+
+
+#c. calculate q1 and q4 by each inty
+
 
 
 #calculate probability of suit change above and below certain thresholds
