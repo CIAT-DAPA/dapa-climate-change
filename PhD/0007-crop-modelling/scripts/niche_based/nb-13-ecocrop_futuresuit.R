@@ -72,33 +72,57 @@ modList$ENS <- sapply(modList$GCM_ENS,FUN=function(x) {unlist(strsplit(paste(x),
 #a. calculate means by each inty
 for (inty in inList) {
   #inty <- inList[1]
-  chg_stk <- list()
   
   #a. first average individual ensemble members
-  for (i in 1:nrow(modList)) {
+  chg_stk <- list()
+  #loop GCMs in modList
+  for (i in 1:length(unique(modList$GCM))) {
     #i <- 1
-    gcm <- paste(modList$GCM[i])
+    gcm <- paste(unique(modList$GCM)[i])
+    cat("\n...averaging",gcm,"\n")
     
+    #create list
+    if (is.null(chg_stk[[gcm]])) {chg_stk[[gcm]] <- list()}
     
-    
+    #list of ensemble members inside this
+    wList <- grep(gcm,names(chgList[[inty]]))
+    if (length(wList) == 1) {
+      #if only one ensemble member then put directly
+      cat("...ens=1, so no need for averaging\n")
+      chg_stk[[gcm]] <- chgList[[inty]][[gcm]]
+    } else {
+      #if more than 1 ensemble member then needs to average
+      cat("...ens=",wList,", so averaging\n")
+      for (rj in ecoRuns) {
+        #rj <- ecoRuns[1]
+        tstk <- c()
+        for (wj in wList) {tstk <- c(tstk,chgList[[inty]][[wj]][[paste("RUN.",rj,sep="")]])}
+        tstk <- stack(tstk)
+        tstk <- calc(tstk,fun=function(x) {mean(x,na.rm=T)})
+      }
+      chg_stk[[gcm]][[paste("RUN.",rj,sep="")]] <- tstk
+    }
   }
-  
   
   #b. then average remaining ensemble members
   tchg_stk <- chgList[[inty]]
   
   
+  #c. calculate sd
+  
+  
+  #d. calculate q1 and q4
+  
+  
+  #e. calculate probability of suit change above and below certain thresholds
+  
+  
 }
 
-#b. calculate sd by each inty
 
 
 
-#c. calculate q1 and q4 by each inty
 
-
-
-#calculate probability of suit change above and below certain thresholds
 
 
 
