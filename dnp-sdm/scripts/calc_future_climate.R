@@ -2,8 +2,11 @@
 #CIAT / CCAFS
 stop("!")
 
+library(rgdal); library(raster)
+
 #source directory
-src.dir <- "~/Repositories/dapa-climate-change/trunk/dnp-sdm/scripts"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/dnp-sdm/scripts"
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/dnp-sdm/scripts"
 source(paste(src.dir,"/calc_future_climate-fun.R",sep=""))
 
 #working directory
@@ -87,8 +90,17 @@ for (i in 1:length(sceList)) {
 #list of time frames
 tfList <- c("2020_2049","2040_2069","2070_2099")
 
+#initial and final scenario*model
+#inim <- 1; finm <- 10
+#inim <- 11; finm <- 20
+#inim <- 21; finm <- 30
+#inim <- 31; finm <- 40
+#inim <- 41; finm <- 50
+#inim <- 51; finm <- 60
+inim <- 61; finm <- nrow(mList)
+
 #select a given scenario
-for (i in 1:nrow(mList)) {
+for (i in inim:finm) {
   #i <- 1
   tsce <- paste(mList$SCE[i])
   tmod <- paste(mList$MODEL[i])
