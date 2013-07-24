@@ -150,4 +150,3 @@ if (!file.exists(paste(prjDir,"/change_summary_rasters.RData",sep=""))) {
   save(list=c("out_summ"),file=paste(prjDir,"/change_summary_rasters.RData",sep=""))
 }
 
-
