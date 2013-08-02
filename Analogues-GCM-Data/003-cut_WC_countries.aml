@@ -1,4 +1,4 @@
-/* &r cut_WC_countries.aml S:\observed\gridded_products\worldclim D:\cenavarro\admin-boundaries\GRID-files-30s D:\cenavarro\Analogues_GCM_data\ExtractByCountry\baseline 30s NO
+/* &r cut_WC_countries.aml S:\observed\gridded_products\worldclim D:\cenavarro\admin-boundaries\GRID-files-continents-2_5min D:\cenavarro\Analogues_GCM_data\ExtractByCountry\sres_a1b\downscaled 2.5min NO
 &args rootdir admdir outputdir resol switch
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
