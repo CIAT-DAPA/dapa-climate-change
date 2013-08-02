@@ -1,4 +1,4 @@
-/* &r 001-cut_GCM_countries.aml S:\gcm\cmip3\downscaled\sres_a1b D:\cenavarro\admin-boundaries\GRID-files-2_5min  D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_A1B\downscaled 2_5min NO
+/* &r 001-cut_GCM_countries.aml S:\gcm\cmip3\downscaled\sres_a1b D:\cenavarro\admin-boundaries\GRID-files-continents-2_5min  D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_A1B\downscaled 2.5min NO
 
 &args rootdir admdir outputdir resol switch
 &if [null %rootdir%] &then &return Use the root_folder argument
@@ -26,6 +26,7 @@
 &if not [exists %outputdir% -dir] &then &sys md %outputdir%
 	
 &s countrylist [listfile %admdir%\* -dir %outputdir%\listcountries.list]
+&ty %countrylist%
 &s openlist [OPEN %outputdir%\listcountries.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
