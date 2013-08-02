@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 007-grid2asciitiff_tiles_baseline.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry D:\cenavarro\Analogues_GCM_data\TilesByCountry baseline 1960_1990 30s NO"
+	print "   - ie: python 007-grid2asciitiff_tiles_baseline.py D:\cenavarro\Analogues_GCM_data\TilesByCountry D:\cenavarro\Analogues_GCM_data\TilesByCountry baseline 1960_1990 10min YES"
 	sys.exit(1)
 
 # Set variables
@@ -33,27 +33,28 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 varlist = "bio", "dtr", "prec", "tmean"
 model = "current"
 
-countrytilelist = "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
-				"cub", "deu", "dza", "ecu", "egy", "eri", "esh", "esp", "eth", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
-				"guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "ken", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
-				"mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nga", "nor", "npl",  "omn",\
-				"pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
-				"syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "tza", "uga", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
-				"zmb", "zwe", "nzl", "rus", "usa"
+countrylist = "af", "eu", "na", "oc", "sa" #"as", 
+# countrytilelist = "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
+				# "cub", "deu", "dza", "ecu", "egy", "eri", "esh", "esp", "eth", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
+				# "guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "ken", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
+				# "mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nga", "nor", "npl",  "omn",\
+				# "pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
+				# "syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "tza", "uga", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
+				# "zmb", "zwe", "nzl", "rus", "usa"
 				
 # countrylist = "ala", "alb", "and", "are", "arm", "ata", "atg", "aut", "aze", "bdi", "bel", "ben", "bgr", "bhr", "bih", "blz", "bmu", "brb", "brn", "btn", "che", "com",\
 			# "cpv", "cri", "cyp", "cze", "dji", "dma", "dom", "est", "fro", "geo", "glp", "gmb", "gnb", "grd", "gtm", "guf", "hnd", "hti", "hun", "irl", "isr", "jam",\
 			# "jor", "kwt", "lbn", "lbr", "lca", "lie", "lka", "lso", "ltu", "lux", "lva", "mac", "mco", "mda", "mkd", "mnp", "mtq", "nld", "pan", "pri", "qat", "reu",\
 			# "rwa", "sle", "slv", "smr", "stp", "sur", "svk", "svn", "swz", "syc", "tgo", "ton", "twn", "vct", "wsm"
-countrylist = "cod", "kna", "mne", "nru", "plw", "pse", "srb", "ssd", "tls", "tto", "tuv"
+# countrylist = "cod", "kna", "mne", "nru", "plw", "pse", "srb", "ssd", "tls", "tto", "tuv"
 			
 if tiled == "NO":
 
 	for country in countrylist:
 		
-		if not gp.Exists(dirout + "\\" + sres + "\\" + country + "_grid2tiff_countries_done.txt"):
+		if not gp.Exists(dirout + "\\" + sres + "\\" + country + "_" + resolution + "_grid2tiff_countries_done.txt"):
 			
-			gp.workspace = dirbase + "\\SRES_A1B\\downscaled\\" + country + "_" + resolution + "\\" + model
+			gp.workspace = dirbase + "\\Baseline\\" + country + "_" + resolution + "\\" + model
 			for var in varlist:
 				
 				print "\n --> Processing: " + country,sres,model,period,var,"\n"
@@ -82,7 +83,7 @@ if tiled == "NO":
 						
 				# os.system("rmdir /s /q " + gp.workspace)
 		
-			checkTXT = open(dirout + "\\" + sres + "\\" + country + "_grid2tiff_countries_done.txt", "w")
+			checkTXT = open(dirout + "\\" + sres + "\\" + country + "_" + resolution + "_grid2tiff_countries_done.txt", "w")
 			checkTXT.close()
 	
 
@@ -90,18 +91,20 @@ if tiled == "NO":
 	
 else:
 
-	outFile = open(dirout + "\\error.txt", "a")
-	outFile.write("sres" + "\t" + "country" + "\t" + "raster"+ "\n")
-	outFile.close()
-	
-	for country in countrytilelist:
-		
-		if not gp.Exists(dirout + "\\" + sres + "\\" + country + "_grid2tiff_countries_done.txt"):
+	# outFile = open(dirout + "\\error.txt", "a")
+	# outFile.write("sres" + "\t" + "country" + "\t" + "raster"+ "\n")
+	# outFile.close()
+	countrytilelist = sorted(os.listdir(dirbase + "\\" + sres))
+	for countryname in countrytilelist:
+		country = countryname.split("_")[0]
+		resolution = countryname.split(country)[1][1:]
+		if not gp.Exists(dirout + "\\" + sres + "\\" + countryname + "_grid2tiff_countries_done.txt"):
 			
 			for var in varlist:
 				
-				gp.workspace = dirout + "\\" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + var
-				print "\n --> Processing: " + country,sres,model,period,var,"\n"
+				gp.workspace = dirout + "\\" + sres + "\\" + countryname + "\\" + model + "\\" + var
+				print gp.workspace 
+				print "\n --> Processing: " + countryname,sres,model,period,var,"\n"
 				
 				# diroutAscii = dirout + "\\SRES_" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + var + "_asciis"
 				# if not os.path.exists(diroutAscii):
@@ -124,11 +127,11 @@ else:
 					if not os.path.exists(OutTiff):
 						os.system("gdal_translate -of GTiff -ot Int32 -co COMPRESS=lzw -quiet " + gp.workspace + "\\" + raster + " " + OutTiff)
 						if not os.path.exists(OutTiff):
-							outFile = open(dirout + "\\error.txt", "a")
-							outFile.write(sres + "\t" + country + "\t" + raster + "\n")
-							outFile.close()
+							# outFile = open(dirout + "\\error.txt", "a")
+							# outFile.write(sres + "\t" + country + "\t" + raster + "\n")
+							# outFile.close()
 							
-							checkTXT = open(dirout + "\\" + sres + "\\" + country + "_grid2tiff_countries_done.txt", "w")
+							checkTXT = open(dirout + "\\" + sres + "\\" + countryname + "_grid2tiff_countries_done.txt", "w")
 						gp.delete_management(raster)
 						
 				os.system("rmdir /s /q " + gp.workspace)
