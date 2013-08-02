@@ -7,6 +7,7 @@
 require(raster)
 require(ncdf)
 require(rgdal)
+require(sp)
 # rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
 
 
@@ -481,8 +482,6 @@ GCMEnsembleAnom <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1
 }
 
 
-
-
 ############################################################################################
 # Description: Script to create images of the differences of ensembles anomalies of GCM data
 ############################################################################################
@@ -543,3 +542,59 @@ GCMEnsembleAnomDiff <- function(baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1"
     cat("GCM Ensemble Differences Anomalies Process Done!")
   }
 }  
+
+
+
+############################################################################################
+# Description: Script to create images from GCM data anomalies and future
+############################################################################################
+GCMVerification <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1", imageDir="T:/gcm/cmip5/baseinfo/inventory") {
+  
+  rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+  periodList <- c("2020_2049", "2040_2069", "2060_2089", "2070_2099")
+  
+  for (rcp in rcpList) {
+    
+    futDir <- paste(baseDir, "/", rcp, sep="")
+    
+    gcmList <- list.dirs(futDir, recursive = FALSE, full.names = FALSE)
+    
+    for (gcm in gcmList) {
+      
+      gcm <- basename(gcm)
+      
+      for (period in periodList) {
+      
+        futAnomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", period, sep="")
+        
+        outImageDir <- paste(imageDir, "/", rcp, "/", gcm, "/", period, sep="")
+        cat(outImageDir)
+        
+        if (!file.exists(imageDir)) {dir.create(imageDir)}
+        if (!file.exists(imageDir, "/", rcp, sep="")) {dir.create(imageDir, "/", rcp, sep="")}
+        if (!file.exists(imageDir, "/", rcp, "/", gcm, sep="")) {dir.create(imageDir, "/", rcp, "/", gcm, sep="")}
+        if (!file.exists(outImageDir)) {dir.create(outImageDir)}
+
+        cat(paste("Processing ", rcp, " ", period, " ", gcm, "\n"))
+    
+        ascList <- list.files(futAnomDir, pattern="*.asc")
+        setwd(futAnomDir)
+              
+        for (asc in ascList) {
+          
+          cat(paste("\t..creating an image for ", asc),"\n")
+          
+          # Creating an image per timeslice and model
+          paste(unlist(strsplit(asc, ".", fixed=T))[1], ".asc", sep="")
+          
+          rs <- raster(asc)
+          jpeg(paste(outImageDir, "/", unlist(strsplit(asc, ".", fixed=T))[1], ".jpg", sep=""))
+          plot(rs)
+          dev.off()
+        }
+      }
+    }
+  }
+  setwd("D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5")
+  return("GCM Verification done!")
+}

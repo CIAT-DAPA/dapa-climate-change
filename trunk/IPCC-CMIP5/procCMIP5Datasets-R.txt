@@ -27,3 +27,6 @@ basePer <- "1985s"
 
 otp <- GCMEnsembleAnom(baseDir, ens, basePer)
 
+imageDir <- "T:/gcm/cmip5/baseinfo/inventory"
+otp <- GCMVerification(baseDir, ens, imageDir)
+
