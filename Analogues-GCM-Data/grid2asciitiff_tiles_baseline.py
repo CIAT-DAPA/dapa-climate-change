@@ -17,12 +17,13 @@ def mainfunction(dirbase, dirout, country, sres, period, resolution, tiled):
 	print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 	varlist = "bio", "dtr", "prec", "tmean"
-	model = "current"	
+	# modellist =  sorted(os.listdir(dirbase + "\\SRES_" + sres + "\\" + country + "_" + resolution))
 	
-	
+	# for model in modellist:
+	model = "current"
 	for var in varlist:
 		
-		gp.workspace = dirbase + "\\" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + var
+		gp.workspace = dirbase + "\\SRES_" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + var
 		
 		print "\n --> Processing: " + country,sres,model,period,var,"\n"
 		
@@ -30,7 +31,7 @@ def mainfunction(dirbase, dirout, country, sres, period, resolution, tiled):
 		# if not os.path.exists(diroutAscii):
 			# os.system('mkdir ' + diroutAscii)
 		
-		diroutTiff = dirout + "\\" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + period + "\\" + var + "_tif"
+		diroutTiff = dirout + "\\SRES_" + sres + "\\" + country + "_" + resolution + "\\" + model + "\\" + period + "\\" + var + "_tif"
 		if not os.path.exists(diroutTiff):
 			os.system('mkdir ' + diroutTiff)
 		
@@ -39,6 +40,7 @@ def mainfunction(dirbase, dirout, country, sres, period, resolution, tiled):
 			
 			# OutAscii = diroutAscii + "\\" + model + "_" + raster + "_1.asc"
 			OutTiff = diroutTiff + "\\" + sres + "_" + period + "_" + model + "_" + raster + ".tif"
+			
 			
 			# if not gp.Exists(OutAscii):
 				# gp.RasterToASCII_conversion(raster, OutAscii)
@@ -54,6 +56,6 @@ def mainfunction(dirbase, dirout, country, sres, period, resolution, tiled):
 		
 		os.system("rmdir /s /q " + gp.workspace)
 
-					
+				
 print " Process Grid to tif done!!!"    
 
