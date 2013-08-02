@@ -29,6 +29,6 @@ Procedimiento
 
 
 NOtas
-*** 2030, 2050, 2070, 2090
+*** 2030, 2050, 2070, 2080
 - Probar con otros tipos de correccion de sesgo. 
 - Procesar solo r1i1p1
