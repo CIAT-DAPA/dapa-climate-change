@@ -11,7 +11,7 @@ from arcpy import env
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 005-tiles_countries.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry b1 D:\cenavarro\Analogues_GCM_data\TilesByCountry 30s 2020_2049"
+	print "   - ie: python 005-tiles_countries.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry a1b D:\cenavarro\Analogues_GCM_data\TilesByCountry 2_5min 2020_2049"
 	sys.exit(1)
 
 #Set variables
@@ -23,17 +23,16 @@ period = sys.argv[5]
 
 os.system('cls')
 if resolution == "30s":
-	countrytilelist = "cod", "fji", "nzl", "ssd"
+	countrytilelist = "cod", "nzl", "ssd", "fji", "jpn", "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
+		"cub", "deu", "dnk", "dza", "ecu", "egy", "eri", "esh", "esp", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
+		"guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
+		"mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nic", "nga", "nor", "npl",  "omn",\
+		"pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
+		"syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
+		"zmb", "zwe", "nzl", "rus", "usa", "eth", "tza", "ken", "uga"
 elif resolution == "2_5min":
-	countrytilelist = "arg", "aus", "bra", "can", "chl", "chn", "grl", "idn", "ind", "jpn", "kaz", "rus", "usa"
-	
-# countrytilelist = "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
-					# "cub", "deu", "dnk", "dza", "ecu", "egy", "eri", "esh", "esp", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
-					# "guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
-					# "mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nic", "nga", "nor", "npl",  "omn",\
-					# "pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
-					# "syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
-					# "zmb", "zwe", "nzl", "rus", "usa", "eth", "tza", "ken", "uga"
+	countrytilelist = "arg", "aus", "bra", "can", "chl", "chn", "grl", "idn", "ind", "kaz", "rus", "usa"
+
 				
 countryDic = {"cod": "6 6 ", "kna": "1 1 ", "mne": "1 1 ", "nru": "1 1 ", "plw": "1 1 ", "pse": "1 1 ", "srb": "1 1 ", "ssd": "3 3 ", "tls": "1 1 ", "tto": "1 1 ", "tuv": "1 1 ",\
 			"bfa": "2 2 ", "bgd": "2 2 ", "bhs": "2 2 ", "blr": "2 2 ", "bwa": "2 2 ", "civ": "2 2 ", "cmr": "2 2 ", "cog": "2 2 ", "cub": "2 2 ",\
