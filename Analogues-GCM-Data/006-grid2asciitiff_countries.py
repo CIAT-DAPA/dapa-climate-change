@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 006-grid2asciitiff_countries.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry D:\cenavarro\Analogues_GCM_data\TilesByCountry b1 2020_2049 30s"
+	print "   - ie: python 006-grid2asciitiff_countries.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry D:\cenavarro\Analogues_GCM_data\TilesByCountry a1b 2020_2049 10min"
 	sys.exit(1)
 
 # Set variables
@@ -24,11 +24,11 @@ os.system('cls')
 gp.CheckOutExtension("Spatial")
 gp.toolbox="management"
 
-countrylist = "cod", "kna", "mne", "nru", "plw", "pse", "srb", "ssd", "tls", "tto", "tuv"
-# countrylist = "ala", "alb", "and", "are", "arm", "ata", "atg", "aut", "aze", "bdi", "bel", "ben", "bgr", "bhr", "bih", "blz", "bmu", "brb", "brn", "btn", "che", "com",\
-			# "cpv", "cri", "cyp", "cze", "dji", "dma", "dom", "est", "fro", "geo", "glp", "gmb", "gnb", "grd", "gtm", "guf", "hnd", "hti", "hun", "irl", "isr", "jam",\
-			# "jor", "kwt", "lbn", "lbr", "lca", "lie", "lka", "lso", "ltu", "lux", "lva", "mac", "mco", "mda", "mkd", "mnp", "mtq", "nld", "pan", "pri", "qat", "reu",\
-			# "rwa", "sle", "slv", "smr", "stp", "sur", "svk", "svn", "swz", "syc", "tgo", "ton", "twn", "vct", "wsm"
+# countrylist = "af", "as", "eu", "na", "oc", "sa"
+countrylist = "cod", "kna", "mne", "nru", "plw", "pse", "srb", "ssd", "tls", "tto", "tuv", "ala", "alb", "and", "are", "arm", "ata", "atg", "aut", "aze", "bdi", "bel", "ben", "bgr", "bhr", "bih", "blz", "bmu", "brb", "brn", "btn", "che", "com",\
+			"cpv", "cri", "cyp", "cze", "dji", "dma", "dom", "est", "fro", "geo", "glp", "gmb", "gnb", "grd", "gtm", "guf", "hnd", "hti", "hun", "irl", "isr", "jam",\
+			"jor", "kwt", "lbn", "lbr", "lca", "lie", "lka", "lso", "ltu", "lux", "lva", "mac", "mco", "mda", "mkd", "mnp", "mtq", "nld", "pan", "pri", "qat", "reu",\
+			"rwa", "sle", "slv", "smr", "stp", "sur", "svk", "svn", "swz", "syc", "tgo", "ton", "twn", "vct", "wsm"
 varlist = "bio", "dtr", "prec", "tmean"
 			
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
