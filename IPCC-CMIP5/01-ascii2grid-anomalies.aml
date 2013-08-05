@@ -1,0 +1,63 @@
+/* &r 01-ascii2grid-anomalies.aml T:\gcm\cmip5\raw\monthly T:\gcm\cmip5\anomalies r1i1p1 rcp45
+
+&args rootdir outdir ensemble
+&if [null %rootdir%] OR [null %outdir%] &then &return Use the root_folder and outputdir argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+
+
+/*&do rcp &list rcp26  rcp60 rcp85
+
+&do period &list 2020_2049 2040_2069 2060_2089 2070_2099
+
+	&s modellist [listfile %rootdir%\%rcp%\* -dir]
+	&s nmodels [token %modellist% -count]
+
+	&do md = 1 &to %nmodels%
+		
+		&s modname [extract %md% %modellist%]
+		&ty Model %modname% (%period%, %rcp%, %ensemble%)
+		
+		&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%period%_ascii2grid_done.txt -file] &then &do
+			
+			&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+			&ty          /\/\/\/\GCM ANOMALIES GRID2ASCII/\/\/\/\
+			&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+			
+			&s inputfolder %rootdir%\%rcp%\%modname%\%ensemble%\anomalies_1975s\%period%
+			&if [exists %rootdir%\%rcp%\%modname%\%ensemble%\anomalies_1975s -dir] &then &do
+				&s outfolder %outdir%\%rcp%\%modname%\%ensemble%\%period%
+				&if not [exists %outfolder% -dir] &then &sys md %outfolder%
+				
+				&s asclist [listfile %inputfolder%\*.asc -file %outfolder%\listfiles.list]
+				&s openlist [OPEN %outfolder%\listfiles.list OPENSTATUS -READ]
+				
+				&if %OPENSTATUS% NE 0 &then &do
+					&ty
+					&ty The file %outfolder%\\listfiles.list does not exist or cannot be opened
+					&return
+				&end
+				&else
+				&do i = 1 &to %asclist%
+				
+					&s ascname [READ %openlist% READSTATUS]
+					&s gridname [before %ascname% .asc]
+					
+					&ty   -> .Processing %ascname%
+					ASCIIGRID %inputfolder%\%ascname% %outfolder%\%gridname%
+				
+				&end
+				
+				&s verfile [listfile %outfolder%\* -grid %outdir%\%rcp%\%modname%\%ensemble%\%period%_ascii2grid_done.txt]
+				
+			&end
+				
+		&end
+		
+			
+	&end
+
+&end
