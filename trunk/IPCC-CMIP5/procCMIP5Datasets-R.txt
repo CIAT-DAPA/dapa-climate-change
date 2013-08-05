@@ -6,7 +6,7 @@ rcp <- "rcp45"
 rcp <- "rcp60"
 rcp <- "rcp85"
 
-baseDir <- "T:/data/gcm/cmip5/raw/monthly"
+baseDir <- "T:/gcm/cmip5/raw/monthly"
 
 otp <- GCMTmpCalc(rcp, baseDir)
 otp <- GCMAverage(rcp, baseDir)
@@ -28,5 +28,7 @@ basePer <- "1985s"
 otp <- GCMEnsembleAnom(baseDir, ens, basePer)
 
 imageDir <- "T:/gcm/cmip5/baseinfo/inventory"
+baseDir <- "T:/gcm/cmip5/raw/monthly"
+ens <- "r1i1p1"
 otp <- GCMVerification(baseDir, ens, imageDir)
 

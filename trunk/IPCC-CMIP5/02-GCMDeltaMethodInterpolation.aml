@@ -1,0 +1,130 @@
+/* This aml calculates prec, tmin and tmax interpolated surfaces 
+/* Written by Julian Ramírez
+/* Modified by Carlos Navarro
+/* CIAT, Cali, Colombia, August 2013
+
+GCMDeltaMethodInterpolation.aml T:\gcm\cmip5\anomalies T:\gcm\cmip5\interpolated G:\jetarapues\masks\mask30s rcp26 bcc_csm1_1 r1i1p1 G:\jetarapues\temporals\
+
+&args inputdir outdir mask sres modname ensemble tmpdir
+&terminal 9999
+&sys cls
+&severity &warning &ignore
+&severity &error &ignore
+&messages &off
+
+&if [null %inputdir%] OR [null %modname%] OR [null %outdir%] OR [null %mask%] OR [null %sres%] OR [null %tmpdir%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax, please use
+		&ty '&r GCMDeltaMethodInterpolation.aml INPUT_DIR MODEL_NAME OUTDIR MASK SRES_SCENARIO TEMPORAL_DIR'
+		&ty available timeslices are SRES SCENARIOS are SRES_A1B, SRES_A2, SRES_B1
+		&ty MASK should be both name and path of to the mask
+		&ty INPUT_DIR should contain folders of SRES scenarios
+		&ty TEMPORAL_DIR is where the interpolation will take place
+		
+		&ty
+		&return
+	&end
+
+&if [show program] NE GRID &then GRID
+&amlpath .
+&s rootdir [show &amlpath]
+
+&if not [exists %tmpdir% -DIR] &then &sys md %tmpdir%
+
+&if not [exists %outdir% -DIR] &then &sys md %outdir% /*same as indir
+&if not [exists %outdir%\%sres% -DIR] &then &sys md %outdir%\%sres%
+&if not [exists %outdir%\%sres%\interpolations -DIR] &then &sys md %outdir%\%sres%\interpolations
+&if not [exists %outdir%\%sres%\interpolations\%modname% -DIR] &then &sys md %outdir%\%sres%\interpolations\%modname%
+
+&ty
+&ty Processing model %modname%
+
+arc w %tmpdir%
+
+&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099 
+	
+	&if not [exists %outdir%\%sres%\interpolations\%modname%\%ts% -DIR] &then &sys md %outdir%\%sres%\interpolations\%modname%\%ts%
+	
+	&do variable &list tmin tmax prec
+		
+		&ty   ->.Processing variable %variable%
+		
+		&do month = 1 &to 12
+		
+			&ty
+			&ty   ->.Processing month %month%
+			
+			/* Copying and creating the interpolation file
+			
+			&if [exists %tmpdir%\%variable%_%month% -GRID] &then kill %tmpdir%\%variable%_%month% all
+			&if [exists %tmpdir%\%variable%_%month%p -COVERAGE] &then kill %tmpdir%\%variable%_%month%p all
+			
+			copy %inputdir%\%sres%\anomalies\%modname%\%ts%\%variable%_%month% %variable%_%month%
+			%tmpdir%\%variable%_%month%p = GRIDPOINT(%tmpdir%\%variable%_%month%, VALUE)
+			&if [exists %tmpdir%\%variable%_%month% -GRID] &then kill %tmpdir%\%variable%_%month% all
+			&if [exists %outdir%\%sres%\interpolations\%modname%\%ts%\%variable%_%month% -grid] &then &goto noproc
+			
+			setwindow -180 -90 15 90
+			setmask off
+			setcell %mask%
+			
+			&ty Interpolating left part of the surface
+			&if [exists %tmpdir%\%variable%_%month%a -grid] &then &ty Interpolated grid exists
+			&else %tmpdir%\%variable%_%month%a = INT(FLOOR(SPLINE(%tmpdir%\%variable%_%month%p, VALUE, REGULARIZED, 0.5, 8) * 100 + 0.5))
+			&ty
+			
+			setwindow -15 -90 180 90
+			setmask off
+			setcell %mask%
+			
+			&ty Interpolating right part of the surface
+			&if [exists %tmpdir%\%variable%_%month%b -grid] &then &ty Interpolated grid exists
+			&else %tmpdir%\%variable%_%month%b = INT(FLOOR(SPLINE(%tmpdir%\%variable%_%month%p, VALUE, REGULARIZED, 0.5, 8) * 100 + 0.5))
+			&ty
+			
+			setwindow -180 -60 0 90 %mask%
+			setmask %mask%
+			setcell %mask%
+			
+			&ty Cutting left part of the surface
+			&if [exists %tmpdir%\%variable%_%month%_l -grid] &then kill %tmpdir%\%variable%_%month%_l all
+			%tmpdir%\%variable%_%month%_l = %tmpdir%\%variable%_%month%a
+			&if [exists %tmpdir%\%variable%_%month%a -grid] &then kill %tmpdir%\%variable%_%month%a all
+			&ty
+			
+			setwindow 0 -60 180 90 %mask%
+			setmask %mask%
+			setcell %mask%
+			
+			&ty Cutting right part of the surface
+			&if [exists %tmpdir%\%variable%_%month%_r -grid] &then kill %tmpdir%\%variable%_%month%_r all
+			%tmpdir%\%variable%_%month%_r = %tmpdir%\%variable%_%month%b
+			&if [exists %tmpdir%\%variable%_%month%b -grid] &then kill %tmpdir%\%variable%_%month%b all
+			&ty
+			
+			setwindow -180 -60 180 90 %mask%
+			setmask %mask%
+			setcell %mask%
+			
+			&ty Merging both sides of the grid
+			&if [exists %tmpdir%\%variable%_%month% -grid] &then kill %tmpdir%\%variable%_%month% all
+			%tmpdir%\%variable%_%month% = MERGE(%tmpdir%\%variable%_%month%_l, %tmpdir%\%variable%_%month%_r)
+			&if [exists %tmpdir%\%variable%_%month%_r -grid] &then kill %tmpdir%\%variable%_%month%_r all
+			&if [exists %tmpdir%\%variable%_%month%_l -grid] &then kill %tmpdir%\%variable%_%month%_l all
+			&ty
+			
+			&ty Copying to output directory
+			&if [exists %outdir%\%sres%\interpolations\%modname%\%ts%\%variable%_%month% -GRID] &then kill %outdir%\%sres%\interpolations\%modname%\%ts%\%variable%_%month% all
+			COPY %tmpdir%\%variable%_%month% %outdir%\%sres%\interpolations\%modname%\%ts%\%variable%_%month%
+			&if [exists %tmpdir%\%variable%_%month% -grid] &then kill %tmpdir%\%variable%_%month% all
+			
+			&label noproc
+			&if [exists %tmpdir%\%variable%_%month%p -COVERAGE] &then kill %tmpdir%\%variable%_%month%p all
+		&end
+	&end
+&end
+QUIT
+&if [exists log -file] &then &sys del log
+w %rootdir%
+&if [exists log -file] &then &sys del log
