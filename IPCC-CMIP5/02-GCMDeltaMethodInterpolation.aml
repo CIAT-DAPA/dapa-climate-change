@@ -44,7 +44,7 @@ arc w %workspace%
 	
 	&ty Model %modname% (%ts%, %rcp%, %ensemble%)
 	
-	&if not [exists %outdir%\interpolations\%rcp%\%modname%\%ts% -DIR] &then &sys md %outdir%\interpolations\%rcp%\%modname%\%ts%
+	&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\%modname%\%ensemble%\%ts%
 	
 	&do variable &list tmin tmax prec
 		
