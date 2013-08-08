@@ -27,7 +27,7 @@
 				&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%period%_ascii2grid_done.txt -file] &then &do
 				
 				&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-				&ty          /\/\/\/\GCM ANOMALIES GRID2ASCII/\/\/\/\
+				&ty          /\/\/\/\GCM ANOMALIES ASCII2GRID/\/\/\/\
 				&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
 					&s outfolder %outdir%\%rcp%\%modname%\%ensemble%\%period%
