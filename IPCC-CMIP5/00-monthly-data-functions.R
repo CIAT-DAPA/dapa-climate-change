@@ -239,6 +239,10 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
   
   }
 
+# rcp <- "rcp26"
+# baseDir <- "T:/gcm/cmip5/raw/monthly"
+# ens <- "r1i1p1"
+# basePer <- "1961_1990"
 
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
@@ -320,11 +324,11 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
                 # resAnomNc  <- resample(anomNc, rs, method='ngb')
                 
                 rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
-                anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=FALSE)
-                resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
+                anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
+                # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
   
                 
-                anomNc <- writeRaster(resAnomNcExt, outAsc, format='ascii', overwrite=FALSE)
+                anomNc <- writeRaster(anomNc, outAsc, format='ascii', overwrite=FALSE)
                 
                 cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
                 
