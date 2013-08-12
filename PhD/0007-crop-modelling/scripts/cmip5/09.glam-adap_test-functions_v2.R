@@ -13,7 +13,7 @@ run_group_adap <- function(j) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
-  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
   
   this_loc <- groupingList$LOC[j]
   this_pst <- groupingList$PARSET[j]
@@ -56,7 +56,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
-  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
   
   #input directories and model
   cropName <- ENV_CFG$CROP_NAME
@@ -352,48 +352,13 @@ cfg_adap_runs <- function(runs_data,rcp_data="output.RData") {
       rowc <- rowc+1
     }
   }
-  
-  #combined runs (with decreased vegetative TT)
-  for (i in 1:nrow(adap_exp)) {
-    #i <- 1
-    for (grp in names(adap_exp)) {
-      #grp <- "BMASS"
-      grp_ad <- gen_df[which(gen_df$group==grp),]
-      if (grp == "TT") {grp_ad <- grp_ad[c(1,3:nrow(grp_ad)),]}
-      for (j in 1:nrow(grp_ad)) {
-        #j <- 1
-        param <- paste(grp_ad$parameter[j])
-        out_df[rowc,param] <- grp_ad[j,paste(adap_exp[i,grp])]
-      }
-    }
-    out_df$RUNID[rowc] <- rowc
-    rowc <- rowc+1
-  }
-  
-  #combined runs (with increased vegetative TT)
-  for (i in 1:nrow(adap_exp)) {
-    #i <- 1
-    for (grp in names(adap_exp)) {
-      #grp <- "BMASS"
-      grp_ad <- gen_df[which(gen_df$group==grp),]
-      if (grp == "TT") {grp_ad <- grp_ad[c(2:nrow(grp_ad)),]}
-      for (j in 1:nrow(grp_ad)) {
-        #j <- 1
-        param <- paste(grp_ad$parameter[j])
-        out_df[rowc,param] <- grp_ad[j,paste(adap_exp[i,grp])]
-      }
-    }
-    out_df$RUNID[rowc] <- rowc
-    rowc <- rowc+1
-  }
-  
   out_df <- out_df[which(!is.na(out_df$RUNID)),]
   
   #all above with:
   #RFD: rainfed
   #IRR: whole GS irrigation
   #using other types of irrigation (i.e. during i=2, or during i=3,4 results in too many runs)
-  out_df <- rbind(cbind(out_df,SEASON="RFD"),cbind(out_df,SEASON="IRR"))
+  out_df <- cbind(out_df,SEASON="RFD")
   out_df$RUNID <- paste("ADAP_",10000+(1:nrow(out_df)),sep="")
   
   #return objects
