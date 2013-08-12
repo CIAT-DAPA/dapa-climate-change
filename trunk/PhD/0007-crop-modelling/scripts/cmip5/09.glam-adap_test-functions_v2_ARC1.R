@@ -13,7 +13,7 @@ run_group_adap <- function(j) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
-  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_ARC1.R",sep=""))
   
   this_loc <- groupingList$LOC[j]
   this_pst <- groupingList$PARSET[j]
@@ -56,7 +56,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
-  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_ARC1.R",sep=""))
   
   #input directories and model
   cropName <- ENV_CFG$CROP_NAME
@@ -64,7 +64,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
   
   #here construct a control file folder
   #out_bdir <- paste(bDir,"/model-runs/",toupper(cropName),"/runs/cmip5_hist",sep="")
-  ctrl_dir <- paste(ENV_CFG$OUT_BDIR,"/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
+  ctrl_dir <- paste("~/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
   if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir,recursive=T)}
   ctrl_fil <- paste(ctrl_dir,"/",RUN_CFG$PERIOD,"_loc-",RUN_CFG$LOC,"_",RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,".proc",sep="")
   
@@ -118,6 +118,16 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     saveFile_his <- paste(his_dir,"/output.RData",sep="")
     saveFile_rcp <- paste(rcp_dir,"/output.RData",sep="")
     
+    #copy the three files
+    system(paste("scp see-gw-01:",saveFile," ","output.RData",sep=""))
+    system(paste("scp see-gw-01:",saveFile_his," ","output_his.RData",sep=""))
+    system(paste("scp see-gw-01:",saveFile_rcp," ","output_rcp.RData",sep=""))
+    
+    #update filenames
+    saveFile <- "./output.RData"
+    saveFile_his <- "./output_his.RData"
+    saveFile_rcp <- "./output_rcp.RData"
+    
     #here check if respective future climate run has been done
     if (file.exists(saveFile_rcp)) {
       if (!file.exists(saveFile)) {
@@ -159,6 +169,14 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
           setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_sh/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
           setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_sh/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
         }
+        
+        #copy weather files
+        system(paste("scp -r see-gw-01:",setup_rcp$WTH_DIR_RFD," ",".",sep=""))
+        system(paste("scp -r see-gw-01:",setup_rcp$WTH_DIR_IRR," ",".",sep=""))
+        
+        #update names of folders
+        setup_rcp$WTH_DIR_RFD <- paste("./rfd_",setup_rcp$CELL,sep="")
+        setup_rcp$WTH_DIR_IRR <- paste("./irr_",setup_rcp$CELL,sep="")
         
         #configuration of adaptation
         adap_run <- cfg_adap_runs(runs_data=ENV_CFG$ADAP_RUNS,rcp_data=saveFile_rcp)
@@ -404,28 +422,13 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   
   #input directories and model
   execName <- paste("glam-",tolower(cropName),sep="")
-  
-  #determine operating system and bin folder
-  machine <- as.data.frame(t(Sys.info()))
-  machine <- paste(machine$sysname)
-  
-  if (is.null(RUN_setup$ALT_BIN)) {
-    binDir <- paste(bDir,"/model-runs/bin/glam-",tolower(machine),sep="")
-  } else {
-    binDir <- paste(RUN_setup$ALT_BIN,"/glam-",tolower(machine),sep="")
-  }
-  
-  if (tolower(machine) == "windows") {
-    glam_cmd <- paste(paste(execName,".exe",sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
-    execName <- paste(execName,".exe",sep="")
-  } else if (tolower(machine) == "linux") {
-    glam_cmd <- paste(paste("./",execName,sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
-  }
+  binDir <- "~/glam/bin/glam-linux"
+  glam_cmd <- paste(paste("./",execName,sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
   
   #output directories
   if (RUN_setup$USE_SCRATCH) {
     cal_dir <- RUN_setup$SCRATCH #run directory
-    nfs_dir <- paste(RUN_setup$CAL_DIR,"/",simset,sep="")
+    nfs_dir <- paste(getwd(),"/",simset,sep="")
     if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
   } else {
     cal_dir <- RUN_setup$CAL_DIR #run directory

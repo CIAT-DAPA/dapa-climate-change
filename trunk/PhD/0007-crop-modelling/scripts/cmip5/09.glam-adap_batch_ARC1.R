@@ -11,7 +11,7 @@ for(i in 1:length(args)) {
   eval(parse(text=args[[i]]))
 }
 
-#should have read lim_a lim_b and gcm_id
+#should have read lim_a lim_b gcm_id and exp_id
 
 #load library
 require(raster)
@@ -27,7 +27,7 @@ ver <- "v6"
 runs_name <- "cmip5_all"
 adap_name <- "cmip5_adapt"
 maxiter <- 15 #to grab last optim values
-scratch <- "~/scratch"
+scratch <- "/nobackup/eejarv"
 use_scratch <- T
 
 #base and data directories
@@ -38,7 +38,7 @@ glamInDir <- paste(cropDir,"/inputs",sep="")
 runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
 adapDir <- paste(cropDir,"/adapt",sep="")
 
-#load grid cells
+#load required base information
 system(paste("scp see-gw-01:",adapDir,"/data/arc1_data.RData ",".",sep=""))
 load(file="./arc1_data.RData")
 
@@ -50,10 +50,8 @@ inList <- c("allin","bcrain","sh","del")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 
 #load list of parameter sets
-#system(paste("scp see-gw-01:",cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv ",".",sep=""))
-#expList <- read.csv("./runs_discard.csv")
 #expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
-expSel <- expList$EXPID[which(expList$ISSEL == 1)]
+expSel <- expList$EXPID[which(expList$ISSEL == 1)][[exp_id]]
 
 #list of GCMs
 #gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
@@ -73,6 +71,7 @@ all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 ###### configuration
 #variable ENV_CFG
 ENV_CFG <- list()
+ENV_CFG$ARCONE.DIR <- getwd()
 ENV_CFG$SRC.DIR <- src.dir
 ENV_CFG$BDIR <- glamDir
 ENV_CFG$CROP_NAME <- cropName
@@ -101,13 +100,10 @@ cat("\n",paste(as.vector(groupingList[lim_a,])),"\n")
 cat(paste(as.vector(groupingList[lim_b,])),"\n")
 
 #loop the runs
-for (k in lim_a:lim_b) {
-  tima <- run_group_adap(k)
-  tima <- sum(tima)/60
-  cat("XXXXXXXXXXXXXXXXXXXXXX\n")
-  cat("TIME ELAPSED:",tima,"\n")
-  cat("XXXXXXXXXXXXXXXXXXXXXX\n")
-}
-#currently L2
-
+tima <- run_group_adap(lim_a)
+tima <- sum(tima)/60
+cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+cat("TIME ELAPSED:",tima,"\n")
+cat("XXXXXXXXXXXXXXXXXXXXXX\n")
+#end
 

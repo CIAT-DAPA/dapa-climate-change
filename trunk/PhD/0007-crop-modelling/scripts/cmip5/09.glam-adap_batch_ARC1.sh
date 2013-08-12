@@ -9,11 +9,12 @@
 LIM_A=$1
 LIM_B=$2
 GCM_ID=$3
+EXP_ID=$4
 #SCR_ID=$4
 
 #get process id based on name of screen
 #PID=`screen -list | grep ${SCR_ID} | cut -f1 -d'.' | sed 's/\W//g'`
-PID=${LIM_A}_${LIM_B}_${GCM_ID}
+PID=${LIM_A}_${LIM_B}_${GCM_ID}_${EXP_ID}
 THOST="arc1"
 
 #make processing directory if it doesnt exist
@@ -34,7 +35,7 @@ fi
 cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/cmip5/09.glam-adap_batch_ARC1.R run.R
 
 #run R in batch for desired stuff
-R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A lim_b=$LIM_B gcm_id=$GCM_ID" run.R /dev/tty
+R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A lim_b=$LIM_B gcm_id=$GCM_ID exp_id=$EXP_ID" run.R /dev/tty
 
 #remove processing directory again
 cd ~/workspace/cmip5_adap
