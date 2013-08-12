@@ -17,7 +17,7 @@ for(i in 1:length(args)) {
 require(raster)
 
 #source functions
-src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
+src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
 #source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep="")) #original!
 
@@ -27,7 +27,7 @@ ver <- "v6"
 runs_name <- "cmip5_all"
 adap_name <- "cmip5_adapt"
 maxiter <- 15 #to grab last optim values
-scratch <- "/scratch/eejarv"
+scratch <- "~/scratch"
 use_scratch <- T
 
 #base and data directories
