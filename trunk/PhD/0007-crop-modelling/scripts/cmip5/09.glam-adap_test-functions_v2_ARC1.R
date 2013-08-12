@@ -36,6 +36,14 @@ run_group_adap <- function(j) {
     runtime <- system.time(glam_adap_run_wrapper(RUN_CFG))
     timeall <- c(timeall,as.numeric(runtime)[3])
   }
+  
+  #remove extra data
+  flist <- list.files()
+  flist <- flist[-grep("rcp_",flist)]
+  x <- sapply(flist,FUN= function(x) {unlink(x)})
+  flist <- flist[which(x == 1)]
+  x <- sapply(flist,FUN= function(x) {unlink(x, recursive=T)})
+  
   return(timeall)
 }
 
