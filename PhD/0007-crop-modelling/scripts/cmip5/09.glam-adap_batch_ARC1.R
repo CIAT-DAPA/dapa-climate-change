@@ -11,7 +11,7 @@ for(i in 1:length(args)) {
   eval(parse(text=args[[i]]))
 }
 
-#should have read lim_a lim_b gcm_id and exp_id
+#should have read lim_a gcm_id and exp_id
 
 #load library
 require(raster)
@@ -42,19 +42,14 @@ adapDir <- paste(cropDir,"/adapt",sep="")
 system(paste("scp see-gw-01:",adapDir,"/data/arc1_data.RData ",".",sep=""))
 load(file="./arc1_data.RData")
 
-#cells <- read.csv(paste("./calib-cells-selection-",ver,".csv",sep=""))
-#cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
-
 #experimental set up
 inList <- c("allin","bcrain","sh","del")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 
 #load list of parameter sets
-#expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
-expSel <- expList$EXPID[which(expList$ISSEL == 1)][[exp_id]]
+expSel <- expList$EXPID[which(expList$ISSEL == 1)][exp_id]
 
 #list of GCMs
-#gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
 gcmList <- gcmList[gcm_id]
 
 ##########################
@@ -91,13 +86,12 @@ ENV_CFG$ADAP_RUNS <- adap_runs
 groupingList <- expand.grid(LOC=cells$CELL,PARSET=expSel,GCM=gcmList)
 
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
-cat("Processing ",lim_a,"to",lim_b,"XXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
+cat("Processing ",lim_a,"XXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 cat("GCM:",paste(gcmList),"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 
 
 cat("\n",paste(as.vector(groupingList[lim_a,])),"\n")
-cat(paste(as.vector(groupingList[lim_b,])),"\n")
 
 #loop the runs
 tima <- run_group_adap(lim_a)

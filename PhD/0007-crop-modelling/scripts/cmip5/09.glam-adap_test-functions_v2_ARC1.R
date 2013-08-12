@@ -1,6 +1,7 @@
 #Julian Ramirez-Villegas
 #UoL / CIAT / CCAFS
-#Dec 2012
+#Initially created for eljefe type systems on Dec 2012
+#Modified 12 Dec for ARC1
 
 run_group_adap <- function(j) {
   #source functions of interest
@@ -72,6 +73,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     #create run setup
     #files that were generated
     setup_rcp <- list()
+    setup_rcp$ARCONE.DIR <- ENV_CFG$ARCONE.DIR
     setup_rcp$BDIR <- ENV_CFG$BDIR
     setup_rcp$SCRATCH <- ENV_CFG$SCRATCH
     setup_rcp$USE_SCRATCH <- ENV_CFG$USE_SCRATCH
@@ -106,15 +108,11 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     setup_rcp$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,"_",setup_rcp$CELL,sep="")
     
     #output file of his and rcp run
-    saveFile <- paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/output.RData",sep="")
     rcp_dir <- paste(setup_rcp$RCP_DIR,"/",setup_rcp$SIM_NAME,sep="")
     his_dir <- paste(setup_rcp$RCP_DIR,"/his_",inputType,"_",RUN_CFG$LOC,sep="")
     
-    #     #baseline run output stuff that is needed to get the optimal ygp value
-    #     if (inputType == "del") {
-    #       his_dir <- paste(setup_rcp$RCP_DIR,"/his_allin_",RUN_CFG$LOC,sep="")
-    #     }
-    
+    #savefiles
+    saveFile <- paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/output.RData",sep="")
     saveFile_his <- paste(his_dir,"/output.RData",sep="")
     saveFile_rcp <- paste(rcp_dir,"/output.RData",sep="")
     
@@ -124,9 +122,9 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     system(paste("scp see-gw-01:",saveFile_rcp," ","output_rcp.RData",sep=""))
     
     #update filenames
-    saveFile <- "./output.RData"
-    saveFile_his <- "./output_his.RData"
-    saveFile_rcp <- "./output_rcp.RData"
+    saveFile <- paste(setup_rcp$ARCONE.DIR,"/output.RData",sep="")
+    saveFile_his <- paste(setup_rcp$ARCONE.DIR,"/output_his.RData",sep="")
+    saveFile_rcp <- paste(setup_rcp$ARCONE.DIR,"/output_rcp.RData",sep="")
     
     #here check if respective future climate run has been done
     if (file.exists(saveFile_rcp)) {
@@ -135,15 +133,8 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         #######################################################
         ### get parameter set
         #######################################################
-        #load baseline
-        #load(saveFile_his)
-        #rm(optimal); rm(optimised); rm(params); rm(setup)
-        #ybas <- out_data[[2]]$DATA$YIELD
-        #rm(out_data)
-        
         #load future
         load(saveFile_rcp)
-        #yfut <- run_data$RUNS[[8]]$DATA$RFD$YIELD
         
         #get parameter set and irrigated ratio
         base_params <- run_data$PARAMS
@@ -174,9 +165,19 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         system(paste("scp -r see-gw-01:",setup_rcp$WTH_DIR_RFD," ",".",sep=""))
         system(paste("scp -r see-gw-01:",setup_rcp$WTH_DIR_IRR," ",".",sep=""))
         
+        #copy all other model files
+        system(paste("scp -r see-gw-01:",setup_rcp$SOL_FILE," ",".",sep=""))
+        system(paste("scp -r see-gw-01:",setup_rcp$SOL_GRID," ",".",sep=""))
+        system(paste("scp -r see-gw-01:",setup_rcp$SOW_FILE_RFD," ",".",sep=""))
+        system(paste("scp -r see-gw-01:",setup_rcp$SOW_FILE_IRR," ",".",sep=""))
+        
         #update names of folders
-        setup_rcp$WTH_DIR_RFD <- paste("./rfd_",setup_rcp$CELL,sep="")
-        setup_rcp$WTH_DIR_IRR <- paste("./irr_",setup_rcp$CELL,sep="")
+        setup_rcp$WTH_DIR_RFD <- paste(setup_rcp$ARCONE.DIR,"/rfd_",setup_rcp$CELL,sep="")
+        setup_rcp$WTH_DIR_IRR <- paste(setup_rcp$ARCONE.DIR,"/irr_",setup_rcp$CELL,sep="")
+        setup_rcp$SOW_FILE_RFD <- paste(setup_rcp$ARCONE.DIR,"/opt_fcal_",setup_rcp$CELL,".txt",sep="")
+        setup_rcp$SOW_FILE_IRR <- paste(setup_rcp$ARCONE.DIR,"/sowing_",setup_rcp$CELL,"_irr.txt",sep="")
+        setup_rcp$SOL_FILE <- paste(setup_rcp$ARCONE.DIR,"/soiltypes_",setup_rcp$CELL,".txt",sep="")
+        setup_rcp$SOL_GRID <- paste(setup_rcp$ARCONE.DIR,"/soilcodes_",setup_rcp$CELL,".txt",sep="")
         
         #configuration of adaptation
         adap_run <- cfg_adap_runs(runs_data=ENV_CFG$ADAP_RUNS,rcp_data=saveFile_rcp)
@@ -428,7 +429,7 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   #output directories
   if (RUN_setup$USE_SCRATCH) {
     cal_dir <- RUN_setup$SCRATCH #run directory
-    nfs_dir <- paste(getwd(),"/",simset,sep="")
+    nfs_dir <- paste(RUN_setup$ARCONE.DIR,"/",simset,sep="")
     if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
   } else {
     cal_dir <- RUN_setup$CAL_DIR #run directory
@@ -437,9 +438,6 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   
   cal_dir <- paste(cal_dir,"/",simset,sep="") #run directory
   if (!file.exists(cal_dir)) {dir.create(cal_dir)}
-  
-  #cal_dir <- paste(cal_dir,"/run-",subdir,sep="")
-  #if (!file.exists(cal_dir)) {dir.create(cal_dir)}
   
   #files that were generated
   yFile <- "nofile"
@@ -772,7 +770,6 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
       
       #remove all input files
       setwd("./inputs/ascii/wth")
-      #system(paste("7z a daily.7z -tzip *.wth"))
       x <- sapply(list.files(".",pattern="\\.wth"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir); setwd("./inputs/ascii/obs")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
@@ -783,14 +780,6 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
       setwd(run_dir); setwd("./inputs")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir)
-      
-      #compress & remove daily files
-      if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
-        setwd("./output/daily")
-        system(paste("7z a daily.7z -tzip *.out"))
-        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
-        setwd(run_dir)
-      }
     } else {
       setwd(run_dir)
     }
@@ -882,14 +871,6 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
       setwd(run_dir); setwd("./inputs")
       x <- sapply(list.files(".",pattern="\\.txt"),FUN= function(x) {s <- file.remove(x)})
       setwd(run_dir)
-      
-      #compress & remove daily files, should they exist (IASCII = 2 or 3)
-      if (GLAM_params$glam_param.mod_mgt$IASCII >= 2) {
-        setwd("./output/daily")
-        system(paste("7z a daily.7z -tzip *.out"))
-        x <- sapply(list.files(".",pattern="\\.out"),FUN= function(x) {s <- file.remove(x)})
-        setwd(run_dir)
-      }
     } else {
       setwd(run_dir)
     }
@@ -917,7 +898,6 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   out_all$DATA$IRR <- irr_data
   
   if (RUN_setup$USE_SCRATCH) {
-    #system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     setwd(nfs_dir)
     system(paste("rm -rf ",cal_dir,sep=""))
   }

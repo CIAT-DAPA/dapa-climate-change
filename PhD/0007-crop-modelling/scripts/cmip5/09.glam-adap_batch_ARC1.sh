@@ -7,14 +7,13 @@
 #$ -m be
 
 LIM_A=$1
-LIM_B=$2
-GCM_ID=$3
-EXP_ID=$4
+GCM_ID=$2
+EXP_ID=$3
 #SCR_ID=$4
 
 #get process id based on name of screen
 #PID=`screen -list | grep ${SCR_ID} | cut -f1 -d'.' | sed 's/\W//g'`
-PID=${LIM_A}_${LIM_B}_${GCM_ID}_${EXP_ID}
+PID=${LIM_A}_${GCM_ID}_${EXP_ID}
 THOST="arc1"
 
 #make processing directory if it doesnt exist
