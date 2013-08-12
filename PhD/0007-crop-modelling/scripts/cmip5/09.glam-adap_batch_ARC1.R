@@ -18,7 +18,7 @@ require(raster)
 
 #source functions
 src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
+source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_ARC1.R",sep=""))
 #source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep="")) #original!
 
 #configuration details
@@ -39,18 +39,24 @@ runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
 adapDir <- paste(cropDir,"/adapt",sep="")
 
 #load grid cells
-cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
+system(paste("scp see-gw-01:",adapDir,"/data/arc1_data.RData ",".",sep=""))
+load(file="./arc1_data.RData")
+
+#cells <- read.csv(paste("./calib-cells-selection-",ver,".csv",sep=""))
+#cells <- read.csv(paste(glamInDir,"/calib-cells-selection-",ver,".csv",sep=""))
 
 #experimental set up
 inList <- c("allin","bcrain","sh","del")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 
 #load list of parameter sets
-expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
+#system(paste("scp see-gw-01:",cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv ",".",sep=""))
+#expList <- read.csv("./runs_discard.csv")
+#expList <- read.csv(paste(cropDir,"/calib/results_exp/summary_exp_33-82/runs_discard.csv",sep=""))
 expSel <- expList$EXPID[which(expList$ISSEL == 1)]
 
 #list of GCMs
-gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
+#gcmList <- list.files(paste(runsDir,"/exp-33_outputs",sep=""),pattern="_ENS_")
 gcmList <- gcmList[gcm_id]
 
 ##########################
@@ -61,7 +67,7 @@ all_proc <- cbind(RUNID=1:nrow(all_proc),all_proc)
 all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 
 #load experiments setup
-adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T)
+#adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T)
 #adap_runs <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T) #original!
 
 ###### configuration
