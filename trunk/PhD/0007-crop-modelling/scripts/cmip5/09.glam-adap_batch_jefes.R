@@ -62,7 +62,7 @@ all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 
 #load experiments setup
 adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T)
-#adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T) #original!
+#adap_runs <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T) #original!
 
 ###### configuration
 #variable ENV_CFG

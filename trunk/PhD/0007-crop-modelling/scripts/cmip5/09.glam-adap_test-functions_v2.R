@@ -314,7 +314,11 @@ cfg_adap_runs <- function(runs_data,rcp_data="output.RData") {
     }
     
     #define modification values
-    advals <- c(minval+ranval*0.25,minval+ranval*0.5,minval+ranval)
+    if (param == "GCPLFL" & as.numeric(paste(runs_data$min[i])) < 0) {
+      advals <- c(maxval-ranval*0.25,maxval-ranval*0.5,maxval-ranval)
+    } else {
+      advals <- c(minval+ranval*0.25,minval+ranval*0.5,minval+ranval)
+    }
     
     if (i==1) {
       gen_df <- data.frame(parameter=param,section=where,group=grp,low=advals[1],
@@ -351,6 +355,24 @@ cfg_adap_runs <- function(runs_data,rcp_data="output.RData") {
       out_df$RUNID[rowc] <- rowc
       rowc <- rowc+1
     }
+  }
+  
+  #combined runs (with decreased vegetative TT)
+  for (i in 1:nrow(adap_exp)) {
+    #i <- 1
+    for (grp in names(adap_exp)) {
+      #grp <- "BMASS"
+      grp_ad <- gen_df[which(gen_df$group==grp),]
+      if (grp == "TT") {grp_ad <- grp_ad[c(1,3:nrow(grp_ad)),]}
+      #grp_ad[1,4:6] <- rev(grp_ad[1,4:6])
+      for (j in 1:nrow(grp_ad)) {
+        #j <- 1
+        param <- paste(grp_ad$parameter[j])
+        out_df[rowc,param] <- grp_ad[j,paste(adap_exp[i,grp])]
+      }
+    }
+    out_df$RUNID[rowc] <- rowc
+    rowc <- rowc+1
   }
   out_df <- out_df[which(!is.na(out_df$RUNID)),]
   
