@@ -39,8 +39,10 @@ runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
 adapDir <- paste(cropDir,"/adapt",sep="")
 
 #load required base information
-system(paste("scp see-gw-01:",adapDir,"/data/arc1_data.RData ",".",sep=""))
-load(file="./arc1_data.RData")
+if (!file.exists("./arc1_data.RData")) {
+  system(paste("scp see-gw-01:",adapDir,"/data/arc1_data.RData ",".",sep=""))
+  load(file="./arc1_data.RData")
+}
 
 #experimental set up
 inList <- c("allin","bcrain","sh","del")
