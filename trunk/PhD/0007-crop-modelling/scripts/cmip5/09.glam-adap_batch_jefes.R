@@ -18,7 +18,8 @@ require(raster)
 
 #source functions
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
-source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep=""))
+source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2.R",sep=""))
+#source(paste(src.dir,"/cmip5/09.glam-adap_test-functions.R",sep="")) #original!
 
 #configuration details
 cropName <- "gnut"
@@ -60,7 +61,8 @@ all_proc <- cbind(RUNID=1:nrow(all_proc),all_proc)
 all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 
 #load experiments setup
-adap_runs <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T)
+adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T)
+#adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T) #original!
 
 ###### configuration
 #variable ENV_CFG
