@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$ -l h_rt=01:00:00
+#$ -l h_rt=02:30:00
 #$ -l h_vmem=1G
 #$ -l cputype=intel
 #$ -cwd -V
@@ -9,7 +9,6 @@
 LIM_A=$1
 GCM_ID=$2
 EXP_ID=$3
-#SCR_ID=$4
 
 #get process id based on name of screen
 PID=${GCM_ID}_${EXP_ID}_${LIM_A}
