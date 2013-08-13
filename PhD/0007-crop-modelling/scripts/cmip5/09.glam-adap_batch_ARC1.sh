@@ -36,6 +36,9 @@ cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/
 #R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /dev/tty
 R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /nobackup/eejarv/outfiles/out_${HOST}_${PID}.out
 
+#remove junk
+#rm -vf /nobackup/eejarv/outfiles/out_${HOST}_${PID}.out
+
 #remove processing directory again
 #cd /nobackup/eejarv/workspace/cmip5_adap
 #rm -rvf process_${THOST}_${PID}
