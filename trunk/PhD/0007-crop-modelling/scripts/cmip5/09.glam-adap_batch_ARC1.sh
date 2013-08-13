@@ -16,12 +16,12 @@ PID=${GCM_ID}_${EXP_ID}_${LIM_A}
 THOST="arc1"
 
 #make processing directory if it doesnt exist
-if [ ! -d "/nobackup/eejarv/workspace/cmip5_adap/process_${THOST}_${PID}" ]
+if [ ! -d "~/workspace/cmip5_adap/process_${THOST}_${PID}" ]
 then
-	mkdir /nobackup/eejarv/workspace/cmip5_adap/process_${THOST}_${PID}
+	mkdir ~/workspace/cmip5_adap/process_${THOST}_${PID}
 fi
 
-cd /nobackup/eejarv/workspace/cmip5_adap/process_${THOST}_${PID}
+cd ~/workspace/cmip5_adap/process_${THOST}_${PID}
 
 #remove run script if it exists
 if [ -f "run.R" ]
@@ -33,10 +33,10 @@ fi
 cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/cmip5/09.glam-adap_batch_ARC1.R run.R
 
 #run R in batch for desired stuff
-#R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id=$GCM_ID exp_id=$EXP_ID" run.R /dev/tty
-R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id=$GCM_ID exp_id=$EXP_ID" run.R /nobackup/eejarv/outfiles/out_${HOST}_${PID}.out
+#R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /dev/tty
+R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /nobackup/eejarv/outfiles/out_${HOST}_${PID}.out
 
 #remove processing directory again
-cd /nobackup/eejarv/workspace/cmip5_adap
-rm -rvf process_${THOST}_${PID}
+#cd /nobackup/eejarv/workspace/cmip5_adap
+#rm -rvf process_${THOST}_${PID}
 
