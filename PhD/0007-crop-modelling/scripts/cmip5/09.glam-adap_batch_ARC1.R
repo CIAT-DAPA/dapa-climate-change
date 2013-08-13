@@ -37,22 +37,22 @@ cropDir <- paste(glamDir,"/model-runs/",toupper(cropName),sep="")
 glamInDir <- paste(cropDir,"/inputs",sep="")
 runsDir <- paste(cropDir,"/runs/",runs_name,sep="")
 adapDir <- paste(cropDir,"/adapt",sep="")
+localcopy <- paste("~/workspace/localcopy/copy_arc1_",gcm_id,"_",exp_id,"_",lim_a,sep="")
 
 #load required base information
-if (!file.exists("./arc1_data.RData")) {
-  system(paste("scp see-gw-01:",adapDir,"/data/arc1_data.RData ",".",sep=""))
-  load(file="./arc1_data.RData")
-}
+load(file=paste(localcopy,"/arc1_data.RData",sep=""))
 
 #experimental set up
 inList <- c("allin","bcrain","sh","del")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 
 #load list of parameter sets
-expSel <- expList$EXPID[which(expList$ISSEL == 1)][exp_id]
+#expSel <- expList$EXPID[which(expList$ISSEL == 1)][exp_id]
+expSel <- exp_id
 
 #list of GCMs
-gcmList <- gcmList[gcm_id]
+#gcmList <- gcmList[gcm_id]
+gcmList <- gcm_id
 
 ##########################
 #all processes
@@ -69,6 +69,7 @@ all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 #variable ENV_CFG
 ENV_CFG <- list()
 ENV_CFG$ARCONE.DIR <- getwd()
+ENV_CFG$LOCALCOPY <- localcopy
 ENV_CFG$SRC.DIR <- src.dir
 ENV_CFG$BDIR <- glamDir
 ENV_CFG$CROP_NAME <- cropName
@@ -92,11 +93,11 @@ cat("Processing ",lim_a,"XXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 cat("GCM:",paste(gcmList),"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n")
 
-
-cat("\n",paste(as.vector(groupingList[lim_a,])),"\n")
+k <- which(groupingList$LOC == lim_a)
+cat("\n",paste(as.vector(groupingList[k,])),"\n")
 
 #loop the runs
-tima <- run_group_adap(lim_a)
+tima <- run_group_adap(k)
 tima <- sum(tima)/60
 cat("XXXXXXXXXXXXXXXXXXXXXX\n")
 cat("TIME ELAPSED:",tima,"\n")

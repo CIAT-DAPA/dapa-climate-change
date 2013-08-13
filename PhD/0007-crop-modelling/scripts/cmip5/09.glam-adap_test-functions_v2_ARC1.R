@@ -72,8 +72,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
   cDir <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),sep="")
   
   #here construct a control file folder
-  #out_bdir <- paste(bDir,"/model-runs/",toupper(cropName),"/runs/cmip5_hist",sep="")
-  ctrl_dir <- paste("/nobackup/eejarv/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
+  ctrl_dir <- paste("~/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
   if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir,recursive=T)}
   ctrl_fil <- paste(ctrl_dir,"/",RUN_CFG$PERIOD,"_loc-",RUN_CFG$LOC,"_",RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,".proc",sep="")
   
@@ -81,6 +80,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     #create run setup
     setup_rcp <- list()
     setup_rcp$ARCONE.DIR <- ENV_CFG$ARCONE.DIR
+    setup_rcp$LOCALCOPY <- ENV_CFG$LOCALCOPY
     setup_rcp$BDIR <- ENV_CFG$BDIR
     setup_rcp$SCRATCH <- ENV_CFG$SCRATCH
     setup_rcp$USE_SCRATCH <- ENV_CFG$USE_SCRATCH
@@ -93,13 +93,13 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     setup_rcp$PRE_DIR <- paste(setup_rcp$BDIR,"/model-runs/",toupper(setup_rcp$CROPNAME),"/calib/exp-",RUN_CFG$PARSET,"_outputs",sep="")
     setup_rcp$YIELD_FILE <- NA #not needed for future climate runs
     setup_rcp$YGP_FILE <- NA #not needed for future climate runs
-    setup_rcp$SOW_FILE_RFD <- paste(setup_rcp$PRE_DIR,"/gridcells/fcal_",setup_rcp$CELL,"/opt_fcal_",setup_rcp$CELL,".txt",sep="")
-    setup_rcp$SOW_FILE_IRR <- paste(cDir,"/inputs/ascii/sow/sowing_",setup_rcp$CELL,"_irr.txt",sep="")
+    setup_rcp$SOW_FILE_RFD <- paste(setup_rcp$LOCALCOPY,"/other/opt_fcal_",setup_rcp$CELL,".txt",sep="")
+    setup_rcp$SOW_FILE_IRR <- paste(setup_rcp$LOCALCOPY,"/other/sowing_",setup_rcp$CELL,"_irr.txt",sep="")
     setup_rcp$WTH_DIR_RFD <- NA #temporary
     setup_rcp$WTH_DIR_IRR <- NA #temporary
     setup_rcp$WTH_ROOT <- "ingc"
-    setup_rcp$SOL_FILE <- paste(cDir,"/inputs/ascii/soil/soiltypes_",setup_rcp$CELL,".txt",sep="")
-    setup_rcp$SOL_GRID <- paste(cDir,"/inputs/ascii/soil/soilcodes_",setup_rcp$CELL,".txt",sep="")
+    setup_rcp$SOL_FILE <- paste(setup_rcp$LOCALCOPY,"/other/soiltypes_",setup_rcp$CELL,".txt",sep="")
+    setup_rcp$SOL_GRID <- paste(setup_rcp$LOCALCOPY,"/other/soilcodes_",setup_rcp$CELL,".txt",sep="")
     setup_rcp$SIM_NAME <- NA # temporary
     setup_rcp$PRE_SEAS <- "OR" #OR: original input data, RF: rainfed by default, IR: irrigated by default
     setup_rcp$OPT_METHOD <- NA #not needed for future climate run
@@ -115,20 +115,11 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
     setup_rcp$SIM_NAME <- paste(RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,"_",setup_rcp$CELL,sep="")
     
     #output file of his and rcp run
-    rcp_dir <- paste(setup_rcp$RCP_DIR,"/",setup_rcp$SIM_NAME,sep="")
-    his_dir <- paste(setup_rcp$RCP_DIR,"/his_",inputType,"_",RUN_CFG$LOC,sep="")
+    rcp_dir <- paste(setup_rcp$LOCALCOPY,"/cmip5_all/",setup_rcp$SIM_NAME,sep="")
     
     #savefiles
-    saveFile <- paste(setup_rcp$CAL_DIR,"/",setup_rcp$SIM_NAME,"/output.RData",sep="")
-    saveFile_rcp <- paste(rcp_dir,"/output.RData",sep="")
-    
-    #copy the three files
-    system(paste("scp see-gw-01:",saveFile," ","output.RData",sep=""))
-    system(paste("scp see-gw-01:",saveFile_rcp," ","output_rcp.RData",sep=""))
-    
-    #update filenames
     saveFile <- paste(setup_rcp$ARCONE.DIR,"/output.RData",sep="")
-    saveFile_rcp <- paste(setup_rcp$ARCONE.DIR,"/output_rcp.RData",sep="")
+    saveFile_rcp <- paste(rcp_dir,"/output.RData",sep="")
     
     #here check if respective future climate run has been done
     if (file.exists(saveFile_rcp)) {
@@ -152,36 +143,18 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
         
         #assign directories according to input type
         if (inputType == "allin") {
-          setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
-          setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_RFD <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45/rfd_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_IRR <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45/irr_",setup_rcp$CELL,sep="")
         } else if (inputType == "bcrain") {
-          setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_bc/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
-          setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_bc/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_RFD <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45_bc/rfd_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_IRR <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45_bc/irr_",setup_rcp$CELL,sep="")
         } else if (inputType == "del") {
-          setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_del/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
-          setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_del/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_RFD <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45_del/rfd_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_IRR <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45_del/irr_",setup_rcp$CELL,sep="")
         } else if (inputType == "sh") {
-          setup_rcp$WTH_DIR_RFD <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_sh/",RUN_CFG$SCE,"/rfd_",setup_rcp$CELL,sep="")
-          setup_rcp$WTH_DIR_IRR <- paste(cDir,"/inputs/ascii/wth-cmip5_rcp45_sh/",RUN_CFG$SCE,"/irr_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_RFD <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45_sh/rfd_",setup_rcp$CELL,sep="")
+          setup_rcp$WTH_DIR_IRR <- paste(setup_rcp$LOCALCOPY,"/weather/cmip5_rcp45_sh/irr_",setup_rcp$CELL,sep="")
         }
-        
-        #copy weather files
-        if (!file.exists(paste("./rfd_",setup_rcp$CELL,sep=""))) {system(paste("scp -r see-gw-01:",setup_rcp$WTH_DIR_RFD," ",".",sep=""))}
-        if (!file.exists(paste("./irr_",setup_rcp$CELL,sep=""))) {system(paste("scp -r see-gw-01:",setup_rcp$WTH_DIR_IRR," ",".",sep=""))}
-        
-        #copy all other model files
-        if (!file.exists(paste("./soiltypes_",setup_rcp$CELL,".txt",sep=""))) {system(paste("scp -r see-gw-01:",setup_rcp$SOL_FILE," ",".",sep=""))}
-        if (!file.exists(paste("./soilcodes_",setup_rcp$CELL,".txt",sep=""))) {system(paste("scp -r see-gw-01:",setup_rcp$SOL_GRID," ",".",sep=""))}
-        if (!file.exists(paste("./opt_fcal_",setup_rcp$CELL,".txt",sep=""))) {system(paste("scp -r see-gw-01:",setup_rcp$SOW_FILE_RFD," ",".",sep=""))}
-        if (!file.exists(paste("./sowing_",setup_rcp$CELL,"_irr.txt",sep=""))) {system(paste("scp -r see-gw-01:",setup_rcp$SOW_FILE_IRR," ",".",sep=""))}
-        
-        #update names of folders
-        setup_rcp$WTH_DIR_RFD <- paste(setup_rcp$ARCONE.DIR,"/rfd_",setup_rcp$CELL,sep="")
-        setup_rcp$WTH_DIR_IRR <- paste(setup_rcp$ARCONE.DIR,"/irr_",setup_rcp$CELL,sep="")
-        setup_rcp$SOW_FILE_RFD <- paste(setup_rcp$ARCONE.DIR,"/opt_fcal_",setup_rcp$CELL,".txt",sep="")
-        setup_rcp$SOW_FILE_IRR <- paste(setup_rcp$ARCONE.DIR,"/sowing_",setup_rcp$CELL,"_irr.txt",sep="")
-        setup_rcp$SOL_FILE <- paste(setup_rcp$ARCONE.DIR,"/soiltypes_",setup_rcp$CELL,".txt",sep="")
-        setup_rcp$SOL_GRID <- paste(setup_rcp$ARCONE.DIR,"/soilcodes_",setup_rcp$CELL,".txt",sep="")
         
         #configuration of adaptation
         adap_run <- cfg_adap_runs(runs_data=ENV_CFG$ADAP_RUNS,rcp_data=saveFile_rcp)
