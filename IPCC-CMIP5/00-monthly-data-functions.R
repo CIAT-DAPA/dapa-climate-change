@@ -4,6 +4,7 @@
 # c.e.navarro@cgiar.org
 #-----------------------------------------------------------------------
 
+require(maptools)
 require(raster)
 require(ncdf)
 require(rgdal)
@@ -239,11 +240,6 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
   
   }
 
-# rcp <- "rcp26"
-# baseDir <- "T:/gcm/cmip5/raw/monthly"
-# ens <- "r1i1p1"
-# basePer <- "1961_1990"
-
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
@@ -295,7 +291,7 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
           if (basePer == "1961_1990"){
 
             anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s", sep="")
-            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", staYear, "_", endYear, sep="")  
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", staYear, "_", endYear, sep="") 
             
           } else if (basePer == "1971_2000") {
             
@@ -303,6 +299,7 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
             
           }
+          
           
           if (!file.exists(anomDir)) {dir.create(anomDir)}
           if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
@@ -313,22 +310,144 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             # Loop around months
             for (mth in monthList) {
               
-              outAsc <- paste(anomPerDir, "/", var, "_", mth, ".asc", sep="")
               
-              if (!file.exists(outAsc)) {
+              outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
+              if (!file.exists(outNc)) {
+              
+                curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                
+                anomNc <- futAvgNc - curAvgNc
+
+                # resAnomNc  <- resample(anomNc, rs, method='ngb')
+                
+                # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
+                # anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
+                # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')
+                anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
+                
+              }
+              
+              outShp <- paste(anomPerDir, "/", var, "_", mth, ".shp", sep="")
+              
+              if (!file.exists(outShp)) {
+                
+                anomPts <- rasterToPoints(raster(outNc)) 
+                
+                coords <- data.frame(anomPts[,1:2])
+                colnames(coords) <- c("LON", "LAT")
+                
+                values <- data.frame(anomPts[,3])
+                colnames(values) <- c("VALUE")
+                
+                anomPts <- SpatialPointsDataFrame(coords,values)
+                anomShp <- writePointsShape(anomPts, paste(anomPerDir, "/", var, "_", mth, sep=""))
+                
+                cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+              
+              } else {cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
+              
+            }    
+          } 
+        }  
+      }  
+    }
+  }
+  cat("GCM Anomalies Process Done!")
+}
+
+
+
+
+#############################################################################################################################################
+# Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data in Shapefile output file format 
+#############################################################################################################################################
+GCMAnomaliesShp <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", outDir="T:/gcm/cmip5/anomalies") {
+  
+  cat(" \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat("XXXXXXXXX GCM ANOMALIES CALCULATION XXXXXXXX \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat(" \n")
+  
+  # List of variables and months
+  varList <- c("prec", "tmax", "tmin")
+  monthList <- c(1:12)
+  
+  curDir <- paste(baseDir, "/historical", sep="")
+  futDir <- paste(baseDir, "/", rcp, sep="")
+  
+  gcmList <- list.dirs(curDir, recursive = FALSE, full.names = FALSE)
+  
+  for (gcm in gcmList) {
+    
+    # Get gcm names    
+    gcm <- basename(gcm)
+    
+    # Path of each ensemble
+    curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
+    
+    # Average directory
+    curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
+    
+    periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+    
+    for (period in periodList) {
+      
+      # Define start and end year
+      staYear <- as.integer(period)
+      endYear <- as.integer(period) + 29
+      
+      futAvgDir <- paste(futDir, "/", gcm, "/", ens, "/average/", staYear, "_", endYear, sep="")
+      
+      if (file.exists(futAvgDir)){
+        
+        if (file.exists(curAvgDir)){
+          
+          cat("\t Anomalies over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
+          
+          # Create anomalies output directory 
+          if (basePer == "1961_1990"){
+            
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s", sep="")
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1975s/", staYear, "_", endYear, sep="")  
+            
+          } else if (basePer == "1971_2000") {
+            
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s", sep="")
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
+            
+          }
+          
+          
+          if (!file.exists(anomDir)) {dir.create(anomDir)}
+          if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
+          
+          # Loop around variables
+          for (var in varList) {
+            
+            # Loop around months
+            for (mth in monthList) {
+              
+              outShp <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
+              
+              if (!file.exists(outShp)) {
                 
                 curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
                 futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
                 
                 anomNc <- futAvgNc - curAvgNc
+                
                 # resAnomNc  <- resample(anomNc, rs, method='ngb')
                 
-                rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
-                anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
-                # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')              
-  
+                # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
+                # anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
+                # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')
+                # anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
                 
-                anomNc <- writeRaster(anomNc, outAsc, format='ascii', overwrite=FALSE)
+                anomPts <- rasterToPoints(anomNc)
+                anomPts <- SpatialPointsDataFrame(data.frame(anomPts[,1:2]),data.frame(anomPts[,3]))
+                anomShp <- writePointsShape(anomPts, paste(anomPerDir, "/", var, "_", mth, sep=""))
                 
                 cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
                 
@@ -342,7 +461,6 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   }
   cat("GCM Anomalies Process Done!")
 }
-
 
 
 ###########################################################
