@@ -84,8 +84,11 @@ do
 	cd ~/workspace/cmip5_adap
 	
 	#copy the script first
-	cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/cmip5/09.glam-adap_batch_ARC1.sh run.sh
-	chmod 755 run.sh
+	if [ ! -f "./run.sh" ]
+	then
+		cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/cmip5/09.glam-adap_batch_ARC1.sh run.sh
+		chmod 755 run.sh
+	fi
 	
   	#do the model run
   	#./run.sh $LOC $GCM $EXP
