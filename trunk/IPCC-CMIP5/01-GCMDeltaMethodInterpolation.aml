@@ -3,7 +3,7 @@
 /* Modified by Carlos Navarro
 /* CIAT, Cali, Colombia, August 2013
 
-/* &r 02-GCMDeltaMethodInterpolation.aml T:\gcm\cmip5\anomalies T:\gcm\cmip5\interpolations D:\Workspace\masks\mask30s rcp26 bcc_csm1_1 r1i1p1 D:\Workspace
+/* &r 02-GCMDeltaMethodInterpolation.aml T:\gcm\cmip5\raw\monthly T:\gcm\cmip5\interpolations D:\Workspace\masks\mask30s rcp26 bcc_csm1_1 r1i1p1 D:\Workspace
 
 &args inputdir outdir mask rcp modname ensemble tmpdir
 &terminal 9999
@@ -31,7 +31,16 @@
 &s rootdir [show &amlpath]
 
 &s workspace %tmpdir%\%rcp%_%modname%
-&if not [exists %workspace% -DIR] &then &sys md %workspace%
+
+&if [exists %workspace% -DIR] &then 
+	&do
+		&sys rmdir /s/q %workspace%
+		&sys md %workspace%
+	&end
+&else
+	&do
+		&sys md %workspace%
+	&end
 
 &ty
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -60,8 +69,8 @@ arc w %workspace%
 			&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
 			&if [exists %workspace%\%variable%_%month%p -COVERAGE] &then kill %workspace%\%variable%_%month%p all
 			
-			copy %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% %variable%_%month%
-			%workspace%\%variable%_%month%p = GRIDPOINT(%workspace%\%variable%_%month%, VALUE)
+			/* copy %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% %variable%_%month%
+			%workspace%\%variable%_%month%p = SHAPEARC(%inputdir%\%rcp%\%modname%\%ensemble%\anomalies_1975s\%ts%\%variable%_%month%.shp, VALUE)
 			&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
 			&if [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -grid] &then &goto noproc
 			
