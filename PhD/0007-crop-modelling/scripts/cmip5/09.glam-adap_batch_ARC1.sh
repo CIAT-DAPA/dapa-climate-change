@@ -17,12 +17,12 @@ PID=${LIM_A}_${GCM_ID}_${EXP_ID}
 THOST="arc1"
 
 #make processing directory if it doesnt exist
-if [ ! -d "~/workspace/cmip5_adap/process_${THOST}_${PID}" ]
+if [ ! -d "/nobackup/eejarv/workspace/cmip5_adap/process_${THOST}_${PID}" ]
 then
-	mkdir ~/workspace/cmip5_adap/process_${THOST}_${PID}
+	mkdir /nobackup/eejarv/workspace/cmip5_adap/process_${THOST}_${PID}
 fi
 
-cd ~/workspace/cmip5_adap/process_${THOST}_${PID}
+cd /nobackup/eejarv/workspace/cmip5_adap/process_${THOST}_${PID}
 
 #remove run script if it exists
 if [ -f "run.R" ]
@@ -37,6 +37,6 @@ cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/
 R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id=$GCM_ID exp_id=$EXP_ID" run.R /dev/tty
 
 #remove processing directory again
-cd ~/workspace/cmip5_adap
+cd /nobackup/eejarv/workspace/cmip5_adap
 rm -rvf process_${THOST}_${PID}
 
