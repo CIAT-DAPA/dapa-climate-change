@@ -46,12 +46,10 @@ load(file=paste(localcopy,"/arc1_data.RData",sep=""))
 inList <- c("allin","bcrain","sh","del")
 CO2ExpList <- c("CO2_p1","CO2_p2","CO2_p3","CO2_p4")
 
-#load list of parameter sets
-#expSel <- expList$EXPID[which(expList$ISSEL == 1)][exp_id]
+#parameter set
 expSel <- exp_id
 
-#list of GCMs
-#gcmList <- gcmList[gcm_id]
+#GCM
 gcmList <- gcm_id
 
 ##########################
@@ -61,9 +59,6 @@ all_proc <- expand.grid(LOC=cells$CELL,GCM=gcmList,PARSET=expSel,WTH_TYPE=inList
 all_proc <- cbind(RUNID=1:nrow(all_proc),all_proc)
 all_proc$RUNID <- paste("RCP_",all_proc$RUNID+1e8,sep="")
 
-#load experiments setup
-#adap_runs <- read.table(paste(adapDir,"/data/adapt_v2.tab",sep=""),sep="\t",header=T)
-#adap_runs <- read.table(paste(adapDir,"/data/adapt.tab",sep=""),sep="\t",header=T) #original!
 
 ###### configuration
 #variable ENV_CFG
@@ -106,7 +101,7 @@ cat("XXXXXXXXXXXXXXXXXXXXXX\n")
 
 
 #copy the output data from this folder /nfs/a17/eejarv
-system(paste("scp -r ", ENV_CFG$ARCONE.DIR, " see-gw-01:",adapDir,"/cmip5_adapt_arc1",sep=""))
-system(paste("scp -r /nobackup/eejarv/workspace/cmip5_adap/_process/exp-",expSel,"_",gcmList, " see-gw-01:",adapDir,"/cmip5_adapt_arc1/_process",sep=""))
+#system(paste("scp -r ", ENV_CFG$ARCONE.DIR, " see-gw-01:",adapDir,"/cmip5_adapt_arc1",sep=""))
+#system(paste("scp -r ~/workspace/cmip5_adap/_process/exp-",expSel,"_",gcmList, " see-gw-01:",adapDir,"/cmip5_adapt_arc1/_process",sep=""))
 
 
