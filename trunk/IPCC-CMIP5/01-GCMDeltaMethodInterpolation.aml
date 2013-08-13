@@ -3,7 +3,7 @@
 /* Modified by Carlos Navarro
 /* CIAT, Cali, Colombia, August 2013
 
-/* &r 02-GCMDeltaMethodInterpolation.aml T:\gcm\cmip5\raw\monthly T:\gcm\cmip5\interpolations D:\Workspace\masks\mask30s rcp26 bcc_csm1_1 r1i1p1 D:\Workspace
+/* &r 01-GCMDeltaMethodInterpolation.aml T:\gcm\cmip5\raw\monthly T:\gcm\cmip5\interpolations D:\Workspace\masks\mask30s rcp26 bcc_csm1_1 r1i1p1 D:\Workspace
 
 &args inputdir outdir mask rcp modname ensemble tmpdir
 &terminal 9999
@@ -16,7 +16,7 @@
 	&do
 		&ty
 		&ty Incorrect command syntax, please use
-		&ty '&r 02-GCMDeltaMethodInterpolation.aml INPUT_DIR outdir MASK rcp modname ensemble TEMPORAL_DIR
+		&ty '&r 01-GCMDeltaMethodInterpolation.aml INPUT_DIR outdir MASK rcp modname ensemble TEMPORAL_DIR
 		&ty available SCENARIOS are rcp_26, rcp_45, rcp_60, rcp85
 		&ty MASK should be both name and path of to the mask
 		&ty INPUT_DIR should contain folders of rcp scenarios
@@ -26,7 +26,7 @@
 		&return
 	&end
 
-&if [show program] NE GRID &then GRID
+
 &amlpath .
 &s rootdir [show &amlpath]
 
@@ -46,94 +46,106 @@
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 &ty          /\/\/\/\GCM ANOMALIES GRID2ASCII/\/\/\/\
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+&ty
 
 arc w %workspace%
 
 &do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 	
-	&ty Model %modname% (%ts%, %rcp%, %ensemble%)
-	
 	&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\%modname%\%ensemble%\%ts%
 	
 	&do variable &list tmin tmax prec
 		
-		&ty   ->.Processing variable %variable%
+		&ty
+		&ty Model %modname% (%ts%, %rcp%, %ensemble%)
+		&ty
+ 
 		
 		&do month = 1 &to 12
 		
 			&ty
-			&ty   ->.Processing month %month%
+			&ty   ->.Processing month %variable% %month%
 			
-			/* Copying and creating the interpolation file
-			
-			&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
-			&if [exists %workspace%\%variable%_%month%p -COVERAGE] &then kill %workspace%\%variable%_%month%p all
-			
-			/* copy %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% %variable%_%month%
-			%workspace%\%variable%_%month%p = SHAPEARC(%inputdir%\%rcp%\%modname%\%ensemble%\anomalies_1975s\%ts%\%variable%_%month%.shp, VALUE)
-			&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
-			&if [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -grid] &then &goto noproc
-			
-			setwindow -180 -90 15 90
-			setmask off
-			setcell %mask%
-			
-			&ty Interpolating left part of the surface
-			&if [exists %workspace%\%variable%_%month%a -grid] &then &ty Interpolated grid exists
-			&else %workspace%\%variable%_%month%a = INT(FLOOR(SPLINE(%workspace%\%variable%_%month%p, VALUE, REGULARIZED, 0.5, 8) * 100 + 0.5))
-			&ty
-			
-			setwindow -15 -90 180 90
-			setmask off
-			setcell %mask%
-			
-			&ty Interpolating right part of the surface
-			&if [exists %workspace%\%variable%_%month%b -grid] &then &ty Interpolated grid exists
-			&else %workspace%\%variable%_%month%b = INT(FLOOR(SPLINE(%workspace%\%variable%_%month%p, VALUE, REGULARIZED, 0.5, 8) * 100 + 0.5))
-			&ty
-			
-			setwindow -180 -60 0 90 %mask%
-			setmask %mask%
-			setcell %mask%
-			
-			&ty Cutting left part of the surface
-			&if [exists %workspace%\%variable%_%month%_l -grid] &then kill %workspace%\%variable%_%month%_l all
-			%workspace%\%variable%_%month%_l = %workspace%\%variable%_%month%a
-			&if [exists %workspace%\%variable%_%month%a -grid] &then kill %workspace%\%variable%_%month%a all
-			&ty
-			
-			setwindow 0 -60 180 90 %mask%
-			setmask %mask%
-			setcell %mask%
-			
-			&ty Cutting right part of the surface
-			&if [exists %workspace%\%variable%_%month%_r -grid] &then kill %workspace%\%variable%_%month%_r all
-			%workspace%\%variable%_%month%_r = %workspace%\%variable%_%month%b
-			&if [exists %workspace%\%variable%_%month%b -grid] &then kill %workspace%\%variable%_%month%b all
-			&ty
-			
-			setwindow -180 -60 180 90 %mask%
-			setmask %mask%
-			setcell %mask%
-			
-			&ty Merging both sides of the grid
-			&if [exists %workspace%\%variable%_%month% -grid] &then kill %workspace%\%variable%_%month% all
-			%workspace%\%variable%_%month% = MERGE(%workspace%\%variable%_%month%_l, %workspace%\%variable%_%month%_r)
-			&if [exists %workspace%\%variable%_%month%_r -grid] &then kill %workspace%\%variable%_%month%_r all
-			&if [exists %workspace%\%variable%_%month%_l -grid] &then kill %workspace%\%variable%_%month%_l all
-			&ty
-			
-			&ty Copying to output directory
-			&if [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -GRID] &then kill %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% all
-			COPY %workspace%\%variable%_%month% %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month%
-			&if [exists %workspace%\%variable%_%month% -grid] &then kill %workspace%\%variable%_%month% all
-			
-			&label noproc
-			&if [exists %workspace%\%variable%_%month%p -COVERAGE] &then kill %workspace%\%variable%_%month%p all
+			&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -GRID] &then 
+			&do
+				
+				/* Copying and creating the interpolation file
+				
+				&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
+				&if [exists %workspace%\%variable%_%month%p -COVERAGE] &then kill %workspace%\%variable%_%month%p all
+				
+				/* copy %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% %variable%_%month%
+				SHAPEARC %inputdir%\%rcp%\%modname%\%ensemble%\anomalies_1975s\%ts%\%variable%_%month%.shp %workspace%\%variable%_%month%p
+				&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
+				&if [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -grid] &then &goto noproc
+				
+				&if [show program] <> GRID &then GRID
+				
+				setwindow -180 -90 15 90
+				setmask off
+				setcell %mask%
+				
+				&ty
+				&ty   Interpolating left part of the surface
+				&if [exists %workspace%\%variable%_%month%a -grid] &then &ty Interpolated grid exists
+				&else %workspace%\%variable%_%month%a = INT(FLOOR(SPLINE(%workspace%\%variable%_%month%p, VALUE, REGULARIZED, 0.5, 8) * 100 + 0.5))
+				&ty
+				
+				setwindow -15 -90 180 90
+				setmask off
+				setcell %mask%
+				
+				&ty   Interpolating right part of the surface
+				&if [exists %workspace%\%variable%_%month%b -grid] &then &ty Interpolated grid exists
+				&else %workspace%\%variable%_%month%b = INT(FLOOR(SPLINE(%workspace%\%variable%_%month%p, VALUE, REGULARIZED, 0.5, 8) * 100 + 0.5))
+				&ty
+				
+				setwindow -180 -60 0 90 %mask%
+				setmask %mask%
+				setcell %mask%
+				
+				&ty   Cutting left part of the surface
+				&if [exists %workspace%\%variable%_%month%_l -grid] &then kill %workspace%\%variable%_%month%_l all
+				%workspace%\%variable%_%month%_l = %workspace%\%variable%_%month%a
+				&if [exists %workspace%\%variable%_%month%a -grid] &then kill %workspace%\%variable%_%month%a all
+				&ty
+				
+				setwindow 0 -60 180 90 %mask%
+				setmask %mask%
+				setcell %mask%
+				
+				&ty   Cutting right part of the surface
+				&if [exists %workspace%\%variable%_%month%_r -grid] &then kill %workspace%\%variable%_%month%_r all
+				%workspace%\%variable%_%month%_r = %workspace%\%variable%_%month%b
+				&if [exists %workspace%\%variable%_%month%b -grid] &then kill %workspace%\%variable%_%month%b all
+				&ty
+				
+				setwindow -180 -60 180 90 %mask%
+				setmask %mask%
+				setcell %mask%
+				
+				&ty   Merging both sides of the grid
+				&if [exists %workspace%\%variable%_%month% -grid] &then kill %workspace%\%variable%_%month% all
+				%workspace%\%variable%_%month% = MERGE(%workspace%\%variable%_%month%_l, %workspace%\%variable%_%month%_r)
+				&if [exists %workspace%\%variable%_%month%_r -grid] &then kill %workspace%\%variable%_%month%_r all
+				&if [exists %workspace%\%variable%_%month%_l -grid] &then kill %workspace%\%variable%_%month%_l all
+				&ty
+				
+				&ty   Copying to output directory
+				&if [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -GRID] &then kill %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% all
+				COPY %workspace%\%variable%_%month% %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month%
+				&if [exists %workspace%\%variable%_%month% -grid] &then kill %workspace%\%variable%_%month% all
+				
+				&label noproc
+				&if [exists %workspace%\%variable%_%month%p -COVERAGE] &then kill %workspace%\%variable%_%month%p all
+				
+				&if [show program] EQ GRID &then QUIT
+				
+			&end
 		&end
 	&end
 &end
-QUIT
+
 &if [exists log -file] &then &sys del log
 w %rootdir%
 &if [exists log -file] &then &sys del log
