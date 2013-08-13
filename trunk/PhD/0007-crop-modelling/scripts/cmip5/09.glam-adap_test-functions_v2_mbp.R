@@ -1,7 +1,7 @@
 #Julian Ramirez-Villegas
 #UoL / CIAT / CCAFS
 #Initially created for eljefe type systems on Dec 2012
-#Modified 12 Dec for ARC1
+#Modified 12 Dec for MBP
 
 run_group_adap <- function(j) {
   #source functions of interest
@@ -14,7 +14,7 @@ run_group_adap <- function(j) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
-  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_ARC1.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_mbp.R",sep=""))
   
   this_loc <- groupingList$LOC[j]
   this_pst <- groupingList$PARSET[j]
@@ -65,14 +65,14 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
   source(paste(src.dir,"/glam/glam-make_wth.R",sep=""))
   source(paste(src.dir,"/glam/glam-optimise-functions.R",sep=""))
   source(paste(src.dir,"/signals/climateSignals-functions.R",sep=""))
-  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_ARC1.R",sep=""))
+  source(paste(src.dir,"/cmip5/09.glam-adap_test-functions_v2_mbp.R",sep=""))
   
   #input directories and model
   cropName <- ENV_CFG$CROP_NAME
   cDir <- paste(ENV_CFG$BDIR,"/model-runs/",toupper(ENV_CFG$CROP_NAME),sep="")
   
   #here construct a control file folder
-  ctrl_dir <- paste("~/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
+  ctrl_dir <- paste("~/PhD-work/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
   if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir,recursive=T)}
   ctrl_fil <- paste(ctrl_dir,"/",RUN_CFG$PERIOD,"_loc-",RUN_CFG$LOC,"_",RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,".proc",sep="")
   
@@ -400,7 +400,7 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   
   #input directories and model
   execName <- paste("glam-",tolower(cropName),sep="")
-  binDir <- "~/glam/bin/glam-linux"
+  binDir <- "~/PhD-work/glam/bin/glam-osx"
   glam_cmd <- paste(paste("./",execName,sep=""),paste("filenames-",tolower(cropName),"-run.txt",sep=""))
   
   #output directories
@@ -862,4 +862,3 @@ GLAM_adap_run_loc <- function(GLAM_params,RUN_setup,iratio=0,subdir="r1") {
   }
   return(out_all)
 }
-
