@@ -34,7 +34,7 @@ cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/
 
 #run R in batch for desired stuff
 #R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /dev/tty
-R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /nobackup/eejarv/outfiles/out_${HOST}_${PID}.out
+R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /nobackup/eejarv/outfiles/out_${THOST}_${PID}.out
 
 #remove junk
 #rm -f /nobackup/eejarv/outfiles/out_${THOST}_${PID}.out
