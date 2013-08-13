@@ -27,7 +27,7 @@ ver <- "v6"
 runs_name <- "cmip5_all"
 adap_name <- "cmip5_adapt"
 maxiter <- 15 #to grab last optim values
-scratch <- "/nobackup/eejarv"
+scratch <- "/scratch/eejarv"
 use_scratch <- T
 
 #base and data directories
