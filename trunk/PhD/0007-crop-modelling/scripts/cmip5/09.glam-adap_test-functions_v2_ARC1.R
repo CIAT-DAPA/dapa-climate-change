@@ -73,7 +73,7 @@ glam_adap_run_wrapper <- function(RUN_CFG) {
   
   #here construct a control file folder
   #out_bdir <- paste(bDir,"/model-runs/",toupper(cropName),"/runs/cmip5_hist",sep="")
-  ctrl_dir <- paste("~/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
+  ctrl_dir <- paste("/nobackup/eejarv/workspace/cmip5_adap/_process/exp-",RUN_CFG$PARSET,"_",RUN_CFG$SCE,sep="")
   if (!file.exists(ctrl_dir)) {dir.create(ctrl_dir,recursive=T)}
   ctrl_fil <- paste(ctrl_dir,"/",RUN_CFG$PERIOD,"_loc-",RUN_CFG$LOC,"_",RUN_CFG$WTYPE,"_",RUN_CFG$CO2_P,".proc",sep="")
   

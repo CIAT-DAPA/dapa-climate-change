@@ -106,6 +106,6 @@ cat("XXXXXXXXXXXXXXXXXXXXXX\n")
 
 #copy the output data from this folder /nfs/a17/eejarv
 system(paste("scp -r ", ENV_CFG$ARCONE.DIR, " see-gw-01:",adapDir,"/cmip5_adapt_arc1",sep=""))
-system(paste("scp -r ~/workspace/cmip5_adap/_process/exp-",expSel,"_",gcmList, " see-gw-01:",adapDir,"/cmip5_adapt_arc1/_process",sep=""))
+system(paste("scp -r /nobackup/eejarv/workspace/cmip5_adap/_process/exp-",expSel,"_",gcmList, " see-gw-01:",adapDir,"/cmip5_adapt_arc1/_process",sep=""))
 
 
