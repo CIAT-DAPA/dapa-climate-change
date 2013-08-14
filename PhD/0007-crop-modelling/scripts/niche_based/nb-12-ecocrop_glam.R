@@ -116,6 +116,37 @@ if (!file.exists(paste(syDir,"/input_EcoCrop_suitability.csv",sep=""))) {
   sbar_all <- read.csv(paste(syDir,"/input_EcoCrop_suitability.csv",sep=""))
 }
 
+
+
+############################################################
+############################################################
+############################################################
+#testing work out the non-linear least squares
+#all commented out for clarity
+# reg_data <- data.frame(PROD=ynor_all$EXP.MEAN, SUIT=sbar_all$RUN.MEAN)
+# reg_data <- reg_data[which(!is.na(reg_data$SUIT)),]
+# 
+# #nls_reg <- nls(PROD ~ SUIT / (SUIT + exp(-b*SUIT)), data=reg_data, 
+# #nls_reg <- nls(PROD ~ a + b / (SUIT + 1), data=reg_data, 
+# #nls_reg <- nls(PROD ~ exp(SUIT / b + a), data=reg_data, 
+# #nls_reg <- nls(PROD ~ a + log(b*SUIT + 1), data=reg_data,
+# nls_reg <- nls(PROD ~ a + b*SUIT, data=reg_data,
+#                start = list(a=0, b=0))
+# 
+# prd_data <- predict(nls_reg, data.frame(SUIT=seq(0,100,by=1)))
+# eva_data <- predict(nls_reg, reg_data)
+# cor.test(reg_data$PROD, eva_data)
+# 
+# plot(reg_data$SUIT,reg_data$PROD,ylim=c(0,1),xlim=c(0,100),pch=20,
+#      xlab="Suitability (%)",ylab="GLAM yield * area (normalised)")
+# lines(seq(0,100,by=1), prd_data, col="red")
+# grid()
+############################################################
+############################################################
+############################################################
+
+
+
 ###qqplot
 tiff(paste(syDir,"/qqplot_suit_vs_yield.tiff",sep=""),res=300,pointsize=10,
      width=1900,height=1700,units="px",compression="lzw")
