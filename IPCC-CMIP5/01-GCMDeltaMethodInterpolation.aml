@@ -48,7 +48,8 @@
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 &ty
 
-arc w %workspace%
+/* arc w %workspace%
+&workspace %workspace%
 
 &do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 	
@@ -74,7 +75,6 @@ arc w %workspace%
 				&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
 				&if [exists %workspace%\%variable%_%month%p -COVERAGE] &then kill %workspace%\%variable%_%month%p all
 				
-				/* copy %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% %variable%_%month%
 				SHAPEARC %inputdir%\%rcp%\%modname%\%ensemble%\anomalies_1975s\%ts%\%variable%_%month%.shp %workspace%\%variable%_%month%p
 				&if [exists %workspace%\%variable%_%month% -GRID] &then kill %workspace%\%variable%_%month% all
 				&if [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%\%variable%_%month% -grid] &then &goto noproc
