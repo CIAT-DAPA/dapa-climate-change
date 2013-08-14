@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$ -l h_rt=03:00:00
+#$ -l h_rt=04:00:00
 #$ -l h_vmem=1G
 #$ -l cputype=intel
 #$ -cwd -V
@@ -35,6 +35,7 @@ cp -vf ~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts/
 R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R /nobackup/eejarv/outfiles/out_${THOST}_${PID}.out
 
 #remove junk
+rm -vf ~/workspace/cmip5_adap/process_${THOST}_${PID}/run.R
 rm -f /nobackup/eejarv/outfiles/out_${THOST}_${PID}.out
 rm -rf ~/workspace/localcopy/copy_${THOST}_${PID}
 
