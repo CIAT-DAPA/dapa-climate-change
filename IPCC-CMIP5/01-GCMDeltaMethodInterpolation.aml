@@ -147,5 +147,5 @@
 &end
 
 &if [exists log -file] &then &sys del log
-w %rootdir%
+&s workspace  %rootdir%
 &if [exists log -file] &then &sys del log
