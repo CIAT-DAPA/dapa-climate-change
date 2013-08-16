@@ -12,6 +12,32 @@ require(sp)
 # rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
 
 
+### Parameters ###
+# source("00-monthly-data-functions.R")
+# rcp <- "historical"
+# rcp <- "rcp26"
+# rcp <- "rcp45"
+# rcp <- "rcp60"
+# rcp <- "rcp85"
+# ens <- "r1i1p1"
+# basePer <- "1961_1990"
+# baseDir <- "T:/gcm/cmip5/raw/monthly"
+# 
+# otp <- GCMTmpCalc(rcp, baseDir)
+# otp <- GCMAverage(rcp, baseDir)
+# otp <- GCMAnomalies(rcp, baseDir, ens, basePer)
+# otp <- GCMSummary(baseDir, ens)
+# 
+# basePer <- "1975s"
+# basePer <- "1985s"
+# otp <- GCMEnsembleAnom(baseDir, ens, basePer)
+# 
+# imageDir <- "T:/gcm/cmip5/baseinfo/inventory"
+# baseDir <- "T:/gcm/cmip5/raw/monthly"
+# ens <- "r1i1p1"
+# otp <- GCMVerification(baseDir, ens, imageDir)
+
+
 #####################################################################################################
 # Description: This function is to calcute tmax or tmin if it is possible
 #####################################################################################################
