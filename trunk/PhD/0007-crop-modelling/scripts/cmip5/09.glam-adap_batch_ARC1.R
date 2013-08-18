@@ -27,9 +27,14 @@ ver <- "v6"
 runs_name <- "cmip5_all"
 adap_name <- "cmip5_adapt"
 maxiter <- 15 #to grab last optim values
-scratch <- "/nobackup/eejarv" #paste("/scratch/eejarv/process_",,sep="")
+scratch <- paste("/scratch/eejarv/process_",gcm_id,"_",exp_id,"_",lim_a,sep="") #"/nobackup/eejarv"
 use_scratch <- T
-#if (use_scratch & !file.exists(scratch)) {dir.create(scratch,recursive=T)}
+
+#check and create scratch as needed
+if (use_scratch) {
+  if (file.exists(scratch)) {system(paste("rm -rf ",scratch,sep=""))}
+  dir.create(scratch, recursive=T)
+} 
 
 #base and data directories
 bDir <- "/nfs/a17/eejarv/PhD-work/crop-modelling"
@@ -100,5 +105,6 @@ cat("TIME ELAPSED:",tima,"\n")
 cat("XXXXXXXXXXXXXXXXXXXXXX\n")
 #end
 
-
+#remove scratch again
+if (use_scratch) {if (file.exists(scratch)) {system(paste("rm -rf ",scratch,sep=""))}}
 
