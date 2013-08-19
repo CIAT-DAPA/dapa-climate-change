@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$ -l h_rt=03:00:00
+#$ -l h_rt=04:00:00
 #$ -l h_vmem=1G
 #$ -l cputype=intel
 #$ -cwd -V
