@@ -4,7 +4,6 @@
 #$ -l h_vmem=1G
 #$ -l cputype=intel
 #$ -cwd -V
-#$ -m be
 
 LIM_A=$1
 GCM_ID=$2
