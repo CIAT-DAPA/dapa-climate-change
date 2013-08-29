@@ -8,7 +8,7 @@ library(raster)
 #src.dir <- "~/Repositories/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0007-crop-modelling/scripts"
 
-source(paste(src.dir,"/cmip5/10.glam-summarise_adap_runs-functions.R",sep=""))
+source(paste(src.dir,"/cmip5/10.glam-summarise_adap_runs-functions_v2.R",sep=""))
 
 #configuration details
 cropName <- "gnut"
@@ -70,15 +70,6 @@ collate_this <- function(gcm_i) {
 }
 
 
-collate_this(14) #1 to 14
+collate_this(10) #1 to 13
 
-# xt = x / (x+z)
-# z <- 50
-# x <- seq(0.5,1000,by=0.1)
-# xt <- x / (x+z)
-# yt <- (x-min(x)) / (max(x)-min(x))
-# zt <- (max(x)-x) / (max(x)-min(x))
-# plot(x,xt,ty="l",ylim=c(0,1))
-# plot(x,yt,ty="l",ylim=c(0,1))
-# plot(x,zt,ty="l",ylim=c(0,1))
 
