@@ -83,24 +83,50 @@ for model in modelList:
 						# Splitting the initial file into yearly files
 						os.system("cdo splityear " + merNc + " " + mthDir + "/" +  varList[var] + "_")				
 						
-						# Splitting the yearly file into monthly files and copying into the multiyr_path folder
-						ncYrList = sorted(glob.glob(mthDir + "\\" + "*.nc"))
-						for ncYr in ncYrList:
-							
-							# Create folder by year
-							year = os.path.basename(ncYr).split("_")[1][:-3]
+						if not model.split("_")[0] = "gfdl":
 						
-							print "\tSplit monthly ", rcp, model, ens, var, os.path.basename(ncYr).split("_")[1][:-3]
-							if int(year) < 1950:
-
-								yrDir = mthDir + "\\" + year
-								if not os.path.exists(yrDir):
-									os.system("mkdir " + yrDir)
+							# Splitting the yearly file into monthly files and copying into the multiyr_path folder
+							ncYrList = sorted(glob.glob(mthDir + "\\" + "*.nc"))
+							for ncYr in ncYrList:
 								
-								# Split month function
-								os.system("cdo splitmon " + ncYr + " " + yrDir + "/" + varList[var] + "_")
+								# Create folder by year
+								year = os.path.basename(ncYr).split("_")[1][:-3]
 							
-							os.remove(ncYr)
+								print "\tSplit monthly ", rcp, model, ens, var, os.path.basename(ncYr).split("_")[1][:-3]
+								if int(year) < 1950:
+
+									yrDir = mthDir + "\\" + year
+									if not os.path.exists(yrDir):
+										os.system("mkdir " + yrDir)
+									
+									# Split month function
+									os.system("cdo splitmon " + ncYr + " " + yrDir + "/" + varList[var] + "_")
+								
+								os.remove(ncYr)
+					
+						else: 
+							
+							# Splitting the yearly file into monthly files and copying into the multiyr_path folder
+							ncYrList = sorted(glob.glob(mthDir + "\\" + "*.nc*"))
+							for ncYr in ncYrList:
+								
+								# Create folder by year
+								year = os.path.basename(ncYr).split("_")[1][:-4]
+							
+								print "\tSplit monthly ", rcp, model, ens, var, os.path.basename(ncYr).split("_")[1][:-3]
+								if int(year) < 1950:
+
+									yrDir = mthDir + "\\" + year
+									if not os.path.exists(yrDir):
+										os.system("mkdir " + yrDir)
+									
+									# Split month function
+									os.system("cdo splitmon " + ncYr + " " + yrDir + "/" + varList[var] + "_")
+									ncMtList = sorted(glob.glob(yrDir + "\\" + varList[var] + "*.nc2"))
+									for ncMt in ncMtList:
+										os.rename(ncMt, ncMt[:-1])
+								
+								os.remove(ncYr)
 					
 				# Write check txt file (one per model-ensemble)
 				checkFile = open(checkFile, "w")
@@ -108,5 +134,6 @@ for model in modelList:
 				checkFile.close()
 		
 			print "\tProcess done for ", rcp, model, ens, "\n"
-							
+				
+				
 print "Process done!"
