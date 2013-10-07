@@ -62,8 +62,13 @@ all_runs <- expand.grid(ALG=modList,NPA=npaList,VSET=varList$SET_ID,SEED=seedLis
 null_runs <- expand.grid(ALG=modList,NPA=npaList,SEED=seedList)
 
 #species name and configuration of run
-this_sppName <- "Jaca_cauc" #species name
 
+this_sppName <- "Mint_moll" #species name
+
+##### above this load for all
+
+
+# #### the below loop is not needed once the null models are done
 # #null model fits
 # for (run_i in 1:nrow(null_runs)) {
 #   #run_i <- 1 #23
@@ -72,8 +77,16 @@ this_sppName <- "Jaca_cauc" #species name
 #   this_npa <- as.numeric(paste(null_runs$NPA[run_i])) #number of pseudo absences (from list)
 #   odir <- run_null_model(bDir,sppName=this_sppName,alg=this_alg,seed=this_seed,npa=this_npa)
 # }
+# #### only for null models
 
-mod <- "GLM"
+
+
+####################################################################################################
+####################################################################################################
+### after this point you need to change both Species and Model
+
+#### from here for actual fits
+mod <- "GBM" #change!
 truns <- which(all_runs$ALG == mod)
 
 #actual model runs
@@ -94,8 +107,6 @@ for (run_i in truns) {
 #70/30 instead of 75/25 for training/testing #done
 #background size of 14285 so that training background is 10000 (Maxent's default) #done
 #------------------
-
-
 
 #########################################################################
 #########################################################################
