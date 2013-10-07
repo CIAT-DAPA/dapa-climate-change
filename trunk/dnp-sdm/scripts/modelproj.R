@@ -42,7 +42,8 @@ seedList <- c(3379, 5728, 3781, 3590, 3266, 9121, 3441, 11667, 4484, 9559)
 npaList <- c(3829, 1922, 1945, 5484, 2125, 8746, 2187, 1521, 9623, 1561)
 
 #list of models
-modList <- c('GLM','GAM','GBM','RF','ANN','MAXENT')
+# modList <- c('GAM','GBM','RF','ANN','MAXENT')
+modList <- c('GAM','GBM','MAXENT')
 
 #experimental matrix
 all_runs <- expand.grid(ALG=modList,NPA=npaList,VSET=varList$SET_ID,SEED=seedList)
@@ -65,14 +66,17 @@ for (i in 1:length(sceList)) {
 mList <- cbind(ID=paste("CLM_",1:nrow(mList),sep=""),mList)
 
 #species name and configuration of run
-this_sppName <- "Bixa_orel" #species name
+this_sppName <- "Boro_pati" #species name
 
 mod <- "MAXENT"
 truns <- all_runs$ID[which(all_runs$ALG == mod)]
 
+# no knowledge selection o 100 models
+rand <- sample(1:800,100,replace=F)
+
 #actual model runs
-for (run_i in truns) {
-  #run_i <- truns[1] #23
+for (i in 1:100) {
+  run_i <- truns[rand[i]] #23
   this_seed <- as.numeric(paste(all_runs$SEED[which(all_runs$ID == run_i)])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[which(all_runs$ID == run_i)])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[which(all_runs$ID == run_i)]) #modelling algorithm
