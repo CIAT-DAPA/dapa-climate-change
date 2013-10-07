@@ -13,7 +13,6 @@ stop("dont run")
 #   to be able to use Hijmans 2012 Ecology ssb AUC correction)
 #6. run a particular algorithm, evaluate, store eval output
 #   configuration in Maxent: probably 10k PA)
-#end loop cross-val
 
 ##############################
 ##############################
@@ -41,21 +40,28 @@ modList <- c('GLM','GAM','GBM','RF','ANN','MAXENT')
 all_runs <- expand.grid(ALG=modList,NPA=npaList)
 
 #species name and configuration of run
-this_sppName <- "Jaca_cauc" #species name
+
+#spp_all <- c("Bixa_orel","Boro_pati","Caes_spin", "Cres_cuje","Geni_amer",
+#             "Indi_suff","Jaca_cauc","Just_pect","Lipp_alba","Mint_moll",
+#             "Myro_bals","Oeno_batu","Smil_moll")
+#for (this_sppName in spp_all) {
+
+this_sppName <- "Just_pect" #species name
 
 #this is the loop for the runs
-for (run_i in 1:nrow(all_runs)) {
-  #run_i <- 4 #23
-  this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
-  this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
-  odir <- run_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg)
-}
+# for (run_i in 1:nrow(all_runs)) {
+#   #run_i <- 4 #23
+#   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
+#   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
+#   odir <- run_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg)
+# }
+
 
 
 #projection of models
 for (run_i in 1:nrow(all_runs)) {
   #run_i <- 4 #23
-  this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
+  this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #numqber of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   odir <- proj_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg) 
 }

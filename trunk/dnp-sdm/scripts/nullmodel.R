@@ -27,7 +27,9 @@ bDir <- "/nfs/a102/eejarv/DNP-biodiversity"
 setwd(bDir)
 
 #source functions
-source(paste(bDir,"/scripts/modelfit-fun.R",sep=""))
+src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/dnp-sdm"
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/dnp-sdm"
+source(paste(src.dir,"/scripts/modelfit-fun.R",sep=""))
 
 #seeds to draw presences and pseudo absences (bootstraps)
 seedList <- c(3379,5728,3781,3590,3266,9121,3441,11667,4484,9559)
@@ -39,7 +41,7 @@ npaList <- c(100, 250, 500, 750, 1000, 2000, 4000, 6000, 8000, 10000)
 all_runs <- expand.grid(NPA=npaList,SEED=seedList)
 
 #species name and configuration of run
-this_sppName <- "bixa_final" #species name
+this_sppName <- "Boro_pati" #species name
 
 #### 
 #some testing runs
