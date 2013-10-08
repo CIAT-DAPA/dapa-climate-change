@@ -17,7 +17,7 @@ import os, sys, string, glob, shutil
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 00-split-monthly-raw-data-preindustrial.py T:\gcm\cmip5\raw\monthly historical"
+	print "   - ie: python 00-split-monthly-raw-data-preindustrial.py \\dapadfs\data_cluster_2\gcm\cmip5\raw\monthly historical"
 	sys.exit(1)
 
 # Define arguments
@@ -33,7 +33,7 @@ print "   Prepare Monthly CMIP5 raw files    "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 # Define variables, rcp's and ensemble members
-varList = {"tas": "tmean", "tasmax": "tmax", "tasmin": "tmin"} # "pr": "prec", "rsds": "rsds", "hur": "hur", "sfcWind": "wsmean"}
+varList = {"tas": "tmean", "pr": "prec", "tasmax": "tmax", "tasmin": "tmin"} #, "rsds": "rsds", "hur": "hur", "sfcWind": "wsmean"}
 # rcpList = "historical", "rcp26", "rcp45", "rcp60", "rcp85"
 # ens = "r1i1p1"
 
@@ -83,7 +83,7 @@ for model in modelList:
 						# Splitting the initial file into yearly files
 						os.system("cdo splityear " + merNc + " " + mthDir + "/" +  varList[var] + "_")				
 						
-						if not model.split("_")[0] = "gfdl":
+						if not model.split("_")[0] == "gfdl":
 						
 							# Splitting the yearly file into monthly files and copying into the multiyr_path folder
 							ncYrList = sorted(glob.glob(mthDir + "\\" + "*.nc"))
@@ -124,6 +124,8 @@ for model in modelList:
 									os.system("cdo splitmon " + ncYr + " " + yrDir + "/" + varList[var] + "_")
 									ncMtList = sorted(glob.glob(yrDir + "\\" + varList[var] + "*.nc2"))
 									for ncMt in ncMtList:
+										if os.path.exists(ncMt[:-1]):
+											os.remove(ncMt[:-1])
 										os.rename(ncMt, ncMt[:-1])
 								
 								os.remove(ncYr)
