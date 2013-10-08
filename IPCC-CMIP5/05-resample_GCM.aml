@@ -1,0 +1,67 @@
+&args inputfolder outputfolder resolution method
+&terminal 9999
+/*&sys cls
+&messages &off
+
+&if [null %inputfolder%] OR [null %outputfolder%] OR [null %resolution%] or [null %method%] &then
+	&do
+		&ty
+		&ty Incorrect command syntax
+		&ty
+		&ty Run the command as: '&RUN INPUT_FOLDER OUTPUT_FOLDER RESOLUTION METHOD'
+		&ty
+		&ty INPUT_FOLDER:   Folder where your grids are located
+		&ty
+		&ty OUTPUT_FOLDER:  Folder where your output grids
+		&ty                 will be located.
+		&ty
+		&ty RESOLUTION:     Resolution in arc-minutes at which
+		&ty                 you want your output grids
+		&ty
+		&ty METHOD:         Resampling method (BILINEAR, CUBIC,
+		&ty                 NEAREST, SEARCH). NEAREST is default
+		&ty
+		&return
+	&end
+
+&if [show program] NE GRID &then GRID
+
+&amlpath .
+&s basedir [show &amlpath]
+
+&if not [exists %outputfolder% -dir] &then &sys md %outputfolder%
+
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+&ty          /\/\/\/\GCM MODELS RESAMPLE/\/\/\/\
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+&s gridlist [listfile %inputfolder%\tm* -grid %outputfolder%\listgrids.list]
+&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
+
+&if %OPENSTATUS% NE 0 &then
+	&do
+		&ty
+		&ty The file %basedir%\listgrids.list does not exist or cannot be opened
+		&return
+	&end
+&else
+	&do
+		&do i = 1 &to %gridlist%
+			&s gridname [READ %openlist% READSTATUS]
+			
+			&s res [calc %resolution% / 60]
+			
+			&ty
+			&ty   -> .Processing %gridname%
+			
+			&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname% all /* &ty Output grid exists
+			%outputfolder%\%gridname% = RESAMPLE(%inputfolder%\%gridname%, %res%, %method%)
+		&end
+	&end
+&s closefile [close %openlist%]
+&if [show program] EQ GRID &then QUIT
+
+&if [exists %outputfolder%\listgrids.list -file] &then &sys del %outputfolder%\listgrids.list
+&if [exists %basedir%\log -file] &then &sys del %basedir%\log
+&ty
+&ty Process done!
