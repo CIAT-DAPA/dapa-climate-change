@@ -36,7 +36,7 @@ require(sp)
 # baseDir <- "T:/gcm/cmip5/raw/monthly"
 # ens <- "r1i1p1"
 # otp <- GCMVerification(baseDir, ens, imageDir)
-
+# otp <- GCMAnomaliesYearly(rcp, baseDir, ens, basePer, outDir)
 
 #####################################################################################################
 # Description: This function is to calcute tmax or tmin if it is possible
@@ -749,4 +749,230 @@ GCMVerification <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1
   }
   setwd("D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5")
   return("GCM Verification done!")
+}
+
+
+
+#################################################################################################################
+# Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
+#################################################################################################################
+GCMAnomaliesYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1971_2000", outDir="G:/cenavarro/Request/urippke") {
+  
+  cat(" \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat("XXXXXXXXX GCM ANOMALIES YEARLY CALCULATION XXXXXXXX \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat(" \n")
+  
+  # List of variables and months
+  varList <- c("prec", "tmax", "tmin")
+
+  # Get a list of month with and withour 0 in one digit numbers
+  monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+  monthListMod <- c(1:12)
+  
+  # Set number of days by month
+  ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+  
+  # Combirn number of month and days in one single data frame
+  ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
+  names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
+  
+  
+  curDir <- paste(baseDir, "/historical", sep="")
+  futDir <- paste(baseDir, "/", rcp, sep="")
+  
+  gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
+
+  # Loop around gcms and ensembles
+  for (i in 1:nrow(gcmStats)){
+    
+    # Don't include variables without all three variables
+    if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
+      
+      if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
+        
+        # Get gcm and ensemble names
+        gcm <- paste(as.matrix(gcmStats)[i,2])
+  
+          
+        #   gcmList <- list.dirs(curDir, recursive = FALSE, full.names = FALSE)
+        #   for (gcm in gcmList) {
+            
+        # Get gcm names    
+        # gcm <- basename(gcm)
+        
+        # Path of each ensemble
+        curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
+        
+        # Average directory
+        curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
+        
+        # periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+        
+        for (year in 2006:2099) {
+          
+          # Define start and end year
+          #staYear <- as.integer(period)
+          #endYear <- as.integer(period) + 29
+          
+          futMthDir <- paste(futDir, "/", gcm, "/", ens, "/monthly-files/", year, sep="")
+          
+          if (file.exists(futMthDir)){
+            
+            if (file.exists(curAvgDir)){
+              
+              cat("\t Anomalies over: ", rcp, " ", gcm, " ", ens, " ", year," \n\n")
+              
+              # Create anomalies output directory 
+              if (basePer == "1961_1990"){
+                
+                anomDir <- paste(outDir, "/anomalies_1975s_yearly/", gcm, "/", ens, "/", year, sep="")
+                            
+              } else if (basePer == "1971_2000") {
+                
+                anomDir <- paste(outDir, "/anomalies/", rcp, "/", gcm, "/", ens, "/", year, sep="")
+                            
+              }
+              
+              
+              if (!file.exists(anomDir)) {dir.create(anomDir, recursive = TRUE)}
+                        
+              # Loop around variables
+              for (var in varList) {
+                
+                # Loop around months
+                for (mth in monthList) {
+                  
+                  mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+                  
+                  outNc <- paste(anomDir, "/", var, "_", mthMod, ".nc", sep="")
+                  if (!file.exists(outNc)) {
+                    
+                    curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mthMod, ".nc", sep="")) ##variables in mm and deg
+                    futMthNc <- raster(paste(futMthDir, "/", var, "_", mth, ".nc", sep=""))
+                    
+                    # Create a stack of list of NC, rotate and convert units in mm/monnth and deg celsious
+                    if (var == "prec"){
+                      
+                      daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
+                      futMthNc <- rotate(futMthNc) * 86400 * (daysmth)
+                      
+                    } else {
+                      
+                      futMthNc <- rotate(futMthNc) - 272.15
+                    }
+                    
+                    
+                    anomNc <- futMthNc - curAvgNc
+                    
+                    # resAnomNc  <- resample(anomNc, rs, method='ngb')                
+                    
+                    rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90, ncols=720, nrows=360)
+                    anomNcExt <- setExtent(anomNc, extent(rs), keepres=FALSE, snap=TRUE)
+                    resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')
+                    
+                    anomNc <- writeRaster(resAnomNcExt, outNc, format='CDF', overwrite=TRUE)
+                    
+                    
+                    cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")
+                    
+                  } else {cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")}
+                  
+                }    
+              } 
+            }  
+          }  
+        }
+      }
+    }
+  }
+  cat("GCM Anomalies Process Done!")
+}
+
+#################################################################################################################
+# Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
+#################################################################################################################
+GCMCalcFutureYearly <- function(rcp='rcp45', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1971_2000", outDir="G:/cenavarro/Request/urippke", cruDir="S:/data/observed/gridded_products/cru-ts-v3-21") {
+  
+  cat(" \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat("XXXXXXXXX GCM FUTURE CALC YEARLY CALCULATION XXXXXXXX \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat(" \n")
+  
+  # List of variables and months
+  varList <- c("prec", "tmax", "tmin")
+  
+  # Get a list of month with and withour 0 in one digit numbers
+  monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+  monthListMod <- c(1:12)
+  
+  # Set number of days by month
+  ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+  
+  # Combirn number of month and days in one single data frame
+  ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
+  names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
+          
+  gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
+  
+  # Loop around gcms and ensembles
+  for (i in 1:nrow(gcmStats)){
+    
+    # Don't include variables without all three variables
+    if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
+      
+      if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
+        
+        # Get gcm and ensemble names
+        gcm <- paste(as.matrix(gcmStats)[i,2])
+        
+        cat("\tFuture Calcs over: ", rcp, " ", gcm, " ", ens, " \n\n")
+        
+        # Loop around months
+        for (mth in monthList) {
+          
+          mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+          
+          # Loop around variables
+          for (var in varList) {
+            
+            if (!file.exists(paste(outDir, "/future/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mthMod, ".asc", sep=""))){
+              
+              year <- 2006:2099
+              cruAsc <- raster(paste(cruDir, "/30yr_averages/", basePer, "/", var, "_", mthMod, ".asc", sep=""))
+              anomDir <- paste(outDir, "/anomalies/", rcp, "/", gcm, "/", ens, sep="")
+              anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mthMod, ".nc", sep=""),FUN=raster)
+              anomNc <- stack(anomNc)
+              outFut <- cruAsc + anomNc
+              ext <- extent(-26, 64, -47, 38)
+              outFut <- crop(outFut, ext)
+              
+              
+              if (var == "prec"){outFut[][outFut[]<0]=0}
+              
+              for (i in 1:dim(outFut)[[3]]){
+                
+                futDir <- paste(outDir, "/future/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
+                if (!file.exists(futDir)) {dir.create(futDir, recursive = TRUE)}
+                
+                futTif <- paste(futDir, "/", var, "_", mthMod, ".tif", sep="")
+                
+                
+                if (!file.exists(futTif)) {
+                  
+                  outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=FALSE)
+                                    
+                  cat(" .> ", paste("\t ", var, "_", mthMod, " ", year[i], sep=""), "\tdone!\n")
+                }  else {cat(" .> ", paste("\t ", var, " ", mthMod, " ", year[i], sep=""), "\tdone!\n")}
+  
+              }
+            }
+          }
+        }  
+      }
+    }
+  } 
+cat("GCM Future Calcs Process Done!")
 }
