@@ -3,6 +3,8 @@
 /* Modified by Carlos Navarro
 /* CIAT, Cali, Colombia, August 2013
 
+/* &r 02-GCMDeltaMethodWCLCalc.aml T:\gcm\cmip5\interpolations T:\gcm\cmip5\downscaled rcp60 bcc_csm1_1 r1i1p1 D:\jetarapues\cmip5_process\masks\mask30s D:\jetarapues\cmip5_process\wcl30s D:\jetarapues\cmip5_process
+
 &args inputdir outdir rcp modname ensemble mask wcldir tmpdir
 &terminal 9999
 &sys cls
@@ -16,11 +18,11 @@
 		&ty Incorrect command syntax, please use
 		&ty <INPUT_DIR> <OUTPUT_DIR> <RCP> <MODNAME> <ENSEMBLE> <MASK> <WCL_DIR> <TEMPORAL_DIR>
 		&ty INPUT_DIR should contain folders of models
-		&ty MODNAME name of model
 		&ty OUTPUT_DIR dirout in final storage system
-		&ty MASK should be both name and path of to the mask
 		&ty RCP Representative Concentration Pathways
+		&ty MODNAME name of model
 		&ty ENSEMBLE Ensemble member
+		&ty MASK should be both name and path of to the mask
 		&ty WCL_DIR should contain current monthly grids
 		&ty TEMPORAL_DIR is a local folder where calculations will be done
 		&ty
@@ -31,7 +33,6 @@
 &s rootdir [show &amlpath]
 
 &s workspace %tmpdir%\%rcp%_%modname%
-
 &if not [exists %workspace% -DIR] &then &sys md %workspace%
 
 &ty
@@ -40,101 +41,107 @@
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 &ty
 			
-&do ts &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
+&do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 
 	&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\%modname%\%ensemble%\%ts%
-	&do 
-		&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%_deltamethod_wclcalc_done.txt -file] &then
-		&do
+	
+	&if not [exists %outdir%\%rcp%\%modname%\%ensemble%\%ts%_deltamethod_wclcalc_done.txt -file] &then
+	&do
 
-				/* Input Grids 
-				
-				&s tmin_c = %wcldir%\tmin_
-				&s tmax_c = %wcldir%\tmax_
-				&s prec_c = %wcldir%\prec_
-				&s dtn = %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\tmin_
-				&s dtx = %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\tmax_
-				&s dpr = %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\prec_
+		/* Input Grids 
+		
+		&s tmin_c = %wcldir%\tmin_
+		&s tmax_c = %wcldir%\tmax_
+		&s prec_c = %wcldir%\prec_
+		&s dtn = %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\tmin_
+		&s dtx = %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\tmax_
+		&s dpr = %inputdir%\%rcp%\%modname%\%ensemble%\%ts%\prec_
 
-				/* Output grids
+		/* Output grids
 
-				&s tmin_m = %workspace%\tmin_ 
-				&s tmax_m = %workspace%\tmax_ 
-				&s prec_m = %workspace%\prec_ 
-				&s tmean_m = %workspace%\tmean_ 
+		&s tmin_m = %workspace%\tmin_ 
+		&s tmax_m = %workspace%\tmax_ 
+		&s prec_m = %workspace%\prec_ 
+		&s tmean_m = %workspace%\tmean_ 
 
-				&ty
-				&ty Model %modname% (%rcp%, %ensemble%, %ts%)
-				&ty
+		&ty
+		&ty Model %modname% (%rcp%, %ensemble%, %ts%)
+		&ty
+	
+		&if [show program] NE GRID &then GRID
+		&workspace %workspace%
+		
+		&do i = 1 &to 12
+
+			&ty
+			&ty   ->.Processing month %i%
+
+			setwindow %mask%
+			setmask %mask%
+			setcell %mask%
+
+			&ty        Processing minimum temperature
+			/* &if [exist %tmin_m%%i% -grid] &then &ty Grid exists /*kill %tmin_m%%i% all
+			%tmin_m%%i% = int(floor((%tmin_c%%i% + %dtn%%i% * 0.1) + 0.5))
 			
-				&if [show program] NE GRID &then GRID
-				&workspace %workspace%
-				
-				&do i = 1 &to 12
+			&ty        Processing maximum temperature
+			/* &if [exist %tmax_m%%i% -grid] &then &ty Grid exists /*kill %tmax_m%%i% all
+			%tmax_m%%i% = int(floor((%tmax_c%%i% + %dtx%%i% * 0.1) + 0.5))
+			
+			&ty        Processing total precipitation
+			/* &if [exist %prec_m%%i% -grid] &then &ty Grid exists /*kill %prec_m%%i% all
+			%prec_m%%i% = int(floor((%prec_c%%i% * abs(1 + ((%dpr%%i% * 0.01) / (%prec_c%%i% + 1)))) + 0.5))
+			
+			&ty        Processing mean temperature
+			/* &if [exist %tmean_m%%i% -grid] &then &ty Grid exists /*kill %tmean_m%%i% all
+			%tmean_m%%i% = int(floor(((%tmin_m%%i% + %tmax_m%%i%) * 0.5 ) + 0.5))
 
-					&ty
-					&ty   ->.Processing month %i%
-
-					setwindow %mask%
-					setmask %mask%
-					setcell %mask%
-
-					&ty        Processing minimum temperature
-					&if [exist %tmin_m%%i% -grid] &then &ty Grid exists /*kill %tmin_m%%i% all
-					&else %tmin_m%%i% = int(floor((%tmin_c%%i% + %dtn%%i% * 0.1) + 0.5))
-					
-					&ty        Processing maximum temperature
-					&if [exist %tmax_m%%i% -grid] &then &ty Grid exists /*kill %tmax_m%%i% all
-					&else %tmax_m%%i% = int(floor((%tmax_c%%i% + %dtx%%i% * 0.1) + 0.5))
-					
-					&ty        Processing total precipitation
-					&if [exist %prec_m%%i% -grid] &then &ty Grid exists /*kill %prec_m%%i% all
-					&else %prec_m%%i% = int(floor((%prec_c%%i% * abs(1 + ((%dpr%%i% * 0.01) / (%prec_c%%i% + 1)))) + 0.5))
-					
-					&ty        Processing mean temperature
-					&if [exist %tmean_m%%i% -grid] &then &ty Grid exists /*kill %tmean_m%%i% all
-					&else %tmean_m%%i% = int(floor(((%tmin_m%%i% + %tmax_m%%i%) * 0.5 ) + 0.5))
-
-				&end
-					
-				&if not [exists %workspace%\bio_19 -grid] &then
-					&do
-						&r 03-mkBCvars.aml %workspace% %rootdir%
-					&end
-				
-				&if not [exists %workspace%\cons_mths -grid] &then
-					&do
-						&r 04-consMthsCalc_v3.aml %workspace% %rootdir% 100
-					&end
-				
-				&ty
-				&ty Now copying...
-				&sys robocopy %workspace% %outdir%\%rcp%\%modname%\%ensemble%\%ts% /z /e
-				
-				&ty
-				&ty Successfully done (%rcp%, %ensemble%, %ts%)
-				
-				&s outcheck [LISTFILE %outdir%\%rcp%\%modname%\%ensemble%\%ts%\* -GRID %outdir%\%rcp%\%modname%\%ensemble%\%ts%_deltamethod_wclcalc_done.txt]
-				&sys rmdir /s/q %workspace%
-
-				&ty
-				&ty Model %modname% (%rcp%, %ensemble%, %ts%) done!
-				&ty
-				
-		&else
+		&end
+			
+		&if not [exists %workspace%\bio_19 -grid] &then
 			&do
-			
+				&ty        Calculating Biclimatics
 				&ty
-				&ty Model %modname% (%rcp%, %ensemble%, %ts%) done!
-				&ty
-
+				&r 03-mkBCvars.aml %workspace% %rootdir%
 			&end
+		
+		&if not [exists %workspace%\cons_mths -grid] &then
+			&do
+				&ty        Calculating Cons Mths
+				&ty
+				&r 04-consMthsCalc_v3.aml %workspace% %rootdir% 100
+			&end
+		
+		&ty
+		&ty Now copying...
+		&sys robocopy %workspace% %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts% /z /e
+		
+		&ty
+		&ty Successfully done (%rcp%, %ensemble%, %ts%)
+		
+		&s outcheck [LISTFILE %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%\* -GRID %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%_deltamethod_wclcalc_done.txt]
+		&sys rmdir /s/q %workspace%
+
+		&ty
+		&ty Model %modname% (%rcp%, %ensemble%, %ts%) done!
+		&ty
 	
 	&end
+	&else
+		
+		&do
+		
+			&ty
+			&ty Model %modname% (%rcp%, %ensemble%, %ts%) done!
+			&ty
+
+		&end
+
+	&end	
 &end
 
 &if [show program] EQ GRID &then QUIT
 
-&sys del log
+&if [exists log -file] &then &sys del log
 &s workspace %rootdir%
 &if [exists log -file] &then &sys del log
