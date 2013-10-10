@@ -40,7 +40,7 @@
 			
 &do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 
-	&s workspace %tmpdir%\%rcp%_%modname%
+	&s workspace %tmpdir%\%rcp%_%modname%_%period%
 	&if not [exists %workspace% -DIR] &then &sys md %workspace%
 
 	&if not [exists %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%
@@ -115,9 +115,6 @@
 		&ty
 		&ty Now copying...
 		&sys robocopy %workspace% %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts% /z /e
-		
-		&ty
-		&ty Successfully done (%rcp%, %ensemble%, %ts%)
 		
 		&s outcheck [LISTFILE %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%\* -GRID %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%_deltamethod_wclcalc_done.txt]
 		&sys rmdir /s/q %workspace%
