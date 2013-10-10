@@ -1,4 +1,6 @@
-&args rootdir outfolder resol /*scenario
+/* &r 05-resampling_downscaled.aml T:\gcm\cmip5\downscaled T:\gcm\cmip5\downscaled rcp26 r1i1p1 10 D:\jetarapues\cmip5_process\masks\mask10m
+
+&args rootdir outfolder rcp ensemble resol mask
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument
 &terminal 9999
 &sys cls
@@ -6,42 +8,43 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-
-&if %resol% EQ 2.5 &then &s outdir %outfolder%\Global_2_5min
-&else &if %resol% EQ 5 &then &s outdir %outfolder%\Global_5min
-&else &s outdir %outfolder%\Global_10min
+&if %resol% EQ 2.5 &then &s outdir %outfolder%\%rcp%\global_2_5min
+&else &if %resol% EQ 5 &then &s outdir %outfolder%\%rcp%\global_5min
+&else &s outdir %outfolder%\%rcp%\global_10min
 
 &if not [exists %outdir% -dir] &then &sys md %outdir%
 
-&s modellist [listfile %rootdir%\* -dir]
+&s modellist [listfile %rootdir%\%rcp%\global_30s\* -dir]
 &s nmodels [token %modellist% -count]
 
 &do md = 1 &to %nmodels%
 	
 	&s modname [extract %md% %modellist%]
 	
-	&s outmoddir %outdir%\%modname%
+	&s outmoddir %outdir%\%modname%\%ensemble%
 	&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
 	
-	&s year 2020_2049
+	&do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 		
-	&s outmodyeardir %outmoddir%\%year%
-	
-	&if not [exists %outdir%\%modname%\moddone_%year%.txt -FILE] &then
-		&do
-			&ty
-			&ty Model %modname% (%year%, %resol%)
-			&if not [exists %outmodyeardir% -dir] &then &sys md %outmodyeardir%
-			&r resample_GCM.aml %rootdir%\%modname%\%year% %outmodyeardir% %resol% NEAREST
-		&end
-	&else 
-		&do
-			&ty 
-			&ty Model %modname% (%year%, %resol%) processed
-		&end
-	
-	&sys dir /d /b /o %outdir%\%modname%\%year%\* > %outdir%\%modname%\moddone_%year%.txt
+		&s outmodtsdir %outmoddir%\%ts%
+		&s inmodtsdir %rootdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%
+		
+		&if not [exists %outdir%\%modname%\resampled_%resol%m_%ensemble%_%ts%.txt -FILE] &then
+			&do
+				&ty
+				&ty Model %modname% (%rcp%, %ts%, %resol%)
+				&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
+				&r 05-resample_GCM.aml %inmodtsdir% %outmodtsdir% %resol% NEAREST %mask%
+				&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\resampled_%resol%m_%ensemble%_%ts%.txt
+			&end
+		&else 
+			&do
+				&ty 
+				&ty Model %modname% (%ts%, %resol%) processed
+			&end
 
+		&end
+	
 	&end
 	
 &end
