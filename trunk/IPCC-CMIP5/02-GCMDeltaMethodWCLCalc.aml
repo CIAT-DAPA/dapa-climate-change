@@ -45,7 +45,7 @@
 		
 		&if not [exists %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%
 		
-		&s workspace %tmpdir%\%rcp%_%modname%_%period%	
+		&s workspace %tmpdir%\%rcp%_%modname%_%ts%	
 		&if not [exists %workspace% -DIR] &then &sys md %workspace%
 	
 		/* Input Grids 
