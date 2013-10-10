@@ -1,9 +1,9 @@
-&args inputfolder outputfolder resolution method
+&args inputfolder outputfolder resolution method mask
 &terminal 9999
 /*&sys cls
 &messages &off
 
-&if [null %inputfolder%] OR [null %outputfolder%] OR [null %resolution%] or [null %method%] &then
+&if [null %inputfolder%] OR [null %outputfolder%] OR [null %resolution%] OR [null %method%] OR [null %mask%] &then
 	&do
 		&ty
 		&ty Incorrect command syntax
@@ -35,7 +35,7 @@
 &ty          /\/\/\/\GCM MODELS RESAMPLE/\/\/\/\
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
-&s gridlist [listfile %inputfolder%\tm* -grid %outputfolder%\listgrids.list]
+&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
 &s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
@@ -55,6 +55,8 @@
 			&ty   -> .Processing %gridname%
 			
 			&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname% all /* &ty Output grid exists
+			
+			setwindow %inputfolder%\%gridname% %mask%		
 			%outputfolder%\%gridname% = RESAMPLE(%inputfolder%\%gridname%, %res%, %method%)
 		&end
 	&end
