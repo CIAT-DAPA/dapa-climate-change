@@ -40,14 +40,14 @@
 			
 &do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 
-	&s workspace %tmpdir%\%rcp%_%modname%_%period%
-	&if not [exists %workspace% -DIR] &then &sys md %workspace%
-
-	&if not [exists %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%
-	
 	&if not [exists %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%_deltamethod_wclcalc_done.txt -file] &then
 	&do
-
+		
+		&if not [exists %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts% -DIR] &then &sys md %outdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%
+		
+		&s workspace %tmpdir%\%rcp%_%modname%_%period%	
+		&if not [exists %workspace% -DIR] &then &sys md %workspace%
+	
 		/* Input Grids 
 		
 		&s tmin_c = %wcldir%\tmin_
