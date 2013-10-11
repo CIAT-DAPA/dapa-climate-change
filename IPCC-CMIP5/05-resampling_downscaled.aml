@@ -29,13 +29,13 @@
 		&s outmodtsdir %outmoddir%\%ts%
 		&s inmodtsdir %rootdir%\%rcp%\global_30s\%modname%\%ensemble%\%ts%
 		
-		&if not [exists %outdir%\%modname%\resampled_%resol%m_%ensemble%_%ts%.txt -FILE] &then
+		&if not [exists %outdir%\%modname%\%ensemble%\%ts%_resampled.txt -FILE] &then
 			&do
 				&ty
 				&ty Model %modname% (%rcp%, %ts%, %resol%)
 				&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
 				&r 05-resample_GCM.aml %inmodtsdir% %outmodtsdir% %resol% NEAREST %mask%
-				&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\resampled_%resol%m_%ensemble%_%ts%.txt
+				&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\%ensemble%\%ts%_resampled.txt
 			&end
 		&else 
 			&do
@@ -43,9 +43,6 @@
 				&ty Model %modname% (%ts%, %resol%) processed
 			&end
 
-		&end
-	
 	&end
 	
 &end
-
