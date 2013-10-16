@@ -32,3 +32,41 @@ baseDir <- "T:/gcm/cmip5/raw/monthly"
 ens <- "r1i1p1"
 otp <- GCMVerification(baseDir, ens, imageDir)
 
+
+
+
+
+source("00-monthly-data-functions-preindustrial.R")
+rcp <- "rcp85"
+baseline <- "historical"
+baseDir <- "L:/gcm/cmip5/raw/monthly"
+trunkDir <- "G:/_scripts/dapa-climate-change/IPCC-CMIP5/data"
+outDir <- "G:/cenavarro/Request/lparker"
+cruDir <- "S:/data/observed/gridded_products/cru-ts-v3-21/20yr_averages/1980_2000"
+
+otp <- GCMAveragePreInd(rcp, baseline, baseDir, trunkDir, outDir)
+
+otp <- GCMDisaggregate(rcp, baseDir, trunkDir, outDir, cruDir)
+
+
+
+
+# rcp <- "rcp26"
+# rcp <- "rcp45"
+# rcp <- "rcp60"
+
+source("00-monthly-data-functions.R")
+rcp <- "rcp26"
+baseDir <- "L:/gcm/cmip5/raw/monthly"
+ens <- "r1i1p1"
+basePer <- "1971_2000"
+outDir <- "V:/workspace/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate"
+cruDir <- "S:/data/observed/gridded_products/cru-ts-v3-21"
+otp <- GCMCalcFutureYearly(rcp, baseDir, ens, basePer, outDir, cruDir)
+
+#otp <- GCMAnomaliesYearly(rcp, baseDir, ens, basePer, outDir)
+
+
+sacar en asciis
+
+L:/gcm/cmip5/raw/monthly/historical/mohc_hadgem2_cc/r1i1p1/monthly-files/1859/tmean_01.nc
