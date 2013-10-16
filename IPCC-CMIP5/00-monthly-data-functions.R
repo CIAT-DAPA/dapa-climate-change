@@ -893,7 +893,7 @@ GCMAnomaliesYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", 
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
-GCMCalcFutureYearly <- function(rcp='rcp45', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1971_2000", outDir="G:/cenavarro/Request/urippke", cruDir="S:/data/observed/gridded_products/cru-ts-v3-21") {
+GCMCalcFutureYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1971_2000", outDir="G:/cenavarro/Request/urippke", cruDir="S:/data/observed/gridded_products/cru-ts-v3-21") {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -925,52 +925,54 @@ GCMCalcFutureYearly <- function(rcp='rcp45', baseDir="L:/gcm/cmip5/raw/monthly",
       
       if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
         
-        # Get gcm and ensemble names
-        gcm <- paste(as.matrix(gcmStats)[i,2])
-        
-        cat("\tFuture Calcs over: ", rcp, " ", gcm, " ", ens, " \n\n")
-        
-        # Loop around months
-        for (mth in monthList) {
+        if(paste(as.matrix(gcmStats)[i,3]) == "r1i1p1"){
+          # Get gcm and ensemble names
+          gcm <- paste(as.matrix(gcmStats)[i,2])
           
-          mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+          cat("\tFuture Calcs over: ", rcp, " ", gcm, " ", ens, " \n\n")
           
-          # Loop around variables
-          for (var in varList) {
+          # Loop around months
+          for (mth in monthList) {
             
-            if (!file.exists(paste(outDir, "/future/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mthMod, ".asc", sep=""))){
+            mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+            
+            # Loop around variables
+            for (var in varList) {
               
-              year <- 2006:2099
-              cruAsc <- raster(paste(cruDir, "/30yr_averages/", basePer, "/", var, "_", mthMod, ".asc", sep=""))
-              anomDir <- paste(outDir, "/anomalies/", rcp, "/", gcm, "/", ens, sep="")
-              anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mthMod, ".nc", sep=""),FUN=raster)
-              anomNc <- stack(anomNc)
-              outFut <- cruAsc + anomNc
-              ext <- extent(-26, 64, -47, 38)
-              outFut <- crop(outFut, ext)
-              
-              
-              if (var == "prec"){outFut[][outFut[]<0]=0}
-              
-              for (i in 1:dim(outFut)[[3]]){
+              if (!file.exists(paste(outDir, "/africa_cmip5_30min_yearly/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mthMod, ".tif", sep=""))){
                 
-                futDir <- paste(outDir, "/future/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
-                if (!file.exists(futDir)) {dir.create(futDir, recursive = TRUE)}
-                
-                futTif <- paste(futDir, "/", var, "_", mthMod, ".tif", sep="")
+                year <- 2006:2099
+                cruAsc <- raster(paste(cruDir, "/30yr_averages/", basePer, "/", var, "_", mthMod, ".asc", sep=""))
+                anomDir <- paste(outDir, "/world_anomalies_cmip5_raw_resolution/", rcp, "/", gcm, "/", ens, sep="")
+                anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mthMod, ".nc", sep=""),FUN=raster)
+                anomNc <- stack(anomNc)
+                outFut <- cruAsc + anomNc
+                ext <- extent(-26, 64, -47, 38)
+                outFut <- crop(outFut, ext)
                 
                 
-                if (!file.exists(futTif)) {
+                if (var == "prec"){outFut[][outFut[]<0]=0}
+                
+                for (i in 1:dim(outFut)[[3]]){
                   
-                  outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=FALSE)
-                                    
-                  cat(" .> ", paste("\t ", var, "_", mthMod, " ", year[i], sep=""), "\tdone!\n")
-                }  else {cat(" .> ", paste("\t ", var, " ", mthMod, " ", year[i], sep=""), "\tdone!\n")}
-  
+                  futDir <- paste(outDir, "/africa_cmip5_30min_yearly/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
+                  if (!file.exists(futDir)) {dir.create(futDir, recursive = TRUE)}
+                  
+                  futTif <- paste(futDir, "/", var, "_", mthMod, ".tif", sep="")
+                  
+                  
+                  if (!file.exists(futTif)) {
+                    
+                    outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=FALSE)
+                                      
+                    cat(" .> ", paste("\t ", var, "_", mthMod, " ", year[i], sep=""), "\tdone!\n")
+                  }  else {cat(" .> ", paste("\t ", var, " ", mthMod, " ", year[i], sep=""), "\tdone!\n")}
+    
+                }
               }
             }
-          }
-        }  
+          }  
+        }
       }
     }
   } 
