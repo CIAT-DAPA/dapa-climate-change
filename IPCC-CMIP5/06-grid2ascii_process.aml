@@ -1,4 +1,4 @@
-/* &r 05-grid2ascii_process.aml T:\gcm\cmip5\downscaled S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled rcp26 r1i1p1 10min
+/* &r 06-grid2ascii_process.aml T:\gcm\cmip5\downscaled S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled rcp26 r1i1p1 10min
 
 &args rootdir outputdir rcp ensemble resol
 
