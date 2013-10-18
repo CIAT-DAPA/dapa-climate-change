@@ -44,7 +44,7 @@
 					
 					&if [locase %switch%] EQ yes &then
 						&do
-							&sys 7za a -mmt=4 %outfolder%\%modname%_%rcpmod%_%tsmod%_%vartype%_%resol%_no_tile_asc.zip %outfolder%\%gridname%.asc
+							&sys 7za a -mmt=4 %outfolder%\%modname%_%rcpmod%_%tsmod%_%vartype%_%resol%_r1i1p1_no_tile_asc.zip %outfolder%\%gridname%.asc
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 						&end
