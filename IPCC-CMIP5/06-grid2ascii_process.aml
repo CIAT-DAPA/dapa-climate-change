@@ -30,12 +30,12 @@
 		&else &if %rcp% EQ rcp60 &then &s rcpmod rcp6_0
 		&else &s rcpmod rcp8_5
 				
-		&if not [exists %outdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt -FILE] &then
+		&if not [exists %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt -FILE] &then
 			&do
 				&ty
 				&ty Model %modname% (%rcpmod%, %tsmod%, %resol%)
 				
-				&s outmoddir %outdir%\%rcpmod%\%tsmod%\%modname%\%resol%
+				&s outmoddir %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%
 				&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
 				&else
 					&do
@@ -44,7 +44,7 @@
 					&end
 				
 				&r 06-grid2ascii_GCM.aml %inmoddir% %outmoddir% %modname% %rcpmod% %tsmod% %resol% YES
-				&s verfile [listfile %outmoddir%\*asc.zip -file %outdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt]
+				&s verfile [listfile %outmoddir%\*asc.zip -file %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt]
 				
 			&end
 		&else 
