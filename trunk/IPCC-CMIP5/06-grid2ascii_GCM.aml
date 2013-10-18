@@ -1,4 +1,4 @@
-&args inputfolder outputfolder modname rcpmod tsmod switch
+&args inputfolder outputfolder modname rcpmod tsmod resol switch
 &terminal 9999
 /*&sys cls
 &messages &off
