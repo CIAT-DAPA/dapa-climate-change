@@ -1,4 +1,4 @@
-/* &r 05-resampling_process.aml T:\gcm\cmip5\downscaled T:\gcm\cmip5\downscaled rcp26 r1i1p1 10 D:\jetarapues\cmip5_process\masks\mask10m
+/* &r 05-resampling_process.aml T:\gcm\cmip5\downscaled T:\gcm\cmip5\downscaled rcp26 r1i1p1 10min D:\jetarapues\cmip5_process\masks\mask10m
 
 &args rootdir outfolder rcp ensemble resol mask
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument
@@ -8,8 +8,8 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-&if %resol% EQ 2.5 &then &s outdir %outfolder%\%rcp%\global_2_5min
-&else &if %resol% EQ 5 &then &s outdir %outfolder%\%rcp%\global_5min
+&if %resol% EQ 2.5min &then &s outdir %outfolder%\%rcp%\global_2_5min
+&else &if %resol% EQ 5min &then &s outdir %outfolder%\%rcp%\global_5min
 &else &s outdir %outfolder%\%rcp%\global_10min
 
 &if not [exists %outdir% -dir] &then &sys md %outdir%
