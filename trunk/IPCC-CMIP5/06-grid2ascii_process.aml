@@ -1,40 +1,58 @@
-&args rootdir outputdir resol 
-&if [null %rootdir%] &then &return Use the root_folder argument
+/* &r 05-grid2ascii_process.aml T:\gcm\cmip5\downscaled S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled rcp26 r1i1p1 10min
+
+&args rootdir outputdir rcp ensemble resol
+
+&if [null %rootdir%] OR [null %outputdir%] OR [null %rcp%] OR [null %ensemble%] OR [null %resol%] &then Use rootdir outputdir rcp ensemble resol
 &terminal 9999
 &sys cls
-
 &amlpath .
 &s bdir [show &amlpath]
 
-&if %resol% EQ 30s &then &s inputdir %rootdir%\Global_30s
-&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\Global_2_5min
-&else &if %resol% EQ 5min &then &s inputdir %rootdir%\Global_5min
-&else &s inputdir %rootdir%\Global_10min
-
-&if %resol% EQ 30s &then &s outdir %outputdir%\Global_30s
-&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\Global_2_5min
-&else &if %resol% EQ 5min &then &s outdir %outputdir%\Global_5min
-&else &s outdir %outputdir%\Global_10min
-
+&s inputdir %rootdir%\%rcp%\global_%resol%
 &s modellist [listfile %inputdir%\* -dir]
 &s nmodels [token %modellist% -count]
 
 &do md = 1 &to %nmodels%
 	
 	&s modname [extract %md% %modellist%]
-	
-	&do year &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
-			
-			&ty
-			&ty Model %modname% (%year%, %resol%)
-			
-			&if not [exists %inputdir%\%modname%\%year%_Grd2AsciiZip30s_done.txt -file] &then
-				&do
-					&if [exists %inputdir%\%modname%\%year%\_asciis -dir] &then &sys del %inputdir%\%modname%\%year%\_asciis\*.zip
-					&r grid2ascii_GCM.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% YES
-					&s verfile [listfile %inputdir%\%modname%\%year%\_asciis\*.zip -file %inputdir%\%modname%\%year%_Grd2AsciiZip30s_done.txt]
-				&end
-				
-	&end
+
+	&do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 		
+		&s inmoddir %inputdir%\%modname%\%ensemble%\%ts%
+		
+		&if %ts% EQ 2020_2049 &then &s tsmod 2030s
+		&else &if %ts% EQ 2040_2069 &then &s tsmod 2050s
+		&else &if %ts% EQ 2060_2089 &then &s tsmod 2070s
+		&else &s tsmod 2080s
+		
+		&if %rcp% EQ rcp26 &then &s rcpmod rcp2_6
+		&else &if %rcp% EQ rcp45 &then &s rcpmod rcp4_5
+		&else &if %rcp% EQ rcp60 &then &s rcpmod rcp6_0
+		&else &s rcpmod rcp8_5
+				
+		&if not [exists %outdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt -FILE] &then
+			&do
+				&ty
+				&ty Model %modname% (%rcpmod%, %tsmod%, %resol%)
+				
+				&s outmoddir %outdir%\%rcpmod%\%tsmod%\%modname%\%resol%
+				&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
+				&else
+					&do
+						&sys del %outmoddir%\*.asc
+						&sys del %outmoddir%\*_asc.zip
+					&end
+				
+				&r 06-grid2ascii_GCM.aml %inmoddir% %outmoddir% %modname% %rcpmod% %tsmod% %resol% YES
+				&s verfile [listfile %outmoddir%\*asc.zip -file %outdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt]
+				
+			&end
+		&else 
+			&do
+				&ty 
+				&ty Model %modname% (%ts%, %resol%) processed
+			&end
+
+	&end
+	
 &end
