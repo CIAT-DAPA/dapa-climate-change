@@ -1,4 +1,4 @@
-&args rootdir tmpfolder /*scenario
+&args rootdir tmpfolder /*scenario 
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument (&r ZipGrids_process.aml ROOT_FOLDER SCENARIO)
 &terminal 9999
 &sys cls
