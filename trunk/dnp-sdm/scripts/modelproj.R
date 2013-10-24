@@ -24,7 +24,7 @@ library(biomod2); library(raster); library(rgdal); library(maptools); library(di
 #base dir
 bDir <- "/nfs/a102/eejarv/DNP-biodiversity"
 #bDir <- "/mnt/a102/eejarv/DNP-biodiversity"
-setwd(bDir)
+setwd(paste("/nfs/a102/eejarv/DNP-biodiversity") #%#%#%
 
 #source functions
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/dnp-sdm"
