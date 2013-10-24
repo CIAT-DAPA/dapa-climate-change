@@ -24,7 +24,7 @@ library(biomod2); library(raster); library(rgdal); library(maptools); library(di
 #base dir
 bDir <- "/nfs/a102/eejarv/DNP-biodiversity"
 #bDir <- "/mnt/a102/eejarv/DNP-biodiversity"
-setwd(paste("/nfs/a102/eejarv/DNP-biodiversity") #%#%#%
+setwd(bDir) 
 
 #source functions
 src.dir <- "~/PhD-work/_tools/dapa-climate-change/trunk/dnp-sdm"
@@ -66,17 +66,14 @@ for (i in 1:length(sceList)) {
 mList <- cbind(ID=paste("CLM_",1:nrow(mList),sep=""),mList)
 
 #species name and configuration of run
-this_sppName <- "Boro_pati" #species name
+this_sppName <- "Avic_germ" #species name
 
-mod <- "MAXENT"
+mod <- "GAM"
 truns <- all_runs$ID[which(all_runs$ALG == mod)]
 
-# no knowledge selection o 100 models
-rand <- sample(1:800,100,replace=F)
-
 #actual model runs
-for (i in 1:100) {
-  run_i <- truns[rand[i]] #23
+for (i in truns) {
+  run_i <- truns[i] #23
   this_seed <- as.numeric(paste(all_runs$SEED[which(all_runs$ID == run_i)])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[which(all_runs$ID == run_i)])) #number of pseudo absences (from list)
   this_alg <- paste(all_runs$ALG[which(all_runs$ID == run_i)]) #modelling algorithm
