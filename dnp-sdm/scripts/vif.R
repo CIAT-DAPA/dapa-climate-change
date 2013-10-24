@@ -105,9 +105,13 @@ sol_dir <- paste(wd,"/env-data/soil",sep="")
 top_dir <- paste(wd,"/env-data/topography",sep="")
 out_dir <- paste(wd,"/vif-analysis",sep="")
 
-spp_all <- c("Bixa_orel","Boro_pati","Caes_spin", "Cres_cuje","Geni_amer",
-             "Indi_suff","Jaca_cauc","Just_pect","Lipp_alba","Mint_moll",
-             "Myro_bals","Oeno_batu","Smil_moll")
+# spp_all <- c("Bixa_orel","Boro_pati","Caes_spin", "Cres_cuje","Geni_amer",
+#              "Indi_suff","Jaca_cauc","Just_pect","Lipp_alba","Mint_moll",
+#              "Myro_bals","Oeno_batu","Smil_moll")
+
+spp_all <- c("Avic_germ","Lagu_race","Pell_rhiz", "Rhiz_mang")
+
+spp_all <- c("Xylo_fron")
 
 for (spp_name in spp_all) {
   #spp name and dir
