@@ -45,7 +45,7 @@ proj_model <- function(bDir,sppName,seed,npa,alg,vset,scenario,period,model,mode
     #2. load model object
     cat("load model objects\n")
     fit_file <- paste(inp_dir,"/",sppName2,"/",sppName2,".",model_class,".models.out",sep="")
-    setwd(paste(modDir,"/",alg,"/PA-",npa,"_SD-",seed,"_VARSET-",vset,sep="")) #%#%#%#
+    setwd(inp_dir)
     sp_mOut <- get(load(fit_file)) #load model outputs
     tmodel <- get(BIOMOD_LoadModels(sp_mOut,models=alg)) #load specific model
     
