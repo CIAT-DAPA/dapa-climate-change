@@ -46,17 +46,18 @@ all_runs <- expand.grid(ALG=modList,NPA=npaList)
 #             "Myro_bals","Oeno_batu","Smil_moll")
 #for (this_sppName in spp_all) {
 
-this_sppName <- "Just_pect" #species name
+this_sppName <- "Avic_germ" #species name
 
-#this is the loop for the runs
-# for (run_i in 1:nrow(all_runs)) {
-#   #run_i <- 4 #23
-#   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
-#   this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
-#   odir <- run_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg)
-# }
+this is the loop for the runs
+for (run_i in 1:nrow(all_runs)) {
+  #run_i <- 4 #23
+  this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
+  this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
+  odir <- run_bias_model(bDir,sppName=this_sppName,npa=this_npa,alg=this_alg)
+}
 
 
+##########
 
 #projection of models
 for (run_i in 1:nrow(all_runs)) {

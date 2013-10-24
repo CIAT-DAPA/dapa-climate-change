@@ -41,18 +41,16 @@ npaList <- c(100, 250, 500, 750, 1000, 2000, 4000, 6000, 8000, 10000)
 all_runs <- expand.grid(NPA=npaList,SEED=seedList)
 
 #species name and configuration of run
-this_sppName <- "Boro_pati" #species name
+this_sppName <- "Avic_germ" #species name
 
 #### 
 #some testing runs
 for (run_i in 1:nrow(all_runs)) {
   this_seed <- as.numeric(paste(all_runs$SEED[run_i])) #seed for the cross validation
   this_npa <- as.numeric(paste(all_runs$NPA[run_i])) #number of pseudo absences (from list)
+  #this_alg <- paste(all_runs$ALG[run_i]) #modelling algorithm
   odir <- run_null_model(bDir,sppName=this_sppName,seed=this_seed,npa=this_npa)
 }
 ###
-
-
-
 
 
