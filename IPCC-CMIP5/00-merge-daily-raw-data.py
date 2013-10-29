@@ -17,7 +17,7 @@ import os, sys, string, glob, shutil
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 00-merge-daily-raw-data.py T:\data\gcm\cmip5\raw\daily historical"
+	print "   - ie: python 00-merge-daily-raw-data.py T:\data\gcm\cmip5\raw\daily rcp_85"
 	sys.exit(1)
 
 # Define arguments
@@ -41,6 +41,13 @@ varList = {"tas": "tmean", "tasmax": "tmax", "tasmin": "tmin", "pr": "prec", "rs
 # for rcp in rcpList:
 rcpDir = dirbase + "\\" + rcp
 
+pathScript = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0])))
+summary = pathScript + "\\data\\cmip5-" + rcp + "-daily-data-summary.txt"
+if not os.path.isfile(summary):
+	sumFile = open(summary, "w")
+	sumFile.write("rcp" + "\t" + "gcm" + "\t" + "ensemble" + "\t" + "pr" + "\t" + "tasmin" + "\t" + "tas" + "\t" + "tasmin" + "\t" + "hur" + "\t" + "rsds" + "\t" + "sfcWind" + "\n")
+	sumFile.close()
+
 # Get a list of models
 modelList = sorted(os.listdir(rcpDir))
 for model in modelList:
@@ -58,17 +65,12 @@ for model in modelList:
 			
 			# if not os.path.exists(checkFile):
 		
-			# Define new folder for original files
-			rawDir = ensDir + "\\original-data"
-			if not os.path.exists(rawDir):
-				os.system("mkdir " + rawDir)
-		
 			# Loop around variables
 			for var in sorted(varList):
 				
 				# Get a list of nc files per variable
 				ncList = sorted(glob.glob(ensDir + "\\" + var + "_day*.nc"))
-				print ncList
+
 				if not len(ncList) == 0:
 
 					# Extract start and end date
@@ -82,6 +84,12 @@ for model in modelList:
 					
 					if len(ncList) > 1:
 						print " .> Merge ", rcp, model, ens, var
+						
+						# Define new folder for original files
+						rawDir = ensDir + "\\original-data"
+						if not os.path.exists(rawDir):
+							os.system("mkdir " + rawDir)
+				
 						if not os.path.exists(merNc):
 							os.system("cdo mergetime " + ' '.join(ncList) + " " + merNc)
 							for nc in ncList:
@@ -110,39 +118,22 @@ for model in modelList:
 				# print "\tProcess done for ", rcp, model, ens, "\n"
 			
 			# else:
-			
-				# print "\tProcess done for ", rcp, model, ens, "\n"
-				# sumFile = dirbase + "\\cmip5-" + rcp + "-daily-data-summary.txt"
-				# if not os.path.isfile(sumFile):
-					# sumFile = open(sumFile, "w")
-					# sumFile.write("rcp" + "\t" + "gcm" + "\t" + "ensemble" + "\t" + "prec" + "\t" + "tmax" + "\t" + "tmean" + "\t" + "tmin" + "\n")
-					# sumFile.close()
+		
+			print "\tProcess done for ", rcp, model, ens, "\n"
+			lineCheck = rcp + "\t" + model + "\t" + ens 
+			varList = "pr", "tasmin", "tas", "tasmax", "tasmin", "hur", "rsds", "sfcWind" 
+			for var in varList:
+				ncList  = sorted(glob.glob(ensDir + "\\" + var + "_day_*.nc"))
+				if not len(ncList) == 0:
+					staYear = os.path.basename(ncList[0]).split("_")[-1].split("-")[0]
+					endYear = os.path.basename(ncList[-1]).split("_")[-1].split("-")[1]
+					lineCheck = lineCheck + "\t" + str(staYear) + "-" + str(endYear)
+				else:
+					lineCheck = lineCheck + "\tN/A"
 				
-					# precList = sorted(glob.glob(ensDir + "\\original-data\\prec.*.nc"))
-					# if not len(precList) == 0:
-						# precCheck = os.path.basename(precList[0]).split(".")[1]
-					# else:
-						# precCheck = "no"
-						
-					# tmaxList = sorted(glob.glob(ensDir + "\\original-data\\tmax.*.nc"))
-					# if not len(tmaxList) == 0:
-						# tmaxCheck = os.path.basename(tmaxList[0]).split(".")[1]
-					# else:
-						# tmaxCheck = "no"
-					
-					# tmeanList = sorted(glob.glob(ensDir + "\\original-data\\tmean.*.nc"))
-					# if not len(tmeanList) == 0:
-						# tmeanCheck = os.path.basename(tmeanList[0]).split(".")[1]
-					# else:
-						# tmeanCheck = "no"
-					
-					# tminList = sorted(glob.glob(ensDir + "\\original-data\\tmin.*.nc"))
-					# if not len(tminList) == 0:
-						# tminCheck = os.path.basename(tminList[0]).split(".")[1]
-					# else:
-						# tminCheck = "no"
-
-					# sumFile = open(sumFile, "a")
-					# sumFile.write(rcp + "\t" + model + "\t" + ens + "\t" + precCheck + "\t" + tmaxCheck + "\t" + tmeanCheck + "\t" + tminCheck + "\n" )
+			print str(lineCheck)
+			sumFile = open(summary, "a")
+			sumFile.write(lineCheck + "\n" )
+			sumFile.close()
 					
 print "Process done!"
