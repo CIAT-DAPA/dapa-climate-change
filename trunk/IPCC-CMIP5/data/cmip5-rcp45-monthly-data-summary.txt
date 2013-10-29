@@ -33,9 +33,9 @@ rcp45	cesm1_cam5_1_fv2	r1i1p1	no	no	2006-2099	no	no	no	ins-var
 rcp45	cesm1_waccm	r2i1p1	2006-2099	2006-2099	2006-2099	2006-2099	no	no	
 rcp45	cesm1_waccm	r3i1p1	2006-2065	2006-2065	2006-2065	2006-2065	no	no	ins-yr
 rcp45	cesm1_waccm	r4i1p1	2006-2065	2006-2065	2006-2065	2006-2065	no	no	ins-yr
-rcp45	cmcc_cm	r1i1p1	2006-2100	2006-2100	2006-2100	2006-2100	no	no	
-rcp45	cmcc_cms	r1i1p1	2006-2100	2006-2100	2006-2100	2006-2100	no	no	
-rcp45	cnrm_cm5	r1i1p1	2006-2300	2006-2300	2006-2300	2006-2300	no	no	
+rcp45	cmcc_cm	r1i1p1	2006-2100	2006-2100	2006-2100	2006-2100	no	no	ins-yr
+rcp45	cmcc_cms	r1i1p1	2006-2100	2006-2100	2006-2100	2006-2100	no	no	ins-yr
+rcp45	cnrm_cm5	r1i1p1	2006-2300	2006-2300	2006-2300	2006-2300	no	no	ins-yr
 rcp45	csiro_mk3_6_0	r10i1p1	2006-2100	2006-2100	2006-2100	no	no	2006-2100	tmin
 rcp45	csiro_mk3_6_0	r1i1p1	2006-2300	2006-2100	2006-2300	no	no	no	tmin
 rcp45	csiro_mk3_6_0	r2i1p1	2006-2300	2006-2100	2006-2300	no	no	2006-2100	tmin
@@ -55,7 +55,7 @@ rcp45	ec_earth	r6i1p1	2006-2100	no	2006-2100	2006-2100	no	no	tmax
 rcp45	ec_earth	r7i1p1	2006-2100	no	2006-2100	no	no	no	ins-var
 rcp45	ec_earth	r8i1p1	2006-2100	no	2006-2100	2006-2100	no	no	tmax
 rcp45	ec_earth	r9i1p1	2006-2100	no	2006-2100	2006-2100	no	no	tmax
-rcp45	lasg_fgoals_g2	r1i1p1	2006-2299	2006-2275	2006-2299	2006-2275	no	no	
+rcp45	lasg_fgoals_g2	r1i1p1	2006-2299	2006-2275	2006-2299	2006-2275	no	no	ins-yr
 rcp45	lasg_fgoals_s2	r1i1p1	2006-2300	no	2006-2300	no	no	no	ins-var
 rcp45	lasg_fgoals_s2	r2i1p1	2006-2100	no	2006-2100	no	no	no	ins-var
 rcp45	lasg_fgoals_s2	r3i1p1	2006-2100	no	2006-2100	no	no	no	ins-var
