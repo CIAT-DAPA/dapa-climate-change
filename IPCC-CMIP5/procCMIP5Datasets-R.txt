@@ -70,3 +70,9 @@ otp <- GCMCalcFutureYearly(rcp, baseDir, ens, basePer, outDir, cruDir)
 sacar en asciis
 
 L:/gcm/cmip5/raw/monthly/historical/mohc_hadgem2_cc/r1i1p1/monthly-files/1859/tmean_01.nc
+
+
+
+
+source("00-daily-data-functions.R")
+otp <- GCM_Cut_Daily(baseDir, ens, rcp, xmin, xmax, ymin, ymax, staYr, endYr, outDir, shift)
