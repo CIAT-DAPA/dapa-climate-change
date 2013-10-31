@@ -4,7 +4,7 @@
 # Purpose: Describe properties of Grids Downscaled, Disaggregated, anomalies or Interpolated datasets
 # ---------------------------------------------------------------------------------------------------
 
-# python G:\_scripts\dapa-climate-change\IPCC-CMIP5\DescribeGCM_CMIP5.py T:\data\gcm\cmip5\interpolations rcp26 18
+# python DescribeGCM_CMIP5.py T:\data\gcm\cmip5\interpolations rcp26 18
 
 import arcgisscripting, os, sys, string
 gp = arcgisscripting.create(9.3)
