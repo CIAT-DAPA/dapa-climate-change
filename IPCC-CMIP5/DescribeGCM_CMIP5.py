@@ -35,7 +35,7 @@ gp.CheckOutExtension("Spatial")
 
 
 #Get lists of models and periods
-periodlist =["2040_2069"] #["2020_2049", "2040_2069", "2060_2089", "2070_2099"]
+periodlist = ["2020_2049", "2040_2069", "2060_2089", "2070_2099"]
 modellist = sorted(os.listdir(dirbase + "\\" + rcp))
 print "\nAvailable models: " + str(modellist)
 descfile = dirbase +"\\"+ rcp+"_describe.txt"
@@ -60,7 +60,7 @@ for model in modellist[int(mod):]:
 		gp.workspace = dirbase + "\\" + rcp + "\\" + model + "\\r1i1p1\\" + period
 
 		#Get a list of raster into the workspace
-		rasters = sorted(gp.ListRasters("tmin_8*", "GRID"))
+		rasters = sorted(gp.ListRasters("*", "GRID"))
 		
 		# Looping around rasters 
 		for raster in rasters:
