@@ -38,7 +38,7 @@ gp.CheckOutExtension("Spatial")
 periodlist = "2020_2049", "2040_2069", "2060_2089", "2070_2099"
 modellist = sorted(os.listdir(dirbase + "\\" + rcp))
 print "\nAvailable models: " + str(modellist)
-descfile = dirbase +"\\"+rcp+"\\"+ rcp+"_describe.txt"
+descfile = dirbase +"\\"+ rcp+"_describe.txt"
 if not os.path.isfile(descfile):
 	outFile = open(descfile, "w")
 	outFile.write("RCP" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" 
