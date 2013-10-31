@@ -41,12 +41,12 @@ GCM_Cut_Daily <- function(baseDir="T:/gcm/cmip5/raw/daily", ens="r1i1p1", rcp="h
     
     model <- basename(gcm)
     
-    verFile <- paste(outDir, "/", model, "_", ens, "_cut_daily_done.txt", sep="")
+    verFile <- paste(outDir, "/", rcp, "/", model, "_", ens, "_cut_daily_done.txt", sep="")
     
     if (!file.exists(verFile)){
       
       ncList <- list.files(paste(gcm, "/", ens, sep=""), full.names = TRUE)
-      outNcDir <- paste(outDir, "/", rcp, "/", ens, sep="")
+      outNcDir <- paste(outDir, "/", rcp, "/", ens, "/", model, sep="")
       
       for (nc in ncList) {
         
