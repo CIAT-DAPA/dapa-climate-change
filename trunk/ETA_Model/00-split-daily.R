@@ -6,7 +6,6 @@
 #-----------------------------------------------------------------------
 
 # baseDir="U:/data/rcm/eta/raw/hadcm_40km"
-# gcm="HADCM_CNTRL"
 # xmin=-81.999995
 # xmax=-24.400283
 # ymin=-49.200006
@@ -14,9 +13,9 @@
 # outDir="U:/data/rcm/eta/processed/sa_20min"
 # shift="yes"
 # source("00-split-daily.R")
-# otp <- ETA_Cut_Daily(baseDir, xmin, xmax, ymin, ymax, outDir, shift)
+# otp <- ETA_Cut_Hourly(baseDir, xmin, xmax, ymin, ymax, outDir, shift)
 
-ETA_Cut_Daily <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", gcm="HADCM_CNTRL", xmin=-81.999995, xmax=-24.400283, ymin=-49.200006, ymax=11.199692, outDir="U:/rcm/eta/processed/sa_20min", shift="yes") {
+ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995, xmax=-24.400283, ymin=-49.200006, ymax=11.199692, outDir="U:/rcm/eta/processed/sa_20min", shift="yes") {
   
   require(maptools)
   require(raster)
@@ -31,47 +30,50 @@ ETA_Cut_Daily <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", gcm="HADCM_CNTRL"
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
   cat(" \n")
   
-  #gcmList <- list.dirs(paste(baseDir, sep=""), recursive = FALSE, full.names = FALSE)
+  ## Convert to NetCDF (multiband) file format and cut lateral boundaries
   
-  #for (gcm in gcmList) {
+  gcmList <- list.dirs(paste(baseDir, sep=""), recursive = FALSE, full.names = FALSE)
   
-  modName <- tolower((basename(gcm)))
+  for (gcm in gcmList) {
   
-  scenList <- list.dirs(paste(gcm, sep=""), recursive = FALSE, full.names = FALSE)
-
-  for (scen in scenList) {
+    modName <- tolower((basename(gcm)))
     
-    scenName <- sapply(strsplit(basename(scen), '[_]'), "[[", 5)
-    if (scenName == "futuro"){scenName <- "sres_a1b"} else {scenName <- "historical"}
-    
-    cat("\n Cut ETA Daily files for: ", scenName, " ", modName, "\n\n")
-    
-    ctlList <- list.files(paste(scen, "/", sep=""), full.names = TRUE, pattern=".ctl")
-    
-    procDir <- paste(scen, "/temp", sep="")
-    if (!file.exists(paste(procDir))) {dir.create(procDir, recursive=TRUE)}
-    
-    cat("\n .> Corverting grads files to NetCDF format \n\n")
-    
-    for (ctl in ctlList) {
+    scenList <- list.dirs(paste(gcm, sep=""), recursive = FALSE, full.names = FALSE)
+  
+    for (scen in scenList) {
       
-      ctlName <- sapply(strsplit(basename(ctl), '[.]'), "[[", 1)
+      scenName <- sapply(strsplit(basename(scen), '[_]'), "[[", 5)
+      if (scenName == "futuro"){scenName <- "sres_a1b"} else {scenName <- "historical"}
       
-      outNc <- paste(scen, "/", ctlName, ".nc", sep="")
-      if (!file.exists(outNc)){
+      cat("\n Cut ETA Daily files for: ", scenName, " ", modName, "\n\n")
+      
+      ctlList <- list.files(paste(scen, "/", sep=""), full.names = TRUE, pattern=".ctl")
+      
+      procDir <- paste(scen, "/temp", sep="")
+      if (!file.exists(paste(procDir))) {dir.create(procDir, recursive=TRUE)}
+      
+      cat("\n .> Corverting grads files to NetCDF format \n\n")
+      
+      for (ctl in ctlList) {
         
-        ## Corvert grads files to NetCDF format
-        system(paste("cdo -f nc import_binary ", ctl, " ", procDir, "/", ctlName, ".nc", sep=""))
+        ctlName <- sapply(strsplit(basename(ctl), '[.]'), "[[", 1)
         
-        ## Cut borders 
-        system(paste("cdo sellonlatbox,", xmin, ",", xmax, ",", ymin, ",", ymax, " ", procDir, "/", ctlName, ".nc", " ", outNc , sep=""))
-        
-        cat("\t .> ", ctlName, " converted\n")
-        
+        outNc <- paste(scen, "/", ctlName, ".nc", sep="")
+        if (!file.exists(outNc)){
+          
+          ## Corvert grads files to NetCDF format
+          system(paste("cdo -f nc import_binary ", ctl, " ", procDir, "/", ctlName, ".nc", sep=""))
+          
+          ## Cut borders 
+          system(paste("cdo sellonlatbox,", xmin, ",", xmax, ",", ymin, ",", ymax, " ", procDir, "/", ctlName, ".nc", " ", outNc , sep=""))
+          
+          cat("\t .> ", ctlName, " converted\n")
+          
+        }
       }
-    }
       
-    unlink(procDir, recursive=TRUE)
+      # Remove temporal folder
+      unlink(procDir, recursive=TRUE)
       
     
       if (shift == "yes"){
@@ -82,12 +84,9 @@ ETA_Cut_Daily <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", gcm="HADCM_CNTRL"
         if (!file.exists(paste(outNcDir))) {dir.create(outNcDir, recursive=TRUE)}
         
         ncList <- list.files(paste(scen, "/", sep=""), full.names = TRUE, pattern=".nc")
-        
         for (nc in ncList) {
             
-          ncName <- sapply(strsplit(basename(nc), '[.]'), "[[", 1)
-          
-          ## Split in yearly files
+          ncName <- sapply(strsplit(basename(nc), '[.]'), "[[", 1)          
           var <- sapply(strsplit(ncName, '[_]'), "[[", 3)
           if (var == "tp2m"){var <- "tmean"} else if (var == "mntp"){var <- "tmin"} else if (var == "mxtp"){var <- "tmax"}
           
@@ -97,25 +96,26 @@ ETA_Cut_Daily <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", gcm="HADCM_CNTRL"
           verFile <- paste(outDir, "/", scenName, "/", modName, "_", var, "_", staYear, "_", endYear, "_split_daily_done.txt", sep="")      
           if (!file.exists(verFile)){
 
-            ## Split  
             
-            # system(paste("cdo splityear ", nc, " ", outNcDir, "/",  var, "_", sep=""))          
+            ## Split in yearly files
+            
+            system(paste("cdo splityear ", nc, " ", outNcDir, "/",  var, "_", sep=""))          
             ncYrList <- list.files(outNcDir, full.names = TRUE, pattern=".nc")
 
             for (ncYr in ncYrList) {
               
               year <- substr(sapply(strsplit(basename(ncYr), '[_]'), "[[", 2), 1, 4)
               
-              cat("\t .> Split ", var, " ", year, " \n")
-              
-              if (!file.exists(paste(outNcDir, "/", year, sep=""))) {dir.create(paste(outNcDir, "/", year, sep=""))}
+              if (!file.exists(paste(outNcDir, "/", year, "/", var, "_123118.nc", sep=""))) {
                 
-              if (!file.exists(paste(outNcDir, "/", year, "/", var, "_365.nc", sep=""))) {
-              
+                cat("\t .> Split ", var, " ", year, " \n")
+                
+                if (!file.exists(paste(outNcDir, "/", year, sep=""))) {dir.create(paste(outNcDir, "/", year, sep=""))}
+                
+                
                 system(paste("cdo splitmon ", ncYr, " ", outNcDir, "/",  year, "/", var, "_", sep=""))
                 
-                ncMthList <- list.files(paste(outNcDir, "/",  year, sep=""), full.names = TRUE)
-                
+                ncMthList <- list.files(paste(outNcDir, "/",  year, sep=""), full.names = TRUE, pattern=paste(var, "_", sep=""))
                 for (ncMth in ncMthList) {
                   
                   month <- substr(sapply(strsplit(basename(ncMth), '[_]'), "[[", 2), 1, 2)
@@ -135,47 +135,54 @@ ETA_Cut_Daily <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", gcm="HADCM_CNTRL"
                   system(paste("cdo splithour ", ncDay, " ", outNcDir, "/",  year, "/", var, "_", month, day, sep=""))
                   file.remove(ncDay)
     
-                  ncHourList <- list.files(paste(outNcDir, "/",  year, sep=""), full.names = TRUE, pattern=paste(var, "_", month, day, sep=""))
-                                    
-                  if (var == "prec"){
-                    ncHourStack <- sum(stack(lapply(ncHourList, FUN=raster))) * 1000
-                  } else {
-                    ncHourStack <- mean(stack(lapply(ncHourList, FUN=raster))) - 272.15
+#                   
+#                                     
+#                   if (var == "prec"){
+#                     ncHourStack <- sum(stack(lapply(ncHourList, FUN=raster))) * 1000
+#                   } else {
+#                     ncHourStack <- mean(stack(lapply(ncHourList, FUN=raster))) - 272.15
+#                   }
+#                   
+#                   doy <- julian(as.integer(month),as.integer(day),as.integer(year),c(1,0,as.integer(year)))
+#                   ncDay <- writeRaster(ncHourStack, paste(outNcDir, "/",  year, "/", var, "_", doy, ".nc", sep=""), format='CDF', overwrite=TRUE)
+#                   
+#                   for (ncHour in ncHourList) {file.remove(ncHour)}
                   }
+              
                   
-                  doy <- julian(as.integer(month),as.integer(day),as.integer(year),c(1,0,as.integer(year)))
-                  ncDay <- writeRaster(ncHourStack, paste(outNcDir, "/",  year, "/", var, "_", doy, ".nc", sep=""), format='CDF', overwrite=TRUE)
+                if (year == "2040" && endYear == "2040"){
                   
+                  ncHourList <- list.files(paste(outNcDir, "/",  year, sep=""), full.names = TRUE, pattern=paste(var, "_", sep=""))
                   for (ncHour in ncHourList) {file.remove(ncHour)}
                 }
-              
+                      
+                if (year == "2070" && endYear == "2070"){
+                  
+                  ncHourList <- list.files(paste(outNcDir, "/",  year, sep=""), full.names = TRUE, pattern=paste(var, "_", sep=""))
+                  for (ncHour in ncHourList) {file.remove(ncHour)}
+                  
+                }
+                
                 file.remove(ncYr)
                 
-              } # else {file.remove(ncYr)}
-              
+              } 
               
             }
             
-            cat("\n Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " done!\n\n")
+            cat("\n .> Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " ", staYear, "_", endYear," done!\n\n")
             
-          } 
-          
-          cat("\n Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " done!\n\n") 
+            opnFile <- file(verFile, open="w")
+            cat(paste("ETA Cut daily ", scenName, " ", modName, " for extent ", xmin, ",", xmax, ",", ymin, ",", ymax, " was processed on ", date(), sep=""), file=opnFile)
+            close.connection(opnFile)
+            
+          } else {cat("\n .> Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " ", staYear, "_", endYear, " done!\n\n")}
           
         } 
         
       }
-      
-      
-      opnFile <- file(verFile, open="w")
-      cat(paste("ETA Cut daily ", scenName, " ", modName, " for extent ", xmin, ",", xmax, ",", ymin, ",", ymax, " was processed on ", date(), sep=""), file=opnFile)
-      close.connection(opnFile)
-      
-      
-      
-    #} else {cat("\n Cut ETA Daily files for: ", scenName, " ", modName, " done!\n\n")}
+
+    }
   }
-  #}
   
   cat("ETA Cut Daily Process Done!")
   
