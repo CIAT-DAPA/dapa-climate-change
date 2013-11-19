@@ -1,0 +1,6 @@
+Scenario,Historical,,,,Future,,,
+Variable,prec,tmean,tmax,tmin,prec,tmean,tmax,tmin
+hadcm_cntrl,X,X,X,X,X,X,,
+hadcm_high,X,X,X,X,X,X,X,X
+hadcm_low,X,X,X,X,X,X,X,X
+hadcm_midi,X,X,X,X,X,X,X,X
