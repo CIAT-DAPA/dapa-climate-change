@@ -1,4 +1,11 @@
-/* &r cut_process.aml T:\gcm\cmip5\downscaled D:\PRUEBAS_SCRIPTs D:\PRUEBAS_SCRIPTs\mask\mask_italia rcp26 30s NO 
+/* &r cut_process.aml T:\gcm\cmip5\downscaled D:\Request\Request_juan D:\Request\Request_juan\mask\africa_2_5m ALL 2.5min YES 
+
+/* rootdir = Root folder where are storaged GCM CMIP5 data
+/* outputdir = Output folder
+/* mask =  Input mask data defining areas to extract
+/* rcp = escenarios: rcp26 rcp45 rcp60 rcp85
+/* resol = The possibilities are 30s 2.5min 5min 10min
+/* switch = Set YES to convert outputs in ESRI-Ascii files
 
 &args rootdir outputdir mask rcp resol switch
 &if [null %rootdir%] &then &return Use the root_folder argument
@@ -8,45 +15,50 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-&if %resol% EQ 30s &then &s inputdir %rootdir%\%rcp%\Global_30s
-&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\%rcp%\global_2_5min
-&else &if %resol% EQ 5min &then &s inputdir %rootdir%\%rcp%\global_5min
-&else &s inputdir %rootdir%\%rcp%\global_10min
+&if %rcp% EQ ALL &then &s rcp rcp26 rcp45 rcp60 rcp85
+&else &s rcp %rcp%
 
-&if not [exists %outputdir%\%rcp%_extracts -dir] &then &sys md %outputdir%\%rcp%_extracts
+&do rcp &list %rcp%
+	&if %resol% EQ 30s &then &s inputdir %rootdir%\%rcp%\Global_30s
+	&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\%rcp%\global_2_5min
+	&else &if %resol% EQ 5min &then &s inputdir %rootdir%\%rcp%\global_5min
+	&else &s inputdir %rootdir%\%rcp%\global_10min
 
-&if %resol% EQ 30s &then &s outdir %outputdir%\%rcp%_extracts\Global_30s
-&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\%rcp%_extracts\Global_2_5min
-&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts\Global_5min
-&else &s outdir %outputdir%\%rcp%_extracts\Global_10min
+	&if not [exists %outputdir%\%rcp%_extracts -dir] &then &sys md %outputdir%\%rcp%_extracts
 
-&s modellist [listfile %rootdir%\%rcp%\global_30s\* -dir]
-&s nmodels [token %modellist% -count]
-&do md = 1 &to %nmodels%
-	
-	&s modname [extract %md% %modellist%]
-	&s outmoddir %outdir%\%modname%\r1i1p1
-	&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
-	
-	&do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
-		&s outmodtsdir %outmoddir%\%ts% /* grids salidas
-		&s inmodtsdir %inputdir%\%modname%\r1i1p1\%ts%	/* grids fuentes
+	&if %resol% EQ 30s &then &s outdir %outputdir%\%rcp%_extracts\Global_30s
+	&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\%rcp%_extracts\Global_2_5min
+	&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts\Global_5min
+	&else &s outdir %outputdir%\%rcp%_extracts\Global_10min
+
+	&s modellist [listfile %rootdir%\%rcp%\global_30s\* -dir]
+	&s nmodels [token %modellist% -count]
+	&do md = 1 &to %nmodels%
 		
-		&if not [exists %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt -FILE] &then
-			&do
-				&ty
-				&ty Model %modname% (%rcp%, %ts%, %resol%)
-				&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
-				&r cut_GCM.aml %inmodtsdir% %outmodtsdir% %outmodtsdir% %mask% %switch%
-				&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt
-			&end
-		&else 
-			&do
-				&ty 
-				&ty Model %modname% (%ts%, %resol%) processed
-			&end		
+		&s modname [extract %md% %modellist%]
+		&s outmoddir %outdir%\%modname%\r1i1p1
+		&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
 		
-	&end
+		&do ts &list 2020_2049 2040_2069 /* 2020_2049 2040_2069 2060_2089 2070_2099
+			&s outmodtsdir %outmoddir%\%ts% 
+			&s inmodtsdir %inputdir%\%modname%\r1i1p1\%ts%
+			
+			&if not [exists %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt -FILE] &then
+				&do
+					&ty
+					&ty Model %modname% (%rcp%, %ts%, %resol%)
+					&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
+					&r cut_GCM.aml %inmodtsdir% %outmodtsdir% %outmodtsdir% %mask% %switch%
+					&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt
+				&end
+			&else 
+				&do
+					&ty 
+					&ty Model %modname% (%ts%, %resol%) processed
+				&end		
+			
+		&end
+	&end	
 &end	
 &ty	
 &ty ======DONE!=======
