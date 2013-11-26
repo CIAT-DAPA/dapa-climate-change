@@ -3,7 +3,7 @@
 /* rootdir = Root folder where are storaged GCM CMIP5 data
 /* outputdir = Output folder
 /* mask =  Input mask data defining areas to extract
-/* rcp = escenarios: rcp26 rcp45 rcp60 rcp85
+/* rcp = escenarios: rcp26 rcp45 rcp60 rcp85. Use ALL to select all the rcps 
 /* resol = The possibilities are 30s 2.5min 5min 10min
 /* switch = Set YES to convert outputs in ESRI-Ascii files
 
