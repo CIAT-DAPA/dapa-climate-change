@@ -11,20 +11,22 @@ stop("!")
 library(rgdal); library(raster); library(maptools); data(wrld_simpl)
 
 #source functions
-src.dir <- "/mnt/a102/eejarv/scaling-effect"
+#src.dir <- "/mnt/a102/eejarv/scaling-effect"
 #src.dir <- "/nfs/a102/eejarv/scaling-effect"
+src.dir <- "~/Repositories/dapa-climate-change/trunk/scaling-effect"
 src.dir2 <- "~/Repositories/dapa-climate-change/trunk/PhD/0006-weather-data"
 #src.dir2 <- "~/PhD-work/_tools/dapa-climate-change/trunk/PhD/0006-weather-data"
 source(paste(src.dir,"/scripts/EcoCrop-model.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #i/o directories and details
-bDir <- "/mnt/a102/eejarv/scaling-effect"
+#bDir <- "/mnt/a102/eejarv/scaling-effect"
 #bDir <- "/nfs/a102/eejarv/scaling-effect"
+bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs",sep="")
-figDir <- paste(bDir,"/figures",sep="")
-cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
+figDir <- paste(bDir,"/figures_new",sep="")
+#cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
 #cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
 if (!file.exists(runDir)) {dir.create(runDir)}
