@@ -1,14 +1,15 @@
-# python AddToDatabase.py S:\gcm\cmip3\downscaled_tiled D:\CIAT\Portals\CCAFS_Climate\v5\downscaled-tiles-files.txt
+# python AddToDatabase.py S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled D:\CIAT\Portals\CCAFS_Climate\v5\downscaled-tiles-files.txt
 
 dirbase = sys.argv[1]
 dirouttxt = sys.argv[2]
 
-res = "1" ## 30s
 format = "1" ## asc
 method = "1" ##Delta Method
 fileset = "4" ##IPCC 4AR (CIAT)
 region = "1" ##global
-count = 42608 ##Last file added + 1
+count = 90296 ##Last file added + 1
+
+resDc = {"30s": "1", "2_5min": "2", "5min": "3", "10min": "4", "30min": "5", "25min": "6", "20min": "7"}
 
 sresDc = {"sres_a1b": "1", "sres_a2": "5", "sres_b1": "6"}
 
@@ -36,7 +37,8 @@ if not os.path.exists(dirouttxt):
 	dirouttxt = open(dirouttxt,'w')
 	dirouttxt.write("id", "\t", "name", "\t", "method_id", "\t", "scenario_id", "\t", "period_id", "\t", "model_id", "\t", "variable_id", "\t", "resolution_id", "\t", "format_id", "\t", "file_set_id", "\t", "region_id", "\t", "tiles", "\t", "local_url", "\t", "availability_status_id")
 	dirouttxt.close()
-	
+
+### Global
 for sres in sresDc:
 	for period in periodDc:
 		modellist = sorted(os.listdir(dirbase + "\\" + sres + "\\" + period))
@@ -59,4 +61,3 @@ for sres in sresDc:
 					count = count + 1
 
 print "Add to database ccafs-climate process done!"
-
