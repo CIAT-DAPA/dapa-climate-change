@@ -4,7 +4,7 @@
 stop("!")
 
 ###
-#do 96 sensitivity runs over the whole of West Africa
+#do 96 sensitivity runs over the whole of West Africa using obs meteorology
 ###
 
 #load packages
@@ -275,6 +275,5 @@ beanplot(bplot_tsens_h[,paste("sens",c(73:80),sep="")],
 axis(1, at=c(1:8), labels=c("-1","0","+1","+2","+3","+4","+5","+6"))
 grid()
 dev.off()
-
 
 
