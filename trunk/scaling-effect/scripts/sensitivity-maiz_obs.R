@@ -26,7 +26,7 @@ lsmDir <- paste(bDir,"/lsm",sep="")
 #cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
 #cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
-sensDir <- paste(runDir,"/sens",sep="")
+sensDir <- paste(runDir,"/sens_obs",sep="")
 if (!file.exists(sensDir)) {dir.create(sensDir)}
 
 #figure dir is local (on mbp)
@@ -42,13 +42,30 @@ msk <- raster(paste(lsmDir,"/Glam_12km_lsm.nc",sep=""))
 msk[which(msk[] < 0)] <- NA
 msk[which(msk[] > 0)] <- 1 #1:length(which(msk[] > 0))
 
+#create calendar
+if (!file.exists(paste(sensDir,"/calendar/cascade_plant.tif",sep=""))) {
+  pdate <- raster(paste(bDir,"/calendar/Maize.crop.calendar/plant.filled.asc",sep=""))
+  pdate <- crop(pdate, msk)
+  pdate <- writeRaster(pdate,paste(sensDir,"/calendar/cascade_plant.tif",sep=""),format="GTiff")
+}
+pdate <- paste(sensDir,"/calendar/cascade_plant.tif",sep="")
+
+if (!file.exists(paste(sensDir,"/calendar/cascade_harvest.tif",sep=""))) {
+  hdate <- raster(paste(bDir,"/calendar/Maize.crop.calendar/harvest.filled.asc",sep=""))
+  hdate <- crop(hdate, msk)
+  hdate <- writeRaster(hdate,paste(sensDir,"/calendar/cascade_harvest.tif",sep=""),format="GTiff")
+}
+hdate <- paste(sensDir,"/calendar/cascade_harvest.tif",sep="")
+
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
-write.csv(sensruns,paste(sensDir,"/sensitivity_runs.csv",sep=""),quote=T,row.names=F)
+if (!file.exists(paste(sensDir,"/sensitivity_runs.csv",sep=""))) {
+  write.csv(sensruns,paste(sensDir,"/sensitivity_runs.csv",sep=""),quote=T,row.names=F)
+}
 
 #resolution
-resol <- "12km_exp"
-metDir <- paste(clmDir,"/cascade_",resol,sep="")
+resol <- "calib"
+metDir <- paste(clmDir,"/global_5min",sep="")
 
 #loop the sensruns
 for (i in 1:nrow(sensruns)) {
@@ -67,34 +84,37 @@ for (i in 1:nrow(sensruns)) {
   #create the meteorology for this run
   for (m in 1:12) {
     #m <- 1
-    cat(m,"... ",sep="")
+    cat(m,"... \n",sep="")
     if (!file.exists(paste(tsensMetDir,"/tmax_",m,".tif",sep=""))) {
-      tmax <- raster(paste(metDir,"/tmax_",m,".tif",sep="")) + temp_p * 10
+      tmax <- raster(paste(metDir,"/tmax_",m,sep=""))
+      tmax <- crop(tmax, msk) + temp_p * 10
       tmax <- writeRaster(tmax,paste(tsensMetDir,"/tmax_",m,".tif",sep=""),format="GTiff",overwrite=F)
       rm(tmax)
     }
     
     if (!file.exists(paste(tsensMetDir,"/tmean_",m,".tif",sep=""))) {
-      tmean <- raster(paste(metDir,"/tmean_",m,".tif",sep="")) + temp_p * 10
+      tmean <- raster(paste(metDir,"/tmean_",m,sep=""))
+      tmean <- crop(tmean, msk) + temp_p * 10
       tmean <- writeRaster(tmean,paste(tsensMetDir,"/tmean_",m,".tif",sep=""),format="GTiff",overwrite=F)
       rm(tmean)
     }
     
     if (!file.exists(paste(tsensMetDir,"/tmin_",m,".tif",sep=""))) {
-      tmin <- raster(paste(metDir,"/tmin_",m,".tif",sep="")) + temp_p * 10
+      tmin <- raster(paste(metDir,"/tmin_",m,sep="")) + temp_p * 10
+      tmin <- crop(tmin, msk) + temp_p * 10
       tmin <- writeRaster(tmin,paste(tsensMetDir,"/tmin_",m,".tif",sep=""),format="GTiff",overwrite=F)
       rm(tmin)
     }
     
     if (!file.exists(paste(tsensMetDir,"/prec_",m,".tif",sep=""))) {
-      prec <- raster(paste(metDir,"/prec_",m,".tif",sep=""))
+      prec <- raster(paste(metDir,"/prec_",m,sep=""))
+      prec <- crop(prec, msk)
       prec <- prec * (1 + prec_p)
       prec <- writeRaster(prec,paste(tsensMetDir,"/prec_",m,".tif",sep=""),format="GTiff",overwrite=F)
       rm(prec)
     }
     g=gc(); closeAllConnections()
   }
-  cat("\n")
   
   #run EcoCrop with modified meteorology
   tkill <- 0; tmin <- 80; topmin <- 200; topmax <- 340; tmax <- 440 #trial 6
@@ -103,14 +123,11 @@ for (i in 1:nrow(sensruns)) {
   trial <- 6
   outf <- paste(tsensDir,"/run_",trial,sep="")
   
-  tpdate <- paste(runDir,"/",resol,"/calendar/plant_",resol,".tif",sep="")
-  thdate <- paste(runDir,"/",resol,"/calendar/harvest_",resol,".tif",sep="")
-  
   #run the model
   if (!file.exists(paste(outf,"/out_suit.png",sep=""))) {
     eco <- suitCalc(climPath=tsensMetDir, 
-                    sowDat=tpdate,
-                    harDat=thdate,
+                    sowDat=pdate,
+                    harDat=hdate,
                     Gmin=NA,Gmax=NA,Tkmp=tkill,Tmin=tmin,Topmin=topmin,
                     Topmax=topmax,Tmax=tmax,Rmin=rmin,Ropmin=ropmin,
                     Ropmax=ropmax,Rmax=rmax, 
@@ -136,14 +153,14 @@ for (i in 1:nrow(sensruns)) {
 
 extn <- extent(msk)
 extn@ymax <- 15
-msk2 <- crop(msk, extn)
+msk2 <- crop(raster(paste(metDir,"/tmax_1",sep="")), extn)
 xy <- as.data.frame(xyFromCell(msk2,which(!is.na(msk2[]))))
 xy <- cbind(cell=cellFromXY(msk2,xy[,c("x","y")]),xy)
 
 #load area harvested and resample to climate grid
 aharv <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep=""))
 fac <- round(xres(msk2)/xres(aharv))
-aharv <- resample(aharv,msk2,method="ngb")
+#aharv <- resample(aharv,msk2,method="ngb")
 xy$aharv <- extract(aharv, xy[,c("x","y")])
 
 outsens <- data.frame()
@@ -170,7 +187,6 @@ for (i in 1:nrow(sensruns)) {
   outdf <- data.frame(sens=i,prec=prec_p,temp=temp_p,suit_all=suit_m1,suit_har=suit_m2)
   outsens <- rbind(outsens,outdf)
 }
-write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.names=F)
 
 
 #4. calculate change in suitability with respect to the unperturbed run
@@ -183,10 +199,20 @@ outsens$reldiff_har <- (outsens$suit_har - suit0_har) / suit0_har * 100
 
 #5. calculate difference between these two (i.e. Y_all - Y_har )
 outsens$diff <- outsens$reldiff_all - outsens$reldiff_har
+outsens$lab <- ""
+outsens$lab[which(outsens$reldiff_all < 0 & outsens$reldiff_har < 0)] <- "-"
+outsens$lab[which(outsens$reldiff_all > 0 & outsens$reldiff_har > 0)] <- "+"
+outsens$lab[which(outsens$reldiff_all > 0 & outsens$reldiff_har < 0)] <- "*"
+outsens$lab[which(outsens$reldiff_all < 0 & outsens$reldiff_har > 0)] <- "*"
+outsens$lab[which(outsens$reldiff_all == 0 | outsens$reldiff_har == 0)] <- ""
+
+write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.names=F)
 
 #make a heatmap with this
-hplot_df <- outsens[,c("prec","temp","diff")]
-hplot_df$prec <- as.factor(hplot_df$prec)
+outsens <- read.csv(paste(sensDir,"/sensitivity_result.csv",sep=""))
+
+hplot_df <- outsens[,c("prec","temp","diff","lab")]
+hplot_df$prec <- as.factor(hplot_df$prec*100)
 hplot_df$temp <- as.factor(hplot_df$temp)
 
 #example
@@ -194,6 +220,7 @@ library(ggplot2)
 library(reshape2)
 
 p <- ggplot(data=hplot_df, aes(temp, prec)) + geom_tile(aes(fill = diff), colour = NA)
+p <- p + geom_text(aes(x=temp, y=prec, label=lab),fill="black")
 p <- p + scale_fill_gradient2(name="", low = "red", mid="white", high = "blue", 
                               midpoint=0, limits=c(-20,20),guide="colourbar")
 p <- p + theme(legend.key.height=unit(3.5,"cm"),legend.key.width=unit(1.25,"cm"), 
@@ -201,7 +228,7 @@ p <- p + theme(legend.key.height=unit(3.5,"cm"),legend.key.width=unit(1.25,"cm")
                axis.text=element_text(colour="black"))
 p <- p + labs(x = "Temperature change (K)", y = "Precipitation change (%)")
 
-pdf(paste(figDir,"/sensitivity_heatmap.pdf",sep=""), height=8,width=10,pointsize=14)
+pdf(paste(figDir,"/sensitivity_heatmap_obs.pdf",sep=""), height=8,width=10,pointsize=14)
 print(p)
 dev.off()
 
