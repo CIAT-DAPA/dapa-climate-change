@@ -44,7 +44,9 @@ msk[which(msk[] > 0)] <- 1 #1:length(which(msk[] > 0))
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
-write.csv(sensruns,paste(sensDir,"/sensitivity_runs.csv",sep=""),quote=T,row.names=F)
+if (!file.exists(paste(sensDir,"/sensitivity_runs.csv",sep=""))) {
+  write.csv(sensruns,paste(sensDir,"/sensitivity_runs.csv",sep=""),quote=T,row.names=F)
+}
 
 #resolution
 resol <- "12km_exp"
@@ -146,32 +148,35 @@ fac <- round(xres(msk2)/xres(aharv))
 aharv <- resample(aharv,msk2,method="ngb")
 xy$aharv <- extract(aharv, xy[,c("x","y")])
 
-outsens <- data.frame()
-for (i in 1:nrow(sensruns)) {
-  #i <- 1
-  cat("Sensitivity run",i,"\n")
-  
-  prec_p <- sensruns$PREC[i]
-  temp_p <- sensruns$TEMP[i]
-  
-  #load suitability raster
-  tsensDir <- paste(sensDir,"/sens_",i,sep="")
-  tsuit <- raster(paste(tsensDir,"/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
-  
-  #extract values for all pixels
-  suit_vals <- extract(tsuit, xy[,c("x","y")])
-  suit_m1 <- mean(suit_vals,na.rm=T)
-  
-  #extract values for aharv>=0.1 pixels
-  suit_vals <- extract(tsuit, xy[which(xy$aharv >= 0.1),c("x","y")])
-  suit_m2 <- mean(suit_vals,na.rm=T)
-  
-  #put in data.frame
-  outdf <- data.frame(sens=i,prec=prec_p,temp=temp_p,suit_all=suit_m1,suit_har=suit_m2)
-  outsens <- rbind(outsens,outdf)
+if (!file.exists(paste(sensDir,"/sensitivity_result.csv",sep=""))) {
+  outsens <- data.frame()
+  for (i in 1:nrow(sensruns)) {
+    #i <- 1
+    cat("Sensitivity run",i,"\n")
+    
+    prec_p <- sensruns$PREC[i]
+    temp_p <- sensruns$TEMP[i]
+    
+    #load suitability raster
+    tsensDir <- paste(sensDir,"/sens_",i,sep="")
+    tsuit <- raster(paste(tsensDir,"/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+    
+    #extract values for all pixels
+    suit_vals <- extract(tsuit, xy[,c("x","y")])
+    suit_m1 <- mean(suit_vals,na.rm=T)
+    
+    #extract values for aharv>=0.1 pixels
+    suit_vals <- extract(tsuit, xy[which(xy$aharv >= 0.1),c("x","y")])
+    suit_m2 <- mean(suit_vals,na.rm=T)
+    
+    #put in data.frame
+    outdf <- data.frame(sens=i,prec=prec_p,temp=temp_p,suit_all=suit_m1,suit_har=suit_m2)
+    outsens <- rbind(outsens,outdf)
+  }
+  write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.names=F)
+} else {
+  outsens <- read.csv(paste(sensDir,"/sensitivity_result.csv",sep=""))
 }
-write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.names=F)
-
 
 #4. calculate change in suitability with respect to the unperturbed run
 #[(Y(T,P) - Y(T0,P0) ) / (Y(T0,P0) *100 ]All - [(Y(T,P) - Y(T0,P0) ) / (Y(T0,P0) *100 ]0.1.
@@ -183,10 +188,16 @@ outsens$reldiff_har <- (outsens$suit_har - suit0_har) / suit0_har * 100
 
 #5. calculate difference between these two (i.e. Y_all - Y_har )
 outsens$diff <- outsens$reldiff_all - outsens$reldiff_har
+outsens$lab <- ""
+outsens$lab[which(outsens$reldiff_all < 0 & outsens$reldiff_har < 0)] <- "-"
+outsens$lab[which(outsens$reldiff_all > 0 & outsens$reldiff_har > 0)] <- "+"
+outsens$lab[which(outsens$reldiff_all > 0 & outsens$reldiff_har < 0)] <- "*"
+outsens$lab[which(outsens$reldiff_all < 0 & outsens$reldiff_har > 0)] <- "*"
+outsens$lab[which(outsens$reldiff_all == 0 | outsens$reldiff_har == 0)] <- ""
 
 #make a heatmap with this
-hplot_df <- outsens[,c("prec","temp","diff")]
-hplot_df$prec <- as.factor(hplot_df$prec)
+hplot_df <- outsens[,c("prec","temp","diff","lab")]
+hplot_df$prec <- as.factor(hplot_df$prec * 100)
 hplot_df$temp <- as.factor(hplot_df$temp)
 
 #example
@@ -194,6 +205,7 @@ library(ggplot2)
 library(reshape2)
 
 p <- ggplot(data=hplot_df, aes(temp, prec)) + geom_tile(aes(fill = diff), colour = NA)
+p <- p + geom_text(aes(x=temp, y=prec, label=lab),fill="black")
 p <- p + scale_fill_gradient2(name="", low = "red", mid="white", high = "blue", 
                               midpoint=0, limits=c(-20,20),guide="colourbar")
 p <- p + theme(legend.key.height=unit(3.5,"cm"),legend.key.width=unit(1.25,"cm"), 
