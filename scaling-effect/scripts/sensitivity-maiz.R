@@ -135,7 +135,6 @@ for (i in 1:nrow(sensruns)) {
 #1. crop to locations in 12km_exp (with top being lat=15)
 #2. calculate average of all pixels
 #3. calculate average of pixels where ahar >= 0.1
-
 extn <- extent(msk)
 extn@ymax <- 15
 msk2 <- crop(msk, extn)
