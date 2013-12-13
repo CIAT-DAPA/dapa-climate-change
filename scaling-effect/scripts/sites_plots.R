@@ -5,6 +5,7 @@ stop("!")
 
 #load packages
 library(rgdal); library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
+library(rasterVis)
 
 #source functions
 src.dir <- "~/Repositories/dapa-climate-change/trunk/scaling-effect"
@@ -124,8 +125,11 @@ ahar[which(ahar[]==0)] <- NA; ahar[which(ahar[]>1)] <- 1
 ahar@crs <- wrld_simpl@proj4string
 ahar <- resample(ahar,msk)
 
+#pdf(paste(figDir,"/sites_ahar_v2.pdf",sep=""), height=8,width=10,pointsize=14)
+#tplot <- rs_levplot2(ahar,zn=0,zx=1,nb=10,brks=c(0,0.02,0.04,0.06,.08,.1,.2,.6,.8,1,1.5),scale=NA,col_i="red",col_f="#FEE0D2",ncol=9,rev=T,leg=T)
+
 pdf(paste(figDir,"/sites_ahar.pdf",sep=""), height=8,width=10,pointsize=14)
-tplot <- rs_levplot2(ahar,0,1,nb=10,scale=NA,col_i="red",col_f="#FEE0D2",ncol=9,rev=T,leg=T)
+tplot <- rs_levplot2(ahar,zn=0,zx=1,nb=10,brks=NA,scale=NA,col_i="red",col_f="#FEE0D2",ncol=9,rev=T,leg=T)
 tplot <- tplot + layer(sp.polygons(as(s1,'SpatialPolygons'),lwd=1.8,col="blue"))
 tplot <- tplot + layer(panel.text((s1@xmin+s1@xmax)*.5, (s1@ymin+s1@ymax)*.5, "R1",cex=2))
 tplot <- tplot + layer(sp.polygons(as(s2,'SpatialPolygons'),lwd=1.8,col="blue"))
