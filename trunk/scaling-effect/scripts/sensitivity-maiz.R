@@ -163,6 +163,7 @@ for (i in 1:nrow(sensruns)) {
   #load suitability raster
   tsensDir <- paste(sensDir,"/sens_",i,sep="")
   tsuit <- raster(paste(tsensDir,"/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+  tsuit <- crop(tsuit, extn)
   
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
@@ -195,7 +196,7 @@ outsens$reldiff_all <- (outsens$suit_all - suit0_all) / suit0_all * 100
 outsens$reldiff_har <- (outsens$suit_har - suit0_har) / suit0_har * 100
 
 #5. calculate difference between these two (i.e. Y_all - Y_har )
-outsens$diff <- outsens$reldiff_all - outsens$reldiff_har
+outsens$diff <- abs(outsens$reldiff_all) - abs(outsens$reldiff_har)
 outsens$lab <- ""
 outsens$lab[which(outsens$reldiff_all < 0 & outsens$reldiff_har < 0)] <- "-"
 outsens$lab[which(outsens$reldiff_all > 0 & outsens$reldiff_har > 0)] <- "+"

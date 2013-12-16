@@ -165,11 +165,31 @@ for (i in which(!is.na(aharv_3d[]))) {
   aharv_3d[i] <- sum(aharv_c[],na.rm=T)
 }
 
+#xy
+# xxy <- as.data.frame(xyFromCell(aharv_3d,which(!is.na(aharv_3d[]))))
+# xxy$aharv <- extract(aharv_3d, xxy[,c("x","y")])
+# xxy <- xxy[order(xxy$aharv,decreasing=F),]
+# plot(1:nrow(xxy),xxy$aharv,ty="l",ylim=c(0,1),xlab="Grid box",ylab="Relative harvested area")
+# xxy$aharv <- xxy$aharv / sum(xxy$aharv)
+# xxy$cumharv <- cumsum(xxy$aharv)
+# plot(1:nrow(xxy),xxy$cumharv,ty="l",ylim=c(0,1),xlab="Grid box",ylab="Relative harvested area")
+# grid(); abline(h=0.1,col="red",lty=1)
+# plot(aharv_3d)
+# points(xxy$x[which(xxy$aharv>=0.1)], xxy$y[which(xxy$aharv>=0.1)])
+
+# aharv <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep=""))
+# aharv2 <- aharv
+# aharv2[which(aharv[] < 0.1)] <- NA
+# aharv <- crop(aharv,extn)
+# aharv <- aharv/sum(aharv[],na.rm=T)
+
 xy$aharv <- extract(aharv_3d, xy[,c("x","y")])
 
 tsuit0 <- raster(paste(sensDir,"/sens_74/","/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 suit_vals0 <- extract(tsuit0, xy[,c("x","y")])
 suit_valsh0 <- extract(tsuit0, xy[which(xy$aharv >= 0.1),c("x","y")])
+
+#points(xy$x[which(xy$aharv>=0.1)], xy$y[which(xy$aharv>=0.1)])
 
 outsens <- data.frame()
 for (i in 1:nrow(sensruns)) {
@@ -182,6 +202,10 @@ for (i in 1:nrow(sensruns)) {
   #load suitability raster
   tsensDir <- paste(sensDir,"/sens_",i,sep="")
   tsuit <- raster(paste(tsensDir,"/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+  tsuit <- crop(tsuit, extn)
+  
+  plot(tsuit)
+  points(xy[which(xy$aharv>=0.1),c("x","y")])
   
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
@@ -214,7 +238,7 @@ suit0_har <- outsens$suit_har[which(outsens$prec == 0 & outsens$temp == 0)]
 outsens$reldiff_all <- (outsens$suit_all - suit0_all) / suit0_all * 100
 outsens$reldiff_har <- (outsens$suit_har - suit0_har) / suit0_har * 100
 
-outsens$diff <- outsens$reldiff_all - outsens$reldiff_har
+outsens$diff <- abs(outsens$reldiff_all) - abs(outsens$reldiff_har)
 outsens$lab <- ""
 outsens$lab[which(outsens$reldiff_all < 0 & outsens$reldiff_har < 0)] <- "-"
 outsens$lab[which(outsens$reldiff_all > 0 & outsens$reldiff_har > 0)] <- "+"
@@ -530,6 +554,7 @@ for (i in 1:nrow(sensruns)) {
   #load suitability raster
   tsensDir <- paste(sensDir,"/sens_",i,sep="")
   tsuit <- raster(paste(tsensDir,"/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+  tsuit <- crop(tsuit,extn)
   
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
