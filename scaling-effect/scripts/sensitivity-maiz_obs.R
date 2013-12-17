@@ -226,6 +226,9 @@ write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.na
 #make a heatmap with this
 outsens <- read.csv(paste(sensDir,"/sensitivity_result.csv",sep=""))
 
+#remove T=-1
+outsens <- outsens[which(outsens$temp != -1),]
+
 #plot of sensitivity of obs runs
 hplot_df <- outsens[,c("prec","temp","reldiff_all")]
 hplot_df$prec <- as.factor(hplot_df$prec*100)

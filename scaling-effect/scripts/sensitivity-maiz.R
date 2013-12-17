@@ -207,6 +207,8 @@ outsens$lab[which(outsens$reldiff_all == 0 | outsens$reldiff_har == 0)] <- ""
 #write sensitivity output
 write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.names=F)
 
+outsens <- outsens[which(outsens$temp != -1),]
+
 #plot of sensitivity of 12km runs
 hplot_df <- outsens[,c("prec","temp","reldiff_all")]
 hplot_df$prec <- as.factor(hplot_df$prec*100)
