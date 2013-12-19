@@ -24,8 +24,8 @@ lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
 sensDir_obs <- paste(runDir,"/sens_obs",sep="")
-sensDir_3deg12km <- paste(runDir,"/sens_3deg-12km_exp",sep="")
-sensDir_3degobs <- paste(runDir,"/sens_3deg-obs",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3dobs <- paste(runDir,"/sens_3deg-obs",sep="")
 
 #figure dir is local (on mbp)
 figDir <- paste(bDir,"/figures_new",sep="")
@@ -33,12 +33,69 @@ if (!file.exists(figDir)) {dir.create(figDir)}
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
-if (!file.exists(paste(sensDir,"/sensitivity_runs.csv",sep=""))) {
-  write.csv(sensruns,paste(sensDir,"/sensitivity_runs.csv",sep=""),quote=T,row.names=F)
-}
 
 #read sensitivity results
-outsens <- read.csv(paste(sensDir,"/sensitivity_result.csv",sep=""))
+outsens_12km <- read.csv(paste(sensDir_12km,"/sensitivity_result.csv",sep=""))
+outsens_obs <- read.csv(paste(sensDir_obs,"/sensitivity_result.csv",sep=""))
+outsens_3d12 <- read.csv(paste(sensDir_3d12,"/sensitivity_result.csv",sep=""))
+outsens_3dobs <- read.csv(paste(sensDir_3dobs,"/sensitivity_result.csv",sep=""))
 
+
+#AR5 style for 12km explicit runs
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_12km_exp.pdf",sep=""), height=8,width=10,pointsize=15)
+par(mar=c(5,5,1,1),las=1,lwd=1.75)
+for (pchg in c(0,-.3,-.6)) {
+  #pchg <- 0
+  tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
+  tchg_3d12 <- outsens_3d12[which(outsens_3d12$prec == pchg & outsens_3d12$temp != -1),]
+  
+  if (pchg == 0) {tcol <- "blue"}
+  if (pchg == -.3) {tcol <- "black"}
+  if (pchg == -.6) {tcol <- "red"}
+  
+  if (pchg == 0) {
+    plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-50,20),col=tcol,
+         xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
+    points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
+    points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
+  } else {
+    points(tchg_12km$temp, tchg_12km$reldiff_all,pch=4,col=tcol,cex=1.5)
+    points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
+    points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
+  }
+}
+grid()
+legend(3.5,20,legend=c("3 degree","12 km","12 km niche"),col=c("black","black","black"),pch=c(1,4,22),bg="white")
+legend(4.75,20,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),lty=c(1,1,1),bg="white")
+dev.off()
+
+
+#AR5 style for observed
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_obs.pdf",sep=""), height=8,width=10,pointsize=15)
+par(mar=c(5,5,1,1),las=1,lwd=1.75)
+for (pchg in c(0,-.3,-.6)) {
+  #pchg <- 0
+  tchg_obs <- outsens_obs[which(outsens_obs$prec == pchg & outsens_obs$temp != -1),]
+  tchg_3dobs <- outsens_3dobs[which(outsens_3dobs$prec == pchg & outsens_3dobs$temp != -1),]
+  
+  if (pchg == 0) {tcol <- "blue"}
+  if (pchg == -.3) {tcol <- "black"}
+  if (pchg == -.6) {tcol <- "red"}
+  
+  if (pchg == 0) {
+    plot(tchg_obs$temp, tchg_obs$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-50,20),col=tcol,
+         xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
+    points(tchg_obs$temp, tchg_obs$reldiff_har,pch=22,col=tcol,cex=1.5)
+    points(tchg_3dobs$temp, tchg_3dobs$reldiff_all,pch=1,col=tcol,cex=1.5)
+  } else {
+    points(tchg_obs$temp, tchg_obs$reldiff_all,pch=4,col=tcol,cex=1.5)
+    points(tchg_obs$temp, tchg_obs$reldiff_har,pch=22,col=tcol,cex=1.5)
+    points(tchg_3dobs$temp, tchg_3dobs$reldiff_all,pch=1,col=tcol,cex=1.5)
+  }
+}
+grid()
+legend(3.5,20,legend=c("3 degree","12 km","12 km niche"),col=c("black","black","black"),pch=c(1,4,22),bg="white")
+legend(4.75,20,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),lty=c(1,1,1),bg="white")
+dev.off()
 
 
