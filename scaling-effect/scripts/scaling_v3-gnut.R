@@ -77,8 +77,13 @@ suit_sc <- raster(paste(srunDir,"/",crop_name,"_suitability.tif",sep=""))
 prec_sc <- raster(paste(srunDir,"/",crop_name,"_gsrain.tif",sep=""))
 tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 
+#matrix of sites, intervals and max/min values
+plotinfo <- data.frame(SITE=paste("S",1:2,sep=""),P_int=c(10,10),
+                       T_int=c(0.5,0.5),P_min=c(-90,-50),
+                       P_max=c(100,100),T_min=c(-4.5,-3),T_max=c(3.5,2.0))
+
 #produce the scaling plot for each point
-for (i in 1:5) {
+for (i in 1:2) {
   #i <- 1
   cat("...",i,"\n")
   text <- get(paste("s",i,sep=""))
@@ -159,6 +164,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-100,100,by=plotinfo$P_int[i]),
                               limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -210,6 +216,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-100,100,by=plotinfo$P_int[i]),
                               limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -258,6 +265,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-10,10,by=plotinfo$T_int[i]),
                               limits=c(plotinfo$T_min[i],plotinfo$T_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Mean temperature difference (K)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -305,6 +313,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-10,10,by=plotinfo$T_int[i]),
                               limits=c(plotinfo$T_min[i],plotinfo$T_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Mean temperature difference (K)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -318,7 +327,7 @@ for (i in 1:5) {
 
 
 ####
-#### obs sites S1 through S5
+#### obs sites S1 through S2
 
 #######################################################################
 #produce 3deg data by aggregation from (04km_exp, 12kmexp, 12km, and 40km)
@@ -356,6 +365,9 @@ for (vn in c("prec","tmin","tmax","tmean")) {
 
 ###
 #perform the 3deg runs
+resol <- "obs"
+cat("resolution:",resol,"\n")
+
 trunDir <- paste(runDir,"/3deg",sep="")
 if (!file.exists(trunDir)) {dir.create(trunDir)}
 
@@ -368,12 +380,17 @@ thdate2 <- raster(paste(tcalDir,"/harvest_3deg.tif",sep=""))
 #resol <- resList[1]
 odataDir <- paste(clmDir,"/cascade_3deg-",resol,sep="")
 
-trial <- 6
+trial <- 3
 outf <- paste(trunDir,"/",resol,"-run_",trial,sep="")
 
 #model parameters
-tkill <- 0; tmin <- 80; topmin <- 200; topmax <- 340; tmax <- 440 #trial 6
-rmin <- 100; ropmin <- 600; ropmax <- 1500; rmax <- 3000 #trial 6
+params <- read.csv(paste(runDir,"/parameter_sets.csv",sep=""))
+selpar <- read.csv(paste(runDir,"/runs_discard.csv",sep=""))#[,c("RUN","SEL")]
+maxauc <- selpar$RUN[which(selpar$HIGH.AUC == max(selpar$HIGH.AUC))]
+params <- params[which(params$RUN == 7),]
+
+rmin <- params$MIN[1]; ropmin <- params$OPMIN[1]; ropmax <- params$OPMAX[1]; rmax <- params$MAX[1] #trial 1
+tkill <- params$KILL[2]; tmin <- 100; topmin <- params$OPMIN[2]; topmax <- params$OPMAX[2]; tmax <- 400 #trial 1
 
 #run the model
 if (!file.exists(paste(outf,"/out_suit.png",sep=""))) {
@@ -399,13 +416,6 @@ if (!file.exists(paste(outf,"/out_suit.png",sep=""))) {
 scaleplotDir <- paste(figDir,"/scale_plots_obs",sep="")
 if (!file.exists(scaleplotDir)) {dir.create(scaleplotDir)}
 
-#matrix of sites, intervals and max/min values
-plotinfo <- data.frame(SITE=paste("S",1:5,sep=""),P_int=c(5,5,10,5,10),
-                       T_int=c(0.5,0.25,0.5,0.25,1),P_min=c(-40,-25,-20,-25,-30),
-                       P_max=c(35,40,65,35,60),T_min=c(-4,-1.5,-2.5,-1.5,-6),T_max=c(1.5,0.5,2.0,0.5,3.0))
-
-resol <- "obs"
-cat("resolution:",resol,"\n")
 trunDir <- paste(runDir,"/calib/run_",trial,sep="")
 srunDir <- paste(runDir,"/3deg/",resol,"-run_",trial,sep="")
 
@@ -419,11 +429,16 @@ suit_sc <- raster(paste(srunDir,"/",crop_name,"_suitability.tif",sep=""))
 prec_sc <- raster(paste(srunDir,"/",crop_name,"_gsrain.tif",sep=""))
 tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 
+#matrix of sites, intervals and max/min values
+plotinfo <- data.frame(SITE=paste("S",1:2,sep=""),P_int=c(10,10),
+                       T_int=c(0.25,0.5),P_min=c(-50,-70),
+                       P_max=c(100,100),T_min=c(-1.5,-3),T_max=c(1.5,1.5))
+
 
 ############################################################################
 ############################################################################
 #produce the scaling plot for each point
-for (i in 1:5) {
+for (i in 1:2) {
   #i <- 1
   cat("...",i,"\n")
   text <- get(paste("s",i,sep=""))
@@ -504,6 +519,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-100,100,by=plotinfo$P_int[i]),
                               limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -555,6 +571,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-100,100,by=plotinfo$P_int[i]),
                               limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -603,6 +620,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-10,10,by=plotinfo$T_int[i]),
                               limits=c(plotinfo$T_min[i],plotinfo$T_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Mean temperature difference (K)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
@@ -650,6 +668,7 @@ for (i in 1:5) {
                       colour="red",shape=8,size=3)
   p <- p + scale_x_continuous(breaks=seq(-10,10,by=plotinfo$T_int[i]),
                               limits=c(plotinfo$T_min[i],plotinfo$T_max[i]))
+  p <- p + scale_y_continuous(breaks=seq(0,100,by=10),limits=c(0,100))
   p <- p + labs(x="Mean temperature difference (K)",y="Suitability (%)")
   p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                  axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),

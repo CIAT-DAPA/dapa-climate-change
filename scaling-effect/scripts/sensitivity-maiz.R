@@ -153,6 +153,7 @@ suit_vals0 <- extract(tsuit0, xy[,c("x","y")])
 suit_valsh0 <- extract(tsuit0, xy[which(xy$aharv >= 0.1),c("x","y")])
 
 outsens <- data.frame()
+rawsens <- data.frame()
 for (i in 1:nrow(sensruns)) {
   #i <- 1
   cat("Sensitivity run",i,"\n")
@@ -168,23 +169,31 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0
+  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
+  suit_s1 <- sd(suitdiff, na.rm=T)
+  
+  outdfraw <- data.frame(sens=i,prec=prec_p,temp=temp_p,type="all",diff=suitdiff)
   
   #extract values for aharv>=0.1 pixels
   suit_vals <- extract(tsuit, xy[which(xy$aharv >= 0.1),c("x","y")])
   suit_m2 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_valsh0
+  suitdiff <- suit_vals - suit_valsh0 / suit_valsh0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p2 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n2 <- length(which(suitdiff < 0)) / length(suitdiff)
+  suit_s2 <- sd(suitdiff, na.rm=T)
+  
+  outdfraw <- rbind(outdfraw, data.frame(sens=i,prec=prec_p,temp=temp_p,type="har",diff=suitdiff))
   
   #put in data.frame
   outdf <- data.frame(sens=i,prec=prec_p,temp=temp_p,suit_all=suit_m1,suit_all_pos=suit_p1,
-                      suit_all_neg=suit_n1,suit_har=suit_m2,suit_har_pos=suit_p2,suit_har_neg=suit_n2)
+                      suit_all_neg=suit_n1,suit_har=suit_m2,suit_har_pos=suit_p2,suit_har_neg=suit_n2,
+                      suit_all_sd=suit_s1,suit_har_sd=suit_s2)
   outsens <- rbind(outsens,outdf)
+  rawsens <- rbind(rawsens,outdfraw)
 }
 
 #4. calculate change in suitability with respect to the unperturbed run
@@ -206,6 +215,7 @@ outsens$lab[which(outsens$reldiff_all == 0 | outsens$reldiff_har == 0)] <- ""
 
 #write sensitivity output
 write.csv(outsens,paste(sensDir,"/sensitivity_result.csv",sep=""),quote=T,row.names=F)
+write.csv(rawsens,paste(sensDir,"/sensitivity_result_raw.csv",sep=""),quote=T,row.names=F)
 
 outsens <- outsens[which(outsens$temp != -1),]
 
