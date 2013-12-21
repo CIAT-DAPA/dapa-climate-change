@@ -70,6 +70,63 @@ legend(4.75,20,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","re
 dev.off()
 
 
+###
+#AR5 style with spread for 12km explicit runs
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_12km_exp_spread.pdf",sep=""), height=8,width=10,pointsize=15)
+par(mar=c(5,5,1,1),las=1,lwd=1.75)
+for (pchg in c(0,-.3,-.6)) {
+  #pchg <- 0
+  tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
+  tchg_3d12 <- outsens_3d12[which(outsens_3d12$prec == pchg & outsens_3d12$temp != -1),]
+  
+  if (pchg == 0) {tcol <- "blue"; polcol <- rgb(red=0,green=0,blue=255,50,maxColorValue=255)}
+  if (pchg == -.3) {tcol <- "black"; polcol <- rgb(red=0,green=0,blue=0,50,maxColorValue=255)}
+  if (pchg == -.6) {tcol <- "red"; polcol <- rgb(red=255,green=0,blue=0,50,maxColorValue=255)}
+  
+  if (pchg == 0) {
+    plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-80,50),col=tcol,
+         xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
+    pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
+    pol_y <- c(tchg_12km$reldiff_all-tchg_12km$suit_all_sd,tchg_12km$reldiff_all+tchg_12km$suit_all_sd)
+    polygon(pol_x,pol_y,col=polcol,border=NA)
+    points(tchg_12km$temp, tchg_12km$reldiff_all,pch=4,col=tcol,cex=1.5)
+    
+    #points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
+    #pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
+    #pol_y <- c(tchg_12km$reldiff_har-tchg_12km$suit_har_sd,tchg_12km$reldiff_har+tchg_12km$suit_har_sd)
+    #polygon(pol_x,pol_y,col=polcol,border=NA)
+    
+    #points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
+    #pol_x <- c(tchg_3d12$temp,rev(tchg_3d12$temp))
+    #pol_y <- c(tchg_3d12$reldiff_all-tchg_3d12$suit_all_sd,tchg_3d12$reldiff_all+tchg_3d12$suit_all_sd)
+    #polygon(pol_x,pol_y,col=polcol,border=NA)
+  } else {
+    points(tchg_12km$temp, tchg_12km$reldiff_all,pch=4,col=tcol,cex=1.5)
+    pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
+    pol_y <- c(tchg_12km$reldiff_all-tchg_12km$suit_all_sd,tchg_12km$reldiff_all+tchg_12km$suit_all_sd)
+    polygon(pol_x,pol_y,col=polcol,border=NA)
+    points(tchg_12km$temp, tchg_12km$reldiff_all,pch=4,col=tcol,cex=1.5)
+    
+    #points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
+    #pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
+    #pol_y <- c(tchg_12km$reldiff_har-tchg_12km$suit_har_sd,tchg_12km$reldiff_har+tchg_12km$suit_har_sd)
+    #polygon(pol_x,pol_y,col=polcol,border=NA)
+    
+    #points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
+    #pol_x <- c(tchg_3d12$temp,rev(tchg_3d12$temp))
+    #pol_y <- c(tchg_3d12$reldiff_all-tchg_3d12$suit_all_sd,tchg_3d12$reldiff_all+tchg_3d12$suit_all_sd)
+    #polygon(pol_x,pol_y,col=polcol,border=NA)
+  }
+}
+grid()
+#legend(3.5,50,legend=c("3 degree","12 km","12 km niche"),col=c("black","black","black"),pch=c(1,4,22),bg="white")
+#legend(4.75,50,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),lty=c(1,1,1),bg="white")
+legend(5,50,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),pch=c(4,4,4),bg="white")
+dev.off()
+
+
+
+
 #AR5 style for observed
 pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_obs.pdf",sep=""), height=8,width=10,pointsize=15)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)

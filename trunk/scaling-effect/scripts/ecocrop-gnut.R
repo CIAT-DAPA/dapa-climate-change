@@ -4,7 +4,7 @@
 stop("!")
 
 ###
-#produce EcoCrop runs for maize in the Sahel for the scaling study
+#produce EcoCrop runs for groundnut in the Sahel for the scaling study
 ###
 
 #load packages
