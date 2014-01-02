@@ -13,14 +13,10 @@ source(paste(src.dir,"/scripts/EcoCrop-model.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
-runDir <- paste(bDir,"/model-runs",sep="")
+runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
-#cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
-#cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
 sensDir_obs <- paste(runDir,"/sens_obs",sep="")
@@ -28,7 +24,7 @@ sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
 sensDir_3dobs <- paste(runDir,"/sens_3deg-obs",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/figures_new",sep="")
+figDir <- paste(bDir,"/figures_gnut",sep="")
 if (!file.exists(figDir)) {dir.create(figDir)}
 
 #make sensitivity table
@@ -42,7 +38,7 @@ outsens_3dobs <- read.csv(paste(sensDir_3dobs,"/sensitivity_result.csv",sep=""))
 
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_12km_exp.pdf",sep=""), height=8,width=10,pointsize=15)
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_gnut_12km_exp.pdf",sep=""), height=8,width=10,pointsize=15)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 for (pchg in c(0,-.3,-.6)) {
   #pchg <- 0
@@ -54,7 +50,7 @@ for (pchg in c(0,-.3,-.6)) {
   if (pchg == -.6) {tcol <- "red"}
   
   if (pchg == 0) {
-    plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-50,20),col=tcol,
+    plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-80,40),col=tcol,
          xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
     points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
     points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
@@ -65,14 +61,14 @@ for (pchg in c(0,-.3,-.6)) {
   }
 }
 grid()
-legend(3.5,20,legend=c("3 degree","12 km","12 km niche"),col=c("black","black","black"),pch=c(1,4,22),bg="white")
-legend(4.75,20,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),lty=c(1,1,1),bg="white")
+legend(3.5,40,legend=c("3 degree","12 km","12 km niche"),col=c("black","black","black"),pch=c(1,4,22),bg="white")
+legend(4.75,40,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),lty=c(1,1,1),bg="white")
 dev.off()
 
 
 ###
 #AR5 style with spread for 12km explicit runs
-pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_12km_exp_spread.pdf",sep=""), height=8,width=10,pointsize=15)
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_gnut_12km_exp_spread.pdf",sep=""), height=8,width=10,pointsize=15)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 for (pchg in c(0,-.3,-.6)) {
   #pchg <- 0
@@ -99,7 +95,7 @@ for (pchg in c(0,-.3,-.6)) {
   }
 }
 grid()
-legend(5,50,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),border=NA,
+legend(4.75,50,legend=c("0% ppt","-30% ppt","-60% ppt"),col=c("blue","black","red"),border=NA,
        pch=c(4,4,4),bg="white",fill=c(rgb(red=0,green=0,blue=255,50,maxColorValue=255),
                                       rgb(red=0,green=0,blue=0,50,maxColorValue=255),
                                       rgb(red=255,green=0,blue=0,50,maxColorValue=255)))
@@ -109,14 +105,14 @@ dev.off()
 ### another version of the AR5-stlye spread one
 ###
 #AR5 style with spread for 12km explicit runs
-pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_12km_exp_spread_2.pdf",sep=""), height=8,width=10,pointsize=15)
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_gnut_12km_exp_spread_2.pdf",sep=""), height=8,width=10,pointsize=15)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 
 pchg <- -.30
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
 tchg_3d12 <- outsens_3d12[which(outsens_3d12$prec == pchg & outsens_3d12$temp != -1),]
 
-plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-50,45),col="blue",
+plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-80,45),col="blue",
      xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
 pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
 pol_y <- c(tchg_12km$reldiff_all-tchg_12km$suit_all_sd,rev(tchg_12km$reldiff_all+tchg_12km$suit_all_sd))
@@ -147,7 +143,7 @@ dev.off()
 
 ######################################################################################
 #AR5 style for observed
-pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_maize_obs.pdf",sep=""), height=8,width=10,pointsize=15)
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_gnut_obs.pdf",sep=""), height=8,width=10,pointsize=15)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 for (pchg in c(0,-.3,-.6)) {
   #pchg <- 0
