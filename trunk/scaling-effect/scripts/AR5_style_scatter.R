@@ -134,10 +134,10 @@ pol_y <- c(tchg_3d12$reldiff_all-tchg_3d12$suit_all_sd,rev(tchg_3d12$reldiff_all
 polygon(pol_x,pol_y,col=rgb(red=255,green=0,blue=0,50,maxColorValue=255),border=NA)
 
 grid()
-legend(4.5,45,legend=c("3 degree","12 km","12 km niche"),col=c("blue","black","red"),
-       pch=c(4,4,4),bg="white",fill=c(rgb(red=0,green=0,blue=255,50,maxColorValue=255),
-                                      rgb(red=0,green=0,blue=0,50,maxColorValue=255),
-                                      rgb(red=255,green=0,blue=0,50,maxColorValue=255)),border=NA)
+legend(4.5,45,legend=c("12 km niche","3 degree","12 km"),col=c("black","red","blue"),
+       pch=c(22,1,4),bg="white",fill=c(rgb(red=0,green=0,blue=0,50,maxColorValue=255),
+                                       rgb(red=255,green=0,blue=0,50,maxColorValue=255),
+                                       rgb(red=0,green=0,blue=255,50,maxColorValue=255)),border=NA)
 dev.off()
 
 
