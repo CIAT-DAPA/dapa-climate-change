@@ -108,6 +108,17 @@ for (i in 1:2) {
   tcells$PREC_DIF <- (tcells$PREC - mean(tcells$PREC)) / mean(tcells$PREC) * 100
   tcells$TMEN_DIF <- tcells$TMEN - mean(tcells$TMEN)
   
+#   plot(density(tcells$SUIT))
+#   abline(v=extract(suit_sc,text))
+#   mean(tcells$SUIT)
+#   mean(tcells$PREC)
+#   mean(tcells$TMEN)
+#   length(which(tcells$PREC < 176))/nrow(tcells)
+#   length(which(tcells$PREC > 961))/nrow(tcells)
+#   length(which(tcells$TMEN < 10))/nrow(tcells)
+#   length(which(tcells$TMEN > 28.6))/nrow(tcells)
+#   extract(suit_sc,text)
+  
   tcells010 <- tcells[which(tcells$AHAR >= 0.1),]
   tcells010$PREC_DIF <- (tcells010$PREC - mean(tcells010$PREC)) / mean(tcells010$PREC) * 100
   tcells010$TMEN_DIF <- tcells010$TMEN - mean(tcells010$TMEN)

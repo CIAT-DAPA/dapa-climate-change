@@ -83,6 +83,11 @@ suit_sc <- raster(paste(srunDir,"/",crop_name,"_suitability.tif",sep=""))
 prec_sc <- raster(paste(srunDir,"/",crop_name,"_gsrain.tif",sep=""))
 tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 
+#matrix of sites, intervals and max/min values
+plotinfo <- data.frame(SITE=paste("S",1:5,sep=""),P_int=c(5,5,10,5,10),
+                       T_int=c(0.5,0.25,0.5,0.25,1),P_min=c(-40,-25,-20,-25,-30),
+                       P_max=c(35,40,65,35,60),T_min=c(-4,-1.5,-2.5,-1.5,-6),T_max=c(1.5,0.5,2.0,0.5,3.0))
+
 #produce the scaling plot for each point
 for (i in 1:5) {
   #i <- 1
@@ -108,6 +113,13 @@ for (i in 1:5) {
   
   tcells$PREC_DIF <- (tcells$PREC - mean(tcells$PREC)) / mean(tcells$PREC) * 100
   tcells$TMEN_DIF <- tcells$TMEN - mean(tcells$TMEN)
+  
+  #plot(density(tcells$SUIT))
+  #abline(v=extract(suit_sc,text))
+  #mean(tcells$SUIT)
+  #mean(tcells$PREC)
+  #length(which(tcells$PREC < 600))/nrow(tcells)
+  #length(which(tcells$PREC > 1500))/nrow(tcells)
   
   tcells010 <- tcells[which(tcells$AHAR >= 0.1),]
   tcells010$PREC_DIF <- (tcells010$PREC - mean(tcells010$PREC)) / mean(tcells010$PREC) * 100
