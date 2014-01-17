@@ -5,7 +5,6 @@ stop("!")
 
 #load packages
 library(rgdal); library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
-library(rasterVis)
 
 #source functions
 src.dir <- "~/Repositories/dapa-climate-change/trunk/scaling-effect"
