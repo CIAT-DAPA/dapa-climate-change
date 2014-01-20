@@ -12,7 +12,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 01-Extract_PointsGCM_MS.py S:\gcm\cmip3\downscaled A1B D:\CIAT\Workspace\Soil_Kenya_shp\Soil_kenya.shp D:\Workspace\Request\Request_brodriguez 30s downscaled"
+	print "   - ie: python 01-Extract_PointsGCM_MS.py \\dapadfs\data_cluster4\cmip3\downscaled A1B D:\CIAT\Workspace\Soil_Kenya_shp\Soil_kenya.shp D:\Workspace\Request\Request_brodriguez 30s downscaled"
 	print "   Syntax	: <Extract_MaskGCM.py>, <dirbase>, <scenario>, <mask>, <dirout>, <resolution>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   scenario	: A1B, A2 or B1"

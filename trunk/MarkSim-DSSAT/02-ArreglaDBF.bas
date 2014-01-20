@@ -34,8 +34,8 @@ Sub Macro1()
     ActiveCell.FormulaR1C1 = "2"
     Range("A2:A3").Select
     Range("A3").Activate
-    Selection.AutoFill Destination:=Range("A2:A18864")
-    Range("A2:A18864").Select
+    Selection.AutoFill Destination:=Range("A2:A50000")
+    Range("A2:A50000").Select
     Range("A15").Select
     Selection.End(xlDown).Select
     Selection.End(xlUp).Select
