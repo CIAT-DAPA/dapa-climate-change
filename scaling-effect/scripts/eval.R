@@ -5,6 +5,7 @@ stop("!")
 
 #load packages
 library(rgdal); library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
+library(dismo)
 
 #source functions
 src.dir <- "~/Repositories/dapa-climate-change/trunk/scaling-effect"
@@ -126,5 +127,45 @@ pdf(paste(figDir,"/eval_suit_12km_exp.pdf",sep=""), height=8,width=10,pointsize=
 tplot <- rs_levplot2(gsuit,zn=0,zx=100,nb=20,scale="RdYlGn",ncol=11,rev=T,leg=T)
 print(tplot)
 dev.off()
+
+
+#### calculate AUC
+p01 <- extent(msk); p01@ymax <- 20
+
+#area harvested raster
+ahar <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep=""))
+ahar <- crop(ahar, p01)
+
+#suitability rasters
+gsuit <- raster(paste(runDir,"/12km_exp/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+gsuit <- crop(gsuit, p01)
+
+osuit <- raster(paste(runDir,"/calib/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+osuit <- crop(osuit, p01)
+
+#xy
+xy <- as.data.frame(xyFromCell(ahar, which(!is.na(ahar[]))))
+xy$ahar <- extract(ahar, xy[,c("x","y")])
+xy$gsuit <- extract(gsuit, xy[,c("x","y")])
+xy$osuit <- extract(osuit, xy[,c("x","y")])
+xy <- xy[which(!is.na(xy$gsuit)),]
+xy <- xy[which(!is.na(xy$osuit)),]
+
+eval_g <- evaluate(p=xy$gsuit[which(xy$ahar > 0)], a=xy$gsuit[which(xy$ahar == 0)], tr=seq(0,100,by=1))
+eval_o <- evaluate(p=xy$osuit[which(xy$ahar > 0)], a=xy$osuit[which(xy$ahar == 0)], tr=seq(0,100,by=1))
+
+#at suit=0, calculate true positive rate (tnr), false negative rate (fnr), true negative rate (tnr)
+confline <- eval_g@confusion[2,]
+tpr_g <- confline[1] / sum(confline[1:2]) * 100 #true positive rate (of positives how many did model predict well)
+fnr_g <- confline[3] / sum(confline[3:4]) * 100 #false negative rate (of negatives how many model predicted badly)
+tnr_g <- confline[4] / sum(confline[3:4]) * 100 #true negative rate (of negatives how many did model predict well)
+
+confline <- eval_o@confusion[2,]
+tpr_o <- confline[1] / sum(confline[1:2]) * 100 #true positive rate (of positives how many did model predict well)
+fnr_o <- confline[3] / sum(confline[3:4]) * 100 #false negative rate (of negatives how many model predicted badly)
+tnr_o <- confline[4] / sum(confline[3:4]) * 100 #true negative rate (of negatives how many did model predict well)
+
+
+
 
 
