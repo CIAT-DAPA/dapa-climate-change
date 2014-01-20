@@ -8,16 +8,17 @@ import arcgisscripting, os, sys, string
 
 gp = arcgisscripting.create(9.3)
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python DescribeGrids.py <dirbase> <diroutfile> <wildcard>"
-	print "   - ex: python DescribeGrids.py D:\Workspace D:\Workspace\describe.txt prec"
+	print "   - ex: python DescribeGrids.py T:\gcm\cmip5\raw\daily\historical\bcc_csm1_1\r1i1p1 D:\CIAT\Workspace\test.txt ALL"
 	sys.exit(1)
 
 # Arguments
 dirbase = sys.argv[1]
 diroutfile = sys.argv[2]
+wildcard = sys.argv[3]
 
 # Clear screen
 os.system('cls')
@@ -28,10 +29,8 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 # Create or open output txt file
 if not os.path.isfile(diroutfile):
-    outFile = open(diroutfile, "w")
-	outFile.write("GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" 
-					+ "\t" + "TOP" + "\t" + "LEFT" + "\t" + "RIGHT" + "\t" + "BOTTOM" + "\t" + "CELLSIZEX" + "\t" + "CELLSIZEY" + "\t" 
-					+ "VALUETYPE" + "\t" + "COLUMNCOUNT" + "\t" + "ROWCOUNT" + "\t" + "BANDCOUNTUSER" + "\n")
+	outFile = open(diroutfile, "w")
+	outFile.write("GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" + "\t" + "TOP" + "\t" + "LEFT" + "\t" + "RIGHT" + "\t" + "BOTTOM" + "\t" + "CELLSIZEX" + "\t" + "CELLSIZEY" + "\t" + "VALUETYPE" + "\t" + "COLUMNCOUNT" + "\t" + "ROWCOUNT" + "\t" + "BANDCOUNTUSER" + "\n")
 	outFile.close()
 	
 # Set workspace
@@ -42,7 +41,7 @@ print "\t ..listing grids into " + dirbase
 if wildcard == "ALL":
 	rasters = sorted(gp.ListRasters("*", "GRID"))
 else:	
-	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
+	rasters = sorted(gp.ListRasters(wildcard + "*", "ALL"))
 	
 # Lopping around the grids
 for raster in sorted(rasters):

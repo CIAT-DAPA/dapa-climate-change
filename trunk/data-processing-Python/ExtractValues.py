@@ -19,7 +19,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractValues.py <dirbase> <diroutfile> <points> <wildcard>"
-	print "   - ex: python ExtractValues.py \\dapadfs\data_cluster_4\observed\gridded_products\worldclim\Global_30s D:\Workspace D:\Workspace\mask\points.shp ALL"
+	print "   - ex: python ExtractValues.py D:\CIAT\Articles\maxent_nicaragua\ensemble\2040_2069 D:\CIAT\Articles\maxent_nicaragua\occurrence_files\ensemble D:\CIAT\Articles\maxent_nicaragua\occurrence_files\coffea_arabica_swd.shp bio"
 	sys.exit(1)
 
 # Arguments
@@ -64,8 +64,9 @@ dbfList = sorted(glob.glob(dirout + "\\*.dbf"))
 for dbf in dbfList:
 	InData = dirout + "\\" + "bio_1.dbf"
 	if not os.path.basename(dbf)[-9:] == "bio_1.dbf":
-		fielraster = os.path.basename(dbf)[:-4].split("_")[-2:]
-		gp.joinfield (InData, "mask", dbf, "mask", fielraster[0] + "_" + fielraster[1])
+		fielraster = os.path.basename(dbf)[:-4]
+		print fielraster
+		gp.joinfield (InData, "mask", dbf, "mask", fielraster)
 
 os.rename(dirout + "\\" + "bio_1.dbf", dirout + "\\extracts.dbf")
 

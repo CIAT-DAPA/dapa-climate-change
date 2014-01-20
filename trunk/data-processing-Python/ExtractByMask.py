@@ -10,7 +10,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractByMask.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ex: python ExtractByMask.py D:\Workspace D:\Workspace\_cut D:\Workspace\_mask\mask ALL"
+	print "   - ex: python ExtractByMask.py D:\CIAT\Projects\PNUMA\03-Projections\Avg_Anom_A2\2020_2049\no_cut D:\CIAT\Projects\PNUMA\03-Projections\Avg_Anom_A2\2020_2049 D:\CIAT\Projects\PNUMA\00-Administrative_boundaries\andesPeEcCo\andesPeruEcuadorCOL.shp ALL"
 	sys.exit(1)
 
 # Arguments
@@ -40,7 +40,7 @@ else:
 	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
 
 # Lopping around the grids
-for raster in rasterlist:
+for raster in rasters:
 	
 	# Extract by mask function
 	gp.ExtractByMask_sa(raster, mask, dirout + "\\" + os.path.basename(raster))

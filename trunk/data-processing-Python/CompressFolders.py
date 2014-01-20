@@ -7,4 +7,5 @@ for ds in dsList:
 	inZip = ds + ".zip"
 	if not os.path.exists(inZip):
 		print inZip
-		os.system("7za a " + inZip + " " + ds)
+		os.system("7za a -mmt=4 " + inZip + " " + ds)
+		os.system("rmdir /s/q " + ds)
