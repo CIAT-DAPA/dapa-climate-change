@@ -79,7 +79,7 @@ if tiled == "NO":
 						# gp.RasterToASCII_conversion(raster, OutAscii)
 					
 					if not gp.Exists(OutTiff):
-						os.system("gdal_translate -of GTiff -ot Int32 -co COMPRESS=lzw -quiet " + gp.workspace + "\\" + raster + " " + OutTiff)
+						os.system("gdal_translate -of GTiff -ot Int32 -co COMPRESS=lzw -quiet -a_nodata -9999 " + gp.workspace + "\\" + raster + " " + OutTiff)
 						
 				# os.system("rmdir /s /q " + gp.workspace)
 		
