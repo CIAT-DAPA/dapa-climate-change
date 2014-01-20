@@ -1,10 +1,10 @@
-# ---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------
 # Author: Carlos Navarro
-# Date: August 24th, 2010
-# Purpose: Describe properties of Grids Downscaled, Disaggregated, anomalies or Interpolated datasets
-# ---------------------------------------------------------------------------------------------------
+# Date: January 20th, 2014
+# Purpose: Describe properties of Grids Downscaled, Disaggregated, anomalies or Interpolated cmip5 datasets
+# ---------------------------------------------------------------------------------------------------------
 
-# python DescribeGCM_CMIP5.py T:\data\gcm\cmip5\interpolations rcp26 18
+# python 10-describe-gcm-cmip5.py \\dapadfs\data_cluster_2\gcm\cmip5\downscaled rcp26 30s
 
 import arcgisscripting, os, sys, string
 gp = arcgisscripting.create(9.3)
@@ -13,19 +13,13 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   Syntax	: DescribeGCM_CMIP3.py <dirbase> <describe file> <sres> <resolution> <period>"
-	print "   - ex: python DescribeGCM_CMIP3.py T:\data\gcm\cmip5\interpolations rcp26"
-	print "   dirbase	: Root folder where are storaged GCM data"
-	print "   descfile	: Output txt file"
-	print "   rcp		: IPCC Emission Escenario"
-	print "   res		: The possibilities are 2_5 min 5min 10min 30s"
-	print "   period	: Future 30yr interval"	
+	print "   Syntax: 10-describe-gcm-cmip5.py <dirbase> <rcp> <resolution>"
 	sys.exit(1)
 
 #Set variables 
 dirbase = sys.argv[1]
 rcp = sys.argv[2]
-mod = sys.argv[3]
+res = sys.argv[3]
 
 # Clean screen
 os.system('cls')
@@ -33,12 +27,13 @@ os.system('cls')
 #Check out Spatial Analyst extension license
 gp.CheckOutExtension("Spatial")
 
-
 #Get lists of models and periods
 periodlist = ["2020_2049", "2040_2069", "2060_2089", "2070_2099"]
-modellist = sorted(os.listdir(dirbase + "\\" + rcp))
+modellist = sorted(os.listdir(dirbase + "\\" + rcp + "\\global_" + res))
+
 print "\nAvailable models: " + str(modellist)
-descfile = dirbase +"\\"+ rcp+"_describe.txt"
+descfile = dirbase +"\\"+ rcp + "_" + res + "_describe.txt"
+
 if not os.path.isfile(descfile):
 	outFile = open(descfile, "w")
 	outFile.write("RCP" + "\t" + "MODEL" + "\t" + "PERIOD" + "\t" + "GRID" + "\t" + "MINIMUM" + "\t" + "MAXIMUM" + "\t" + "MEAN" + "\t" + "STD" 
@@ -49,7 +44,8 @@ if not os.path.isfile(descfile):
 # Looping around periods
 
 # Looping around models 
-for model in modellist[int(mod):]:
+for model in modellist:
+
 	for period in periodlist:
 	
 		print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -57,7 +53,7 @@ for model in modellist[int(mod):]:
 		print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 		
 		#Set workspace
-		gp.workspace = dirbase + "\\" + rcp + "\\" + model + "\\r1i1p1\\" + period
+		gp.workspace = dirbase + "\\" + rcp + "\\global_" + res + "\\" + model + "\\r1i1p1\\" + period
 
 		#Get a list of raster into the workspace
 		rasters = sorted(gp.ListRasters("*", "GRID"))
