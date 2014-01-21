@@ -137,6 +137,38 @@ legend(4.5,45,legend=c("12 km niche","3 degree","12 km"),col=c("black","red","bl
 dev.off()
 
 
+#with dP=0
+pdf(paste(figDir,"/AR5_style_scatter/scatterplot_AR5_style_gnut_12km_exp_spread_3.pdf",sep=""), height=8,width=10,pointsize=15)
+par(mar=c(5,5,1,1),las=1,lwd=1.75)
+
+pchg <- 0
+tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
+tchg_3d12 <- outsens_3d12[which(outsens_3d12$prec == pchg & outsens_3d12$temp != -1),]
+
+plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,6),ylim=c(-80,45),col="blue",
+     xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
+pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
+pol_y <- c(tchg_12km$reldiff_all-tchg_12km$suit_all_sd,rev(tchg_12km$reldiff_all+tchg_12km$suit_all_sd))
+polygon(pol_x,pol_y,col=rgb(red=0,green=0,blue=255,50,maxColorValue=255),border=NA)
+points(tchg_12km$temp, tchg_12km$reldiff_all,pch=4,col="blue",cex=1.5)
+
+points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col="black",cex=1.5)
+pol_x <- c(tchg_12km$temp,rev(tchg_12km$temp))
+pol_y <- c(tchg_12km$reldiff_har-tchg_12km$suit_har_sd,rev(tchg_12km$reldiff_har+tchg_12km$suit_har_sd))
+polygon(pol_x,pol_y,col=rgb(red=0,green=0,blue=0,50,maxColorValue=255),border=NA)
+
+points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col="red",cex=1.5)
+pol_x <- c(tchg_3d12$temp,rev(tchg_3d12$temp))
+pol_y <- c(tchg_3d12$reldiff_all-tchg_3d12$suit_all_sd,rev(tchg_3d12$reldiff_all+tchg_3d12$suit_all_sd))
+polygon(pol_x,pol_y,col=rgb(red=255,green=0,blue=0,50,maxColorValue=255),border=NA)
+
+grid()
+legend(4.5,45,legend=c("12 km niche","3 degree","12 km"),col=c("black","red","blue"),
+       pch=c(22,1,4),bg="white",fill=c(rgb(red=0,green=0,blue=0,50,maxColorValue=255),
+                                       rgb(red=255,green=0,blue=0,50,maxColorValue=255),
+                                       rgb(red=0,green=0,blue=255,50,maxColorValue=255)),border=NA)
+dev.off()
+
 
 
 ######################################################################################
