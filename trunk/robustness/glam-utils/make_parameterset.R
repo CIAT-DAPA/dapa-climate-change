@@ -22,7 +22,7 @@
 #bmass: *BIOMASS
 #phenol: *PHENOLOGY
 #fswsow: *INTELLIGENT SOWING
-#hts_fut: *ADDITIONAL VARIABLES CURRENTLY ONLY USED FOR GROUNDNUT AND/OR SPRING WHEAT UNDER HEAT STRESS OR FUTURE CLIMATE
+#hts_fut: *ADDITIONAL VARIABLES CURRENTLY ONLY USED FOR GROUNDNUT
 #wheat: *ADDITIONAL WHEAT (SPRING AND WINTER) VARIABLES
 #wwin: *ADDITIONAL WINTER WHEAT VARIABLES
 #maize: *ADDITIONAL MAIZE VARIABLES
@@ -30,10 +30,11 @@
 #sparei: *SPARE INTEGER VARIABLES
 #sparer: *SPARE REAL VARIABLES
 
-setwd("~/Leeds-work/quest-for-robustness/bin/glam-maize-osx")
-parFile <- "maize_param_base.txt"
-outfile <- "maize_param_test.txt"
-tpar <- GLAM_get_default("./")
+#setwd("~/Leeds-work/quest-for-robustness/bin/glam-maize-osx")
+#parFile <- "maize_param_base.txt"
+#outfile <- "maize_param_run.txt"
+#tpar <- GLAM_get_default("./")
+#pfil <- GLAM_create_parfile(params=tpar,outfile=outfile)
 
 GLAM_get_par <- function(parFile,retain="all") {
   fullset <- c("all","ygp","sim_ctr","mod_mgt","spt_mgt","soils","drn_upk","evap",
@@ -480,15 +481,19 @@ write_line <- function(parlist,outfile,format="short") {
   if (tolower(format) == "short") {
     cat(paste(sprintf("%-12s",l_name),sprintf("%-11.2f",parlist[[l_name]]$Value),
               sprintf("%-7s",parlist[[l_name]]$Meth),
-              sprintf("%1$-9.2f%2$-9.2f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$NVAL),"\n",sep=""),file=pf)
+              sprintf("%1$-9.2f%2$-9.2f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$Nval),"\n",sep=""),file=pf)
   } else if (tolower(format) == "int") {
     cat(paste(sprintf("%-12s",l_name),sprintf("%-11d",parlist[[l_name]]$Value),
               sprintf("%-7s",parlist[[l_name]]$Meth),
-              sprintf("%1$-9d%2$-9d%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$NVAL),"\n",sep=""),file=pf)
+              sprintf("%1$-9d%2$-9d%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$Nval),"\n",sep=""),file=pf)
   } else if (tolower(format) == "long") {
     cat(paste(sprintf("%-12s",l_name),sprintf("%-11.4f",parlist[[l_name]]$Value),
               sprintf("%-7s",parlist[[l_name]]$Meth),
-              sprintf("%1$-9.4f%2$-9.4f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$NVAL),"\n",sep=""),file=pf)
+              sprintf("%1$-9.4f%2$-9.4f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$Nval),"\n",sep=""),file=pf)
+  } else if (tolower(format) == "string") {
+    cat(paste(sprintf("%-12s",l_name),sprintf("%-11s",parlist[[l_name]]$Value),
+              sprintf("%-7s",parlist[[l_name]]$Meth),
+              sprintf("%1$-9s%2$-9s%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$Nval),"\n",sep=""),file=pf)
   }
   close(pf)
 }
@@ -557,7 +562,7 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
             sprintf("%-9s","x"),"\n",
             sprintf("%-12s","TETRS"),
             sprintf("%-11s",glam_param.sim_ctr$TETRS),
-            sprintf("%-16s",glam_param.sim_ctr$RunID),
+            sprintf("%-16s",glam_param.sim_ctr$CROP),
             sprintf("%-9d",glam_param.sim_ctr$IVMETH),
             sprintf("%-9d",glam_param.sim_ctr$IC02),"\n\n",
             sep=""),file=pf)
@@ -744,7 +749,7 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
   
   #additional HTS and high CO2 parameterisations
   pf <- file(outfile,open="a")
-  cat("\n*ADDITIONAL VARIABLES CURRENTLY ONLY USED FOR GROUNDNUT AND/OR SPRING WHEAT UNDER HEAT STRESS OR FUTURE CLIMATE\n",file=pf)
+  cat("\n*ADDITIONAL VARIABLES CURRENTLY ONLY USED FOR GROUNDNUT\n",file=pf)
   cat("Name        Value      Meth   Min      Max      NVAL     Comments\n",file=pf)
   close(pf)
   
@@ -839,17 +844,17 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
     glam_param.maize <- params$glam_param.maize
   }
   
-  write_line(list(RMAIZE1=glam_param.maize$RMAIZE1),outfile=outfile,format="long")
-  write_line(list(RMAIZE2=glam_param.maize$RMAIZE2),outfile=outfile,format="short")
-  write_line(list(RMAIZE3=glam_param.maize$RMAIZE3),outfile=outfile,format="short")
-  write_line(list(RMAIZE4=glam_param.maize$RMAIZE4),outfile=outfile,format="short")
-  write_line(list(RMAIZE5=glam_param.maize$RMAIZE5),outfile=outfile,format="short")
-  write_line(list(RMAIZE6=glam_param.maize$RMAIZE6),outfile=outfile,format="short")
-  write_line(list(RMAIZE7=glam_param.maize$RMAIZE7),outfile=outfile,format="short")
-  write_line(list(RMAIZE8=glam_param.maize$RMAIZE8),outfile=outfile,format="short")
-  write_line(list(RMAIZE9=glam_param.maize$RMAIZE9),outfile=outfile,format="short")
-  write_line(list(IMAIZE1=glam_param.maize$IMAIZE1),outfile=outfile,format="int")
-  write_line(list(IMAIZE2=glam_param.maize$IMAIZE2),outfile=outfile,format="int")
+  write_line(list(MASPA=glam_param.maize$MASPA),outfile=outfile,format="long")
+  write_line(list(TBMAI=glam_param.maize$TBMAI),outfile=outfile,format="short")
+  write_line(list(TOMAI=glam_param.maize$TOMAI),outfile=outfile,format="short")
+  write_line(list(TMMAI=glam_param.maize$TMMAI),outfile=outfile,format="short")
+  write_line(list(TLIMJUV=glam_param.maize$TLIMJUV),outfile=outfile,format="short")
+  write_line(list(TLIMSIL=glam_param.maize$TLIMSIL),outfile=outfile,format="short")
+  write_line(list(TLIMPFL=glam_param.maize$TLIMPFL),outfile=outfile,format="short")
+  write_line(list(TLIMGFP=glam_param.maize$TLIMGFP),outfile=outfile,format="short")
+  write_line(list(PPSEN=glam_param.maize$PPSEN),outfile=outfile,format="long")
+  write_line(list(TRLAI=glam_param.maize$TRLAI),outfile=outfile,format="string")
+  write_line(list(TRKILL=glam_param.maize$TRKILL),outfile=outfile,format="string")
   write_line(list(IMAIZE3=glam_param.maize$IMAIZE3),outfile=outfile,format="int")
   write_line(list(IMAIZE4=glam_param.maize$IMAIZE4),outfile=outfile,format="int")
   write_line(list(IMAIZE5=glam_param.maize$IMAIZE5),outfile=outfile,format="int")
@@ -903,7 +908,7 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
     glam_param.sparei <- params$glam_param.sparei
   }
   
-  write_line(list(ISPARE1=glam_param.sparei$ISPARE1),outfile=outfile,format="int")
+  write_line(list(ISPARE1=glam_param.sparei$ISPARE1),outfile=outfile,format="string")
   write_line(list(ISPARE2=glam_param.sparei$ISPARE2),outfile=outfile,format="int")
   write_line(list(ISPARE3=glam_param.sparei$ISPARE3),outfile=outfile,format="int")
   write_line(list(ISPARE4=glam_param.sparei$ISPARE4),outfile=outfile,format="int")
@@ -925,21 +930,26 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
     glam_param.sparer <- params$glam_param.sparer
   }
   
-  write_line(list(RSPARE1=glam_param.sparer$RSPARE1),outfile=outfile,format="long")
-  write_line(list(RSPARE2=glam_param.sparer$RSPARE2),outfile=outfile,format="long")
-  write_line(list(RSPARE3=glam_param.sparer$RSPARE3),outfile=outfile,format="short")
-  write_line(list(RSPARE4=glam_param.sparer$RSPARE4),outfile=outfile,format="short")
-  write_line(list(RSPARE5=glam_param.sparer$RSPARE5),outfile=outfile,format="short")
-  write_line(list(RSPARE6=glam_param.sparer$RSPARE6),outfile=outfile,format="short")
-  write_line(list(RSPARE7=glam_param.sparer$RSPARE7),outfile=outfile,format="short")
-  write_line(list(RSPARE8=glam_param.sparer$RSPARE8),outfile=outfile,format="short")
-  write_line(list(RSPARE9=glam_param.sparer$RSPARE9),outfile=outfile,format="short")
+  write_line(list(CRITPP=glam_param.sparer$CRITPP),outfile=outfile,format="short")
+  write_line(list(PPSE=glam_param.sparer$PPSE),outfile=outfile,format="short")
+  write_line(list(RUE=glam_param.sparer$RUE),outfile=outfile,format="short")
+  write_line(list(RUE_MAX=glam_param.sparer$RUE_MAX),outfile=outfile,format="short")
+  write_line(list(TSETCRIT=glam_param.sparer$TSETCRIT),outfile=outfile,format="short")
+  write_line(list(TSETZERO=glam_param.sparer$TSETZERO),outfile=outfile,format="short")
+  write_line(list(RCO2=glam_param.sparer$RCO2),outfile=outfile,format="short")
+  write_line(list(RSPARE8=glam_param.sparer$RSPARE8),outfile=outfile,format="long")
+  write_line(list(RSPARE9=glam_param.sparer$RSPARE9),outfile=outfile,format="long")
+  write_line(list(TETR3=glam_param.sparer$TETR3),outfile=outfile,format="short")
+  write_line(list(TETR4=glam_param.sparer$TETR4),outfile=outfile,format="short")
+  write_line(list(TRLAIB=glam_param.sparer$TRLAIB),outfile=outfile,format="short")
+  write_line(list(TRLAIO=glam_param.sparer$TRLAIO),outfile=outfile,format="short")
+  write_line(list(TRLAIM=glam_param.sparer$TRLAIM),outfile=outfile,format="short")
+  write_line(list(TRKILL1=glam_param.sparer$TRKILL1),outfile=outfile,format="short")
+  write_line(list(TRKILL2=glam_param.sparer$TRKILL2),outfile=outfile,format="short")
   
   #close the connection
-  #detach(pf)
-  #close(pf)
   pf <- file(outfile,open="a")
-  cat("\n",file=pf); cat("\n",file=pf)
+  cat("\n",file=pf)#; cat("\n",file=pf)
   close(pf)
   
   #return name of output file
