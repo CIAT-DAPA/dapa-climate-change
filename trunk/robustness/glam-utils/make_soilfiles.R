@@ -2,20 +2,44 @@
 #UoL / CCAFS / CIAT
 #May 2012
 
+#testing run
+#library(raster); library(rgdal)
+#wd <- "~/Leeds-work/quest-for-robustness"
+#yiDir <- paste(wd,"/data/yield_data_maize",sep="")
+#solDir <- paste(wd,"/data/soils",sep="")
+#yrs <- raster(paste(yiDir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
+#cellid <- 1792
+#xy <- xyFromCell(yrs, cellid)
+#lon <- xy[1]; lat <- xy[2]
+#rll <- raster(paste(solDir,"/rll_lr.tif",sep=""))
+#dul <- raster(paste(solDir,"/dul_lr.tif",sep=""))
+#sat <- raster(paste(solDir,"/sat_lr.tif",sep=""))
+
+#rll <- as.numeric(extract(rll, xy))
+#dul <- as.numeric(extract(dul, xy))
+#sat <- as.numeric(extract(sat, xy))
+
+#x <- data.frame(CELL=cellid,X=lon,Y=lat,RLL=rll,DUL=dul,SAT=sat,ASW=(dul-rll))
+#outfile <- paste(solDir,"/soiltypes.txt",sep="")
+#write_soil_types(x,outfile)
+
+#outfile <- paste(solDir,"/soilcodes.txt",sep="")
+#write_soilcodes(outfile)
+
 ##########################################################################################
 ########### write the soil file, with each soil code belonging to a gridcell, 
 ########### to avoid the hassle of having to assign categories to each gridcell, and hence
 ########### using the actual gridcell soil data
 ##########################################################################################
-write_soil_types <- function(x,outfile,fields=list(CELL="CELL",SAND="SAND",CLAY="CLAY",AREA_FRAC="AREA_FRAC")) {
+write_soil_types <- function(x,outfile,fields=list(CELL="CELL",RLL="RLL",DUL="DUL",SAT="SAT",ASW="ASW")) {
   #note that x must be a data frame
   
   #checks on the existence of proper fields in the input command and in the data frame (x)
-  if (length(which(toupper(names(fields)) %in% c("CELL","SAND","CLAY","AREA_FRAC"))) != 4) {
+  if (length(which(toupper(names(fields)) %in% c("CELL","RLL","DUL","SAT","ASW"))) != 5) {
     stop("field list incomplete")
   }
   
-  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 5) {
     stop("field list does not match with data.frame")
   }
   
@@ -25,47 +49,43 @@ write_soil_types <- function(x,outfile,fields=list(CELL="CELL",SAND="SAND",CLAY=
   
   #get names right
   names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
-  names(x)[which(toupper(names(x)) == toupper(fields$SAND))] <- "SAND"
-  names(x)[which(toupper(names(x)) == toupper(fields$CLAY))] <- "CLAY"
-  names(x)[which(toupper(names(x)) == toupper(fields$AREA_FRAC))] <- "AREA_FRAC"
+  names(x)[which(toupper(names(x)) == toupper(fields$RLL))] <- "RLL"
+  names(x)[which(toupper(names(x)) == toupper(fields$DUL))] <- "DUL"
+  names(x)[which(toupper(names(x)) == toupper(fields$SAT))] <- "SAT"
+  names(x)[which(toupper(names(x)) == toupper(fields$ASW))] <- "ASW"
   
   #open the connection
   sfil <- file(outfile,"w")
   cat("SOIL_CODE  RLL    RLL_L  RLL_U  DUL   DUL_L   DUL_U  SAT    SAT_L  SAT_U  ASW_L  ASW_U  SOIL_TYPE\n",file=sfil)
   
   #loop through cells
-  cnt <- 1
-  for (cll in unique(x$CELL)) {
-    cellData <- x[which(x$CELL==cll),]
-    
-    #calculate hydro characteristics
-    cellData$RLL <- apply(cbind(cellData$SAND,cellData$CLAY),1,function(x) hydroChars(x[1],x[2])$RLL)
-    cellData$DUL <- apply(cbind(cellData$SAND,cellData$CLAY),1,function(x) hydroChars(x[1],x[2])$DUL)
-    cellData$SAT <- apply(cbind(cellData$SAND,cellData$CLAY),1,function(x) hydroChars(x[1],x[2])$SAT)
-    
-    #get mean, max, min values of RLL, DUL and SAT
-    rll_m <- sum(cellData$RLL*cellData$AREA_FRAC)/sum(cellData$AREA_FRAC)
-    rll_n <- min(cellData$RLL)
-    rll_x <- max(cellData$RLL)
-    
-    dul_m <- sum(cellData$DUL*cellData$AREA_FRAC)/sum(cellData$AREA_FRAC)
-    dul_n <- min(cellData$DUL)
-    dul_x <- max(cellData$DUL)
-    
-    sat_m <- sum(cellData$SAT*cellData$AREA_FRAC)/sum(cellData$AREA_FRAC)
-    sat_n <- min(cellData$SAT)
-    sat_x <- max(cellData$SAT)
-    
-    #available soil water (DUL-RLL)
-    asw_l <- dul_n-rll_n
-    asw_u <- asw_l*1.75
-    
-    #write the output line
+  cll <- x$CELL
+  cellData <- x[which(x$CELL==cll),]
+  
+  #perturb values of RLL, DUL and SAT
+  rll_m <- cellData$RLL
+  rll_n <- rll_m * 0.9
+  rll_x <- rll_m * 1.1
+  
+  dul_m <- cellData$DUL
+  dul_n <- dul_m * 0.9
+  dul_x <- dul_m * 1.1
+  
+  sat_m <- cellData$SAT
+  sat_n <- sat_m * 0.9
+  sat_x <- sat_m * 1.1
+  
+  #available soil water (DUL-RLL)
+  asw_l <- dul_n-rll_n
+  asw_u <- asw_l*1.75
+  
+  #write the output line
+  for (cnt in 1:7) {
     out_line <- paste(sprintf("%-11s",cnt),
-                      substr(rll_m,2,4),"    ",substr(rll_n,2,4),"    ",substr(rll_x,2,4),"    ",
-                      substr(dul_m,2,4),"    ",substr(dul_n,2,4),"    ",substr(dul_x,2,4),"    ",
-                      substr(sat_m,2,4),"    ",substr(sat_n,2,4),"    ",substr(sat_x,2,4),"    ",
-                      substr(asw_l,2,4),"    ",substr(asw_u,2,4),"     ",paste("GridCell_",cll,sep=""),"\n",sep="")
+                      substr(sprintf("%3.2f",rll_m),2,4),"    ",substr(sprintf("%3.2f",rll_n),2,4),"    ",substr(sprintf("%3.2f",rll_x),2,4),"    ",
+                      substr(sprintf("%3.2f",dul_m),2,4),"    ",substr(sprintf("%3.2f",dul_n),2,4),"    ",substr(sprintf("%3.2f",dul_x),2,4),"    ",
+                      substr(sprintf("%3.2f",sat_m),2,4),"    ",substr(sprintf("%3.2f",sat_n),2,4),"    ",substr(sprintf("%3.2f",sat_x),2,4),"    ",
+                      substr(sprintf("%3.2f",asw_l),2,4),"    ",substr(sprintf("%3.2f",asw_u),2,4),"     ",paste("gridcell_",cll,sep=""),"\n",sep="")
     cat(out_line,file=sfil)
     cnt <- cnt+1
   }
@@ -77,82 +97,13 @@ write_soil_types <- function(x,outfile,fields=list(CELL="CELL",SAND="SAND",CLAY=
 
 
 ###### write soil codes
-write_soilcodes <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW")) {
-  
-  if (length(which(toupper(names(fields)) %in% c("CELL","COL","ROW"))) != 3) {
-    stop("field list incomplete")
-  }
-  
-  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 3) {
-    stop("field list does not match with data.frame")
-  }
-  
-  if (class(x) != "data.frame") {
-    stop("x must be a data.frame")
-  }
-  
-  names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
-  names(x)[which(toupper(names(x)) == toupper(fields$COL))] <- "COL"
-  names(x)[which(toupper(names(x)) == toupper(fields$ROW))] <- "ROW"
-  
+# this will write a file with only one line, and all being 1 1 1
+write_soilcodes <- function(outfile) {
   fsg <- file(outfile,"w")
   cnt <- 1; col <- 0; row <- 1
-  for (cll in cell) {
-    if (col == 10) {
-      col <- 1
-      row <- row+1
-    } else {
-      col <- col+1
-    }
-    #col <-  #x$COL[which(x$CELL == cll)]
-    #row <-  #x$ROW[which(x$CELL == cll)]
-    
-    cat(paste(sprintf("%1$4d%2$4d",row,col),
-              sprintf("%6d",cnt),"\n",sep=""),file=fsg)
-    cnt <- cnt+1
-  }
-  close(fsg)
-  return(outfile)
-}
-
-
-###### write soil codes in old Challinor et al. (2004) style
-write_soilcodes_oldstyle <- function(x,outfile,cell=c(636),fields=list(CELL="CELL",COL="COL",ROW="ROW",SOILCODE="SOILCODE")) {
-  
-  if (length(which(toupper(names(fields)) %in% c("CELL","COL","ROW","SOILCODE"))) != 4) {
-    stop("field list incomplete")
-  }
-  
-  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
-    stop("field list does not match with data.frame")
-  }
-  
-  if (class(x) != "data.frame") {
-    stop("x must be a data.frame")
-  }
-  
-  names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
-  names(x)[which(toupper(names(x)) == toupper(fields$COL))] <- "COL"
-  names(x)[which(toupper(names(x)) == toupper(fields$ROW))] <- "ROW"
-  names(x)[which(toupper(names(x)) == toupper(fields$SOILCODE))] <- "SOILCODE"
-  
-  fsg <- file(outfile,"w")
-  cnt <- 1; col <- 0; row <- 1
-  for (cll in cell) {
-    if (col == 10) {
-      col <- 1
-      row <- row+1
-    } else {
-      col <- col+1
-    }
-    #col <-  #x$COL[which(x$CELL == cll)]
-    #row <-  #x$ROW[which(x$CELL == cll)]
-    dat <-  x$SOILCODE[which(x$CELL == cll)]
-    
-    cat(paste(sprintf("%1$4d%2$4d",row,col),
-              sprintf("%6d",dat),"\n",sep=""),file=fsg)
-    cnt <- cnt+1
-  }
+  cat(paste(sprintf("%1$4d%2$4d",1,1),
+            sprintf("%4d",cnt),"\n",sep=""),file=fsg)
+  cnt <- cnt+1
   close(fsg)
   return(outfile)
 }
