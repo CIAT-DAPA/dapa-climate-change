@@ -84,17 +84,14 @@ process_isimip_wth <- function(gcm, sce) {
       if (!file.exists(paste(ogcmDir,"/",fnameout,sep=""))) {
         #cdo for remapping onto a different grid
         setwd(igcmDir)
-        system(paste("cdo remapcon2,r320x160 ",fname," ",ogcmDir,"/pr_remapped.nc",sep=""))
+        system(paste("cdo remapcon2,r320x160 ",fname," ",ogcmDir,"/",vname,"_remapped.nc",sep=""))
         setwd(ogcmDir)
         
-        #optional with bilinear interpolation
-        #system(paste("cdo remapbil,r320x160 ",fname," pr_remapbil.nc",sep=""))
-        
         #cut to Africa
-        system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," pr_remapped.nc ",fnameout,sep=""))
+        system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",vname,"_remapped.nc ",fnameout,sep=""))
         
         #garbage collection
-        system(paste("rm -f pr_remapped.nc",sep=""))
+        system(paste("rm -f ",vname,"_remapped.nc",sep=""))
         setwd(wd)
       }
     }
