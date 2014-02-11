@@ -11,11 +11,11 @@ stop("!")
 library(sp); library(raster); library(rgdal); library(maptools)
 
 #input directories
-wd <- "~/Leeds-work/quest-for-robustness"
-#wd <- "/nfs/a101/eejarv/quest-for-robustness"
+#wd <- "~/Leeds-work/quest-for-robustness"
+wd <- "/nfs/a101/eejarv/quest-for-robustness"
 srcDir <- paste(wd,"/scripts",sep="")
-metDir <- paste(wd,"/data/meteorology/ISIMIP_wth",sep="")
-#metDir <- "/nfs/a101/earak/data/ISIMIP_wth"
+#metDir <- paste(wd,"/data/meteorology/ISIMIP_wth",sep="")
+metDir <- "/nfs/a101/earak/data/ISIMIP_wth"
 yiDir <- paste(wd,"/data/yield_data_maize",sep="")
 sowDir <- paste(wd,"/data/crop_calendar_sacks",sep="")
 
@@ -38,17 +38,6 @@ yrs <- raster(paste(yiDir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
 bbox <- extent(yrs)
 if (bbox@xmin < 0)  bbox@xmin <- bbox@xmin+360
 if (bbox@xmax < 0)  bbox@xmax <- bbox@xmax+360
-
-#choose gcm and scenario
-#gcm <- gcm_list[1]
-#sce <- sce_list[1]
-
-for (sce in sce_list) {
-  for (gcm in gcm_list) {
-    cat("\n...processing rcp=",sce,"and gcm=",gcm,"\n")
-    process_isimip_wth(gcm,sce)
-  }
-}
 
 #function to process isimip weather data
 process_isimip_wth <- function(gcm, sce) {
@@ -99,4 +88,11 @@ process_isimip_wth <- function(gcm, sce) {
 }
 
 
+#loop gcm and scenario
+for (sce in sce_list) {
+  for (gcm in gcm_list) {
+    cat("\n...processing rcp=",sce,"and gcm=",gcm,"\n")
+    process_isimip_wth(gcm,sce)
+  }
+}
 
