@@ -27,7 +27,11 @@ if (!file.exists(ometDir)) {dir.create(ometDir)}
 gcm_list <- c("gfdl-esm2m","hadgem2-es","ipsl-cm5a-lr","miroc-esm-chem","noresm1-m")
 sce_list <- c("hist","rcp26","rcp45","rcp60","rcp85")
 hisp_list <- c("1950","1951-1960","1961-1970","1971-1980","1981-1990","1991-2000","2001-2005")
+hisp_list2 <- c("1950","1951-1960","1961-1970","1971-1980","1981-1990","1991-2000","2001-2004")
+
 futp_list <- c("2006-2010","2011-2020","2021-2030","2031-2040","2041-2050","2051-2060",
+               "2061-2070","2071-2080","2081-2090","2091-2099")
+futp_list2 <- c("2005-2010","2011-2020","2021-2030","2031-2040","2041-2050","2051-2060",
                "2061-2070","2071-2080","2081-2090","2091-2099")
 var_list <- c("pr","rsds","tasmax","tasmin")
 
@@ -49,16 +53,22 @@ process_isimip_wth <- function(gcm, sce) {
   #defining list of years and aspects of file names
   if (sce == "hist") {
     scename <- "hist"; year_list <- hisp_list
+    if (gcm == "hadgem2-es") {year_list <- hisp_list2}
   } else if (sce == "rcp26") {
     scename <- "rcp2p6"; year_list <- futp_list
+    if (gcm == "hadgem2-es") {year_list <- futp_list2}
   } else if (sce == "rcp45") {
     scename <- "rcp4p5"; year_list <- futp_list
+    if (gcm == "hadgem2-es") {year_list <- futp_list2}
   } else if (sce == "rcp60") {
     scename <- "rcp6p0"; year_list <- futp_list
+    if (gcm == "hadgem2-es") {year_list <- futp_list2}
   } else {
     scename <- "rcp8p5"; year_list <- futp_list
+    if (gcm == "hadgem2-es") {year_list <- futp_list2}
   }
   
+  #loop variable names and periods
   for (vname in var_list) {
     #vname <- "pr"
     cat("...processing variable",vname,"\n")
