@@ -43,13 +43,13 @@ write_wth <- function(inData,outfile,site.details) {
 # function to make weather for a number of cells
 #################################################################################
 #################################################################################
-make_wth <- function(x,wthDir,years,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE="SOW_DATE")) {
+make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="X",Y="Y")) {
   #checks
-  if (length(which(toupper(names(fields)) %in% c("CELL","X","Y","SOW_DATE"))) != 4) {
+  if (length(which(toupper(names(fields)) %in% c("CELL","X","Y"))) != 3) {
     stop("field list incomplete")
   }
   
-  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 3) {
     stop("field list does not match with data.frame")
   }
   
@@ -57,13 +57,15 @@ make_wth <- function(x,wthDir,years,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE
     stop("x must be a data.frame")
   }
   
+  if (is.na(wthDir_out)) {wthDir_out <- wthDir_in} #if not specified then o/ dir is i/ dir
+  
   names(x)[which(toupper(names(x)) == toupper(fields$CELL))] <- "CELL"
   names(x)[which(toupper(names(x)) == toupper(fields$X))] <- "X"
   names(x)[which(toupper(names(x)) == toupper(fields$Y))] <- "Y"
-  names(x)[which(toupper(names(x)) == toupper(fields$SOW_DATE))] <- "SOW_DATE"
   
-  #check if wthDir does exist
-  if (!file.exists(wthDir)) {dir.create(wthDir)}
+  #check if wthDir_out does exist. wthDir_in must exist
+  if (!file.exists(wthDir_out)) {dir.create(wthDir_out,recursive=T)}
+  if (!file.exists(wthDir_in)) {stop("wthDir_in not found, please check")}
   
   #all cells
   cell <- x$CELL
@@ -90,45 +92,19 @@ make_wth <- function(x,wthDir,years,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE
     if (row >= 10 & row < 100) {row_t <- paste("0",row,sep="")}
     if (row >= 100) {row_t <- paste(row)}
     
-    ###sowing date
-    sdate <- x$SOW_DATE[which(x$CELL == cll)]
-    hdate <- sdate+120
-    
+    #site details
     s_details <- data.frame(NAME=paste("gridcell ",cll,sep=""),INSI="AFRB",LAT=lat,LONG=lon,
                             ELEV=-99,TAV=-99,AMP=-99,REFHT=-99,WNDHT=-99)
     
     ###read in meteorology
-    metdata <- read.table(paste(wthDir,"/meteo_cell-",cll,".met",sep=""),header=T,sep="\t")
+    metdata <- read.table(paste(wthDir_in,"/meteo_cell-",cll,".met",sep=""),header=T,sep="\t")
     
     #loop through years and write weather files
     for (yr in years) {
-      #yr <- 1950
       #the below needs to be changed if you wanna write more than 1 cell
-      wthfile <- paste(wthDir,"/afrb",row_t,col_t,yr,".wth",sep="")
-      
-      #get the weather data for that particular gridcell
-      if (hdate > 365) {
-        osdate <- 31 #output planting date
-        
-        #planted in prev. year, get that weather
-        pyr <- yr-1
-        
-        #previous year
-        mdat <- metdata[which(metdata$year == pyr),]
-        mdat$year <- NULL
-        mdat_1 <- mdat[(sdate-30):365,]
-        
-        #harv year
-        mdat <- metdata[which(metdata$year == yr),]
-        mdat$year <- NULL
-        mdat_2 <- mdat[1:(365-nrow(mdat_1)),]
-        mdat <- rbind(mdat_1,mdat_2)
-      } else {
-        osdate <- sdate #output planting date
-        
-        mdat <- metdata[which(metdata$year == yr),]
-        mdat$year <- NULL
-      }
+      wthfile <- paste(wthDir_out,"/afrb",row_t,col_t,yr,".wth",sep="")
+      mdat <- metdata[which(metdata$year == yr),]
+      mdat$year <- NULL
       
       wx <- data.frame(DATE=NA,JDAY=1:365,SRAD=mdat$rsds,TMAX=mdat$tasmax,TMIN=mdat$tasmin,RAIN=mdat$pr)
       wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
@@ -138,7 +114,7 @@ make_wth <- function(x,wthDir,years,fields=list(CELL="CELL",X="X",Y="Y",SOW_DATE
       wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
     }
   }
-  return(list(WTH_DIR=wthDir,SOW_DATE=osdate))
+  return(list(WTH_DIR=wthDir_out))
 }
 
 

@@ -19,7 +19,7 @@
 
 #### Write the file with sowing dates
 #### a similar
-write_sowdates <- function(x,outfile,fields=list(CELL="CELL",SOW_DATE="SOW_DATE")) {
+make_sowdates <- function(x,outfile,fields=list(CELL="CELL",SOW_DATE="SOW_DATE")) {
   
   if (length(which(toupper(names(fields)) %in% c("CELL","SOW_DATE"))) != 2) {
     stop("field list incomplete")

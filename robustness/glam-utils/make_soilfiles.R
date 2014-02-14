@@ -31,15 +31,15 @@
 ########### to avoid the hassle of having to assign categories to each gridcell, and hence
 ########### using the actual gridcell soil data
 ##########################################################################################
-write_soil_types <- function(x,outfile,fields=list(CELL="CELL",RLL="RLL",DUL="DUL",SAT="SAT",ASW="ASW")) {
+make_soiltypes <- function(x,outfile,fields=list(CELL="CELL",RLL="RLL",DUL="DUL",SAT="SAT")) {
   #note that x must be a data frame
   
   #checks on the existence of proper fields in the input command and in the data frame (x)
-  if (length(which(toupper(names(fields)) %in% c("CELL","RLL","DUL","SAT","ASW"))) != 5) {
+  if (length(which(toupper(names(fields)) %in% c("CELL","RLL","DUL","SAT"))) != 4) {
     stop("field list incomplete")
   }
   
-  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 5) {
+  if (length(which(toupper(names(x)) %in% toupper(unlist(fields)))) != 4) {
     stop("field list does not match with data.frame")
   }
   
@@ -52,7 +52,6 @@ write_soil_types <- function(x,outfile,fields=list(CELL="CELL",RLL="RLL",DUL="DU
   names(x)[which(toupper(names(x)) == toupper(fields$RLL))] <- "RLL"
   names(x)[which(toupper(names(x)) == toupper(fields$DUL))] <- "DUL"
   names(x)[which(toupper(names(x)) == toupper(fields$SAT))] <- "SAT"
-  names(x)[which(toupper(names(x)) == toupper(fields$ASW))] <- "ASW"
   
   #open the connection
   sfil <- file(outfile,"w")
@@ -98,7 +97,7 @@ write_soil_types <- function(x,outfile,fields=list(CELL="CELL",RLL="RLL",DUL="DU
 
 ###### write soil codes
 # this will write a file with only one line, and all being 1 1 1
-write_soilcodes <- function(outfile) {
+make_soilcodes <- function(outfile) {
   fsg <- file(outfile,"w")
   cnt <- 1; col <- 0; row <- 1
   cat(paste(sprintf("%1$4d%2$4d",1,1),
