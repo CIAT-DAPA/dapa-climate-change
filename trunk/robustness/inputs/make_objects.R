@@ -10,6 +10,7 @@ stop("!")
 #1. grid cell list data frame
 #2. planting and harvesting dates
 #3. soil data
+#4. ME in which located
 
 #A second file per cropping season with:
 #1. grid cell list data frame
@@ -29,6 +30,7 @@ yiDir_main <- paste(wd,"/data/yield_data_major_maize",sep="")
 yiDir_secd <- paste(wd,"/data/yield_data_second_maize",sep="")
 sowDir <- paste(wd,"/data/crop_calendar_sacks",sep="")
 solDir <- paste(wd,"/data/soils",sep="")
+mesDir <- paste(wd,"/data/maize_MEs",sep="")
 
 #output directory
 mdataDir <- paste(wd,"/data/model_data",sep="")
@@ -65,6 +67,11 @@ row.names(xy_main) <- 1:nrow(xy_main)
 #add gridcell numbers to xy data.frame
 xy_main <- cbind(LOC=cellFromXY(yrs,xy_main[,c("x","y")]), xy_main)
 xy_main <- cbind(ID=1:nrow(xy_main), xy_main)
+
+#extract ME data
+me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres.tif",sep=""))
+xy_main$ME <- extract(me_rs, xy_main[,c("x","y")])
+xy_main <- xy_main[which(!is.na(xy_main$ME)),]
 
 #load crop calendar data
 sow_i <- raster(paste(sowDir,"/major_maize_plant.start.tif",sep=""))
@@ -153,6 +160,11 @@ row.names(xy_second) <- 1:nrow(xy_second)
 #add gridcell numbers to xy data.frame
 xy_second <- cbind(LOC=cellFromXY(yrs,xy_second[,c("x","y")]), xy_second)
 xy_second <- cbind(ID=1:nrow(xy_second), xy_second)
+
+#extract ME data
+me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres.tif",sep=""))
+xy_second$ME <- extract(me_rs, xy_second[,c("x","y")])
+xy_second <- xy_second[which(!is.na(xy_second$ME)),]
 
 #load crop calendar data
 sow_i <- raster(paste(sowDir,"/second_maize_plant.start.tif",sep=""))
