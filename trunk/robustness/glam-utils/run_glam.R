@@ -10,4 +10,7 @@
 
 src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
 source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
-source()
+source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
+source(paste(src.dir,"/glam-utils/make_sowfile.R",sep=""))
+source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
+source(paste(src.dir,"/glam-utils/make_parameterset.R",sep=""))
