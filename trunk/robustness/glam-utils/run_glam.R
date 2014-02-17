@@ -27,6 +27,8 @@
 #run_data$RLL: lower moisture limit, extracted as xy_main$RLL[which(xy_main$LOC == run_data$LOC)]
 #run_data$DUL: upper moisture limit, extracted as xy_main$DUL[which(xy_main$LOC == run_data$LOC)]
 #run_data$SAT: saturation limit, extracted as xy_main$SAT[which(xy_main$LOC == run_data$LOC)]
+#run_data$ISYR: first year of simulation
+#run_data$IEYR: last year of simulation
 
 #start of function
 run_glam <- function(run_data) {
@@ -40,8 +42,9 @@ run_glam <- function(run_data) {
   
   #load and write parameter file
   params <- GLAM_get_default(run_data$PAR_DIR)
-  params$glam_param.mod_mgt$ISYR <- 1950; params$glam_param.mod_mgt$IEYR <- 1950 #year
-  params$glam_param.mod_mgt$IASCII <- 0
+  params$glam_param.mod_mgt$IASCII <- 1 #output only to season file
+  params$glam_param.mod_mgt$ISYR <- run_data$ISYR
+  params$glam_param.mod_mgt$IEYR <- run_data$IEYR
   params$glam_param.sim_ctr$SMLON <- run_data$LON
   params$glam_param.sim_ctr$CROP <- run_data$CROP
   parfile <- GLAM_create_parfile(params, paste(run_dir,"/",run_data$CROP,"_param_run.txt",sep=""))
