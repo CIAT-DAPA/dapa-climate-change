@@ -8,10 +8,16 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-&if %resol% EQ 30s &then &s inputdir %rootdir%\%rcp%\Global_30s &s ncountrys 198
-&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\%rcp%\global_2_5min &s ncountrys 19
-&else &if %resol% EQ 5min &then &s inputdir %rootdir%\%rcp%\global_5min &s ncountrys 6
-&else &s inputdir %rootdir%\%rcp%\global_10min &s ncountrys 6
+&if %resol% EQ 30s &then &s inputdir %rootdir%\%rcp%\Global_30s
+&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\%rcp%\global_2_5min
+&else &if %resol% EQ 5min &then &s inputdir %rootdir%\%rcp%\global_5min
+&else &s inputdir %rootdir%\%rcp%\global_10min
+
+&if %resol% EQ 30s &then &s ncountrys 198
+&else &if %resol% EQ 2.5min &then &s ncountrys 19
+&else &if %resol% EQ 5min &then &s ncountrys 6
+&else &s ncountrys 6
+
 
 &amlpath .
 &s bdir [show &amlpath]
@@ -26,12 +32,8 @@
 &s outputdir %outputdir%\%rcp%
 
 &if not [exists %outputdir% -dir] &then &sys md %outputdir%
-	
-/*&s countrylist [listfile %admdir%\listcountries_%resol%.list]
-/*&ty %countrylist%
 
-&s openlist [OPEN %admdir%\listcountries_%resol%.list OPENSTATUS -READ]
-
+&s openlist [OPEN %admdir%\%rcp%_listcountries_%resol%.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
 	&do
@@ -41,7 +43,7 @@
 	&end
 &else
 
-	&do nc = 1 &to ncountrys
+	&do nc = 1 &to %ncountrys%
 
 		&s countryname [READ %openlist% READSTATUS]
 		&s country [before %countryname% _]
@@ -76,7 +78,6 @@
 		&end		
 		
 	&end
-
 
 
 &ty
