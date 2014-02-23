@@ -53,8 +53,13 @@ glam_yield[cellFromXY(glam_yield,xy)] <- NA
 
 yieldvals <- glam_yield[which(!is.na(glam_yield[]))]
 this <- hist(yieldvals, breaks=seq(0,max(yieldvals,na.rm=T)+50,by=500), plot=F)
+
+pdf(file=paste(figDir,"/maize_glam_histogram.pdf",sep=""),height=6,width=8,pointsize=12,family="Helvetica")
+par(mar=c(5,5,1,1),las=1,lwd=1.75)
 plot(this$mids, this$counts/sum(this$counts),ty="l", col="blue", 
-     ylim=c(0,.6), xlim=c(0,4000), xlab="Yield (ton / ha)", ylab="Fractional count")
+     ylim=c(0,.6), xlim=c(0,4000), xlab="Yield (kg / ha)", ylab="Fractional count")
+grid()
+dev.off()
 
 #map of observed yield data
 oyield <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_yield.tif",sep=""))
