@@ -173,7 +173,7 @@ xy$aharv <- extract(aharv_3d, xy[,c("x","y")])
 
 tsuit0 <- raster(paste(sensDir,"/sens_74/","/run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 suit_vals0 <- extract(tsuit0, xy[,c("x","y")])
-suit_valsh0 <- extract(tsuit0, xy[which(xy$aharv >= 0.1),c("x","y")])
+suit_valsh0 <- extract(tsuit0, xy[which(xy$aharv >= 0.05),c("x","y")])
 
 #points(xy$x[which(xy$aharv>=0.1)], xy$y[which(xy$aharv>=0.1)])
 
@@ -203,7 +203,7 @@ for (i in 1:nrow(sensruns)) {
   outdfraw <- data.frame(sens=i,prec=prec_p,temp=temp_p,type="all",diff=suitdiff)
   
   #extract values for aharv>=0.1 pixels
-  suit_vals <- extract(tsuit, xy[which(xy$aharv >= 0.1),c("x","y")])
+  suit_vals <- extract(tsuit, xy[which(xy$aharv >= 0.05),c("x","y")])
   suit_m2 <- mean(suit_vals,na.rm=T)
   suitdiff <- suit_vals - suit_valsh0 / suit_valsh0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
