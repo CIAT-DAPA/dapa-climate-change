@@ -37,7 +37,7 @@ mdataDir <- paste(wd,"/data/model_data",sep="")
 if (!file.exists(mdataDir)) {dir.create(mdataDir)}
 
 #dodgy points with unrealistic crop yield estimates
-dodgypoints <- cbind(x=c(28.6875,20.8125,21.9375),y=c(-23.0625,-25.3125,-26.4375))
+dodgypoints <- cbind(x=c(28.125,21.375,20.250),y=c(-23.0625,-26.4375,-25.3125))
 
 
 ###########################################################################################
@@ -69,7 +69,7 @@ xy_main <- cbind(LOC=cellFromXY(yrs,xy_main[,c("x","y")]), xy_main)
 xy_main <- cbind(ID=1:nrow(xy_main), xy_main)
 
 #extract ME data
-me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres.tif",sep=""))
+me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
 xy_main$ME <- extract(me_rs, xy_main[,c("x","y")])
 xy_main <- xy_main[which(!is.na(xy_main$ME)),]
 
@@ -162,7 +162,7 @@ xy_second <- cbind(LOC=cellFromXY(yrs,xy_second[,c("x","y")]), xy_second)
 xy_second <- cbind(ID=1:nrow(xy_second), xy_second)
 
 #extract ME data
-me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres.tif",sep=""))
+me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
 xy_second$ME <- extract(me_rs, xy_second[,c("x","y")])
 xy_second <- xy_second[which(!is.na(xy_second$ME)),]
 
