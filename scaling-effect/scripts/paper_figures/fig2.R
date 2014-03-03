@@ -51,7 +51,7 @@ tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp !=
 tchg_3d12 <- outsens_3d12[which(outsens_3d12$prec == pchg & outsens_3d12$temp != -1),]
 
 tcol <- "blue"
-plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,50),col=tcol,
+plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-60,50),col=tcol,
      xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
 points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
