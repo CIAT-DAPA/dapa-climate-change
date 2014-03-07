@@ -210,12 +210,12 @@ GCMAveragePreInd <- function(rcp='rcp85', baseline='historical', baseDir="L:/gcm
 }
 
 
-# rcp <- "rcp85"
-# baseline <- "historical"
-# baseDir <- "L:/gcm/cmip5/raw/monthly"
-# trunkDir <- "G:/_scripts/dapa-climate-change/IPCC-CMIP5/data"
-# outDir <- "G:/cenavarro/Request/lparker"
-# cruDir <- "S:/data/observed/gridded_products/cru-ts-v3-21/20yr_averages/1980_2000"
+rcp <- "rcp85"
+baseline <- "historical"
+baseDir <- "L:/gcm/cmip5/raw/monthly"
+trunkDir <- "G:/_scripts/dapa-climate-change/IPCC-CMIP5/data"
+outDir <- "G:/cenavarro/Request/lparker"
+cruDir <- "S:/observed/gridded_products/cru-ts-v3-21/20yr_averages/1980_2000"
 
 GCMDisaggregate <- function(rcp='rcp85', baseDir="L:/gcm/cmip5/raw/monthly", trunkDir='G:/_scripts/dapa-climate-change/IPCC-CMIP5/data', outDir='G:/cenavarro/Request/lparker', cruDir="S:/data/observed/gridded_products/cru-ts-v3-21/20yr_averages/1980_2000") {
 
@@ -271,8 +271,8 @@ GCMDisaggregate <- function(rcp='rcp85', baseDir="L:/gcm/cmip5/raw/monthly", tru
           if (!file.exists(avgDir)) {dir.create(avgDir)}
 
           # Define start and end year
-          staYear <- "2059"
-          endYear <- "2079"
+          staYear <- "2056"
+          endYear <- "2076"
           
           if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, "/", gcm, sep=""))) 
           {dir.create(paste(avgDir, "/", staYear, "_", endYear, "/", gcm, sep=""), recursive=TRUE)}
@@ -313,13 +313,16 @@ GCMDisaggregate <- function(rcp='rcp85', baseDir="L:/gcm/cmip5/raw/monthly", tru
                 }
                 
                 
-                rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90, ncols=720, nrows=360)
+                # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90, ncols=720, nrows=360)
+                rs <- raster(xmn=-26, xmx=64, ymn=-47, ymx=38, ncols=180, nrows=170)
                 mthNcAvg <- setExtent(mthNcAvg, extent(rs), keepres=FALSE, snap=TRUE)
                 mthNcAvgRes  <- resample(mthNcAvg, rs, method='ngb')
                 
                 cruAsc <- raster(paste(cruDir, "/", var, "_", mthMod, ".asc", sep=""))
+                cruAsc <- setExtent(cruAsc, extent(rs), keepres=FALSE, snap=TRUE)
+                cruAscRes  <- resample(cruAsc, rs, method='ngb')
                 
-                dissAvg <- cruAsc + mthNcAvgRes
+                dissAvg <- cruAscRes + mthNcAvgRes
                 
 #                 dissAvg[][dissAvg[]<0]=0
                 
@@ -356,11 +359,11 @@ GCMDisaggregate <- function(rcp='rcp85', baseDir="L:/gcm/cmip5/raw/monthly", tru
 rcp <- "rcp85"
 ens <- "r1i1p1"
 baseline <- "historical"
-baseDir <- "Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies"
-outDir <- "Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies_africa"
+baseDir <- "X:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies"
+outDir <- "X:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies_africa"
 otp <- "00-monthly-data-functions-preindustrial.R"
 var <- "tmean"
-region <- "Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies_africa/_region/af0.shp"
+region <- "X:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies_africa/_region/af0.shp"
 
 GCM_Cut_Daily_Preindustrial <- function(baseDir="Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/anomalies", ens="r1i1p1", rcp="historical", xmin=-18, xmax=-11, ymin=12, ymax=17, staYr=1850, endYr=2100, outDir="D:/CIAT/Workspace/cmip5_daily_test", shift="yes") {
   
@@ -388,42 +391,43 @@ GCM_Cut_Daily_Preindustrial <- function(baseDir="Y:/VULNERABILITY_ANALYSIS_CC_SA
     
     model <- basename(gcm)
     
-    yrList <- list.dirs(paste(gcm, "/", ens, sep=""), recursive = FALSE, full.names = FALSE)
+#     yrList <- list.dirs(paste(gcm, "/", ens, sep=""), recursive = FALSE, full.names = FALSE)
       
-    for (yrDir in yrList) {
+    for (yrDir in 1850:2099) {
     
-      nc <- paste(yrDir, "/", var, "_ann.nc", sep="")
-      outNcDir <- paste(outDir, "/", rcp, "/", model, "/", ens, "/", basename(yrDir), sep="")
+      nc <- paste(gcm, "/", ens, "/", yrDir, "/", var, "_ann.nc", sep="")
+      outNcDir <- paste(outDir, "/", rcp, "/", model, "/", ens, "/", yrDir, sep="")
       ncName <- basename(nc)
       
       ## Cut
       
       if (!file.exists(paste(outNcDir))) {dir.create(outNcDir, recursive=TRUE)}
       
+      if (file.exists(nc)) {
         outNc <- paste(outNcDir, "/", ncName, sep="")
         
         if (!file.exists(paste(outNc))) {
           
           ncCrop <- mask(raster(nc), region)
           ncDay <- writeRaster(ncCrop, outNc, format='CDF', overwrite=TRUE)
-          cat("\t\t ", var, " ", year, " ", doy, " \n")
+          cat("\t\t ", yrDir, " ", model, " \n")
           
-        }   
-           
-        
+        }
       }
-  
+    }
+
     cat("\n Cut nc files for: ", rcp, " ", model, " ", ens, " done!\n\n")
     
   }
   
   for (gcm in gcmList) {
     
-    for (yr in 1850:2099){
+    model <- basename(gcm)
+    for (yrDir in 1850:2099){
       
       outNc <- paste(outDir, "/", rcp, "/", model, "/", ens, "/", yrDir, "/", var, "_ann.nc", sep="")
         
-      if (!file.exists(paste(outNc))) {
+      if (file.exists(paste(outNc))) {
           
         yrNcAnomMean <- cellStats(raster(outNc), stat='mean', na.rm=TRUE)
     
@@ -434,7 +438,7 @@ GCM_Cut_Daily_Preindustrial <- function(baseDir="Y:/VULNERABILITY_ANALYSIS_CC_SA
       }
         
       
-      if (yr == "1850"){
+      if (yrDir == "1850"){
         
         dataMatrix_2 <- c(model, ens, rcp, yrNcAnomMean)
         
@@ -443,7 +447,7 @@ GCM_Cut_Daily_Preindustrial <- function(baseDir="Y:/VULNERABILITY_ANALYSIS_CC_SA
         dataMatrix_2 <- c(dataMatrix_2,yrNcAnomMean)
       }
       
-      cat(" .>", yr, "\tdone!\n")
+      cat(" .>", yrDir, "\tdone!\n")
       
       
     }
