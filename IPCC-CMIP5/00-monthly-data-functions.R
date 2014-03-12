@@ -978,3 +978,124 @@ GCMCalcFutureYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly",
   } 
 cat("GCM Future Calcs Process Done!")
 }
+
+
+
+
+
+#################################################################################################################
+# Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
+#################################################################################################################
+GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1")  {
+  
+  cat(" \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat("XXXXXXXXX GCM FUTURE CALC YEARLY CALCULATION XXXXXXXX \n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
+  cat(" \n")
+  
+  # List of variables and months
+  varList <- c("prec", "tmax", "tmin")
+  periodList <- c("2020_2049", "2040_2069", "2060_2089")
+  
+  # Get a list of month with and withour 0 in one digit numbers
+  monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+  monthListMod <- c(1:12)
+  
+  # Set number of days by month
+  ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+  
+  # Combirn number of month and days in one single data frame
+  ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
+  names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
+  
+  gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
+  
+  futDir <- paste(baseDir, "/", rcp, sep="")
+  
+  # Loop around gcms and ensembles
+  for (i in 1:nrow(gcmStats)){
+    
+    # Don't include variables without all three variables
+    if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
+      
+      if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
+        
+        if(paste(as.matrix(gcmStats)[i,3]) == "r1i1p1"){
+         
+          # Get gcm and ensemble names
+          gcm <- paste(as.matrix(gcmStats)[i,2])
+          
+          
+          
+          
+          
+          for (period in periodList) {
+              
+            futAvgDir <- paste(baseDir, "/", rcp, "/", gcm, "/", ens, "/average/", period, sep="")
+            
+            cat("\tFuture Mean Temp Calcs over: ", rcp, " ", gcm, " ", ens, " ", period, " \n\n")
+            
+            # Loop around months
+            for (mth in monthList) {
+              
+              if (!file.exists(paste(futAvgDir, "/tmean_", mth, ".nc", sep=""))) {
+              
+                tmaxMth <- raster(paste(futAvgDir, "/tmax_", mth, ".nc", sep=""))
+                tminMth <- raster(paste(futAvgDir, "/tmin_", mth, ".nc", sep=""))
+                
+                tmeanMth <- tmaxMth - tminMth
+                tmeanMth <- writeRaster(tmeanMth, paste(futAvgDir, "/tmean_", mth, ".nc", sep=""), format='CDF', overwrite=TRUE)
+                
+              
+              cat(" .> ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+              
+              } else {cat(" .> ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
+              
+            }
+
+            if (!file.exists(paste(futAvgDir, "/tmean_jja.nc", sep=""))) {
+              
+            precAnn <- lapply(paste(futAvgDir, "/prec_", 1:12, ".nc", sep=""), FUN=raster)
+            precAnn <- sum(stack(precAnn))
+            precAnn <- writeRaster(precAnn, paste(futAvgDir, "/prec_ann.nc", sep=""), format='CDF', overwrite=T)
+            cat(" .> ", paste("\t prec_ann", sep=""), "\tdone!\n")
+            
+            precDJF <- lapply(paste(futAvgDir, "/prec_", c(12,1:2), ".nc", sep=""), FUN=raster)
+            precDJF <- sum(stack(precDJF))
+            precDJF <- writeRaster(precDJF, paste(futAvgDir, "/prec_djf.nc", sep=""), format='CDF', overwrite=T)
+            cat(" .> ", paste("\t prec_djf", sep=""), "\tdone!\n")
+            
+            precJJA <- lapply(paste(futAvgDir, "/prec_", 6:8, ".nc", sep=""), FUN=raster)
+            precJJA <- sum(stack(precJJA))
+            precJJA <- writeRaster(precJJA, paste(futAvgDir, "/prec_jja.nc", sep=""), format='CDF', overwrite=T)
+            cat(" .> ", paste("\t prec_jja", sep=""), "\tdone!\n")
+            
+            tmeanAnn <- lapply(paste(futAvgDir, "/tmean_", 1:12, ".nc", sep=""), FUN=raster)
+            tmeanAnn <- mean(stack(tmeanAnn))
+            tmeanAnn <- writeRaster(tmeanAnn, paste(futAvgDir, "/tmean_ann.nc", sep=""), format='CDF', overwrite=T)
+            cat(" .> ", paste("\t tmean_ann", sep=""), "\tdone!\n")
+            
+            tmeanDJF <- lapply(paste(futAvgDir, "/tmean_", c(12,1:2), ".nc", sep=""), FUN=raster)
+            tmeanDJF <- mean(stack(tmeanDJF))
+            tmeanDJF <- writeRaster(tmeanDJF, paste(futAvgDir, "/tmean_djf.nc", sep=""), format='CDF', overwrite=T)
+            cat(" .> ", paste("\t tmean_djf", sep=""), "\tdone!\n")
+            
+            tmeanJJA <- lapply(paste(futAvgDir, "/tmean_", 6:8, ".nc", sep=""), FUN=raster)
+            tmeanJJA <- mean(stack(tmeanJJA))
+            tmeanJJA <- writeRaster(tmeanJJA, paste(futAvgDir, "/tmean_jja.nc", sep=""), format='CDF', overwrite=T)
+            cat(" .> ", paste("\t tmean_jja", sep=""), "\tdone!\n")
+            
+            }
+          }
+        }
+      }
+    }
+  }
+
+  cat("GCM Future Calcs Process Done!")
+  
+}
+
+
+
