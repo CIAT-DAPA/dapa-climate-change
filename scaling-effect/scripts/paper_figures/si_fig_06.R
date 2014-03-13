@@ -12,19 +12,15 @@ library(rgdal); library(raster); library(maptools); library(rasterVis); data(wrl
 library(ggplot2); library(reshape2)
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
-#cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
-#cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
 sensDir <- paste(runDir,"/sens",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #model run details
 trial <- 6
@@ -76,7 +72,7 @@ dev.off()
 
 ###
 #3 deg heatmap
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #read in sensitivity output
 outsens <- read.csv(paste(sensDir,"/sensitivity_result.csv",sep=""))

@@ -14,15 +14,13 @@ source(paste(src.dir,"/scripts/EcoCrop-model.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #model run details
 trial <- 3
@@ -37,11 +35,8 @@ msk[which(msk[] > 0)] <- 1 #1:length(which(msk[] > 0))
 msk2 <- raster(paste(lsmDir,"/3deg_mask.tif",sep=""))
 
 #new points
-s1 <- extent(-16.5,-13.5,12,15)
-s2 <- extent(7.5,10.5,12,15)
-
-#s1 <- extent(-16.5,-13.5,15,18)
-#s2 <- extent(7.5,10.5,15,18)
+g1 <- extent(-16.5,-13.5,12,15)
+g2 <- extent(7.5,10.5,12,15)
 
 p00 <- extent(msk)
 p00@ymax <- 15
@@ -61,7 +56,7 @@ scaleplotDir <- figDir
 resol <- "12km_exp"
 cat("resolution:",resol,"\n")
 trunDir <- paste(runDir,"/",resol,"/run_",trial,sep="")
-srunDir <- paste(runDir,"/3deg/",resol,"-run_",trial,sep="")
+srunDir <- paste(runDir,"/3deg/12km_exp_bil-run_",trial,sep="")
 
 #load suitability, rain and temp raster ---at high resolution
 suit <- raster(paste(trunDir,"/",crop_name,"_suitability.tif",sep=""))
@@ -74,7 +69,7 @@ prec_sc <- raster(paste(srunDir,"/",crop_name,"_gsrain.tif",sep=""))
 tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 
 #matrix of sites, intervals and max/min values
-plotinfo <- data.frame(SITE=paste("S",1:2,sep=""),P_int=c(20,20),
+plotinfo <- data.frame(SITE=paste("G",1:2,sep=""),P_int=c(20,20),
                        T_int=c(1,1),P_min=c(-90,-90),
                        P_max=c(90,90),T_min=c(-4,-4),T_max=c(4,4))
 
@@ -82,7 +77,7 @@ plotinfo <- data.frame(SITE=paste("S",1:2,sep=""),P_int=c(20,20),
 ### G1
 i <- 1
 cat("...",i,"\n")
-text <- get(paste("s",i,sep=""))
+text <- get(paste("g",i,sep=""))
 xy <- c(x=(text@xmin+text@xmax)*.5,y=(text@ymin+text@ymax)*.5)
 suit_p <- crop(suit,text); prec_p <- crop(prec,text); tmen_p <- crop(tmen,text) * 0.1
 ahar_p <- crop(ahar,text)
@@ -217,7 +212,7 @@ dev.off()
 ### G2
 i <- 2
 cat("...",i,"\n")
-text <- get(paste("s",i,sep=""))
+text <- get(paste("g",i,sep=""))
 xy <- c(x=(text@xmin+text@xmax)*.5,y=(text@ymin+text@ymax)*.5)
 suit_p <- crop(suit,text); prec_p <- crop(prec,text); tmen_p <- crop(tmen,text) * 0.1
 ahar_p <- crop(ahar,text)

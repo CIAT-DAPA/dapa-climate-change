@@ -10,15 +10,13 @@ library(rgdal); library(raster); library(maptools); library(rasterVis); data(wrl
 library(ggplot2); library(plyr)
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #model run details
 trial <- 6
@@ -31,7 +29,7 @@ msk[which(msk[] > 0)] <- 1 #1:length(which(msk[] > 0))
 msk2 <- raster(paste(lsmDir,"/3deg_mask.tif",sep=""))
 
 #new points
-s2 <- extent(7.5,10.5,12,15)
+g2 <- extent(7.5,10.5,12,15)
 
 p00 <- extent(msk)
 p00@ymax <- 15
@@ -51,7 +49,7 @@ scaleplotDir <- figDir
 resol <- "12km_exp"
 cat("resolution:",resol,"\n")
 trunDir <- paste(runDir,"/",resol,"/run_",trial,sep="")
-srunDir <- paste(runDir,"/3deg/",resol,"-run_",trial,sep="")
+srunDir <- paste(runDir,"/3deg/12km_exp_bil-run_",trial,sep="")
 
 #load suitability, rain and temp raster ---at high resolution
 suit <- raster(paste(trunDir,"/",crop_name,"_suitability.tif",sep=""))
@@ -64,16 +62,16 @@ prec_sc <- raster(paste(srunDir,"/",crop_name,"_gsrain.tif",sep=""))
 tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 
 #matrix of sites, intervals and max/min values
-plotinfo <- data.frame(SITE=paste("S",1:5,sep=""),P_int=c(NA,20,20,NA,NA),
-                       T_int=c(NA,0.5,0.5,NA,NA),P_min=c(NA,-90,-90,NA,NA),
-                       P_max=c(NA,90,90,NA,NA),T_min=c(NA,-2,-2,NA,NA),
-                       T_max=c(NA,2,2,NA,NA))
+plotinfo <- data.frame(SITE=paste("M",1:2,sep=""),P_int=c(20,20),
+                       T_int=c(0.5,0.5),P_min=c(-90,-90),
+                       P_max=c(90,90),T_min=c(-2,-2),
+                       T_max=c(2,2))
 
 #produce the scaling plot for each point
 ### G2
 i <- 2
 cat("...",i,"\n")
-text <- get(paste("s",i,sep=""))
+text <- get(paste("g",i,sep=""))
 xy <- c(x=(text@xmin+text@xmax)*.5,y=(text@ymin+text@ymax)*.5)
 suit_p <- crop(suit,text); prec_p <- crop(prec,text); tmen_p <- crop(tmen,text) * 0.1
 ahar_p <- crop(ahar,text)

@@ -13,16 +13,12 @@ source(paste(src.dir,"/scripts/EcoCrop-model.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
-#cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
-#cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 ################################################################################################
 ########## for maize

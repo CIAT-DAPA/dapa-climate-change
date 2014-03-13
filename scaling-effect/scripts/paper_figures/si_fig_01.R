@@ -13,17 +13,13 @@ source(paste(src.dir,"/scripts/EcoCrop-model.R",sep=""))
 source(paste(src.dir2,"/scripts/GHCND-GSOD-functions.R",sep=""))
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
-#cascadeDir <- "/mnt/see-archive-12_a4scratch/eebjp"
-#cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #get mask from CASCADE output
 msk <- raster(paste(lsmDir,"/Glam_12km_lsm.nc",sep=""))
@@ -98,10 +94,6 @@ tplot <- rs_levplot2(rsx,minval,maxval,nb=length(rbrks),brks=rbrks,scale=NA,
                      col_i="#DEEBF7",col_f="#08306B",ncol=9,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M1",cex=1.5))
-tplot <- tplot + layer(sp.polygons(as(m2,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((m2@xmin+m2@xmax)*.5, (m2@ymin+m2@ymax)*.5, "M2",cex=1.5))
-tplot <- tplot + layer(sp.polygons(as(g1,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((g1@xmin+g1@xmax)*.5, (g1@ymin+g1@ymax)*.5, "G1",cex=1.5))
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G2",cex=1.5))
 print(tplot)
@@ -124,10 +116,6 @@ pdf(paste(figDir,"/SI-Fig01a_temperature.pdf",sep=""), height=6,width=8,pointsiz
 tplot <- rs_levplot2(rsx,minval,maxval,nb=length(tbrks),brks=tbrks,scale="YlOrRd",ncol=9,rev=T,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M1",cex=1.5))
-tplot <- tplot + layer(sp.polygons(as(m2,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((m2@xmin+m2@xmax)*.5, (m2@ymin+m2@ymax)*.5, "M2",cex=1.5))
-tplot <- tplot + layer(sp.polygons(as(g1,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((g1@xmin+g1@xmax)*.5, (g1@ymin+g1@ymax)*.5, "G1",cex=1.5))
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G2",cex=1.5))
 print(tplot)

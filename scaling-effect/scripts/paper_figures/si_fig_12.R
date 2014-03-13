@@ -11,18 +11,16 @@ library(rgdal); library(raster); library(maptools); library(rasterVis)
 library(ggplot2); library(reshape2)
 
 #i/o directories and details
-#bDir <- "/mnt/a102/eejarv/scaling-effect"
-#bDir <- "/nfs/a102/eejarv/scaling-effect"
 bDir <- "~/Leeds-work/scaling-effect"
 clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -107,9 +105,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 6
 crop_name <- "maiz"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- m1
@@ -122,7 +120,7 @@ aharv <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -204,10 +202,10 @@ runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -280,9 +278,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 6
 crop_name <- "maiz"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- m2
@@ -295,7 +293,7 @@ aharv <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -378,10 +376,10 @@ runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -456,9 +454,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 6
 crop_name <- "maiz"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- g1
@@ -471,7 +469,7 @@ aharv <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -553,10 +551,10 @@ runDir <- paste(bDir,"/model-runs",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -631,7 +629,7 @@ trial <- 6
 crop_name <- "maiz"
 resol <- "3deg-12km_exp"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- g2
@@ -644,7 +642,7 @@ aharv <- raster(paste(bDir,"/calendar/Maize.crop.calendar/cascade_aharv.tif",sep
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -729,10 +727,10 @@ runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -807,9 +805,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 3
 crop_name <- "gnut"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- m1
@@ -822,7 +820,7 @@ aharv <- raster(paste(bDir,"/calendar/Groundnuts.crop.calendar/cascade_aharv.tif
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -893,6 +891,8 @@ grid()
 legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
 dev.off()
 
+rm(list=ls()); g=gc(); rm(g)
+
 
 ###############################################
 # groundnut in m2
@@ -902,10 +902,10 @@ runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -980,9 +980,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 3
 crop_name <- "gnut"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- m2
@@ -995,7 +995,7 @@ aharv <- raster(paste(bDir,"/calendar/Groundnuts.crop.calendar/cascade_aharv.tif
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -1077,10 +1077,10 @@ runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -1155,9 +1155,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 3
 crop_name <- "gnut"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- g1
@@ -1170,7 +1170,7 @@ aharv <- raster(paste(bDir,"/calendar/Groundnuts.crop.calendar/cascade_aharv.tif
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
@@ -1252,10 +1252,10 @@ runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
 sensDir_12km <- paste(runDir,"/sens",sep="")
-sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir_3d12 <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #make sensitivity table
 sensruns <- expand.grid(TEMP=seq(-1,6,by=1),PREC=seq(-0.9,0.2,by=0.1))
@@ -1330,9 +1330,9 @@ outsens_12km <- outsens
 #model run details
 trial <- 3
 crop_name <- "gnut"
-resol <- "3deg-12km_exp"
+resol <- "3deg-12km_exp_bil"
 metDir <- paste(clmDir,"/cascade_",resol,sep="")
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #get mask
 extn <- g2
@@ -1345,7 +1345,7 @@ aharv <- raster(paste(bDir,"/calendar/Groundnuts.crop.calendar/cascade_aharv.tif
 aharv_a <- area(aharv)
 aharv <- aharv*aharv_a
 
-aharv_3d <- raster(paste(runDir,"/3deg/12km_exp-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
+aharv_3d <- raster(paste(runDir,"/3deg/12km_exp_bil-run_",trial,"/",crop_name,"_suitability.tif",sep=""))
 aharv_3d <- crop(aharv_3d, msk2)
 aharv_3d[which(!is.na(aharv_3d[]))] <- 0
 for (i in which(!is.na(aharv_3d[]))) {
