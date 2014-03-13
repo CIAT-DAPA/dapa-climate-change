@@ -20,7 +20,7 @@ lsmDir <- paste(bDir,"/lsm",sep="")
 sensDir <- paste(runDir,"/sens",sep="")
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/paper_figures",sep="")
+figDir <- paste(bDir,"/paper_figures_v2",sep="")
 
 #model run details
 trial <- 3
@@ -72,7 +72,7 @@ dev.off()
 
 ###
 #3 deg heatmap
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 
 #read in sensitivity output
 outsens <- read.csv(paste(sensDir,"/sensitivity_result.csv",sep=""))

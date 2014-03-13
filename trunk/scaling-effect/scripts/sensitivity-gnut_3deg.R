@@ -23,7 +23,7 @@ clmDir <- paste(bDir,"/climate_data",sep="")
 runDir <- paste(bDir,"/model-runs_gnut",sep="")
 lsmDir <- paste(bDir,"/lsm",sep="")
 
-sensDir <- paste(runDir,"/sens_3deg-12km_exp",sep="")
+sensDir <- paste(runDir,"/sens_3deg-12km_exp_bil",sep="")
 if (!file.exists(sensDir)) {dir.create(sensDir)}
 
 #figure dir is local (on mbp)
