@@ -62,10 +62,10 @@ prec_sc <- raster(paste(srunDir,"/",crop_name,"_gsrain.tif",sep=""))
 tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 
 #matrix of sites, intervals and max/min values
-plotinfo <- data.frame(SITE=paste("M",1:2,sep=""),P_int=c(20,20),
-                       T_int=c(0.5,0.5),P_min=c(-90,-90),
-                       P_max=c(90,90),T_min=c(-2,-2),
-                       T_max=c(2,2))
+plotinfo <- data.frame(SITE=paste("M",1:2,sep=""),P_int=c(25,25),
+                       T_int=c(0.5,0.5),P_min=c(-100,-100),
+                       P_max=c(225,225),T_min=c(-3,-3),
+                       T_max=c(4,4))
 
 #produce the scaling plot for each point
 ### G2
@@ -91,7 +91,7 @@ tcells$PREC_DIF <- (tcells$PREC - mean(tcells$PREC)) / mean(tcells$PREC) * 100
 tcells$TMEN_DIF <- tcells$TMEN - mean(tcells$TMEN)
 
 #classes
-pr_seq <- seq(-100,100,by=plotinfo$P_int[i])
+pr_seq <- seq(-225,225,by=plotinfo$P_int[i])
 pr_seq <- data.frame(INI=pr_seq[1:(length(pr_seq)-1)],FIN=pr_seq[2:length(pr_seq)])
 pr_seq <- cbind(CLASS=1:nrow(pr_seq),pr_seq)
 pr_seq$CENTER <- (pr_seq$INI + pr_seq$FIN) * 0.5
@@ -188,7 +188,7 @@ p <- p + geom_point(x=((extract(prec_sc,text)-mean(tcells$PREC)) / mean(tcells$P
                     y=extract(suit_sc,text),colour="black",shape=8,size=3)
 p <- p + geom_point(x=mean(tcells$PREC_DIF,na.rm=T),y=mean(tcells$SUIT,na.rm=T),
                     colour="red",shape=8,size=3)
-p <- p + scale_x_continuous(breaks=seq(-100,100,by=plotinfo$P_int[i]),
+p <- p + scale_x_continuous(breaks=seq(-225,225,by=plotinfo$P_int[i]),
                             limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
 p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
 p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
