@@ -93,9 +93,9 @@ pdf(paste(figDir,"/SI-Fig01b_precipitation.pdf",sep=""), height=6,width=8,points
 tplot <- rs_levplot2(rsx,minval,maxval,nb=length(rbrks),brks=rbrks,scale=NA,
                      col_i="#DEEBF7",col_f="#08306B",ncol=9,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M1",cex=1.5))
+tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M",cex=1.5))
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G2",cex=1.5))
+tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G",cex=1.5))
 print(tplot)
 dev.off()
 
@@ -115,9 +115,9 @@ tbrks <- seq(10,45,by=2.5)
 pdf(paste(figDir,"/SI-Fig01a_temperature.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
 tplot <- rs_levplot2(rsx,minval,maxval,nb=length(tbrks),brks=tbrks,scale="YlOrRd",ncol=9,rev=T,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M1",cex=1.5))
+tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M",cex=1.5))
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
-tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G2",cex=1.5))
+tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G",cex=1.5))
 print(tplot)
 dev.off()
 
