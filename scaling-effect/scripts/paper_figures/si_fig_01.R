@@ -84,10 +84,10 @@ rsx <- calc(gsrain,fun=function(x) {sum(x,na.rm=T)})
 rsx <- resample(rsx, msk)
 rsx[which(is.na(msk[]))] <- NA
 
-rsx[which(rsx[] > 5000)] <- 5100
-rbrks <- c(seq(0,5000,by=250),5100)
+rsx[which(rsx[] > 2500)] <- 2600
+rbrks <- c(seq(0,2500,by=250),2600)
 rsx <- crop(rsx, text)
-minval <- 0; maxval <- 5100
+minval <- 0; maxval <- 2600
 
 pdf(paste(figDir,"/SI-Fig01b_precipitation.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
 tplot <- rs_levplot2(rsx,minval,maxval,nb=length(rbrks),brks=rbrks,scale=NA,
