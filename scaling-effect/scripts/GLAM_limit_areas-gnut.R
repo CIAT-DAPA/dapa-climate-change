@@ -86,12 +86,6 @@ rs_levplot2 <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCEC
 }
 
 
-rs_print <- function(p,pdfName) {
-  pdf(pdfName,height=ht,width=wt,pointsize=14)
-  print(p)
-  dev.off()
-}
-
 #figure details
 ht <- 6
 rs <- msk
@@ -108,7 +102,7 @@ p00@ymax <- 15
 g2 <- extent(7.5,10.5,12,15)
 
 #figure with locations
-pdf(paste(figDir,"/gnut_yield_monfreda.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/gnut_yield_monfreda.pdf",sep=""), height=5,width=7,pointsize=12,family="Helvetica")
 tplot <- rs_levplot2(oyield,zn=NA,zx=NA,nb=NA,brks=seq(0,4.5,by=0.25),scale="Spectral",col_i="red",col_f="#FEE0D2",ncol=11,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G",cex=1.5))
@@ -118,7 +112,7 @@ dev.off()
 #glam yield YGP=1
 gyield <- glam_yield * 0.001
 
-pdf(paste(figDir,"/gnut_yield_glam.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/gnut_yield_glam.pdf",sep=""), height=5,width=7,pointsize=12,family="Helvetica")
 tplot <- rs_levplot2(gyield,zn=NA,zx=NA,nb=NA,brks=seq(0,4.5,by=0.25),scale="Spectral",col_i="red",col_f="#FEE0D2",ncol=11,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G",cex=1.5))
@@ -129,7 +123,7 @@ dev.off()
 #glam yield YGP=0.5
 gyield <- glam_yield050 * 0.001
 
-pdf(paste(figDir,"/gnut_yield_glam_ygp050.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/gnut_yield_glam_ygp050.pdf",sep=""), height=5,width=7,pointsize=12,family="Helvetica")
 tplot <- rs_levplot2(gyield,zn=NA,zx=NA,nb=NA,brks=seq(0,4.5,by=0.25),scale="Spectral",col_i="red",col_f="#FEE0D2",ncol=11,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G",cex=1.5))
