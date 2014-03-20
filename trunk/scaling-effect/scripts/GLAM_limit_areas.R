@@ -71,7 +71,7 @@ rs_levplot2 <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCEC
   
   #set theme
   this_theme <- custom.theme(fill = pal,region = pal,
-                             bg = "white", fg = "grey20", pch = 14)
+                             bg = "white", fg = "grey20", pch = 20)
   
   p <- rasterVis:::levelplot(rsin, margin=F, par.settings = this_theme, colorkey=leg,
                              at = brks, maxpixels=ncell(rsin)) + 
@@ -80,12 +80,6 @@ rs_levplot2 <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCEC
   return(p)
 }
 
-
-rs_print <- function(p,pdfName) {
-  pdf(pdfName,height=ht,width=wt,pointsize=14)
-  print(p)
-  dev.off()
-}
 
 #figure details
 ht <- 6
@@ -103,7 +97,7 @@ p00@ymax <- 15
 m1 <- extent(1.5,4.5,6,9)
 
 #figure with locations
-pdf(paste(figDir,"/maize_yield_monfreda.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/maize_yield_monfreda.pdf",sep=""), height=5,width=7,pointsize=15,family="Helvetica")
 tplot <- rs_levplot2(oyield,zn=NA,zx=NA,nb=NA,brks=seq(0,10,by=0.5),scale="Spectral",col_i="red",col_f="#FEE0D2",ncol=11,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M",cex=1.5))
@@ -113,7 +107,7 @@ dev.off()
 #glam yield YGP=1
 gyield <- glam_yield * 0.001
 
-pdf(paste(figDir,"/maize_yield_glam.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/maize_yield_glam.pdf",sep=""), height=5,width=7,pointsize=15,family="Helvetica")
 tplot <- rs_levplot2(gyield,zn=NA,zx=NA,nb=NA,brks=seq(0,10,by=0.5),scale="Spectral",col_i="red",col_f="#FEE0D2",ncol=11,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M",cex=1.5))
@@ -124,7 +118,7 @@ dev.off()
 #glam yield YGP=0.5
 gyield <- glam_yield050 * 0.001
 
-pdf(paste(figDir,"/maize_yield_glam_ygp050.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/maize_yield_glam_ygp050.pdf",sep=""), height=5,width=7,pointsize=15,family="Helvetica")
 tplot <- rs_levplot2(gyield,zn=NA,zx=NA,nb=NA,brks=seq(0,10,by=0.5),scale="Spectral",col_i="red",col_f="#FEE0D2",ncol=11,rev=F,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M",cex=1.5))

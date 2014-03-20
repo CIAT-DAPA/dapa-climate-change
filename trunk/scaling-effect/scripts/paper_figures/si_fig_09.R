@@ -65,7 +65,7 @@ tmen_sc <- raster(paste(srunDir,"/",crop_name,"_gstmean.tif",sep=""))
 #matrix of sites, intervals and max/min values
 plotinfo <- data.frame(SITE=paste("M",1:2,sep=""),P_int=c(25,25),
                        T_int=c(0.5,0.5),P_min=c(-100,-100),
-                       P_max=c(225,225),T_min=c(-3,-3),
+                       P_max=c(250,250),T_min=c(-4,-4),
                        T_max=c(4,4))
 
 #produce the scaling plot for each point
@@ -138,7 +138,7 @@ p <- p + geom_point(x=(extract(tmen_sc,text)*.1-mean(tcells$TMEN)),
                     y=extract(suit_sc,text),colour="black",shape=8,size=3)
 p <- p + geom_point(x=mean(tcells$TMEN_DIF,na.rm=T),y=mean(tcells$SUIT,na.rm=T),
                     colour="red",shape=8,size=3)
-p <- p + scale_x_continuous(breaks=seq(-10,10,by=plotinfo$T_int[i]),
+p <- p + scale_x_continuous(breaks=seq(-10,10,by=1),
                             limits=c(plotinfo$T_min[i],plotinfo$T_max[i]))
 p <- p + labs(x="Mean temperature difference (K)",y="Suitability (%)")
 p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
@@ -189,7 +189,7 @@ p <- p + geom_point(x=((extract(prec_sc,text)-mean(tcells$PREC)) / mean(tcells$P
                     y=extract(suit_sc,text),colour="black",shape=8,size=3)
 p <- p + geom_point(x=mean(tcells$PREC_DIF,na.rm=T),y=mean(tcells$SUIT,na.rm=T),
                     colour="red",shape=8,size=3)
-p <- p + scale_x_continuous(breaks=seq(-225,225,by=plotinfo$P_int[i]),
+p <- p + scale_x_continuous(breaks=seq(-250,250,by=50),
                             limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
 p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
 p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
@@ -271,7 +271,7 @@ p <- p + geom_point(x=(extract(tmen_sc,text)*.1-mean(tcells$TMEN)),
                     y=extract(suit_sc,text),colour="black",shape=8,size=3)
 p <- p + geom_point(x=mean(tcells$TMEN_DIF,na.rm=T),y=mean(tcells$SUIT,na.rm=T),
                     colour="red",shape=8,size=3)
-p <- p + scale_x_continuous(breaks=seq(-10,10,by=plotinfo$T_int[i]),
+p <- p + scale_x_continuous(breaks=seq(-10,10,by=1),
                             limits=c(plotinfo$T_min[i],plotinfo$T_max[i]))
 p <- p + labs(x="Mean temperature difference (K)",y="Suitability (%)")
 p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
@@ -322,7 +322,7 @@ p <- p + geom_point(x=((extract(prec_sc,text)-mean(tcells$PREC)) / mean(tcells$P
                     y=extract(suit_sc,text),colour="black",shape=8,size=3)
 p <- p + geom_point(x=mean(tcells$PREC_DIF,na.rm=T),y=mean(tcells$SUIT,na.rm=T),
                     colour="red",shape=8,size=3)
-p <- p + scale_x_continuous(breaks=seq(-225,225,by=plotinfo$P_int[i]),
+p <- p + scale_x_continuous(breaks=seq(-250,250,by=50),
                             limits=c(plotinfo$P_min[i],plotinfo$P_max[i]))
 p <- p + labs(x="Precipitation difference (%)",y="Suitability (%)")
 p <- p + theme(panel.background=element_rect(fill="white",colour="black"),

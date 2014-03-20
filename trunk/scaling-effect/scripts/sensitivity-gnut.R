@@ -172,7 +172,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -183,7 +183,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for aharv>=0.1 pixels
   suit_vals <- extract(tsuit, xy[which(xy$aharv >= 0.05),c("x","y")])
   suit_m2 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_valsh0 / suit_valsh0 * 100
+  suitdiff <- (suit_vals - suit_valsh0) / suit_valsh0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p2 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n2 <- length(which(suitdiff < 0)) / length(suitdiff)
