@@ -58,9 +58,9 @@ opt_data$METHOD <- "RMSE"
 opt_data$USE_SCRATCH <- F
 opt_data$SCRATCH <- NA
 
-#if toupper(param) == "YGP" then calibrate after optim, else only optim
+#calibrate ygp
 
-GLAM_optimise_param <- function(opt_data,iter=1) {
+GLAM_calibrate <- function(opt_data,iter=1) {
   param <- toupper(opt_data$PARAM)
   sect <- tolower(opt_data$SECT)
   simset <- opt_data$SIM_NAME
@@ -114,18 +114,15 @@ GLAM_optimise_param <- function(opt_data,iter=1) {
   cal_dir <- paste(cal_dir,"/",simset,sep="") #calibration directory
   if (!file.exists(cal_dir)) {dir.create(cal_dir)}
   
-  if (!is.na(iter)) {
-    cal_dir <- paste(cal_dir,"/iter-",iter,sep="")
-    if (!file.exists(cal_dir)) {dir.create(cal_dir)}
-  }
-  
   #create optimisation folder if it does not exist
-  optDir <- paste(cal_dir,"/",tolower(param),sep="")
+  optDir <- paste(cal_dir,"/",tolower(param),"_iter-",iter,sep="")
   if (!file.exists(optDir)) {dir.create(optDir)}
   
   #create sequence of values
   vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
-    
+  
+  #here i am!!
+  
   #loop through sequence of values
   for (i in 1:length(vals)) {
     #i <- 1
