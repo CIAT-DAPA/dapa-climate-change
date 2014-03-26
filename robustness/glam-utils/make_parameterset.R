@@ -32,7 +32,7 @@
 
 #setwd("~/Leeds-work/quest-for-robustness/bin/glam-maize-osx")
 #parFile <- "maize_param_base.txt"
-#outfile <- "maize_param_run.txt"
+#outfile <- "maize_param_run2.txt"
 #tpar <- GLAM_get_default("./")
 #pfil <- GLAM_create_parfile(params=tpar,outfile=outfile)
 
@@ -337,6 +337,7 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
   write_line(list(IDURMAX=glam_param.hts_fut$IDURMAX),outfile=outfile,format="int")
   write_line(list(IBAMAX=glam_param.hts_fut$IBAMAX),outfile=outfile,format="int")
   write_line(list(IAAMAX=glam_param.hts_fut$IAAMAX),outfile=outfile,format="int")
+  write_line(list(TLINT2=glam_param.hts_fut$TLINT2),outfile=outfile,format="short")
   write_line(list(TETR1=glam_param.hts_fut$TETR1),outfile=outfile,format="short")
   write_line(list(TETR2=glam_param.hts_fut$TETR2),outfile=outfile,format="short")
   
@@ -418,9 +419,9 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
   write_line(list(PPSEN=glam_param.maize$PPSEN),outfile=outfile,format="long")
   write_line(list(TRLAI=glam_param.maize$TRLAI),outfile=outfile,format="string")
   write_line(list(TRKILL=glam_param.maize$TRKILL),outfile=outfile,format="string")
-  write_line(list(IMAIZE3=glam_param.maize$IMAIZE3),outfile=outfile,format="int")
-  write_line(list(IMAIZE4=glam_param.maize$IMAIZE4),outfile=outfile,format="int")
-  write_line(list(IMAIZE5=glam_param.maize$IMAIZE5),outfile=outfile,format="int")
+  write_line(list(NMAXTDS=glam_param.maize$NMAXTDS),outfile=outfile,format="int")
+  write_line(list(CROPFAIL=glam_param.maize$CROPFAIL),outfile=outfile,format="string")
+  write_line(list(NDSMAX=glam_param.maize$NDSMAX),outfile=outfile,format="int")
   write_line(list(IMAIZE6=glam_param.maize$IMAIZE6),outfile=outfile,format="int")
   write_line(list(IMAIZE7=glam_param.maize$IMAIZE7),outfile=outfile,format="int")
   write_line(list(IMAIZE8=glam_param.maize$IMAIZE8),outfile=outfile,format="int")
@@ -500,8 +501,8 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
   write_line(list(TSETCRIT=glam_param.sparer$TSETCRIT),outfile=outfile,format="short")
   write_line(list(TSETZERO=glam_param.sparer$TSETZERO),outfile=outfile,format="short")
   write_line(list(RCO2=glam_param.sparer$RCO2),outfile=outfile,format="short")
-  write_line(list(RSPARE8=glam_param.sparer$RSPARE8),outfile=outfile,format="long")
-  write_line(list(RSPARE9=glam_param.sparer$RSPARE9),outfile=outfile,format="long")
+  write_line(list(HIMIN=glam_param.sparer$HIMIN),outfile=outfile,format="long")
+  write_line(list(SWC_FAC=glam_param.sparer$SWC_FAC),outfile=outfile,format="long")
   write_line(list(TETR3=glam_param.sparer$TETR3),outfile=outfile,format="short")
   write_line(list(TETR4=glam_param.sparer$TETR4),outfile=outfile,format="short")
   write_line(list(TRLAIB=glam_param.sparer$TRLAIB),outfile=outfile,format="short")
@@ -509,6 +510,8 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
   write_line(list(TRLAIM=glam_param.sparer$TRLAIM),outfile=outfile,format="short")
   write_line(list(TRKILL1=glam_param.sparer$TRKILL1),outfile=outfile,format="short")
   write_line(list(TRKILL2=glam_param.sparer$TRKILL2),outfile=outfile,format="short")
+  write_line(list(FSWEMER=glam_param.sparer$FSWEMER),outfile=outfile,format="short")
+  write_line(list(SLATTF=glam_param.sparer$SLATTF),outfile=outfile,format="short")
   
   #close the connection
   pf <- file(outfile,open="a")
