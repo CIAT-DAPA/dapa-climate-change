@@ -283,20 +283,21 @@ get_add <- function(pFile) {
   idurmax <- get_line(pFile,l=98,float=T) #from HTS parameterisation, not to be changed
   ibamax <- get_line(pFile,l=99,float=T) #from HTS parameterisation, not to be changed
   iaamax <- get_line(pFile,l=100,float=T) #from HTS parameterisation, not to be changed
-  tetr1 <- get_line(pFile,l=101,float=T) #from transpiration efficiency reduction at high temperature, not to be changed
-  tetr2 <- get_line(pFile,l=102,float=T) #from transpiration efficiency reduction at high temperature, not to be changed
+  tlint2 <- get_line(pFile,l=101,float=T) #from HTS parameterisation, not to be changed
+  tetr1 <- get_line(pFile,l=102,float=T) #from transpiration efficiency reduction at high temperature, not to be changed
+  tetr2 <- get_line(pFile,l=103,float=T) #from transpiration efficiency reduction at high temperature, not to be changed
   addC <- list(SWFF_THR=swff_thr,TENFAC=tenfac,B_TE=b_te,B_TEN_MAX=b_ten_max,
                TCRITMIN=tcritmin,PPCRIT=ppcrit,TLINT=tlint,TCSLOPE=tcslope,
                TLSLOPE=tlslope,FDWIDTH=fdwidth,FDOFFSET=fdoffset,TLIMMIN=tlimmin,
-               IDURMAX=idurmax,IBAMAX=ibamax,IAAMAX=iaamax,TETR1=tetr1,TETR2=tetr2)
+               IDURMAX=idurmax,IBAMAX=ibamax,IAAMAX=iaamax,TLINT2=tlint2,TETR1=tetr1,TETR2=tetr2)
   return(addC)
 }
 
 
 #additional wheat (spring and winter) variables
 get_awht <- function(pFile) {
-  gcpfen <- get_line(pFile,l=106,float=T)
-  gcenha <- get_line(pFile,l=107,float=T)
+  gcpfen <- get_line(pFile,l=107,float=T)
+  gcenha <- get_line(pFile,l=108,float=T)
   awhtC <- list(GCPFEN=gcpfen,GCENHA=gcenha)
   return(awhtC)
 }
@@ -304,30 +305,30 @@ get_awht <- function(pFile) {
 
 #additional winter wheat varieties
 get_wwin <- function(pFile) {
-  gcplts <- get_line(pFile,l=111,float=T)
-  tbplts <- get_line(pFile,l=112,float=T)
-  toplts <- get_line(pFile,l=113,float=T)
-  tmplts <- get_line(pFile,l=114,float=T)
-  gctsfl <- get_line(pFile,l=115,float=T)
-  tbtsfl <- get_line(pFile,l=116,float=T)
-  totsfl <- get_line(pFile,l=117,float=T)
-  tmtsfl <- get_line(pFile,l=118,float=T)
-  wwspa1 <- get_line(pFile,l=119,float=T) #for senescence, see GLAM parameter file
-  rlaiflt <- get_line(pFile,l=120,float=T)
-  en <- get_line(pFile,l=121,float=T)
-  vr <- get_line(pFile,l=122,float=T)
-  ftdrfac <- get_line(pFile,l=123,float=T)
-  fttsfac <- get_line(pFile,l=124,float=T)
-  vs <- get_line(pFile,l=125,float=T)
-  ps <- get_line(pFile,l=126,float=T)
-  wwspa2 <- get_line(pFile,l=127,float=T)
-  wwspa3 <- get_line(pFile,l=128,float=T)
-  wwspa4 <- get_line(pFile,l=129,float=T)
-  wwspa5 <- get_line(pFile,l=130,float=T)
-  wwspa6 <- get_line(pFile,l=131,float=T)
-  wwspa7 <- get_line(pFile,l=132,float=T)
-  wwspa8 <- get_line(pFile,l=133,float=T)
-  wwspa9 <- get_line(pFile,l=134,float=T)
+  gcplts <- get_line(pFile,l=112,float=T)
+  tbplts <- get_line(pFile,l=113,float=T)
+  toplts <- get_line(pFile,l=114,float=T)
+  tmplts <- get_line(pFile,l=115,float=T)
+  gctsfl <- get_line(pFile,l=116,float=T)
+  tbtsfl <- get_line(pFile,l=117,float=T)
+  totsfl <- get_line(pFile,l=118,float=T)
+  tmtsfl <- get_line(pFile,l=119,float=T)
+  wwspa1 <- get_line(pFile,l=120,float=T) #for senescence, see GLAM parameter file
+  rlaiflt <- get_line(pFile,l=121,float=T)
+  en <- get_line(pFile,l=122,float=T)
+  vr <- get_line(pFile,l=123,float=T)
+  ftdrfac <- get_line(pFile,l=124,float=T)
+  fttsfac <- get_line(pFile,l=125,float=T)
+  vs <- get_line(pFile,l=126,float=T)
+  ps <- get_line(pFile,l=127,float=T)
+  wwspa2 <- get_line(pFile,l=128,float=T)
+  wwspa3 <- get_line(pFile,l=129,float=T)
+  wwspa4 <- get_line(pFile,l=130,float=T)
+  wwspa5 <- get_line(pFile,l=131,float=T)
+  wwspa6 <- get_line(pFile,l=132,float=T)
+  wwspa7 <- get_line(pFile,l=133,float=T)
+  wwspa8 <- get_line(pFile,l=134,float=T)
+  wwspa9 <- get_line(pFile,l=135,float=T)
   wwinC <- list(GCPLTS=gcplts,TBPLTS=tbplts,TOPLTS=toplts,TMPLTS=tmplts,GCTSFL=gctsfl,
                 TBTSFL=tbtsfl,TOTSFL=totsfl,TMTSFL=tmtsfl,WWSPA1=wwspa1,RLAIFLT=rlaiflt,
                 EN=en,VR=vr,FTDRFAC=ftdrfac,FTTSFAC=fttsfac,VS=vs,PS=ps,WWSPA2=wwspa2,
@@ -339,51 +340,51 @@ get_wwin <- function(pFile) {
 
 #additional maize variables
 get_mai <- function(pFile) {
-  maspa <- get_line(pFile,l=138,float=T)
-  tbmai <- get_line(pFile,l=139,float=T)
-  tomai <- get_line(pFile,l=140,float=T)
-  tmmai <- get_line(pFile,l=141,float=T)
-  tlimjuv <- get_line(pFile,l=142,float=T)
-  tlimsil <- get_line(pFile,l=143,float=T)
-  tlimpfl <- get_line(pFile,l=144,float=T)
-  tlimgfp <- get_line(pFile,l=145,float=T)
-  ppsen <- get_line(pFile,l=146,float=T)
-  trlai <- get_line(pFile,l=147,float=F,tex=T)
-  trkill <- get_line(pFile,l=148,float=F,tex=T)
-  imaize3 <- get_line(pFile,l=149,float=T)
-  imaize4 <- get_line(pFile,l=150,float=T)
-  imaize5 <- get_line(pFile,l=151,float=T)
-  imaize6 <- get_line(pFile,l=152,float=T)
-  imaize7 <- get_line(pFile,l=153,float=T)
-  imaize8 <- get_line(pFile,l=154,float=T)
-  imaize9 <- get_line(pFile,l=155,float=T)
+  maspa <- get_line(pFile,l=139,float=T)
+  tbmai <- get_line(pFile,l=140,float=T)
+  tomai <- get_line(pFile,l=141,float=T)
+  tmmai <- get_line(pFile,l=142,float=T)
+  tlimjuv <- get_line(pFile,l=143,float=T)
+  tlimsil <- get_line(pFile,l=144,float=T)
+  tlimpfl <- get_line(pFile,l=145,float=T)
+  tlimgfp <- get_line(pFile,l=146,float=T)
+  ppsen <- get_line(pFile,l=147,float=T)
+  trlai <- get_line(pFile,l=148,float=F,tex=T)
+  trkill <- get_line(pFile,l=149,float=F,tex=T)
+  nmaxtds <- get_line(pFile,l=150,float=F)
+  cropfail <- get_line(pFile,l=151,float=F,tex=T)
+  ndsmax <- get_line(pFile,l=152,float=F)
+  imaize6 <- get_line(pFile,l=153,float=T)
+  imaize7 <- get_line(pFile,l=154,float=T)
+  imaize8 <- get_line(pFile,l=155,float=T)
+  imaize9 <- get_line(pFile,l=156,float=T)
   maiC <- list(MASPA=maspa,TBMAI=tbmai,TOMAI=tomai,TMMAI=tmmai,TLIMJUV=tlimjuv,
                TLIMSIL=tlimsil,TLIMPFL=tlimpfl,TLIMGFP=tlimgfp,PPSEN=ppsen,TRLAI=trlai,
-               TRKILL=trkill,IMAIZE3=imaize3,IMAIZE4=imaize4,IMAIZE5=imaize5,IMAIZE6=imaize6,
+               TRKILL=trkill,NMAXTDS=nmaxtds,CROPFAIL=cropfail,NDSMAX=ndsmax,IMAIZE6=imaize6,
                IMAIZE7=imaize7,IMAIZE8=imaize8,IMAIZE9=imaize9)
   return(maiC)
 }
 
 #additional rice variables
 get_rice <- function(pFile) {
-  rrice1 <- get_line(pFile,l=159,float=T)
-  rrice2 <- get_line(pFile,l=160,float=T)
-  rrice3 <- get_line(pFile,l=161,float=T)
-  rrice4 <- get_line(pFile,l=162,float=T)
-  rrice5 <- get_line(pFile,l=163,float=T)
-  rrice6 <- get_line(pFile,l=164,float=T)
-  rrice7 <- get_line(pFile,l=165,float=T)
-  rrice8 <- get_line(pFile,l=166,float=T)
-  rrice9 <- get_line(pFile,l=167,float=T)
-  irice1 <- get_line(pFile,l=168,float=T)
-  irice2 <- get_line(pFile,l=169,float=T)
-  irice3 <- get_line(pFile,l=170,float=T)
-  irice4 <- get_line(pFile,l=171,float=T)
-  irice5 <- get_line(pFile,l=172,float=T)
-  irice6 <- get_line(pFile,l=173,float=T)
-  irice7 <- get_line(pFile,l=174,float=T)
-  irice8 <- get_line(pFile,l=175,float=T)
-  irice9 <- get_line(pFile,l=176,float=T)
+  rrice1 <- get_line(pFile,l=160,float=T)
+  rrice2 <- get_line(pFile,l=161,float=T)
+  rrice3 <- get_line(pFile,l=162,float=T)
+  rrice4 <- get_line(pFile,l=163,float=T)
+  rrice5 <- get_line(pFile,l=164,float=T)
+  rrice6 <- get_line(pFile,l=165,float=T)
+  rrice7 <- get_line(pFile,l=166,float=T)
+  rrice8 <- get_line(pFile,l=167,float=T)
+  rrice9 <- get_line(pFile,l=168,float=T)
+  irice1 <- get_line(pFile,l=169,float=T)
+  irice2 <- get_line(pFile,l=170,float=T)
+  irice3 <- get_line(pFile,l=171,float=T)
+  irice4 <- get_line(pFile,l=172,float=T)
+  irice5 <- get_line(pFile,l=173,float=T)
+  irice6 <- get_line(pFile,l=174,float=T)
+  irice7 <- get_line(pFile,l=175,float=T)
+  irice8 <- get_line(pFile,l=176,float=T)
+  irice9 <- get_line(pFile,l=177,float=T)
   ricC <- list(RRICE1=rrice1,RRICE2=rrice2,RRICE3=rrice3,RRICE4=rrice4,RRICE5=rrice5,
                RRICE6=rrice6,RRICE7=rrice7,RRICE8=rrice8,RRICE9=rrice9,IRICE1=irice1,
                IRICE2=irice2,IRICE3=irice3,IRICE4=irice4,IRICE5=irice5,IRICE6=irice6,
@@ -393,15 +394,15 @@ get_rice <- function(pFile) {
 
 #spare integer variables
 get_spi <- function(pFile) {
-  ispare1 <- get_line(pFile,l=180,float=T,tex=T) #note ISPARE1 is a parameter for winter wheat
-  ispare2 <- get_line(pFile,l=181,float=T)
-  ispare3 <- get_line(pFile,l=182,float=T)
-  ispare4 <- get_line(pFile,l=183,float=T)
-  ispare5 <- get_line(pFile,l=184,float=T)
-  ispare6 <- get_line(pFile,l=185,float=T)
-  ispare7 <- get_line(pFile,l=186,float=T)
-  ispare8 <- get_line(pFile,l=187,float=T)
-  ispare9 <- get_line(pFile,l=188,float=T)
+  ispare1 <- get_line(pFile,l=181,float=T,tex=T) #note ISPARE1 is a parameter for winter wheat
+  ispare2 <- get_line(pFile,l=182,float=T)
+  ispare3 <- get_line(pFile,l=183,float=T)
+  ispare4 <- get_line(pFile,l=184,float=T)
+  ispare5 <- get_line(pFile,l=185,float=T)
+  ispare6 <- get_line(pFile,l=186,float=T)
+  ispare7 <- get_line(pFile,l=187,float=T)
+  ispare8 <- get_line(pFile,l=188,float=T)
+  ispare9 <- get_line(pFile,l=189,float=T)
   spiC <- list(ISPARE1=ispare1,ISPARE2=ispare2,ISPARE3=ispare3,ISPARE4=ispare4,ISPARE5=ispare5,
                ISPARE6=ispare6,ISPARE7=ispare7,ISPARE8=ispare8,ISPARE9=ispare9)
   return(spiC)
@@ -409,26 +410,29 @@ get_spi <- function(pFile) {
 
 #spare real variables
 get_spr <- function(pFile) {
-  critpp <- get_line(pFile,l=192,float=T)
-  ppse <- get_line(pFile,l=193,float=T)
-  rue <- get_line(pFile,l=194,float=T)
-  rue_max <- get_line(pFile,l=195,float=T)
-  tsetcrit <- get_line(pFile,l=196,float=T)
-  tsetzero <- get_line(pFile,l=197,float=T)
-  rco2 <- get_line(pFile,l=198,float=T)
-  rspare8 <- get_line(pFile,l=199,float=T) #value of HIMIN for TDS in groundnut
-  rspare9 <- get_line(pFile,l=200,float=T) #value of SWC_FAC for TDS runs
-  tetr3 <- get_line(pFile,l=201,float=T)
-  tetr4 <- get_line(pFile,l=202,float=T)
-  trlaib <- get_line(pFile,l=203,float=T)
-  trlaio <- get_line(pFile,l=204,float=T)
-  trlaim <- get_line(pFile,l=205,float=T)
-  trkill1 <- get_line(pFile,l=206,float=T)
-  trkill2 <- get_line(pFile,l=207,float=T)
+  critpp <- get_line(pFile,l=193,float=T)
+  ppse <- get_line(pFile,l=194,float=T)
+  rue <- get_line(pFile,l=195,float=T)
+  rue_max <- get_line(pFile,l=196,float=T)
+  tsetcrit <- get_line(pFile,l=197,float=T)
+  tsetzero <- get_line(pFile,l=198,float=T)
+  rco2 <- get_line(pFile,l=199,float=T)
+  himin <- get_line(pFile,l=200,float=T)
+  swc_fac <- get_line(pFile,l=201,float=T)
+  tetr3 <- get_line(pFile,l=202,float=T)
+  tetr4 <- get_line(pFile,l=203,float=T)
+  trlaib <- get_line(pFile,l=204,float=T)
+  trlaio <- get_line(pFile,l=205,float=T)
+  trlaim <- get_line(pFile,l=206,float=T)
+  trkill1 <- get_line(pFile,l=207,float=T)
+  trkill2 <- get_line(pFile,l=208,float=T)
+  fswemer <- get_line(pFile,l=209,float=T)
+  slattf <- get_line(pFile,l=210,float=T)
   
   sprC <- list(CRITPP=critpp,PPSE=ppse,RUE=rue,RUE_MAX=rue_max,TSETCRIT=tsetcrit,TSETZERO=tsetzero,
-               RCO2=rco2,RSPARE8=rspare8,RSPARE9=rspare9,TETR3=tetr3,TETR4=tetr4,TRLAIB=trlaib,
-               TRLAIO=trlaio,TRLAIM=trlaim,TRKILL1=trkill1,TRKILL2=trkill2)
+               RCO2=rco2,HIMIN=himin,SWC_FAC=swc_fac,TETR3=tetr3,TETR4=tetr4,TRLAIB=trlaib,
+               TRLAIO=trlaio,TRLAIM=trlaim,TRKILL1=trkill1,TRKILL2=trkill2,FSWEMER=fswemer,
+               SLATTF=slattf)
   return(sprC)
 }
 
