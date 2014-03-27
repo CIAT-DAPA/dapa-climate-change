@@ -50,8 +50,8 @@ opt_data$INI_COND <- xy_main
 opt_data$YLD_DATA <- xy_main_yield
 opt_data$PARAMS <- GLAM_get_default(opt_data$PAR_DIR)
 opt_data$SIM_NAME <- "optim1"
-opt_data$PARAM <- "YGP"
-opt_data$SECT <- "glam_param.ygp"
+#opt_data$PARAM <- "YGP"
+#opt_data$SECT <- "glam_param.ygp"
 opt_data$NSTEPS <- 100
 opt_data$RUN_TYPE <- "RFD"
 opt_data$METHOD <- "RMSE"
@@ -60,14 +60,14 @@ opt_data$SCRATCH <- NA
 
 #calibrate ygp
 
-GLAM_calibrate <- function(opt_data,iter=1) {
-  param <- toupper(opt_data$PARAM)
-  sect <- tolower(opt_data$SECT)
+GLAM_calibrate <- function(opt_data) {
+  param <- "YGP" #toupper(opt_data$PARAM)
+  sect <- "glam_param.ygp" #tolower(opt_data$SECT)
   simset <- opt_data$SIM_NAME
   cell <- opt_data$CELL
   method <- opt_data$METHOD
-  cropName <- opt_data$CROP
-  bDir <- opt_data$BASE_DIR
+  crop_name <- opt_data$CROP
+  b_dir <- opt_data$BASE_DIR
   isyr <- opt_data$ISYR
   ieyr <- opt_data$IEYR
   params <- opt_data$PARAMS
@@ -85,17 +85,16 @@ GLAM_calibrate <- function(opt_data,iter=1) {
   #      on the difference between mean yields only. I guess this method is only valid when
   #      an insufficiently large observed yield + weather time series is available.
   if (is.null(opt_data$METHOD)) {
-    optMeth <- "RMSE" #defaulting to RMSE if missing in input list
+    opt_meth <- "RMSE" #defaulting to RMSE if missing in input list
   } else {
-    optMeth <- toupper(opt_data$METHOD)
+    opt_meth <- toupper(opt_data$METHOD)
   }
   
-  if (!optMeth %in% c("RMSE","CH07","CH10")) {
-    optMeth <- "RMSE" #defaulting the RMSE
+  if (!opt_meth %in% c("RMSE","CH07","CH10")) {
+    opt_meth <- "RMSE" #defaulting the RMSE
   }
   
   #input directories and model
-  #cropDir <- paste(bDir,"/model-runs/",toupper(cropName),sep="")
   exec_name <- opt_data$MODEL
   
   #running command
@@ -115,26 +114,31 @@ GLAM_calibrate <- function(opt_data,iter=1) {
   if (!file.exists(cal_dir)) {dir.create(cal_dir)}
   
   #create optimisation folder if it does not exist
-  optDir <- paste(cal_dir,"/",tolower(param),"_iter-",iter,sep="")
-  if (!file.exists(optDir)) {dir.create(optDir)}
+  opt_dir <- paste(cal_dir,"/",tolower(param),sep="")
+  if (!file.exists(opt_dir)) {dir.create(opt_dir)}
   
   #create sequence of values
   vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
   
-  #here i am!!
-  
   #loop through sequence of values
   for (i in 1:length(vals)) {
     #i <- 1
-    cat("performing run ",run.type,i," value = ",vals[i]," (",param,")",sep="","\n")
+    cat("performing run ",run_type," ",i," value = ",vals[i]," (",param,")",sep="","\n")
     
     #assign values to parameter set
     params[[sect]][[param]][,"Value"] <- vals[i]
     
     ##############here irrigation rate
-    params$glam_param.mod_mgt$SEASON <- run.type
+    params$glam_param.mod_mgt$SEASON <- run_type
     
-    #process the planting date #here i am
+    for (loc in opt_data$LOC) { #here i am
+      #loc <- opt_data$LOC[1]
+      lon <- opt_data$INI_COND$x[which(opt_data$INI_COND$LOC == loc)]
+      cat("...loc= ",loc,sep="","\n")
+      
+    }
+    #process the planting date
+    sow_date <- opt_data$INI_COND$SOW_DATE1[which(opt_data$INI_COND$LOC == )]
     if (sowFile_rfd == "nofile") {
       if (GLAM_params$glam_param.spt_mgt$IPDATE$Value < -90) {
         stop("in a rainfed run you need either a sow dates file or a value for IPDATE")
