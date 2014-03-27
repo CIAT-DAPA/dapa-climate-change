@@ -9,7 +9,7 @@ import os, sys, string, glob
 if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ideam-sort-daily-stations.py S:\observed\weather_station\ideam-col\organized-daily\automatic"
+	print "   - ie: python ideam-sort-stations.py S:\observed\weather_station\ideam-col\organized-monthly\conventional-madr-2nd-request"
 	sys.exit(1)
 
 #Set variables 
