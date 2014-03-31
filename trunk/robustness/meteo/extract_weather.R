@@ -2,44 +2,44 @@
 #UoL / CCAFS
 #Jan 2014
 
-stop("!")
-
-#load libraries
-library(sp); library(raster); library(rgdal); library(maptools)
-
-#directory
-wd <- "~/Leeds-work/quest-for-robustness"
-src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
-met_dir <- paste(wd,"/data/meteorology",sep="")
-mdata_dir <- paste(wd,"/data/model_data",sep="")
-
-#source needed functions
-source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
-
-#load xy_main
-load(paste(mdata_dir,"/initial_conditions_major.RData",sep=""))
-
 ###
 #for a particular location, extract daily weather using cdo
-cellid <- xy_main$LOC[1]
+###
 
-#select gcm or obs
-#select which: gcm, rcp
-#select years
+#cellid: is the cell identifier from the robustness study. check initial_conditions_*.RData
+#data_type: either obs or gcm
+#sce: hist, rcp26, rcp45, rcp60, rcp85
+#dataset: WFD, WFDEI, or name of GCM (e.g. gfdl-esm2m)
+#years: range of years from which to extract
 
-#data_type <- "obs"
-#dataset <- "WFD" #WFDEI or GCM name
-#sce <- "hist" #or rcp
-#years <- 1950:2001
+# #example
+# #---------------------------------------------------------------
+# #load libraries
+# library(sp); library(raster); library(rgdal); library(maptools)
+# 
+# #directory
+# wd <- "~/Leeds-work/quest-for-robustness"
+# src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
+# met_dir <- paste(wd,"/data/meteorology",sep="")
+# mdata_dir <- paste(wd,"/data/model_data",sep="")
+# 
+# #source needed functions
+# source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
+# 
+# #load xy_main
+# load(paste(mdata_dir,"/initial_conditions_major.RData",sep=""))
 
-#data_type <- "gcm"
-#dataset <- "gfdl-esm2m"
-#sce <- "hist"
-#years <- 1950:2005
+# #run function
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="obs", dataset="WFD", sce="hist", years=1950:2001)
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], met_dir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], met_dir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], met_dir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
+# #---------------------------------------------------------------
 
-extract_weather <- function(cellid, met_dir, xy_main) {
-  lon <- xy_main$x[which(xy_main$LOC == cellid)]
-  lat <- xy_main$y[which(xy_main$LOC == cellid)]
+extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005) {
+  #get arguments in proper format
+  data_type <- tolower(data_type); sce <- tolower(sce)
+  if (data_type == "obs") {dataset <- toupper(dataset)} else {dataset <- tolower(dataset)}
   
   #create temporary folder for daily met of location
   asc_dir <- paste(met_dir,"/ascii_extract_raw",sep="")
@@ -58,7 +58,7 @@ extract_weather <- function(cellid, met_dir, xy_main) {
       } else {
         if (length(which(!years %in% c(1979:2010))) > 0) {stop("specified years should be in the range 1979-2010 for WFD")}
       }
-      vnames <- c("Rainf","SWdown","Tmin","Tmax")
+      vnames <- c("Rainf","SWdown","Tmax","Tmin")
     } else {
       if (!tolower(sce) %in% c("hist","rcp26","rcp45","rcp60","rcp85")) {stop("sce must be either hist, rcp26, rcp45, rcp60, rcp85")}
       if (!tolower(dataset) %in% c("gfdl-esm2m","hadgem2-es","ipsl-cm5a-lr","miroc-esm-chem","noresm1-m")) {stop("dataset must be one of gfdl-esm2m, hadgem2-es, ipsl-cm5a-lr, miroc-esm-chem, noresm1-m")}
@@ -69,8 +69,8 @@ extract_weather <- function(cellid, met_dir, xy_main) {
         if (tolower(dataset) == "hadgem2-es") {yi <- 2004; yf <- 2099} else {yi <- 2006; yf <- 2099}
       }
       if (length(which(!years %in% c(yi:yf))) > 0) {stop("specified years are not in the expected range")}
+      vnames <- c("pr","rsds","tasmax","tasmin")
     }
-    vnames <- c("pr","rsds","tasmax","tasmin")
   }
   
   #create folder of output
@@ -93,7 +93,7 @@ extract_weather <- function(cellid, met_dir, xy_main) {
         if (vname == "Rainf") {
           fnames <- paste(met_dir,"/baseline_climate/",vname,"_daily_",dataset,"_GPCC","/afr_",vname,"_daily_",dataset,"_GPCC_",ym_m$YM,".nc",sep="")
         } else {
-          fnames <- paste(met_dir,"/baseline_climate/",vname,"_daily_",dataset,"/afr_",vname,"_daily_",dataset,"_GPCC_",ym_m$YM,".nc",sep="")
+          fnames <- paste(met_dir,"/baseline_climate/",vname,"_daily_",dataset,"/afr_",vname,"_daily_",dataset,"_",ym_m$YM,".nc",sep="")
         }
       } else {
         fnames <- list.files(paste(met_dir,"/future_climate/",dataset,"/",sce,sep=""),pattern=paste("afr_",vname,sep=""))
@@ -101,7 +101,7 @@ extract_weather <- function(cellid, met_dir, xy_main) {
       }
       
       #loop files to extract data
-      fdata <- data.frame()
+      fdata <- data.frame(); fcount <- 1
       for (fname in fnames) {
         #fname <- fnames[1]
         #temporary output file
@@ -114,12 +114,23 @@ extract_weather <- function(cellid, met_dir, xy_main) {
         idata <- read.table(odat,header=F)
         system(paste("rm -f ",odat,sep=""))
         names(idata) <- c("year","month","day","lon","lat",vname)
+        
+        if (tolower(dataset) == "wfd" | tolower(dataset) == "wfdei") {
+          idata$year <- ym_m$YEAR[fcount]
+          idata$month <- as.numeric(ym_m$MONTH[fcount])
+          idata$day <- 1:nrow(idata)
+        }
         fdata <- rbind(fdata, idata)
+        fcount <- fcount+1
       }
       
-      #select only years in question
-      idata <- data.frame(year=years)
-      idata <- merge(fdata, idata, by="year", all.x=F, all.y=F, sort=F)
+      #select only years in question (only for gcm)
+      if (tolower(data_type) == "gcm") {
+        idata <- data.frame(year=years)
+        idata <- merge(fdata, idata, by="year", all.x=F, all.y=F, sort=F)
+      } else {
+        idata <- fdata
+      }
       
       #cbind all variables
       if (vname == vnames[1]) {

@@ -29,6 +29,7 @@
 #run_data$SAT: saturation limit, extracted as xy_main$SAT[which(xy_main$LOC == run_data$LOC)]
 #run_data$ISYR: first year of simulation
 #run_data$IEYR: last year of simulation
+#run_data$PARAMS: GLAM parameter set
 
 #start of function
 run_glam <- function(run_data) {
@@ -41,12 +42,25 @@ run_glam <- function(run_data) {
   run_dir <- create_dirs(run_dir)
   
   #load and write parameter file
-  params <- GLAM_get_default(run_data$PAR_DIR)
-  params$glam_param.mod_mgt$IASCII <- 1 #output only to season file
-  params$glam_param.mod_mgt$ISYR <- run_data$ISYR
-  params$glam_param.mod_mgt$IEYR <- run_data$IEYR
-  params$glam_param.sim_ctr$SMLON <- run_data$LON
-  params$glam_param.sim_ctr$CROP <- run_data$CROP
+  if (is.null(run_data$PARAMS)) {
+    params <- GLAM_get_default(run_data$PAR_DIR)
+    params$glam_param.mod_mgt$IASCII <- 1 #output only to season file
+    params$glam_param.mod_mgt$ISYR <- run_data$ISYR
+    params$glam_param.mod_mgt$IEYR <- run_data$IEYR
+    params$glam_param.sim_ctr$SMLON <- run_data$LON
+    params$glam_param.sim_ctr$CROP <- run_data$CROP
+  } else {
+    if (is.na(run_data$PARAMS)[1]) {
+      params <- GLAM_get_default(run_data$PAR_DIR)
+      params$glam_param.mod_mgt$IASCII <- 1 #output only to season file
+      params$glam_param.mod_mgt$ISYR <- run_data$ISYR
+      params$glam_param.mod_mgt$IEYR <- run_data$IEYR
+      params$glam_param.sim_ctr$SMLON <- run_data$LON
+      params$glam_param.sim_ctr$CROP <- run_data$CROP
+    } else {
+      params <- run_data$PARAMS
+    }
+  }
   parfile <- GLAM_create_parfile(params, paste(run_dir,"/",run_data$CROP,"_param_run.txt",sep=""))
   
   #create weather files
