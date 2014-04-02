@@ -10,7 +10,7 @@ write_wth <- function(inData,outfile,site.details) {
   wthfil <- file(outfile,open="w")
   
   #Write header
-  cat(paste("*WEATHER : ",site.details$NAME,sep=""),"\n",sep="",file=wthfil)
+  cat(paste("*WEATHER DATA : ",site.details$NAME,sep=""),"\n",sep="",file=wthfil)
   #cat("\n",file=wthfil)
   cat("@ INSI      LAT     LONG  ELEV   TAV   AMP REFHT WNDHT\n",file=wthfil)
   cat(sprintf("%6s",site.details$INSI),sep="",file=wthfil)
@@ -22,14 +22,14 @@ write_wth <- function(inData,outfile,site.details) {
   cat(sprintf("%6.1f",site.details$REFHT),file=wthfil)
   cat(sprintf("%6.1f",site.details$WNDHT),file=wthfil)
   cat("\n",file=wthfil)
-  cat("@DATE  SRAD  TMAX   TMIN    RAIN    \n",file=wthfil)
+  cat("@DATE  SRAD  TMAX  TMIN  RAIN    \n",file=wthfil)
   
   for (row in 1:nrow(inData)) {
     cat(inData$DATE[row],file=wthfil)
-    cat(sprintf("%6.1f",inData$SRAD[row]),file=wthfil)
-    cat(sprintf("%7.2f",inData$TMAX[row]),file=wthfil)
-    cat(sprintf("%7.2f",inData$TMIN[row]),file=wthfil)
-    cat(sprintf("%7.2f",inData$RAIN[row]),file=wthfil)
+    cat(sprintf("%6.2f",inData$SRAD[row]),file=wthfil)
+    cat(sprintf("%6.2f",inData$TMAX[row]),file=wthfil)
+    cat(sprintf("%6.2f",inData$TMIN[row]),file=wthfil)
+    cat(sprintf("%6.2f",inData$RAIN[row]),file=wthfil)
     cat("\n",file=wthfil)
   }
   

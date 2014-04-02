@@ -63,10 +63,20 @@ run_glam <- function(run_data) {
   }
   parfile <- GLAM_create_parfile(params, paste(run_dir,"/",run_data$CROP,"_param_run.txt",sep=""))
   
-  #create weather files
-  wthfil <- make_wth(data.frame(CELL=run_data$LOC,X=run_data$LON,Y=run_data$LAT),
-                     wthDir_in=run_data$WTH_DIR,wthDir_out=paste(run_dir,"/inputs/ascii/wth",sep=""),
-                     years=params$glam_param.mod_mgt$ISYR:(params$glam_param.mod_mgt$IEYR+1))
+  #copy (if these exist) or create weather files
+  #always one extra year to avoid running out of weather data
+  wthfil <- list.files(paste(run_data$WTH_DIR,"/loc-",run_data$LOC,sep=""),pattern="\\.wth")
+  nwthfil <- unlist(lapply(params$glam_param.mod_mgt$ISYR:(params$glam_param.mod_mgt$IEYR+1),function(x) grep(x,wthfil)))
+  nyears <- length(params$glam_param.mod_mgt$ISYR:(params$glam_param.mod_mgt$IEYR+1))
+  if (length(nwthfil) == nyears) {
+    wthfil <- wthfil[nwthfil]
+    cpfil <- lapply(wthfil, function(x) file.copy(paste(run_data$WTH_DIR,"/loc-",run_data$LOC,"/",x,sep=""),paste(run_dir,"/inputs/ascii/wth",sep="")))
+    wthfil <- list(WTH_DIR=paste(run_dir,"/inputs/ascii/wth",sep=""))
+  } else {
+    wthfil <- make_wth(data.frame(CELL=run_data$LOC,X=run_data$LON,Y=run_data$LAT),
+                       wthDir_in=run_data$WTH_DIR,wthDir_out=paste(run_dir,"/inputs/ascii/wth",sep=""),
+                       years=params$glam_param.mod_mgt$ISYR:(params$glam_param.mod_mgt$IEYR+1))
+  }
   
   #create soil files
   solfil <- make_soilcodes(outfile=paste(run_dir,"/inputs/ascii/soil/soilcodes.txt",sep=""))
@@ -83,7 +93,7 @@ run_glam <- function(run_data) {
   #write filenames file
   fn <- file(paste(run_dir,"/filenames.txt",sep=""),"w")
   cat(sprintf("%-41s",gsub(paste(run_dir,"/",sep=""),"",parfile)),"\n",sep="",file=fn)
-  cat(sprintf("%-41s",paste(gsub(paste(run_dir,"/",sep=""),"",wthfil),"/afrb",sep="")),"\n",sep="",file=fn)
+  cat(sprintf("%-41s",paste(gsub(paste(run_dir,"/",sep=""),"",wthfil$WTH_DIR),"/afrb",sep="")),"\n",sep="",file=fn)
   cat(sprintf("%-41s",gsub(paste(run_dir,"/",sep=""),"",solfil)),"\n",sep="",file=fn)
   cat(sprintf("%-41s","inputs/ascii/soil/soilcodes.txt"),"\n",sep="",file=fn)
   cat(sprintf("%-41s",gsub(paste(run_dir,"/",sep=""),"",sowfil)),"\n",sep="",file=fn)

@@ -31,12 +31,12 @@
 
 # #run function
 # extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="obs", dataset="WFD", sce="hist", years=1950:2001)
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], met_dir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], met_dir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], met_dir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
+# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
 # #---------------------------------------------------------------
 
-extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005) {
+extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005, write_wthfil=T) {
   #get arguments in proper format
   data_type <- tolower(data_type); sce <- tolower(sce)
   if (data_type == "obs") {dataset <- toupper(dataset)} else {dataset <- tolower(dataset)}
@@ -164,8 +164,13 @@ extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset=
     #save file with all data
     write.table(metdata,file=out_file,col.names=T,row.names=F,sep="\t")
   }
-  xin <- data.frame(CELL=cellid,X=lon,Y=lat)
-  xout <- make_wth(x=xin,wthDir_in=out_adir,wthDir_out=paste(out_adir,"/loc-",cellid,sep=""),years=years,fields=list(CELL="CELL",X="X",Y="Y"))
+  
+  if (write_wthfil) {
+    xin <- data.frame(CELL=cellid,X=lon,Y=lat)
+    xout <- make_wth(x=xin,wthDir_in=out_adir,wthDir_out=paste(out_adir,"/loc-",cellid,sep=""),years=years,fields=list(CELL="CELL",X="X",Y="Y"))
+  } else {
+    xout <- out_file
+  }
   return(xout)
 }
 
