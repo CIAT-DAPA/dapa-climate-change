@@ -3,11 +3,12 @@
 #Apr 2014
 
 #############################################################################################
-####### WFD/WFDEI data looked dodgy in places so i decided to compare these to CRU and WCL
+####### WFD/WFDEI daily data looked dodgy in places so i decided to compare these to CRU and WCL
 #############################################################################################
 
 #packages
-library(raster); library(rgdal); library(ncdf)
+library(raster); library(rgdal); library(ncdf); library(rasterVis); library(maptools)
+data(wrld_simpl)
 
 #input directories
 wd <- "~/Leeds-work/quest-for-robustness"
@@ -20,8 +21,26 @@ load(paste(mdata_dir,"/initial_conditions_major.RData",sep=""))
 load(paste(mdata_dir,"/yield_major.RData",sep=""))
 
 #define dataset, period, variable
-dataset <- "WFD" #WFD, WFDEI
-years <- 1982:2001 #1982:2001 for WFD, 1982:2005 for WFDEI
+dataset <- "WFDEI" #WFD, WFDEI
+years <- 1982:2005 #1982:2001 for WFD, 1982:2005 for WFDEI
+
+#i/o directories for cru
+cru_idir <- "~/Leeds-work/datasets/meteorology/cru-ts-v3-21"
+cru_odir <- paste(met_dir,"/cru-ts-v3-21",sep="")
+if (!file.exists(cru_odir)) {dir.create(cru_odir)}
+
+#i/o directories for worldclim
+wcl_idir <- "~/Leeds-work/datasets/meteorology/worldclim_global_5min"
+wcl_odir <- paste(met_dir,"/worldclim",sep="")
+if (!file.exists(wcl_odir)) {dir.create(wcl_odir)}
+
+#/o directory for figs
+fig_dir <- paste(wd,"/text/wfd_wfdei_checks/",tolower(dataset),sep="")
+if (!file.exists(fig_dir)) {dir.create(fig_dir,recursive=T)}
+
+#determine extent to cut the resampled netcdfs (of CRU and WorldClim)
+yrs <- raster(paste(yi_dir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
+bbox <- extent(yrs)
 
 #loop variables
 for (vname in c("Rainf","SWdown","Tmax","Tmin")) {
@@ -182,7 +201,7 @@ for (vname in c("Rainf","SWdown","Tmax","Tmin")) {
       } else {
         rs_mcv <- rs_mvar / (rs_mmean) * 100
       }
-      rs_mcv <- writeRaster(rs_cv,cmth_fname_cv,format="GTiff")
+      rs_mcv <- writeRaster(rs_mcv,cmth_fname_cv,format="GTiff")
     }
   }
 }
@@ -191,14 +210,6 @@ for (vname in c("Rainf","SWdown","Tmax","Tmin")) {
 ################################################################################
 ################################################################################
 #### calculate mean, s.d. and c.v. for cru, for africa
-
-cru_idir <- "~/Leeds-work/datasets/meteorology/cru-ts-v3-21"
-cru_odir <- paste(met_dir,"/cru-ts-v3-21",sep="")
-if (!file.exists(cru_odir)) {dir.create(cru_odir)}
-
-#determine extent to cut the resampled netcdf
-yrs <- raster(paste(yi_dir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
-bbox <- extent(yrs)
 
 ##first process the CRU time series 1950-2012 (change resolution and cut to Africa)
 #loop variables
@@ -340,7 +351,7 @@ for (vname in c("pre","tmn","tmx","tmp")) {
       } else {
         rs_mcv <- rs_mvar / (rs_mmean) * 100
       }
-      rs_mcv <- writeRaster(rs_cv,cmth_fname_cv,format="GTiff")
+      rs_mcv <- writeRaster(rs_mcv,cmth_fname_cv,format="GTiff")
     }
   }
 }
@@ -348,30 +359,237 @@ for (vname in c("pre","tmn","tmx","tmp")) {
 
 ################################################################################
 ################################################################################
-#aggregate worldclim to 0.5 degree, then remapcon2, then cut to Africa
+#aggregate worldclim to 0.5 degree, then remapnn, then cut to Africa
 
-wcl_idir <- "~/Leeds-work/datasets/meteorology/worldclim_global_5min"
-wcl_odir <- paste(met_dir,"/worldclim",sep="")
-if (!file.exists(wcl_odir)) {dir.create(wcl_odir)}
-
-vname <- "prec"
-
-for (m in 1:12) {
-  #m <- 1
-  #load raster
-  rs <- raster(paste(wcl_idir,"/",vname,"_",m,sep=""))
+for (vname in c("prec","tmax","tmin","tmean")) {
+  #vname <- "prec"
   
-  #aggregate to 0.5 degree
-  rs <- aggregate(rs, fact=6, fun=mean, expand=T, na.rm=T)
+  for (m in 1:12) {
+    #m <- 1
+    cat("...processing month",m,"\n")
+    
+    #file names
+    ifil <- paste(wcl_idir,"/",vname,"_",m,sep="")
+    ofil <- paste(wcl_odir,"/afr_", vname,"_",m,".nc",sep="")
+    
+    if (!file.exists(ofil)) {
+      #load raster
+      rs <- raster(ifil)
+      
+      #aggregate to 0.5 degree
+      rs <- aggregate(rs, fact=6, fun=mean, expand=T, na.rm=T)
+      rsx <- raster(xmn=-180,xmx=180,ymn=-90,ymx=90,ncols=720,nrows=360)
+      rs <- merge(rs,rsx)
+      rs <- rotate(rs)
+      
+      #write .nc
+      rs <- writeRaster(rs, paste(wcl_odir,"/", vname,"_",m,".nc",sep=""), format="CDF", varname="pr", varunit="mm", 
+                        longname="Total monthly precipitation in mm", xname="lon", yname="lat",
+                        zname="time", zunit="day")
+      
+      #remapcon2
+      system(paste("cdo remapnn,r320x160 ",wcl_odir,"/", vname,"_",m,".nc"," ",wcl_odir,"/",vname,"_remapped.nc",sep=""))
+      
+      #cut to Africa
+      system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",wcl_odir,"/",vname,"_remapped.nc ",ofil,sep=""))
+      
+      #remove junk
+      system(paste("rm -f ",wcl_odir,"/",vname,"_",m,".nc",sep=""))
+      system(paste("rm -f ",wcl_odir,"/",vname,"_remapped.nc",sep=""))
+      
+      #load raster
+      rso <- raster(ofil)
+    } else {
+      rso <- raster(ofil)
+    }
+    
+    #append into single object
+    if (m == 1) {rs_all <- rso} else {rs_all <- c(rs_all, rso)}
+  }
+  rs_all <- stack(rs_all)
   
-  #write .nc
+  clm_fname <- paste(wcl_odir,"/afr_",vname,"_meanclim.tif",sep="")
   
-  #remapcon2
-  
-  #cut to Africa
-  
+  #mean
+  if (!file.exists(clm_fname)) {
+    if (vname == "prec") {
+      rs_mean <- calc(rs_all, function(x) {sum(x,na.rm=T)})
+    } else {
+      rs_mean <- calc(rs_all, function(x) {mean(x,na.rm=T)})
+    }
+    rs_mean <- writeRaster(rs_mean,clm_fname,format="GTiff")
+  } else {
+    rs_mean <- raster(clm_fname)
+  }
 }
 
 
+################################################################################
+################################################################################
+###
+#plot maps of CRU, worldclim, WFD or WFDEI
+###
+
+### functions
+#functions
+rs_levplot2 <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCECE6",col_f="#00441B",rev=F,leg=T) {
+  if (scale %in% row.names(brewer.pal.info)) {
+    pal <- rev(brewer.pal(ncol, scale))
+  } else {
+    pal <- colorRampPalette(c(col_i,col_f))(ncol)
+  }
+  if (rev) {pal <- rev(pal)}
+  
+  if (is.na(brks[1])) {brks <- do.breaks(c(zn,zx),nb)}
+  
+  #set theme
+  this_theme <- custom.theme(fill = pal,region = pal,
+                             bg = "white", fg = "grey20", pch = 14)
+  
+  p <- rasterVis:::levelplot(rsin, margin=F, par.settings = this_theme, colorkey=leg,
+                             at = brks, maxpixels=ncell(rsin)) + 
+    layer(sp.lines(grat,lwd=0.5,lty=2,col="grey 50")) +
+    layer(sp.polygons(wrld_simpl,lwd=0.8,col="black"))
+  return(p)
+}
+
+#figure details
+ht <- 6
+rs <- yrs
+fct <- (rs@extent@xmin-rs@extent@xmax)/(rs@extent@ymin-rs@extent@ymax)
+wt <- ht*(fct+.1)
+grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=15), norths=seq(-90,90,by=15))
+
+#loop variable
+for (vname in c("Rainf","Tmax","Tmin")) {
+  #vname <- "Rainf"
+  cat("\n...processing for",vname,"\n")
+  
+  if (vname == "Rainf") {vname_cru <- "pre"; vname_wcl <- "prec"}
+  if (vname == "Tmax") {vname_cru <- "tmx"; vname_wcl <- "tmax"}
+  if (vname == "Tmin") {vname_cru <- "tmn"; vname_wcl <- "tmin"}
+  if (vname == "Rainf") {suffix <- "_GPCC"} else {suffix <- ""}
+  
+  #define minval, maxval (for yearly)
+  if (vname == "Rainf") {minval <- 1e-5; maxval <- 5000}
+  if (vname == "Tmax") {minval <- 10; maxval <- 45}
+  if (vname == "Tmin") {minval <- 0; maxval <- 35}
+  
+  #1. mean climate (all datasets)
+  #a. year
+  rs_wcl <- raster(paste(wcl_odir,"/afr_",vname_wcl,"_meanclim.tif",sep=""))
+  if (vname != "Rainf") {rs_wcl <- rs_wcl * 0.1}
+  rs_cru <- raster(paste(cru_odir,"/",vname_cru,"_climatology/afr_",vname_cru,"_meanclim_",min(years),"-",max(years),".tif",sep=""))
+  rs_dse <- raster(paste(met_dir,"/baseline_climate/",vname,"_climatology_",dataset,suffix,"/afr_",vname,"_meanclim_",dataset,suffix,"_",min(years),"-",max(years),".tif",sep=""))
+  rs_dse <- crop(rs_dse,rs_wcl)
+  
+  trs <- stack(rs_wcl,rs_cru,rs_dse)
+  names(trs) <- c("WorldClim","CRU-TS v3.21",dataset)
+  #print(min(trs[],na.rm=T)); print(max(trs[],na.rm=T))
+  if (vname == "Rainf") {
+    tplot <- rs_levplot2(trs,zn=minval,zx=maxval,nb=20,brks=NA,scale="Spectral",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+  } else {
+    tplot <- rs_levplot2(trs,zn=minval,zx=maxval,nb=20,brks=NA,scale="YlOrRd",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+  }
+  
+  #plot into a three-panel figure
+  pdf(paste(fig_dir,"/meanclim_",vname,"_",dataset,".pdf",sep=""), height=3.5,width=10,pointsize=14)
+  print(tplot)
+  dev.off()
+  
+  ##
+  #2. c.v. (only CRU and WF* datasets)
+  rs_cru <- raster(paste(cru_odir,"/",vname_cru,"_climatology/afr_",vname_cru,"_cvclim_",min(years),"-",max(years),".tif",sep=""))
+  rs_dse <- raster(paste(met_dir,"/baseline_climate/",vname,"_climatology_",dataset,suffix,"/afr_",vname,"_cvclim_",dataset,suffix,"_",min(years),"-",max(years),".tif",sep=""))
+  rs_dse <- crop(rs_dse,rs_cru)
+  rs_cru[which(rs_cru[] > 100)] <- 100
+  rs_dse[which(rs_dse[] > 100)] <- 100
+  trs <- stack(rs_cru,rs_dse)
+  names(trs) <- c("CRU-TS v3.21",dataset)
+  tplot <- rs_levplot2(trs,zn=0,zx=100,nb=20,brks=NA,scale="Blues",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+  pdf(paste(fig_dir,"/cvclim_",vname,"_",dataset,".pdf",sep=""), height=3.5,width=7.5,pointsize=14)
+  print(tplot)
+  dev.off()
+  
+  #define minval, maxval (for monthly)
+  if (vname == "Rainf") {minval <- 1e-5; maxval <- 1000}
+  if (vname == "Tmax") {minval <- 10; maxval <- 45}
+  if (vname == "Tmin") {minval <- 0; maxval <- 35}
+  
+  #b. each month
+  for (m in 1:12) {
+    #m <- 1
+    cat("...plotting for month",m,"\n")
+    
+    #load rasters
+    rs_wcl <- raster(paste(wcl_odir,"/afr_",vname_wcl,"_",m,".nc",sep=""))
+    if (vname != "Rainf") {rs_wcl <- rs_wcl * 0.1}
+    rs_cru <- raster(paste(cru_odir,"/",vname_cru,"_climatology/afr_",vname_cru,"_meanclim_",min(years),"-",max(years),"_",sprintf("%1$02d",m),".tif",sep=""))
+    rs_dse <- raster(paste(met_dir,"/baseline_climate/",vname,"_climatology_",dataset,suffix,"/afr_",vname,"_meanclim_",dataset,suffix,"_",min(years),"-",max(years),"_",sprintf("%1$02d",m),".tif",sep=""))
+    rs_dse <- crop(rs_dse,rs_wcl)
+    
+    #plot into a three-panel figure
+    trs <- stack(rs_wcl,rs_cru,rs_dse)
+    names(trs) <- c("WorldClim","CRU-TS v3.21",dataset)
+    #maxval <- max(trs[],na.rm=T)
+    if (vname == "Rainf") {
+      tplot <- rs_levplot2(trs,zn=minval,zx=maxval,nb=20,brks=NA,scale="Spectral",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+    } else {
+      tplot <- rs_levplot2(trs,zn=minval,zx=maxval,nb=20,brks=NA,scale="YlOrRd",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+    }
+    pdf(paste(fig_dir,"/meanclim_",vname,"_",dataset,"_",sprintf("%1$02d",m),".pdf",sep=""), height=3.5,width=10,pointsize=14)
+    print(tplot)
+    dev.off()
+    
+    #2. c.v. (only CRU and WF* datasets)
+    rs_cru <- raster(paste(cru_odir,"/",vname_cru,"_climatology/afr_",vname_cru,"_cvclim_",min(years),"-",max(years),"_",sprintf("%1$02d",m),".tif",sep=""))
+    rs_dse <- raster(paste(met_dir,"/baseline_climate/",vname,"_climatology_",dataset,suffix,"/afr_",vname,"_cvclim_",dataset,suffix,"_",min(years),"-",max(years),"_",sprintf("%1$02d",m),".tif",sep=""))
+    rs_dse <- crop(rs_dse,rs_cru)
+    rs_cru[which(rs_cru[] > 100)] <- 100
+    rs_dse[which(rs_dse[] > 100)] <- 100
+    trs <- stack(rs_cru,rs_dse)
+    names(trs) <- c("CRU-TS v3.21",dataset)
+    tplot <- rs_levplot2(trs,zn=0,zx=100,nb=20,brks=NA,scale="Blues",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+    pdf(paste(fig_dir,"/cvclim_",vname,"_",dataset,"_",sprintf("%1$02d",m),".pdf",sep=""), height=3.5,width=7.5,pointsize=14)
+    print(tplot)
+    dev.off()
+  }
+}
+
+
+################################################################################
+################################################################################
+##### calculate yield / mm (or / kg rain fall)
+
+rs_wcl <- raster(paste(wcl_odir,"/afr_prec_meanclim.tif",sep=""))
+rs_cru <- raster(paste(cru_odir,"/pre_climatology/afr_pre_meanclim_",min(years),"-",max(years),".tif",sep=""))
+rs_dse <- raster(paste(met_dir,"/baseline_climate/Rainf_climatology_",dataset,"_GPCC/afr_Rainf_meanclim_",dataset,"_GPCC_",min(years),"-",max(years),".tif",sep=""))
+rs_dse <- crop(rs_dse,rs_wcl)
+
+#set grid cells not in yield dataset as NA
+true_cells <- cellFromXY(rs_wcl,xy_main_yield[,c("x","y")])
+rs_wcl[!(1:ncell(rs_wcl)) %in% true_cells] <- NA
+true_cells <- cellFromXY(rs_cru,xy_main_yield[,c("x","y")])
+rs_cru[!(1:ncell(rs_cru)) %in% true_cells] <- NA
+true_cells <- cellFromXY(rs_dse,xy_main_yield[,c("x","y")])
+rs_dse[!(1:ncell(rs_dse)) %in% true_cells] <- NA
+
+#create raster with yield
+rs_yield <- raster(rs_dse)
+rs_yield[cellFromXY(rs_yield,xy_main_yield[,c("x","y")])] <- rowMeans(xy_main_yield[,paste("Y.",years,sep="")])
+
+#calculate g grain / kg water ratio
+#mm * 10 [m3 / ha] * 1000 [kg / m3] = kg / ha water
+ratio_wcl <- (rs_yield * 1000) / (rs_wcl * 10 * 1000)
+ratio_cru <- (rs_yield * 1000) / (rs_cru * 10 * 1000)
+ratio_dse <- (rs_yield * 1000) / (rs_dse * 10 * 1000)
+
+trs <- stack(ratio_wcl,ratio_cru,ratio_dse)
+names(trs) <- c("WorldClim","CRU-TS v3.21",dataset)
+
+tplot <- rs_levplot2(trs,zn=0,zx=0.75,nb=15,brks=NA,scale="YlGnBu",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
+pdf(paste(fig_dir,"/yield_ratio_Rainf_",dataset,".pdf",sep=""), height=3.5,width=10,pointsize=14)
+print(tplot)
+dev.off()
 
 
