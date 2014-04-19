@@ -116,12 +116,12 @@ pdf(paste(figDir,"/extra_plots/niche_size_change_temperature_maize.pdf",sep=""),
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 tchg_12km <- outsens[which(outsens$prec == 0 & outsens$temp != -1),]
 sens_12km <- outsens_12km[which(outsens_12km$prec == 0 & outsens_12km$temp != -1),]
-plot(tchg_12km$temp, tchg_12km$size_chg1,ty="p",pch=1,xlim=c(0,5),col="blue",ylim=c(-20,0),
+plot(tchg_12km$temp, tchg_12km$size_chg1,ty="p",pch=1,xlim=c(0,5),col="blue",ylim=c(-100,15),
      xlab="Temperature change (K)", ylab="Percentage change (%)",cex=1.5)
 points(tchg_12km$temp, tchg_12km$size_chg2,pch=4,col="blue",cex=1.5)
 points(sens_12km$temp, sens_12km$reldiff_har,pch=22,col="blue",cex=1.5)
 grid()
-legend(0,-15,legend=c("size at thresh=48 %","size at thresh=71 %","suitability"),col=c("blue","blue","blue"),pch=c(1,4,22),bg="white",cex=0.9)
+legend(0,-75,legend=c("size at thresh=48 %","size at thresh=71 %","suitability"),col=c("blue","blue","blue"),pch=c(1,4,22),bg="white",cex=0.9)
 dev.off()
 
 
@@ -130,8 +130,8 @@ pdf(paste(figDir,"/extra_plots/niche_size_change_precipitation_maize.pdf",sep=""
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 tchg_12km <- outsens[which(outsens$temp == 0),]
 sens_12km <- outsens_12km[which(outsens_12km$temp == 0),]
-plot(tchg_12km$prec*100, tchg_12km$size_chg1, ty="p",pch=1,xlim=c(-90,20),col="blue",ylim=c(-100,10),
-     xlab="Temperature change (K)", ylab="Percentage change (%)",cex=1.5)
+plot(tchg_12km$prec*100, tchg_12km$size_chg1, ty="p",pch=1,xlim=c(-90,20),col="blue",ylim=c(-100,15),
+     xlab="Precipitation change (%)", ylab="Percentage change (%)",cex=1.5)
 points(tchg_12km$prec*100, tchg_12km$size_chg2,pch=4,col="blue",cex=1.5)
 points(sens_12km$prec*100, sens_12km$reldiff_har,pch=22,col="blue",cex=1.5)
 grid()
