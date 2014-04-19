@@ -40,20 +40,21 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/Fig2c_ar5_ecocrop.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/Fig2c_ar5_ecocrop_30_to_-80.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
 tchg_3d12 <- outsens_3d12[which(outsens_3d12$prec == pchg & outsens_3d12$temp != -1),]
 
 tcol <- "blue"
-plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,50),col=tcol,
+plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-80,30),col=tcol,
      xlab="Temperature change (K)", ylab="Suitability change (%)",cex=1.5)
 points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km","12 km niche"),col=c("blue","blue","blue"),pch=c(1,4,22),bg="white")
+legend(4,30,legend=c("3 degree","12 km","12 km niche"),col=c("blue","blue","blue"),
+       pch=c(1,4,22),bg="white",cex=0.75)
 dev.off()
 
 

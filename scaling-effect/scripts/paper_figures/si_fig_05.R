@@ -44,7 +44,7 @@ outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <=
 outsens_3d12_all <- outsens_3d12[which(outsens_3d12$prec == 0 & outsens_3d12$type == "all"),]
 outsens_3d12_har <- outsens_3d12[which(outsens_3d12$prec == 0 & outsens_3d12$type == "har"),]
 
-pdf(paste(figDir,"/SI-Fig05d_ecocrop_12km.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig05d_ecocrop_12km.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.25)
 boxplot(outsens_12km_all$diff~outsens_12km_all$temp,pch=3,cex=0.5,col="white",border="black",
         ylim=c(-100,20),xlab="Temperature change (K)", ylab="Suitability change (%)",
@@ -55,7 +55,7 @@ boxplot(outsens_12km_all$diff~outsens_12km_all$temp,pch=3,cex=0.5,col="white",bo
         outcol="red",medcol="red",boxcol="blue",add=T)
 dev.off()
 
-pdf(paste(figDir,"/SI-Fig05e_ecocrop_12km_niche.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig05e_ecocrop_12km_niche.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.25)
 boxplot(outsens_12km_har$diff~outsens_12km_har$temp,pch=3,cex=0.5,col="white",border="black",
         ylim=c(-100,20),xlab="Temperature change (K)", ylab="Suitability change (%)",
@@ -67,7 +67,7 @@ boxplot(outsens_12km_har$diff~outsens_12km_har$temp,pch=3,cex=0.5,col="white",bo
 dev.off()
 
 
-pdf(paste(figDir,"/SI-Fig05f_ecocrop_3deg.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig05f_ecocrop_3deg.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.25)
 boxplot(outsens_3d12_all$diff~outsens_3d12_all$temp,pch=3,cex=0.5,col="white",border="black",
         ylim=c(-100,20),xlab="Temperature change (K)", ylab="Suitability change (%)",
