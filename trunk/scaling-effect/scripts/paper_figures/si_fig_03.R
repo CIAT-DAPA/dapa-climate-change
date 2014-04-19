@@ -65,7 +65,7 @@ this_all <- hist(his_df$suit,breaks=seq(0,100,by=10),plot=F)
 this_niche <- hist(his_df$suit[which(his_df$aharv >= 0.1)],breaks=seq(0,100,by=10),plot=F)
 
 #plot histograms
-pdf(paste(figDir,"/SI-Fig03a_maize.pdf",sep=""),width=8,height=5,pointsize=12)
+pdf(paste(figDir,"/SI-Fig03a_maize.pdf",sep=""),width=8,height=5,pointsize=16)
 par(mar=c(4.5,4.5,1,1))
 plot(this_all$mids,this_all$counts/(sum(this_all$counts)),ty="l",col="black",xlim=c(0,100),ylim=c(0,1),
      xlab="Suitability (%)",ylab="Relative frequency",lwd=2)
@@ -74,7 +74,7 @@ grid(lwd=1.25)
 abline(v=mean(his_df$suit),col="black",lty=2)
 abline(v=mean(his_df$suit[which(his_df$aharv >= 0.05)]),col="blue",lty=2)
 legend(x=0,y=1,cex=1.0,lty=c(1,1),col=c("black","blue"),lwd=rep(1.5,2),
-       legend=c("All areas","Niche"))
+       legend=c("All areas","Niche"),bg="white")
 dev.off()
 
 
@@ -117,7 +117,7 @@ this_all <- hist(his_df$suit,breaks=seq(0,100,by=10),plot=F)
 this_niche <- hist(his_df$suit[which(his_df$aharv >= 0.05)],breaks=seq(0,100,by=10),plot=F)
 
 #plot histograms
-pdf(paste(figDir,"/SI-Fig03b_groundnut.pdf",sep=""),width=8,height=5,pointsize=12)
+pdf(paste(figDir,"/SI-Fig03b_groundnut.pdf",sep=""),width=8,height=5,pointsize=16)
 par(mar=c(4.5,4.5,1,1))
 plot(this_all$mids,this_all$counts/(sum(this_all$counts)),ty="l",col="black",xlim=c(0,100),ylim=c(0,1),
      xlab="Suitability (%)",ylab="Relative frequency",lwd=2)
@@ -126,7 +126,7 @@ grid(lwd=1.25)
 abline(v=mean(his_df$suit),col="black",lty=2)
 abline(v=mean(his_df$suit[which(his_df$aharv >= 0.05)]),col="blue",lty=2)
 legend(x=0,y=1,cex=1.0,lty=c(1,1),col=c("black","blue"),lwd=rep(1.5,2),
-       legend=c("All areas","Niche"))
+       legend=c("All areas","Niche"),bg="white")
 dev.off()
 
 

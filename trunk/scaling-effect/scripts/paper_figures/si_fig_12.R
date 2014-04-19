@@ -82,7 +82,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -150,7 +150,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -176,7 +176,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_m1_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_m1_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -188,7 +188,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -255,7 +255,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -323,7 +323,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -349,7 +349,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_m2_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_m2_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -361,7 +361,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -431,7 +431,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -499,7 +499,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -525,7 +525,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_g1_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_g1_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -537,7 +537,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -604,7 +604,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -672,7 +672,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -698,7 +698,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_g2_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_g2_ecocrop_maize.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -710,7 +710,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -782,7 +782,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -850,7 +850,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -876,7 +876,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_m1_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_m1_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -888,7 +888,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -957,7 +957,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -1025,7 +1025,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -1051,7 +1051,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_m2_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_m2_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -1063,7 +1063,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -1132,7 +1132,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -1200,7 +1200,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -1226,7 +1226,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_g1_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_g1_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -1238,7 +1238,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)
@@ -1307,7 +1307,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -1375,7 +1375,7 @@ for (i in 1:nrow(sensruns)) {
   #extract values for all pixels
   suit_vals <- extract(tsuit, xy[,c("x","y")])
   suit_m1 <- mean(suit_vals,na.rm=T)
-  suitdiff <- suit_vals - suit_vals0 / suit_vals0 * 100
+  suitdiff <- (suit_vals - suit_vals0) / suit_vals0 * 100
   suitdiff <- suitdiff[which(!is.na(suitdiff))]
   suit_p1 <- length(which(suitdiff > 0)) / length(suitdiff)
   suit_n1 <- length(which(suitdiff < 0)) / length(suitdiff)
@@ -1401,7 +1401,7 @@ outsens_12km <- outsens_12km[which(outsens_12km$temp >= 0 & outsens_12km$temp <=
 outsens_3d12 <- outsens_3d12[which(outsens_3d12$temp >= 0 & outsens_3d12$temp <= 5),]
 
 #AR5 style for 12km explicit runs
-pdf(paste(figDir,"/SI-Fig12_ar5_g2_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/SI-Fig12_ar5_g2_ecocrop_gnut.pdf",sep=""), height=6,width=8,pointsize=16)
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 pchg <- 0
 tchg_12km <- outsens_12km[which(outsens_12km$prec == pchg & outsens_12km$temp != -1),]
@@ -1413,7 +1413,7 @@ plot(tchg_12km$temp, tchg_12km$reldiff_all,ty="p",pch=4,xlim=c(0,5),ylim=c(-100,
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white")
+legend(4,50,legend=c("3 degree","12 km"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
 dev.off()
 
 rm(list=ls()); g=gc(); rm(g)

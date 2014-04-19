@@ -145,7 +145,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig09e_ecocrop_m1_temperature.pdf",sep=""),width=8,height=5,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig09e_ecocrop_m1_temperature.pdf",sep=""),width=6,height=4,family="Helvetica")
 print(p)
 dev.off()
 
@@ -196,7 +196,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig09f_ecocrop_m1_precipitation.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig09f_ecocrop_m1_precipitation.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 
@@ -278,7 +278,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig09g_ecocrop_m2_temperature.pdf",sep=""),width=8,height=5,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig09g_ecocrop_m2_temperature.pdf",sep=""),width=6,height=4,family="Helvetica")
 print(p)
 dev.off()
 
@@ -329,7 +329,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig09h_ecocrop_m2_precipitation.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig09h_ecocrop_m2_precipitation.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 

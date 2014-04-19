@@ -148,7 +148,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_maize_in_g2_temperature.pdf",sep=""),width=8,height=5,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_maize_in_g2_temperature.pdf",sep=""),width=6,height=4,family="Helvetica")
 print(p)
 dev.off()
 
@@ -199,7 +199,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_maize_in_g2_precipitation.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_maize_in_g2_precipitation.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 
@@ -322,7 +322,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_gnut_in_m1_temperature.pdf",sep=""),width=8,height=5,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_gnut_in_m1_temperature.pdf",sep=""),width=6,height=4,family="Helvetica")
 print(p)
 dev.off()
 
@@ -373,7 +373,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_gnut_in_m1_precipitation.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig11_ecocrop_gnut_in_m1_precipitation.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 

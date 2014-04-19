@@ -153,7 +153,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig10e_ecocrop_g1_temperature.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig10e_ecocrop_g1_temperature.pdf",sep=""),width=6,height=4,pointsize=16,family="Helvetica")
 print(p)
 dev.off()
 
@@ -205,7 +205,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig10f_ecocrop_g1_precipitation.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig10f_ecocrop_g1_precipitation.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 
@@ -288,7 +288,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig10g_ecocrop_g2_temperature.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig10g_ecocrop_g2_temperature.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 
@@ -340,7 +340,7 @@ p <- p + theme(panel.background=element_rect(fill="white",colour="black"),
                axis.ticks=element_line(colour="black"),axis.text=element_text(size=12,colour="black"),
                axis.title=element_text(size=13,face="bold"))
 
-pdf(paste(scaleplotDir,"/SI-Fig10h_ecocrop_g2_precipitation.pdf",sep=""),width=8,height=5,pointsize=12,family="Helvetica")
+pdf(paste(scaleplotDir,"/SI-Fig10h_ecocrop_g2_precipitation.pdf",sep=""),width=6,height=4,pointsize=12,family="Helvetica")
 print(p)
 dev.off()
 
