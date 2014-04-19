@@ -32,41 +32,6 @@ fig_dir <- paste(wd,"/text/wfd_wfdei_checks/",tolower(dataset),sep="")
 out_dir <- paste(met_dir,"/baseline_climate/Rainf_gseason_",dataset,"_GPCC",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir)}
 
-#1. load this year's and previous year's data
-#2. get various planting date values using the range and runif()
-#3. with planting date, calculate total precipitation for growing season
-#4. take mean
-
-#loop years
-yr <- years[1]
-
-#1. load this year's and previous year's data
-stk_y1 <- c(); stk_y2 <- c()
-for (m in 1:12) {
-  #m <- 1
-  cat("...loading m=",m,"\n")
-  ifil1 <- paste(met_dir,"/baseline_climate/Rainf_daily_",dataset,"_GPCC/afr_Rainf_daily_",dataset,"_GPCC_",(yr-1),sprintf("%1$02d",m),".nc",sep="")
-  ifil2 <- paste(met_dir,"/baseline_climate/Rainf_daily_",dataset,"_GPCC/afr_Rainf_daily_",dataset,"_GPCC_",yr,sprintf("%1$02d",m),".nc",sep="")
-  stk_m1 <- stack(ifil1); stk_m2 <- stack(ifil2)
-  stk_y1 <- c(stk_y1,stk_m1); stk_y2 <- c(stk_y2,stk_m2)
-}
-#building stacks
-stk_y1 <- stack(stk_y1); stk_y2 <- stack(stk_y2)
-
-#naming rasters in stacks
-names(stk_y1) <- paste("y.",yr-1,"_day.",1:nlayers(stk_y1),sep="")
-names(stk_y2) <- paste("y.",yr,"_day.",1:nlayers(stk_y2),sep="")
-
-#single stack of both stacks
-stk_y <- stack(stk_y1,stk_y2)
-
-#remove grid cells where no yield data exists
-true_cells <- cellFromXY(stk_y,xy_main_yield[,c("x","y")])
-stk_y[!(1:ncell(stk_y)) %in% true_cells] <- NA
-
-#calculate precip in mm
-stk_y <- stk_y * 3600 * 24 #kg m-2 s-1 to mm/day
-
 ###
 #function to return precip value for growing season of a particular year
 calc_season_pr <- function(x, stk_y, yr) {
@@ -135,22 +100,58 @@ calc_season_pr <- function(x, stk_y, yr) {
   #5. calculate ratio to this year's yield
   yratio <- yield / (pr_mean * 10)
   
+  #return vector
+  outval <- c(pr_mean,yratio)
+  
   #return both things
-  return(c(pr_mean,yratio))
+  return(outval)
 }
 
-###
-###calculate
-in_data <- cbind(xy_main[,c("LOC","SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")],xy_main_yield)
-row.names(in_data) <- 1:nrow(in_data)
-xx <- apply(in_data, 1, FUN=calc_season_pr, stk_y, yr)
+#loop years
+for (yr in years) {
+  #yr <- years[1]
+  cat("...processing year",yr,"\n")
+  
+  if (!file.exists(paste(out_dir,"/afr_Rainf_gseason_",yr,"_yield_ratio.tif",sep=""))) {
+    #1. load this year's and previous year's data
+    stk_y1 <- c(); stk_y2 <- c()
+    for (m in 1:12) {
+      #m <- 1
+      cat("...loading m=",m,"\n")
+      ifil1 <- paste(met_dir,"/baseline_climate/Rainf_daily_",dataset,"_GPCC/afr_Rainf_daily_",dataset,"_GPCC_",(yr-1),sprintf("%1$02d",m),".nc",sep="")
+      ifil2 <- paste(met_dir,"/baseline_climate/Rainf_daily_",dataset,"_GPCC/afr_Rainf_daily_",dataset,"_GPCC_",yr,sprintf("%1$02d",m),".nc",sep="")
+      stk_m1 <- stack(ifil1); stk_m2 <- stack(ifil2)
+      stk_y1 <- c(stk_y1,stk_m1); stk_y2 <- c(stk_y2,stk_m2)
+    }
+    #building stacks
+    stk_y1 <- stack(stk_y1); stk_y2 <- stack(stk_y2)
+    
+    #naming rasters in stacks
+    names(stk_y1) <- paste("y.",yr-1,"_day.",1:nlayers(stk_y1),sep="")
+    names(stk_y2) <- paste("y.",yr,"_day.",1:nlayers(stk_y2),sep="")
+    
+    #single stack of both stacks
+    stk_y <- stack(stk_y1,stk_y2)
+    
+    #remove grid cells where no yield data exists
+    true_cells <- cellFromXY(stk_y,xy_main_yield[,c("x","y")])
+    stk_y[!(1:ncell(stk_y)) %in% true_cells] <- NA
+    
+    #calculate precip in mm
+    stk_y <- stk_y * 3600 * 24 #kg m-2 s-1 to mm/day
+    
+    #calculate gs precip
+    in_data <- cbind(xy_main[,c("LOC","SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")],xy_main_yield)
+    row.names(in_data) <- 1:nrow(in_data)
+    xx <- apply(in_data, 1, FUN=calc_season_pr, stk_y, yr)
+    
+    #output growing season precip and ratio rasters
+    pr_rs <- raster(stk_y); pr_rs[true_cells] <- xx[1,]
+    yratio_rs <- raster(stk_y); yratio_rs[true_cells] <- xx[2,]
+    
+    #write rasters
+    pr_rs <- writeRaster(pr_rs, paste(out_dir,"/afr_Rainf_gseason_",yr,"_total_rain.tif",sep=""),format="GTiff")
+    yratio_rs <- writeRaster(yratio_rs, paste(out_dir,"/afr_Rainf_gseason_",yr,"_yield_ratio.tif",sep=""),format="GTiff")
+  }
+}
 
-#output growing season precip and ratio rasters
-pr_rs <- raster(stk_y); pr_rs[true_cells] <- xx[1,]
-yratio_rs <- raster(stk_y); yratio_rs[true_cells] <- xx[2,]
-
-#write rasters
-pr_rs <- writeRaster(pr_rs, paste(out_dir,"/afr_Rainf_gseason_",yr,"_total_rain.tif",sep=""),format="GTiff")
-yratio_rs <- writeRaster(yratio_rs, paste(out_dir,"/afr_Rainf_gseason_",yr,"_yield_ratio.tif",sep=""),format="GTiff")
-
-#plot(pr_rs); plot(yratio_rs)
