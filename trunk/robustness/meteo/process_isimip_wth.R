@@ -89,6 +89,11 @@ process_isimip_wth <- function(gcm, sce) {
         #cut to Africa
         system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",vname,"_remapped.nc ",fnameout,sep=""))
         
+        #note: for some reason the below was required for the following file:
+        #/nfs/a101/eejarv/quest-for-robustness/data/meteorology/future_climate/gfdl-esm2m/rcp26/afr_pr_bced_1960_1999_gfdl-esm2m_rcp2p6_2011-2020.nc
+        #uncomment the below and comment out the above cut to Africa
+        #system(paste("cdo sellonlatbox,",bbox@xmin-0.5625,",",bbox@xmax+0.5625,",",bbox@ymin,",",bbox@ymax," ",vname,"_remapped.nc ",fnameout,sep=""))
+        
         #garbage collection
         system(paste("rm -f ",vname,"_remapped.nc",sep=""))
         setwd(wd)
@@ -99,7 +104,7 @@ process_isimip_wth <- function(gcm, sce) {
 
 
 #loop gcm and scenario
-for (sce in sce_list) {
+for (sce ggin sce_list) {
   for (gcm in gcm_list) {
     cat("\n...processing rcp=",sce,"and gcm=",gcm,"\n")
     process_isimip_wth(gcm,sce)
