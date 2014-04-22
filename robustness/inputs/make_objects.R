@@ -117,6 +117,29 @@ for (vn in flds) {
   }
 }
 
+#fix planting dates
+xy_main$SOW_DATE1[which(xy_main$LOC == 1084)] <- 25; xy_main$SOW_DATE2[which(xy_main$LOC == 1084)] <- 50
+xy_main$HAR_DATE1[which(xy_main$LOC == 1084)] <- 180; xy_main$HAR_DATE2[which(xy_main$LOC == 1084)] <- 251
+xy_main$SOW_DATE1[which(xy_main$LOC == 1174)] <- 25; xy_main$SOW_DATE2[which(xy_main$LOC == 1174)] <- 50
+xy_main$HAR_DATE1[which(xy_main$LOC == 1174)] <- 125; xy_main$HAR_DATE2[which(xy_main$LOC == 1174)] <- 150
+
+tseq <- c(1233,1299,1300,1302,1303,1304,1305,1364,1365,1366,1367,1368,1369,1370,1371)
+xy_main$SOW_DATE1[which(xy_main$LOC %in% tseq)] <- 1; xy_main$SOW_DATE2[which(xy_main$LOC %in% tseq)] <- 50
+xy_main$HAR_DATE1[which(xy_main$LOC %in% tseq)] <- 120; xy_main$HAR_DATE2[which(xy_main$LOC %in% tseq)] <- 170
+
+tseq <- c(1430,1431,1432,1433,1434,1435,1436,1437,1496,1497,1498,1499,1500,1501,1502,1503,1549,1550,1563,1564,1565,1566,1567,1568,1614,1615,1616,1620,1629,1630,1696)
+xy_main$SOW_DATE1[which(xy_main$LOC %in% tseq)] <- 300; xy_main$SOW_DATE2[which(xy_main$LOC %in% tseq)] <- 360
+xy_main$HAR_DATE1[which(xy_main$LOC %in% tseq)] <- 80; xy_main$HAR_DATE2[which(xy_main$LOC %in% tseq)] <- 130
+
+xy_main$HAR_DATE1[which(xy_main$LOC == 1481)] <- 330
+xy_main$HAR_DATE1[which(xy_main$LOC == 1684)] <- 98; xy_main$HAR_DATE2[which(xy_main$LOC == 1684)] <- 120
+
+tseq <- c(1763,1897,1898,1899,1900,2281,2285,2346,2352,2419,2486,2616,2681)
+a <- xy_main$SOW_DATE1[which(xy_main$LOC %in% tseq)]
+b <- xy_main$SOW_DATE2[which(xy_main$LOC %in% tseq)]
+xy_main$SOW_DATE1[which(xy_main$LOC %in% tseq)] <- b
+xy_main$SOW_DATE2[which(xy_main$LOC %in% tseq)] <- a
+
 #save this data frame in a RData file
 save(list=c("xy_main"),file=paste(mdataDir,"/initial_conditions_major.RData",sep=""))
 
