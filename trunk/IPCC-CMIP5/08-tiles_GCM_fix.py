@@ -4,118 +4,180 @@
 # Note: If process is interrupted, you must be erase the last processed period
 # ----------------------------------------------------------------------------------
 
-import arcgisscripting, os, sys, string
-gp = arcgisscripting.create(9.3)
+import arcpy, os, sys, string, glob, shutil
+from arcpy import env
 
 #Syntax
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Tiles_GCM_fix.py M:\climate_change\IPCC_CMIP3 D:\climate_change\IPCC_CMIP3 N:\climate_change\IPCC_CMIP3 A2 30s downscaled"
-	print "   Syntax	: <Tiles_GCM.py>, <dirbase>, <dirtemp>, <scenario>, <dirout>, <scenario>, <resolution>, <type>"
+	print "   - ie: python 08-tiles_GCM_fix.py T:\gcm\cmip5\ipcc_5ar_ciat_tiled T:\gcm\cmip5\downscaled G:\jetarapues\cmip5_process\cmip5_tiles_process T:\gcm\cmip5\ipcc_5ar_ciat_tiled rcp26 30s"
+	print "   Syntax	: <Tiles_GCM.py>, <dirbase>, <dirtemp>, <scenario>, <dirout>, <scenario>, <res>, <type>"
 	print "   dirbase	: Root folder where are storaged the datasets"
 	print "   dirtemp 	: Where is made calculations"
 	print "   dirout	: Out folder"
 	print "   scenario  : A1B, A2 or B1"
-	print "   resolution: The possibilities are 2_5 min 5min 10min 30s"
+	print "   res: The possibilities are 2_5 min 5min 10min 30s"
 	print "   type		: Disaggregated, Interpolated or Downscaled"	
 	sys.exit(1)
 
-dirbase = sys.argv[1]
-dirtemp = sys.argv[2]
-dirout = sys.argv[3]
-scenario = sys.argv[4]
-resolution = sys.argv[5]
-type = sys.argv[6]
+dirTiles = sys.argv[1]
+dirBase = sys.argv[2]
+dirTmp = sys.argv[3]
+dirOut = sys.argv[4]
+rcp = sys.argv[5]
+res = sys.argv[6]
+
 
 os.system('cls')
-gp.CheckOutExtension("Spatial")
+# gp.CheckOutExtension("Spatial")
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 print "    SPLIT IN TILES     "
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
-#periodlist = "2010_2039", "2020_2049", "2030_2059", "2040_2069", "2050_2079", "2060_2089", "2070_2099"
-modellist = "cccma_cgcm3_1_t47", "cccma_cgcm3_1_t90" #sorted(os.listdir(dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution)))
-periodDc = {"2020_2049": "2030s", "2030_2059": "2040s", "2040_2069": "2050s", "2050_2079": "2060s"}
-latDc = {"A": 30, "B": -30, "C": -90}
-lonDc = {"1": -180, "2": -120, "3": -60, "4": 0, "5": 60, "6": 120}
+if rcp=='rcp26':
+	modellist = ['bcc_csm1_1', 'bcc_csm1_1_m', 'bnu_esm', 'cccma_canesm2', 'cesm1_cam5', 'csiro_mk3_6_0', 'fio_esm', 'gfdl_cm3', 'gfdl_esm2g', 'gfdl_esm2m', 'giss_e2_h', 'giss_e2_r', 'ipsl_cm5a_lr', 'ipsl_cm5a_mr', 'lasg_fgoals_g2', 'miroc_esm', 'miroc_esm_chem', 'miroc_miroc5', 'mohc_hadgem2_es', 'mpi_esm_lr', 'mpi_esm_mr', 'mri_cgcm3', 'ncar_ccsm4', 'ncc_noresm1_m', 'nimr_hadgem2_ao']
 
-print "Available models: " + str(modellist)
+ens= 'r1i1p1'
 
-for model in sorted(modellist):
+rcpDc = {"rcp26": "rcp2_6", "rcp45": "rcp4_5", "rcp60": "rcp6_0", "rcp85": "rcp8_5"}
+periodDc = {"2030s":"2020_2049", "2050s":"2040_2069", "2070s":"2060_2089", "2080s":"2070_2099"}
+periodList = ["2030s", "2050s", "2070s","2080s"]
+variablelist = ["bio","tmin","tmax","tmean","prec","cons"]
 
-    # diroutmodel = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model
-    # if not os.path.exists(diroutmodel):
-        # os.system('mkdir ' + diroutmodel)
+zoneDc = {"0":"c1", "1":"c2", "2":"c3", "3":"c4", "4":"c5", "5":"c6", "6":"b1", "7":"b2", "8":"b3", "9":"b4", "10":"b5", "11":"b6", "12":"a1", "13":"a2", "14":"a3", "15":"a4", "16":"a5", "17":"a6"}
 
-    for period in sorted(periodDc):
+latDc = ["a", "b", "c"]
+lonDc = ["1", "2", "3", "4", "5", "6"]
 
-        gp.workspace = dirbase + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
 
-        if os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "_TilesProcess_Done.txt"):
-            
-            print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
-            
-            #Set dirtemp
-            diroutraster = dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period
-            dirouttiles = diroutraster + "\\_tiles"
-            if not os.path.exists(dirouttiles):
-                os.system('mkdir ' + dirouttiles)
-                            
-            if not os.path.exists(diroutraster):
-                os.system('mkdir ' + diroutraster)
-                
-            #Get a list of raster in workspace
-            rasters = sorted(gp.ListRasters("", "GRID"))
-            for raster in rasters:
+check = []
 
-                for lat in sorted(latDc):
-                
-                    for lon in sorted(lonDc):
+for period in periodList:
+	for model in sorted(modellist):
+		fileList = dirTiles + "\\" + rcpDc[rcp]+ "\\" +period+ "\\" +model + "\\" + res
+		checkFile = dirTiles + "\\check_"+rcpDc[rcp] + ".txt"
+		# if os.path.exists(checkFile):
+		for var in variablelist:
+			for lat in sorted(latDc):
+				for lon in sorted(lonDc): 
+					inZip = fileList + "\\" + model + "_" + rcpDc[rcp] + "_" + period + "_" + var + "_" + res + "_r1i1p1_" + lat + lon + "_asc.zip"
+					if not os.path.exists(inZip):
+						# print inZip
+						check.append(model + "-" + rcpDc[rcp] + "-" + period + "-" + var)
 						
-						if os.path.exists(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period + "\\_tiles\\_VAR_" + os.path.basename(raster).split("_")[0] + ".txt") and not str(lat) + str(lon) == "A1":
-							if raster == "bio_9" or raster == "cons_mths" or raster == "prec_9" or raster == "tmin_9" or raster == "tmax_9" or raster == "tmean_9" :
-								print "\n    Processing " + raster 
-								print "    ----> Extracting "
-								OutRaster = diroutraster + "\\" + raster
-								xmin = str(lonDc [lon])
-								ymin = str(latDc [lat])
-								xmax = int(xmin) + 60
-								ymax = int(ymin) + 60
-								
-								gp.clip_management(raster," " + str(xmin) + " " + str(ymin) + " " + str(xmax) + " " + str(ymax) + " ",OutRaster)
+###################################################################################################					
+	
+			
+print '----------- Fix check -----------------------\n'
+print list(set(check))
+print '\n-------------------------------------\n'
 
-								print "    ----> Converting " 
-								OutAscii = dirouttiles + "\\" + os.path.basename(OutRaster) + ".asc"							
-								gp.RasterToASCII_conversion(OutRaster, OutAscii)
-								gp.delete_management(OutRaster)
-								
-								print "    ----> Compressing "
-								InZip = dirouttiles + "\\" + model + "_" + scenario + "_" + str(periodDc [period]) + "_" + os.path.basename(OutRaster).split("_")[0] + "_Zone" + str(lat) + str(lon)  + "_asc.zip"
-								os.system('7za a ' + InZip + " " + OutAscii)
-								os.remove(OutAscii)
-								
-                        
-            print "Done!!"
-                
-        else:
-            print "\nThe model " + model + " " + period + " is already processed"
-            print "Processing the next period \n"
+for item in  list(set(check)):
+	model = item.split('-')[0]
+	period = item.split('-')[2]
+	var = item.split('-')[3]
 
-    # try:
-        # print "\n    ----> Copying out tiles by models... \n"
-        # # diroutcopy = dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model + "\\" + period 
-        # # if not os.path.exists(diroutcopy):
-            # # os.system('mkdir ' + diroutcopy)
-        # shutil.copytree(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model, dirout + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model)
-        # print "\n    ----> Copy done... \n"
+	dirProc = dirTmp + "\\" + rcp + "_" + model + "_" + period
+	dirgrids = dirTmp + "\\" + rcp + "_" + model + "_" + period + "\grids"
+	dirCopy = dirOut + "\\" + rcpDc[rcp] + "\\" + period + "\\" +  model + "\\" + res	
+	
+	checkfile = dirCopy + "_tiles_done1.txt"
+	if not os.path.exists(checkfile):	
+		
+		if not os.path.exists(dirProc):
+			os.system('mkdir ' + dirProc)
+		if not os.path.exists(dirgrids):
+			os.system('mkdir ' + dirgrids)
+			
+		print "\n\tprocessing", model,period,var + "\n"
 
-    # except: 
-        # print "Error copying output ascii folder of " + str(model)
-        # sys.exit(4)
+		##### Get a list of raster in workspace
+		arcpy.env.workspace = dirBase + "\\" + rcp + "\\global_" + str(res) + "\\" + model + "\\" + ens + "\\" + periodDc[period]
 
-    # print "\n    ----> Removing temporal folders ... \n"
-    # shutil.rmtree(dirtemp + "\\SRES_" + scenario + "\\" + type + "\\Global_" + str(resolution) + "\\" + model)
+		rasterList = sorted(arcpy.ListRasters(var+"*", "GRID"))
+		for raster in rasterList:
+			if not arcpy.Exists(dirgrids+"\\"+raster+"_17"):
+				arcpy.SplitRaster_management(raster, dirgrids, raster + "_", "NUMBER_OF_TILES",  "GRID", "#", "6 3", "#", "0", "DEGREES", "#", "#")
+				print "\t ", os.path.basename(raster), " splited"# + "_"+str(i)
+			else:
+				print "\t ", os.path.basename(raster), " splited"		
+		
+		#########Get a list of raster in processing dir
+		arcpy.env.workspace = dirgrids		
+		rasterList = sorted(arcpy.ListRasters("", "GRID"))
+		for raster in rasterList:
+			
+			############# Convert to ESRI-Ascii
+			var = os.path.basename(raster).split("_")[0]
+			month = os.path.basename(raster).split("_")[1]
+			zone = os.path.basename(raster).split("_")[-1]
+				
+			dirAsc = dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ascii\\" + var + "_" + zoneDc[zone]
+			if not os.path.exists(dirAsc):
+				os.system('mkdir ' + dirAsc)
+			
+			outAsc = dirAsc + "\\" + var + "_" + month + ".asc"
+			prjAsc = dirAsc + "\\" + var + "_" + month + ".prj"
+			# print outAsc
+			if not os.path.exists(outAsc): 
+				try:
+					##########os.system("gdal_translate -of AAIGrid -ot Int16 -quiet " + arcpy.env.workspace + "\\" + raster + " " + outAsc)
+					arcpy.RasterToASCII_conversion(raster, outAsc)
+					
+				except:
+					arcpy.CalculateStatistics_management(raster)
+					arcpy.RasterToASCII_conversion(raster, outAsc)
+				print "\t", os.path.basename(raster), " converted to ascii"
+				# arcpy.Delete_management(raster)
+			else:
+				print "\t", os.path.basename(raster), " converted"
+				
+			if os.path.exists(prjAsc):
+				os.system("del /s /q " + prjAsc)					
+			
+		#################### Compress by Zones
+		print "\n .> Compress by Zones: ", rcp, model, str(res), ens, period, "\n"
 
+		######### if os.path.exists(dirProc + "\\info"):
+			###### os.system("rmdir /s /q " + dirProc + "\\info")
+		if not os.path.exists(dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ZipVarZonas"):
+			os.system('mkdir ' + dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ZipVarZonas")
+
+			
+		varZones = sorted(os.listdir(dirProc+ "\\ascii"))
+		for varZone in varZones:
+			######### if varZone.split("_")[0] == "cons":
+				###########inZip = dirProc + "\\" + model + "_" + rcpDc[rcp] + "_" + periodDc[period] + "_" + varZone.split("_")[0] + "_" + res + "_" + ens + "_" + varZone.split("_")[1] + "_asc.zip"
+			######## else:
+			inZip = dirProc + "\\ZipVarZonas\\" + model + "_" + rcpDc[rcp] + "_" + period + "_" + varZone.split("_")[0] + "_" + res + "_" + ens + "_" + varZone.split("_")[1] + "_asc.zip"
+			if not os.path.exists(inZip):
+				os.system('7za a -tzip ' + inZip + " " + dirProc + "\\ascii\\" + varZone)
+				
+				os.system("rmdir /s /q " + dirProc + "\\" + varZone)
+				
+				print varZone, " compressed!"
+			
+			########## else:
+				######### Copying to output dir
+				if not os.path.exists(dirCopy + "\\"+os.path.basename(inZip) ):
+					print "\n .> Copying to output dir: ", rcp, model, str(res), ens, period, "\n"
+					os.system("robocopy " + dirProc + "\\ZipVarZonas" + " " + dirCopy + " "+os.path.basename(inZip)+ " /z /e /MOV")
+		
+		# os.system("rmdir /s /q " + dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ascii")
+		
+		os.system("rmdir /s /q " + dirProc)
+		# checkTxt = open(checkfile, "w")
+		# checkTxt.close()
+		
+		print "\n .> Slit in tiles: ", rcp, model, str(res), ens, period, " done! \n"
+
+	else:
+		
+		print "\n .> Slit in tiles: ", rcp, model, str(res), ens, period, " done! \n"
+	
+	
+			
+				
 print "Process done!!!" 
