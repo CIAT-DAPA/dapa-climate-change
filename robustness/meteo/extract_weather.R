@@ -30,10 +30,10 @@
 # load(paste(mdata_dir,"/initial_conditions_major.RData",sep=""))
 
 # #run function
-# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="obs", dataset="WFD", sce="hist", years=1950:2001)
-# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
-# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
-# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
+# extract_weather(cellid=xy_main$LOC[231], lon=xy_main$x[231], lat=xy_main$y[231], met_dir=metDir, data_type="obs", dataset="WFD", sce="hist", years=1950:2001)
+# extract_weather(cellid=xy_main$LOC[231], lon=xy_main$x[231], lat=xy_main$y[231], met_dir=metDir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
+# extract_weather(cellid=xy_main$LOC[231], lon=xy_main$x[231], lat=xy_main$y[231], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
+# extract_weather(cellid=xy_main$LOC[231], lon=xy_main$x[231], lat=xy_main$y[231], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
 # #---------------------------------------------------------------
 
 extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005, write_wthfil=T, use_cdo=T) {
