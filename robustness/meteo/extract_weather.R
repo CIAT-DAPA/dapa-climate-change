@@ -30,13 +30,13 @@
 # load(paste(mdata_dir,"/initial_conditions_major.RData",sep=""))
 
 # #run function
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="obs", dataset="WFD", sce="hist", years=1950:2001)
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
-# extract_weather(cellid=xy_main$LOC[229], lon=xy_main$x[229], lat=xy_main$y[229], metDir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
+# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="obs", dataset="WFD", sce="hist", years=1950:2001)
+# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="obs", dataset="WFDEI", sce="hist", years=1979:2010)
+# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="hist", years=1950:2005)
+# extract_weather(cellid=xy_main$LOC[230], lon=xy_main$x[230], lat=xy_main$y[230], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
 # #---------------------------------------------------------------
 
-extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005, write_wthfil=T) {
+extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005, write_wthfil=T, use_cdo=T) {
   #get arguments in proper format
   data_type <- tolower(data_type); sce <- tolower(sce)
   if (data_type == "obs") {dataset <- toupper(dataset)} else {dataset <- tolower(dataset)}
@@ -75,7 +75,7 @@ extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset=
   
   #create folder of output
   out_adir <- paste(asc_dir,"/",data_type,"_",sce,"_",dataset,sep="")
-  if (!file.exists(out_adir)) {dir.create(out_adir)}
+  if (!file.exists(out_adir)) {dir.create(out_adir, recursive=T)}
   
   #output file
   out_file <- paste(out_adir,"/meteo_cell-",cellid,".met",sep="")
@@ -88,7 +88,7 @@ extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset=
       #generate list of files from which to extract
       if (data_type == "obs") {
         #years_months
-        ym_m <- expand.grid(YEAR=years,MONTH=sprintf("%1$02d",1:12))
+        ym_m <- expand.grid(MONTH=sprintf("%1$02d",1:12),YEAR=years)
         ym_m$YM <- paste(ym_m$YEAR,ym_m$MONTH,sep="")
         if (vname == "Rainf") {
           fnames <- paste(met_dir,"/baseline_climate/",vname,"_daily_",dataset,"_GPCC","/afr_",vname,"_daily_",dataset,"_GPCC_",ym_m$YM,".nc",sep="")
@@ -104,17 +104,33 @@ extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset=
       fdata <- data.frame(); fcount <- 1
       for (fname in fnames) {
         #fname <- fnames[1]
-        #temporary output file
-        odat <- paste(out_adir,"/",vname,"_cell-",cellid,"_",min(years),"-",max(years),".tab",sep="")
+        if (use_cdo) {
+          #temporary output file
+          odat <- paste(out_adir,"/",vname,"_cell-",cellid,"_",min(years),"-",max(years),".tab",sep="")
+          
+          #extract the data
+          if (!file.exists(odat)) {system(paste("cdo -outputtab,year,month,day,lon,lat,value -remapnn,lon=",lon,"_lat=",lat," ",fname," > ",odat,sep=""))}
+          
+          #read in  the data
+          idata <- read.table(odat,header=F)
+          system(paste("rm -f ",odat,sep=""))
+          names(idata) <- c("year","month","day","lon","lat",vname)
+        } else {
+          #reading in file in R
+          cat(fname,"\n")
+          rstk <- stack(fname)
+          rstk <- extract(rstk, cbind(x=lon,y=lat))
+          if (tolower(data_type) == "obs") {
+            idata <- data.frame(year=NA, month=NA, day=NA, lon=lon, lat=lat, value=as.numeric(rstk))
+          } else {
+            idata <- data.frame(year=NA, month=NA, day=NA, lon=lon, lat=lat, value=as.numeric(rstk),dname=unlist(dimnames(rstk)))
+            idata$year <- substr(idata$dname,2,5); idata$month <- as.numeric(substr(idata$dname,7,8))
+            idata$day <- as.numeric(substr(idata$dname,10,11)); idata$dname <- NULL
+          }
+          names(idata) <- c("year","month","day","lon","lat",vname)
+        }
         
-        #extract the data
-        if (!file.exists(odat)) {system(paste("cdo -outputtab,year,month,day,lon,lat,value -remapnn,lon=",lon,"_lat=",lat," ",fname," > ",odat,sep=""))}
-        
-        #read in  the data
-        idata <- read.table(odat,header=F)
-        system(paste("rm -f ",odat,sep=""))
-        names(idata) <- c("year","month","day","lon","lat",vname)
-        
+        #setting day and year
         if (tolower(dataset) == "wfd" | tolower(dataset) == "wfdei") {
           idata$year <- ym_m$YEAR[fcount]
           idata$month <- as.numeric(ym_m$MONTH[fcount])
