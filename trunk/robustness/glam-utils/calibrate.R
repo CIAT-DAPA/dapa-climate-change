@@ -45,7 +45,7 @@
 # opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
 # opt_data$WTH_ROOT <- "obs_hist_WFD"
 # opt_data$LOC <- c(680,681,682)
-# opt_data$ISYR <- 1982
+# opt_data$ISYR <- 1981
 # opt_data$IEYR <- 2000
 # opt_data$INI_COND <- xy_main
 # opt_data$YLD_DATA <- xy_main_yield
@@ -64,6 +64,11 @@
 # 
 # ygpcalib <- GLAM_calibrate(opt_data)
 # #---------------------------------------------------------------
+
+
+### note:
+#simulate year before starting one because if sowing date is late then harvest is in this year
+#last year cannot be last year of time series since model runs could fail due to late sowing
 
 #calibrate ygp
 GLAM_calibrate <- function(opt_data) {
@@ -200,8 +205,10 @@ GLAM_calibrate <- function(opt_data) {
           y_o <- y_o[which(y_o$YEAR >= opt_data$ISYR & y_o$YEAR <= opt_data$IEYR),]
           y_o <- y_o$YIELD
           
-          #calc rmse
-          odf <- data.frame(YEAR=opt_data$ISYR:opt_data$IEYR,VALUE=vals[i],OBS=y_o,PRED=y_p)
+          #calc rmse, depending on which year the crop was actually harvested
+          har_date <- mean(pred$PLANTING_DATE + pred$DUR) #get harvest date first
+          if (har_date<365) {y_p <- y_p[2:length(y_p)]} else {y_p <- y_p[1:(length(y_p)-1)]}
+          odf <- data.frame(YEAR=(opt_data$ISYR+1):opt_data$IEYR,VALUE=vals[i],OBS=y_o,PRED=y_p)
           
           if (opt_meth == "RMSE") {
             rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
@@ -213,7 +220,6 @@ GLAM_calibrate <- function(opt_data) {
           
           #remove junk
           system(paste("rm -rf ",run_data$RUN_DIR,sep=""))
-          
         } else {
           rmse <- NA
         }
@@ -241,7 +247,7 @@ GLAM_calibrate <- function(opt_data) {
     }
   }
   
-  #remove junk
+  #remove junk from scratch
   if (opt_data$USE_SCRATCH) {
     system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     system(paste("rm -rf ",cal_dir,sep=""))
