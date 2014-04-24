@@ -2,9 +2,9 @@
 #UoL / CCAFS / CIAT
 #Feb 2014 #borrows from PhD script called "glam-optimise-functions.R"
 
-#############################################################################################
-####### function to calibrate GLAM (for as many grid cells as provided)
-#############################################################################################
+##############################################################################################
+####### function to calibrate GLAM (for as many grid cells as provided), each one individually
+##############################################################################################
 
 #this (first) function should
 #1. use number of steps to choose the values to iterate
@@ -12,6 +12,8 @@
 #3. return table of grid cell * ygp values, RMSE value, and crop yield
 
 #note: a second function will deal with optimisation of parameters
+#note: this function should be applicable to both the hypercube and the normal 
+#      optimisation procedure
 
 # #example:
 # #---------------------------------------------------------------
@@ -65,6 +67,13 @@
 # ygpcalib <- GLAM_calibrate(opt_data)
 # #---------------------------------------------------------------
 
+# #plotting some of the results
+# xx <- ygpcalib$RAW_DATA[which(ygpcalib$RAW_DATA$VALUE==0.87 & ygpcalib$RAW_DATA$LOC==680),]
+# plot(xx$YEAR,xx$OBS_ADJ,ty="l",ylim=c(0,1200))
+# lines(xx$YEAR,xx$PRED_ADJ,col="red")
+# 
+# yy <- ygpcalib$CALIBRATION[which(ygpcalib$CALIBRATION$LOC==680),]
+# plot(yy$VALUE, yy$RMSE/yy$YOBS_ADJ*100, ty='l',ylim=c(0,100))
 
 ### note:
 #simulate year before starting one because if sowing date is late then harvest is in this year
@@ -124,10 +133,10 @@ GLAM_calibrate <- function(opt_data) {
   vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
   
   #type of run
-  params$glam_param.mod_mgt$SEASON <- opt_data$RUN_TYPE
+  #params$glam_param.mod_mgt$SEASON <- opt_data$RUN_TYPE
   
   #params config
-  params$glam_param.mod_mgt$IASCII <- 1 #output only to season file
+  #params$glam_param.mod_mgt$IASCII <- 1 #output only to season file
   
   #loop through desired locations
   for (loc in opt_data$LOC) {
@@ -161,7 +170,8 @@ GLAM_calibrate <- function(opt_data) {
     run_data$PARAMS <- params
     
     #file of output
-    cal_outfile <- paste(opt_dir,"/cal-",run_data$LOC,".txt",sep="")
+    cal_outfile <- paste(opt_dir,"/cal-",run_data$LOC,".txt",sep="") #summary
+    raw_outfile <- paste(opt_dir,"/cal-",run_data$LOC,"_raw.txt",sep="") #raw
     
     if (!file.exists(cal_outfile)) {
       #loop through sequence of values
@@ -205,17 +215,36 @@ GLAM_calibrate <- function(opt_data) {
           y_o <- y_o[which(y_o$YEAR >= opt_data$ISYR & y_o$YEAR <= opt_data$IEYR),]
           y_o <- y_o$YIELD
           
-          #calc rmse, depending on which year the crop was actually harvested
-          har_date <- mean(pred$PLANTING_DATE + pred$DUR) #get harvest date first
+          #get simulated yield, depending on which year the crop was actually harvested:
+          #** if planted and harvested this year then use simulation from this year to end
+          #** if planted this and harvested next year then use simulation from year-1 to end-1
+          har_date <- mean((pred$PLANTING_DATE + pred$DUR)) #get harvest date first
           if (har_date<365) {y_p <- y_p[2:length(y_p)]} else {y_p <- y_p[1:(length(y_p)-1)]}
           odf <- data.frame(YEAR=(opt_data$ISYR+1):opt_data$IEYR,VALUE=vals[i],OBS=y_o,PRED=y_p)
           
+          ## detrending (borrows from detrender-functions.R)
+          #detrend observed yield
+          fit_loess <- loess(odf$OBS ~ odf$YEAR) #compute lowess fit
+          y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
+          odf$LOESS_PRED <- y_loess$fit
+          rd_loess <- (odf$OBS - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
+          odf$OBS_ADJ <- (rd_loess+1) * odf$OBS[nrow(odf)] #loess
+          
+          #detrend simulated yield
+          fit_loess <- loess(odf$PRED ~ odf$YEAR, degree=1, span=2) #compute lowess fit
+          y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
+          odf$LOESS_PRED <- y_loess$fit
+          rd_loess <- (odf$PRED - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
+          odf$PRED_ADJ <- (rd_loess+1) * odf$PRED[nrow(odf)] #loess
+          odf$LOESS_PRED <- NULL
+          
+          #choose optimisation method (RMSE, CH07, CH10)
           if (opt_meth == "RMSE") {
-            rmse <- sqrt(sum((odf$OBS-odf$PRED)^2,na.rm=T) / (length(which(!is.na(odf$OBS)))))
+            rmse <- sqrt(sum((odf$OBS_ADJ-odf$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(odf$OBS_ADJ)))))
           } else if (opt_meth == "CH07") {
-            rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2 + (sd(odf$OBS,na.rm=T)-sd(odf$PRED,na.rm=T))^2
+            rmse <- (mean(odf$OBS_ADJ,na.rm=T)-mean(odf$PRED_ADJ,na.rm=T))^2 + (sd(odf$OBS_ADJ,na.rm=T)-sd(odf$PRED_ADJ,na.rm=T))^2
           } else if (opt_meth == "CH10") {
-            rmse <- (mean(odf$OBS,na.rm=T)-mean(odf$PRED,na.rm=T))^2
+            rmse <- (mean(odf$OBS_ADJ,na.rm=T)-mean(odf$PRED_ADJ,na.rm=T))^2
           }
           
           #remove junk
@@ -223,7 +252,8 @@ GLAM_calibrate <- function(opt_data) {
         } else {
           rmse <- NA
         }
-        out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(odf$OBS,na.rm=T), YPRED=mean(odf$PRED,na.rm=T))
+        out_row <- data.frame(VALUE=vals[i], RMSE=rmse, YOBS=mean(odf$OBS,na.rm=T), YPRED=mean(odf$PRED,na.rm=T), 
+                              YOBS_ADJ=mean(odf$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(odf$PRED_ADJ,na.rm=T))
         
         if (i == 1) {
           out_all <- out_row
@@ -233,17 +263,23 @@ GLAM_calibrate <- function(opt_data) {
           raw_all <- rbind(raw_all, odf)
         }
       }
+      #write outputs for this grid cell
       write.table(out_all,sep="\t",quote=F,file=cal_outfile,row.names=F)
+      write.table(raw_all,sep="\t",quote=F,file=raw_outfile,row.names=F)
     } else {
       out_all <- read.table(cal_outfile,sep="\t",header=T)
+      raw_all <- read.table(raw_outfile,sep="\t",header=T)
     }
     
     #append location data
     out_all <- cbind(LOC=loc,out_all)
+    raw_all <- cbind(LOC=loc,raw_all)
     if (loc == opt_data$LOC[1]) {
       cal_all <- out_all
+      raw_cal <- raw_all
     } else {
       cal_all <- rbind(cal_all, out_all)
+      raw_cal <- rbind(raw_cal, raw_all)
     }
   }
   
@@ -254,5 +290,6 @@ GLAM_calibrate <- function(opt_data) {
   }
   
   #return object
-  return(cal_all)
+  r_list <- list(CALIBRATION=cal_all, RAW_DATA=raw_cal)
+  return(r_list)
 }
