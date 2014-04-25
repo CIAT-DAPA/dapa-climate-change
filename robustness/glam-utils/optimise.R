@@ -17,57 +17,58 @@
 
 # #example:
 # #---------------------------------------------------------------
-src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
-source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
-source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
-source(paste(src.dir,"/glam-utils/make_sowfile.R",sep=""))
-source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
-source(paste(src.dir,"/glam-utils/make_parameterset.R",sep=""))
-source(paste(src.dir,"/glam-utils/get_parameterset.R",sep=""))
-source(paste(src.dir,"/glam-utils/run_glam.R",sep=""))
-source(paste(src.dir,"/glam-utils/calibrate.R",sep=""))
-
-wd <- "~/Leeds-work/quest-for-robustness"
-runsDir <- paste(wd,"/crop_model_runs",sep="")
-calibDir <- paste(runsDir,"/ppe_optimisation",sep="")
-mdataDir <- paste(wd,"/data/model_data",sep="")
-metDir <- paste(wd,"/data/meteorology",sep="")
-binDir <- paste(wd,"/bin/glam-maize-osx",sep="")
-
-#load objects
-load(paste(mdataDir,"/initial_conditions_major.RData",sep=""))
-load(paste(mdataDir,"/yield_major.RData",sep=""))
-
-#arguments
-opt_data <- list()
-opt_data$CROP <- "maize"
-opt_data$MODEL <- "glam-maiz"
-opt_data$BASE_DIR <- calibDir
-opt_data$BIN_DIR <- binDir
-opt_data$PAR_DIR <- mdataDir
-opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
-opt_data$WTH_ROOT <- "obs_hist_WFD"
-opt_data$LOC <- c(680,681,682)
-opt_data$ISYR <- 1981
-opt_data$IEYR <- 2000
-opt_data$INI_COND <- xy_main
-opt_data$YLD_DATA <- xy_main_yield
-opt_data$PARAMS <- GLAM_get_default(opt_data$PAR_DIR)
-opt_data$SIM_NAME <- "optim1"
-opt_data$PARAM <- "TE"
-opt_data$SECT <- "glam_param.bmass"
-opt_data$NSTEPS <- 50
-opt_data$RUN_TYPE <- "RFD"
-opt_data$METHOD <- "RMSE"
-opt_data$USE_SCRATCH <- F
-opt_data$SCRATCH <- NA
-
-#modify parameter value to avoid model failure
-opt_data$PARAMS$glam_param.maize$TLIMJUV$Value <- 280
-
+# src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
+# source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
+# source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
+# source(paste(src.dir,"/glam-utils/make_sowfile.R",sep=""))
+# source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
+# source(paste(src.dir,"/glam-utils/make_parameterset.R",sep=""))
+# source(paste(src.dir,"/glam-utils/get_parameterset.R",sep=""))
+# source(paste(src.dir,"/glam-utils/run_glam.R",sep=""))
+# source(paste(src.dir,"/glam-utils/calibrate.R",sep=""))
+# 
+# wd <- "~/Leeds-work/quest-for-robustness"
+# runsDir <- paste(wd,"/crop_model_runs",sep="")
+# calibDir <- paste(runsDir,"/ppe_optimisation",sep="")
+# mdataDir <- paste(wd,"/data/model_data",sep="")
+# metDir <- paste(wd,"/data/meteorology",sep="")
+# binDir <- paste(wd,"/bin/glam-maize-osx",sep="")
+# 
+# #load objects
+# load(paste(mdataDir,"/initial_conditions_major.RData",sep=""))
+# load(paste(mdataDir,"/yield_major.RData",sep=""))
+# 
+# #arguments
+# opt_data <- list()
+# opt_data$CROP <- "maize"
+# opt_data$MODEL <- "glam-maiz"
+# opt_data$BASE_DIR <- calibDir
+# opt_data$BIN_DIR <- binDir
+# opt_data$PAR_DIR <- mdataDir
+# opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
+# opt_data$WTH_ROOT <- "obs_hist_WFD"
+# opt_data$LOC <- c(680,681,682)
+# opt_data$ISYR <- 1981
+# opt_data$IEYR <- 2000
+# opt_data$INI_COND <- xy_main
+# opt_data$YLD_DATA <- xy_main_yield
+# opt_data$PARAMS <- GLAM_get_default(opt_data$PAR_DIR)
+# opt_data$SIM_NAME <- "optim1"
+# opt_data$PARAM <- "TE"
+# opt_data$SECT <- "glam_param.bmass"
+# opt_data$NSTEPS <- 36
+# opt_data$RUN_TYPE <- "RFD"
+# opt_data$METHOD <- "RMSE"
+# opt_data$USE_SCRATCH <- F
+# opt_data$SCRATCH <- NA
+# 
+# #modify parameter value to avoid model failure
+# opt_data$PARAMS$glam_param.maize$TLIMJUV$Value <- 280
+# 
 # paroptim <- GLAM_optimise(opt_data)
 # #---------------------------------------------------------------
 
+# plot(paroptim$OPTIMISATION$VALUE, paroptim$OPTIMISATION$RMSE, ty='l')
 
 ### note:
 #simulate year before starting one because if sowing date is late then harvest is in this year
@@ -134,7 +135,7 @@ GLAM_optimise <- function(opt_data) {
   
   #file of output
   cal_outfile <- paste(opt_dir,"/opt-",opt_data$PARAM,".txt",sep="") #summary
-  raw_outfile <- paste(opt_dir,"/cal-",opt_data$PARAM,"_raw.txt",sep="") #raw
+  raw_outfile <- paste(opt_dir,"/opt-",opt_data$PARAM,"_raw.txt",sep="") #raw
   
   #do only if calibration file does not exist
   if (!file.exists(cal_outfile)) {
@@ -150,7 +151,7 @@ GLAM_optimise <- function(opt_data) {
       cal_data <- opt_data
       cal_data$BASE_DIR <- opt_dir
       cal_data$SIM_NAME <- paste("calibration_",cal_data$PARAM,"_run-",i,sep="")
-      cal_data$NSTEPS <- 46
+      cal_data$NSTEPS <- 67
       ygp_calib <- GLAM_calibrate(cal_data)
       
       #yearly output
@@ -186,7 +187,8 @@ GLAM_optimise <- function(opt_data) {
         }
         rmse <- sqrt(rmse/length(unique(ygp_all$LOC)))
       }
-      out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(ygp_all$OBS,na.rm=T), YPRED=mean(ygp_all$PRED,na.rm=T))
+      out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(ygp_all$OBS,na.rm=T), YPRED=mean(ygp_all$PRED,na.rm=T),
+                            YOBS_ADJ=mean(ygp_all$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(ygp_all$PRED_ADJ,na.rm=T))
       names(ygp_all)[3] <- "YGP"
       ygp_all$VALUE <- vals[i]
       

@@ -147,7 +147,7 @@ GLAM_calibrate <- function(opt_data) {
     sow_date1 <- opt_data$INI_COND$SOW_DATE1[which(opt_data$INI_COND$LOC == loc)]
     sow_date2 <- opt_data$INI_COND$SOW_DATE2[which(opt_data$INI_COND$LOC == loc)]
     sow_window <- sow_date1 - sow_date2
-    params$glam_param.mod_mgt$ISDAY$Value <- sow_window
+    params$glam_param.mod_mgt$ISDAY$Value <- min(c(sow_window,-30))
     
     #prepare input object
     run_data <- list()
@@ -177,7 +177,7 @@ GLAM_calibrate <- function(opt_data) {
       #loop through sequence of values
       for (i in 1:length(vals)) {
         #i <- 1
-        cat("performing run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
+        cat("performing ygp calibration run ",opt_data$RUN_TYPE," ",i," value = ",vals[i],sep="","\n")
         
         #run id
         run_data$RUN_ID <- paste("run-",i,"_val-",vals[i],"_loc-",run_data$LOC,sep="")
