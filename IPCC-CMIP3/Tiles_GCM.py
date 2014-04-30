@@ -11,7 +11,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Tiles_GCM.py S:\data\gcm\cmip3\downscaled G:\cenavarro\tiles_downscaled_process S:\data\gcm\cmip3\downscaled_tiled b1 30s"
+	print "   - ie: python Tiles_GCM.py S:\data\gcm\cmip3\downscaled G:\jtarapues\tiles_downscaled_process G:\jtarapues\downscaled_tiled b1 30s"
 	sys.exit(1)
 
 dirbase = sys.argv[1]

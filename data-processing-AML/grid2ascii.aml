@@ -1,3 +1,4 @@
+/* &r grid2ascii.aml S:\gcm\cmip3\downscaled\ensemble\sres_a1b\Global_30s\2020_2049 S:\gcm\cmip3\downscaled\ensemble\sres_a1b\Global_30s\2020_2049\_asciis ALL
 &args indir outdir preffix
 &terminal 9999
 &sys cls
@@ -45,12 +46,17 @@
 				&do file = 1 &to %gridlist%
 					
 					&s gridname [READ %openlist% READSTATUS]
+					&s vartype [before %gridname% _]
 					
 					&ty .-Creating ascii file %gridname% ([substr [calc %file% / %gridlist% * 100] 1 5]'%')
 					
 					&if [exists %outdir%\%gridname%.asc -file] &then &sys del %outdir%\%gridname%.asc
 					&if [exists %outdir%\%gridname%.prj -file] &then &sys del %outdir%\%gridname%.prj
 					%outdir%\%gridname%.asc = GRIDASCII(%indir%\%gridname%)
+					
+					&sys 7za a %outdir%\%vartype%_asc.zip %outdir%\%gridname%.asc
+					&if [exists %outdir%\%gridname%.asc -file] &then &s delstat [DELETE %outdir%\%gridname%.asc -file]
+					&if [exists %outdir%\%gridname%.prj -file] &then &s delstat [DELETE %outdir%\%gridname%.prj -file]
 					
 				&end
 				
