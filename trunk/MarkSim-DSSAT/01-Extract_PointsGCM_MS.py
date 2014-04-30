@@ -45,7 +45,7 @@ print "Available models: " + str(modellist)
 
 for model in modellist:
 	# for period in periodlist:
-	period = "2020_2049"
+	period = "2010_2039"
 	print "\n---> Processing: " + "SRES_" + scenario + " " + type + " Global_" + str(resolution) + " " + model + " " + period + "\n"
 	diroutpoints = dirout + "\\_extract_" + "SRES_" + scenario 
 	if not os.path.exists(diroutpoints):
