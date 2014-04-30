@@ -24,8 +24,7 @@ lsmDir <- paste(bDir,"/lsm",sep="")
 #cascadeDir <- "/nfs/see-archive-12_a4scratch/eebjp"
 
 #figure dir is local (on mbp)
-figDir <- paste(bDir,"/figures_new",sep="")
-if (!file.exists(figDir)) {dir.create(figDir)}
+figDir <- paste(bDir,"/paper_figures_v2/extra_plots",sep="")
 
 #model run details
 trial <- 6
@@ -95,7 +94,7 @@ ahar@crs <- wrld_simpl@proj4string
 ahar <- resample(ahar,msk)
 ahar <- crop(ahar, p00)
 
-pdf(paste(figDir,"/eval_aharv.pdf",sep=""), height=8,width=10,pointsize=14)
+pdf(paste(figDir,"/eval_aharv_maize.pdf",sep=""), height=4,width=5,pointsize=16)
 tplot <- rs_levplot2(ahar,zn=0,zx=1.4,nb=10,brks=c(0,0.02,0.04,0.06,.08,.1,.2,.6,.8,1,1.5),
                      scale=NA,col_i="red",col_f="#FEE0D2",ncol=9,rev=T,leg=T)
 print(tplot)
@@ -109,7 +108,7 @@ gsuit <- raster(paste(trunDir,"/",crop_name,"_suitability.tif",sep=""))
 gsuit <- resample(gsuit,msk,method="ngb")
 gsuit <- crop(gsuit, p00)
 
-pdf(paste(figDir,"/eval_suit_obs.pdf",sep=""), height=8,width=10,pointsize=14)
+pdf(paste(figDir,"/eval_suit_obs_maize.pdf",sep=""), height=4,width=5,pointsize=16)
 tplot <- rs_levplot2(gsuit,zn=0,zx=100,nb=20,scale="RdYlGn",ncol=11,rev=T,leg=T)
 print(tplot)
 dev.off()
@@ -123,7 +122,7 @@ gsuit <- raster(paste(trunDir,"/",crop_name,"_suitability.tif",sep=""))
 gsuit <- resample(gsuit,msk,method="ngb")
 gsuit <- crop(gsuit, p00)
 
-pdf(paste(figDir,"/eval_suit_12km_exp.pdf",sep=""), height=8,width=10,pointsize=14)
+pdf(paste(figDir,"/eval_suit_12km_exp_maize.pdf",sep=""), height=4,width=5,pointsize=16)
 tplot <- rs_levplot2(gsuit,zn=0,zx=100,nb=20,scale="RdYlGn",ncol=11,rev=T,leg=T)
 print(tplot)
 dev.off()
