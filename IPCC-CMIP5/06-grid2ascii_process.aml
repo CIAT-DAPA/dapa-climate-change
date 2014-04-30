@@ -1,6 +1,6 @@
 /* &r 06-grid2ascii_process.aml T:\gcm\cmip5\downscaled S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled rcp26 r1i1p1 10min
 
-&args rootdir outputdir rcp ensemble resol
+&args rootdir outputdir rcp ensemble resol var
 
 &if [null %rootdir%] OR [null %outputdir%] OR [null %rcp%] OR [null %ensemble%] OR [null %resol%] &then Use rootdir outputdir rcp ensemble resol
 &terminal 9999
@@ -30,21 +30,24 @@
 		&else &if %rcp% EQ rcp60 &then &s rcpmod rcp6_0
 		&else &s rcpmod rcp8_5
 				
-		&if not [exists %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt -FILE] &then
+		/*&if not [exists %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done -FILE] &then
+		&s file_check %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done
+		&if not [exists %file_check% -FILE] and not [exists %file_check%.txt -file] and not [exists %file_check%.tx -file] and not [exists %file_check%.t -file] &then
+		
 			&do
 				&ty
 				&ty Model %modname% (%rcpmod%, %tsmod%, %resol%)
 				
 				&s outmoddir %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%
 				&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
-				&else
-					&do
-						&sys del %outmoddir%\*.asc
-						&sys del %outmoddir%\*_asc.zip
-					&end
+				/*&else
+					/*&do
+					/*	&sys del %outmoddir%\*.asc
+					/*	&sys del %outmoddir%\*_asc.zip
+					/*&end
 				
-				&r 06-grid2ascii_GCM.aml %inmoddir% %outmoddir% %modname% %rcpmod% %tsmod% %resol% YES
-				&s verfile [listfile %outmoddir%\*asc.zip -file %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done.txt]
+				&r 06-grid2ascii_GCM.aml %inmoddir% %outmoddir% %modname% %rcpmod% %tsmod% %resol% YES %var%
+				&s verfile [listfile %outmoddir%\*asc.zip -file %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2asc_done]
 				
 			&end
 		&else 

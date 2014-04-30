@@ -73,6 +73,19 @@ L:/gcm/cmip5/raw/monthly/historical/mohc_hadgem2_cc/r1i1p1/monthly-files/1859/tm
 
 
 
+baseDir="T:/data/gcm/cmip5/raw/daily"
+ens="r1i1p1"
+rcp="historical"
+xmin=33
+xmax=44
+ymin=30
+ymax=39
+staYr=1950
+endYr=2100
+outDir <- "G:/cenavarro/Request/srolf"
+shift <- "yes"
+
+
 
 source("00-daily-data-functions.R")
 otp <- GCM_Cut_Daily(baseDir, ens, rcp, xmin, xmax, ymin, ymax, staYr, endYr, outDir, shift)

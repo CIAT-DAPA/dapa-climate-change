@@ -246,7 +246,7 @@ GCMDisaggregate <- function(rcp='rcp85', baseDir="L:/gcm/cmip5/raw/monthly", tru
   names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
   
   # List of variables to average
-  varList <- c("tmax", "tmin")
+  varList <- c("prec", "tmax", "tmin")
   
   # Loop around gcms and ensembles
   for (i in 1:nrow(gcmStatsRcp)){

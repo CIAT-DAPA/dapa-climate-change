@@ -5,14 +5,14 @@
 # email: c.e.navarro@cgiar.org
 # ---------------------------------------------------------------------------------
 
-import arcpy, os, sys, string, glob
+import arcpy, os, sys, string, glob, shutil
 from arcpy import env
 
 #Syntax
 if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 08-tiles_GCM.py T:\gcm\cmip5\downscaled D:\CIAT\Workspace\cmip5_tiles_process S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled rcp26 10min r1i1p1"
+	print "   - ie: python 08-tiles_GCM.py T:\gcm\cmip5\downscaled D:\jetarapues\cmip5_process\cmip5_tiles_process T:\gcm\cmip5\ipcc_5ar_ciat_tiled rcp45 30s r1i1p1 ALL"
 	sys.exit(1)
 
 dirBase = sys.argv[1]
@@ -21,6 +21,7 @@ dirOut = sys.argv[3]
 rcp = sys.argv[4]
 res = sys.argv[5]
 ens = sys.argv[6]
+varlist = sys.argv[7]
 
 os.system('cls')
 
@@ -30,9 +31,15 @@ print "\t/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ \n"
 
 modellist = sorted(os.listdir(dirBase + "\\" + rcp + "\\global_" + str(res)))
 
+if varlist == "ALL":
+	variablelist = ["bio","cons_mths","prec","tmin","tmax","tmean" ]
+else:
+	variablelist = variable.split(",")
+
+
 rcpDc = {"rcp26": "rcp2_6", "rcp45": "rcp4_5", "rcp60": "rcp6_0", "rcp85": "rcp8_5"}
 periodDc = {"2020_2049": "2030s", "2040_2069": "2050s", "2060_2089": "2070s", "2070_2099": "2080s"}
-zoneDc = {"0":"C1", "1":"C2", "2":"C3", "3":"C4", "4":"C5", "5":"C6", "6":"B1", "7":"B2", "8":"B3", "9":"B4", "10":"B5", "11":"B6", "12":"A1", "13":"A2", "14":"A3", "15":"A4", "16":"A5", "17":"A6"}
+zoneDc = {"0":"c1", "1":"c2", "2":"c3", "3":"c4", "4":"c5", "5":"c6", "6":"b1", "7":"b2", "8":"b3", "9":"b4", "10":"b5", "11":"b6", "12":"a1", "13":"a2", "14":"a3", "15":"a4", "16":"a5", "17":"a6"}
 
 print "Available models: " + str(modellist)
 
@@ -45,77 +52,141 @@ for model in sorted(modellist):
 		if not os.path.exists(checkfile):
 			
 			##### Slit in tiles
-			print "\n .> Slit in tiles: ", rcp, model, str(res), ens, period, "\n"
+			# print "\n .> Slit in tiles: ", rcp, model, str(res), ens, period, "\n"
 			
 			#Set dirTmp
 			dirProc = dirTmp + "\\" + rcp + "_" + model + "_" + period
+			dirgrids = dirTmp + "\\" + rcp + "_" + model + "_" + period + "\grids"
 			if not os.path.exists(dirProc):
 				os.system('mkdir ' + dirProc)
+			if not os.path.exists(dirgrids):
+				os.system('mkdir ' + dirgrids)
+				
+			print "\n\tprocessing", model,period + "\n"
 			
-			#Get a list of raster in workspace
+			########## ckeck if raster exist!
+			# arcpy.env.workspace = dirgrids
+			# for variable in variablelist:
+				# if variable == "bio":
+					# num = 19
+				# else:
+					# num = 12
+				# for month in range (1, num + 1, 1):
+					# for i in range(1,18):
+						# if variable == "cons_mths":
+							# raster = arcpy.env.workspace + "\\" + variable + "_" + str(i)
+						# else:
+							# raster = arcpy.env.workspace + "\\" + variable + "_" + str(month) + "_" + str(i)
+						# if not arcpy.Exists(raster):
+							# print "no existe", os.path.basename(raster), model, period
+							# raster = dirBase + "\\" + rcp + "\\global_" + str(res) + "\\" + model + "\\" + ens + "\\" + period + "\\" + os.path.basename(raster).split("_")[0]+"_"+os.path.basename(raster).split("_")[1]
+							# arcpy.SplitRaster_management(raster, dirgrids, raster + "_", "NUMBER_OF_TILES",  "GRID", "#", "6 3", "#", "0", "DEGREES", "#", "#")
+							# print "\t", os.path.basename(raster)+"_"+str(i), "fix splited" 							
+				
+
+			########### ckeck if raster exist!
+			
+			# arcpy.env.workspace = dirgrids	
+			# text = dirgrids+"\\errores.txt"	
+			# if os.path.exists(text):
+				# os.system("del /s /q " + text)
+				# print "\tdelete file exist:",text	
+			# rasterList = sorted(arcpy.ListRasters("", "GRID"))
+			# for raster in rasterList:
+				# try:
+					######### arcpy.CalculateStatistics_management(raster)
+					# arcpy.GetRasterProperties_management(raster, "MINIMUM")
+				# except:
+					# print "DELETE FILE  ", raster
+
+					# txt =  open(dirgrids+"\\errores.txt", "a")	
+					# txt.write(raster+"\n")
+					# txt.close()
+					# shutil.rmtree(dirgrids+"\\"+raster)
+			# arcpy.env.workspace = dirBase + "\\" + rcp + "\\global_" + str(res) + "\\" + model + "\\" + ens + "\\" + period		
+			# if os.path.exists(dirgrids+"\\errores.txt"):
+				# txt =  open(dirgrids+"\\errores.txt", "r")
+				# for grds in txt:
+					# raster = grds.split("_")[0]+"_"+grds.split("_")[1]
+					# arcpy.SplitRaster_management(raster, dirgrids, raster + "_", "NUMBER_OF_TILES",  "GRID", "#", "6 3", "#", "0", "DEGREES", "#", "#")
+					# print "\t", os.path.basename(raster), "fix splited" 
+				
+				
+			###### Get a list of raster in workspace
 			arcpy.env.workspace = dirBase + "\\" + rcp + "\\global_" + str(res) + "\\" + model + "\\" + ens + "\\" + period
 			rasterList = sorted(arcpy.ListRasters("", "GRID"))
 			for raster in rasterList:
-				
-				# if not os.path.basename(raster).split("_")[0] == "cons" :				
-				# Split in tiles function
-				arcpy.SplitRaster_management(raster, dirProc, raster + "_", "NUMBER_OF_TILES",  "GRID", "#", "6 3", "#", "0", "DEGREES", "#", "#")
-				print "\t", os.path.basename(raster), " splited"
-				
+				if not arcpy.Exists(dirgrids+"\\"+raster+"_17"):
+					arcpy.SplitRaster_management(raster, dirgrids, raster + "_", "NUMBER_OF_TILES",  "GRID", "#", "6 3", "#", "0", "DEGREES", "#", "#")
+					print "\t ", os.path.basename(raster), " splited"# + "_"+str(i)
+				else:
+					print "\t ", os.path.basename(raster), " splited"
+			####### Convert to Asciis
+			# print "\n .> Convert to Asciis: ", rcp, model, str(res), ens, period, "\n"
 			
-			##### Convert to Asciis
-			print "\n .> Convert to Asciis: ", rcp, model, str(res), ens, period, "\n"
-			
-			#Get a list of raster in processing dir
-			arcpy.env.workspace = dirProc			
+			#########Get a list of raster in processing dir
+			arcpy.env.workspace = dirgrids		
 			rasterList = sorted(arcpy.ListRasters("", "GRID"))
 			for raster in rasterList:
 				
-				# Convert to ESRI-Ascii
+				############# Convert to ESRI-Ascii
 				var = os.path.basename(raster).split("_")[0]
 				month = os.path.basename(raster).split("_")[1]
 				zone = os.path.basename(raster).split("_")[-1]
 					
-				dirAsc = dirProc + "\\" + var + "_" + zoneDc[zone]
+				dirAsc = dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ascii\\" + var + "_" + zoneDc[zone]
 				if not os.path.exists(dirAsc):
 					os.system('mkdir ' + dirAsc)
 				
 				outAsc = dirAsc + "\\" + var + "_" + month + ".asc"
-				try:
-					# os.system("gdal_translate -of AAIGrid -ot Int16 -quiet " + arcpy.env.workspace + "\\" + raster + " " + outAsc)
-					arcpy.RasterToASCII_conversion(raster, outAsc)
-				except:
-					arcpy.CalculateStatistics_management(raster)
-					arcpy.RasterToASCII_conversion(raster, outAsc)
+				prjAsc = dirAsc + "\\" + var + "_" + month + ".prj"
+				# print outAsc
+				if not os.path.exists(outAsc): 
+					try:
+						##########os.system("gdal_translate -of AAIGrid -ot Int16 -quiet " + arcpy.env.workspace + "\\" + raster + " " + outAsc)
+						arcpy.RasterToASCII_conversion(raster, outAsc)
+						
+					except:
+						arcpy.CalculateStatistics_management(raster)
+						arcpy.RasterToASCII_conversion(raster, outAsc)
+					print "\t", os.path.basename(raster), " converted to ascii"
+					# arcpy.Delete_management(raster)
+				else:
+					print "\t", os.path.basename(raster), " converted"
 					
-				arcpy.Delete_management(raster)
+				if os.path.exists(prjAsc):
+					os.system("del /s /q " + prjAsc)					
 				
-				print "\t", os.path.basename(raster), " converted"
-				
-			
-			##### Compress by Zones
+			#################### Compress by Zones
 			print "\n .> Compress by Zones: ", rcp, model, str(res), ens, period, "\n"
 
-			if os.path.exists(dirProc + "\\info"):
-				os.system("rmdir /s /q " + dirProc + "\\info")
-			
-			varZones = sorted(os.listdir(dirProc))
-			for varZone in varZones:
-				
-				inZip = dirProc + "\\" + model + "_" + rcpDc[rcp] + "_" + periodDc[period] + "_" + varZone.split("_")[0] + "_" + res + "_" + ens + "_" + varZone.split("_")[1] + "_asc.zip"
-				os.system('7za a -tzip ' + inZip + " " + dirProc + "\\" + varZone)
-				
-				os.system("rmdir /s /q " + dirProc + "\\" + varZone)
-				
-				print varZone, " compressed!"
-				
-				
-			##### Copying to output dir
-			print "\n .> Copying to output dir: ", rcp, model, str(res), ens, period, "\n"
-			
-			os.system("robocopy " + dirProc + " " + dirCopy + " /z /e")
-			os.system("rmdir /s /q " + dirProc)
+			######### if os.path.exists(dirProc + "\\info"):
+				###### os.system("rmdir /s /q " + dirProc + "\\info")
+			if not os.path.exists(dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ZipVarZonas"):
+				os.system('mkdir ' + dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ZipVarZonas")
 
+				
+			varZones = sorted(os.listdir(dirProc+ "\\ascii"))
+			for varZone in varZones:
+				######### if varZone.split("_")[0] == "cons":
+					###########inZip = dirProc + "\\" + model + "_" + rcpDc[rcp] + "_" + periodDc[period] + "_" + varZone.split("_")[0] + "_" + res + "_" + ens + "_" + varZone.split("_")[1] + "_asc.zip"
+				######## else:
+				inZip = dirProc + "\\ZipVarZonas\\" + model + "_" + rcpDc[rcp] + "_" + periodDc[period] + "_" + varZone.split("_")[0] + "_" + res + "_" + ens + "_" + varZone.split("_")[1] + "_asc.zip"
+				if not os.path.exists(inZip):
+					os.system('7za a -tzip ' + inZip + " " + dirProc + "\\ascii\\" + varZone)
+					
+					os.system("rmdir /s /q " + dirProc + "\\" + varZone)
+					
+					print varZone, " compressed!"
+				
+				########## else:
+					######### Copying to output dir
+					if not os.path.exists(dirCopy + "\\"+os.path.basename(inZip) ):
+						print "\n .> Copying to output dir: ", rcp, model, str(res), ens, period, "\n"
+						os.system("robocopy " + dirProc + "\\ZipVarZonas" + " " + dirCopy + " "+os.path.basename(inZip)+ " /z /e /MOV")
+			
+			# os.system("rmdir /s /q " + dirTmp + "\\" + rcp + "_" + model + "_" + period  + "\\ascii")
+			os.system("rmdir /s /q " + dirProc)
 			checkTxt = open(checkfile, "w")
 			checkTxt.close()
 			
