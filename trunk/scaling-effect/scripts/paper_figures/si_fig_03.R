@@ -74,7 +74,7 @@ grid(lwd=1.25)
 abline(v=mean(his_df$suit),col="black",lty=2)
 abline(v=mean(his_df$suit[which(his_df$aharv >= 0.05)]),col="blue",lty=2)
 legend(x=0,y=1,cex=1.0,lty=c(1,1),col=c("black","blue"),lwd=rep(1.5,2),
-       legend=c("All areas","Niche"),bg="white")
+       legend=c("All areas","Growing area > 10 %"),bg="white")
 dev.off()
 
 
@@ -126,7 +126,7 @@ grid(lwd=1.25)
 abline(v=mean(his_df$suit),col="black",lty=2)
 abline(v=mean(his_df$suit[which(his_df$aharv >= 0.05)]),col="blue",lty=2)
 legend(x=0,y=1,cex=1.0,lty=c(1,1),col=c("black","blue"),lwd=rep(1.5,2),
-       legend=c("All areas","Niche"),bg="white")
+       legend=c("All areas","Growing area > 5 %"),bg="white")
 dev.off()
 
 

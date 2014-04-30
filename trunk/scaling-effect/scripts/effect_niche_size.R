@@ -131,7 +131,7 @@ points(tchg_12km$temp, tchg_12km$size_chg1_n,pch=1,col="red",cex=1.5)
 points(tchg_12km$temp, tchg_12km$size_chg2_n,pch=4,col="red",cex=1.5)
 grid()
 legend(0,20,legend=c("Threshold 1","Threshold 2"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
-legend(1.5,20,legend=c("All","Niche"),col=c("blue","red"),pch=c(1,1),bg="white",cex=0.9)
+legend(1.5,20,legend=c("All","Growing area > 10 %"),col=c("blue","red"),pch=c(1,1),bg="white",cex=0.9)
 dev.off()
 
 
@@ -145,8 +145,8 @@ points(tchg_12km$prec*100, tchg_12km$size_chg2,pch=4,col="blue",cex=1.5)
 points(tchg_12km$prec*100, tchg_12km$size_chg1_n,pch=1,col="red",cex=1.5)
 points(tchg_12km$prec*100, tchg_12km$size_chg2_n,pch=4,col="red",cex=1.5)
 grid()
-legend(-30,20,legend=c("Threshold 1","Threshold 2"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
-legend(0,20,legend=c("All","Niche"),col=c("blue","red"),pch=c(1,1),bg="white",cex=0.9)
+legend(-50,20,legend=c("Threshold 1","Threshold 2"),col=c("blue","blue"),pch=c(1,4),bg="white",cex=0.9)
+legend(-20,20,legend=c("All","Growing area > 10 %"),col=c("blue","red"),pch=c(1,1),bg="white",cex=0.9)
 dev.off()
 
 
@@ -176,7 +176,7 @@ axis(1, 0:5, labels=seq(0,5,by=1), lwd=1.75)
 axis(2, seq(0,100,by=10), labels=seq(0,100,by=10), lwd=1.75)
 box(lwd=1.75)
 grid(lwd=0.5)
-legend(-0.75,20,legend=c("All","Niche"),col=c("blue","red"),lty=c(1,1),bg="white",cex=0.9)
+legend(-0.75,20,legend=c("All","Growing area > 10 %"),col=c("blue","red"),lty=c(1,1),bg="white",cex=0.9)
 dev.off()
 
 
@@ -204,7 +204,7 @@ axis(1, 1:12, labels=seq(-90,20,by=10), lwd=1.75)
 axis(2, seq(0,110,by=10), labels=seq(0,110,by=10), lwd=1.75)
 box(lwd=1.75)
 grid(lwd=0.5)
-legend(10,20,legend=c("All","Niche"),col=c("blue","red"),lty=c(1,1),bg="white",cex=0.9)
+legend(7,20,legend=c("All","Growing area > 10 %"),col=c("blue","red"),lty=c(1,1),bg="white",cex=0.9)
 dev.off()
 
 
