@@ -73,6 +73,11 @@ me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
 xy_main$ME <- extract(me_rs, xy_main[,c("x","y")])
 xy_main <- xy_main[which(!is.na(xy_main$ME)),]
 
+#extract ME data (N/S divisions of MEs)
+me_rs_new <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final_splitted.tif",sep=""))
+xy_main$ME_NEW <- extract(me_rs_new, xy_main[,c("x","y")])
+xy_main <- xy_main[which(!is.na(xy_main$ME_NEW)),]
+
 #load crop calendar data
 sow_i <- raster(paste(sowDir,"/major_maize_plant.start.tif",sep=""))
 sow_f <- raster(paste(sowDir,"/major_maize_plant.end.tif",sep=""))
@@ -89,14 +94,14 @@ xy_main <- cbind(xy_main, SOW_DATE1=extract(sow_i, xy_main[,c("x","y")]),
 xy_main[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")] <- round(xy_main[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")],digits=0)
 
 #load soil data
-rll <- raster(paste(solDir,"/rll_lr.tif",sep=""))
-dul <- raster(paste(solDir,"/dul_lr.tif",sep=""))
-sat <- raster(paste(solDir,"/sat_lr.tif",sep=""))
-asw <- raster(paste(solDir,"/asw_lr.tif",sep=""))
+rll <- raster(paste(solDir,"/rll_lr_shangguan2014.tif",sep=""))
+dul <- raster(paste(solDir,"/dul_lr_shangguan2014.tif",sep=""))
+sat <- raster(paste(solDir,"/sat_lr_shangguan2014.tif",sep=""))
+asw <- raster(paste(solDir,"/asw_lr_shangguan2014.tif",sep=""))
 
 #extract soil data
-xy_main <- cbind(xy_main, RLL=extract(rll, xy_main[,c("x","y")]), DUL=extract(dul, xy_main[,c("x","y")]),
-                 SAT=extract(sat, xy_main[,c("x","y")]), ASW=extract(asw, xy_main[,c("x","y")]))
+xy_main <- cbind(xy_main, RLL=extract(rll, xy_main[,c("x","y")])*0.01, DUL=extract(dul, xy_main[,c("x","y")])*0.01,
+                 SAT=extract(sat, xy_main[,c("x","y")])*0.01, ASW=extract(asw, xy_main[,c("x","y")])*0.01)
 
 #clean up NAs: assign nearest neighbour to points with NA (for all variables in the dataset)
 flds <- c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2","RLL","DUL","SAT","ASW")
@@ -189,6 +194,11 @@ me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
 xy_second$ME <- extract(me_rs, xy_second[,c("x","y")])
 xy_second <- xy_second[which(!is.na(xy_second$ME)),]
 
+#extract splitted ME data
+me_rs_new <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final_splitted.tif",sep=""))
+xy_second$ME_NEW <- extract(me_rs_new, xy_second[,c("x","y")])
+xy_second <- xy_second[which(!is.na(xy_second$ME_NEW)),]
+
 #load crop calendar data
 sow_i <- raster(paste(sowDir,"/second_maize_plant.start.tif",sep=""))
 sow_f <- raster(paste(sowDir,"/second_maize_plant.end.tif",sep=""))
@@ -205,14 +215,14 @@ xy_second <- cbind(xy_second, SOW_DATE1=extract(sow_i, xy_second[,c("x","y")]),
 xy_second[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")] <- round(xy_second[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")],digits=0)
 
 #load soil data
-rll <- raster(paste(solDir,"/rll_lr.tif",sep=""))
-dul <- raster(paste(solDir,"/dul_lr.tif",sep=""))
-sat <- raster(paste(solDir,"/sat_lr.tif",sep=""))
-asw <- raster(paste(solDir,"/asw_lr.tif",sep=""))
+rll <- raster(paste(solDir,"/rll_lr_shangguan2014.tif",sep=""))
+dul <- raster(paste(solDir,"/dul_lr_shangguan2014.tif",sep=""))
+sat <- raster(paste(solDir,"/sat_lr_shangguan2014.tif",sep=""))
+asw <- raster(paste(solDir,"/asw_lr_shangguan2014.tif",sep=""))
 
 #extract soil data
-xy_second <- cbind(xy_second, RLL=extract(rll, xy_second[,c("x","y")]), DUL=extract(dul, xy_second[,c("x","y")]),
-                 SAT=extract(sat, xy_second[,c("x","y")]), ASW=extract(asw, xy_second[,c("x","y")]))
+xy_second <- cbind(xy_second, RLL=extract(rll, xy_second[,c("x","y")])*0.01, DUL=extract(dul, xy_second[,c("x","y")])*0.01,
+                 SAT=extract(sat, xy_second[,c("x","y")])*0.01, ASW=extract(asw, xy_second[,c("x","y")])*0.01)
 
 #clean up NAs: assign nearest neighbour to points with NA (for all variables in the dataset)
 flds <- c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2","RLL","DUL","SAT","ASW")
