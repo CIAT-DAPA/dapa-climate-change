@@ -1,14 +1,14 @@
 # Fix corrupted downsacaled 30s files from ccafs-climate.org
 # Carlos Navarro
-# python TestCompressFiles.py S:\data\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat S:\data\gcm\cmip3\downscaled sres_b1
+# python TestCompressFiles.py S:\data\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_disaggregated sres_a1b
 
 import arcgisscripting, os, sys, string, glob
 gp = arcgisscripting.create(9.3)
 gp.CheckOutExtension("Spatial")
 
 dirbase = sys.argv[1]
-dirgrid = sys.argv[2]
-sres = sys.argv[3]
+# dirgrid = sys.argv[2]
+sres = sys.argv[2]
 
 # res = "30s"
 reslist = "30s", "2_5min", "5min", "10min"
