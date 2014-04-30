@@ -38,11 +38,6 @@ require(sp)
 # otp <- GCMVerification(baseDir, ens, imageDir)
 # otp <- GCMAnomaliesYearly(rcp, baseDir, ens, basePer, outDir)
 
-# 
-# baseDir <- "T:/gcm/cmip5/raw/monthly"
-# ens <- "r1i1p1"
-# rcp <- "rcp26"
-# otp <- GCMCalcFutureSeasons(rcp, baseDir, ens)
 
 
 
@@ -357,7 +352,7 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
                 
                 # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
                 # anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
-                # resAnomNcExt  <- resample(anomNcExt, rs, method='ngb')
+                # resAnomNcExt  <- resample(anomNcExt, rs, method='bilinear')
                 anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
                 
               }
@@ -988,13 +983,17 @@ cat("GCM Future Calcs Process Done!")
 }
 
 
-
-
+# source("00-monthly-data-functions.R")
+# baseDir <- "T:/gcm/cmip5/raw/monthly"
+# ens <- "r1i1p1"
+# rcp <- "historical"
+# outDir <- "D:/CIAT/Articles/ccafs-climate/1-perfect-sibling-evaluation"
+# otp <- GCMCalcFutureSeasons(rcp, baseDir, ens, outDir)
 
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
-GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1")  {
+GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", outDir="D:/CIAT/Articles/ccafs-climate/1-perfect-sibling-evaluation")  {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -1003,8 +1002,9 @@ GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly"
   cat(" \n")
   
   # List of variables and months
-  varList <- c("prec", "tmax", "tmin")
-  periodList <- c("1870_1890", "1961_1990", "1971_2000")
+  varList <- c("prec", "tmean")
+  # periodList <- c("1961_1990", "1971_2000")
+  periodList <- c("2020_2049", "2040_2069")
   
   # Get a list of month with and withour 0 in one digit numbers
   monthList <- c(1:12)
@@ -1016,9 +1016,20 @@ GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly"
 #   ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
 #   names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
   
-  gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
+  gcmStats <- read.table(paste("D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
   
   futDir <- paste(baseDir, "/", rcp, sep="")
+  
+  rsRef <- paste(outDir, "/rs.nc", sep="")
+  
+  if (!file.exists(rsRef)) {
+  
+    rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90, ncols=360, nrows=180)
+    rs[] <- 1
+    rs <- writeRaster(rs, rsRef, format='CDF', overwrite=T)
+    
+  }
+  
   
   # Loop around gcms and ensembles
   for (i in 1:nrow(gcmStats)){
@@ -1034,15 +1045,12 @@ GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly"
           gcm <- paste(as.matrix(gcmStats)[i,2])
           
           
-          
-          
-          
           for (period in periodList) {
               
             futAvgDir <- paste(baseDir, "/", rcp, "/", gcm, "/", ens, "/average/", period, sep="")
             
             cat("\tFuture Mean Temp Calcs over: ", rcp, " ", gcm, " ", ens, " ", period, " \n\n")
-            
+
             # Loop around months
             for (mth in monthList) {
               
@@ -1061,13 +1069,14 @@ GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly"
                
             }
 
+
             if (!file.exists(paste(futAvgDir, "/tmean_jja.nc", sep=""))) {
               
               precAnn <- lapply(paste(futAvgDir, "/prec_", 1:12, ".nc", sep=""), FUN=raster)
               precAnn <- sum(stack(precAnn))
               precAnn <- writeRaster(precAnn, paste(futAvgDir, "/prec_ann.nc", sep=""), format='CDF', overwrite=T)
               cat(" .> ", paste("\t prec_ann", sep=""), "\tdone!\n")
-              
+
               precDJF <- lapply(paste(futAvgDir, "/prec_", c(12,1:2), ".nc", sep=""), FUN=raster)
               precDJF <- sum(stack(precDJF))
               precDJF <- writeRaster(precDJF, paste(futAvgDir, "/prec_djf.nc", sep=""), format='CDF', overwrite=T)
@@ -1092,8 +1101,30 @@ GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly"
               tmeanJJA <- mean(stack(tmeanJJA))
               tmeanJJA <- writeRaster(tmeanJJA, paste(futAvgDir, "/tmean_jja.nc", sep=""), format='CDF', overwrite=T)
               cat(" .> ", paste("\t tmean_jja", sep=""), "\tdone!\n")
+          
+            } 
             
-            }
+            cat("\tReggrided Calcs over: ", rcp, " ", gcm, " ", ens, " ", period, " \n\n")
+            
+            regDir <- paste(outDir, "/reggrided/", rcp, "/", gcm, "/", ens, "/", period, sep="")
+            if (!file.exists(regDir)) {dir.create(regDir, recursive = TRUE)}
+                
+            if (!file.exists(paste(regDir, "/tmean_jja.nc", sep=""))) {
+                
+                system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/prec_ann.nc", sep=""), " ", paste(regDir, "/prec_ann.nc", sep=""), sep=""), intern=TRUE)
+                system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/prec_djf.nc", sep=""), " ", paste(regDir, "/prec_djf.nc", sep=""), sep=""), intern=TRUE)
+                system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/prec_jja.nc", sep=""), " ", paste(regDir, "/prec_jja.nc", sep=""), sep=""), intern=TRUE)
+                
+                system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/tmean_ann.nc", sep=""), " ", paste(regDir, "/tmean_ann.nc", sep=""), sep=""), intern=TRUE)
+                system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/tmean_djf.nc", sep=""), " ", paste(regDir, "/tmean_djf.nc", sep=""), sep=""), intern=TRUE)
+                system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/tmean_jja.nc", sep=""), " ", paste(regDir, "/tmean_jja.nc", sep=""), sep=""), intern=TRUE)
+                
+            
+            }    
+            
+            system(paste("cdo remapbil,", rsRef, " ", paste(futAvgDir, "/tmean_jja.nc", sep=""), " ", paste(regDir, "/tmean_jja.nc", sep=""), sep=""), intern=TRUE)
+            
+            
           }
         }
       }
@@ -1106,3 +1137,41 @@ GCMCalcFutureSeasons <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly"
 
 
 
+#################################################################################################################
+# Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
+#################################################################################################################
+GCMChangeFactorCalcs <- function(rcp='rcp85', baseDir="D:/CIAT/Articles/ccafs-climate/1-perfect-sibling-evaluation/reggrided", ens="r1i1p1", outDir="D:/CIAT/Articles/ccafs-climate/1-perfect-sibling-evaluation/change-factor")  {
+  
+  varList <- c("prec_ann", "prec_djf", "prec_jja", "tmean_ann", "tmean_djf", "tmean_jja")
+  rcpDir <- paste(baseDir, "/", rcp, sep="")
+  periodList <- c("2020_2049", "2040_2069")
+  
+  gcmList <- list.dirs(paste(rcpDir, sep=""), recursive = FALSE, full.names = FALSE)
+  
+  for (gcm in gcmList) {
+      
+    model <- basename(gcm)
+
+    for (period in periodList) {
+      
+      cfDir <- paste(outDir, "/", rcp, "/", model, "/", ens, "/", period, sep="")
+      if (!file.exists(cfDir)) {dir.create(cfDir, recursive = TRUE)}
+            
+      for (var in varList) {
+        
+        if (file.exists(paste(baseDir, "/historical/", model, "/", ens, "/1961_1990", "/", var, ".nc", sep=""))) {
+          
+          Rcp <- raster(paste(gcm, "/", ens, "/", period, "/", var, ".nc", sep=""))
+          Hist <- raster(paste(baseDir, "/historical/", model, "/", ens, "/1961_1990", "/", var, ".nc", sep=""))
+          Wcl <- raster(paste(baseDir, "/worldclim", "/", var, ".nc", sep=""))
+          
+          ChgFac <- Rcp - Hist + Wcl
+          ChgFac <- writeRaster(ChgFac, paste(cfDir, "/", var, ".nc", sep=""), format='CDF', overwrite=T)
+          
+        }
+      }
+      
+    }
+    
+  }
+}

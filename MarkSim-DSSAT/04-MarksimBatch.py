@@ -6,7 +6,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python 2_marksim_batch.py D:\Workspace\Mexico\MS D:\Workspace\Mexico\MS D:\Workspace\tmp"
+	print "   - python 04-MarksimBatch.py D:\CIAT\Workspace\jperez\MS D:\CIAT\Workspace\jperez\MS D:\CIAT\Workspace\jperez\tmp"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -21,7 +21,7 @@ if not os.path.exists(dirout):
 # set Pathes
 
 # script to run marksim
-script = os.getcwd() + "\\1_runing_interpolations.py"
+script = os.getcwd() + "\\runing_interpolations.py"
 
 # where marksim located
 marksim = os.getcwd() + "\\lib\\marksim.zip"
