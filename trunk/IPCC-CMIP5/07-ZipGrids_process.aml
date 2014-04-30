@@ -1,42 +1,62 @@
-&args rootdir tmpfolder /*scenario 
-&if [null %rootdir%] &then &return Use scenario and/or root_folder argument (&r ZipGrids_process.aml ROOT_FOLDER SCENARIO)
+/* &r 07-ZipGrids_process.aml T:\data\gcm\cmip5\downscaled S:\data\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled rcp26 r1i1p1 10min
+
+&args rootdir outputdir rcp ensemble resol
+
+&if [null %rootdir%] OR [null %outputdir%] OR [null %rcp%] OR [null %ensemble%] OR [null %resol%] &then Use rootdir outputdir rcp ensemble resol
 &terminal 9999
 &sys cls
-
 &amlpath .
 &s bdir [show &amlpath]
 
-&do resol &list 2.5min 5min 10min /*30s
+&s inputdir %rootdir%\%rcp%\global_%resol%
+&s modellist [listfile %inputdir%\* -dir]
+&s nmodels [token %modellist% -count]
+
+&do md = 1 &to %nmodels%
 	
-	&if %resol% EQ 30s &then &s outdir %rootdir%\Global_30s
-	&else &if %resol% EQ 2.5min &then &s outdir %rootdir%\Global_2_5min
-	&else &if %resol% EQ 5min &then &s outdir %rootdir%\Global_5min
-	&else &s outdir %rootdir%\Global_10min
-	
-	&if %resol% EQ 30s &then &s temporalfolder %tmpfolder%\Global_30s
-	&else &if %resol% EQ 2.5min &then &s temporalfolder %tmpfolder%\Global_2_5min
-	&else &if %resol% EQ 5min &then &s temporalfolder %tmpfolder%\Global_5min
-	&else &s temporalfolder %tmpfolder%\Global_10min
-	
-	&s modellist [listfile %rootdir%\Global_2_5min\* -dir]
-	&s nmodels [token %modellist% -count]
-	
-	&do md = 1 &to %nmodels%
+	&s modname [extract %md% %modellist%]
+
+	&do ts &list 2020_2049 2040_2069 2060_2089 2070_2099
 		
-		&s modname [extract %md% %modellist%]
-	
-		&do year &list 2010_2039 2020_2049 2030_2059 2040_2069 2050_2079 2060_2089 2070_2099
-			
-			&ty
-			&ty Model %modname% (%year%, %resol%)
-			
-			&if not [exists %outdir%\%modname%\%year%_ZipGrids_done.txt -file] &then
-				&do
-					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*_grd.zip
-					&r ZipGrids_GCM.aml %outdir%\%modname%\%year% %temporalfolder%\%modname%\%year% 
-					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*_grd.zip -file %outdir%\%modname%\%year%_ZipGrids_done.txt]
-				&end
-					
-		&end
+		&s inmoddir %inputdir%\%modname%\%ensemble%\%ts%
+		
+		&if %ts% EQ 2020_2049 &then &s tsmod 2030s
+		&else &if %ts% EQ 2040_2069 &then &s tsmod 2050s
+		&else &if %ts% EQ 2060_2089 &then &s tsmod 2070s
+		&else &s tsmod 2080s
+		
+		&if %rcp% EQ rcp26 &then &s rcpmod rcp2_6
+		&else &if %rcp% EQ rcp45 &then &s rcpmod rcp4_5
+		&else &if %rcp% EQ rcp60 &then &s rcpmod rcp6_0
+		&else &s rcpmod rcp8_5
+				
+		&if not [exists %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2zip_done.txt -FILE] &then
+			&do
+				&ty
+				&ty Model %modname% (%rcpmod%, %tsmod%, %resol%)
+				/* &ty %inmoddir%
+				/* &ty %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%
+				
+				
+				&s outmoddir %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%
+				/* &if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
+				/* &else
+					/* &do
+						/* &sys del %outmoddir%\*.asc
+						/* &sys del %outmoddir%\*_asc.zip
+					/* &end
+				
+				&r 07-ZipGrids_GCM.aml %inmoddir% %outmoddir% %modname% %rcpmod% %tsmod% %resol% YES
+				
+				&s verfile [listfile %outmoddir%\*grd.zip -file %outputdir%\%rcpmod%\%tsmod%\%modname%\%resol%_grd2zip_done.txt]
+				
+			&end
+		&else 
+			&do
+				&ty 
+				&ty Model %modname% (%ts%, %resol%) processed
+			&end
+
 	&end
+	
 &end

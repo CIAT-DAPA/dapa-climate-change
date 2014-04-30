@@ -8,8 +8,8 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-&if %resol% EQ 2.5min &then &s outdir %outfolder%\%rcp%\global_2_5min
-&else &if %resol% EQ 5min &then &s outdir %outfolder%\%rcp%\global_5min
+&if %resol% EQ 2.5 &then &s outdir %outfolder%\%rcp%\global_2_5min
+&else &if %resol% EQ 5 &then &s outdir %outfolder%\%rcp%\global_5min
 &else &s outdir %outfolder%\%rcp%\global_10min
 
 &if not [exists %outdir% -dir] &then &sys md %outdir%
