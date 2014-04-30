@@ -104,56 +104,60 @@ dev.off()
 
 
 ### deleting grid cells
-x11()
-plot(rsx1, col=c("dark green","green","yellow","orange","red","light blue"),horizontal=T)
-
-#first 20
-crm <- c(250,317,383,449,516,582,648,581,515,514,448,513,512,577,578,644,643,709,710)
-rsx1[crm] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red","light blue"),horizontal=T)
-
-#second 20
-crm2 <- c(734,874,811,588,579,579,580,645,645,646,647,712,712,713,778,778,779,776,777,711)
-rsx1[crm2] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red","light blue"),horizontal=T)
-
-#third 20
-crm3 <- c(3077,2947,2948,2274,2207,2141,1107,1173,1239,1238,2751,2884,1106,1683,1548,1680,1746,2541,2476,2075)
-rsx1[crm3] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-
-#fourth 20
-crm4 <- c(2142,2143,2208,2209,2408,2409,2294,1769,1768,1243,1308,1373,1307,1241,1240,1306,1372,1438,1504,1504)
-rsx1[crm4] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-
-#fifth 20
-crm5 <- c(1439,1569,1570,1636,1976,2041,2042,2106,2107,2108,2170,2171,2172,2173,2174,2236,2237,2238,2239,2302)
-rsx1[crm5] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-
-#sixth 20
-crm6 <- c(2303,2304,2305,2371,2370,2369,2368,2434,2435,2436,2502,2501,2500,2499,2565,2566,2567,2568,2633,2632)
-rsx1[crm6] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-
-#seventh 20
-crm7 <- c(2630,2698,2699)
-rsx1[crm7] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-
-#last grid cells
-crm8 <- c(2631,2015,2082,739,740,674,806,469,535,620)
-rsx1[crm8] <- NA
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-
-pdf(file=paste(meDir,"/maizeMESglobal_lowres_me_final.pdf",sep=""),height=8,width=8,pointsize=12,family="Helvetica")
-plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
-plot(wrld_simpl,add=T)
-grid()
-dev.off()
-
-rsx1 <- writeRaster(rsx1,paste(meDir,"/maizeMESglobal_lowres_me_final.tif",sep=""),format="GTiff")
+if (!file.exists(paste(meDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))) {
+  x11()
+  plot(rsx1, col=c("dark green","green","yellow","orange","red","light blue"),horizontal=T)
+  
+  #first 20
+  crm <- c(250,317,383,449,516,582,648,581,515,514,448,513,512,577,578,644,643,709,710)
+  rsx1[crm] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red","light blue"),horizontal=T)
+  
+  #second 20
+  crm2 <- c(734,874,811,588,579,579,580,645,645,646,647,712,712,713,778,778,779,776,777,711)
+  rsx1[crm2] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red","light blue"),horizontal=T)
+  
+  #third 20
+  crm3 <- c(3077,2947,2948,2274,2207,2141,1107,1173,1239,1238,2751,2884,1106,1683,1548,1680,1746,2541,2476,2075)
+  rsx1[crm3] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  
+  #fourth 20
+  crm4 <- c(2142,2143,2208,2209,2408,2409,2294,1769,1768,1243,1308,1373,1307,1241,1240,1306,1372,1438,1504,1504)
+  rsx1[crm4] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  
+  #fifth 20
+  crm5 <- c(1439,1569,1570,1636,1976,2041,2042,2106,2107,2108,2170,2171,2172,2173,2174,2236,2237,2238,2239,2302)
+  rsx1[crm5] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  
+  #sixth 20
+  crm6 <- c(2303,2304,2305,2371,2370,2369,2368,2434,2435,2436,2502,2501,2500,2499,2565,2566,2567,2568,2633,2632)
+  rsx1[crm6] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  
+  #seventh 20
+  crm7 <- c(2630,2698,2699)
+  rsx1[crm7] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  
+  #last grid cells
+  crm8 <- c(2631,2015,2082,739,740,674,806,469,535,620)
+  rsx1[crm8] <- NA
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  
+  pdf(file=paste(meDir,"/maizeMESglobal_lowres_me_final.pdf",sep=""),height=8,width=8,pointsize=12,family="Helvetica")
+  plot(rsx1, col=c("dark green","green","yellow","orange","red"),horizontal=T)
+  plot(wrld_simpl,add=T)
+  grid()
+  dev.off()
+  
+  rsx1 <- writeRaster(rsx1,paste(meDir,"/maizeMESglobal_lowres_me_final.tif",sep=""),format="GTiff")
+} else {
+  rsx1 <- raster(paste(meDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
+}
 
 #temporary for deleting grid cells
 # xy_rm <- locator(20)
@@ -161,11 +165,9 @@ rsx1 <- writeRaster(rsx1,paste(meDir,"/maizeMESglobal_lowres_me_final.tif",sep="
 # xy_rm1$cell <- cellFromXY(rsx1,xy_rm1)
 # xy_rm1$cell
 
-#aggregate ME raster to 1.125 dataset (using nearest neighbour interpolation)
-#yrs <- raster(paste(yiDir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
-#rs_af <- crop(rs, yrs)
-#rs_af <- resample(rs, yrs, method="ngb")
-#rs_af <- writeRaster(rs_af, paste(meDir,"/maizeMESglobal_lowres_nn.tif",sep=""),format="GTiff")
+####
+#### produce plots of yield variation for MEs
+####
 
 #for each mega-environment extract mean and sigma yield (from 1982 to 2005)
 dodgypoints <- cbind(x=c(28.125,21.375,20.250),y=c(-23.0625,-26.4375,-25.3125))
@@ -276,6 +278,164 @@ grid()
 legend(3.5,70,legend=allname, col=allcols, pch=20)
 dev.off()
 
+
+####
+#### N/S divisions of MEs
+####
+me_ids <- data.frame(ME=unique(rsx1[]))
+me_ids <- merge(me_ids, medata, by="ME", all.x=F, all.y=F)
+me_ids$NAME <- paste(me_ids$NAME)
+print(me_ids)
+
+# Dry Lowland (23): split at lat=0
+# Wet Lowland (22): split at lat=-7
+# Dry Mid-altitude (21): split at lat=-10
+# Wet Upper Mid-altitude (19) and Wet Lower Mid-altitude (20): split at lon=20, lat=-5
+
+xy_me <- as.data.frame(xyFromCell(rsx1, which(!is.na(rsx1[]))))
+xy_me <- cbind(LOC=which(!is.na(rsx1[])), xy_me)
+xy_me$ME <- extract(rsx1, xy_me[,c("x","y")])
+xy_me$ME_NEW <- NA
+
+#assign new ME values
+xy_me$ME_NEW[which(xy_me$ME == 19 & xy_me$x <= 20 & xy_me$y >= -5)] <- 1
+xy_me$ME_NEW[which(xy_me$ME == 19 & xy_me$x > 20 & xy_me$y < -5)] <- 2
+xy_me$ME_NEW[which(xy_me$ME == 19 & xy_me$x <= 20 & xy_me$y <= -5)] <- 2
+xy_me$ME_NEW[which(xy_me$ME == 19 & xy_me$x >= 20 & xy_me$y >= -5)] <- 2
+xy_me$ME_NEW[which(xy_me$ME == 20 & xy_me$x <= 20 & xy_me$y >= -5)] <- 3
+xy_me$ME_NEW[which(xy_me$ME == 20 & xy_me$x > 20 & xy_me$y < -5)] <- 4
+xy_me$ME_NEW[which(xy_me$ME == 20 & xy_me$x <= 20 & xy_me$y <= -5)] <- 4
+xy_me$ME_NEW[which(xy_me$ME == 20 & xy_me$x >= 20 & xy_me$y >= -5)] <- 4
+xy_me$ME_NEW[which(xy_me$ME == 21 & xy_me$y >= -10)] <- 5
+xy_me$ME_NEW[which(xy_me$ME == 21 & xy_me$y < -10)] <- 6
+xy_me$ME_NEW[which(xy_me$ME == 22 & xy_me$y >= -7)] <- 7
+xy_me$ME_NEW[which(xy_me$ME == 22 & xy_me$y < -7)] <- 8
+xy_me$ME_NEW[which(xy_me$ME == 23 & xy_me$y >= 0)] <- 9
+xy_me$ME_NEW[which(xy_me$ME == 23 & xy_me$y < 0)] <- 10
+
+#new names for MEs
+xy_me$NAME <- NA
+xy_me$NAME[which(xy_me$ME_NEW == 1)] <- "Western Wet Upper Mid-altitude"
+xy_me$NAME[which(xy_me$ME_NEW == 2)] <- "South-Eastern Wet Upper Mid-altitude"
+xy_me$NAME[which(xy_me$ME_NEW == 3)] <- "Western Wet Lower Mid-altitude"
+xy_me$NAME[which(xy_me$ME_NEW == 4)] <- "South-Eastern Wet Lower Mid-altitude"
+xy_me$NAME[which(xy_me$ME_NEW == 5)] <- "Northern Dry Mid-altitude"
+xy_me$NAME[which(xy_me$ME_NEW == 6)] <- "Southern Dry Mid-altitude"
+xy_me$NAME[which(xy_me$ME_NEW == 7)] <- "Northern Wet Lowland"
+xy_me$NAME[which(xy_me$ME_NEW == 8)] <- "Southern Wet Lowland"
+xy_me$NAME[which(xy_me$ME_NEW == 9)] <- "Northern Dry Lowland"
+xy_me$NAME[which(xy_me$ME_NEW == 10)] <- "Southern Dry Lowland"
+
+#create new raster with these values
+rsx1_new <- raster(rsx1)
+rsx1_new[xy_me$LOC] <- xy_me$ME_NEW
+rsx1_new <- writeRaster(rsx1_new,paste(meDir,"/maizeMESglobal_lowres_me_final_splitted.tif",sep=""),format="GTiff")
+
+pdf(file=paste(meDir,"/maizeMESglobal_lowres_me_final_splitted.pdf",sep=""),height=8,width=8,pointsize=12,family="Helvetica")
+plot(rsx1_new, col=c("dark green","green","light blue","blue","yellow","yellowgreen","orange","brown","pink","red"), horizontal=T)
+plot(wrld_simpl,add=T)
+grid()
+dev.off()
+
+#loop mega environments to extract mean, sd and c.v.
+allme <- data.frame()
+for (me in 1:10) {
+  #me <- 1
+  xyme <- as.data.frame(xyFromCell(rsx1_new, which(rsx1_new[]==me)))
+  xyme$mean <- extract(yi_mean, xyme[,c("x","y")])
+  xyme$sd <- extract(yi_sd, xyme[,c("x","y")])
+  xyme$cv <- extract(yi_cv, xyme[,c("x","y")])
+  xyme <- cbind(ME_NEW=me,xyme)
+  allme <- rbind(allme, xyme)
+}
+
+#figure dir
+figDir <- paste(meDir,"/figures",sep="")
+
+#produce boxplot with ME as factor
+me_ids_new <- unique(xy_me[,c(5,6)])
+allme <- merge(allme, me_ids_new, by="ME_NEW")
+allme$NAME <- paste(allme$NAME)
+allme$NAME <- factor(allme$NAME,levels=c("Western Wet Upper Mid-altitude","South-Eastern Wet Upper Mid-altitude",
+                        "Western Wet Lower Mid-altitude","South-Eastern Wet Lower Mid-altitude",
+                        "Northern Dry Mid-altitude","Southern Dry Mid-altitude",
+                        "Northern Wet Lowland","Southern Wet Lowland","Northern Dry Lowland",
+                        "Southern Dry Lowland"))
+
+#determine limits
+yilim <- range(allme$mean, na.rm=T); yilim[1] <- floor(yilim[1]); yilim[2] <- ceiling(yilim[2])
+sdlim <- range(allme$sd, na.rm=T); sdlim[1] <- floor(sdlim[1]); sdlim[2] <- ceiling(sdlim[2])
+cvlim <- range(allme$cv, na.rm=T); cvlim[1] <- floor(cvlim[1]); cvlim[2] <- ceiling(cvlim[2])
+
+#boxplots
+pdf(paste(figDir,"/boxplot_maize_MES_meanyield_splitted.pdf",sep=""), height=8,width=12,pointsize=15)
+par(mar=c(5,16,1,1),las=1)
+boxplot(allme$mean ~ allme$NAME, horizontal=T, col="grey 80", pch=20, xlab="Yield (ton/ha)",ylim=yilim)
+grid()
+dev.off()
+
+pdf(paste(figDir,"/boxplot_maize_MES_sdyield_splitted.pdf",sep=""), height=8,width=12,pointsize=15)
+par(mar=c(5,16,1,1),las=1)
+boxplot(allme$sd ~ allme$NAME, horizontal=T, col="grey 80", pch=20, xlab="Yield s.d. (ton/ha)",ylim=sdlim)
+grid()
+dev.off()
+
+pdf(paste(figDir,"/boxplot_maize_MES_cvyield_splitted.pdf",sep=""), height=8,width=12,pointsize=15)
+par(mar=c(5,16,1,1),las=1)
+boxplot(allme$cv ~ allme$NAME, horizontal=T, col="grey 80", pch=20, 
+        xlab="Coefficient of variation (%)", ylim=cvlim)
+grid()
+dev.off()
+
+
+### scatter plot for each ME
+for (me in 1:10) {
+  #me <- 1
+  mename <- paste(medata$NAME[which(medata$ME == me)])
+  xyme <- as.data.frame(xyFromCell(rsx1_new, which(rsx1_new[]==me)))
+  xyme$mean <- extract(yi_mean, xyme[,c("x","y")])
+  xyme$sd <- extract(yi_sd, xyme[,c("x","y")])
+  xyme$cv <- extract(yi_cv, xyme[,c("x","y")])
+  
+  pdf(paste(figDir,"/scatter_maize_MES_mean_sd_ME-",me,"_splitted.pdf",sep=""), height=8,width=10,pointsize=14)
+  par(mar=c(5,5,2,1),las=1)
+  plot(xyme$mean,xyme$sd,pch=20,xlim=yilim,ylim=sdlim,xlab="Mean yield (ton/ha)",
+       ylab="Yield s.d. (ton/ha)", main=mename)
+  grid()
+  dev.off()
+  
+  pdf(paste(figDir,"/scatter_maize_MES_mean_cv_ME-",me,"_splitted.pdf",sep=""), height=8,width=10,pointsize=14)
+  par(mar=c(5,5,2,1),las=1)
+  plot(xyme$mean,xyme$cv,pch=20,xlim=yilim,ylim=cvlim,xlab="Mean yield (ton/ha)",
+       ylab="Coefficient of variation (%)", main=mename)
+  grid()
+  dev.off()
+}
+
+
+#all in one
+pdf(paste(figDir,"/scatter_maize_MES_mean_cv_MEs_splitted.pdf",sep=""), height=8,width=10,pointsize=14)
+par(mar=c(5,5,1,1),las=1)
+allcols <- c("dark green","green","light blue","blue","yellow","yellowgreen","orange","brown","pink","red")
+allname <- c()
+for (me in 1:10) {
+  #me <- mes[1]
+  xyme <- as.data.frame(xyFromCell(rsx1_new, which(rsx1_new[]==me)))
+  xyme$mean <- extract(yi_mean, xyme[,c("x","y")])
+  xyme$sd <- extract(yi_sd, xyme[,c("x","y")])
+  xyme$cv <- extract(yi_cv, xyme[,c("x","y")])
+  allname <- c(allname, paste(me_ids_new$NAME[which(me_ids_new$ME_NEW == me)]))
+  
+  if (me == 1) {
+    plot(xyme$mean,xyme$cv,pch=20,xlim=yilim,ylim=cvlim,xlab="Mean yield (ton/ha)",
+         ylab="Coefficient of variation (%)",col=allcols[me], cex=1.25)
+  } else {
+    points(xyme$mean,xyme$cv,pch=20,col=allcols[me], cex=1.25)
+  }
+}
+grid()
+legend(2.5,75,legend=allname, col=allcols, pch=20)
+dev.off()
 
 
 
