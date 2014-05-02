@@ -156,7 +156,7 @@ GLAM_calibrate <- function(opt_data) {
     run_data$BASE_DIR <- opt_dir
     run_data$BIN_DIR <- opt_data$BIN_DIR
     run_data$PAR_DIR <- NA
-    run_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw/",opt_data$WTH_ROOT,sep="") #to be specified
+    run_data$WTH_DIR <- paste(opt_data$WTH_DIR,"/",opt_data$WTH_ROOT,sep="") #to be specified
     run_data$LOC <- loc
     run_data$LON <- opt_data$INI_COND$x[which(opt_data$INI_COND$LOC == loc)]
     run_data$LAT <- opt_data$INI_COND$y[which(opt_data$INI_COND$LOC == loc)]
