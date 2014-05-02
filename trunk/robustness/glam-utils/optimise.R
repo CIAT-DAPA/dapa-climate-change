@@ -11,9 +11,8 @@
 #2. optimise (i.e. find optimum value for parameter) by running all grid cells simultaneously
 #3. return table of parameter values, RMSE value, and crop yield (obs and simulated)
 
-#note: a second function will deal with optimisation of parameters
-#note: this function should be applicable to both the hypercube and the normal 
-#      optimisation procedure
+#note: a first function deals with YGP calibration
+#note: this function should is applicable only to the normal optimisation procedure
 
 # #example:
 # #---------------------------------------------------------------
