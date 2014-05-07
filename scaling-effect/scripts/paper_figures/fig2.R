@@ -53,7 +53,7 @@ points(tchg_12km$temp, tchg_12km$reldiff_har,pch=22,col=tcol,cex=1.5)
 points(tchg_3d12$temp, tchg_3d12$reldiff_all,pch=1,col=tcol,cex=1.5)
 
 grid()
-legend(4,30,legend=c("3 degree","12 km","12 km niche"),col=c("blue","blue","blue"),
+legend(3,30,legend=c("3 degree","12 km","12 km growing area > 10 %"),col=c("blue","blue","blue"),
        pch=c(1,4,22),bg="white",cex=0.75)
 dev.off()
 

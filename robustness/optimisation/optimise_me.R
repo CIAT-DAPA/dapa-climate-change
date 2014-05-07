@@ -83,8 +83,28 @@ for (i in 1:nrow(xy_sel)) {
 this_params <- GLAM_get_default(mdata_dir)
 iter <- 1
 
+#arguments
+opt_data <- list()
+opt_data$CROP <- "maize"
+opt_data$MODEL <- "glam-maiz"
+opt_data$BASE_DIR <- calib_dir
+opt_data$BIN_DIR <- bin_dir
+opt_data$PAR_DIR <- mdata_dir
+opt_data$WTH_DIR <- paste(met_dir,"/ascii_extract_raw",sep="") #for reading .wth files
+opt_data$WTH_ROOT <- "obs_hist_WFD"
+opt_data$LOC <- xy_sel$LOC
+opt_data$ISYR <- 1981
+opt_data$IEYR <- 2000
+opt_data$INI_COND <- xy_main
+opt_data$YLD_DATA <- xy_main_yield
+opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
+opt_data$RUN_TYPE <- "RFD"
+opt_data$METHOD <- "RMSE"
+opt_data$USE_SCRATCH <- F
+opt_data$SCRATCH <- NA
+
 for (i in 1:nrow(param_list)) {
-  #i <- 1
+  #i <- 8
   #previous parameters
   prev_params <- this_params
   
@@ -92,39 +112,21 @@ for (i in 1:nrow(param_list)) {
   param <- paste(param_list$PARAM[i]); sect <- paste(param_list$WHERE[i])
   nsteps <- param_list$NSTEPS[i]
   
-  #arguments
-  opt_data <- list()
-  opt_data$CROP <- "maize"
-  opt_data$MODEL <- "glam-maiz"
-  opt_data$BASE_DIR <- calib_dir
-  opt_data$BIN_DIR <- bin_dir
-  opt_data$PAR_DIR <- mdata_dir
-  opt_data$WTH_DIR <- paste(met_dir,"/ascii_extract_raw",sep="") #for reading .wth files
-  opt_data$WTH_ROOT <- "obs_hist_WFD"
-  opt_data$LOC <- xy_sel$LOC
-  opt_data$ISYR <- 1981
-  opt_data$IEYR <- 2000
-  opt_data$INI_COND <- xy_main
-  opt_data$YLD_DATA <- xy_main_yield
+  #update arguments
   opt_data$PARAMS <- this_params
-  opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
   opt_data$PARAM <- param
   opt_data$SECT <- sect
   opt_data$NSTEPS <- nsteps
-  opt_data$RUN_TYPE <- "RFD"
-  opt_data$METHOD <- "RMSE"
-  opt_data$USE_SCRATCH <- F
-  opt_data$SCRATCH <- NA
   
+  #!!!beware of NDSLA, SLA_INI (modify GLAM_optimise)!!!
   #run optim function
   par_optim <- GLAM_optimise(opt_data)
+  #plot(par_optim$OPTIMISATION$VALUE, par_optim$OPTIMISATION$RMSE, ty="l") #plot RMSE curve
   
   #update parameter value with optimal
-  
-  
-  #update YGP for each grid cell with optimal one
-  
-  
+  opt_val <- par_optim$OPTIMISATION$VALUE[which(par_optim$OPTIMISATION$RMSE == min(par_optim$OPTIMISATION$RMSE))]
+  if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
+  this_params[[sect]][[param]]$Value <- opt_val
 }
 
 

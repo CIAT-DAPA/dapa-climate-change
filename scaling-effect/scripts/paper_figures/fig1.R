@@ -51,7 +51,7 @@ brks_mon <- seq(0,max(xy$yield_mon,na.rm=T)+.5,by=0.2)
 his_mon_all <- hist(xy$yield_mon, breaks=brks_mon,plot=F)
 his_mon_har <- hist(xy$yield_mon[which(xy$ahar >= 0.1)], breaks=brks_mon,plot=F)
 
-pdf(file=paste(figDir,"/Fig1a_obs_hist_maize.pdf",sep=""),height=6,width=8,pointsize=12,family="Helvetica")
+pdf(file=paste(figDir,"/Fig1a_obs_hist_maize.pdf",sep=""),height=6,width=8,pointsize=16,family="Helvetica")
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 plot(his_mon_all$mids, his_mon_all$counts/sum(his_mon_all$counts),ty="l", col="blue", 
      ylim=c(0,.6), xlim=c(0,3.5), xlab="Yield (ton / ha)", ylab="Fractional count")
@@ -59,7 +59,7 @@ lines(his_mon_har$mids, his_mon_har$counts/sum(his_mon_har$counts), col="red")
 abline(v=mean(xy$yield_mon,na.rm=T),lty=1,col="blue",lwd=1.5)
 abline(v=mean(xy$yield_mon[which(xy$ahar >= 0.1)],na.rm=T),lty=1,col="red",lwd=1.5)
 grid()
-legend(2.8,.6,legend=c("All areas","Niche"),col=c("blue","red"),lty=c(1,1),bg="white")
+legend(1.9,.6,legend=c("All areas","Growing areas > 10 %"),col=c("blue","red"),lty=c(1,1),bg="white",cex=0.9)
 dev.off()
 
 
@@ -110,7 +110,7 @@ p00 <- extent(msk)
 p00@ymax <- 15
 
 #figure with locations
-pdf(paste(figDir,"/Fig1c_area_harvested_maize.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/Fig1c_area_harvested_maize.pdf",sep=""), height=4,width=6,pointsize=16,family="Helvetica")
 tplot <- rs_levplot2(ahar,zn=0,zx=1,nb=10,brks=c(0,0.02,0.04,0.06,.08,.1,.2,.6,.8,1),scale=NA,col_i="red",col_f="#FEE0D2",ncol=9,rev=T,leg=T)
 tplot <- tplot + layer(sp.polygons(as(m1,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((m1@xmin+m1@xmax)*.5, (m1@ymin+m1@ymax)*.5, "M",cex=1.5))
@@ -139,7 +139,7 @@ his_mon_all <- hist(xy$yield_mon, breaks=brks_mon,plot=F)
 his_mon_har <- hist(xy$yield_mon[which(xy$ahar >= 0.1)], breaks=brks_mon,plot=F)
 
 #produce the plot
-pdf(paste(figDir,"/Fig1b_obs_hist_gnut.pdf",sep=""), height=6,width=8,pointsize=12,family="Helvetica")
+pdf(paste(figDir,"/Fig1b_obs_hist_gnut.pdf",sep=""), height=6,width=8,pointsize=16,family="Helvetica")
 par(mar=c(5,5,1,1),las=1,lwd=1.75)
 plot(his_mon_all$mids, his_mon_all$counts/sum(his_mon_all$counts),ty="l", col="blue", 
      ylim=c(0,.6), xlim=c(0,3.5), xlab="Yield (ton / ha)", ylab="Fractional count")
@@ -147,7 +147,7 @@ lines(his_mon_har$mids, his_mon_har$counts/sum(his_mon_har$counts), col="red")
 abline(v=mean(xy$yield_mon,na.rm=T),lty=1,col="blue",lwd=1)
 abline(v=mean(xy$yield_mon[which(xy$ahar >= 0.1)],na.rm=T),lty=1,col="red",lwd=1)
 grid()
-legend(2.8,.6,legend=c("All areas","Niche"),col=c("blue","red"),lty=c(1,1),bg="white")
+legend(1.9,.6,legend=c("All areas","Growing areas > 5 %"),col=c("blue","red"),lty=c(1,1),bg="white",cex=0.9)
 dev.off()
 
 #research site
@@ -159,7 +159,7 @@ ahar@crs <- wrld_simpl@proj4string
 ahar <- resample(ahar,msk)
 
 #produce plot
-pdf(paste(figDir,"/Fig1d_area_harvested_gnut.pdf",sep=""), height=6,width=8,pointsize=12)
+pdf(paste(figDir,"/Fig1d_area_harvested_gnut.pdf",sep=""), height=4,width=6,pointsize=16)
 tplot <- rs_levplot2(ahar,zn=0,zx=1,nb=10,brks=c(0,0.02,0.04,0.06,.08,.1,.2,.6,.8,1),scale=NA,col_i="red",col_f="#FEE0D2",ncol=9,rev=T,leg=T)
 tplot <- tplot + layer(sp.polygons(as(g2,'SpatialPolygons'),lwd=1.25,col="blue"))
 tplot <- tplot + layer(panel.text((g2@xmin+g2@xmax)*.5, (g2@ymin+g2@ymax)*.5, "G",cex=1.5))
