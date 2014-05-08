@@ -99,9 +99,7 @@ for (mth in 1:12) {
       matrix_names <- cbind(matrix_names, paste(var, "_", mth, sep=""))
       
     }
-    
-    
-    
+        
   }
 }
 
@@ -249,7 +247,7 @@ for (var in varlist){
 }
 
 
-## 4- Extract values from GCM raw daily files
+## 4- GCM Daily process
 
 require(maptools)
 require(raster)
@@ -262,16 +260,13 @@ dirbase <- "S:/observed/gridded_products/wfd"
 gcmHisDir <- "T:/gcm/cmip5/raw/daily/historical"
 gcmFutDir <- "T:/gcm/cmip5/raw/daily/rcp_45"
 dirout <- "G:/cenavarro/bid/gcm_raw_res"
-diroutcut <- "G:/cenavarro/bid/gcm_0_5deg"
+diroutcut <- "G:/cenavarro/bid/gcm_0_5deg_lat"
 
 latlon <- open.ncdf(paste(dirbase, "/raw/WFD-land-lat-long-z.nc", sep=""), write=FALSE)
 lon <- get.var.ncdf(latlon, "Longitude")
 lat <- get.var.ncdf(latlon, "Latitude")
 coords <- data.frame(lon, lat)
 close.ncdf(latlon)
-
-alt_30s <- "S:/observed/gridded_products/srtm/Altitude_30s/alt"
-alt <- extract(raster(alt_30s), coords)
 
 gcmList <- list.dirs(dirout, recursive = FALSE, full.names = FALSE)
 varlist <- c("tasmax", "tasmin", "pr")
@@ -283,6 +278,8 @@ mthListMod <- c(1:12)
 mthMat <- as.data.frame(cbind(mthList, mthListMod))
 names(mthMat) <- c("Mth", "MthMod")
 
+bbox <- extent(-120,-30,-56,33)
+  
 for (gcm in gcmList){
   
   cat(" Obtain values for WFD coordinates : ", "historical ", basename(gcm), " \n")
@@ -290,94 +287,73 @@ for (gcm in gcmList){
   ##Historical
   for (var in varlist){
     
-    diroutgcmhis <- paste(dirout, "/", basename(gcm), "/1950_2000", sep="")
+    diroutgcmhis <- paste(dirout, "/", basename(gcm), "/1960_1990", sep="")
     if (!file.exists(diroutgcmhis)) {dir.create(diroutgcmhis, recursive=T)}
     
     ncList <- list.files(path=paste(gcmHisDir, "/", basename(gcm), "/r1i1p1", sep=""), pattern=paste(var, "_day*", sep=""), full.names=TRUE)
     
-    if (!file.exists(paste(diroutgcmhis, "/", var, "_std_12.nc", sep=""))) {
+    if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))) {
       
-      system(paste("cdo seldate,1950-01-01,2000-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1950_2000_day.nc", sep=""))
+      system(paste("cdo seldate,1960-01-01,1990-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))
       
-      system(paste("cdo ymonavg ", diroutgcmhis, "/", var, "_1950_2000_day.nc", " ",  diroutgcmhis, "/", var, "_1950_2000_avg_day.nc", sep=""))
-      system(paste("cdo ymonstd ", diroutgcmhis, "/", var, "_1950_2000_day.nc", " ",  diroutgcmhis, "/", var, "_1950_2000_std_day.nc", sep=""))
-      
-      system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1950_2000_avg_day.nc ", diroutgcmhis, "/", var, "_avg_", sep=""))
-      system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1950_2000_std_day.nc ", diroutgcmhis, "/", var, "_std_", sep=""))
-      
-    }
+      system(paste("cdo ymonavg ", diroutgcmhis, "/", var, "_1960_1990_day.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_avg_day.nc", sep=""))
+      system(paste("cdo ymonstd ", diroutgcmhis, "/", var, "_1960_1990_day.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))
     
-    if (file.exists(paste(diroutgcmhis, "/", var, "_1950_2000_day.nc", sep=""))) {file.remove(paste(diroutgcmhis, "/", var, "_1950_2000_day.nc", sep=""))}
-    
-  }
-  
-  
-  ## Extract values in WFD coordinates
-  
-  diroutgcmhiscut <- paste(diroutcut, "/", basename(gcm), "/1950_2000", sep="")
-  if (!file.exists(diroutgcmhiscut)) {dir.create(diroutgcmhiscut, recursive=T)}
-  
-  
-  
-  for (met in metlist){
-    
-    if (!file.exists(paste(diroutgcmhiscut, "/_", met, "_1950_2000.txt", sep=""))) {
-      
-      for (mth in mthList) {
-        
-        mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
-        
-        for (var in varlist){
-          
-          if  (var == "tasmax"){varmod <- "tmax"}
-          if (var == "tasmin"){varmod <- "tmin"}
-          if (var == "pr"){varmod <- "prec"}
-          
-          cat(" Resample: ", var, "_", mth, " ", met, " \n")
-          
-          if (!file.exists(paste(diroutgcmhiscut, "/", var, "_", met, "_", mth, ".nc", sep=""))) {
-            
-            gcmAvgMon <- rotate(raster(paste(diroutgcmhis, "/", var, "_", met, "_", mth, ".nc", sep="")))
-            resGcmAvgMon <- resample(gcmAvgMon, raster(nrows=360, ncols=720, xmn=-180, xmx=180, ymn=-90, ymx=90), method='bilinear') 
-            # cutresGcmAvgMon <- crop(resGcmAvgMon, extent(xmin, xmax, ymin, ymax))
-            cutresGcmAvgMon <- writeRaster(resGcmAvgMon, paste(diroutgcmhiscut, "/", varmod, "_", met, "_", mth, ".nc", sep=""), overwrite=T)
-          }
-          
-          cutresGcmAvgMon <- raster(paste(diroutgcmhiscut, "/", varmod, "_", met, "_", mth, ".nc", sep=""))
-          gcmVals <- extract(cutresGcmAvgMon, coords)
-          
-          ## Conver units from kg/m2/s to mm/day and K to deg C
-          if (varmod == "prec"){
-            gcmVals <- gcmVals * 86400
-          } else {
-            gcmVals <- gcmVals - 273.15
-          }
-          
-          if (paste(varmod, "_", mthMod, sep="") == "tmax_1") {        
-            
-            matrix <- cbind.data.frame(1:dim(coords)[1], coords[,2], coords[,1], alt, gcmVals)
-            matrix_names <- cbind(paste(varmod, "_", mthMod, sep=""))
-            
-          } else{
-            
-            matrix <- cbind.data.frame(matrix, gcmVals)
-            matrix_names <- cbind(matrix_names, paste(varmod, "_", mthMod, sep=""))
-            
-          }
-          
-          
-        }
       }
+    
+#       system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmhis, "/", var, "_1960_1990_avg_day.nc ",diroutgcmhis, "/lat_", var, "_1960_1990_avg_day.nc",sep=""))
+#       system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmhis, "/", var, "_1960_1990_std_day.nc ",diroutgcmhis, "/lat_", var, "_1960_1990_std_day.nc",sep=""))    
+    
+      system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1960_1990_avg_day.nc ", diroutgcmhis, "/", var, "_avg_", sep=""))
+      system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1960_1990_std_day.nc ", diroutgcmhis, "/", var, "_std_", sep=""))
       
-      colnames(matrix) <- c("id", "lat", "lon", "alt", matrix_names)
-      
-      cat(" Writting output tab delimited file\n\n")
-      write.table(matrix, paste(diroutgcmhiscut, "/_", met, "_1950_2000.txt", sep=""), row.names=F, sep="\t")
-      
-    } 
+    
+    
+    if (file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))) {file.remove(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))}
+    
   }
-}    
-
+  
+#   
+#   ## Extract values in WFD coordinates
+#   
+#   diroutgcmhiscut <- paste(diroutcut, "/", basename(gcm), "/1960_1990", sep="")
+#   if (!file.exists(diroutgcmhiscut)) {dir.create(diroutgcmhiscut, recursive=T)}
+#     
+#   for (met in metlist){
+#             
+#     for (mth in mthList) {
+#       
+#       mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
+#       
+#       for (var in varlist){
+#         
+#         if  (var == "tasmax"){varmod <- "tmax"}
+#         if (var == "tasmin"){varmod <- "tmin"}
+#         if (var == "pr"){varmod <- "prec"}
+#         
+#         cat(" Resample: ", var, "_", mth, " ", met, " \n")
+#         
+#         if (!file.exists(paste(diroutgcmhiscut, "/", varmod, "_", met, "_", mth, ".nc", sep=""))) {
+#           
+#           gcmAvgMon <- rotate(raster(paste(diroutgcmhis, "/", var, "_", met, "_", mth, ".nc", sep="")))
+#           resGcmAvgMon <- resample(gcmAvgMon, raster(nrows=360, ncols=720, xmn=-180, xmx=180, ymn=-90, ymx=90), method='bilinear')
+#           cutresGcmAvgMon <- crop(resGcmAvgMon, bbox)
+#           
+#           if (varmod == "prec"){
+#             cutresGcmAvgMon <- cutresGcmAvgMon * 86400
+#           } else {
+#             cutresGcmAvgMon <- cutresGcmAvgMon - 273.15
+#           }
+#           
+#           cutresGcmAvgMon <- writeRaster(cutresGcmAvgMon, paste(diroutgcmhiscut, "/", varmod, "_", met, "_", mth, ".nc", sep=""), overwrite=T)
+#           
+#           if (file.exists(paste(diroutgcmhis, "/", varmod, "_", met, "_", mth, ".nc", sep=""))) {file.remove(paste(diroutgcmhis, "/", varmod, "_", met, "_", mth, ".nc", sep=""))}
+#           
+#         }
+#       }      
+#     } 
+#   }    
+}
 
 for (gcm in gcmList){
   
@@ -392,100 +368,79 @@ for (gcm in gcmList){
     
     ncList <- list.files(path=paste(gcmFutDir, "/", basename(gcm), "/r1i1p1", sep=""), pattern=paste(var, "_day*", sep=""), full.names=TRUE)
     
-    if (!file.exists(paste(diroutgcmfut, "/", var, "_std_12.nc", sep=""))) {
+    if (!file.exists(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))) {
       
       system(paste("cdo seldate,2020-01-01,2049-12-31 ", ncList[1], " ", diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))
       
       system(paste("cdo ymonavg ", diroutgcmfut, "/", var, "_2020_2049_day.nc", " ",  diroutgcmfut, "/", var, "_2020_2049_avg_day.nc", sep=""))
       system(paste("cdo ymonstd ", diroutgcmfut, "/", var, "_2020_2049_day.nc", " ",  diroutgcmfut, "/", var, "_2020_2049_std_day.nc", sep=""))
       
-      system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_avg_day.nc ", diroutgcmfut, "/", var, "_avg_", sep=""))
-      system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_std_day.nc ", diroutgcmfut, "/", var, "_std_", sep=""))
-      
     }
+    
+#     system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmfut, "/", var, "_2020_2049_avg_day.nc ",diroutgcmfut, "/lat_", var, "_2020_2049_avg_day.nc",sep=""))
+#     system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmfut, "/", var, "_2020_2049_std_day.nc ",diroutgcmfut, "/lat_", var, "_2020_2049_std_day.nc",sep=""))    
+    
+    system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_avg_day.nc ", diroutgcmfut, "/", var, "_avg_", sep=""))
+    system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_std_day.nc ", diroutgcmfut, "/", var, "_std_", sep=""))
+      
+    
     
     if (file.exists(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))) {file.remove(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))}
     
   }
-  
-  
-  ## Extract values in WFD coordinates
-  
-  diroutgcmfutcut <- paste(diroutcut, "/", basename(gcm), "/2020_2049", sep="")
-  if (!file.exists(diroutgcmfutcut)) {dir.create(diroutgcmfutcut, recursive=T)}
-  
-  # xmin <- -120    xmax <- -30    ymin <- -56    ymax <- 33
-  
-  for (met in metlist){
-    
-    if (!file.exists(paste(diroutgcmfutcut, "/_", met, "_2020_2049.txt", sep=""))) {
-      
-      for (mth in mthList) {
-        
-        mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
-        
-        for (var in varlist){
-          
-          if  (var == "tasmax"){varmod <- "tmax"}
-          if (var == "tasmin"){varmod <- "tmin"}
-          if (var == "pr"){varmod <- "prec"}
-          
-          cat(" Resample: ", var, "_", mth, " ", met, " \n")
-          
-          if (!file.exists(paste(diroutgcmfutcut, "/", var, "_", met, "_", mth, ".nc", sep=""))) {
-            
-            gcmAvgMon <- rotate(raster(paste(diroutgcmfut, "/", var, "_", met, "_", mth, ".nc", sep="")))
-            resGcmAvgMon <- resample(gcmAvgMon, raster(nrows=360, ncols=720, xmn=-180, xmx=180, ymn=-90, ymx=90), method='bilinear') 
-            # cutresGcmAvgMon <- crop(resGcmAvgMon, extent(xmin, xmax, ymin, ymax))
-            cutresGcmAvgMon <- writeRaster(resGcmAvgMon, paste(diroutgcmfutcut, "/", varmod, "_", met, "_", mth, ".nc", sep=""), overwrite=T)
-          }
-          
-          cutresGcmAvgMon <- raster(paste(diroutgcmfutcut, "/", varmod, "_", met, "_", mth, ".nc", sep=""))
-          gcmVals <- extract(cutresGcmAvgMon, coords)
-          
-          ## Conver units from kg/m2/s to mm/day and K to deg C
-          if (varmod == "prec"){
-            gcmVals <- gcmVals * 86400
-          } else {
-            gcmVals <- gcmVals - 273.15
-          }
-          
-          if (paste(varmod, "_", mthMod, sep="") == "tmax_1") {        
-            
-            matrix <- cbind.data.frame(1:dim(coords)[1], coords[,2], coords[,1], alt, gcmVals)
-            matrix_names <- cbind(paste(varmod, "_", mthMod, sep=""))
-            
-          } else{
-            
-            matrix <- cbind.data.frame(matrix, gcmVals)
-            matrix_names <- cbind(matrix_names, paste(varmod, "_", mthMod, sep=""))
-            
-          }
-          
-          
-        }
-      }
-      
-      colnames(matrix) <- c("id", "lat", "lon", "alt", matrix_names)
-      
-      cat(" Writting output tab delimited file\n\n")
-      write.table(matrix, paste(diroutgcmfutcut, "/_", met, "_2020_2049.txt", sep=""), row.names=F, sep="\t")
-      
-    }
-  }
-  
-}  
+#   
+#   
+#   ## Extract values in WFD coordinates
+#   
+#   diroutgcmfutcut <- paste(diroutcut, "/", basename(gcm), "/2020_2049", sep="")
+#   if (!file.exists(diroutgcmfutcut)) {dir.create(diroutgcmfutcut, recursive=T)}
+#   
+#   for (met in metlist){
+#     
+#     for (mth in mthList) {
+#       
+#       mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
+#       
+#       for (var in varlist){
+#         
+#         if  (var == "tasmax"){varmod <- "tmax"}
+#         if (var == "tasmin"){varmod <- "tmin"}
+#         if (var == "pr"){varmod <- "prec"}
+#         
+#         cat(" Resample: ", var, "_", mth, " ", met, " \n")
+#         
+#         if (!file.exists(paste(diroutgcmfutcut, "/", varmod, "_", met, "_", mth, ".nc", sep=""))) {
+#           
+#           gcmAvgMon <- rotate(raster(paste(diroutgcmfut, "/", var, "_", met, "_", mth, ".nc", sep="")))
+#           resGcmAvgMon <- resample(gcmAvgMon, raster(nrows=360, ncols=720, xmn=-180, xmx=180, ymn=-90, ymx=90), method='bilinear') 
+#           cutresGcmAvgMon <- crop(resGcmAvgMon, bbox)
+#           
+#           if (varmod == "prec"){
+#             cutresGcmAvgMon <- cutresGcmAvgMon * 86400
+#           } else {
+#             cutresGcmAvgMon <- cutresGcmAvgMon - 273.15
+#           }
+#           
+#           cutresGcmAvgMon <- writeRaster(cutresGcmAvgMon, paste(diroutgcmfutcut, "/", varmod, "_", met, "_", mth, ".nc", sep=""), overwrite=T)
+#           
+#           if (file.exists(paste(diroutgcmfut, "/", var, "_", met, "_", mth, ".nc", sep=""))) {file.remove(paste(diroutgcmfut, "/", var, "_", met, "_", mth, ".nc", sep=""))}
+#           
+#         }
+#         
+#       }
+#     }
+#   }
+}
 
 
 
 ## 5-  CF Calculation
 require(raster)
-dirwfd <- "G:/cenavarro/bid/wfd_0_5_deg"
-dirgcm <- "G:/cenavarro/bid/gcm_0_5deg"
-dirout <- "G:/cenavarro/bid/cf_0_5_deg"
-diroutlat <- "G:/cenavarro/bid/cf_0_5_deg_lat"
+dirwfd <- "G:/cenavarro/bid/wfd_0_5_deg_lat"
+dirgcm <- "G:/cenavarro/bid/gcm_0_5deg_lat"
+dirout <- "G:/cenavarro/bid/cf_0_5_deg_lat"
 
-extlat <- extent(-120,-30,-56,33)
+  bbox <- extent(-120,-30,-56,33)
 
 # Get a list of month with and withour 0 in one digit numbers
 monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
@@ -497,50 +452,37 @@ names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
 varlist <- c("prec", "tmax", "tmin")
 
 if (!file.exists(dirout)) {dir.create(dirout)}
-if (!file.exists(diroutlat)) {dir.create(diroutlat)}
 
 gcmList <- list.dirs(dirgcm, recursive = FALSE, full.names = FALSE)
 
 for (gcm in gcmList){
   
-  gcmhis.avg.array <- read.table(paste(dirgcm, "/", basename(gcm), "/1950_2000/_avg_1950_2000.txt", sep=""), header=T)
-  gcmfut.avg.array <- read.table(paste(dirgcm, "/", basename(gcm), "/2020_2049/_avg_2020_2049.txt", sep=""), header=T)
-  gcmhis.std.array <- read.table(paste(dirgcm, "/", basename(gcm), "/1950_2000/_std_1950_2000.txt", sep=""), header=T)
-  gcmfut.std.array <- read.table(paste(dirgcm, "/", basename(gcm), "/2020_2049/_std_2020_2049.txt", sep=""), header=T)
-  
   for (var in varlist){
     
-    if  (var == "tmax"){colNum <- 5}
+    if  (var == "tmax"){varWfd == "Tmax"}
     if (var == "tmin"){colNum <- 6}
     if (var == "prec"){colNum <- 7}
     
     for (mth in monthList){
-      
-      if (var == "prec"){
-        gcmhis.std <- gcmhis.std.array[colNum]
-        gcmfut.std <- gcmfut.std.array[colNum]
-      } else {
-        gcmhis.std <- gcmhis.std.array[colNum] + 273.15
-        gcmfut.std <- gcmfut.std.array[colNum] + 273.15
-      }
             
-      
-      matrixCf <- gcmhis.avg.array[1:4]
-      
       mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
       
-      if (!file.exists(paste(diroutlat, "/", var, "_", mthMod, ".txt", sep=""))) {
-        
+      if (!file.exists(paste(dirout, "/", var, "_", mthMod, ".nc", sep=""))) {
         
         daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
         
-        wfd.array <- read.csv(paste(dirwfd, "/", var, "_", mth, ".csv", sep=""), header=T)      
+        
+        gcm.avg.fut <- raster(paste(dirgcm, "/", gcm, "/2020_2049/", var, "_avg_", mth, ".nc", sep=""))
+        gcm.avg.his <- raster(paste(dirgcm, "/", gcm, "/1960_1990/", var, "_avg_", mth, ".nc", sep=""))
+        gcm.std.fut <- raster(paste(dirgcm, "/", gcm, "/2020_2049/", var, "_std_", mth, ".nc", sep=""))
+        gcm.std.his <- raster(paste(dirgcm, "/", gcm, "/1960_1990/", var, "_std_", mth, ".nc", sep=""))
+        wfd.day <- raster(paste(dirwfd, "/1960_1990/", var, "_std_", mth, ".nc", sep=""))
         
         for (day in 3:dim(wfd.array)[2]){
           
           cat(" CF Calc: ", var, "_", mth, " day", paste(day-2), " \n")
+          cfCalc <- gcm.avg.fut + (gcm.std.fut / gcm.std.his * (wfd.array[day] - gcm.std.his))
           
-          cfCalc <- gcmfut.avg.array[colNum] + (gcmfut.std / gcmhis.std * (wfd.array[day] - gcmhis.avg.array[colNum]))
           
           if (var == "prec"){ cfCalc[cfCalc<0] <- 0}
           
