@@ -292,7 +292,7 @@ for (gcm in gcmList){
     
     ncList <- list.files(path=paste(gcmHisDir, "/", basename(gcm), "/r1i1p1", sep=""), pattern=paste(var, "_day*", sep=""), full.names=TRUE)
     
-    if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))) {
+    if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))) {
       
       system(paste("cdo seldate,1960-01-01,1990-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))
       
@@ -300,16 +300,18 @@ for (gcm in gcmList){
       system(paste("cdo ymonstd ", diroutgcmhis, "/", var, "_1960_1990_day.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))
     
       }
-    
+  }
+}
+  
 #       system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmhis, "/", var, "_1960_1990_avg_day.nc ",diroutgcmhis, "/lat_", var, "_1960_1990_avg_day.nc",sep=""))
 #       system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmhis, "/", var, "_1960_1990_std_day.nc ",diroutgcmhis, "/lat_", var, "_1960_1990_std_day.nc",sep=""))    
     
-      system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1960_1990_avg_day.nc ", diroutgcmhis, "/", var, "_avg_", sep=""))
-      system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1960_1990_std_day.nc ", diroutgcmhis, "/", var, "_std_", sep=""))
+#       system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1960_1990_avg_day.nc ", diroutgcmhis, "/", var, "_avg_", sep=""))
+#       system(paste("cdo splitmon ", diroutgcmhis, "/", var, "_1960_1990_std_day.nc ", diroutgcmhis, "/", var, "_std_", sep=""))
       
     
     
-    if (file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))) {file.remove(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))}
+#     if (file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))) {file.remove(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))}
     
   }
   
@@ -380,14 +382,15 @@ for (gcm in gcmList){
 #     system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmfut, "/", var, "_2020_2049_avg_day.nc ",diroutgcmfut, "/lat_", var, "_2020_2049_avg_day.nc",sep=""))
 #     system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",diroutgcmfut, "/", var, "_2020_2049_std_day.nc ",diroutgcmfut, "/lat_", var, "_2020_2049_std_day.nc",sep=""))    
     
-    system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_avg_day.nc ", diroutgcmfut, "/", var, "_avg_", sep=""))
-    system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_std_day.nc ", diroutgcmfut, "/", var, "_std_", sep=""))
+#     system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_avg_day.nc ", diroutgcmfut, "/", var, "_avg_", sep=""))
+#     system(paste("cdo splitmon ", diroutgcmfut, "/", var, "_2020_2049_std_day.nc ", diroutgcmfut, "/", var, "_std_", sep=""))
       
     
     
-    if (file.exists(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))) {file.remove(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))}
+#     if (file.exists(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))) {file.remove(paste(diroutgcmfut, "/", var, "_2020_2049_day.nc", sep=""))}
     
   }
+}
 #   
 #   
 #   ## Extract values in WFD coordinates
