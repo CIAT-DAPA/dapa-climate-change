@@ -104,7 +104,7 @@ opt_data$USE_SCRATCH <- F
 opt_data$SCRATCH <- NA
 
 for (i in 1:nrow(param_list)) {
-  #i <- 8
+  #i <- 15
   #previous parameters
   prev_params <- this_params
   
@@ -128,6 +128,5 @@ for (i in 1:nrow(param_list)) {
   if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
   this_params[[sect]][[param]]$Value <- opt_val
 }
-
 
 
