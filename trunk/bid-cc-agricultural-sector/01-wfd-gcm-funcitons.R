@@ -1,3 +1,7 @@
+# cd G:\_scripts\dapa-climate-change\bid-cc-agricultural-sector
+# source("01-wfd-gcm-funcitons.R")
+# GCMDailyProcessHistorical(1,4)
+
 ### 0 - Obtain lat, lon, alt & alt strm from wfd coordinates
 WFDMask <- function(dirbase="S:/observed/gridded_products/wfd"){
   
@@ -248,7 +252,8 @@ GCMDailyProcessHistorical <- function(startModel=1, endModel=2){
   gcmHisDir <- "T:/gcm/cmip5/raw/daily/historical"
   gcmFutDir <- "T:/gcm/cmip5/raw/daily/rcp_45"
   dirout <- "G:/cenavarro/bid/gcm_raw_res"
-  diroutcut <- "G:/cenavarro/bid/gcm_0_5deg_lat"
+#   diroutcut <- "G:/cenavarro/bid/gcm_0_5deg_lat"
+  diroutcut <- "W:/bid/gcm_0_5deg_lat"
   
   gcmList <- list.dirs(dirout, recursive = FALSE, full.names = FALSE)
   varlist <- c("tasmax", "tasmin", "pr")
@@ -267,150 +272,152 @@ GCMDailyProcessHistorical <- function(startModel=1, endModel=2){
   ## Process GCM Historical
   for (gcm in gcmList[startModel:endModel]){
     
-    cat(" Cutting : ", "historical ", basename(gcm), " \n")
-    
-    diroutgcmhis <- paste(dirout, "/", basename(gcm), "/1960_1990", sep="")
-    if (!file.exists(diroutgcmhis)) {dir.create(diroutgcmhis, recursive=T)}
-    if (!file.exists(paste(diroutgcmhis, "/by-month", sep=""))) {dir.create(paste(diroutgcmhis, "/by-month", sep=""), recursive=T)}
-    
-    ##Historical
-    for (var in varlist){
-        
-      if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))) {
-        
-        ncList <- list.files(path=paste(gcmHisDir, "/", basename(gcm), "/r1i1p1", sep=""), pattern=paste(var, "_day*", sep=""), full.names=TRUE)
-        
-        system(paste("cdo seldate,1960-01-01,1990-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))
-
-      }
-
-      if (!file.exists(paste(diroutgcmhis, "/by-month/", var, "_1990_12.nc", sep=""))) {
-        
-        system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1960_1990_day.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
-        
-        for (yr in 1960:1990){
-          system(paste("cdo splitmon ", diroutgcmhis, "/by-month/", var, "_", yr, ".nc ", diroutgcmhis, "/by-month/", var, "_", yr, "_", sep=""))
-          file.remove(paste(diroutgcmhis, "/by-month/", var, "_", yr, ".nc", sep=""))
-        }
-      }
-      
-          
-      if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))) {
-        
-        system(paste("cdo ymonavg ", diroutgcmhis, "/", var, "_1960_1990_day.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_avg_day.nc", sep=""))
-        system(paste("cdo ymonstd ", diroutgcmhis, "/", var, "_1960_1990_day.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))
-        
-      }
-    }
-  }
-    
-  ## Reggrid GCM Historical
-  for (gcm in gcmList[startModel:endModel]){
-    
     diroutgcmhis <- paste(dirout, "/", basename(gcm), "/1960_1990", sep="")
     diroutgcmhiscut <- paste(diroutcut, "/", basename(gcm), "/1960_1990", sep="")
-    if (!file.exists(diroutgcmhiscut)) {dir.create(diroutgcmhiscut, recursive=T)}
-    if (!file.exists(paste(diroutgcmhiscut, "/by-month", sep=""))) {dir.create(paste(diroutgcmhiscut, "/by-month", sep=""), recursive=T)}
     
-    for (var in varlist){
+    if (!file.exists(paste(diroutgcmhiscut, "/by-month/prec_1990_12.nc", sep=""))){
       
-      if (var == "tasmax"){varmod <- "tmax"}
-      if (var == "tasmin"){varmod <- "tmin"}
-      if (var == "pr"){varmod <- "prec"}
+      cat(" Cutting : ", "historical ", basename(gcm), " \n")
       
-      for (met in metList){
-      
-        if (!file.exists(paste(diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day.nc", sep=""))) {
-          
-          for (mth in mthList) {
-            
-            mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
-                       
-            cat(" Resample metrics : ", basename(gcm), " ", varmod, " ", mth, " ", met)
-           
-            monNc <- raster(paste(diroutgcmhis, "/", var, "_1960_1990_", met, "_day.nc", sep=""), band=mthMod)
-            monNc <- resample(monNc, raster(nrows=360, ncols=720, xmn=0, xmx=360, ymn=-90, ymx=90), method='bilinear')
-            monNc <- crop(rotate(monNc), bbox)
-           
-            if (varmod == "prec"){
-              monNc <- monNc * 86400
-            } else {
-              monNc <- monNc - 273.15
-            }
-           
-           monNc <- writeRaster(monNc, paste(diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day_", mth, "_temp.nc", sep=""), format="CDF", overwrite=T)
-           system(paste("cdo setdate,1990-", mth, "-31,00:00 ", diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day_", mth, "_temp.nc ", diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day_", mth, ".nc", sep=""))
-           file.remove(paste(diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day_", mth, "_temp.nc", sep=""))
-           
-           }
-           
-           ncMthList <- list.files(path=diroutgcmhiscut, pattern=paste(varmod, "_1960_1990_", met, "_day_", "*", sep=""), full.names=TRUE)
-           cat("...merging\n")
-           system(paste("cdo -s mergetime ", paste(ncMthList, collapse=" "), " ", diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day.nc",sep=""))
-           
-           for (nc in ncMthList){
-             
-             file.remove(nc)
-             
-           }
-        }    
-      }
-    }
-       
-             
-    
-    for (yr in 1960:1990){
-      
-      for (mth in mthList) {
+      if (!file.exists(diroutgcmhis)) {dir.create(diroutgcmhis, recursive=T)}
+      if (!file.exists(paste(diroutgcmhis, "/by-month", sep=""))) {dir.create(paste(diroutgcmhis, "/by-month", sep=""), recursive=T)}
         
-        mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
-        ndayMth <- as.numeric(paste((mthMat$Ndays[which(mthMat$Mth == mth)])))
-        
-        for (var in varlist){
+      if (!file.exists(diroutgcmhiscut)) {dir.create(diroutgcmhiscut, recursive=T)}
+      if (!file.exists(paste(diroutgcmhiscut, "/by-month", sep=""))) {dir.create(paste(diroutgcmhiscut, "/by-month", sep=""), recursive=T)}
+      
+      
+      ##Historical
+      for (var in varlist){
           
-          if  (var == "tasmax"){varmod <- "tmax"}
-          if (var == "tasmin"){varmod <- "tmin"}
-          if (var == "pr"){varmod <- "prec"}
+        if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day_lat.nc", sep=""))) {
           
-          cat(" Resample daily: historical ", varmod, "_", yr, " ", mth, "\n")
+          ncList <- list.files(path=paste(gcmHisDir, "/", basename(gcm), "/r2i1p1", sep=""), pattern=paste(var, "_day*", sep=""), full.names=TRUE)
           
-          if (!file.exists(paste(diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, ".nc", sep=""))) {
-            
-            datedays <- c(paste("0", 1:9, sep=""), paste(10:ndayMth, sep=""))
-            
-            for (day in datedays){
-             
-              dayNc <- raster(paste(diroutgcmhis, "/by-month/", var, "_", yr, "_", mth, ".nc", sep=""), band=as.numeric(day))
-              dayNcRes <- resample(dayNc, raster(nrows=360, ncols=720, xmn=0, xmx=360, ymn=-90, ymx=90), method='bilinear')
-              dayNcRes <- crop(rotate(dayNcRes), bbox)
-              
-              if (varmod == "prec"){
-                dayNcRes <- dayNcRes * 86400
-              } else {
-                dayNcRes <- dayNcRes - 273.15
-              }
-              
-              
-              dayNcRes <- writeRaster(dayNcRes, paste(diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, "_", day, "_temp.nc", sep=""), format="CDF", overwrite=T)
-              system(paste("cdo -s setdate,", yr, "-", mth, "-", day, ",00:00 ", diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, "_", day, "_temp.nc ", diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, "_", day, ".nc", sep=""))
-              file.remove(paste(diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, "_", day, "_temp.nc", sep=""))
-   
-            }
-                      
-            ncDayList <- list.files(path=paste(diroutgcmhiscut, "/by-month", sep=""), pattern=paste(varmod, "_", yr, "_", mth, "_*", sep=""), full.names=TRUE)
-            cat("...merging\n")
-            system(paste("cdo -s mergetime ", paste(ncDayList, collapse=" "), " ", diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, ".nc",sep=""))
-            
-            for (nc in ncDayList){
-              
-              file.remove(nc)
-              
-            }
-            
+          if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))) {
+            system(paste("cdo seldate,1980-01-01,1990-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))
+          }
+          
+          system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", diroutgcmhis, "/", var, "_1960_1990_day.nc ", diroutgcmhis, "/", var, "_1960_1990_day_lat.nc",sep=""))
+          file.remove(paste(diroutgcmhis, "/", var, "_1960_1990_day.nc", sep=""))
+          
+        }
+  
+        if (!file.exists(paste(diroutgcmhis, "/by-month/", var, "_1990_12.nc", sep=""))) {
+          
+          system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1960_1990_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
+          
+          for (yr in 1960:1990){
+            system(paste("cdo splitmon ", diroutgcmhis, "/by-month/", var, "_", yr, ".nc ", diroutgcmhis, "/by-month/", var, "_", yr, "_", sep=""))
+            file.remove(paste(diroutgcmhis, "/by-month/", var, "_", yr, ".nc", sep=""))
           }
         }
-      }  
-    }    
+        
+            
+        if (!file.exists(paste(diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))) {
+          
+          system(paste("cdo ymonavg ", diroutgcmhis, "/", var, "_1960_1990_day_lat.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_avg_day.nc", sep=""))
+          system(paste("cdo ymonstd ", diroutgcmhis, "/", var, "_1960_1990_day_lat.nc", " ",  diroutgcmhis, "/", var, "_1960_1990_std_day.nc", sep=""))
+          
+        }
+      }
+  #   }
+  #     
+  #   ## Reggrid GCM Historical
+  #   for (gcm in gcmList[startModel:endModel]){
+      
+      for (var in varlist){
+        
+        if (var == "tasmax"){varmod <- "tmax"}
+        if (var == "tasmin"){varmod <- "tmin"}
+        if (var == "pr"){varmod <- "prec"}
+        
+        for (met in metList){
+        
+          if (!file.exists(paste(diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day.nc", sep=""))) {
+ 
+            cat(" Resampling : ", "historical ", basename(gcm), " ", varmod, " 1960_1990 ", met, " \n")
+            
+            m <- paste(diroutgcmhis, "/", var, "_1960_1990_", met, "_day.nc", sep="")
+            mx <- raster(m)
+            
+            for( i in 1:mx@file@nbands){
+              assign(paste("m", i, sep=""), raster(m, band=i))
+            }
+            
+            mList <- c(m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)
+            
+            mthNcStack <- stack(mList[1:12])
+            mthNcStackRes <- resample(mthNcStack, raster(nrows=178, ncols=180, xmn=bbox@xmin+360, xmx=bbox@xmax+360, ymn=bbox@ymin, ymx=bbox@ymax), method='bilinear')
+            
+            xmin(mthNcStackRes) <- xmin(mthNcStackRes)-360
+            xmax(mthNcStackRes) <- xmax(mthNcStackRes)-360
+            
+            if (varmod == "prec"){
+              mthNcStackRes <- mthNcStackRes * 86400
+            } else {
+              mthNcStackRes <- mthNcStackRes - 273.15
+            }
+            
+            mthNcStackRes <- writeRaster(mthNcStackRes, paste(diroutgcmhiscut, "/", varmod, "_1960_1990_", met, "_day.nc", sep=""), format="CDF", overwrite=T)
+            
+            
+          }    
+        }
+      }
+         
+      for (var in varlist){
+        
+        for (yr in 1960:1990){
+                  
+          for (mth in mthList) {
+  
+            for(i in 1:31){
+              assign(paste("d", i, sep=""), raster())
+            }
+  
+            mthMod <- as.numeric(paste((mthMat$MthMod[which(mthMat$Mth == mth)])))
+            ndayMth <- as.numeric(paste((mthMat$Ndays[which(mthMat$Mth == mth)])))
+            
+            if  (var == "tasmax"){varmod <- "tmax"}
+            if (var == "tasmin"){varmod <- "tmin"}
+            if (var == "pr"){varmod <- "prec"}
+            
+            cat(" Resample daily: historical ", varmod, "_", yr, " ", mth, "\n")
+            
+            if (!file.exists(paste(diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, ".nc", sep=""))) {
+              
+              f <- paste(diroutgcmhis, "/by-month/", var, "_", yr, "_", mth, ".nc", sep="")
+              rx <- raster(f)
+              
+              for( i in 1:rx@file@nbands ){
+                assign(paste("d", i, sep=""), raster(f, band=i))
+              }
+              
+              dList <- c(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31)
+              
+              dayNcStack <- stack(dList[1:ndayMth])
+              dayNcStackRes <- resample(dayNcStack, raster(nrows=178, ncols=180, xmn=bbox@xmin+360, xmx=bbox@xmax+360, ymn=bbox@ymin, ymx=bbox@ymax), method='bilinear')
+              
+              xmin(dayNcStackRes) <- xmin(dayNcStackRes)-360
+              xmax(dayNcStackRes) <- xmax(dayNcStackRes)-360
+              
+              if (varmod == "prec"){
+                dayNcStackRes <- dayNcStackRes * 86400
+              } else {
+                dayNcStackRes <- dayNcStackRes - 273.15
+              }
+              
+              dayNcStackRes <- writeRaster(dayNcStackRes, paste(diroutgcmhiscut, "/by-month/", varmod, "_", yr, "_", mth, ".nc", sep=""), format="CDF", overwrite=T)
+  
+            }
+          }
+        }  
+      }
+      
+      if (file.exists(paste(diroutgcmhis, "/by-month", sep=""))) {
+        system(paste("rmdir /s /q ", diroutgcmhis, "/by-month", sep=""))
+      }
+    }
   }
 }
 
