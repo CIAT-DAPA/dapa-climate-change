@@ -1,7 +1,7 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS
 #Feb 2014
-stop("!")
+# stop("!")
 
 #remap grid of WFD dataset and cut to African domain
 
@@ -22,28 +22,26 @@ stop("!")
 library(sp); library(raster); library(rgdal); library(maptools); library(ncdf)
 
 #input directories
-#wd <- "~/Leeds-work/quest-for-robustness"
-wd <- "/nfs/a101/eejarv/quest-for-robustness"
-metDir <- paste(wd,"/data/meteorology/wfd_data",sep="")
-yiDir <- paste(wd,"/data/yield_data_maize",sep="")
+wd <- "S:/observed/gridded_products/wfd"
+metDir <- "S:/observed/gridded_products/wfd/raw"
+oDir <- paste("S:/observed/gridded_products/wfd/nc-files/wfd_0_5_deg_lat",sep="")
+if (!file.exists(oDir)) {dir.create(oDir)}
 
-#output directory
-ometDir <- paste(wd,"/data/meteorology/baseline_climate",sep="")
-if (!file.exists(ometDir)) {dir.create(ometDir)}
-
-#read in yield data for getting mask
-yrs <- raster(paste(yiDir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
-
-#determine extent to cut the resampled netcdf
-bbox <- extent(yrs)
+bbox <- extent(-120,-30,-56,33)
 if (bbox@xmin < 0)  bbox@xmin <- bbox@xmin+360
 if (bbox@xmax < 0)  bbox@xmax <- bbox@xmax+360
+
+# Get a list of month with and withour 0 in one digit numbers
+mthList <- c(1:12)
+mthListMod <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+mthMat <- as.data.frame(cbind(mthList, mthListMod))
+names(mthMat) <- c("Mth", "MthMod")
 
 #details
 var_list <- c("Rainf","SWdown","Tmax","Tmin")
 dst_list <- c("WFD","WFDEI")
 wfdei_yrs <- c(1979:2012)
-wfd_yrs <- c(1950:2001)
+wfd_yrs <- c(1960:1990)
 
 #function to process all years and months of a variable and dataset
 process_wfd_wth <- function(dataset,vname) {
@@ -57,21 +55,26 @@ process_wfd_wth <- function(dataset,vname) {
   if (vname == "Rainf") {vunits <- "kg m-2 s-1"} else if (vname == "SWdown") {vunits <- "W m-2"} else {vunits <- "K"}
   
   idataDir <- paste(metDir,"/",vname,suffix,sep="")
-  odataDir <- paste(ometDir,"/",vname,suffix,sep="")
+  odataDir <- paste(oDir,"/",vname,suffix,sep="")
   if (!file.exists(odataDir)) {dir.create(odataDir)}
   
   years <- get(paste(tolower(dataset),"_yrs",sep=""))
   
   #loop years and months
-  for (yr in years) {
-    #yr <- years[1]
-    for (mth in 1:12) {
-      #mth <- 1
+  for (mth in 1:12) {
+
+    for (yr in years) {
+      
+      mthMod <- paste((mthMat$MthMod[which(mthMat$Mth == mth)]))
+      
       cat("...processing year=",yr,"and month=",mth,"\n")
       tmth <- sprintf("%1$02d",mth)
       
       fname <- paste(vname,suffix,"_",yr,tmth,".nc",sep="")
-      fnameout <- paste("afr_",vname,suffix,"_",yr,tmth,".nc",sep="")
+      fnameout <- paste("lat_",vname,suffix,"_",yr,tmth,".nc",sep="")
+      
+      fnameout_avg <- paste("lat_",vname,suffix,"_",yr,tmth,"_avg.nc",sep="")
+      fnameout_std <- paste("lat_",vname,suffix,"_",yr,tmth,"_std.nc",sep="")
       
       if (!file.exists(paste(odataDir,"/",fnameout,sep=""))) {
         #read netcdf using ncdf package
@@ -116,27 +119,77 @@ process_wfd_wth <- function(dataset,vname) {
         nc <- close(nc)
         
         setwd(odataDir)
-        system(paste("cdo remapcon2,r320x160 ",vname,"_rewritten.nc ",odataDir,"/",vname,"_remapped.nc",sep=""))
+        # system(paste("cdo remapcon2,r320x160 ",vname,"_rewritten.nc ",odataDir,"/",vname,"_remapped.nc",sep=""))
         
         #cut to Africa
-        system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",vname,"_remapped.nc ",fnameout,sep=""))
+        system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",vname,"_rewritten.nc ",vname,"_cutted.nc",sep=""))
+        system(paste("cdo settaxis,",yr,"-",mthMod,"-01,00:00,1day ",vname,"_cutted.nc ",fnameout,sep=""))
         
         #garbage collection
         system(paste("rm -f ",vname,"_rewritten.nc",sep=""))
-        system(paste("rm -f ",vname,"_remapped.nc",sep=""))
+        system(paste("rm -f ",vname,"_cutted",sep=""))
         setwd(wd)
-      }
+        
+      } else {cat("...processed year=",yr,"and month=",mth,"\n")}
+
+      setwd(odataDir)
+      
+      cat(" Calculating avg and std daily: future ", fnameout, " avg and std\n")
+      system(paste("cdo -s monavg ", fnameout, " ",  fnameout_avg, sep=""))
+      system(paste("cdo -s monstd ", fnameout, " ",  fnameout_std, sep=""))
+      
+      setwd(wd)
+      
     }
+    
+    setwd(odataDir)
+        
+    avgNcList <- paste("lat_",vname,suffix,"_",1960:1990,tmth,"_avg.nc",sep="")
+    system(paste("cdo ensavg ", paste(avgNcList, collapse=" "), " ", "lat_",vname,suffix,"_1960_1990_",tmth,"_avg.nc", sep=""))
+        
+    stdNcList <- paste("lat_",vname,suffix,"_",1960:1990,tmth,"_std.nc",sep="")
+    system(paste("cdo ensavg ", paste(stdNcList, collapse=" "), " ", "lat_",vname,suffix,"_1960_1990_",tmth,"_std.nc", sep=""))
+    
+    for (nc in avgNcList){
+      file.remove(paste(nc))
+    }
+    
+    for (nc in stdNcList){
+      file.remove(paste(nc))                       
+    }
+    
+    setwd(wd)
+  }
+      
+  for (mth in 1:12) {
+    #mth <- 1
+    mthMod <- paste((mthMat$MthMod[which(mthMat$Mth == mth)]))
+    
+    
+    if (!file.exists(paste(odataDir, "/lat_",vname,suffix,"_1960_1990_", mthMod, ".nc", sep=""))) {
+      
+      #Merge WFD files
+      cat("...merging=",vname,"\n")
+      ncList <- paste(odataDir, "/lat_", vname, suffix, "_", 1960:1990, mthMod, ".nc", sep="")
+      cat("...merging=",ncList,"\n")
+      system(paste("cdo mergetime ", paste(ncList, collapse=" "), " ", odataDir, "/lat_",vname,suffix,"_1960_1990_", mthMod, ".nc",sep=""))
+    
+      }
+
+    #     for (nc in ncList){
+#       system(paste("rm -f ", odataDir, "/", nc, sep=""))
+#     }
+    
   }
 }
+
+
 
 #loop through datasets and variables
-for (dataset in dst_list) {
-  #dataset <- dst_list[1]
-  for (vname in var_list) {
-    #vname <- var_list[1]
-    process_wfd_wth(dataset,vname)
-  }
+# for (dataset in dst_list) {
+dataset <- dst_list[1]
+for (vname in var_list) {
+  #vname <- var_list[1]
+  process_wfd_wth(dataset,vname)
 }
-
-
+# }
