@@ -375,76 +375,314 @@ dev.off()
 #1. percentage of pixels that go transformed, for each of the limits
 #2. amount of area (projection defined using http://people.oregonstate.edu/~savricb/selectiontool/#)
 
-cum_chg_m <- list(); cum_chg_u <- list(); cum_chg_l <- list()
-for (i in 1:nrow(thresh_val)) {
+if (!file.exists(paste(dfil_dir,"/cumulative_transformation.RData",sep=""))) {
+  cum_chg_m <- list(); cum_chg_u <- list(); cum_chg_l <- list()
+  for (i in 1:nrow(thresh_val)) {
+    #i <- 1
+    crop_name <- paste(thresh_val$crops[i])
+    cat("\n...processing crop=",crop_name,"\n")
+    
+    #folder of dfil_dir per crop
+    dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
+    
+    #decadal output
+    dc_out <- data.frame()
+    
+    if (exists("cross_stk")) rm(list=c("cross_stk","dc_out_stk"))
+    for (gcm in gcm_list[-grep("eco_ensemble",gcm_list)]) {
+      #gcm <- gcm_list[1]
+      
+      #load processed output
+      load(file=paste(dfil_crop,"/crossing_",rcp,"_",gcm,".RData",sep=""))
+      rm(dc_out_stk)
+      
+      #total number of pixels in area
+      crosstime <- cross_stk$layer.2
+      crosstime[which(crosstime[] < 0)] <- NA
+      ntotal <- length(which(!is.na(crosstime[])))
+      
+      #project (use projection definition from http://people.oregonstate.edu/~savricb/selectiontool/#)
+      crosstime_prj <- projectRaster(crosstime, crs="+proj=aea +lon_0=22.67578125", method="ngb")
+      
+      #loop decades
+      for (dc in 1:length(dc_list)) {
+        #dc <- 1
+        tdec <- crosstime_val$crosstime[crosstime_val$crossval == dc]
+        ndc <- length(which(crosstime[] <= tdec)) / ntotal * 100 #use <= for cumulative areas with change
+        trha <- length(which(crosstime_prj[] <= tdec)) * xres(crosstime_prj) * yres(crosstime_prj) #in m2
+        trha <- trha / (100*100) #in ha
+        out_row <- data.frame(GCM=gcm, DEC_ID=dc, DEC=tdec, PER.TRANS=ndc, HA.TRANS=trha)
+        dc_out <- rbind(dc_out, out_row)
+      }
+      rm(cross_stk)
+    }
+    dc_out$MHA.TRANS <- dc_out$HA.TRANS / 1000000
+    
+    #calculate mean and s.d. for each decade
+    dc_out_m <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {median(x,na.rm=T)})
+    dc_out_u <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {quantile(x,probs=0.75,na.rm=T)})
+    dc_out_l <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {quantile(x,probs=0.25,na.rm=T)})
+    #dc_out_v <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {sd(x,na.rm=T)})
+    #dc_out_x <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {max(x,na.rm=T)})
+    #dc_out_n <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {min(x,na.rm=T)})
+    
+    #put into lists
+    cum_chg_m[[crop_name]] <- dc_out_m; cum_chg_u[[crop_name]] <- dc_out_u; cum_chg_l[[crop_name]] <- dc_out_l
+  }
+  save(list=c("cum_chg_m","cum_chg_u","cum_chg_l"),file=paste(dfil_dir,"/cumulative_transformation.RData",sep=""))
+} else {
+  load(file=paste(dfil_dir,"/cumulative_transformation.RData",sep=""))
+}
+
+
+################################################################################################
+# plot into pdfs
+
+##### roots and bananas
+#relative change
+pdf(paste(fig_dir,"/cumulative_transformation_roots-banana_per.pdf",sep=""), height=7.5,width=9,pointsize=18)
+for (i in c(1,2,8)) { #nrow(thresh_val)) {
   #i <- 1
   crop_name <- paste(thresh_val$crops[i])
   cat("\n...processing crop=",crop_name,"\n")
   
-  #folder of dfil_dir per crop
-  dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
+  #get data
+  dc_out_m <- cum_chg_m[[crop_name]]; dc_out_u <- cum_chg_u[[crop_name]]; dc_out_l <- cum_chg_l[[crop_name]]
   
-  #decadal output
-  dc_out <- data.frame()
-  
-  if (exists("cross_stk")) rm(list=c("cross_stk","dc_out_stk"))
-  for (gcm in gcm_list[-grep("eco_ensemble",gcm_list)]) {
-    #gcm <- gcm_list[1]
-    
-    #load processed output
-    load(file=paste(dfil_crop,"/crossing_",rcp,"_",gcm,".RData",sep=""))
-    rm(dc_out_stk)
-    
-    #total number of pixels in area
-    crosstime <- cross_stk$layer.2
-    crosstime[which(crosstime[] < 0)] <- NA
-    ntotal <- length(which(!is.na(crosstime[])))
-    
-    #project (use projection definition from http://people.oregonstate.edu/~savricb/selectiontool/#)
-    crosstime_prj <- projectRaster(crosstime, crs="+proj=aea +lon_0=22.67578125", method="ngb")
-    
-    #loop decades
-    for (dc in 1:length(dc_list)) {
-      #dc <- 1
-      tdec <- crosstime_val$crosstime[crosstime_val$crossval == dc]
-      ndc <- length(which(crosstime[] <= tdec)) / ntotal * 100 #use <= for cumulative areas with change
-      trha <- length(which(crosstime_prj[] <= tdec)) * xres(crosstime_prj) * yres(crosstime_prj) #in m2
-      trha <- trha / (100*100) #in ha
-      out_row <- data.frame(GCM=gcm, DEC_ID=dc, DEC=tdec, PER.TRANS=ndc, HA.TRANS=trha)
-      dc_out <- rbind(dc_out, out_row)
-    }
-    rm(cross_stk)
+  #plot line and polygon
+  if (i == 1) {
+    par(mar=c(5,5,1,1),las=1,lwd=1)
+    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,17.5),
+         xlab="Year", ylab="Extent of transformation (%)", axes=F, 
+         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+    axis(2, at=seq(0,20,by=5),labels=paste(seq(0,20,by=5)),lwd=1.5)
+    box(lwd=1.5)
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 2) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 8) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
   }
-  dc_out$MHA.TRANS <- dc_out$HA.TRANS / 1000000
-  
-  #calculate mean and s.d. for each decade
-  dc_out_m <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {median(x,na.rm=T)})
-  dc_out_u <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {quantile(x,probs=0.75,na.rm=T)})
-  dc_out_l <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {quantile(x,probs=0.25,na.rm=T)})
-  #dc_out_v <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {sd(x,na.rm=T)})
-  #dc_out_x <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {max(x,na.rm=T)})
-  #dc_out_n <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {min(x,na.rm=T)})
-  
-  #put into lists
-  cum_chg_m[[crop_name]] <- dc_out_m; cum_chg_u[[crop_name]] <- dc_out_u; cum_chg_l[[crop_name]] <- dc_out_l
 }
-save(list=c("cum_chg_m","cum_chg_u","cum_chg_l"),file=paste(dfil_dir,"/cumulative_transformation.RData",sep=""))
+grid(lwd=1.5)
+legend(x=2000,y=17.5,legend=c("Banana","Cassava","Yams"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.8,box.lwd=1.5,bg="white",
+       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
+             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255)))
+dev.off()
 
 
-par(mar=c(5,5,1,1),las=1)
-plot(c(2006,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2005,2095), ylim=c(0,20),
-     xlab="Year", ylab="Extent of transformation (%)",col="red")
-polygon(x=c(c(2006,dc_out_m$DEC),rev(c(2006,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),col="pink",
-        border="pink")
-lines(c(2006,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col="red", cex=1.5)
-grid()
+#absolute change
+pdf(paste(fig_dir,"/cumulative_transformation_roots-banana_abs.pdf",sep=""), height=7.5,width=9,pointsize=18)
+for (i in c(1,2,8)) { #nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
+  
+  #get data
+  dc_out_m <- cum_chg_m[[crop_name]]; dc_out_u <- cum_chg_u[[crop_name]]; dc_out_l <- cum_chg_l[[crop_name]]
+  
+  #plot line and polygon
+  if (i == 1) {
+    par(mar=c(5,5,1,1),las=1,lwd=1)
+    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,180),
+         xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
+         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+    axis(2, at=seq(0,180,by=20),labels=paste(seq(0,180,by=20)),lwd=1.5)
+    box(lwd=1.5)
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 2) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 8) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+  }
+}
+grid(lwd=1.5)
+legend(x=2000,y=180,legend=c("Banana","Cassava","Yams"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.8,box.lwd=1.5,bg="white",
+       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
+             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255)))
+dev.off()
 
 
-par(mar=c(5,5,1,1),las=1)
-plot(c(2006,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2005,2095), ylim=c(0,100),
-     xlab="Year", ylab="Extent of transformation (Million ha)",col="red")
-polygon(x=c(c(2006,dc_out_m$DEC),rev(c(2006,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),col="pink",
-        border="pink")
-lines(c(2006,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col="red", cex=1.5)
-grid()
+##### grain legumes
+#relative change
+pdf(paste(fig_dir,"/cumulative_transformation_legumes_per.pdf",sep=""), height=7.5,width=9,pointsize=18)
+for (i in c(3,5)) { #nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
+  
+  #get data
+  dc_out_m <- cum_chg_m[[crop_name]]; dc_out_u <- cum_chg_u[[crop_name]]; dc_out_l <- cum_chg_l[[crop_name]]
+  
+  #plot line and polygon
+  if (i == 3) {
+    par(mar=c(5,5,1,1),las=1,lwd=1)
+    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,80),
+         xlab="Year", ylab="Extent of transformation (%)", axes=F, 
+         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+    axis(2, at=seq(0,80,by=10),labels=paste(seq(0,80,by=10)),lwd=1.5)
+    box(lwd=1.5)
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 5) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  }
+}
+grid(lwd=1.5)
+legend(x=2000,y=80,legend=c("Bean","Groundnut"),lty=c(1,1),lwd=c(2,2),cex=0.8,box.lwd=1.5,bg="white",
+       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255)))
+dev.off()
+
+
+#absolute change
+pdf(paste(fig_dir,"/cumulative_transformation_legumes_abs.pdf",sep=""), height=7.5,width=9,pointsize=18)
+for (i in c(3,5)) { #nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
+  
+  #get data
+  dc_out_m <- cum_chg_m[[crop_name]]; dc_out_u <- cum_chg_u[[crop_name]]; dc_out_l <- cum_chg_l[[crop_name]]
+  
+  #plot line and polygon
+  if (i == 3) {
+    par(mar=c(5,5,1,1),las=1,lwd=1)
+    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,700),
+         xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
+         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+    axis(2, at=seq(0,700,by=50),labels=paste(seq(0,700,by=50)),lwd=1.5)
+    box(lwd=1.5)
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 5) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  }
+}
+grid(lwd=1.5)
+legend(x=2000,y=700,legend=c("Bean","Groundnut"),lty=c(1),lwd=c(2),cex=0.8,box.lwd=1.5,bg="white",
+       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255)))
+dev.off()
+
+
+##### cereals
+#relative change
+pdf(paste(fig_dir,"/cumulative_transformation_cereals_per.pdf",sep=""), height=7.5,width=9,pointsize=18)
+for (i in c(4,6,7)) { #nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
+  
+  #get data
+  dc_out_m <- cum_chg_m[[crop_name]]; dc_out_u <- cum_chg_u[[crop_name]]; dc_out_l <- cum_chg_l[[crop_name]]
+  
+  #plot line and polygon
+  if (i == 4) {
+    par(mar=c(5,5,1,1),las=1,lwd=1)
+    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,17.5),
+         xlab="Year", ylab="Extent of transformation (%)", axes=F, 
+         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+    axis(2, at=seq(0,20,by=5),labels=paste(seq(0,20,by=5)),lwd=1.5)
+    box(lwd=1.5)
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 6) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 7) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+  }
+}
+grid(lwd=1.5)
+legend(x=2000,y=17.5,legend=c("F. millet","P. millet","Sorghum"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.8,box.lwd=1.5,bg="white",
+       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
+             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255)))
+dev.off()
+
+
+#absolute change
+pdf(paste(fig_dir,"/cumulative_transformation_cereals_abs.pdf",sep=""), height=7.5,width=9,pointsize=18)
+for (i in c(4,6,7)) { #nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
+  
+  #get data
+  dc_out_m <- cum_chg_m[[crop_name]]; dc_out_u <- cum_chg_u[[crop_name]]; dc_out_l <- cum_chg_l[[crop_name]]
+  
+  #plot line and polygon
+  if (i == 4) {
+    par(mar=c(5,5,1,1),las=1,lwd=1)
+    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,180),
+         xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
+         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+    axis(2, at=seq(0,180,by=20),labels=paste(seq(0,180,by=20)),lwd=1.5)
+    box(lwd=1.5)
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 6) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 7) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
+            border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
+    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+  }
+}
+grid(lwd=1.5)
+legend(x=2000,y=180,legend=c("F. millet","P. millet","Sorghum"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.8,box.lwd=1.5,bg="white",
+       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
+             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255)))
+dev.off()
 
