@@ -38,7 +38,7 @@ b_dir <- "Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_mo
 base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
 out_dir <- paste("D:/transformational-adaptation")
 fig_dir <- paste(out_dir,"/figures",sep="")
-dfil_dir <- paste(out_dir,"/data_files.old",sep="")
+dfil_dir <- paste(out_dir,"/data_files",sep="")
 if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
 
 #rcp input dir
@@ -228,10 +228,11 @@ rs_levplot2 <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCEC
     pal <- rev(brewer.pal(ncol, scale))
     if (!is.na(colours[1])) {pal <- colours}
   } else {
-    pal <- c("grey 50",colorRampPalette(c(col_i,col_f))(ncol))
+    pal <- colorRampPalette(c(col_i,col_f))(ncol)
     if (!is.na(colours[1])) {pal <- colours}
   }
   if (rev) {pal <- rev(pal)}
+  pal <- c(pal,"grey 80")
   
   if (is.na(brks[1])) {brks <- do.breaks(c(zn,zx),nb)}
   
@@ -249,58 +250,201 @@ rs_levplot2 <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCEC
 #figure details
 grat <- gridlines(wrld_simpl, easts=seq(-180,180,by=20), norths=seq(-90,90,by=20))
 
-i <- 1
-crop_name <- paste(thresh_val$crops[i])
-cat("\n...processing crop=",crop_name,"\n")
-
-#folder of dfil_dir per crop
-dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
-
-if (exists("cross_stk")) rm(list=c("cross_stk","dc_out_stk"))
-cross_all <- list(cross1=c(),cross2=c())
-for (gcm in gcm_list[-grep("eco_ensemble",gcm_list)]) {
-  #gcm <- gcm_list[1]
+#loop through crops
+cross_1_all <- list(earliest=c(),mean=c(),latest=c())
+cross_2_all <- list(earliest=c(),mean=c(),latest=c())
+for (i in 1:nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
   
-  #load processed output
-  load(file=paste(dfil_crop,"/crossing_",rcp,"_",gcm,".RData",sep=""))
+  #folder of dfil_dir per crop
+  dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
   
-  #put into raster stack
-  cross_all$cross1 <- c(cross_all$cross1, cross_stk$layer.1)
-  cross_all$cross2 <- c(cross_all$cross2, cross_stk$layer.2)
+  if (exists("cross_stk")) rm(list=c("cross_stk","dc_out_stk"))
+  cross_all <- list(cross1=c(),cross2=c())
+  for (gcm in gcm_list[-grep("eco_ensemble",gcm_list)]) {
+    #gcm <- gcm_list[1]
+    
+    #load processed output
+    load(file=paste(dfil_crop,"/crossing_",rcp,"_",gcm,".RData",sep=""))
+    
+    #put into raster stack
+    cross_all$cross1 <- c(cross_all$cross1, cross_stk$layer.1)
+    cross_all$cross2 <- c(cross_all$cross2, cross_stk$layer.2)
+    
+    #remove any previous objects and load data for this GCM
+    rm(list=c("cross_stk","dc_out_stk"))
+  }
   
-  #remove any previous objects and load data for this GCM
-  rm(list=c("cross_stk","dc_out_stk"))
+  cross_all$cross1 <- stack(cross_all$cross1)
+  cross_all$cross2 <- stack(cross_all$cross2)
+  
+  #put together the three rasters i need for each
+  load(file=paste(dfil_crop,"/crossing_",rcp,"_eco_ensemble.RData",sep=""))
+  
+  for (ctime in 1:2) {
+    #ctime <- 2
+    crosstime <- c(calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(min(x,na.rm=T))}}),
+                   #cross_stk[[paste("layer.",ctime,sep="")]],
+                   calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(round(mean(x,na.rm=T)))}}),
+                   calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(max(x,na.rm=T))}}))
+    crosstime <- stack(crosstime); names(crosstime) <- c("Earliest","Mean","Latest")
+    crosstime[which(crosstime[] < 0)] <- NA
+    crosstime[which(crosstime[] > 2089)] <- 2095
+    
+    #plot figure
+    tplot <- rs_levplot2(crosstime,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                         leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+    pdf(paste(fig_dir,"/crossing_time_",ctime,"_",gsub("\\.tif","",crop_name),".pdf",sep=""), height=6,width=12,pointsize=16)
+    print(tplot)
+    dev.off()
+    
+    #append into multi-crop list
+    if (ctime == 1) {
+      cross_1_all$earliest <- c(cross_1_all$earliest, crosstime[["Earliest"]])
+      cross_1_all$mean <- c(cross_1_all$mean, crosstime[["Mean"]])
+      cross_1_all$latest <- c(cross_1_all$latest, crosstime[["Latest"]])
+    } else {
+      cross_2_all$earliest <- c(cross_2_all$earliest, crosstime[["Earliest"]])
+      cross_2_all$mean <- c(cross_2_all$mean, crosstime[["Mean"]])
+      cross_2_all$latest <- c(cross_2_all$latest, crosstime[["Latest"]])
+    }
+  }
 }
 
-cross_all$cross1 <- stack(cross_all$cross1)
-cross_all$cross2 <- stack(cross_all$cross2)
+### ground adapt
+#plot earliest for all crops
+plot_rs <- stack(cross_1_all$earliest)
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                     leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+pdf(paste(fig_dir,"/crossing_time_1_all-crops_earliest.pdf",sep=""), height=6,width=12,pointsize=16)
+print(tplot)
+dev.off()
 
-#put together the three rasters i need for each
-load(file=paste(dfil_crop,"/crossing_",rcp,"_eco_ensemble.RData",sep=""))
+#plot mean for all crops
+plot_rs <- stack(cross_1_all$mean)
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                     leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+pdf(paste(fig_dir,"/crossing_time_1_all-crops_mean.pdf",sep=""), height=6,width=12,pointsize=16)
+print(tplot)
+dev.off()
 
-for (ctime in 1:2) {
-  #ctime <- 1
-  crosstime <- c(calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(min(x,na.rm=T))}}),
-                 calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(round(mean(x,na.rm=T)))}}),
-                 calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(max(x,na.rm=T))}}))
-  crosstime <- stack(crosstime); names(crosstime) <- c("Earliest","Mean","Latest")
-  crosstime[which(crosstime[] < 0)] <- NA
-  
-  #plot figure
-  tplot <- rs_levplot2(crosstime,zn=2010,zx=2090,nb=16,brks=NA,scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,leg=T)
-  pdf(paste(fig_dir,"/crossing_time_",ctime,"_",crop_name,".pdf",sep=""), height=5,width=10,pointsize=16)
-  print(tplot)
-  dev.off()
-}
+#plot latest for all crops
+plot_rs <- stack(cross_1_all$latest)
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                     leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+pdf(paste(fig_dir,"/crossing_time_1_all-crops_latest.pdf",sep=""), height=6,width=12,pointsize=16)
+print(tplot)
+dev.off()
 
+### transformation phase
+#plot earliest for all crops
+plot_rs <- stack(cross_2_all$earliest)
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                     leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+pdf(paste(fig_dir,"/crossing_time_2_all-crops_earliest.pdf",sep=""), height=6,width=12,pointsize=16)
+print(tplot)
+dev.off()
+
+#plot mean for all crops
+plot_rs <- stack(cross_2_all$mean)
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                     leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+pdf(paste(fig_dir,"/crossing_time_2_all-crops_mean.pdf",sep=""), height=6,width=12,pointsize=16)
+print(tplot)
+dev.off()
+
+#plot latest for all crops
+plot_rs <- stack(cross_2_all$latest)
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2015,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
+                     leg=list(at=c(seq(2015,2090,by=5),2095),labels=c(paste(seq(2015,2090,by=5)),"No Adap.")))
+pdf(paste(fig_dir,"/crossing_time_2_all-crops_latest.pdf",sep=""), height=6,width=12,pointsize=16)
+print(tplot)
+dev.off()
 
 
 ####
 #for each GCM and crop need to loop through decades and calculate:
 #1. percentage of pixels that go transformed, for each of the limits
-#2. amount of area (need to define projection)
+#2. amount of area (projection defined using http://people.oregonstate.edu/~savricb/selectiontool/#)
+
+cum_chg_m <- list(); cum_chg_u <- list(); cum_chg_l <- list()
+for (i in 1:nrow(thresh_val)) {
+  #i <- 1
+  crop_name <- paste(thresh_val$crops[i])
+  cat("\n...processing crop=",crop_name,"\n")
+  
+  #folder of dfil_dir per crop
+  dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
+  
+  #decadal output
+  dc_out <- data.frame()
+  
+  if (exists("cross_stk")) rm(list=c("cross_stk","dc_out_stk"))
+  for (gcm in gcm_list[-grep("eco_ensemble",gcm_list)]) {
+    #gcm <- gcm_list[1]
+    
+    #load processed output
+    load(file=paste(dfil_crop,"/crossing_",rcp,"_",gcm,".RData",sep=""))
+    rm(dc_out_stk)
+    
+    #total number of pixels in area
+    crosstime <- cross_stk$layer.2
+    crosstime[which(crosstime[] < 0)] <- NA
+    ntotal <- length(which(!is.na(crosstime[])))
+    
+    #project (use projection definition from http://people.oregonstate.edu/~savricb/selectiontool/#)
+    crosstime_prj <- projectRaster(crosstime, crs="+proj=aea +lon_0=22.67578125", method="ngb")
+    
+    #loop decades
+    for (dc in 1:length(dc_list)) {
+      #dc <- 1
+      tdec <- crosstime_val$crosstime[crosstime_val$crossval == dc]
+      ndc <- length(which(crosstime[] <= tdec)) / ntotal * 100 #use <= for cumulative areas with change
+      trha <- length(which(crosstime_prj[] <= tdec)) * xres(crosstime_prj) * yres(crosstime_prj) #in m2
+      trha <- trha / (100*100) #in ha
+      out_row <- data.frame(GCM=gcm, DEC_ID=dc, DEC=tdec, PER.TRANS=ndc, HA.TRANS=trha)
+      dc_out <- rbind(dc_out, out_row)
+    }
+    rm(cross_stk)
+  }
+  dc_out$MHA.TRANS <- dc_out$HA.TRANS / 1000000
+  
+  #calculate mean and s.d. for each decade
+  dc_out_m <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {median(x,na.rm=T)})
+  dc_out_u <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {quantile(x,probs=0.75,na.rm=T)})
+  dc_out_l <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {quantile(x,probs=0.25,na.rm=T)})
+  #dc_out_v <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {sd(x,na.rm=T)})
+  #dc_out_x <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {max(x,na.rm=T)})
+  #dc_out_n <- aggregate(dc_out[,c("PER.TRANS","HA.TRANS","MHA.TRANS")],by=list(DEC=dc_out$DEC), FUN=function(x) {min(x,na.rm=T)})
+  
+  #put into lists
+  cum_chg_m[[crop_name]] <- dc_out_m; cum_chg_u[[crop_name]] <- dc_out_u; cum_chg_l[[crop_name]] <- dc_out_l
+}
+save(list=c("cum_chg_m","cum_chg_u","cum_chg_l"),file=paste(dfil_dir,"/cumulative_transformation.RData",sep=""))
 
 
+par(mar=c(5,5,1,1),las=1)
+plot(c(2006,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2005,2095), ylim=c(0,20),
+     xlab="Year", ylab="Extent of transformation (%)",col="red")
+polygon(x=c(c(2006,dc_out_m$DEC),rev(c(2006,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),col="pink",
+        border="pink")
+lines(c(2006,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col="red", cex=1.5)
+grid()
 
 
+par(mar=c(5,5,1,1),las=1)
+plot(c(2006,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2005,2095), ylim=c(0,100),
+     xlab="Year", ylab="Extent of transformation (Million ha)",col="red")
+polygon(x=c(c(2006,dc_out_m$DEC),rev(c(2006,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),col="pink",
+        border="pink")
+lines(c(2006,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col="red", cex=1.5)
+grid()
 
