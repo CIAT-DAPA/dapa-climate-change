@@ -104,7 +104,7 @@ opt_data$USE_SCRATCH <- F
 opt_data$SCRATCH <- NA
 
 for (i in 1:nrow(param_list)) {
-  #i <- 15
+  #i <- 18
   #previous parameters
   prev_params <- this_params
   
