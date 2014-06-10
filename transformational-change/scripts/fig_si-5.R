@@ -86,14 +86,14 @@ for (i in 1:nrow(thresh_val)) {
           #x <- as.numeric(xy_all[9941,3:ncol(xy_all)])
           x_b <- x[1]
           x_d <- x[2:length(x)]
-          if (is.na(x_b)) { #if pixel value is NA then 
+          if (is.na(x_b)) { #if pixel value is NA in baseline then NA (outside land areas)
             y <- NA
-          } else if (x_b == 0) {
-            y <- -2
-          } else if (x_b < thr) {
-            y <- -1
-          } else {
-            y <- length(which(x_d < thr))# / length(x_d)
+          } else if (x_b == 0 | x_b < thr) { #if baseline == 0 (unsuitable) then perform calculation
+            y <- length(which(x_d < thr))
+          } else if (x_b < thr) { #if baseline < threshold then perform calculation
+            y <- length(which(x_d < thr))
+          } else { #if not below threshold then return -1
+            y <- -1 #length(which(x_d < thr))
           }
           return(y)
         }
