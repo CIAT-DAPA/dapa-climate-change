@@ -1,0 +1,27 @@
+/* &r resample_ensemble.aml T:\gcm\cmip5\downscaled\ensemble rcp26 2.5 2_5min
+&args rootdir rcp resol maskc
+&terminal 9999
+/*&sys cls
+&messages &off
+
+&s mask D:\jetarapues\cmip5_process\masks\mask%maskc%
+
+&amlpath .
+&s basedir [show &amlpath]
+
+&if %rcp% EQ ALL &then &s rcp rcp26 rcp45 rcp60 rcp85
+&else &s rcp %rcp%
+
+&do rcp &list %rcp%
+	&s input %rootdir%\%rcp%\Global_30s\2020_2049
+	&if %resol% EQ 30 &then &s inputdir %rootdir%\%rcp%\Global_30s\2020_2049
+	&else &if %resol% EQ 2.5 &then &s inputdir %rootdir%\%rcp%\global_2_5min\2020_2049
+	&else &if %resol% EQ 5 &then &s inputdir %rootdir%\%rcp%\global_5min\2020_2049
+	&else &s inputdir %rootdir%\%rcp%\global_10min\2020_2049
+
+	&if not [exists %inputdir% -dir] &then &sys md %inputdir%
+	 /*&ty %mask%
+	&r 05-resample_GCM.aml %input% %inputdir% %resol% NEAREST %mask%
+
+&ty
+&ty Process done!
