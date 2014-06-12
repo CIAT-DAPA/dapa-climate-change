@@ -1,5 +1,5 @@
-/* &r 002-cut_GCM_countries_ensemble.aml S:\gcm\cmip3\downscaled\ensemble\sres_b1 D:\cenavarro\admin-boundaries\GRID-files-30s D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_B1\downscaled 30s NO
-&args rootdir admdir outputdir resol switch
+/* &r 002-cut_GCM_countries_ensemble.aml T:\gcm\cmip5\downscaled\ensemble U:\portals\ccafs-analogues\mask U:\portals\ccafs-analogues\grid_files 2.5min rcp85 NO
+&args rootdir admdir output resol rcp switch
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
 &sys cls
@@ -7,10 +7,15 @@
 &amlpath .
 &s bdir [show &amlpath]
 
-&if %resol% EQ 30s &then &s inputdir %rootdir%\Global_30s
-&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\Global_2_5min
-&else &if %resol% EQ 5min &then &s inputdir %rootdir%\Global_5min
-&else &s inputdir %rootdir%\Global_10min
+&if %resol% EQ 30s &then &s inputdir %rootdir%\%rcp%\Global_30s
+&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\%rcp%\global_2_5min
+&else &if %resol% EQ 5min &then &s inputdir %rootdir%\%rcp%\global_5min
+&else &s inputdir %rootdir%\%rcp%\global_10min
+
+&if %resol% EQ 30s &then &s ncountrys 198
+&else &if %resol% EQ 2.5min &then &s ncountrys 19
+&else &if %resol% EQ 5min &then &s ncountrys 6
+&else &s ncountrys 6
 
 &amlpath .
 &s bdir [show &amlpath]
@@ -19,28 +24,32 @@
 &ty          /\/\/\/\/\/CUT GCM ANALOGUES/\/\/\/\/
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 	
+	
+&s outputdir %output%\%rcp%
+	
 &s modellist [listfile %inputdir%\* -dir]
 &s nmodels [token %modellist% -count]
 
 &if not [exists %outputdir% -dir] &then &sys md %outputdir%
 	
-&s countrylist [listfile %admdir%\* -dir %outputdir%\listcountries_2.list]
-&s openlist [OPEN %outputdir%\listcountries_2.list OPENSTATUS -READ]
+/*&s countrylist [listfile %admdir%\* -dir %outputdir%\listcountries_2.list]
+/* &s openlist [OPEN %outputdir%\listcountries_2.list OPENSTATUS -READ]
+&s openlist [OPEN %admdir%\%rcp%_listcountries_%resol%.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
 	&do
 		&ty
-		&ty The file %outputdir%\listcountries_2.list does not exist or cannot be opened
+		&ty The file %admdir%\%rcp%_listcountries_%resol%.list does not exist or cannot be opened
 		&return
 	&end
 &else
 
-	&do nc = 1 &to %countrylist%
+	&do nc = 1 &to %ncountrys%
 
 		&s countryname [READ %openlist% READSTATUS]
 		&s country [before %countryname% _]
 		
-		&s mask %admdir%\%countryname%\%country%0
+		&s mask %admdir%\%resol%\%countryname%\%country%0
 		
 		&if %resol% EQ 30s &then &s outdir %outputdir%\%country%_30s
 		&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\%country%_2_5min
@@ -61,6 +70,7 @@
 				
 				/* &if not [exists %outputdir%\%country%_CutGridGCMCountries_done.txt -file] &then
 				&do
+					&ty %year% %countryname%
 					&r cut_GCM.aml %inputdir%\%year% %outdir%\ensemble\%year% %mask% %switch%
 					&if [exists %outdir%\ensemble\%year%\listgrids.list -file] &then &sys del %outdir%\ensemble\%year%\listgrids.list
 				&end
