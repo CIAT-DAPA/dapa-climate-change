@@ -29,7 +29,7 @@
 &s modellist [listfile %inputdir%\* -dir]
 &s nmodels [token %modellist% -count]
 
-&s outputdir %outputdir%\%rcp%
+
 
 &if not [exists %outputdir% -dir] &then &sys md %outputdir%
 
@@ -48,7 +48,10 @@
 		&s countryname [READ %openlist% READSTATUS]
 		&s country [before %countryname% _]
 		
-		&if not [exists %outputdir%\%country%_CutGCM_done.txt -file] &then
+		/*&if not [exists %outputdir%\%country%_CutGCM_done.txt -file] &then
+		&s file_check %outputdir%\%country%_CutGCM_done
+		&if not [exists %file_check% -FILE] and not [exists %file_check%.txt -file] and not [exists %file_check%.tx -file] and not [exists %file_check%.t -file] &then
+
 		
 		&do
 			&s mask %admdir%\%resol%\%countryname%\%country%0
@@ -74,7 +77,8 @@
 					&if [exists %outdir%\%modname%\%year%\listgrids.list -file] &then &sys del %outdir%\%modname%\%year%\listgrids.list
 				&end
 			&end			
-			&s verfile [listfile %outdir%\%modname%\%year%\* -grid %outputdir%\%country%_CutGCM_done.txt]
+			&s verfile [listfile %outdir%\%modname%\%year%\* -grid %outputdir%\%country%_CutGCM_done]
+			
 		&end		
 		
 	&end
