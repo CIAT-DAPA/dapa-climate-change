@@ -1,5 +1,5 @@
-/* &r dtr_calc_GCM.aml D:\cenavarro\Analogues_GCM_data\ExtractByCountry\SRES_A1B\downscaled
-&args rootdir 
+/* &r 004-dtr_calc_GCM.aml U:\data\portals\ccafs-analogues\grid_files rcp26
+&args rootdir rcp
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
 &messages &off
@@ -14,12 +14,12 @@
 &ty          /\/\/\/\/\/\/DTR CALC GCM/\/\/\/\/\/\
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 	
-&s countrylist [listfile %rootdir%\* -dir %rootdir%\listcountries_1.list]
-&s openlist [OPEN %rootdir%\listcountries_1.list OPENSTATUS -READ]
+&s countrylist [listfile %rootdir%\%rcp%\* -dir %rootdir%\%rcp%\listcountries_%rcp%.list]
+&s openlist [OPEN %rootdir%\%rcp%\listcountries_%rcp%.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
 	&do
-		&ty The file %outputdir%\listcountries.list does not exist or cannot be opened
+		&ty The file %rootdir%\%rcp%\listcountries_%rcp%.list does not exist or cannot be opened
 		&return
 	&end
 &else
@@ -27,14 +27,14 @@
 	&do nc = 1 &to %countrylist%
 		
 		&s countryname [READ %openlist% READSTATUS]
-		&s modellist [listfile %rootdir%\%countryname%\* -dir]
+		&s modellist [listfile %rootdir%\%rcp%\%countryname%\* -dir]
 		&s nmodels [token %modellist% -count]
 				
 		&do md = 1 &to %nmodels%
 			
 			&s modname [extract %md% %modellist%]
-			&if %modname% EQ current &then &s inputdir %rootdir%\%countryname%\%modname%
-			&else &s inputdir %rootdir%\%countryname%\%modname%\2020_2049
+			&if %modname% EQ current &then &s inputdir %rootdir%\%rcp%\%countryname%\%modname%
+			&else &s inputdir %rootdir%\%rcp%\%countryname%\%modname%\2020_2049
 			
 			&ty
 			&ty Calculating %modname% %countryname%
@@ -48,7 +48,7 @@
 			&end
 		&end
 	&end
-	&if [exists %rootdir%\listcountries_1.list -file] &then &sys del %rootdir%\listcountries_1.list
+	&if [exists %rootdir%\%rcp%\listcountries_%rcp%.list -file] &then &sys del %rootdir%\%rcp%\listcountries_%rcp%.list
 
 &ty
 &ty Process done!
