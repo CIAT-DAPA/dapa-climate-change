@@ -33,7 +33,12 @@ rcp <- "RCP_60_new" #RCP_60_new RCP_85
 rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
 
 #read in thresholds and crop names
-thresh_val <- read.csv(paste(b_dir,"/thres_ov_short.csv",sep=""))
+if (!file.exists(paste(dfil_dir,"/thres_ov_short.csv",sep=""))) {
+  thresh_val <- read.csv(paste(b_dir,"/thres_ov_short.csv",sep=""))
+  write.csv(thresh_val, paste(dfil_dir,"/thres_ov_short.csv",sep=""))
+} else {
+  thresh_val <- read.csv(paste(dfil_dir,"/thres_ov_short.csv",sep=""))
+}
 
 #load baseline suitability rasters
 base_stk <- stack(paste(base_run,"/",thresh_val$crops,sep=""))
@@ -90,8 +95,6 @@ for (i in 1:nrow(thresh_val)) {
             y <- NA
           } else if (x_b == 0 | x_b < thr) { #if baseline == 0 (unsuitable) then perform calculation
             y <- length(which(x_d < thr))
-          } else if (x_b < thr) { #if baseline < threshold then perform calculation
-            y <- length(which(x_d < thr))
           } else { #if not below threshold then return -1
             y <- -1 #length(which(x_d < thr))
           }
@@ -112,9 +115,8 @@ for (i in 1:nrow(thresh_val)) {
       names(dc_out_stk) <- paste("dec.",dc_list,sep="")
       
       ###
-      #calculate the two decades of interest:
-      #*time1: 5-10 years below threshold
-      #*time2: more than 10 years below threshold
+      #calculate decade of interest:
+      #*time2: 10 or less years with frequency of crossing
       
       #function to calculate decade
       calc_ctime <- function(x, adap=1) {
