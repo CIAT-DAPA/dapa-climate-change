@@ -45,13 +45,13 @@
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		
-		&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
-		&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
+		&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids3.list]
+		&s openlist [OPEN %outputfolder%\listgrids3.list OPENSTATUS -READ]
 		
 		&if %OPENSTATUS% NE 0 &then
 			&do
 				&ty
-				&ty The file %basedir%\listgrids.list does not exist or cannot be opened
+				&ty The file %basedir%\listgrids3.list does not exist or cannot be opened
 				&return
 			&end
 		&else
@@ -61,13 +61,15 @@
 					
 					&s vartype [before %gridname% _]
 					
-					&ty
-					&ty   -> .Processing %gridname%
-					
-					setwindow %mask% %mask%
-					setmask %mask%
-					setcell %mask%	
-					
+					&if not [exists %outputfolder%\%gridname% -dir] &then
+						/*&ty
+						&ty Processing %gridname%
+						setwindow %mask% %mask%
+						setmask %mask%
+						setcell %mask%	
+					/* &else &ty Processed %gridname%
+						
+						
 					%outputfolder%\%gridname% = %inputfolder%\%gridname%
 					
 					&if [locase %switch%] EQ yes &then
@@ -103,7 +105,7 @@
 		&return
 	&end
 
-&if [exists %outputfolder%\listgrids.list -file] &then &sys del %outputfolder%\listgrids.list
+&if [exists %outputfolder%\listgrids3.list -file] &then &sys del %outputfolder%\listgrids3.list
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
 
 &ty
