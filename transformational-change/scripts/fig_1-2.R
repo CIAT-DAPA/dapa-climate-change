@@ -49,7 +49,7 @@ dfil_dir <- paste(out_dir,"/data_files_new",sep="")
 if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
 
 #rcp input dir
-rcp <- "RCP_60_new" #RCP_60_new RCP_85
+rcp <- "RCP_85" #RCP_60_new RCP_85
 rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
 
 #read in thresholds and crop names
@@ -302,14 +302,55 @@ for (i in 1:nrow(thresh_val)) {
   
   for (ctime in 1:2) {
     #ctime <- 2
-    crosstime <- c(calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(min(x,na.rm=T))}}),
-                   #cross_stk[[paste("layer.",ctime,sep="")]],
-                   calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(round(mean(x,na.rm=T)))}}),
-                   calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(max(x,na.rm=T))}}))
+    calcmean <- function(x) {
+      if (length(which(is.na(x))) >= round(length(x)/2)) {
+        y <- NA
+      } else if (length(which(x == 2090)) >= round(length(x)/2)) {
+        y <- 2095
+      } else if (length(which(x == 2015)) >= round(length(x)/2)) {
+        y <- 2014
+      } else if (length(which(x < 0)) >= round(length(x)/2)) {
+        y <- NA
+      } else {
+        x <- x[which(x > 2015 & x < 2090)]; y <- mean(x, na.rm=T)
+      }
+      return(y)
+    }
+    
+    calcmin <- function(x) {
+      if (length(which(is.na(x))) >= round(length(x)/2)) {
+        y <- NA
+      } else if (length(which(x == 2090)) >= round(length(x)/2)) {
+        y <- 2095
+      } else if (length(which(x == 2015)) >= round(length(x)/2)) {
+        y <- 2014
+      } else if (length(which(x < 0)) >= round(length(x)/2)) {
+        y <- NA
+      } else {
+        x <- x[which(x > 2015 & x < 2090)]; y <- min(x, na.rm=T)
+      }
+      return(y)
+    }
+    
+    calcmax <- function(x) {
+      if (length(which(is.na(x))) >= round(length(x)/2)) {
+        y <- NA
+      } else if (length(which(x >= 2089)) >= round(length(x)/2)) {
+        y <- 2095
+      } else if (length(which(x == 2015)) >= round(length(x)/2)) {
+        y <- 2014
+      } else if (length(which(x < 0)) >= round(length(x)/2)) {
+        y <- NA
+      } else {
+        x <- x[which(x > 2015 & x < 2090)]; y <- max(x, na.rm=T)
+      }
+      return(y)
+    }
+    
+    crosstime <- c(calc(cross_all[[paste("cross",ctime,sep="")]], fun=calcmin),
+                   calc(cross_all[[paste("cross",ctime,sep="")]], fun=calcmean),
+                   calc(cross_all[[paste("cross",ctime,sep="")]], fun=calcmax))
     crosstime <- stack(crosstime); names(crosstime) <- c("Earliest","Mean","Latest")
-    crosstime[which(crosstime[] < 0)] <- NA
-    crosstime[which(crosstime[] > 2089)] <- 2095
-    crosstime[which(crosstime[] == 2015)] <- 2014
     
     #plot figure
     tplot <- rs_levplot2(crosstime,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,

@@ -88,12 +88,55 @@ for (i in 1:nrow(thresh_val)) {
   
   cross_all$cross2 <- stack(cross_all$cross2)
   
-  crosstime <- c(calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(min(x,na.rm=T))}}),
-                 calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(round(mean(x,na.rm=T)))}}),
-                 calc(cross_all[[paste("cross",ctime,sep="")]], fun=function(x){if (length(which(is.na(x))) == length(x)) {return(NA)} else {return(max(x,na.rm=T))}}))
+  calcmean <- function(x) {
+    if (length(which(is.na(x))) >= round(length(x)/2)) {
+      y <- NA
+    } else if (length(which(x == 2090)) >= round(length(x)/2)) {
+      y <- 2095
+    } else if (length(which(x == 2015)) >= round(length(x)/2)) {
+      y <- 2014
+    } else if (length(which(x < 0)) >= round(length(x)/2)) {
+      y <- NA
+    } else {
+      x <- x[which(x > 2015 & x < 2090)]; y <- mean(x, na.rm=T)
+    }
+    return(y)
+  }
+  
+  calcmin <- function(x) {
+    if (length(which(is.na(x))) >= round(length(x)/2)) {
+      y <- NA
+    } else if (length(which(x == 2090)) >= round(length(x)/2)) {
+      y <- 2095
+    } else if (length(which(x == 2015)) >= round(length(x)/2)) {
+      y <- 2014
+    } else if (length(which(x < 0)) >= round(length(x)/2)) {
+      y <- NA
+    } else {
+      x <- x[which(x > 2015 & x < 2090)]; y <- min(x, na.rm=T)
+    }
+    return(y)
+  }
+  
+  calcmax <- function(x) {
+    if (length(which(is.na(x))) >= round(length(x)/2)) {
+      y <- NA
+    } else if (length(which(x >= 2089)) >= round(length(x)/2)) {
+      y <- 2095
+    } else if (length(which(x == 2015)) >= round(length(x)/2)) {
+      y <- 2014
+    } else if (length(which(x < 0)) >= round(length(x)/2)) {
+      y <- NA
+    } else {
+      x <- x[which(x > 2015 & x < 2090)]; y <- max(x, na.rm=T)
+    }
+    return(y)
+  }
+  
+  crosstime <- c(calc(cross_all[[paste("cross",ctime,sep="")]], fun=calcmin),
+                 calc(cross_all[[paste("cross",ctime,sep="")]], fun=calcmean),
+                 calc(cross_all[[paste("cross",ctime,sep="")]], fun=calcmax))
   crosstime <- stack(crosstime); names(crosstime) <- c("Earliest","Mean","Latest")
-  crosstime[which(crosstime[] < 0)] <- NA
-  crosstime[which(crosstime[] > 2089)] <- 2095
   
   #append into multi-crop list
   cross_2_all$earliest <- c(cross_2_all$earliest, crosstime[["Earliest"]])
