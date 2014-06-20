@@ -18,21 +18,32 @@ library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 #5. plot minimum, maximum and ensemble mean
 
 #i/o directories
-#b_dir <- "Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
-b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
-base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
-#out_dir <- paste("D:/transformational-adaptation") #lenovo
+#mbp at CIAT
+#b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
+#base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
+
+#mbp at UoL
+b_dir <- "/nfs/a101/earjr/cul-de-sacs"
+base_run <- paste(b_dir,"/cru_select_corNames",sep="")
+
+#output dirs
 out_dir <- paste("~/Google Drive/papers/transformational-adaptation") #mbp
 fig_dir <- paste(out_dir,"/figures",sep="")
 dfil_dir <- paste(out_dir,"/data_files_new",sep="")
 if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
 
 #rcp input dir
-rcp <- "RCP_85" #RCP_60_new | RCP_85
+rcp <- "RCP_85" #RCP_60_new RCP_85
 rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
 
 #read in thresholds and crop names
-thresh_val <- read.csv(paste(b_dir,"/thres_ov_short.csv",sep=""))
+if (!file.exists(paste(dfil_dir,"/thres_compl.csv",sep=""))) {
+  thresh_val <- read.csv(paste(b_dir,"/thres_compl.csv",sep=""))
+  write.csv(thresh_val, paste(dfil_dir,"/thres_compl.csv",sep=""))
+} else {
+  thresh_val <- read.csv(paste(dfil_dir,"/thres_compl.csv",sep=""))
+}
+
 
 #load baseline suitability rasters
 base_stk <- stack(paste(base_run,"/",thresh_val$crops,sep=""))
@@ -40,6 +51,9 @@ names(base_stk) <- paste(thresh_val$crops)
 
 #list of GCMs
 gcm_list <- list.files(rcp_run)
+#gcm_list <- list.files(paste(dfil_dir,"/Maize_suit",sep=""),pattern=rcp)
+#gcm_list <- gsub(paste("crossing_",rcp,"_",sep=""),"",gcm_list)
+#gcm_list <- gsub(".RData","",gcm_list)
 
 #list of years and decades
 yr_list <- c(2006:2098)
@@ -132,7 +146,7 @@ for (uval in c("earliest","mean","latest")) {
   }
   
   #need to generate a sensible categorisation of this
-  crop_list <- c("BA","CA","BE","FM","GN","PM","SO","YM")
+  crop_list <- c("BA","CA","BE","FM","GN","MZ","PM","SO","YM")
   
   for (cid in 1:length(crop_list)) {
     #cid <- 1
@@ -194,8 +208,8 @@ for (uval in c("earliest","mean","latest")) {
 cross_new$earliest <- stack(cross_new$earliest)
 cross_new$mean <- stack(cross_new$mean)
 cross_new$latest <- stack(cross_new$latest)
-names(cross_new$earliest) <- names(cross_new$mean) <- names(cross_new$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
-names(legends$earliest) <- names(legends$mean) <- names(legends$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(cross_new$earliest) <- names(cross_new$mean) <- names(cross_new$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
+names(legends$earliest) <- names(legends$mean) <- names(legends$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 #print(legends$earliest[[1]])
 #plot(cross_new$earliest[[1]])
 
@@ -243,7 +257,7 @@ for (uval in c("earliest","mean","latest")) {
   }
   
   #need to generate a sensible categorisation of this
-  crop_list <- c("BA","CA","BE","FM","GN","PM","SO","YM")
+  crop_list <- c("BA","CA","BE","FM","GN","MZ","PM","SO","YM")
   
   crop_all <- data.frame()
   for (cid in 1:length(crop_list)) {
@@ -306,7 +320,7 @@ for (uval in c("earliest","mean","latest")) {
 #barplots
 library(ggplot2)
 
-crop_list <- c("BA","CA","BE","FM","GN","PM","SO","YM")
+crop_list <- c("BA","CA","BE","FM","GN","MZ","PM","SO","YM")
 for (cid in 1:length(crop_list)) {
   #cid <- 1
   cat("   ...processing crop",crop_list[cid],"\n")
@@ -407,7 +421,7 @@ for (uval in c("earliest","mean","latest")) {
   }
   
   #need to generate a sensible categorisation of this
-  crop_list <- c("BA","CA","BE","FM","GN","PM","SO","YM")
+  crop_list <- c("BA","CA","BE","FM","GN","MZ","PM","SO","YM")
   
   for (cid in 1:length(crop_list)) {
     #cid <- 1
@@ -469,12 +483,12 @@ for (uval in c("earliest","mean","latest")) {
 cross_new$earliest <- stack(cross_new$earliest)
 cross_new$mean <- stack(cross_new$mean)
 cross_new$latest <- stack(cross_new$latest)
-names(cross_new$earliest) <- names(cross_new$mean) <- names(cross_new$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
-names(legends$earliest) <- names(legends$mean) <- names(legends$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(cross_new$earliest) <- names(cross_new$mean) <- names(cross_new$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
+names(legends$earliest) <- names(legends$mean) <- names(legends$latest) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 #print(legends$earliest[[1]])
 #plot(cross_new$earliest[[1]])
 
-osubs_dir <- paste(fig_dir,"/fig_substitution_nofail",sep="")
+osubs_dir <- paste(fig_dir,"/fig_substitution_nofail_",rcp,sep="")
 if (!file.exists(osubs_dir)) {dir.create(osubs_dir)}
 for (cname in names(cross_new$mean)) {
   if (!file.exists(paste(osubs_dir,"/mean_substitution_",cname,".tif",sep=""))) writeRaster(cross_new$mean[[cname]], paste(osubs_dir,"/mean_substitution_",cname,".tif",sep=""),format="GTiff")
@@ -518,7 +532,7 @@ for (uval in c("earliest","mean","latest")) {
   }
   
   #need to generate a sensible categorisation of this
-  crop_list <- c("BA","CA","BE","FM","GN","PM","SO","YM")
+  crop_list <- c("BA","CA","BE","FM","GN","MZ","PM","SO","YM")
   
   crop_all <- data.frame()
   for (cid in 1:length(crop_list)) {
@@ -581,7 +595,7 @@ for (uval in c("earliest","mean","latest")) {
 #barplots
 library(ggplot2)
 
-crop_list <- c("BA","CA","BE","FM","GN","PM","SO","YM")
+crop_list <- c("BA","CA","BE","FM","GN","MZ","PM","SO","YM")
 for (cid in 1:length(crop_list)) {
   #cid <- 1
   cat("   ...processing crop",crop_list[cid],"\n")
