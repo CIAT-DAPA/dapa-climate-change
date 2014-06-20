@@ -34,21 +34,31 @@ library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 #5. plot minimum, maximum and ensemble mean
 
 #i/o directories
-#b_dir <- "Y:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
-b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
-base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
-#out_dir <- paste("D:/transformational-adaptation") #lenovo
+#mbp at CIAT
+#b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
+#base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
+
+#mbp at UoL
+b_dir <- "/nfs/a101/earjr/cul-de-sacs"
+base_run <- paste(b_dir,"/cru_select_corNames",sep="")
+
+#output dirs
 out_dir <- paste("~/Google Drive/papers/transformational-adaptation") #mbp
 fig_dir <- paste(out_dir,"/figures",sep="")
 dfil_dir <- paste(out_dir,"/data_files_new",sep="")
 if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
 
 #rcp input dir
-rcp <- "RCP_85" #RCP_60_new RCP_85
+rcp <- "RCP_60_new" #RCP_60_new RCP_85
 rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
 
 #read in thresholds and crop names
-thresh_val <- read.csv(paste(b_dir,"/thres_ov_short.csv",sep=""))
+if (!file.exists(paste(dfil_dir,"/thres_compl.csv",sep=""))) {
+  thresh_val <- read.csv(paste(b_dir,"/thres_compl.csv",sep=""))
+  write.csv(thresh_val, paste(dfil_dir,"/thres_compl.csv",sep=""))
+} else {
+  thresh_val <- read.csv(paste(dfil_dir,"/thres_compl.csv",sep=""))
+}
 
 #load baseline suitability rasters
 base_stk <- stack(paste(base_run,"/",thresh_val$crops,sep=""))
@@ -56,6 +66,9 @@ names(base_stk) <- paste(thresh_val$crops)
 
 #list of GCMs
 gcm_list <- list.files(rcp_run)
+#gcm_list <- list.files(paste(dfil_dir,"/Maize_suit",sep=""),pattern=rcp)
+#gcm_list <- gsub(paste("crossing_",rcp,"_",sep=""),"",gcm_list)
+#gcm_list <- gsub(".RData","",gcm_list)
 
 #list of years and decades
 yr_list <- c(2006:2098)
@@ -324,10 +337,10 @@ for (i in 1:nrow(thresh_val)) {
 ### ground adapt
 #plot earliest for all crops
 plot_rs <- stack(cross_1_all$earliest)
-names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
                      leg=list(at=c(seq(2010,2090,by=5),2095),labels=c("Now",paste(seq(2015,2090,by=5)),"No Adap.")))
-pdf(paste(fig_dir,"/crossing_time_1_all-crops_earliest_",rcp,".pdf",sep=""), height=6,width=12,pointsize=16)
+pdf(paste(fig_dir,"/crossing_time_1_all-crops_earliest_",rcp,".pdf",sep=""), height=8,width=8,pointsize=16)
 print(tplot)
 dev.off()
 setwd(fig_dir)
@@ -336,10 +349,10 @@ setwd("~")
 
 #plot mean for all crops
 plot_rs <- stack(cross_1_all$mean)
-names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
                      leg=list(at=c(seq(2010,2090,by=5),2095),labels=c("Now",paste(seq(2015,2090,by=5)),"No Adap.")))
-pdf(paste(fig_dir,"/crossing_time_1_all-crops_mean_",rcp,".pdf",sep=""), height=6,width=12,pointsize=16)
+pdf(paste(fig_dir,"/crossing_time_1_all-crops_mean_",rcp,".pdf",sep=""), height=8,width=8,pointsize=16)
 print(tplot)
 dev.off()
 setwd(fig_dir)
@@ -349,10 +362,10 @@ setwd("~")
 
 #plot latest for all crops
 plot_rs <- stack(cross_1_all$latest)
-names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
                      leg=list(at=c(seq(2010,2090,by=5),2095),labels=c("Now",paste(seq(2015,2090,by=5)),"No Adap.")))
-pdf(paste(fig_dir,"/crossing_time_1_all-crops_latest_",rcp,".pdf",sep=""), height=6,width=12,pointsize=16)
+pdf(paste(fig_dir,"/crossing_time_1_all-crops_latest_",rcp,".pdf",sep=""), height=8,width=8,pointsize=16)
 print(tplot)
 dev.off()
 setwd(fig_dir)
@@ -363,10 +376,10 @@ setwd("~")
 ### transformation phase
 #plot earliest for all crops
 plot_rs <- stack(cross_2_all$earliest)
-names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
                      leg=list(at=c(seq(2010,2090,by=5),2095),labels=c("Now",paste(seq(2015,2090,by=5)),"No Adap.")))
-pdf(paste(fig_dir,"/crossing_time_2_all-crops_earliest_",rcp,".pdf",sep=""), height=6,width=12,pointsize=16)
+pdf(paste(fig_dir,"/crossing_time_2_all-crops_earliest_",rcp,".pdf",sep=""), height=8,width=8,pointsize=16)
 print(tplot)
 dev.off()
 setwd(fig_dir)
@@ -375,10 +388,10 @@ setwd("~")
 
 #plot mean for all crops
 plot_rs <- stack(cross_2_all$mean)
-names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
                      leg=list(at=c(seq(2010,2090,by=5),2095),labels=c("Now",paste(seq(2015,2090,by=5)),"No Adap.")))
-pdf(paste(fig_dir,"/crossing_time_2_all-crops_mean_",rcp,".pdf",sep=""), height=6,width=12,pointsize=16)
+pdf(paste(fig_dir,"/crossing_time_2_all-crops_mean_",rcp,".pdf",sep=""), height=8,width=8,pointsize=16)
 print(tplot)
 dev.off()
 setwd(fig_dir)
@@ -387,10 +400,10 @@ setwd("~")
 
 #plot latest for all crops
 plot_rs <- stack(cross_2_all$latest)
-names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","P millet","Sorghum","Yam")
+names(plot_rs) <- c("Banana","Cassava","Bean","F millet","Groundnut","Maize","P millet","Sorghum","Yam")
 tplot <- rs_levplot2(plot_rs,zn=NA,zx=NA,nb=NA,brks=c(seq(2010,2090,by=5),2095),scale="RdYlGn",col_i=NA,col_f=NA,ncol=9,rev=T,
                      leg=list(at=c(seq(2010,2090,by=5),2095),labels=c("Now",paste(seq(2015,2090,by=5)),"No Adap.")))
-pdf(paste(fig_dir,"/crossing_time_2_all-crops_latest_",rcp,".pdf",sep=""), height=6,width=12,pointsize=16)
+pdf(paste(fig_dir,"/crossing_time_2_all-crops_latest_",rcp,".pdf",sep=""), height=8,width=8,pointsize=16)
 print(tplot)
 dev.off()
 setwd(fig_dir)
@@ -408,7 +421,7 @@ crosstime_val <- rbind(crosstime_val,c(-1,-1))
 crosstime_val <- rbind(crosstime_val,c(0,2015))
 crosstime_val <- rbind(crosstime_val,c((length(dc_list)+1),(max(dc_list)+1)))
 
-if (!file.exists(paste(dfil_dir,"/cumulative_transformation_",rcp,".RData",sep=""))) {
+if (!file.exists(paste(dfil_dir,"/cumulative_transformation_",rcp,"_with_maize.RData",sep=""))) {
   cum_chg_m <- list(); cum_chg_u <- list(); cum_chg_l <- list()
   for (i in 1:nrow(thresh_val)) {
     #i <- 1
@@ -462,22 +475,22 @@ if (!file.exists(paste(dfil_dir,"/cumulative_transformation_",rcp,".RData",sep="
     #put into lists
     cum_chg_m[[crop_name]] <- dc_out_m; cum_chg_u[[crop_name]] <- dc_out_u; cum_chg_l[[crop_name]] <- dc_out_l
   }
-  save(list=c("cum_chg_m","cum_chg_u","cum_chg_l"),file=paste(dfil_dir,"/cumulative_transformation_",rcp,".RData",sep=""))
+  save(list=c("cum_chg_m","cum_chg_u","cum_chg_l"),file=paste(dfil_dir,"/cumulative_transformation_",rcp,"_with_maize.RData",sep=""))
 } else {
-  load(file=paste(dfil_dir,"/cumulative_transformation_",rcp,".RData",sep=""))
+  load(file=paste(dfil_dir,"/cumulative_transformation_",rcp,"_with_maize.RData",sep=""))
 }
 
 
 ################################################################################################
 # plot into pdfs
 
-if (rcp == "RCP_60_new") {yx1 <- 17.5; yx2 <- 180; stp2 <- 20}
-if (rcp == "RCP_85") {yx1 <- 30; yx2 <- 320; stp2 <- 40}
+if (rcp == "RCP_60_new") {yx1 <- 40; yx2 <- 550; stp2 <- 50}
+if (rcp == "RCP_85") {yx1 <- 70; yx2 <- 1000; stp2 <- 100}
 
 ##### roots and bananas
 #relative change
 pdf(paste(fig_dir,"/cumulative_transformation_roots-banana_per_",rcp,".pdf",sep=""), height=7.5,width=9,pointsize=18)
-for (i in c(1,2,8)) { #nrow(thresh_val)) {
+for (i in c(1,2,9)) { #nrow(thresh_val)) {
   #i <- 1
   crop_name <- paste(thresh_val$crops[i])
   cat("\n...processing crop=",crop_name,"\n")
@@ -488,7 +501,7 @@ for (i in c(1,2,8)) { #nrow(thresh_val)) {
   #plot line and polygon
   if (i == 1) {
     par(mar=c(5,5,1,1),las=1,lwd=1.5)
-    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
+    plot(dc_out_m$DEC, dc_out_m$PER.TRANS, ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
          xlab="Year", ylab="Extent of transformation (%)", axes=F, 
          col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
     axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
@@ -497,17 +510,20 @@ for (i in c(1,2,8)) { #nrow(thresh_val)) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
             border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 2) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
-  } else if (i == 8) {
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 9) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
   }
 }
 grid(lwd=1.5)
@@ -523,7 +539,7 @@ setwd("~")
 
 #absolute change
 pdf(paste(fig_dir,"/cumulative_transformation_roots-banana_abs_",rcp,".pdf",sep=""), height=7.5,width=9,pointsize=18)
-for (i in c(1,2,8)) { #nrow(thresh_val)) {
+for (i in c(1,2,9)) { #nrow(thresh_val)) {
   #i <- 1
   crop_name <- paste(thresh_val$crops[i])
   cat("\n...processing crop=",crop_name,"\n")
@@ -534,7 +550,7 @@ for (i in c(1,2,8)) { #nrow(thresh_val)) {
   #plot line and polygon
   if (i == 1) {
     par(mar=c(5,5,1,1),las=1,lwd=1.5)
-    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
+    plot(dc_out_m$DEC, dc_out_m$MHA.TRANS, ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
          xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
          col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
     axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
@@ -543,17 +559,20 @@ for (i in c(1,2,8)) { #nrow(thresh_val)) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
             border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 2) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
-  } else if (i == 8) {
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 9) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
   }
 }
 grid(lwd=1.5)
@@ -582,25 +601,27 @@ for (i in c(3,5)) { #nrow(thresh_val)) {
   #plot line and polygon
   if (i == 3) {
     par(mar=c(5,5,1,1),las=1,lwd=1.5)
-    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS*.1), ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
+    plot(dc_out_m$DEC, dc_out_m$PER.TRANS*.5, ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
          xlab="Year", ylab="Extent of transformation (%)", axes=F, 
          col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
     axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
     axis(2, at=seq(0,yx1,by=5),labels=paste(seq(0,yx1,by=5)),lwd=1.5)
     box(lwd=1.5)
-    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS*.1,rev(dc_out_u$PER.TRANS*.1),0),
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS*.5,rev(dc_out_u$PER.TRANS*.5),0),
             col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
             border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS*0.1), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS*0.5, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]*0.5), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 5) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
   }
 }
 grid(lwd=1.5)
-legend(x=2000,y=yx1,legend=c("Bean (*0.1)","Groundnut"),lty=c(1,1),lwd=c(2,2),cex=0.9,box.lwd=1.5,bg="white",
+legend(x=2000,y=yx1,legend=c("Bean (*0.5)","Groundnut"),lty=c(1,1),lwd=c(2,2),cex=0.9,box.lwd=1.5,bg="white",
        col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
              rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255)))
 dev.off()
@@ -622,27 +643,49 @@ for (i in c(3,5)) { #nrow(thresh_val)) {
   #plot line and polygon
   if (i == 3) {
     par(mar=c(5,5,1,1),las=1,lwd=1.5)
-    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS*.1), ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
-         xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
-         col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
-    axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
-    axis(2, at=seq(0,yx2,by=stp2),labels=paste(seq(0,yx2,by=stp2)),lwd=1.5)
-    box(lwd=1.5)
-    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS*.1,rev(dc_out_u$MHA.TRANS*.1),0),
-            col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
-            border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS*.1), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    if (rcp == "RCP_85") {
+      plot(dc_out_m$DEC, dc_out_m$MHA.TRANS, ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
+           xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
+           col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+      axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+      axis(2, at=seq(0,yx2,by=stp2),labels=paste(seq(0,yx2,by=stp2)),lwd=1.5)
+      box(lwd=1.5)
+      polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+              col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+              border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+      lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    } else {
+      plot(dc_out_m$DEC, dc_out_m$MHA.TRANS*.5, ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
+           xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
+           col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
+      axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
+      axis(2, at=seq(0,yx2,by=stp2),labels=paste(seq(0,yx2,by=stp2)),lwd=1.5)
+      box(lwd=1.5)
+      polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS*.5,rev(dc_out_u$MHA.TRANS*.5),0),
+              col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
+              border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
+      lines(dc_out_m$DEC, dc_out_m$MHA.TRANS*.5, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]*.5), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    }
   } else if (i == 5) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
   }
 }
 grid(lwd=1.5)
-legend(x=2000,y=yx2,legend=c("Bean (*0.1)","Groundnut"),lty=c(1),lwd=c(2),cex=0.9,box.lwd=1.5,bg="white",
-       col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
-             rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255)))
+if (rcp == "RCP_85") {
+  legend(x=2000,y=yx2,legend=c("Bean","Groundnut"),lty=c(1),lwd=c(2),cex=0.9,box.lwd=1.5,bg="white",
+         col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+               rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255)))
+} else {
+  legend(x=2000,y=yx2,legend=c("Bean (*0.5)","Groundnut"),lty=c(1),lwd=c(2),cex=0.9,box.lwd=1.5,bg="white",
+         col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
+               rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255)))
+}
 dev.off()
 setwd(fig_dir)
 system(paste("convert -verbose -density 300 cumulative_transformation_legumes_abs_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off cumulative_transformation_legumes_abs_",rcp,".png",sep=""))
@@ -652,7 +695,7 @@ setwd("~")
 ##### cereals
 #relative change
 pdf(paste(fig_dir,"/cumulative_transformation_cereals_per_",rcp,".pdf",sep=""), height=7.5,width=9,pointsize=18)
-for (i in c(4,6,7)) { #nrow(thresh_val)) {
+for (i in c(4,6,7,8)) { #nrow(thresh_val)) {
   #i <- 1
   crop_name <- paste(thresh_val$crops[i])
   cat("\n...processing crop=",crop_name,"\n")
@@ -663,7 +706,7 @@ for (i in c(4,6,7)) { #nrow(thresh_val)) {
   #plot line and polygon
   if (i == 4) {
     par(mar=c(5,5,1,1),las=1,lwd=1.5)
-    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
+    plot(dc_out_m$DEC, dc_out_m$PER.TRANS, ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
          xlab="Year", ylab="Extent of transformation (%)", axes=F, 
          col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
     axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
@@ -672,24 +715,34 @@ for (i in c(4,6,7)) { #nrow(thresh_val)) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
             border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 6) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 7) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
             col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$PER.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 8) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$PER.TRANS,rev(dc_out_u$PER.TRANS),0),
+            col=rgb(red=255,green=165,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=165,blue=0,alpha=50,maxColorValue=255))
+    lines(dc_out_m$DEC, dc_out_m$PER.TRANS, col=rgb(red=255,green=165,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$PER.TRANS[1]), lty=2, col=rgb(red=255,green=165,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   }
 }
 grid(lwd=1.5)
-legend(x=2000,y=yx1,legend=c("F. millet","P. millet","Sorghum"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.9,box.lwd=1.5,bg="white",
+legend(x=2000,y=yx1,legend=c("F. millet","Maize","P. millet","Sorghum"),lty=c(1,1,1,1),lwd=c(2,2,2,2),cex=0.9,box.lwd=1.5,bg="white",
        col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
              rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
-             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255)))
+             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255),
+             rgb(red=255,green=165,blue=0,alpha=255,maxColorValue=255)))
 dev.off()
 setwd(fig_dir)
 system(paste("convert -verbose -density 300 cumulative_transformation_cereals_per_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off cumulative_transformation_cereals_per_",rcp,".png",sep=""))
@@ -698,7 +751,7 @@ setwd("~")
 
 #absolute change
 pdf(paste(fig_dir,"/cumulative_transformation_cereals_abs_",rcp,".pdf",sep=""), height=7.5,width=9,pointsize=18)
-for (i in c(4,6,7)) { #nrow(thresh_val)) {
+for (i in c(4,6,7,8)) { #nrow(thresh_val)) {
   #i <- 1
   crop_name <- paste(thresh_val$crops[i])
   cat("\n...processing crop=",crop_name,"\n")
@@ -709,7 +762,7 @@ for (i in c(4,6,7)) { #nrow(thresh_val)) {
   #plot line and polygon
   if (i == 4) {
     par(mar=c(5,5,1,1),las=1,lwd=1.5)
-    plot(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
+    plot(dc_out_m$DEC, dc_out_m$MHA.TRANS, ty="l", xlim=c(2000,2095), ylim=c(0,yx2),
          xlab="Year", ylab="Extent of transformation (Million ha)", axes=F, 
          col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
     axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
@@ -718,24 +771,34 @@ for (i in c(4,6,7)) { #nrow(thresh_val)) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
             border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 6) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
   } else if (i == 7) {
     polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
             col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
             border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
-    lines(c(2000,dc_out_m$DEC), c(0,dc_out_m$MHA.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+  } else if (i == 8) {
+    polygon(x=c(c(2000,dc_out_m$DEC),rev(c(2000,dc_out_m$DEC))),y=c(0,dc_out_l$MHA.TRANS,rev(dc_out_u$MHA.TRANS),0),
+            col=rgb(red=255,green=165,blue=0,alpha=50,maxColorValue=255),
+            border=rgb(red=255,green=165,blue=0,alpha=50,maxColorValue=255))
+    lines(dc_out_m$DEC, dc_out_m$MHA.TRANS, col=rgb(red=255,green=165,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+    lines(c(2000,dc_out_m$DEC[1]), c(0,dc_out_m$MHA.TRANS[1]), lty=2, col=rgb(red=255,green=165,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
   }
 }
 grid(lwd=1.5)
-legend(x=2000,y=yx2,legend=c("F. millet","P. millet","Sorghum"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.9,box.lwd=1.5,bg="white",
+legend(x=2000,y=yx2,legend=c("F. millet","Maize","P. millet","Sorghum"),lty=c(1,1,1),lwd=c(2,2,2),cex=0.9,box.lwd=1.5,bg="white",
        col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
              rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
-             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255)))
+             rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255),
+             rgb(red=255,green=165,blue=0,alpha=255,maxColorValue=255)))
 dev.off()
 setwd(fig_dir)
 system(paste("convert -verbose -density 300 cumulative_transformation_cereals_abs_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off cumulative_transformation_cereals_abs_",rcp,".png",sep=""))
@@ -754,9 +817,13 @@ wrld_rs_prj <- projectRaster(wrld_rs, crs="+proj=aea +lon_0=22.67578125", method
 #read in table of top-5 per crop
 top5_list <- read.table(paste(out_dir,"/top_5_producers.tab",sep=""),sep="\t",header=T)
 
+#reset figure configuration
+if (rcp == "RCP_60_new") {yx1 <- 50}
+if (rcp == "RCP_85") {yx1 <- 70}
+
 cum_chg_m <- list(); cum_chg_u <- list(); cum_chg_l <- list()
 for (i in 1:nrow(thresh_val)) {
-  #i <- 3
+  #i <- 4
   crop_name <- paste(thresh_val$crops[i])
   cat("\n...processing crop=",crop_name,"\n")
   
@@ -832,53 +899,59 @@ for (i in 1:nrow(thresh_val)) {
     ctry_out_u <- dc_out_u[which(dc_out_u$COUNTRY == ctry),]
     
     if (i == 3 | i == 4) {
-      ctry_out_m$PER.TRANS <- ctry_out_m$PER.TRANS * 0.1
-      ctry_out_l$PER.TRANS <- ctry_out_l$PER.TRANS * 0.1
-      ctry_out_u$PER.TRANS <- ctry_out_u$PER.TRANS * 0.1
+      ctry_out_m$PER.TRANS <- ctry_out_m$PER.TRANS * 0.5
+      ctry_out_l$PER.TRANS <- ctry_out_l$PER.TRANS * 0.5
+      ctry_out_u$PER.TRANS <- ctry_out_u$PER.TRANS * 0.5
     }
     
     
     if (ctry == c_list[1]) {
       par(mar=c(5,5,1,1),las=1,lwd=1.5)
-      plot(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
+      plot(ctry_out_m$DEC, ctry_out_m$PER.TRANS, ty="l", xlim=c(2000,2095), ylim=c(0,yx1),
            xlab="Year", ylab="Extent of transformation (%)", axes=F, 
            col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255))
       axis(1, at=seq(2000,2090,by=10),labels=paste(seq(2000,2090,by=10)),lwd=1.5)
-      axis(2, at=seq(0,yx1,by=2),labels=paste(seq(0,yx1,by=2)),lwd=1.5)
+      axis(2, at=seq(0,yx1,by=5),labels=paste(seq(0,yx1,by=5)),lwd=1.5)
       box(lwd=1.5)
       polygon(x=c(c(2000,ctry_out_m$DEC),rev(c(2000,ctry_out_m$DEC))),y=c(0,ctry_out_l$PER.TRANS,rev(ctry_out_u$PER.TRANS),0),
               col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),
               border=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255))
-      lines(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(ctry_out_m$DEC, ctry_out_m$PER.TRANS, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,ctry_out_m$DEC[1]), c(0,ctry_out_m$PER.TRANS[1]), lty=2, col=rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
     } else if (ctry == c_list[2]) {
       polygon(x=c(c(2000,ctry_out_m$DEC),rev(c(2000,ctry_out_m$DEC))),y=c(0,ctry_out_l$PER.TRANS,rev(ctry_out_u$PER.TRANS),0),
               col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),
               border=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255))
-      lines(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(ctry_out_m$DEC, ctry_out_m$PER.TRANS, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,ctry_out_m$DEC[1]), c(0,ctry_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
     } else if (ctry == c_list[3]) {
       polygon(x=c(c(2000,ctry_out_m$DEC),rev(c(2000,ctry_out_m$DEC))),y=c(0,ctry_out_l$PER.TRANS,rev(ctry_out_u$PER.TRANS),0),
               col=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255),
               border=rgb(red=0,green=150,blue=150,alpha=50,maxColorValue=255))
-      lines(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(ctry_out_m$DEC, ctry_out_m$PER.TRANS, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,ctry_out_m$DEC[1]), c(0,ctry_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255), lwd=1.5)
     } else if (ctry == c_list[4]) {
       polygon(x=c(c(2000,ctry_out_m$DEC),rev(c(2000,ctry_out_m$DEC))),y=c(0,ctry_out_l$PER.TRANS,rev(ctry_out_u$PER.TRANS),0),
               col=rgb(red=255,green=150,blue=0,alpha=50,maxColorValue=255),
               border=rgb(red=255,green=150,blue=0,alpha=50,maxColorValue=255))
-      lines(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), col=rgb(red=255,green=150,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(ctry_out_m$DEC, ctry_out_m$PER.TRANS, col=rgb(red=255,green=150,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,ctry_out_m$DEC[1]), c(0,ctry_out_m$PER.TRANS[1]), lty=2, col=rgb(red=255,green=150,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
     } else if (ctry == c_list[4]) {
       polygon(x=c(c(2000,ctry_out_m$DEC),rev(c(2000,ctry_out_m$DEC))),y=c(0,ctry_out_l$PER.TRANS,rev(ctry_out_u$PER.TRANS),0),
               col=rgb(red=255,green=150,blue=0,alpha=50,maxColorValue=255),
               border=rgb(red=255,green=150,blue=0,alpha=50,maxColorValue=255))
-      lines(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), col=rgb(red=255,green=150,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(ctry_out_m$DEC, ctry_out_m$PER.TRANS, col=rgb(red=255,green=150,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,ctry_out_m$DEC[1]), c(0,ctry_out_m$PER.TRANS[1]), lty=2, col=rgb(red=255,green=150,blue=0,alpha=255,maxColorValue=255), lwd=1.5)
     } else if (ctry == c_list[5]) {
       polygon(x=c(c(2000,ctry_out_m$DEC),rev(c(2000,ctry_out_m$DEC))),y=c(0,ctry_out_l$PER.TRANS,rev(ctry_out_u$PER.TRANS),0),
               col=rgb(red=0,green=150,blue=255,alpha=50,maxColorValue=255),
               border=rgb(red=0,green=150,blue=255,alpha=50,maxColorValue=255))
-      lines(c(2000,ctry_out_m$DEC), c(0,ctry_out_m$PER.TRANS), col=rgb(red=0,green=150,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(ctry_out_m$DEC,ctry_out_m$PER.TRANS, col=rgb(red=0,green=150,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
+      lines(c(2000,ctry_out_m$DEC[1]), c(0,ctry_out_m$PER.TRANS[1]), lty=2, col=rgb(red=0,green=150,blue=255,alpha=255,maxColorValue=255), lwd=1.5)
     }
   }
   grid(lwd=1.5)
-  legend(x=2000,y=yx1,legend=c_list,lty=rep(1,5),lwd=rep(2,5),cex=0.85,box.lwd=1.5,bg="white",ncol=2,
+  legend(x=2000,y=yx1,legend=c_list,lty=rep(1,5),lwd=rep(3,5),cex=1,box.lwd=2,bg="white",ncol=2,
          col=c(rgb(red=255,green=0,blue=0,alpha=255,maxColorValue=255),
                rgb(red=0,green=0,blue=255,alpha=255,maxColorValue=255),
                rgb(red=0,green=150,blue=150,alpha=255,maxColorValue=255),
