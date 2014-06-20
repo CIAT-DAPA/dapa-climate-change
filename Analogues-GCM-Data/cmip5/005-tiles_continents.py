@@ -30,7 +30,9 @@ elif resolution == "5min":
 	countryDic = {"af": "2 2 ", "as": "3 3 ", "eu": "2 2 ", "na": "3 3 ", "oc": "2 2 ", "sa": "2 2 "}
 elif resolution == "10min":
 	countryDic = {"af": "1 1 ", "as": "2 2 ", "eu": "1 1 ", "na": "1 1 ", "oc": "1 1 ", "sa": "1 1 "}
-				
+	
+
+	
 for country in countrytilelist:
 	# country = "af"
 	out = dirout + "\\" + rcp +"\\"+ country + "_" + str(resolution)
