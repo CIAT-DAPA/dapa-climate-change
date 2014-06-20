@@ -11,28 +11,34 @@ from arcpy import env
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 005-tiles_countries.py D:\cenavarro\Analogues_GCM_data\ExtractByCountry a1b D:\cenavarro\Analogues_GCM_data\TilesByCountry 2_5min 2020_2049"
+	print "   - ie: python 005-tiles_countries.py U:\portals\ccafs-analogues\grid_files rcp26 U:\portals\ccafs-analogues\TilesByCountry 30s 2020_2049"
 	sys.exit(1)
 
 #Set variables
 dirbase = sys.argv[1]
-sres = sys.argv[2]
+rcp = sys.argv[2]
 dirout = sys.argv[3]
 resolution = sys.argv[4]
 period = sys.argv[5]
+# start = sys.argv[6]
+# end = sys.argv[7]
 
 os.system('cls')
-if resolution == "30s":
-	countrytilelist = "cod", "nzl", "ssd", "fji", "jpn", "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
-		"cub", "deu", "dnk", "dza", "ecu", "egy", "eri", "esh", "esp", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
-		"guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
-		"mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nic", "nga", "nor", "npl",  "omn",\
-		"pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
-		"syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
-		"zmb", "zwe", "nzl", "rus", "usa", "eth", "tza", "ken", "uga"
-elif resolution == "2_5min":
-	countrytilelist = "arg", "aus", "bra", "can", "chl", "chn", "grl", "idn", "ind", "kaz", "rus", "usa"
+# if resolution == "30s":
+	# countrytilelist = "cod", "nzl", "ssd", "fji", "jpn", "afg", "ago", "arg", "aus", "bfa", "bgd", "bhs", "blr", "bol", "bra", "bwa", "caf", "can", "chl", "chn", "civ", "cmr", "cog", "col",\
+		# "cub", "deu", "dnk", "dza", "ecu", "egy", "eri", "esh", "esp", "fin", "fji", "fra", "gab", "gbr", "gha", "gin", "gnq", "grc", "grl",\
+		# "guy", "hrv", "idn", "ind", "irn", "irq", "isl", "ita", "jpn", "kaz", "kgz", "khm", "kir", "kor", "lao", "lby", "mar", "mdg",\
+		# "mdv", "mex", "mli", "mlt", "mmr", "mng", "moz", "mrt", "mus", "mwi", "mys", "nam", "ncl", "ner", "nic", "nga", "nor", "npl",  "omn",\
+		# "pak", "per", "phl", "png", "pol", "prk", "prt", "pry", "pyf", "rom",  "sau", "sdn", "sen", "sgp", "sjm", "slb", "som", "swe",\
+		# "syr", "tca", "tcd", "tha", "tjk", "tkm", "tun", "tur", "ukr", "ury",  "uzb", "ven", "vnm", "vut", "yem", "zaf",\
+		# "zmb", "zwe", "nzl", "rus", "usa", "eth", "tza", "ken", "uga"
+		
 
+		
+# elif resolution == "2_5min":
+	# countrytilelist = "arg", "aus", "bra", "can", "chl", "chn", "grl", "idn", "ind", "kaz", "rus", "usa"
+
+countrytilelist = open(dirbase+"\\"+"listcountries_"+resolution+".list", "r")	
 				
 countryDic = {"cod": "6 6 ", "kna": "1 1 ", "mne": "1 1 ", "nru": "1 1 ", "plw": "1 1 ", "pse": "1 1 ", "srb": "1 1 ", "ssd": "3 3 ", "tls": "1 1 ", "tto": "1 1 ", "tuv": "1 1 ",\
 			"bfa": "2 2 ", "bgd": "2 2 ", "bhs": "2 2 ", "blr": "2 2 ", "bwa": "2 2 ", "civ": "2 2 ", "cmr": "2 2 ", "cog": "2 2 ", "cub": "2 2 ",\
@@ -49,73 +55,81 @@ countryDic = {"cod": "6 6 ", "kna": "1 1 ", "mne": "1 1 ", "nru": "1 1 ", "plw":
 			"zaf": "5 5 ", "arg": "2 2 ", "idn": "2 2 ", "jpn": "1 1 ", "kaz": "2 2 ", "ind": "2 2 ", "bra": "3 3 ", "chl": "3 3 ",\
 			"grl": "3 3 ", "aus": "3 3 ", "chn": "3 3 ", "fji": "1 1 ", "can": "4 4 ", "nzl": "5 5 ", "rus": "7 7 ", "usa": "8 8 "}
 
-for country in countrytilelist:
 
-	if not os.path.exists(dirout + "\\SRES_" + sres + "\\" + country + "_tiles_countries_done.txt"):
+	
+# for country in countrytilelist[int(start):int(end)]:
+for country in countrytilelist:
+	country = country.split("_")[0]
+	out = dirout + "\\" + rcp +"\\"+ country + "_" + str(resolution)
+	checkFile = out + "_tiles_countries_done.txt"
+	if not os.path.exists(checkFile):
 		
-		modellist = sorted(os.listdir(dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution)))
+		input = dirbase + "\\" + rcp +"\\"+ country + "_" + str(resolution)
+		modellist = sorted(os.listdir(input))
 		
 		print "~~~~~~~~~~~~~~~~~~~"
 		print "  TILES COUNTRIES  "
 		print "~~~~~~~~~~~~~~~~~~~"
 		
 		for model in modellist:
-				
 			if model == "current":
-				arcpy.env.workspace = dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution) + "\\" + model
-				diroutGrids = dirout + "\\Baseline\\" + country + "_" + str(resolution) + "\\" + model
+				arcpy.env.workspace = input + "\\" + model
+				diroutGrids = dirout + "\\baseline\\" + country + "_" + str(resolution) + "\\" + model
 			else:
-				arcpy.env.workspace = dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution) + "\\" + model + "\\" + str(period)
-				diroutGrids = dirout + "\\SRES_" + sres + "\\" + country + "_" + str(resolution) + "\\" + model + "\\" + str(period)
-			
+				arcpy.env.workspace = input + "\\" + model + "\\" + str(period)
+				diroutGrids = out + "\\" + model + "\\" + str(period)
+				
 			print "\nProcessing",country,model,period,"\n"
+
 			rasterList = arcpy.ListRasters("*", "GRID")
 			for raster in rasterList:
-				
+
 				if os.path.basename(raster).split("_")[0] == "bio" or os.path.basename(raster).split("_")[0] == "prec" or os.path.basename(raster).split("_")[0] == "tmean" or os.path.basename(raster).split("_")[0] == "dtr":
 					
-					diroutGridsVar = diroutGrids + "\\" + os.path.basename(raster).split("_")[0]
+					diroutGridsVar = diroutGrids + "\\" + os.path.basename(raster).split("_")[0]+"_tif"
 					if not os.path.exists(diroutGridsVar):
 						os.system('mkdir ' + diroutGridsVar)
-					
-					if not arcpy.Exists(diroutGridsVar + "\\" + raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)):
+					tileTif= rcp+"_"+period+"_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"
+					if not arcpy.Exists(diroutGridsVar + "\\" + rcp+"_"+period+"_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"):
 						
-						trashList = sorted(glob.glob(diroutGridsVar + "\\" + raster + "*.*"))
-						for trashfile in trashList:
-							os.remove(trashfile)
+						# trashList = sorted(glob.glob(diroutGridsVar + "\\" + raster + "*.*"))
+						# for trashfile in trashList:
+							# os.remove(trashfile)
 						
 						print "\tspliting .. ",raster
 						
-						rasterdeleteList = sorted(glob.glob(diroutGridsVar + "\\" + os.path.basename(raster) + "_*"))
-						for rasterdelete in rasterdeleteList:
-							arcpy.Delete_management(rasterdelete)
+						# rasterdeleteList = sorted(glob.glob(diroutGridsVar + "\\" + os.path.basename(raster) + "_*"))
+						# for rasterdelete in rasterdeleteList:
+							# arcpy.Delete_management(rasterdelete)
 						
-						arcpy.SplitRaster_management(raster, diroutGridsVar, raster + "_", "NUMBER_OF_TILES", "GRID", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
+						arcpy.SplitRaster_management(raster, diroutGridsVar, rcp+"_"+period+"_"+model+"_"+raster + "_", "NUMBER_OF_TILES", "TIFF", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
+						# arcpy.SplitRaster_management(raster,diroutGridsVar,raster + "_","NUMBER_OF_TILES","TIFF","NEAREST","4 4","2048 2048","0","PIXELS","#","#")
+						# arcpy.SplitRaster_management(raster, diroutGridsVar, raster + "_", "NUMBER_OF_TILES", "GRID", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
 						print "\t" + raster,"tiled"					
 						
-						trashList = sorted(glob.glob(diroutGridsVar + "\\" + raster + "*.*"))
-						for trashfile in trashList:
-							os.remove(trashfile)
+						# trashList = sorted(glob.glob(diroutGridsVar + "\\" + raster + "*.*"))
+						# for trashfile in trashList:
+							# os.remove(trashfile)
 						
 					else:
 						print "\t" + raster,"tiled"
 				
 		#Compressing and delete input files
-		os.system("7za a -mmt8 " + dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution) + ".zip " + dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution))
-		os.system("rmdir /s /q " + dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution))
+		# os.system("7za a -mmt8 " + dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution) + ".zip " + dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution))
+		# os.system("rmdir /s /q " + dirbase + "\\SRES_" + sres + "\\downscaled\\" + country + "_" + str(resolution))
 		
 		#Create check file
-		checkTXT = open(dirout + "\\SRES_" + sres + "\\" + country + "_tiles_countries_done.txt", "w")
+		checkTXT = open(checkFile, "w")
 		checkTXT.close()
 
 	else:
 		
 		print "\n\t",country," Tiled!"
-	
-	if os.path.exists(dirout + "\\SRES_" + sres + "\\" + country + "_tiles_countries_done.txt") and not os.path.exists(dirout + "\\SRES_" + sres + "\\" + country + "_grid2tiff_countries_done.txt"):
+
+	# if not os.path.exists(dirout + "\\SRES_" + sres + "\\" + country + "_" + resolution + "_grid2tiff_countries_done.txt"):
 		
 		##Scenarios
-		grid2asciitiff_tiles.mainfunction(dirout, dirout, country, sres, period, resolution, "YES")
+		# grid2asciitiff_tiles.mainfunction(dirout, dirout, country, sres, period, resolution, "YES")
 		
 		## Compressing country files
 		# print " \nCompressing country folder"
@@ -123,12 +137,12 @@ for country in countrytilelist:
 		# os.system("rmdir /s /q " + dirout + "\\SRES_" + sres + "\\" + country + "_" + resolution)
 		# print " \nCompression done!"
 		
-		checkTXT = open(dirout + "\\SRES_" + sres + "\\" + country + "_grid2tiff_countries_done.txt", "w")
-		checkTXT.close()
-	
-		print "\n",country," Tiles converted!"
+		# checkTXT = open(dirout + "\\SRES_" + sres + "\\" + country + "_" + resolution + "_grid2tiff_countries_done.txt", "w")
+		# checkTXT.close()
 
-	else:
-		print "\n",country," Tiles converted!"
-	
+		# print "\n",country," Tiles converted!"
+
+	# else:
+		# print "\n",country," Tiles converted!"
+
 print "\n Process done!"
