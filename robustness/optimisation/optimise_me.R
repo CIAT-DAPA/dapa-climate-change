@@ -104,7 +104,7 @@ opt_data$USE_SCRATCH <- F
 opt_data$SCRATCH <- NA
 
 for (i in 1:nrow(param_list)) {
-  #i <- 18
+  #i <- 20
   #previous parameters
   prev_params <- this_params
   
@@ -118,7 +118,11 @@ for (i in 1:nrow(param_list)) {
   opt_data$SECT <- sect
   opt_data$NSTEPS <- nsteps
   
-  #!!!beware of NDSLA, SLA_INI (modify GLAM_optimise)!!!
+  if (param %in% c("SLA_INI","NDSLA")) {
+    opt_data$MINVAL <- param_list$MIN[i]
+    opt_data$MAXVAL <- param_list$MAX[i]
+  }
+  
   #run optim function
   par_optim <- GLAM_optimise(opt_data)
   #plot(par_optim$OPTIMISATION$VALUE, par_optim$OPTIMISATION$RMSE, ty="l") #plot RMSE curve
@@ -126,7 +130,11 @@ for (i in 1:nrow(param_list)) {
   #update parameter value with optimal
   opt_val <- par_optim$OPTIMISATION$VALUE[which(par_optim$OPTIMISATION$RMSE == min(par_optim$OPTIMISATION$RMSE))]
   if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
-  this_params[[sect]][[param]]$Value <- opt_val
+  if (param %in% c("SLA_INI","NDSLA")) {
+    this_params[[sect]][[param]] <- opt_val
+  } else {
+    this_params[[sect]][[param]]$Value <- opt_val
+  }
 }
 
 

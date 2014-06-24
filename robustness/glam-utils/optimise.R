@@ -124,7 +124,11 @@ GLAM_optimise <- function(opt_data) {
   if (!file.exists(opt_dir)) {dir.create(opt_dir)}
   
   #create sequence of values
-  vals <- seq(opt_data$PARAMS[[sect]][[param]][,"Min"],opt_data$PARAMS[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
+  if (param %in% c("SLA_INI","NDSLA")) {
+    vals <- seq(opt_data$MINVAL,opt_data$MAXVAL,length.out=opt_data$NSTEPS)
+  } else {
+    vals <- seq(opt_data$PARAMS[[sect]][[param]][,"Min"],opt_data$PARAMS[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
+  }
   
   #type of run
   opt_data$PARAMS$glam_param.mod_mgt$SEASON <- opt_data$RUN_TYPE
@@ -144,7 +148,11 @@ GLAM_optimise <- function(opt_data) {
       cat("\nperforming run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
       
       #assign values to parameter set
-      opt_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
+      if (param %in% c("SLA_INI","NDSLA")) {
+        opt_data$PARAMS[[sect]][[param]] <- vals[i]
+      } else {
+        opt_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
+      }
       
       #calibrate model
       cal_data <- opt_data
