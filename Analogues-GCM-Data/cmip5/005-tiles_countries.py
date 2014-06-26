@@ -20,8 +20,8 @@ rcp = sys.argv[2]
 dirout = sys.argv[3]
 resolution = sys.argv[4]
 period = sys.argv[5]
-# start = sys.argv[6]
-# end = sys.argv[7]
+start = sys.argv[6]
+end = sys.argv[7]
 
 os.system('cls')
 # if resolution == "30s":
@@ -58,8 +58,8 @@ countryDic = {"ala": "1 1 ","alb": "1 1 ","and": "1 1 ","are": "1 1 ","arm": "1 
 
 
 	
-# for country in countrytilelist[int(start):int(end)]:
-for country in countrytilelist:
+for country in countrytilelist[int(start):int(end)]:
+# for country in countrytilelist:
 	country = country.split("_")[0]
 	out = dirout + "\\" + rcp +"\\"+ country + "_" + str(resolution)
 	checkFile = out + "_tiles_countries_done.txt"
