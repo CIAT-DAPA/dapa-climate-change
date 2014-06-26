@@ -38,7 +38,8 @@ os.system('cls')
 # elif resolution == "2_5min":
 	# countrytilelist = "arg", "aus", "bra", "can", "chl", "chn", "grl", "idn", "ind", "kaz", "rus", "usa"
 
-countrytilelist = open(dirbase+"\\"+"listcountries_"+resolution+".list", "r")	
+l = open(dirbase+"\\"+"listcountries_"+resolution+".list", "r")	
+countrytilelist = [i for i in l.readlines()]
 				
 countryDic = {"ala": "1 1 ","alb": "1 1 ","and": "1 1 ","are": "1 1 ","arm": "1 1 ","atg": "1 1 ","aut": "1 1 ","aze": "1 1 ","cod": "6 6 ", "kna": "1 1 ", "mne": "1 1 ", "nru": "1 1 ", "plw": "1 1 ", "pse": "1 1 ", "srb": "1 1 ", "ssd": "3 3 ", "tls": "1 1 ", "tto": "1 1 ", "tuv": "1 1 ",\
 			"btn": "1 1 ","brn": "1 1 ","brb": "1 1 ","bmu": "1 1 ","bih": "1 1 ","blz": "1 1 ","bhi": "1 1 ","bhr": "1 1 ","bhr": "1 1 ","bdi": "1 1 ", "bel": "1 1 ", "ben": "1 1 ", "bfa": "2 2 ", "bgd": "2 2 ", "bhs": "2 2 ", "blr": "2 2 ", "bwa": "2 2 ","bgr": "2 2 ", "civ": "2 2 ", "cmr": "2 2 ", "cog": "2 2 ", "cub": "2 2 ",\
@@ -53,9 +54,9 @@ countryDic = {"ala": "1 1 ","alb": "1 1 ","and": "1 1 ","are": "1 1 ","arm": "1 
 			"ven": "3 3 ", "vnm": "3 3 ", "zmb": "3 3 ", "col": "4 4 ", "esp": "4 4 ", "irn": "4 4 ", "lby": "4 4 ", "mli": "4 4 ", "mlt": "4 4 ",\
 			"mng": "4 4 ", "nor": "4 4 ", "pak": "4 4 ", "per": "4 4 ", "prt": "4 4 ", "sau": "4 4 ", "sdn": "4 4 ", "dza": "5 5 ", "mex": "5 5 ", "sjm": "5 5 ",\
 			"zaf": "5 5 ", "arg": "2 2 ", "idn": "2 2 ", "jpn": "1 1 ", "kaz": "2 2 ", "ind": "2 2 ", "bra": "3 3 ", "chl": "3 3 ",\
-			"grl": "3 3 ", "aus": "3 3 ", "chn": "3 3 ", "fji": "1 1 ", "can": "4 4 ", "nzl": "5 5 ", "rus": "7 7 ", "usa": "8 8 "}
-
-
+			"grl": "3 3 ", "aus": "3 3 ", "chn": "3 3 ", "fji": "1 1 ", "can": "4 4 ", "nzl": "5 5 ", "rus": "7 7 ", "usa": "8 8 ",\
+"ala": "1 1 ", "alb": "1 1 ", "asm": "1 1 ", "and": "1 1 ", "aia": "1 1 ", "atg": "1 1 ", "arm": "1 1 ", "abw": "1 1 ", "bhs": "1 1 ", "bhr": "1 1 ", "brb": "1 1 ", "bel": "1 1 ", "blz": "1 1 ", "bmu": "1 1 ", "btn": "1 1 ", "bih": "1 1 ", "bvt": "1 1 ", "iot": "1 1 ", "vgb": "1 1 ", "brn": "1 1 ", "bdi": "1 1 ", "cpv": "1 1 ", "cym": "1 1 ", "cxr": "1 1 ", "cck": "1 1 ", "com": "1 1 ", "cok": "1 1 ", "cri": "1 1 ", "cyp": "1 1 ", "dji": "1 1 ", "dma": "1 1 ", "slv": "1 1 ", "imn": "1 1 ", "isr": "1 1 ", "gnq": "1 1 ", "flk": "1 1 ", "fji": "1 1 ", "fro": "1 1 ", "pyf": "1 1 ", "atf": "1 1 ", "gmb": "1 1 ", "gib": "1 1 ", "grd": "1 1 ", "glp": "1 1 ", "gum": "1 1 ", "ggy": "1 1 ", "gnb": "1 1 ", "hti": "1 1 ", "hmd": "1 1 ", "hkg": "1 1 ", "jam": "1 1 ", "jey": "1 1 ", "kir": "1 1 ", "kwt": "1 1 ", "lbn": "1 1 ", "lso": "1 1 ", "lie": "1 1 ", "lux": "1 1 ", "mac": "1 1 ", "mkd": "1 1 ", "mdv": "1 1 ", "mlt": "1 1 ", "mhl": "1 1 ", "mtq": "1 1 ", "mus": "1 1 ", "myt": "1 1 ", "fsm": "1 1 ", "mda": "1 1 ", "mco": "1 1 ", "mne": "1 1 ", "msr": "1 1 ", "ncl": "1 1 ", "niu": "1 1 ", "nfk": "1 1 ", "mnp": "1 1 ", "plw": "1 1 ", "pse": "1 1 ", "pcn": "1 1 ", "pri": "1 1 ", "qat": "1 1 ", "nru": "1 1 ", "nld": "1 1 ", "ant": "1 1 ", "dom": "1 1 ", "reu": "1 1 ", "rwa": "1 1 ", "shn": "1 1 ", "kna": "1 1 ", "spm": "1 1 ", "sgs": "1 1 ", "sp-": "1 1 ", "lka": "1 1 ", "che": "1 1 ", "swz": "1 1 ", "twn": "1 1 ", "tls": "1 1 ", "tgo": "1 1 ", "tkl": "1 1 ", "ton": "1 1 ", "tto": "1 1 ", "tca": "1 1 ", "tuv": "1 1 ", "umi": "1 1 ", "vut": "1 1 ", "vat": "1 1 ", "vir": "1 1 ", "wlf": "1 1 ", "ko-": "1 1 ", "vct": "1 1 ", "wsm": "1 1 ", "smr": "1 1 ", "lca": "1 1 ", "stp": "1 1 ", "syc": "1 1 ", "sle": "1 1 ", "sgp": "1 1 ", "svk": "1 1 ", "svn": "1 1 ", "slb": "1 1 "			
+			}
 
 	
 for country in countrytilelist[int(start):int(end)]:
