@@ -9,7 +9,7 @@ import os, sys, string, glob
 if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python ideam-sort-stations.py S:\observed\weather_station\ideam-col\organized-monthly\conventional-madr-2nd-request"
+	print "   - ie: python ideam-sort-stations.py \\dapadfs\data_cluster_4\observed\weather_station\col-ideam\daily-raw"
 	sys.exit(1)
 
 #Set variables 
@@ -44,28 +44,28 @@ for var in varlist:
 		print var, os.path.basename(st)
 		
 		## Rename weather file
-		stproc = dirbase + "\\" + var + "-per-station\\proc-" + os.path.basename(st)
+		stproc = dirbase + "\\" + var + "-per-station\\" + os.path.basename(st)[:-4] + "_" + var + "_raw.txt"
 		os.rename(st, stproc)
 		
-		## Open renamed file
-		stf = open(stproc,'r')
-		lines = stf.readlines()
+		# ## Open renamed file
+		# stf = open(stproc,'r')
+		# lines = stf.readlines()
 
-		## Write sorted weather file
-		wFile = open(st, "w")
-		wFile.write("Date" + "\t" + "Value" + "\n")
-		wFile.close()
-		wFile = open(st, "a")
-		for line in sorted(lines)[:-1]:
-			wFile.write(line)
+		# ## Write sorted weather file
+		# wFile = open(st, "w")
+		# wFile.write("Date" + "\t" + "Value" + "\n")
+		# wFile.close()
+		# wFile = open(st, "a")
+		# for line in sorted(lines)[:-1]:
+			# wFile.write(line)
 
-		## Close files and remove proc File
-		wFile.close()
-		stf.close()
-		os.remove(stproc)
+		# ## Close files and remove proc File
+		# wFile.close()
+		# stf.close()
+		# os.remove(stproc)
 
 		## Open sorted file
-		wFile = open(st, "r")
+		wFile = open(stproc, "r")
 		lines = wFile.readlines()
 		
 		## Writing start and end date in new txt file
