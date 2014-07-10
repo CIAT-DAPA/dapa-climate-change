@@ -137,11 +137,10 @@ GLAM_optimise <- function(opt_data) {
   opt_data$PARAMS$glam_param.mod_mgt$IASCII <- 1 #output only to season file
   
   #file of output
-  cal_outfile <- paste(opt_dir,"/opt-",opt_data$PARAM,".txt",sep="") #summary
-  raw_outfile <- paste(opt_dir,"/opt-",opt_data$PARAM,"_raw.txt",sep="") #raw
+  save_file <- paste(cal_dir,"/opt-",opt_data$PARAM,".RData",sep="")
   
   #do only if calibration file does not exist
-  if (!file.exists(cal_outfile)) {
+  if (!file.exists(save_file)) {
     #loop through sequence of values
     for (i in 1:length(vals)) {
       #i <- 1
@@ -167,6 +166,7 @@ GLAM_optimise <- function(opt_data) {
       #select optimal ygp of each grid cell
       ygp_all <- data.frame()
       for (loc in unique(yr_out$LOC)) {
+        #loc <- unique(yr_out$LOC)[1]
         ygp_opt <- min(ygp_calib$CALIBRATION$RMSE[which(ygp_calib$CALIBRATION$LOC == loc)])
         ygp_opt <- ygp_calib$CALIBRATION$VALUE[which(ygp_calib$CALIBRATION$LOC == loc & ygp_calib$CALIBRATION$RMSE == ygp_opt)]
         if (length(ygp_opt) > 1) {ygp_opt <- max(ygp_opt)}
@@ -196,26 +196,38 @@ GLAM_optimise <- function(opt_data) {
       }
       out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(ygp_all$OBS,na.rm=T), YPRED=mean(ygp_all$PRED,na.rm=T),
                             YOBS_ADJ=mean(ygp_all$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(ygp_all$PRED_ADJ,na.rm=T))
-      names(ygp_all)[3] <- "YGP"
+      names(ygp_all)[4] <- "YGP"
       ygp_all$VALUE <- vals[i]
+      
+      #for final object
+      names(yr_out)[4] <- "YGP"; yr_out$VALUE <- vals[i]
+      this_cal <- ygp_calib$CALIBRATION; names(this_cal)[2] <- "YGP"; this_cal$VALUE <- vals[i]
       
       if (i == 1) {
         out_all <- out_row
         out_raw <- ygp_all
+        cal_all <- this_cal
+        cal_raw <- yr_out
       } else {
         out_all <- rbind(out_all,out_row)
         out_raw <- rbind(out_raw,ygp_all)
+        cal_all <- rbind(cal_all,this_cal)
+        cal_raw <- rbind(cal_raw,yr_out)
       }
     }
-    #write outputs for this grid cell
-    write.table(out_all,sep="\t",quote=F,file=cal_outfile,row.names=F)
-    write.table(out_raw,sep="\t",quote=F,file=raw_outfile,row.names=F)
+    
+    #return object
+    r_list <- list(OPTIMISATION=out_all, RAW_OPTIMISATION=out_raw, 
+                   CALIBRATION=cal_all, RAW_CALIBRATION=cal_raw)
+    
+    #save file
+    save(list=c("r_list"),file=save_file)
   } else {
-    out_all <- read.table(cal_outfile,sep="\t",header=T)
-    out_raw <- read.table(raw_outfile,sep="\t",header=T)
+    load(file=save_file)
   }
   
-  #return object
-  r_list <- list(OPTIMISATION=out_all, RAW_DATA=out_raw)
+  #clean up
+  system(paste("rm -rf ",opt_dir,sep=""))
+  
   return(r_list)
 }

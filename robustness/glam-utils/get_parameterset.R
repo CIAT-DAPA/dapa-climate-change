@@ -449,7 +449,7 @@ GLAM_get_default <- function(parDir) {
   GLAM_params$glam_param.mod_mgt$INETCDF <- 0 #no netcdf output
   GLAM_params$glam_param.mod_mgt$IASCII <- 3 #output ascii and daily
   GLAM_params$glam_param.mod_mgt$I_E <- 2 #I_E = 2, for GLAM-R2
-  GLAM_params$glam_param.mod_mgt$I_R <- 2 #I_R = 2, for GLAM-R2
+  #GLAM_params$glam_param.mod_mgt$I_R <- 2 #I_R = 2, for GLAM-R2: leave as is for maize #JRV
   GLAM_params$glam_param.sim_ctr$MMNO <- 1 #MMNO = 1, meaning calibration based on RMSE
   GLAM_params$glam_param.sim_ctr$IMERF <- 0 #IMERF = 1 (global optimisation)
   GLAM_params$glam_param.sim_ctr$SLA_INI <- 300 #SLA should be on!, SLA_INI = 300 (Challinor and Wheeler 2008)
