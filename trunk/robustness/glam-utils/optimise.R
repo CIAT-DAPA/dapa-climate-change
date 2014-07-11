@@ -143,7 +143,7 @@ GLAM_optimise <- function(opt_data) {
   if (!file.exists(save_file)) {
     #loop through sequence of values
     for (i in 1:length(vals)) {
-      #i <- 1
+      #i <- 2
       cat("\nperforming run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
       
       #assign values to parameter set

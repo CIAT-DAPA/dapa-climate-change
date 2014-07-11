@@ -25,7 +25,7 @@ source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 #input directories
 wd <- "~/Leeds-work/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
-calib_dir <- paste(runs_dir,"/ppe_optimisation_tofix2",sep="")
+calib_dir <- paste(runs_dir,"/ppe_optimisation_t1",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
 met_dir <- paste(wd,"/data/meteorology",sep="")
 bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
