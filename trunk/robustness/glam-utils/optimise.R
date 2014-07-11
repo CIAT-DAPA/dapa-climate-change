@@ -160,7 +160,7 @@ GLAM_optimise <- function(opt_data) {
       #calibrate model
       cal_data <- opt_data
       if (opt_data$USE_SCRATCH) {
-        opt_dir$SCRATCH <- opt_dir
+        cal_data$SCRATCH <- opt_dir
         cal_data$BASE_DIR <- nfs_dir
       } else {
         cal_data$BASE_DIR <- opt_dir
@@ -168,8 +168,6 @@ GLAM_optimise <- function(opt_data) {
       cal_data$SIM_NAME <- paste("calibration_",cal_data$PARAM,"_run-",i,sep="")
       cal_data$NSTEPS <- 67
       ygp_calib <- GLAM_calibrate(cal_data)
-      
-      
       
       #yearly output
       yr_out <- ygp_calib$RAW_DATA
