@@ -147,7 +147,7 @@ GLAM_calibrate <- function(cal_data) {
     
     #data.frame of iterative soil*sowing date trials
     sow_seq <- round(seq(sow_date1, sow_date2, length.out=10), 0)
-    sol_seq <- c(1,1.15,1.3)
+    sol_seq <- c(1,1.2,1.4,1.6,1.8)
     run_df <- expand.grid(sow=sow_seq, sol=sol_seq)
     
     #prepare input object
@@ -170,9 +170,9 @@ GLAM_calibrate <- function(cal_data) {
     run_data$IEYR <- cal_data$IEYR
     run_data$PARAMS <- params
     
-    #file of output
-    cal_outfile <- paste(opt_dir,"/cal-",run_data$LOC,".txt",sep="") #summary
-    raw_outfile <- paste(opt_dir,"/cal-",run_data$LOC,"_raw.txt",sep="") #raw
+    ##file of output
+    #cal_outfile <- paste(opt_dir,"/cal-",run_data$LOC,".txt",sep="") #summary
+    #raw_outfile <- paste(opt_dir,"/cal-",run_data$LOC,"_raw.txt",sep="") #raw
     
     #if (!file.exists(cal_outfile)) {
       #loop through sequence of values
@@ -206,7 +206,7 @@ GLAM_calibrate <- function(cal_data) {
             run_data$RUN_DIR <- paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")
           }
           
-          #read in the predicted yield
+          #read in the simulated yield
           if (length(run_data$SEAS_FILES) == 1 | length(outfile) == 1) {
             pred <- read.table(paste(run_data$RUN_DIR,"/output/",run_data$SEAS_FILES,sep=""),header=F,sep="\t")
             names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
@@ -226,7 +226,7 @@ GLAM_calibrate <- function(cal_data) {
         #fix brackets below
         if (nrow(pred_all) > 0) { #for existence of output GLAM file
           #average by YEAR and SAT_FAC
-          pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
+          #pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
           pred_agg <- aggregate(pred_all[,c("SOW","YIELD","PLANTING_DATE","DUR")], by=list(YEAR=pred_all$YEAR, SAT_FAC=pred_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
           
           #perform this calculation for each value of SAT_FAC
