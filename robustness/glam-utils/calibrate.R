@@ -190,8 +190,6 @@ GLAM_calibrate <- function(cal_data) {
         pred_all <- data.frame()
         for (k in 1:nrow(run_df)) {
           #k <- 1
-          #cat(k,". ",sep="")
-          
           #get sow date and SAT multiplier
           sow_date <- run_df$sow[k]
           run_data$SAT <- cal_data$INI_COND$SAT[which(cal_data$INI_COND$LOC == run_data$LOC)] * run_df$sol[k]
@@ -200,7 +198,15 @@ GLAM_calibrate <- function(cal_data) {
           #check whether the *.out already exists
           outfile <- list.files(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/output",sep=""),pattern="\\.out")
           if (length(outfile) == 0) {
-            run_data <- run_glam(run_data)
+            if (k == 1) {
+              run_data <- run_glam(run_data)
+            } else {
+              #if (cal_data$USE_SCRATCH) {}
+              solfil <- make_soilcodes(outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soilcodes.txt",sep=""))
+              solfil <- make_soiltypes(data.frame(CELL=run_data$LOC,RLL=run_data$RLL,DUL=run_data$DUL,SAT=run_data$SAT),
+                                       outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
+              thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
+            }
           } else {
             run_data$SEAS_FILES <- outfile
             run_data$RUN_DIR <- paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")
@@ -218,10 +224,9 @@ GLAM_calibrate <- function(cal_data) {
                              "SWFAC_TOT","SWFAC_MEAN","SWFAC_COUNT")
             pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","STG","YIELD","PLANTING_DATE","DUR")])
             pred_all <- rbind(pred_all, pred)
-            system(paste("rm -rf ",run_data$RUN_DIR,sep="")) #remove junk
+            #system(paste("rm -rf ",run_data$RUN_DIR,sep="")) #remove junk
           }
         }
-        #cat("\n")
         
         #fix brackets below
         if (nrow(pred_all) > 0) { #for existence of output GLAM file
@@ -284,6 +289,9 @@ GLAM_calibrate <- function(cal_data) {
           rmse_all <- aggregate(odf_all[,c("RMSE")], by=list(SAT_FAC=odf_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
           sfac <- rmse_all$SAT_FAC[which(rmse_all$x == min(rmse_all$x))][1]
           rmse <- min(rmse_all$x)
+          
+          #remove junk
+          system(paste("rm -rf ",run_data$RUN_DIR,sep=""))
         } else {
           rmse <- NA
         }

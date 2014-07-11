@@ -23,8 +23,8 @@ source(paste(src.dir,"/glam-utils/optimise.R",sep=""))
 source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 
 #input directories
-#wd <- "~/Leeds-work/quest-for-robustness"
-wd <- "/nfs/a101/earjr/quest-for-robustness"
+wd <- "~/Leeds-work/quest-for-robustness"
+#wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
 calib_dir <- paste(runs_dir,"/ppe_optimisation_t1",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
@@ -102,7 +102,8 @@ opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep=""
 opt_data$RUN_TYPE <- "RFD"
 opt_data$METHOD <- "RMSE"
 opt_data$USE_SCRATCH <- T
-opt_data$SCRATCH <- "/scratch/earjr"
+#opt_data$SCRATCH <- "/scratch/earjr"
+opt_data$SCRATCH <- paste(wd,"/scratch",sep="")
 
 for (i in 1:nrow(param_list)) {
   #i <- 2
