@@ -108,7 +108,7 @@ GLAM_optimise <- function(opt_data) {
   
   #output directories
   if (opt_data$USE_SCRATCH) {
-    cal_dir <- opt_data$SCRATCH #calibration directory
+    cal_dir <- opt_data$SCRATCH #optimisation directory
     nfs_dir <- paste(opt_data$BASE_DIR,"/",opt_data$SIM_NAME,sep="")
     if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
   } else {
@@ -137,7 +137,11 @@ GLAM_optimise <- function(opt_data) {
   opt_data$PARAMS$glam_param.mod_mgt$IASCII <- 1 #output only to season file
   
   #file of output
-  save_file <- paste(cal_dir,"/opt-",opt_data$PARAM,".RData",sep="")
+  if (opt_data$USE_SCRATCH) {
+    save_file <- paste(cal_dir,"/opt-",opt_data$PARAM,".RData",sep="")
+  } else {
+    save_file <- paste(nfs_dir,"/opt-",opt_data$PARAM,".RData",sep="")
+  }
   
   #do only if calibration file does not exist
   if (!file.exists(save_file)) {
@@ -155,10 +159,17 @@ GLAM_optimise <- function(opt_data) {
       
       #calibrate model
       cal_data <- opt_data
-      cal_data$BASE_DIR <- opt_dir
+      if (opt_data$USE_SCRATCH) {
+        opt_dir$SCRATCH <- opt_dir
+        cal_data$BASE_DIR <- nfs_dir
+      } else {
+        cal_data$BASE_DIR <- opt_dir
+      }
       cal_data$SIM_NAME <- paste("calibration_",cal_data$PARAM,"_run-",i,sep="")
       cal_data$NSTEPS <- 67
       ygp_calib <- GLAM_calibrate(cal_data)
+      
+      
       
       #yearly output
       yr_out <- ygp_calib$RAW_DATA

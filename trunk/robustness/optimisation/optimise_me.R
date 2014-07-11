@@ -23,7 +23,8 @@ source(paste(src.dir,"/glam-utils/optimise.R",sep=""))
 source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 
 #input directories
-wd <- "~/Leeds-work/quest-for-robustness"
+#wd <- "~/Leeds-work/quest-for-robustness"
+wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
 calib_dir <- paste(runs_dir,"/ppe_optimisation_t1",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
@@ -72,11 +73,11 @@ xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in
 
 ###
 #5. create meteorology for selected grid cells
-for (i in 1:nrow(xy_sel)) {
-  loc <- xy_sel$LOC[i]; x <- xy_sel$x[i]; y <- xy_sel$y[i]
-  wval <- extract_weather(cellid=loc, lon=x, lat=y, met_dir=met_dir, data_type="obs", dataset="WFD", 
-                          sce="hist", years=1950:2001)
-}
+#for (i in 1:nrow(xy_sel)) {
+#  loc <- xy_sel$LOC[i]; x <- xy_sel$x[i]; y <- xy_sel$y[i]
+#  wval <- extract_weather(cellid=loc, lon=x, lat=y, met_dir=met_dir, data_type="obs", dataset="WFD", 
+#                          sce="hist", years=1950:2001)
+#}
 
 ###
 #6. iteratively optimise over the list of parameters (with a defined number of iterations)
@@ -100,8 +101,8 @@ opt_data$YLD_DATA <- xy_main_yield
 opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
 opt_data$RUN_TYPE <- "RFD"
 opt_data$METHOD <- "RMSE"
-opt_data$USE_SCRATCH <- F
-opt_data$SCRATCH <- NA
+opt_data$USE_SCRATCH <- T
+opt_data$SCRATCH <- "/scratch/earjr"
 
 for (i in 1:nrow(param_list)) {
   #i <- 2
