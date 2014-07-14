@@ -15,3 +15,6 @@ for (i in 2:nrow(lhyp1)) {
   points(rep(i,ncol(lhyp1)),lhyp1[i,],pch=c(1:ncol(lhyp1)),cex=0.8)
 }
 
+#to generate the values in the actual parameter range
+#where min and max are specific to parameter being sampled
+p1vals <- qunif(lhyp1[1,],min=1,max=2.5) 
