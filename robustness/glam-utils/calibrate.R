@@ -117,8 +117,8 @@ GLAM_calibrate <- function(cal_data) {
   #output directories
   if (cal_data$USE_SCRATCH) {
     cal_dir <- cal_data$SCRATCH #calibration directory
-    nfs_dir <- paste(cal_data$BASE_DIR,"/",cal_data$SIM_NAME,sep="")
-    if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
+    #nfs_dir <- paste(cal_data$BASE_DIR,"/",cal_data$SIM_NAME,sep="")
+    #if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
   } else {
     cal_dir <- cal_data$BASE_DIR #calibration directory
   }
