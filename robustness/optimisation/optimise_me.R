@@ -127,7 +127,11 @@ for (i in 1:nrow(param_list)) {
   
   #run optim function
   par_optim <- GLAM_optimise(opt_data)
+  #par_optim <- get(load(file=paste(opt_data$BASE_DIR,"/",opt_data$SIM_NAME,"/opt-",opt_data$PARAM,".RData",sep="")))
+  #rm(r_list)
   #plot(par_optim$OPTIMISATION$VALUE, par_optim$OPTIMISATION$RMSE, ty="l") #plot RMSE curve
+  
+  #head(par_optim$RAW_OPTIMISATION)
   
   #update parameter value with optimal
   opt_val <- par_optim$OPTIMISATION$VALUE[which(par_optim$OPTIMISATION$RMSE == min(par_optim$OPTIMISATION$RMSE))]
