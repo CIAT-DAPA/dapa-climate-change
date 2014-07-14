@@ -273,10 +273,10 @@ GLAM_calibrate <- function(cal_data) {
               y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
               odf$LOESS_PRED <- y_loess$fit
               rd_loess <- (odf$PRED - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
-              odf$PRED_ADJ <- (rd_loess+1) * mean(odf$PRED) #odf$PRED[nrow(odf)] #loess
-              odf$LOESS_PRED <- NULL
+              odf$PRED_ADJ <- (rd_loess+1) * mean(odf$PRED, na.rm=T) #odf$PRED[nrow(odf)] #loess
             }
-              
+            odf$LOESS_PRED <- NULL #remove extra field
+            
             #choose optimisation method (RMSE, CH07, CH10)
             if (opt_meth == "RMSE") {
               rmse <- sqrt(sum((odf$OBS_ADJ-odf$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(odf$OBS_ADJ)))))
