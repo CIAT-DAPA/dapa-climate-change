@@ -21,9 +21,14 @@ param_list <- read.csv(paste(mdata_dir,"/parameter_list.txt",sep=""),sep="\t",he
 #2. create sample of parameter sets
 #n=number of points (i.e. replicas) --how many values in each dimension?
 #k=number of dimensions (i.e. parameters) --how many dimensions (i.e. parameters)?
-nrep <- 100
+nrep <- 10000
 set.seed(2303)
-lhyp1 <- maximinLHS(n=nrep,k=nrow(param_list),dup=1)
+if (!file.exists(paste(mdata_dir,"/glam_lhs.RData",sep=""))) {
+  lhyp1 <- maximinLHS(n=nrep,k=nrow(param_list),dup=1)
+  save(list=c("lhyp1"),file=paste(mdata_dir,"/glam_lhs.RData",sep=""))
+} else {
+  load(file=paste(mdata_dir,"/glam_lhs.RData",sep=""))
+}
 
 #to generate the values in the actual parameter range
 #where min and max are specific to parameter being sampled
