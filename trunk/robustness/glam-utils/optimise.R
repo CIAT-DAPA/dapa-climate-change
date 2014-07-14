@@ -123,6 +123,21 @@ GLAM_optimise <- function(opt_data) {
   opt_dir <- paste(cal_dir,"/",tolower(param),sep="")
   if (!file.exists(opt_dir)) {dir.create(opt_dir)}
   
+  #move model and weather files to scratch
+  if (opt_data$USE_SCRATCH) {
+    #copy bin
+    nbin_dir <- paste(cal_dir,"/glam_bin",sep="")
+    if (!file.exists(nbin_dir)) {dir.create(nbin_dir)}
+    system(paste("cp -f ",opt_data$BIN_DIR,"/",exec_name," ",nbin_dir,"/.",sep=""))
+    opt_data$BIN_DIR <- nbin_dir
+    
+    #copy weather files
+    nwth_dir <- paste(cal_dir,"/weather",sep="")
+    if (!file.exists(nwth_dir)) {dir.create(nwth_dir)}
+    system(paste("cp -rf ",opt_data$WTH_DIR,"/. ",nwth_dir,sep=""))
+    opt_data$WTH_DIR <- nwth_dir
+  }
+  
   #create sequence of values
   if (param %in% c("SLA_INI","NDSLA")) {
     vals <- seq(opt_data$MINVAL,opt_data$MAXVAL,length.out=opt_data$NSTEPS)
@@ -138,16 +153,16 @@ GLAM_optimise <- function(opt_data) {
   
   #file of output
   if (opt_data$USE_SCRATCH) {
-    save_file <- paste(cal_dir,"/opt-",opt_data$PARAM,".RData",sep="")
-  } else {
     save_file <- paste(nfs_dir,"/opt-",opt_data$PARAM,".RData",sep="")
+  } else {
+    save_file <- paste(cal_dir,"/opt-",opt_data$PARAM,".RData",sep="")
   }
   
   #do only if calibration file does not exist
   if (!file.exists(save_file)) {
     #loop through sequence of values
     for (i in 1:length(vals)) {
-      #i <- 2
+      #i <- 1
       cat("\nperforming run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
       
       #assign values to parameter set
@@ -236,7 +251,11 @@ GLAM_optimise <- function(opt_data) {
   }
   
   #clean up
-  system(paste("rm -rf ",opt_dir,sep=""))
+  if (opt_data$USE_SCRATCH) {
+    system(paste("rm -rf ",cal_dir,sep=""))
+  } else {
+    system(paste("rm -rf ",opt_dir,sep=""))
+  }
   
   return(r_list)
 }
