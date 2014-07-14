@@ -228,7 +228,7 @@ GLAM_calibrate <- function(cal_data) {
           }
         }
         
-        #fix brackets below
+        #read in all files and determine best sat multiplier
         if (nrow(pred_all) > 0) { #for existence of output GLAM file
           #average by YEAR and SAT_FAC
           #pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
@@ -330,7 +330,7 @@ GLAM_calibrate <- function(cal_data) {
   
   #remove junk from scratch
   if (cal_data$USE_SCRATCH) {
-    system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
+    #system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     system(paste("rm -rf ",cal_dir,sep=""))
   }
   
