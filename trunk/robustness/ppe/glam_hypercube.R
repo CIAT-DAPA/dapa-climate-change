@@ -123,5 +123,9 @@ wval <- extract_weather(cellid=cal_data$LOC, lon=cal_data$LON, lat=cal_data$LAT,
 cal_data$PARAMS$glam_param.mod_mgt$IASCII <- 1 #output only to season file
 ygp_calib <- GLAM_calibrate(cal_data)
 
+#save output object
+save(ygp_calib, file=paste(cal_data$BASE_DIR,"/",cal_data$SIM_NAME,".RData",sep=""))
 
+#remove junk / scratch as needed
+if (cal_data$USE_SCRATCH) {system(paste("rm -rf ",cal_data$SCRATCH,sep=""))}
 
