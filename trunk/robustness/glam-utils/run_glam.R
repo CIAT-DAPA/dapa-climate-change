@@ -59,6 +59,7 @@ run_glam <- function(run_data) {
       params$glam_param.sim_ctr$CROP <- run_data$CROP
     } else {
       params <- run_data$PARAMS
+      params$glam_param.sim_ctr$SMLON <- run_data$LON
     }
   }
   parfile <- GLAM_create_parfile(params, paste(run_dir,"/",run_data$CROP,"_param_run.txt",sep=""))

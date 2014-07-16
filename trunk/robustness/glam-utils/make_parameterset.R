@@ -46,7 +46,7 @@ write_line <- function(parlist,outfile,format="short") {
               sprintf("%-7s",parlist[[l_name]]$Meth),
               sprintf("%1$-9.2f%2$-9.2f%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$Nval),"\n",sep=""),file=pf)
   } else if (tolower(format) == "int") {
-    cat(paste(sprintf("%-12s",l_name),sprintf("%-11d",parlist[[l_name]]$Value),
+    cat(paste(sprintf("%-12s",l_name),sprintf("%-11d",as.integer(parlist[[l_name]]$Value)),
               sprintf("%-7s",parlist[[l_name]]$Meth),
               sprintf("%1$-9d%2$-9d%3$-9d",parlist[[l_name]]$Min,parlist[[l_name]]$Max,parlist[[l_name]]$Nval),"\n",sep=""),file=pf)
   } else if (tolower(format) == "long") {
@@ -118,8 +118,8 @@ GLAM_create_parfile <- function(params,outfile,base_file=NA,overwrite=T) {
             sprintf("%-9d",glam_param.sim_ctr$ISHF),
             sprintf("%-9d",glam_param.sim_ctr$IUPT),"\n",
             sprintf("%-12s","NDSLA"),
-            sprintf("%-11d",glam_param.sim_ctr$NDSLA),
-            sprintf("%-7.1f",glam_param.sim_ctr$SLA_INI),
+            sprintf("%-11d",as.integer(glam_param.sim_ctr$NDSLA)),
+            sprintf("%-7.1f",round(glam_param.sim_ctr$SLA_INI)),
             sprintf("%-9.1f",glam_param.sim_ctr$ZSMAX),
             sprintf("%-9.1f",glam_param.sim_ctr$SMLON),
             sprintf("%-9s","x"),"\n",

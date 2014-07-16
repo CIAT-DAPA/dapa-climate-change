@@ -161,7 +161,7 @@ GLAM_calibrate <- function(cal_data) {
     run_data$LOC <- loc
     run_data$LON <- cal_data$INI_COND$x[which(cal_data$INI_COND$LOC == loc)]
     run_data$LAT <- cal_data$INI_COND$y[which(cal_data$INI_COND$LOC == loc)]
-    run_data$ME <- cal_data$INI_COND$ME[which(cal_data$INI_COND$LOC == run_data$LOC)]
+    run_data$ME <- cal_data$INI_COND$ME_NEW[which(cal_data$INI_COND$LOC == run_data$LOC)]
     run_data$SOW_DATE <- cal_data$INI_COND$SOW_DATE1[which(cal_data$INI_COND$LOC == run_data$LOC)]
     run_data$RLL <- cal_data$INI_COND$RLL[which(cal_data$INI_COND$LOC == run_data$LOC)]
     run_data$DUL <- cal_data$INI_COND$DUL[which(cal_data$INI_COND$LOC == run_data$LOC)]
@@ -205,6 +205,8 @@ GLAM_calibrate <- function(cal_data) {
               solfil <- make_soilcodes(outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soilcodes.txt",sep=""))
               solfil <- make_soiltypes(data.frame(CELL=run_data$LOC,RLL=run_data$RLL,DUL=run_data$DUL,SAT=run_data$SAT),
                                        outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
+              sowfil <- make_sowdates(data.frame(CELL=run_data$LOC,SOW_DATE=sow_date),
+                                      outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/sow/sowing.txt",sep=""))
               thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
             }
           } else {
