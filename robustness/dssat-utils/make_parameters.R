@@ -35,7 +35,6 @@
 #speall <- get_spepar(in_file=spe_file) #read in
 #spefil <- make_spepar(params=speall, out_file=spe_file, overwrite=F) #write
 
-
 #make ecotype parameter file
 make_ecopar <- function(params, out_file, overwrite=F) {
   #determine which model
@@ -265,10 +264,26 @@ make_spepar <- function(params, out_file, overwrite=F) {
   }
   cat("\n",file=pf)
   
-  #root parameters
+  #respiration parameters (only ixm)
+  if (model == "ixm") {
+    cat("*RESPIRATION PARAMETERS\n",file=pf)
+    cat(paste(sprintf("%1$9.6f%2$7.4f",params$respiration$RES30C,params$respiration$R30C2),"\n",sep=""),file=pf)
+    cat("\n",file=pf)
+  }
+  
+  #root parameters (different for each model)
   cat("*PLANT COMPOSITION VALUES\n",file=pf)
-  for (i in 1:nrow(params$plant_comp)) {
-    cat(paste(sprintf("%8s",params$plant_comp$PARAM[i]),sprintf("%1$7.3f",params$plant_comp$VALUE[i]),"\n",sep=""),file=pf)
+  if (model == "ixm") {
+    cat(paste(sprintf("%1$6.3f%2$6.3f%3$6.3f%4$6.3f%5$6.3f",params$plant_comp1$PCARLF,params$plant_comp1$PCARST,params$plant_comp1$PCARRT,params$plant_comp1$PCAREA,params$plant_comp1$PCARSD),"\n",sep=""),file=pf)
+    cat(paste(sprintf("%1$6.3f%2$6.3f%3$6.3f%4$6.3f%5$6.3f",params$plant_comp2$PPROLF,params$plant_comp2$PPROST,params$plant_comp2$PPRORT,params$plant_comp2$PPROEA,params$plant_comp2$PPROSD),"\n",sep=""),file=pf)
+    cat(paste(sprintf("%1$6.3f%2$6.3f%3$6.3f%4$6.3f%5$6.3f",params$plant_comp3$PLIPLF,params$plant_comp3$PLIPST,params$plant_comp3$PLIPRT,params$plant_comp3$PLIPEA,params$plant_comp3$PLIPSD),"\n",sep=""),file=pf)
+    cat(paste(sprintf("%1$6.3f%2$6.3f%3$6.3f%4$6.3f%5$6.3f",params$plant_comp4$PLIGLF,params$plant_comp4$PLIGST,params$plant_comp4$PLIGRT,params$plant_comp4$PLIGEA,params$plant_comp4$PLIGSD),"\n",sep=""),file=pf)
+    cat(paste(sprintf("%1$6.3f%2$6.3f%3$6.3f%4$6.3f%5$6.3f",params$plant_comp5$POALF,params$plant_comp5$POAST,params$plant_comp5$POART,params$plant_comp5$POAEA,params$plant_comp5$POASD),"\n",sep=""),file=pf)
+    cat(paste(sprintf("%1$6.3f%2$6.3f%3$6.3f%4$6.3f%5$6.3f",params$plant_comp6$PMINLF,params$plant_comp6$PMINST,params$plant_comp6$PMINRT,params$plant_comp6$PMINEA,params$plant_comp6$PMINSD),"\n",sep=""),file=pf)
+  } else {
+    for (i in 1:nrow(params$plant_comp)) {
+      cat(paste(sprintf("%8s",params$plant_comp$PARAM[i]),sprintf("%1$7.3f",params$plant_comp$VALUE[i]),"\n",sep=""),file=pf)
+    }
   }
   cat("\n",file=pf)
   
@@ -293,8 +308,12 @@ make_spepar <- function(params, out_file, overwrite=F) {
   #last few (unidentified) parameters
   cat(paste(sprintf("%1$8.2f%2$8.2f",params$srat$SRATPHOTO,params$srat$SRATPART),"\n",sep=""),file=pf)
   cat(paste(sprintf("%1$8.2f",params$FRACPMOBIL),"\n",sep=""),file=pf)
-  cat(paste(sprintf("%1$8.4f",params$ROOTRAD),"\n",sep=""),file=pf)
-  #cat("\n",file=pf)
+  
+  if (model == "ixm") {
+    cat(paste(sprintf("%1$8.2f",params$FRACPUPTAKE),"\n",sep=""),file=pf)
+  } else {
+    cat(paste(sprintf("%1$8.4f",params$ROOTRAD),"\n",sep=""),file=pf)
+  }
   
   #close file
   close(pf)
