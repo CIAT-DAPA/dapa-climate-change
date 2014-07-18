@@ -205,7 +205,12 @@ get_spepar <- function(in_file) {
   #last few (unidentified) parameters
   spepar$srat <- read.fortran(in_file,skip=71+ic,n=1,format=c("2F8")); names(spepar$srat) <- c("SRATPHOTO","SRATPART")
   spepar$FRACPMOBIL <- read.fortran(in_file,skip=72+ic,n=1,format=c("F8"))$V1
-  spepar$ROOTRAD <- read.fortran(in_file,skip=73+ic,n=1,format=c("F8"))$V1
+  
+  if (model == "ixm") {
+    spepar$FRACPUPTAKE <- read.fortran(in_file,skip=73+ic,n=1,format=c("F8"))$V1
+  } else {
+    spepar$ROOTRAD <- read.fortran(in_file,skip=73+ic,n=1,format=c("F8"))$V1
+  }
   
   return(spepar)
 }
