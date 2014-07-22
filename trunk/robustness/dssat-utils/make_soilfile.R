@@ -1,6 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
-#May 2012
+#Jul 2014
 
 ##########################################################################################
 ########### write the soil file (SOIL.SOL), with a generic soil code to be used for a
