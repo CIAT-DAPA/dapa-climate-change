@@ -234,8 +234,9 @@ GLAM_calibrate <- function(cal_data) {
         if (nrow(pred_all) > 0) { #for existence of output GLAM file
           #average by YEAR and SAT_FAC
           #pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
+          pred_all$YIELD[which(pred_all$STG == 9)] <- NA #set to NA all STG==0
           pred_agg <- aggregate(pred_all[,c("SOW","YIELD","PLANTING_DATE","DUR")], by=list(YEAR=pred_all$YEAR, SAT_FAC=pred_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
-          
+                    
           #perform this calculation for each value of SAT_FAC
           odf_all <- data.frame()
           for (sfac in sol_seq) {
@@ -243,6 +244,7 @@ GLAM_calibrate <- function(cal_data) {
             #grab predicted yield
             pred <- pred_agg[which(pred_agg$SAT_FAC == sfac),]
             y_p <- pred$YIELD
+            y_p[which(is.na(y_p))] <- 0 #set to zero any NAs (product of emergence failure)
             
             #grab observed yield
             y_o <- as.data.frame(t(cal_data$YLD_DATA[which(cal_data$YLD_DATA$x == run_data$LON & cal_data$YLD_DATA$y == run_data$LAT),3:ncol(cal_data$YLD_DATA)]))

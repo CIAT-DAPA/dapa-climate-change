@@ -17,24 +17,45 @@ yiDir <- paste(wd,"/data/yield_data_maize",sep="")
 #read in yield data for getting mask
 yrs <- raster(paste(yiDir,"/descriptive_stats/mean_ModelYld500.tif",sep=""))
 
+#create data.frame with coordinates of big grid cell (all)
+xy <- as.data.frame(xyFromCell(yrs,1:ncell(yrs)))
+xy$ID <- 1:nrow(xy)
+
+#function to average data within the grid cell
+agg_soil <- function(x,target_res,in_rs) {
+  #x <- as.numeric(xy[900,])
+  lon <- x[1]; lat <- x[2]; id <- x[3]
+  cat("...loc ",id," out of ",3564," (",round((id/3564*100),2)," %)\n",sep="")
+  
+  rs_cut <- crop(in_rs, extent((lon-target_res*.5),(lon+target_res*.5),(lat-target_res*.5),(lat+target_res*.5)))
+  ret_val <- mean(rs_cut[],na.rm=T)
+  return(ret_val)
+}
+
 #read in soil data
 rll_rs <- raster(paste(sdataDir,"/Glam_soil_bjp/Glam_FAO_SOIL.nc",sep=""),varname="rll")
 rll_rs <- crop(rll_rs, yrs)
-rll_rs <- resample(rll_rs, yrs, method="bilinear")
-rll_rs <- writeRaster(rll_rs, paste(soDir, "/rll_lr.tif",sep=""), format="GTiff")
+#rll_rs <- resample(rll_rs, yrs, method="bilinear")
+rll_rs_ag <- apply(xy, 1, agg_soil, xres(yrs), rll_rs)
+rll_rs_af <- yrs; rll_rs_af[] <- NA; rll_rs_af[] <- rll_rs_ag
+rll_rs_af <- writeRaster(rll_rs_af, paste(soDir, "/rll_lr.tif",sep=""), format="GTiff")
 
 dul_rs <- raster(paste(sdataDir,"/Glam_soil_bjp/Glam_FAO_SOIL.nc",sep=""),varname="dul")
 dul_rs <- crop(dul_rs, yrs)
-dul_rs <- resample(dul_rs, yrs, method="bilinear")
-dul_rs <- writeRaster(dul_rs, paste(soDir, "/dul_lr.tif",sep=""), format="GTiff")
+#dul_rs <- resample(dul_rs, yrs, method="bilinear")
+dul_rs_ag <- apply(xy, 1, agg_soil, xres(yrs), dul_rs)
+dul_rs_af <- yrs; dul_rs_af[] <- NA; dul_rs_af[] <- dul_rs_ag
+dul_rs_af <- writeRaster(dul_rs_af, paste(soDir, "/dul_lr.tif",sep=""), format="GTiff")
 
 sat_rs <- raster(paste(sdataDir,"/Glam_soil_bjp/Glam_FAO_SOIL.nc",sep=""),varname="sat")
 sat_rs <- crop(sat_rs, yrs)
-sat_rs <- resample(sat_rs, yrs, method="bilinear")
-sat_rs <- writeRaster(sat_rs, paste(soDir, "/sat_lr.tif",sep=""), format="GTiff")
+#sat_rs <- resample(sat_rs, yrs, method="bilinear")
+sat_rs_ag <- apply(xy, 1, agg_soil, xres(yrs), sat_rs)
+sat_rs_af <- yrs; sat_rs_af[] <- NA; sat_rs_af[] <- sat_rs_ag
+sat_rs_af <- writeRaster(sat_rs_af, paste(soDir, "/sat_lr.tif",sep=""), format="GTiff")
 
 #calculate asw from dul-rll
-asw_rs <- dul_rs - rll_rs
+asw_rs <- dul_rs_af - rll_rs_af
 asw_rs <- writeRaster(asw_rs, paste(soDir, "/asw_lr.tif",sep=""), format="GTiff")
 
 
@@ -54,7 +75,7 @@ for (fil in flist) {
   ncfil <- gsub("\\.zip","\\.nc",fil)
   if (!file.exists(paste(sshanDir,"/",ncfil,sep=""))) {
     setwd(sshanDir)
-    system(paste("unzip ",fil,sep=""))
+    system(paste("7z x ",fil,sep=""))
     setwd("~")
   }
   
@@ -62,6 +83,7 @@ for (fil in flist) {
   
   #loop levels (soil depth)
   for (i in 1:4) {
+    #i <- 1
     cat("...processing layer",i,"\n")
     if (!file.exists(paste(soDir,"/",filname,"_",i,".tif",sep=""))) {
       #read in raster
@@ -72,7 +94,9 @@ for (fil in flist) {
       rs <- crop(rs, yrs)
       
       #resample to 1.125
-      rs <- resample(rs, yrs, method="bilinear")
+      #rs <- resample(rs, yrs, method="bilinear")
+      ag_val <- apply(xy, 1, agg_soil, xres(yrs), rs)
+      rs <- yrs; rs[] <- NA; rs[] <- ag_val
       #plot(rs, zlim=c(0,60))
       
       #write raster file
