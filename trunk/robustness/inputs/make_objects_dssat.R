@@ -1,6 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS
-#Feb 2014
+#Jul 2014
 
 stop("!")
 #Make an .RData file with all data that is needed for maize DSSAT runs (MZCER, MZIXM). 
@@ -74,6 +74,10 @@ row.names(xy_main) <- 1:nrow(xy_main)
 xy_main <- cbind(LOC=cellFromXY(yrs,xy_main[,c("x","y")]), xy_main)
 xy_main <- cbind(ID=1:nrow(xy_main), xy_main)
 
+#extract elevation
+elev <- raster(paste(wd,"/data/elevation/elevation_af.nc",sep=""))
+xy_main$ELEV <- extract(elev, xy_main[,c("x","y")])
+
 #extract ME data
 me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
 xy_main$ME <- extract(me_rs, xy_main[,c("x","y")])
@@ -100,9 +104,9 @@ xy_main <- cbind(xy_main, SOW_DATE1=extract(sow_i, xy_main[,c("x","y")]),
 xy_main[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")] <- round(xy_main[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")],digits=0)
 
 #load soil data
-rll <- stack(c(paste(solDir,"/VMC11_",1:4,".tif",sep=""),paste(solDir,"/VMC12_",1:4,".tif",sep="")))
+rll <- stack(c(paste(solDir,"/VMC31_",1:4,".tif",sep=""),paste(solDir,"/VMC32_",1:4,".tif",sep="")))
 dul <- stack(c(paste(solDir,"/VMC21_",1:4,".tif",sep=""),paste(solDir,"/VMC22_",1:4,".tif",sep="")))
-sat <- stack(c(paste(solDir,"/VMC31_",1:4,".tif",sep=""),paste(solDir,"/VMC32_",1:4,".tif",sep="")))
+sat <- stack(c(paste(solDir,"/VMC11_",1:4,".tif",sep=""),paste(solDir,"/VMC12_",1:4,".tif",sep="")))
 bud <- stack(c(paste(solDir,"/BD1_",1:4,".tif",sep=""),paste(solDir,"/BD2_",1:4,".tif",sep="")))
 org <- stack(c(paste(solDir,"/OC1_",1:4,".tif",sep=""),paste(solDir,"/OC2_",1:4,".tif",sep="")))
 
@@ -114,11 +118,11 @@ xy_main <- cbind(xy_main, as.data.frame(extract(bud, xy_main[,c("x","y")]))*0.01
 xy_main <- cbind(xy_main, as.data.frame(extract(org, xy_main[,c("x","y")]))*0.01)
 
 #renaming fields
-names(xy_main)[11:18] <- paste("SLLL_",1:8,sep="")
-names(xy_main)[19:26] <- paste("SDUL_",1:8,sep="")
-names(xy_main)[27:34] <- paste("SSAT_",1:8,sep="")
-names(xy_main)[35:42] <- paste("SBDM_",1:8,sep="")
-names(xy_main)[43:50] <- paste("SLOC_",1:8,sep="")
+names(xy_main)[12:19] <- paste("SLLL_",1:8,sep="")
+names(xy_main)[20:27] <- paste("SDUL_",1:8,sep="")
+names(xy_main)[28:35] <- paste("SSAT_",1:8,sep="")
+names(xy_main)[36:43] <- paste("SBDM_",1:8,sep="")
+names(xy_main)[44:51] <- paste("SLOC_",1:8,sep="")
 
 #clean up NAs: assign nearest neighbour to points with NA (for all variables in the dataset)
 flds <- c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2",paste("SLLL_",1:8,sep=""),paste("SDUL_",1:8,sep=""),
@@ -216,6 +220,10 @@ row.names(xy_second) <- 1:nrow(xy_second)
 xy_second <- cbind(LOC=cellFromXY(yrs,xy_second[,c("x","y")]), xy_second)
 xy_second <- cbind(ID=1:nrow(xy_second), xy_second)
 
+#extract elevation
+elev <- raster(paste(wd,"/data/elevation/elevation_af.nc",sep=""))
+xy_second$ELEV <- extract(elev, xy_second[,c("x","y")])
+
 #extract ME data
 me_rs <- raster(paste(mesDir,"/maizeMESglobal_lowres_me_final.tif",sep=""))
 xy_second$ME <- extract(me_rs, xy_second[,c("x","y")])
@@ -242,17 +250,29 @@ xy_second <- cbind(xy_second, SOW_DATE1=extract(sow_i, xy_second[,c("x","y")]),
 xy_second[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")] <- round(xy_second[,c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2")],digits=0)
 
 #load soil data
-rll <- raster(paste(solDir,"/rll_lr_shangguan2014.tif",sep=""))
-dul <- raster(paste(solDir,"/dul_lr_shangguan2014.tif",sep=""))
-sat <- raster(paste(solDir,"/sat_lr_shangguan2014.tif",sep=""))
-asw <- raster(paste(solDir,"/asw_lr_shangguan2014.tif",sep=""))
+rll <- stack(c(paste(solDir,"/VMC31_",1:4,".tif",sep=""),paste(solDir,"/VMC32_",1:4,".tif",sep="")))
+dul <- stack(c(paste(solDir,"/VMC21_",1:4,".tif",sep=""),paste(solDir,"/VMC22_",1:4,".tif",sep="")))
+sat <- stack(c(paste(solDir,"/VMC11_",1:4,".tif",sep=""),paste(solDir,"/VMC12_",1:4,".tif",sep="")))
+bud <- stack(c(paste(solDir,"/BD1_",1:4,".tif",sep=""),paste(solDir,"/BD2_",1:4,".tif",sep="")))
+org <- stack(c(paste(solDir,"/OC1_",1:4,".tif",sep=""),paste(solDir,"/OC2_",1:4,".tif",sep="")))
 
 #extract soil data
-xy_second <- cbind(xy_second, RLL=extract(rll, xy_second[,c("x","y")])*0.01, DUL=extract(dul, xy_second[,c("x","y")])*0.01,
-                   SAT=extract(sat, xy_second[,c("x","y")])*0.01, ASW=extract(asw, xy_second[,c("x","y")])*0.01)
+xy_second <- cbind(xy_second, as.data.frame(extract(rll, xy_second[,c("x","y")]))*0.01)
+xy_second <- cbind(xy_second, as.data.frame(extract(dul, xy_second[,c("x","y")]))*0.01)
+xy_second <- cbind(xy_second, as.data.frame(extract(sat, xy_second[,c("x","y")]))*0.01)
+xy_second <- cbind(xy_second, as.data.frame(extract(bud, xy_second[,c("x","y")]))*0.01)
+xy_second <- cbind(xy_second, as.data.frame(extract(org, xy_second[,c("x","y")]))*0.01)
+
+#renaming fields
+names(xy_second)[12:19] <- paste("SLLL_",1:8,sep="")
+names(xy_second)[20:27] <- paste("SDUL_",1:8,sep="")
+names(xy_second)[28:35] <- paste("SSAT_",1:8,sep="")
+names(xy_second)[36:43] <- paste("SBDM_",1:8,sep="")
+names(xy_second)[44:51] <- paste("SLOC_",1:8,sep="")
 
 #clean up NAs: assign nearest neighbour to points with NA (for all variables in the dataset)
-flds <- c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2","RLL","DUL","SAT","ASW")
+flds <- c("SOW_DATE1","SOW_DATE2","HAR_DATE1","HAR_DATE2",paste("SLLL_",1:8,sep=""),paste("SDUL_",1:8,sep=""),
+          paste("SSAT_",1:8,sep=""),paste("SBDM_",1:8,sep=""),paste("SLOC_",1:8,sep=""))
 xy_second$NAs <- apply(xy_second[,flds],1,FUN=function(x) {length(which(is.na(x)))})
 nna <- which((xy_second$NAs == 0))
 xy_second$NAs <- NULL
@@ -270,8 +290,17 @@ for (vn in flds) {
   }
 }
 
+#calculate SSKS and DRATE for each layer
+ssks_fun <- function(x) {y <- 37 * ((x[2]-x[1])/x[1])^2; y <- y/24; return(y)} #cm/h
+drat_fun <- function(x) {y <- 2.96 * x[1]^2 - 2.62 * x[1] + 0.85} #day-1
+for (i in 1:8) {flds <- c(paste("SDUL_",i,sep=""),paste("SSAT_",i,sep="")); xy_second$VALUE <- apply(xy_second[,flds],1,ssks_fun); names(xy_second)[ncol(xy_second)] <- paste("SSKS_",i,sep="")}
+for (i in 1:8) {flds <- c(paste("SDUL_",i,sep=""),paste("SSAT_",i,sep="")); xy_second$VALUE <- apply(xy_second[,flds],1,drat_fun); names(xy_second)[ncol(xy_second)] <- paste("DRATE_",i,sep="")}
+
+#calculate SLDR for entire profile
+xy_second$SLDR <- apply(xy_second[,paste("DRATE_",1:8,sep="")],1,FUN=function(x) {y<-mean(x,na.rm=T); return(y)})
+
 #save this data frame in a RData file
-save(list=c("xy_second"),file=paste(mdataDir,"/initial_conditions_second.RData",sep=""))
+save(list=c("xy_second"),file=paste(mdataDir,"/initial_conditions_second_dssat.RData",sep=""))
 
 #extract crop yields
 xy_second_yield <- xy_second[,c("x","y")]
@@ -282,6 +311,6 @@ names(xy_second_yield)[3:ncol(xy_second_yield)] <- paste("Y.",1982:2005,sep="")
 xy_second_yield[,paste("Y.",1982:2005,sep="")] <- xy_second_yield[,paste("Y.",1982:2005,sep="")] * 1000
 
 #save crop yields
-save(list=c("xy_second_yield"),file=paste(mdataDir,"/yield_second.RData",sep=""))
+save(list=c("xy_second_yield"),file=paste(mdataDir,"/yield_second_dssat.RData",sep=""))
 
 
