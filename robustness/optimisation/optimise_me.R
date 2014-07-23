@@ -26,7 +26,7 @@ source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 #wd <- "~/Leeds-work/quest-for-robustness"
 wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
-calib_dir <- paste(runs_dir,"/ppe_optimisation_t1",sep="")
+calib_dir <- paste(runs_dir,"/ppe_optimisation_t2",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
 met_dir <- paste(wd,"/data/meteorology",sep="")
 bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
@@ -104,15 +104,17 @@ opt_data$METHOD <- "RMSE"
 opt_data$USE_SCRATCH <- T
 opt_data$SCRATCH <- "/scratch/earjr"
 #opt_data$SCRATCH <- paste(wd,"/scratch",sep="")
+opt_data$NPROC <- 3 #25 for eljefe / lajefa
 
 for (i in 1:nrow(param_list)) {
-  #i <- 2
+  #i <- 1
   #previous parameters
   prev_params <- this_params
   
   #parameter and loc within
   param <- paste(param_list$PARAM[i]); sect <- paste(param_list$WHERE[i])
   nsteps <- param_list$NSTEPS[i]
+  opt_data$NPROC <- min(c(opt_data$NPROC,nsteps))
   
   #update arguments
   opt_data$PARAMS <- this_params
@@ -127,6 +129,7 @@ for (i in 1:nrow(param_list)) {
   
   #run optim function
   par_optim <- GLAM_optimise(opt_data)
+  par_optim <- GLAM_optimise_parallel(opt_data)
   #par_optim <- get(load(file=paste(opt_data$BASE_DIR,"/",opt_data$SIM_NAME,"/opt-",opt_data$PARAM,".RData",sep=""))); rm(r_list)
   #plot(par_optim$OPTIMISATION$VALUE, par_optim$OPTIMISATION$RMSE, ty="l") #plot RMSE curve
   

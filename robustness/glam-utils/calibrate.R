@@ -132,7 +132,8 @@ GLAM_calibrate <- function(cal_data) {
   if (!file.exists(opt_dir)) {dir.create(opt_dir)}
   
   #create sequence of values
-  vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=cal_data$NSTEPS)
+  #vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=cal_data$NSTEPS)
+  vals <- seq(0,1,length.out=51)[2:51] #0.2, 0.4, ... 1.0 (total of 50)
   
   #loop through desired locations
   for (loc in cal_data$LOC) {
