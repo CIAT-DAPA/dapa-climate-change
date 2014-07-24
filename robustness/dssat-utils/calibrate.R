@@ -1,6 +1,7 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
 #Feb 2014 #borrows from PhD script called "glam-optimise-functions.R"
+stop("!")
 
 ##############################################################################################
 ####### function to calibrate GLAM (for as many grid cells as provided), each one individually
@@ -23,6 +24,8 @@ source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
 source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
 source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
 source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
+source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
+source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
 source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
 
 wd <- "~/Leeds-work/quest-for-robustness"
@@ -47,18 +50,18 @@ cal_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth 
 cal_data$WTH_ROOT <- "obs_hist_WFD"
 cal_data$LOC <- c(680,681,682)
 cal_data$ISYR <- 1980
-cal_data$IEYR <- 2000
+cal_data$IEYR <- 2001
 cal_data$INI_COND <- xy_main
 cal_data$YLD_DATA <- xy_main_yield
-cal_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9,AX=800,LX=800) #default for missing ones
-cal_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,PSTM=0.75,PEAR=0.15,TSEN=6.0,CDAY=15.0)
+cal_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
+cal_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
 cal_data$SPE <- get_spepar(paste(cal_data$BIN_DIR,"/MZCER045.SPE",sep=""))
 cal_data$SIM_NAME <- "calib_01"
 cal_data$METHOD <- "RMSE"
 cal_data$USE_SCRATCH <- F
 cal_data$SCRATCH <- NA
 
-ygpcalib <- GLAM_calibrate(cal_data)
+#ygpcalib <- GLAM_calibrate(cal_data)
 #---------------------------------------------------------------
 
 #plotting some of the results
@@ -81,12 +84,7 @@ plot(yy$VALUE, yy$RMSE/yy$YOBS_ADJ*100, ty='l',ylim=c(0,100))
 DSSAT_calibrate <- function(cal_data) {
   param <- "SLPF"
   ifile <- "SOL"
-  sect <- "glam_param.ygp" #tolower(cal_data$SECT)
-  params <- cal_data$PARAMS
-  
-  #put years into parameter set
-  params$glam_param.mod_mgt$ISYR <- cal_data$ISYR
-  params$glam_param.mod_mgt$IEYR <- cal_data$IEYR
+  sect <- "properties"
   
   #here is the optimisation method
   #RMSE: is yearly root mean square error (classical)
@@ -106,16 +104,14 @@ DSSAT_calibrate <- function(cal_data) {
   }
   
   #input directories and model
-  exec_name <- cal_data$MODEL
+  exec_name <- "DSCSM045.EXE"
   
   #running command
-  glam_cmd <- paste("./",exec_name,sep="")
+  dssat_cmd <- paste("./",exec_name," ",cal_data$MODEL," B DSSBatch.v45",sep="")
   
   #output directories
   if (cal_data$USE_SCRATCH) {
     cal_dir <- cal_data$SCRATCH #calibration directory
-    #nfs_dir <- paste(cal_data$BASE_DIR,"/",cal_data$SIM_NAME,sep="")
-    #if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
   } else {
     cal_dir <- cal_data$BASE_DIR #calibration directory
   }
@@ -140,8 +136,6 @@ DSSAT_calibrate <- function(cal_data) {
     #sowing window
     sow_date1 <- cal_data$INI_COND$SOW_DATE1[which(cal_data$INI_COND$LOC == loc)]
     sow_date2 <- cal_data$INI_COND$SOW_DATE2[which(cal_data$INI_COND$LOC == loc)]
-    #sow_window <- sow_date1 - sow_date2 #no need due to multiple planting
-    params$glam_param.mod_mgt$ISDAY$Value <- -30 #min(c(sow_window,-30)) #set to -30 as multiple planting
     
     #data.frame of iterative soil*sowing date trials
     sow_seq <- round(seq(sow_date1, sow_date2, length.out=10), 0)
@@ -150,79 +144,89 @@ DSSAT_calibrate <- function(cal_data) {
     
     #prepare input object
     run_data <- list()
-    run_data$CROP <- cal_data$CROP
     run_data$MODEL <- cal_data$MODEL
+    run_data$BASENAME <- cal_data$BASENAME
     run_data$BASE_DIR <- opt_dir
     run_data$BIN_DIR <- cal_data$BIN_DIR
-    run_data$PAR_DIR <- NA
-    run_data$WTH_DIR <- paste(cal_data$WTH_DIR,"/",cal_data$WTH_ROOT,sep="") #to be specified
+    run_data$WTH_DIR <- paste(cal_data$WTH_DIR,"/",cal_data$WTH_ROOT,sep="")
     run_data$LOC <- loc
-    run_data$LON <- cal_data$INI_COND$x[which(cal_data$INI_COND$LOC == loc)]
-    run_data$LAT <- cal_data$INI_COND$y[which(cal_data$INI_COND$LOC == loc)]
+    run_data$LON <- cal_data$INI_COND$x[which(cal_data$INI_COND$LOC == run_data$LOC)]
+    run_data$LAT <- cal_data$INI_COND$y[which(cal_data$INI_COND$LOC == run_data$LOC)]
+    run_data$ELEV <- cal_data$INI_COND$ELEV[which(cal_data$INI_COND$LOC == run_data$LOC)]
     run_data$ME <- cal_data$INI_COND$ME_NEW[which(cal_data$INI_COND$LOC == run_data$LOC)]
-    run_data$SOW_DATE <- cal_data$INI_COND$SOW_DATE1[which(cal_data$INI_COND$LOC == run_data$LOC)]
-    run_data$RLL <- cal_data$INI_COND$RLL[which(cal_data$INI_COND$LOC == run_data$LOC)]
-    run_data$DUL <- cal_data$INI_COND$DUL[which(cal_data$INI_COND$LOC == run_data$LOC)]
-    run_data$SAT <- NA #cal_data$INI_COND$SAT[which(cal_data$INI_COND$LOC == run_data$LOC)]
     run_data$ISYR <- cal_data$ISYR
     run_data$IEYR <- cal_data$IEYR
-    run_data$PARAMS <- params
+    run_data$SOW_DATE <- sow_date1
+    run_data$SOW_WINDOW <- 30 #sow_date2 - sow_date1
+    run_data$SOILS <- get_soils(run_data, cal_data$INI_COND)
+    run_data$CUL <- cal_data$CUL
+    run_data$ECO <- cal_data$ECO
+    run_data$SPE <- cal_data$SPE
+    run_data$XFILE <- get_xfile(run_data)
     
-    ##file of output
-    #cal_outfile <- paste(opt_dir,"/cal-",run_data$LOC,".txt",sep="") #summary
-    #raw_outfile <- paste(opt_dir,"/cal-",run_data$LOC,"_raw.txt",sep="") #raw
-    
-    #if (!file.exists(cal_outfile)) {
     #loop through sequence of values
     for (i in 1:length(vals)) {
       #i <- 1
-      cat("performing ygp calibration run ",cal_data$RUN_TYPE," ",i," value = ",vals[i],sep="","\n")
+      cat("performing slpf calibration run ",i," value = ",vals[i],sep="","\n")
       
       #run id
       run_data$RUN_ID <- paste("run-",i,"_val-",vals[i],"_loc-",run_data$LOC,sep="")
       
-      #assign values to parameter set
-      run_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
+      #assign values to soil file set
+      run_data$SOILS[[sect]][[param]] <- vals[i]
       
       #run all sow*sol options for this YGP value and location
-      pred_all <- data.frame()
+      soils_orig <- run_data$SOILS #original soil data to avoid over-increasing SSAT
+      pred_all <- data.frame() 
       for (k in 1:nrow(run_df)) {
         #k <- 1
-        #get sow date and SAT multiplier
+        #get sow date and SAT multiplier into relevant files
         sow_date <- run_df$sow[k]
-        run_data$SAT <- cal_data$INI_COND$SAT[which(cal_data$INI_COND$LOC == run_data$LOC)] * run_df$sol[k]
+        run_data$SOILS$profile$SSAT <- soils_orig$profile$SSAT * run_df$sol[k]
+        run_data$XFILE$ini_cond_properties$ICDAT <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date),sep="")
+        run_data$XFILE$planting$PDATE <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date),sep="")
+        run_data$XFILE$planting$EDATE <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date+8),sep="")
+        run_data$XFILE$sim_ctrl$SDATE <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date),sep="")
+        run_data$XFILE$auto_mgmt$PFRST <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date),sep="")
+        run_data$XFILE$auto_mgmt$PLAST <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date+run_data$SOW_WINDOW),sep="")
         
         #run the model from scratch if k == 1, otherwise just go to dir, run and grab
         #check whether the *.out already exists
-        outfile <- list.files(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/output",sep=""),pattern="\\.out")
+        outfile <- list.files(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep=""),pattern="\\.OUT")
         if (length(outfile) == 0) {
           if (k == 1) {
-            run_data <- run_glam(run_data)
+            run_data <- run_dssat(run_data)
           } else {
             #if (cal_data$USE_SCRATCH) {}
-            solfil <- make_soilcodes(outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soilcodes.txt",sep=""))
-            solfil <- make_soiltypes(data.frame(CELL=run_data$LOC,RLL=run_data$RLL,DUL=run_data$DUL,SAT=run_data$SAT),
-                                     outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
-            sowfil <- make_sowdates(data.frame(CELL=run_data$LOC,SOW_DATE=sow_date),
-                                    outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/sow/sowing.txt",sep=""))
-            thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
+            soilfil <- make_soilfile(run_data$SOILS, paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/SOIL.SOL",sep=""), overwrite=T)
+            xfil <- make_xfile(run_data$XFILE, paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/",run_data$BASENAME,substr(paste(run_data$ISYR),3,4),"01.MZX",sep=""),overwrite=T)
+            #thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
+            thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",run_data$MODEL," B DSSBatch.v45",sep="")); setwd(thisdir)
           }
         } else {
-          run_data$SEAS_FILES <- outfile
+          run_data$OUT_FILES <- outfile
           run_data$RUN_DIR <- paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")
         }
         
         #read in the simulated yield
-        if (length(run_data$SEAS_FILES) == 1 | length(outfile) == 1) {
-          pred <- read.table(paste(run_data$RUN_DIR,"/output/",run_data$SEAS_FILES,sep=""),header=F,sep="\t")
-          names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                           "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                           "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                           "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                           "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT",
-                           "IPLANT","LETHAL_YIELD","LETHAL_HI","LETHAL_BMASS","LETHAL_BMASS","LETHAL_DAP",
-                           "SWFAC_TOT","SWFAC_MEAN","SWFAC_COUNT")
-          pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","STG","YIELD","PLANTING_DATE","DUR")])
+        if (length(run_data$OUT_FILES) > 0 | length(outfile) > 1) {
+          pred <- read.table(paste(run_data$RUN_DIR,"/Summary.OUT",sep=""),skip=4,header=F,sep="")
+          #HWAM: Harvest Weight At Maturity
+          #HIAM: Harvest Index At Maturity
+          #LAIX: LAI maXimum
+          names(pred) <- c("RUNNO","TRNO","RNO","ONO","CNO","CR","MODEL","TNAME","FNAME","WSTA","SOIL_ID",
+                           "SDAT","PDAT","EDAT","ADAT","MDAT","HDAT","DWAP","CWAM","HWAM","HWAH","BWAH",
+                           "PWAM","HWUM","HnAM","HnUM","HIAM","LAIX","IRnM","IRCM","PRCM","ETCM","EPCM",
+                           "ESCM","ROCM","DRCM","SWXM","NInM","NICM","NFXM","NUCM","NLCM","NIAM","CNAM",
+                           "GNAM","PInM","PICM","PUPC","SPAM","KInM","KICM","KUPC","SKAM","RECM","ONTAM",
+                           "ONAM","OPTAM","OPAM","OCTAM","OCAM","DMPPM","DMPEM","DMPTM","DMPIM","YPPM",
+                           "YPEM","YPTM","YPIM","DPNAM","DPNUM","YPNAM","YPNUM","NDCH","TMAXA","TMINA",
+                           "SRADA","DAYLA","CO2A","PRCP","ETCP")
+          pred <- cbind(YEAR=pred$SDAT,pred); pred$YEAR <- as.numeric(substr(pred$YEAR,1,4))
+          pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","PDAT","MDAT","HWAM")])
+          pred$PDAT <- as.numeric(substr(pred$PDAT,5,7)); pred$MDAT <- as.numeric(substr(pred$MDAT,5,7))
+          pred$DUR <- NA; pred$DUR[which(pred$MDAT > pred$PDAT)] <- pred$MDAT-pred$PDAT
+          pred$DUR[which(pred$MDAT <= pred$PDAT)] <- (pred$MDAT+365)-pred$PDAT
           pred_all <- rbind(pred_all, pred)
           #system(paste("rm -rf ",run_data$RUN_DIR,sep="")) #remove junk
         }
@@ -314,13 +318,6 @@ DSSAT_calibrate <- function(cal_data) {
         raw_all <- rbind(raw_all, odf)
       }
     }
-    ##write outputs for this grid cell
-    #write.table(out_all,sep="\t",quote=F,file=cal_outfile,row.names=F)
-    #write.table(raw_all,sep="\t",quote=F,file=raw_outfile,row.names=F)
-    #} else {
-    #  out_all <- read.table(cal_outfile,sep="\t",header=T)
-    #  raw_all <- read.table(raw_outfile,sep="\t",header=T)
-    #}
     
     #append location data
     out_all <- cbind(LOC=loc,out_all)
