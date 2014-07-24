@@ -123,7 +123,7 @@ run_dssat <- function(run_data) {
   soilfil <- make_soilfile(run_data$SOILS, paste(run_dir,"/SOIL.SOL",sep=""), overwrite=T)
   
   #write xfile
-  run_data$XFILE$sim_ctrl$VBOSE <- "0" #write only Summary.OUT outputs (as needed)
+  #run_data$XFILE$sim_ctrl$VBOSE <- "0" #write only Summary.OUT outputs (as needed)
   xfil <- make_xfile(run_data$XFILE, paste(run_dir,"/",basename,substr(paste(run_data$ISYR),3,4),"01.MZX",sep=""),overwrite=T)
   
   #write DSSBatch.v45

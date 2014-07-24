@@ -27,21 +27,21 @@ get_xfile <- function(run_data) {
                                  AREA=-99,SLEN=-99,
                                  FLWR=-99,SLAS=-99,FLHST=-99,FHDUR=-99)
   xfil_data$ini_cond_properties <- data.frame(C=1,PCR="MZ",
-                                              ICDAT=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE,sep=""),
+                                              ICDAT=paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",run_data$SOW_DATE),sep=""),
                                               ICRT=-99,ICND=-99,ICRN=-99,ICRE=-99,
                                               ICWD=-99,ICRES=-99,ICREN=-99,ICREP=-99,ICRIP=-99,ICRID=-99,
                                               ICNAME="inicond1")
   xfil_data$ini_cond_profile <- data.frame(C=rep(1,5),ICBL=rep(-99,5),SH2O=rep(-99,5),SNH4=rep(-99,5),
                                            SNO3=rep(-99,5))
   xfil_data$planting <- data.frame(P=1,
-                                   PDATE=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE,sep=""),
-                                   EDATE=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE+8,sep=""),
+                                   PDATE=paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",run_data$SOW_DATE),sep=""),
+                                   EDATE=paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",run_data$SOW_DATE+8),sep=""),
                                    PPOP=7,PPOE=7,PLME="S",PLDS="R",PLRS=80,PLRD=-99,PLDP=5,
                                    PLWT=-99,PAGE=-99,PENV=-99,PLPH=-99,SPRL=-99,PLNAME="plant1")
   xfil_data$sim_ctrl <- data.frame(N=1,GENERAL="GE",
                                    NYERS=length(years)-1, #run 1 year less in case of running short of weather years
                                    NREPS=1,START="S",
-                                   SDATE=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE,sep=""),
+                                   SDATE=paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",run_data$SOW_DATE),sep=""),
                                    RSEED=2150,
                                    SNAME="simctr1",SMODEL=-99,OPTIONS="OP",WATER="Y",NITRO="N",SYMBI="N",
                                    PHOSP="N",POTAS="N",DISES="N",CHEM="N",TILL="N",CO2="D",METHODS="ME",
@@ -51,8 +51,8 @@ get_xfile <- function(run_data) {
                                    SUMRY="Y",FROPT=1,GROUT="Y",CAOUT="Y",WAOUT="Y",NIOUT="N",MIOUT="Y",
                                    DIOUT="N",VBOSE="0",CHOUT="N",OPOUT="Y")
   xfil_data$auto_mgmt <- data.frame(N=1,PLANTING="PL",
-                                    PFRST=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE,sep=""),
-                                    PLAST=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE+run_data$SOW_WINDOW,sep=""),
+                                    PFRST=paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",run_data$SOW_DATE),sep=""),
+                                    PLAST=paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",run_data$SOW_DATE+run_data$SOW_WINDOW),sep=""),
                                     PH2OL=25,PH2OU=100,PH2OD=20,
                                     PSTMX=40,PSTMN=10,IRRIGATION="IR",IMDEP=30,ITHRL=50,ITHRU=100,
                                     IROFF="GS000",IMETH="IR001",IRAMT=10,IREFF=1,NITROGEN="NI",NMDEP=30,
