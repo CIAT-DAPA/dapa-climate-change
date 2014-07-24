@@ -19,14 +19,14 @@
 #                             FLDD=-99,FLDS=-99,FLST=-99,SLTX=-99,SLDP=-99,ID_SOIL="IB00000001",
 #                             FLNAME="field1",XCRD=35.438,YCRD=-9.562,ELEV=733,AREA=-99,SLEN=-99,
 #                             FLWR=-99,SLAS=-99,FLHST=-99,FHDUR=-99)
-#in_data$ini_cond_properties <- data.frame(C=1,PCR="MZ",ICDAT=50001,ICRT=-99,ICND=-99,ICRN=-99,ICRE=-99,
+#in_data$ini_cond_properties <- data.frame(C=1,PCR="MZ",ICDAT="50001",ICRT=-99,ICND=-99,ICRN=-99,ICRE=-99,
 #                                          ICWD=-99,ICRES=-99,ICREN=-99,ICREP=-99,ICRIP=-99,ICRID=-99,
 #                                          ICNAME="inicond1")
 #in_data$ini_cond_profile <- data.frame(C=rep(1,5),ICBL=rep(-99,5),SH2O=rep(-99,5),SNH4=rep(-99,5),
 #                                       SNO3=rep(-99,5))
-#in_data$planting <- data.frame(P=1,PDATE=50005,EDATE=50013,PPOP=7,PPOE=7,PLME="S",PLDS="R",PLRS=80,PLRD=-99,PLDP=5,
+#in_data$planting <- data.frame(P=1,PDATE="50005",EDATE="50013",PPOP=7,PPOE=7,PLME="S",PLDS="R",PLRS=80,PLRD=-99,PLDP=5,
 #                               PLWT=-99,PAGE=-99,PENV=-99,PLPH=-99,SPRL=-99,PLNAME="plant1")
-#in_data$sim_ctrl <- data.frame(N=1,GENERAL="GE",NYERS=3,NREPS=1,START="S",SDATE=50005,RSEED=2150,
+#in_data$sim_ctrl <- data.frame(N=1,GENERAL="GE",NYERS=3,NREPS=1,START="S",SDATE="50005",RSEED=2150,
 #                               SNAME="simctr1",SMODEL=-99,OPTIONS="OP",WATER="Y",NITRO="N",SYMBI="N",
 #                               PHOSP="N",POTAS="N",DISES="N",CHEM="N",TILL="N",CO2="D",METHODS="ME",
 #                               WTHER="M",INCON="M",LIGHT="E",EVAPO="R",INFIL="S",PHOTO="R",HYDRO="R",
@@ -34,7 +34,7 @@
 #                               FERTI="N",RESID="N",HARVS="M",OUTPUTS="OU",FNAME="N",OVVEW="Y",
 #                               SUMRY="Y",FROPT=1,GROUT="Y",CAOUT="Y",WAOUT="Y",NIOUT="N",MIOUT="Y",
 #                               DIOUT="N",VBOSE="Y",CHOUT="N",OPOUT="Y")
-#in_data$auto_mgmt <- data.frame(N=1,PLANTING="PL",PFRST=50005,PLAST=50040,PH2OL=25,PH2OU=100,PH2OD=20,
+#in_data$auto_mgmt <- data.frame(N=1,PLANTING="PL",PFRST="50005",PLAST="50040",PH2OL=25,PH2OU=100,PH2OD=20,
 #                                PSTMX=40,PSTMN=10,IRRIGATION="IR",IMDEP=30,ITHRL=50,ITHRU=100,
 #                                IROFF="GS000",IMETH="IR001",IRAMT=10,IREFF=1,NITROGEN="NI",NMDEP=30,
 #                                NMTHR=50,NAMNT=25,NCODE="FE001",NAOFF="GS000",RESIDUES="RE",RIPCN=100,
@@ -130,7 +130,7 @@ make_xfile <- function(in_data, out_file, overwrite=F) {
   cat("*INITIAL CONDITIONS\n",file=pf)
   cat("@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME\n",file=pf)
   cat(paste(sprintf("%2d",as.integer(in_data$ini_cond_properties$C))," ",sprintf("%5s",in_data$ini_cond_properties$PCR),
-            " ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICDAT))," ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICRT)),
+            " ",sprintf("%5s",in_data$ini_cond_properties$ICDAT)," ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICRT)),
             " ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICND))," ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICRN)),
             " ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICRE))," ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICWD)),
             " ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICRES))," ",sprintf("%5d",as.integer(in_data$ini_cond_properties$ICREN)),
@@ -148,8 +148,8 @@ make_xfile <- function(in_data, out_file, overwrite=F) {
   #planting details
   cat("*PLANTING DETAILS\n",file=pf)
   cat("@P PDATE EDATE  PPOP  PPOE  PLME  PLDS  PLRS  PLRD  PLDP  PLWT  PAGE  PENV  PLPH  SPRL                        PLNAME\n",file=pf)
-  cat(paste(sprintf("%2d",as.integer(in_data$planting$P))," ",sprintf("%5d",as.integer(in_data$planting$PDATE)),
-            " ",sprintf("%5d",as.integer(in_data$planting$EDATE))," ",sprintf("%5d",as.integer(in_data$planting$PPOP)),
+  cat(paste(sprintf("%2d",as.integer(in_data$planting$P))," ",sprintf("%5s",in_data$planting$PDATE),
+            " ",sprintf("%5s",in_data$planting$EDATE)," ",sprintf("%5d",as.integer(in_data$planting$PPOP)),
             " ",sprintf("%5d",as.integer(in_data$planting$PPOE))," ",sprintf("%5s",in_data$planting$PLME),
             " ",sprintf("%5s",in_data$planting$PLDS)," ",sprintf("%5d",as.integer(in_data$planting$PLRS)),
             " ",sprintf("%5d",as.integer(in_data$planting$PLRD))," ",sprintf("%5d",as.integer(in_data$planting$PLDP)),
@@ -164,7 +164,7 @@ make_xfile <- function(in_data, out_file, overwrite=F) {
   cat("@N GENERAL     NYERS NREPS START SDATE RSEED SNAME.................... SMODEL\n",file=pf)
   cat(paste(sprintf("%2d",as.integer(in_data$sim_ctrl$N))," ",sprintf("%-11s",in_data$sim_ctrl$GENERAL),
             " ",sprintf("%5d",as.integer(in_data$sim_ctrl$NYERS))," ",sprintf("%5d",as.integer(in_data$sim_ctrl$NREPS)),
-            " ",sprintf("%5s",in_data$sim_ctrl$START)," ",sprintf("%5d",as.integer(in_data$sim_ctrl$SDATE)),
+            " ",sprintf("%5s",in_data$sim_ctrl$START)," ",sprintf("%5s",in_data$sim_ctrl$SDATE),
             " ",sprintf("%5d",as.integer(in_data$sim_ctrl$RSEED))," ",sprintf("%-25s",in_data$sim_ctrl$SNAME),
             " ",sprintf("%-6s",in_data$sim_ctrl$SMODEL),"\n",sep=""),file=pf)
   cat("@N OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2\n",file=pf)
@@ -202,7 +202,7 @@ make_xfile <- function(in_data, out_file, overwrite=F) {
   cat("@  AUTOMATIC MANAGEMENT\n",file=pf)
   cat("@N PLANTING    PFRST PLAST PH2OL PH2OU PH2OD PSTMX PSTMN\n",file=pf)
   cat(paste(sprintf("%2d",as.integer(in_data$auto_mgmt$N))," ",sprintf("%-11s",in_data$auto_mgmt$PLANTING),
-            " ",sprintf("%5d",as.integer(in_data$auto_mgmt$PFRST))," ",sprintf("%5d",as.integer(in_data$auto_mgmt$PLAST)),
+            " ",sprintf("%5s",in_data$auto_mgmt$PFRST)," ",sprintf("%5s",in_data$auto_mgmt$PLAST),
             " ",sprintf("%5d",as.integer(in_data$auto_mgmt$PH2OL))," ",sprintf("%5d",as.integer(in_data$auto_mgmt$PH2OU)),
             " ",sprintf("%5d",as.integer(in_data$auto_mgmt$PH2OD))," ",sprintf("%5d",as.integer(in_data$auto_mgmt$PSTMX)),
             " ",sprintf("%5d",as.integer(in_data$auto_mgmt$PSTMN)),"\n",sep=""),file=pf)
