@@ -13,7 +13,7 @@ stop("!")
   #3a. Bulk density (SBDM) of all eight layers
   #3b. Soil organic carbon (SLOC) of all eight layers
   #3c. Soil moisture limits (SLLL, SDUL, SSAT) for all eight layers
-  #3d. Saturated hydraulic conductivity (SSKS), calculated as SSKS=(37*((SSAT-SDUL)/SDUL)^2) / 24 [cm/h]
+  #3d. Saturated hydraulic conductivity (SSKS), calculated as SSKS=(75*((SSAT-SDUL)/SDUL)^2) / 24 [cm/h]
   #3e. Drainage rate (SLDR), calculated as SLDR=D1*SDUL^2 + D2*SDUL + D3 [day-1], where
        #D1=2.96, D2=-2.62, D3=0.85
 #4. ME in which located
@@ -145,7 +145,7 @@ for (vn in flds) {
 }
 
 #calculate SSKS and DRATE for each layer
-ssks_fun <- function(x) {y <- 37 * ((x[2]-x[1])/x[1])^2; y <- y/24; return(y)} #cm/h
+ssks_fun <- function(x) {y <- 75 * ((x[2]-x[1])/x[1])^2; y <- y/24; return(y)} #cm/h
 drat_fun <- function(x) {y <- 2.96 * x[1]^2 - 2.62 * x[1] + 0.85} #day-1
 for (i in 1:8) {flds <- c(paste("SDUL_",i,sep=""),paste("SSAT_",i,sep="")); xy_main$VALUE <- apply(xy_main[,flds],1,ssks_fun); names(xy_main)[ncol(xy_main)] <- paste("SSKS_",i,sep="")}
 for (i in 1:8) {flds <- c(paste("SDUL_",i,sep=""),paste("SSAT_",i,sep="")); xy_main$VALUE <- apply(xy_main[,flds],1,drat_fun); names(xy_main)[ncol(xy_main)] <- paste("DRATE_",i,sep="")}
@@ -291,7 +291,7 @@ for (vn in flds) {
 }
 
 #calculate SSKS and DRATE for each layer
-ssks_fun <- function(x) {y <- 37 * ((x[2]-x[1])/x[1])^2; y <- y/24; return(y)} #cm/h
+ssks_fun <- function(x) {y <- 75 * ((x[2]-x[1])/x[1])^2; y <- y/24; return(y)} #cm/h
 drat_fun <- function(x) {y <- 2.96 * x[1]^2 - 2.62 * x[1] + 0.85} #day-1
 for (i in 1:8) {flds <- c(paste("SDUL_",i,sep=""),paste("SSAT_",i,sep="")); xy_second$VALUE <- apply(xy_second[,flds],1,ssks_fun); names(xy_second)[ncol(xy_second)] <- paste("SSKS_",i,sep="")}
 for (i in 1:8) {flds <- c(paste("SDUL_",i,sep=""),paste("SSAT_",i,sep="")); xy_second$VALUE <- apply(xy_second[,flds],1,drat_fun); names(xy_second)[ncol(xy_second)] <- paste("DRATE_",i,sep="")}

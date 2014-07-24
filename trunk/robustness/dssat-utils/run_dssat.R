@@ -4,7 +4,7 @@
 
 #single run of DSSAT CSM for a given set of inputs. This run will
 #1. create directory (a single directory per run is needed)
-#2. copy all .CDE, .SDA, .WDA, DSSATPRO.L45, MODEL.ERR
+#2. copy all .CDE, .SDA, .WDA, DSSATPRO.L45, MODEL.ERR, DSCSM045.EXE
 #3. write meteorology and soil files
 #4. write parameter files (.CUL, .ECO, .SPE)
 #5. write DSSBatch.v45
@@ -57,7 +57,7 @@ run_dssat <- function(run_data) {
     }
     
     #ecotype
-    if (length(which(names(run_data$CUL) %in% c("DSGFT","RUE","KCAN","TSEN","CDAY")) == 5)) {
+    if (length(which(names(run_data$ECO) %in% c("DSGFT","RUE","KCAN","TSEN","CDAY")) == 5)) {
       run_data$ECO$ECO_ID <- "IB0001"; run_data$ECO$ECO_NAME <- "generic"
       run_data$ECO$TBASE <- 8; run_data$ECO$TOPT <- 34; run_data$ECO$ROPT <- 34
       run_data$ECO$P20 <- 12.5; run_data$ECO$DJTI <- 4; run_data$ECO$GDDE <- 6
@@ -83,7 +83,7 @@ run_dssat <- function(run_data) {
     }
     
     #ecotype
-    if (length(which(names(run_data$CUL) %in% c("DSGFT","RUE","KCAN","PSTM","PEAR","TSEN","CDAY")) == 7)) {
+    if (length(which(names(run_data$ECO) %in% c("DSGFT","RUE","KCAN","PSTM","PEAR","TSEN","CDAY")) == 7)) {
       run_data$ECO$ECO_ID <- "IB0001"; run_data$ECO$ECO_NAME <- "generic"
       run_data$ECO$TBASE <- 8; run_data$ECO$TOPT <- 34; run_data$ECO$ROPT <- 34
       run_data$ECO$P20 <- 12.5; run_data$ECO$DJTI <- 4; run_data$ECO$GDDE <- 6
@@ -103,7 +103,7 @@ run_dssat <- function(run_data) {
   }
   
   #copy (if file exist) or create weather files 
-  #1. set weather filename, check existence, copy if exists, else create using .met file
+  #set weather filename, check existence, copy if exists, else create using .met file
   nyears <- length(years)
   wthfil <- paste(basename,substr(paste(run_data$ISYR),3,4),nyears,".WTH",sep="")
   wthfil_raw <- paste(basename,substr(paste(run_data$ISYR),3,4),nyears,"_loc-",run_data$LOC,".WTH",sep="")
@@ -119,6 +119,46 @@ run_dssat <- function(run_data) {
     
   }
   
+  #write soil file
+  soilfil <- make_soilfile(run_data$SOILS, paste(run_dir,"/SOIL.SOL",sep=""), overwrite=T)
+  
+  #write xfile
+  run_data$XFILE$sim_ctrl$VBOSE <- "0" #write only Summary.OUT outputs (as needed)
+  xfil <- make_xfile(run_data$XFILE, paste(run_dir,"/",basename,substr(paste(run_data$ISYR),3,4),"01.MZX",sep=""),overwrite=T)
+  
+  #write DSSBatch.v45
+  dssfil <- file(paste(run_dir,"/DSSBatch.v45",sep=""),open="w")
+  cat("$BATCH(MAIZE)\n",file=dssfil)
+  cat("@FILEX                                                                                        TRTNO     RP     SQ     OP     CO\n",file=dssfil)
+  for (i in 1:nrow(run_data$XFILE$treatments)) {
+    cat(paste(sprintf("%-92s",paste(basename,substr(paste(run_data$ISYR),3,4),"01.MZX",sep=""))," ",
+              sprintf("%6d",as.integer(run_data$XFILE$treatments$N[i]))," ",
+              sprintf("%6d",as.integer(run_data$XFILE$treatments$R[i]))," ",
+              sprintf("%6d",as.integer(0))," ", #assume this is for sequential runs (i.e. irrelevant here)
+              sprintf("%6d",as.integer(run_data$XFILE$treatments$O[i]))," ",
+              sprintf("%6d",as.integer(run_data$XFILE$treatments$C[i]))," ",sep=""),file=dssfil)
+  }
+  close(dssfil)
+  
+  #copy model (-fp to *force and *preserve_attributes)
+  system(paste("cp -fp ",run_data$BIN_DIR,"/DSCSM045.EXE ",run_dir,"/.",sep=""))
+  
+  #copy needed files (.CDE, .WDA, .SDA, DSSATPRO.L45, MODEL.ERR)
+  system(paste("cp -fp ",run_data$BIN_DIR,"/*.CDE ",run_dir,"/.",sep=""))
+  system(paste("cp -fp ",run_data$BIN_DIR,"/*.WDA ",run_dir,"/.",sep=""))
+  system(paste("cp -fp ",run_data$BIN_DIR,"/*.SDA ",run_dir,"/.",sep=""))
+  system(paste("cp -fp ",run_data$BIN_DIR,"/DSSATPRO.L45 ",run_dir,"/.",sep=""))
+  system(paste("cp -fp ",run_data$BIN_DIR,"/MODEL.ERR ",run_dir,"/.",sep=""))
+  
+  #go to dir, run model, return to where i am
+  thisdir <- getwd(); setwd(run_dir); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",model," B DSSBatch.v45",sep="")); setwd(thisdir)
+  
+  #return run_dir, and out_file for copying of file
+  run_data$OUT_FILES <- list.files(run_dir,pattern="\\.OUT")
+  run_data$RUN_DIR <- run_dir
+  
+  #return object
+  return(run_data)
 }
 
 #function to grab soil data
@@ -126,7 +166,7 @@ grab_soils <- function(run_data, xy_main) {
   ### soil data
   soil_data <- list()
   soil_data$general <- data.frame(SITE=-99,COUNTRY="Generic",LAT=run_data$LAT,LON=run_data$LON,SCSFAM="Generic")
-  soil_data$properties <- data.frame(SCOM="BN",SALB=0.13,SLU1=200,SLDR=xy_main$SLDR[which(xy_main$LOC == run_data$LOC)],SLRO=75,SLNF=1,SLPF=1,SMHB="IB001",SMPX="IB001",SMKE="IB001")
+  soil_data$properties <- data.frame(SCOM="BN",SALB=0.13,SLU1=200,SLDR=xy_main$SLDR[which(xy_main$LOC == run_data$LOC)],SLRO=75,SLNF=1,SLPF=1,SMHB="SA012",SMPX="IB001",SMKE="IB001")
   soil_data$profile <- data.frame(SLB=c(4.5,9.1,16.6,28.9,49.3,82.9,138.3,229.6)) #depth
   soil_data$profile$SLMH <- -99
   soil_data$profile$SLLL <- as.numeric(xy_main[which(xy_main$LOC == run_data$LOC),paste("SLLL_",1:8,sep="")])
@@ -139,6 +179,22 @@ grab_soils <- function(run_data, xy_main) {
   soil_data$profile$SLCL <- -99; soil_data$profile$SLSI <- -99; soil_data$profile$SLCF <- -99 
   soil_data$profile$SLNI <- -99; soil_data$profile$SLHW <- -99; soil_data$profile$SLHB <- -99
   soil_data$profile$SCEC <- -99; soil_data$profile$SADC <- -99 
+  
+  #check that SDUL > SLLL
+  corr_lay <- soil_data$profile$SLB[which(round(soil_data$profile$SDUL,3) <= round(soil_data$profile$SLLL,3))]
+  if (length(corr_lay) > 0) {
+    corr_fac <- mean((soil_data$profile$SDUL[-which(round(soil_data$profile$SDUL,3) <= round(soil_data$profile$SLLL,3))]-soil_data$profile$SLLL[-which(round(soil_data$profile$SDUL,3) <= round(soil_data$profile$SLLL,3))]),na.rm=T)
+    soil_data$profile$SDUL[which(soil_data$profile$SLB %in% corr_lay)] <- soil_data$profile$SLLL[which(soil_data$profile$SLB %in% corr_lay)] + corr_fac
+    soil_data$profile$SDUL[which(soil_data$profile$SLB %in% corr_lay)] <- soil_data$profile$SDUL[which(soil_data$profile$SLB %in% corr_lay)]
+  }
+  
+  #check that SSAT > SDUL
+  corr_lay <- soil_data$profile$SLB[which(round(soil_data$profile$SSAT,3) <= round(soil_data$profile$SDUL,3))]
+  if (length(corr_lay) > 0) {
+    corr_fac <- mean((soil_data$profile$SSAT[-which(round(soil_data$profile$SSAT,3) <= round(soil_data$profile$SDUL,3))]-soil_data$profile$SDUL[-which(round(soil_data$profile$SSAT,3) <= round(soil_data$profile$SDUL,3))]),na.rm=T)
+    soil_data$profile$SSAT[which(soil_data$profile$SLB %in% corr_lay)] <- soil_data$profile$SDUL[which(soil_data$profile$SLB %in% corr_lay)] + corr_fac
+    soil_data$profile$SSAT[which(soil_data$profile$SLB %in% corr_lay)] <- soil_data$profile$SSAT[which(soil_data$profile$SLB %in% corr_lay)]
+  }
   
   #return object
   return(soil_data)
@@ -162,7 +218,11 @@ grab_xfile <- function(run_data) {
                                  WSTA=paste(basename,substr(as.character(run_data$ISYR),3,4),length(years),sep=""),
                                  FLSA=-99,FLOB=-99,FLDT="DR003",
                                  FLDD=-99,FLDS=-99,FLST=-99,SLTX=-99,SLDP=-99,ID_SOIL="IB00000001",
-                                 FLNAME="field1",XCRD=35.438,YCRD=-9.562,ELEV=733,AREA=-99,SLEN=-99,
+                                 FLNAME="field1",
+                                 XCRD=run_data$LON,
+                                 YCRD=run_data$LAT,
+                                 ELEV=run_data$ELEV,
+                                 AREA=-99,SLEN=-99,
                                  FLWR=-99,SLAS=-99,FLHST=-99,FHDUR=-99)
   xfil_data$ini_cond_properties <- data.frame(C=1,PCR="MZ",
                                               ICDAT=paste(substr(as.character(run_data$ISYR),3,4),run_data$SOW_DATE,sep=""),

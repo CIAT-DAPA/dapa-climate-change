@@ -8,6 +8,7 @@ src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
 source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
 source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
 source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
+source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
 source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
 source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
 
@@ -51,5 +52,5 @@ run_data$XFILE <- grab_xfile(run_data)
 #run DSSAT CSM
 ofiles <- run_dssat(run_data)
 
-
+xx <- get_culpar(paste(ofiles$BIN_DIR,"/MZCER045.CUL",sep=""),l=-1)
 
