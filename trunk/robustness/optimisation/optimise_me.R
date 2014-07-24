@@ -26,7 +26,7 @@ source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 #wd <- "~/Leeds-work/quest-for-robustness"
 wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
-calib_dir <- paste(runs_dir,"/ppe_optimisation_t2",sep="")
+calib_dir <- paste(runs_dir,"/ppe_optimisation_t3",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
 met_dir <- paste(wd,"/data/meteorology",sep="")
 bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
@@ -82,65 +82,68 @@ xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in
 ###
 #6. iteratively optimise over the list of parameters (with a defined number of iterations)
 this_params <- GLAM_get_default(mdata_dir)
-iter <- 1
+nmaxiter <- 15
 
-#arguments
-opt_data <- list()
-opt_data$CROP <- "maize"
-opt_data$MODEL <- "glam-maiz"
-opt_data$BASE_DIR <- calib_dir
-opt_data$BIN_DIR <- bin_dir
-opt_data$PAR_DIR <- mdata_dir
-opt_data$WTH_DIR <- paste(met_dir,"/ascii_extract_raw",sep="") #for reading .wth files
-opt_data$WTH_ROOT <- "obs_hist_WFD"
-opt_data$LOC <- xy_sel$LOC
-opt_data$ISYR <- 1981
-opt_data$IEYR <- 2000
-opt_data$INI_COND <- xy_main
-opt_data$YLD_DATA <- xy_main_yield
-opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
-opt_data$RUN_TYPE <- "RFD"
-opt_data$METHOD <- "RMSE"
-opt_data$USE_SCRATCH <- T
-opt_data$SCRATCH <- "/scratch/earjr"
-#opt_data$SCRATCH <- paste(wd,"/scratch",sep="")
-
-#loop parameters to optimise
-for (i in 1:nrow(param_list)) {
-  #i <- 1
-  #previous parameters
-  prev_params <- this_params
+#15 total iterations
+for (iter in 1:nmaxiter) {
+  #iter <- 1
+  #arguments
+  opt_data <- list()
+  opt_data$CROP <- "maize"
+  opt_data$MODEL <- "glam-maiz"
+  opt_data$BASE_DIR <- calib_dir
+  opt_data$BIN_DIR <- bin_dir
+  opt_data$PAR_DIR <- mdata_dir
+  opt_data$WTH_DIR <- paste(met_dir,"/ascii_extract_raw",sep="") #for reading .wth files
+  opt_data$WTH_ROOT <- "obs_hist_WFD"
+  opt_data$LOC <- xy_sel$LOC
+  opt_data$ISYR <- 1981
+  opt_data$IEYR <- 2000
+  opt_data$INI_COND <- xy_main
+  opt_data$YLD_DATA <- xy_main_yield
+  opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
+  opt_data$RUN_TYPE <- "RFD"
+  opt_data$METHOD <- "RMSE"
+  opt_data$USE_SCRATCH <- T
+  opt_data$SCRATCH <- "/scratch/earjr"
+  #opt_data$SCRATCH <- paste(wd,"/scratch",sep="")
   
-  #parameter and loc within
-  param <- paste(param_list$PARAM[i]); sect <- paste(param_list$WHERE[i])
-  nsteps <- param_list$NSTEPS[i]
-  opt_data$NPROC <- min(c(25,nsteps)) #25 for eljefe / lajefa #3 for mbp
-  
-  #update arguments
-  opt_data$PARAMS <- this_params
-  opt_data$PARAM <- param
-  opt_data$SECT <- sect
-  opt_data$NSTEPS <- nsteps
-  
-  if (param %in% c("SLA_INI","NDSLA")) {
-    opt_data$MINVAL <- param_list$MIN[i]
-    opt_data$MAXVAL <- param_list$MAX[i]
-  }
-  
-  #run optim function
-  #par_optim <- GLAM_optimise(opt_data)
-  par_optim <- GLAM_optimise_parallel(opt_data)
-  #par_optim <- get(load(file=paste(opt_data$BASE_DIR,"/",opt_data$SIM_NAME,"/opt-",opt_data$PARAM,".RData",sep=""))); rm(r_list)
-  #plot(par_optim$OPTIMISATION$VALUE, par_optim$OPTIMISATION$RMSE, ty="l") #plot RMSE curve
-  
-  #update parameter value with optimal
-  opt_val <- par_optim$OPTIMISATION$VALUE[which(par_optim$OPTIMISATION$RMSE == min(par_optim$OPTIMISATION$RMSE))]
-  if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
-  if (param %in% c("SLA_INI","NDSLA")) {
-    this_params[[sect]][[param]] <- opt_val
-  } else {
-    this_params[[sect]][[param]]$Value <- opt_val
+  #loop parameters to optimise
+  for (i in 1:nrow(param_list)) {
+    #i <- 1
+    #previous parameters
+    prev_params <- this_params
+    
+    #parameter and loc within
+    param <- paste(param_list$PARAM[i]); sect <- paste(param_list$WHERE[i])
+    nsteps <- param_list$NSTEPS[i]
+    opt_data$NPROC <- min(c(30,nsteps)) #30 for eljefe / lajefa #3 for mbp
+    
+    #update arguments
+    opt_data$PARAMS <- this_params
+    opt_data$PARAM <- param
+    opt_data$SECT <- sect
+    opt_data$NSTEPS <- nsteps
+    
+    if (param %in% c("SLA_INI","NDSLA")) {
+      opt_data$MINVAL <- param_list$MIN[i]
+      opt_data$MAXVAL <- param_list$MAX[i]
+    }
+    
+    #run optim function
+    #par_optim <- GLAM_optimise(opt_data)
+    par_optim <- GLAM_optimise_parallel(opt_data)
+    #par_optim <- get(load(file=paste(opt_data$BASE_DIR,"/",opt_data$SIM_NAME,"/opt-",opt_data$PARAM,".RData",sep=""))); rm(r_list)
+    #plot(par_optim$OPTIMISATION$VALUE, par_optim$OPTIMISATION$RMSE, ty="l") #plot RMSE curve
+    
+    #update parameter value with optimal
+    opt_val <- par_optim$OPTIMISATION$VALUE[which(par_optim$OPTIMISATION$RMSE == min(par_optim$OPTIMISATION$RMSE))]
+    if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
+    if (param %in% c("SLA_INI","NDSLA")) {
+      this_params[[sect]][[param]] <- opt_val
+    } else {
+      this_params[[sect]][[param]]$Value <- opt_val
+    }
   }
 }
-
 
