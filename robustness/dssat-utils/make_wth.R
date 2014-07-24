@@ -13,7 +13,7 @@
 #fildir <- make_wth(x=data.frame(CELL=xy_main$LOC[i],X=xy_main$x[i],Y=xy_main$y[i],ELEV=xy_main$ELEV[i]),
 #                   wthDir_in=paste(wthdir,"/obs_hist_WFD",sep=""),
 #                   wthDir_out=paste(wthdir,"/obs_hist_WFD/loc-",xy_main$LOC[i],sep=""),
-#                   years=1980:2001,fields=list(CELL="CELL",X="X",Y="Y",ELEV="ELEV"))
+#                   years=1980:2001,fields=list(CELL="CELL",X="X",Y="Y",ELEV="ELEV"),out_file=NA)
 
 #function to write DSSAT wth data (with all years in a single .WTH file)
 #inData should have fields named: DATE, SRAD, TMAX, TMIN, RAIN
@@ -62,7 +62,7 @@ write_wth <- function(in_data,out_file,site_details,append=T) {
 # function to make weather for a number of cells
 #################################################################################
 #################################################################################
-make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="X",Y="Y",ELEV="ELEV")) {
+make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="X",Y="Y",ELEV="ELEV"),out_file=NA) {
   #checks
   if (length(which(toupper(names(fields)) %in% c("CELL","X","Y","ELEV"))) != 4) {
     stop("field list incomplete")
@@ -98,8 +98,12 @@ make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="
     elev <- round(x$ELEV[which(x$CELL == cll)],0)
     
     #filename
-    basename <- "AFRB"; ext=".WTH"; yri <- substr(paste(min(years)),3,4); nyrs <- length(years)
-    wthfile <- paste(wthDir_out,"/",basename,yri,nyrs,"_loc-",cll,ext,sep="")
+    if (is.na(out_file)) {
+      basename <- "AFRB"; ext=".WTH"; yri <- substr(paste(min(years)),3,4); nyrs <- length(years)
+      wthfile <- paste(wthDir_out,"/",basename,yri,nyrs,"_loc-",cll,ext,sep="")
+    } else {
+      wthfile <- paste(wthDir_out,"/",out_file,sep="")
+    }
     
     #site details
     s_details <- data.frame(NAME=paste("gridcell ",cll,sep=""),INSI="AFRB",LAT=lat,LONG=lon,

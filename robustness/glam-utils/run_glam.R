@@ -11,7 +11,7 @@
 #this function requires other functions to be loaded into memory (see ./robustness/)
 
 #an object of type _list_ is the only input to this function. such object has the following 
-#characteristics:
+#elements:
 #run_data$CROP: name of crop, e.g. "maize"
 #run_data$MODEL: name of executable e.g. "glam-maiz"
 #run_data$BASE_DIR: directory where all runs are stored --a directory with run will be created inside
