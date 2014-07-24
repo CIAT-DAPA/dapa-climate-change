@@ -124,14 +124,14 @@ make_culpar <- function(params, out_file, overwrite=F) {
   for (i in 1:nrow(params)) {
     if (model == "ixm") {
       cat(paste(sprintf("%-7s",params$CUL_ID[i]),sprintf("%-17s",params$CUL_NAME[i]),
-                sprintf("%-5s",params$EXPNO[i]),sprintf("%-7s",params$ECO_ID[i]),
+                sprintf("%5s",params$EXPNO[i]),sprintf("%7s",params$ECO_ID[i]),
                 sprintf("%1$6.1f%2$6.3f%3$6.1f%4$6.1f%5$6.2f%6$6.2f%7$6.1f%8$6.1f",
                         params$P1[i],params$P2[i],params$P5[i],params$G2[i],params$G3[i],
                         params$PHINT[i],params$AX[i],params$LX[i]),
                 "\n",sep=""),file=pf)
     } else {
       cat(paste(sprintf("%-7s",params$CUL_ID[i]),sprintf("%-17s",params$CUL_NAME[i]),
-                sprintf("%-5s",params$EXPNO[i]),sprintf("%-7s",params$ECO_ID[i]),
+                sprintf("%5s",params$EXPNO[i]),sprintf("%7s",params$ECO_ID[i]),
                 sprintf("%1$6.1f%2$6.3f%3$6.1f%4$6.1f%5$6.2f%6$6.2f",
                         params$P1[i],params$P2[i],params$P5[i],params$G2[i],params$G3[i],params$PHINT[i]),
                 "\n",sep=""),file=pf)
