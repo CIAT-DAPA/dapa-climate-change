@@ -133,7 +133,8 @@ GLAM_calibrate <- function(cal_data) {
   
   #create sequence of values
   #vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=cal_data$NSTEPS)
-  vals <- seq(0,1,length.out=51)[2:51] #0.2, 0.4, ... 1.0 (total of 50)
+  #vals <- seq(0,1,length.out=51)[2:51] #0.2, 0.4, ... 1.0 (total of 50)
+  vals <- c(0.01,seq(0.05,1,length.out=20)) #(total of 21)
   
   #loop through desired locations
   for (loc in cal_data$LOC) {
