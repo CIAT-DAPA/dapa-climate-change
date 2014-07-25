@@ -1,6 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
-#January 2014 --borrows from PhD script called glam-make_wth.R
+#Jul 2014 --borrows from PhD script called glam-make_wth.R
 
 #make DSSAT weather files
 #wd <- "~/Leeds-work/quest-for-robustness"

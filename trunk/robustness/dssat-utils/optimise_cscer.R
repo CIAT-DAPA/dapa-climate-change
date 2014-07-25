@@ -67,9 +67,28 @@ opt_data$NSTEPS <- 9
 opt_data$METHOD <- "RMSE"
 opt_data$USE_SCRATCH <- F
 opt_data$SCRATCH <- NA
+opt_data$NPROC <- 3
 
-#paroptim <- DSSAT_optimise(opt_data)
-#paroptim <- DSSAT_optimise_parallel(opt_data)
+# #create meteorology for selected grid cells
+# for (loc in opt_data$LOC) {
+#   #loc <- opt_data$LOC[1]
+#   cat("...making weather for loc=",loc,"\n")
+#   x <- opt_data$INI_COND$x[which(opt_data$INI_COND$LOC == loc)]
+#   y <- opt_data$INI_COND$y[which(opt_data$INI_COND$LOC == loc)]
+#   elev <- opt_data$INI_COND$ELEV[which(opt_data$INI_COND$LOC == loc)]
+#   
+#   #write file
+#   fildir <- make_wth(x=data.frame(CELL=loc,X=x,Y=y,ELEV=elev),
+#                      wthDir_in=paste(opt_data$WTH_DIR,"/obs_hist_WFD",sep=""),
+#                      wthDir_out=paste(opt_data$WTH_DIR,"/obs_hist_WFD/loc-",loc,sep=""),
+#                      years=(opt_data$ISYR:opt_data$IEYR),
+#                      fields=list(CELL="CELL",X="X",Y="Y",ELEV="ELEV"),
+#                      out_file=NA)
+# }
+
+
+#paroptim <- CSCER_optimise(opt_data)
+#paroptim <- CSCER_optimise_parallel(opt_data)
 #---------------------------------------------------------------
 
 # plot(paroptim$OPTIMISATION$VALUE, paroptim$OPTIMISATION$RMSE, ty='l')
@@ -270,6 +289,9 @@ CSCER_optimise <- function(opt_data) {
 #################################################################################
 #optimise given parameter in parallel
 CSCER_optimise_parallel <- function(opt_data) {
+  require(snowfall) #parallelisation library
+  
+  #parameter location and type
   param <- toupper(opt_data$PARAM)
   ifile <- toupper(opt_data$IFILE)
   sect <- tolower(opt_data$SECT)
