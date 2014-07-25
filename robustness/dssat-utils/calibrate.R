@@ -49,7 +49,6 @@
 # cal_data$BASENAME <- "AFRB" #basename of runs
 # cal_data$BASE_DIR <- calibDir
 # cal_data$BIN_DIR <- binDir
-# cal_data$PAR_DIR <- mdataDir
 # cal_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
 # cal_data$WTH_ROOT <- "obs_hist_WFD"
 # cal_data$LOC <- c(680,681,682)
@@ -113,9 +112,6 @@ DSSAT_calibrate <- function(cal_data) {
   #input directories and model
   exec_name <- "DSCSM045.EXE"
   
-  #running command
-  dssat_cmd <- paste("./",exec_name," ",cal_data$MODEL," B DSSBatch.v45",sep="")
-  
   #output directories
   if (cal_data$USE_SCRATCH) {
     cal_dir <- cal_data$SCRATCH #calibration directory
@@ -133,7 +129,8 @@ DSSAT_calibrate <- function(cal_data) {
   
   #create sequence of values
   #vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=cal_data$NSTEPS)
-  vals <- seq(0,1,length.out=51)[2:51] #0.2, 0.4, ... 1.0 (total of 50)
+  #vals <- seq(0,1,length.out=51)[2:51] #0.2, 0.4, ... 1.0 (total of 50)
+  vals <- c(0.01,seq(0.05,1,length.out=20)) #(total of 21)
   
   #loop through desired locations
   for (loc in cal_data$LOC) {
@@ -172,6 +169,11 @@ DSSAT_calibrate <- function(cal_data) {
     run_data$SPE <- cal_data$SPE
     run_data$XFILE <- get_xfile(run_data)
     #run_data$XFILE$sim_ctrl$VBOSE <- "0" #write only Summary.OUT outputs (as needed)
+    
+    #when optimisation is done on .MZX parameters
+    if (cal_data$IFILE == "XFILE") {
+      in_data[[cal_data$SECT]][[cal_data$PARAM]] <- cal_data$PARAM_VALUE
+    }
     
     #loop through sequence of values
     for (i in 1:length(vals)) {
@@ -235,7 +237,7 @@ DSSAT_calibrate <- function(cal_data) {
           pred$DUR <- NA; pred$DUR[which(pred$MDAT > pred$PDAT)] <- pred$MDAT-pred$PDAT
           pred$DUR[which(pred$MDAT <= pred$PDAT)] <- (pred$MDAT+365)-pred$PDAT
           pred_all <- rbind(pred_all, pred)
-          #system(paste("rm -rf ",run_data$RUN_DIR,sep="")) #remove junk
+          system(paste("rm -f ",run_data$RUN_DIR,"/*.OUT",sep="")) #remove junk
         }
       }
       
