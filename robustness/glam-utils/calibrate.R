@@ -148,8 +148,8 @@ GLAM_calibrate <- function(cal_data) {
     params$glam_param.mod_mgt$ISDAY$Value <- -30 #min(c(sow_window,-30)) #set to -30 as multiple planting
     
     #data.frame of iterative soil*sowing date trials
-    sow_seq <- round(seq(sow_date1, sow_date2, length.out=10), 0)
-    sol_seq <- c(1,1.2,1.4,1.6,1.8)
+    sow_seq <- round(seq(sow_date1, sow_date2, length.out=5), 0)
+    sol_seq <- c(1,1.3,1.6)
     run_df <- expand.grid(sow=sow_seq, sol=sol_seq)
     
     #prepare input object

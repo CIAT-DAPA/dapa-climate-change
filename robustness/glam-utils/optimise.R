@@ -366,8 +366,6 @@ GLAM_optimise_parallel <- function(opt_data) {
       source(paste(src.dir,"/glam-utils/calibrate.R",sep=""))
       source(paste(src.dir,"/glam-utils/optimise.R",sep=""))
       
-      #cat("\nperforming run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
-      
       #assign values to parameter set
       if (param %in% c("SLA_INI","NDSLA")) {
         opt_data$PARAMS[[sect]][[param]] <- vals[i]
@@ -458,7 +456,6 @@ GLAM_optimise_parallel <- function(opt_data) {
     for (i in 1:length(vals)) {
       i_s <- i*4-3
       #cat("values: ",i_s," ",i_s+1," ",i_s+2," ",i_s+3,"\n")
-      
       out_row <- calib_output[[i_s]]
       ygp_all <- calib_output[[i_s+1]]
       this_cal <- calib_output[[i_s+2]]

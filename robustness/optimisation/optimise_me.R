@@ -33,7 +33,7 @@ bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
 
 ###
 #1. load list of parameters and ranges (./data/model_data/parameter_list.txt)
-param_list <- read.csv(paste(mdata_dir,"/parameter_list.txt",sep=""),sep="\t",header=T)
+param_list <- read.csv(paste(mdata_dir,"/parameter_list_glam.txt",sep=""),sep="\t",header=T)
 
 ###
 #2. load objects (initial conditions and yields)

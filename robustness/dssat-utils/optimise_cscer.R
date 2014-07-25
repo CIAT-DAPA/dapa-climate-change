@@ -69,6 +69,7 @@ opt_data$USE_SCRATCH <- F
 opt_data$SCRATCH <- NA
 
 #paroptim <- DSSAT_optimise(opt_data)
+#paroptim <- DSSAT_optimise_parallel(opt_data)
 #---------------------------------------------------------------
 
 # plot(paroptim$OPTIMISATION$VALUE, paroptim$OPTIMISATION$RMSE, ty='l')
@@ -204,41 +205,41 @@ CSCER_optimise <- function(opt_data) {
       
       #choose optimisation method (RMSE, CH07, CH10)
       if (opt_meth == "RMSE") {
-        rmse <- sqrt(sum((ygp_all$OBS_ADJ-ygp_all$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(ygp_all$OBS_ADJ)))))
+        rmse <- sqrt(sum((slpf_all$OBS_ADJ-slpf_all$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(slpf_all$OBS_ADJ)))))
       } else if (opt_meth == "CH07") {
         #do for individual cells and add them up
         rmse <- 0
-        for (loc in unique(ygp_all$LOC)) {
-          rmse_loc <- ygp_all[which(ygp_all$LOC == loc),]
+        for (loc in unique(slpf_all$LOC)) {
+          rmse_loc <- slpf_all[which(slpf_all$LOC == loc),]
           rmse_loc <- (mean(rmse_loc$OBS_ADJ,na.rm=T)-mean(rmse_loc$PRED_ADJ,na.rm=T))^2 + (sd(rmse_loc$OBS,na.rm=T)-sd(rmse_loc$PRED,na.rm=T))^2
           rmse <- rmse + rmse_loc
         }
       } else if (opt_meth == "CH10") {
         rmse <- 0
-        for (loc in unique(ygp_all$LOC)) {
-          rmse_loc <- ygp_all[which(ygp_all$LOC == loc),]
+        for (loc in unique(slpf_all$LOC)) {
+          rmse_loc <- slpf_all[which(slpf_all$LOC == loc),]
           rmse_loc <- (mean(rmse_loc$OBS_ADJ,na.rm=T)-mean(rmse_loc$PRED_ADJ,na.rm=T))^2
           rmse <- rmse + rmse_loc
         }
-        rmse <- sqrt(rmse/length(unique(ygp_all$LOC)))
+        rmse <- sqrt(rmse/length(unique(slpf_all$LOC)))
       }
-      out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(ygp_all$OBS,na.rm=T), YPRED=mean(ygp_all$PRED,na.rm=T),
-                            YOBS_ADJ=mean(ygp_all$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(ygp_all$PRED_ADJ,na.rm=T))
-      names(ygp_all)[4] <- "YGP"
-      ygp_all$VALUE <- vals[i]
+      out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(slpf_all$OBS,na.rm=T), YPRED=mean(slpf_all$PRED,na.rm=T),
+                            YOBS_ADJ=mean(slpf_all$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(slpf_all$PRED_ADJ,na.rm=T))
+      names(slpf_all)[4] <- "SLPF"
+      slpf_all$VALUE <- vals[i]
       
       #for final object
-      names(yr_out)[4] <- "YGP"; yr_out$VALUE <- vals[i]
-      this_cal <- ygp_calib$CALIBRATION; names(this_cal)[2] <- "YGP"; this_cal$VALUE <- vals[i]
+      names(yr_out)[4] <- "SLPF"; yr_out$VALUE <- vals[i]
+      this_cal <- slpf_calib$CALIBRATION; names(this_cal)[2] <- "SLPF"; this_cal$VALUE <- vals[i]
       
       if (i == 1) {
         out_all <- out_row
-        out_raw <- ygp_all
+        out_raw <- slpf_all
         cal_all <- this_cal
         cal_raw <- yr_out
       } else {
         out_all <- rbind(out_all,out_row)
-        out_raw <- rbind(out_raw,ygp_all)
+        out_raw <- rbind(out_raw,slpf_all)
         cal_all <- rbind(cal_all,this_cal)
         cal_raw <- rbind(cal_raw,yr_out)
       }
@@ -264,16 +265,14 @@ CSCER_optimise <- function(opt_data) {
   return(r_list)
 }
 
+
+#################################################################################
+#################################################################################
 #optimise given parameter in parallel
-GLAM_optimise_parallel <- function(opt_data) {
-  require(snowfall) #parallelisation library
-  
+CSCER_optimise_parallel <- function(opt_data) {
   param <- toupper(opt_data$PARAM)
+  ifile <- toupper(opt_data$IFILE)
   sect <- tolower(opt_data$SECT)
-  
-  #put years into parameter set
-  opt_data$PARAMS$glam_param.mod_mgt$ISYR <- opt_data$ISYR
-  opt_data$PARAMS$glam_param.mod_mgt$IEYR <- opt_data$IEYR
   
   #here is the optimisation method
   #RMSE: is yearly root mean square error (classical)
@@ -293,10 +292,7 @@ GLAM_optimise_parallel <- function(opt_data) {
   }
   
   #input directories and model
-  exec_name <- opt_data$MODEL
-  
-  #running command
-  glam_cmd <- paste("./",exec_name,sep="")
+  exec_name <- "DSCSM045.EXE"
   
   #output directories
   if (opt_data$USE_SCRATCH) {
@@ -331,17 +327,7 @@ GLAM_optimise_parallel <- function(opt_data) {
   }
   
   #create sequence of values
-  if (param %in% c("SLA_INI","NDSLA")) {
-    vals <- seq(opt_data$MINVAL,opt_data$MAXVAL,length.out=opt_data$NSTEPS)
-  } else {
-    vals <- seq(opt_data$PARAMS[[sect]][[param]][,"Min"],opt_data$PARAMS[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
-  }
-  
-  #type of run
-  opt_data$PARAMS$glam_param.mod_mgt$SEASON <- opt_data$RUN_TYPE
-  
-  #params config
-  opt_data$PARAMS$glam_param.mod_mgt$IASCII <- 1 #output only to season file
+  vals <- opt_data$VALS
   
   #file of output
   if (opt_data$USE_SCRATCH) {
@@ -356,23 +342,38 @@ GLAM_optimise_parallel <- function(opt_data) {
     calib_value <- function(i) {
       #i <- 1
       #source all needed functions
-      source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
-      source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
-      source(paste(src.dir,"/glam-utils/make_sowfile.R",sep=""))
-      source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
-      source(paste(src.dir,"/glam-utils/make_parameterset.R",sep=""))
-      source(paste(src.dir,"/glam-utils/get_parameterset.R",sep=""))
-      source(paste(src.dir,"/glam-utils/run_glam.R",sep=""))
-      source(paste(src.dir,"/glam-utils/calibrate.R",sep=""))
-      source(paste(src.dir,"/glam-utils/optimise.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/calibrate.R",sep=""))
+      source(paste(src.dir,"/dssat-utils/optimise_cscer.R",sep=""))
       
-      #cat("\nperforming run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
-      
-      #assign values to parameter set
-      if (param %in% c("SLA_INI","NDSLA")) {
-        opt_data$PARAMS[[sect]][[param]] <- vals[i]
+      #assign values to relevant parameter set
+      #see below relevant info:
+      #opt_data[["SPE"]][["photo_param"]][["PARSR"]]
+      #opt_data[["SPE"]][["seed_growth"]][which(gsub(" ","",opt_data[["SPE"]][["seed_growth"]][["PARAM"]]) == "SDSZ"),"VALUE"]
+      #opt_data[["ECO"]][["KCAN"]]
+      #opt_data[["CUL"]][["P1"]]
+      #in_data <- get_xfile_dummy()
+      #in_data[["planting"]][["PPOP"]]
+      #in_data[["auto_mgmt"]][["PH2OL"]]
+      if (ifile == "SPE") {
+        if (param %in% c("SDSZ","RSGRT")) {
+          opt_data[[ifile]][[sect]][which(gsub(" ","",opt_data[[ifile]][[sect]][["PARAM"]]) == param),"VALUE"] <- vals[i]
+        } else {
+          opt_data[[ifile]][[sect]][[param]] <- vals[i]
+        }
+      } else if (ifile == "ECO" | ifile == "CUL") {
+        opt_data[[ifile]][[param]] <- vals[i]
+      } else if (ifile == "XFILE") {
+        opt_data$PARAM_VALUE <- vals[i]
       } else {
-        opt_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
+        stop("invalid ifile, check opt_data$IFILE")
       }
       
       #calibrate model
@@ -384,54 +385,53 @@ GLAM_optimise_parallel <- function(opt_data) {
         cal_data$BASE_DIR <- opt_dir
       }
       cal_data$SIM_NAME <- paste("calibration_",cal_data$PARAM,"_run-",i,sep="")
-      cal_data$NSTEPS <- 50 #67
-      ygp_calib <- GLAM_calibrate(cal_data)
+      slpf_calib <- DSSAT_calibrate(cal_data)
       
       #yearly output
-      yr_out <- ygp_calib$RAW_DATA
+      yr_out <- slpf_calib$RAW_DATA
       
       #select optimal ygp of each grid cell
-      ygp_all <- data.frame()
+      slpf_all <- data.frame()
       for (loc in unique(yr_out$LOC)) {
         #loc <- unique(yr_out$LOC)[1]
-        ygp_opt <- min(ygp_calib$CALIBRATION$RMSE[which(ygp_calib$CALIBRATION$LOC == loc)])
-        ygp_opt <- ygp_calib$CALIBRATION$VALUE[which(ygp_calib$CALIBRATION$LOC == loc & ygp_calib$CALIBRATION$RMSE == ygp_opt)]
-        if (length(ygp_opt) > 1) {ygp_opt <- max(ygp_opt)}
-        ygp_loc <- yr_out[which(yr_out$LOC == loc & yr_out$VALUE == ygp_opt),]
-        ygp_all <- rbind(ygp_all, ygp_loc)
+        slpf_opt <- min(slpf_calib$CALIBRATION$RMSE[which(slpf_calib$CALIBRATION$LOC == loc)])
+        slpf_opt <- slpf_calib$CALIBRATION$VALUE[which(slpf_calib$CALIBRATION$LOC == loc & slpf_calib$CALIBRATION$RMSE == slpf_opt)]
+        if (length(slpf_opt) > 1) {slpf_opt <- max(slpf_opt)}
+        slpf_loc <- yr_out[which(yr_out$LOC == loc & yr_out$VALUE == slpf_opt),]
+        slpf_all <- rbind(slpf_all, slpf_loc)
       }
       
       #choose optimisation method (RMSE, CH07, CH10)
       if (opt_meth == "RMSE") {
-        rmse <- sqrt(sum((ygp_all$OBS_ADJ-ygp_all$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(ygp_all$OBS_ADJ)))))
+        rmse <- sqrt(sum((slpf_all$OBS_ADJ-slpf_all$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(slpf_all$OBS_ADJ)))))
       } else if (opt_meth == "CH07") {
         #do for individual cells and add them up
         rmse <- 0
-        for (loc in unique(ygp_all$LOC)) {
-          rmse_loc <- ygp_all[which(ygp_all$LOC == loc),]
+        for (loc in unique(slpf_all$LOC)) {
+          rmse_loc <- slpf_all[which(slpf_all$LOC == loc),]
           rmse_loc <- (mean(rmse_loc$OBS_ADJ,na.rm=T)-mean(rmse_loc$PRED_ADJ,na.rm=T))^2 + (sd(rmse_loc$OBS,na.rm=T)-sd(rmse_loc$PRED,na.rm=T))^2
           rmse <- rmse + rmse_loc
         }
       } else if (opt_meth == "CH10") {
         rmse <- 0
-        for (loc in unique(ygp_all$LOC)) {
-          rmse_loc <- ygp_all[which(ygp_all$LOC == loc),]
+        for (loc in unique(slpf_all$LOC)) {
+          rmse_loc <- slpf_all[which(slpf_all$LOC == loc),]
           rmse_loc <- (mean(rmse_loc$OBS_ADJ,na.rm=T)-mean(rmse_loc$PRED_ADJ,na.rm=T))^2
           rmse <- rmse + rmse_loc
         }
-        rmse <- sqrt(rmse/length(unique(ygp_all$LOC)))
+        rmse <- sqrt(rmse/length(unique(slpf_all$LOC)))
       }
-      out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(ygp_all$OBS,na.rm=T), YPRED=mean(ygp_all$PRED,na.rm=T),
-                            YOBS_ADJ=mean(ygp_all$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(ygp_all$PRED_ADJ,na.rm=T))
-      names(ygp_all)[4] <- "YGP"
-      ygp_all$VALUE <- vals[i]
+      out_row <- data.frame(VALUE=vals[i],RMSE=rmse,YOBS=mean(slpf_all$OBS,na.rm=T), YPRED=mean(slpf_all$PRED,na.rm=T),
+                            YOBS_ADJ=mean(slpf_all$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(slpf_all$PRED_ADJ,na.rm=T))
+      names(slpf_all)[4] <- "SLPF"
+      slpf_all$VALUE <- vals[i]
       
       #for final object
-      names(yr_out)[4] <- "YGP"; yr_out$VALUE <- vals[i]
-      this_cal <- ygp_calib$CALIBRATION; names(this_cal)[2] <- "YGP"; this_cal$VALUE <- vals[i]
+      names(yr_out)[4] <- "SLPF"; yr_out$VALUE <- vals[i]
+      this_cal <- slpf_calib$CALIBRATION; names(this_cal)[2] <- "SLPF"; this_cal$VALUE <- vals[i]
       
       #return object
-      ret_obj <- list(out_row,ygp_all,this_cal,yr_out)
+      ret_obj <- list(out_row,slpf_all,this_cal,yr_out)
       return(ret_obj)
     }
     
@@ -443,6 +443,7 @@ GLAM_optimise_parallel <- function(opt_data) {
     sfExport("opt_dir")
     sfExport("nfs_dir")
     sfExport("sect")
+    sfExport("ifile")
     sfExport("param")
     sfExport("vals")
     sfExport("opt_meth")
@@ -457,21 +458,19 @@ GLAM_optimise_parallel <- function(opt_data) {
     #loop to organise output
     for (i in 1:length(vals)) {
       i_s <- i*4-3
-      #cat("values: ",i_s," ",i_s+1," ",i_s+2," ",i_s+3,"\n")
-      
       out_row <- calib_output[[i_s]]
-      ygp_all <- calib_output[[i_s+1]]
+      slpf_all <- calib_output[[i_s+1]]
       this_cal <- calib_output[[i_s+2]]
       yr_out <- calib_output[[i_s+3]]
       
       if (i == 1) {
         out_all <- out_row
-        out_raw <- ygp_all
+        out_raw <- slpf_all
         cal_all <- this_cal
         cal_raw <- yr_out
       } else {
         out_all <- rbind(out_all,out_row)
-        out_raw <- rbind(out_raw,ygp_all)
+        out_raw <- rbind(out_raw,slpf_all)
         cal_all <- rbind(cal_all,this_cal)
         cal_raw <- rbind(cal_raw,yr_out)
       }

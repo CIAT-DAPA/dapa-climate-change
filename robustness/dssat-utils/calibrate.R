@@ -144,8 +144,8 @@ DSSAT_calibrate <- function(cal_data) {
     sow_date2 <- cal_data$INI_COND$SOW_DATE2[which(cal_data$INI_COND$LOC == loc)]
     
     #data.frame of iterative soil*sowing date trials
-    sow_seq <- round(seq(sow_date1, sow_date2, length.out=10), 0)
-    sol_seq <- c(1,1.2,1.4,1.6,1.8)
+    sow_seq <- round(seq(sow_date1, sow_date2, length.out=5), 0)
+    sol_seq <- c(1,1.3,1.6)
     run_df <- expand.grid(sow=sow_seq, sol=sol_seq)
     
     #prepare input object
