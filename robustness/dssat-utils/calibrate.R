@@ -72,8 +72,10 @@
 #plot(xx$VALUE, xx$RMSE, ty="l")
 
 #yy <- slpfcalib$RAW_DATA
-#yy <- yy[which(yy$LOC == 682 & yy$SAT_FAC == 1 & yy$VALUE == 0.66),]
-#plot(yy$YEAR, yy$PRED_ADJ, col="red", ty="l")
+#optval <- xx$VALUE[which(xx$RMSE == min(xx$RMSE))]
+#opsfac <- xx$SAT_FAC[which(xx$RMSE == min(xx$RMSE))]
+#yy <- yy[which(yy$LOC == 682 & yy$SAT_FAC == opsfac & yy$VALUE == optval),]
+#plot(yy$YEAR, yy$PRED_ADJ, col="red", ty="l",ylim=c(200,800))
 #lines(yy$YEAR, yy$OBS_ADJ)
 #plot(yy$OBS_ADJ, yy$PRED_ADJ,xlim=c(0,1200),ylim=c(0,1200))
 #abline(0,1)
