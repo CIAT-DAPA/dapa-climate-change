@@ -208,7 +208,7 @@ GLAM_calibrate <- function(cal_data) {
                                        outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
               sowfil <- make_sowdates(data.frame(CELL=run_data$LOC,SOW_DATE=sow_date),
                                       outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/sow/sowing.txt",sep=""))
-              thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
+              thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("rm -f ./output/*.out ./",run_data$MODEL,sep="")); setwd(thisdir)
             }
           } else {
             run_data$SEAS_FILES <- outfile
@@ -227,7 +227,7 @@ GLAM_calibrate <- function(cal_data) {
                              "SWFAC_TOT","SWFAC_MEAN","SWFAC_COUNT")
             pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","STG","YIELD","PLANTING_DATE","DUR")])
             pred_all <- rbind(pred_all, pred)
-            #system(paste("rm -rf ",run_data$RUN_DIR,sep="")) #remove junk
+            system(paste("rm -f ",run_data$RUN_DIR,"/output/*.out",sep="")) #remove junk
           }
         }
         

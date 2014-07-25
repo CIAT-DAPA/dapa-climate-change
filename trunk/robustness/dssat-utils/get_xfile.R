@@ -62,3 +62,39 @@ get_xfile <- function(run_data) {
   #return object
   return(xfil_data)
 }
+
+#get dummy one
+get_xfile_dummy <- function() {
+  in_data <- list()
+  in_data$general <- list(PEOPLE="generic",ADDRESS="generic",SITE="generic",
+                         PLOT_DETAILS=data.frame(PAREA=-99,PRNO=-99,PLEN=-99,PLDR=-99,PLSP=-99,
+                                          PLAY=-99,HAREA=-99,HRNO=-99,HLEN=-99,HARM=-99))
+  in_data$treatments <- data.frame(N=1,R=1,O=1,C=0,TNAME="generic",CU=1,FL=1,SA=0,IC=1,MP=1,
+                                  MI=0,MF=0,MR=0,MC=0,MT=0,ME=0,MH=0,SM=1)
+  in_data$cultivars <- data.frame(C=1,CR="MZ",INGENO="GE0001",CNAME="generic")
+  in_data$fields <- data.frame(L=1,ID_FIELD="AFRB0001",WSTA="AFRB5001",FLSA=-99,FLOB=-99,FLDT="DR003",
+                              FLDD=-99,FLDS=-99,FLST=-99,SLTX=-99,SLDP=-99,ID_SOIL="IB00000001",
+                              FLNAME="field1",XCRD=35.438,YCRD=-9.562,ELEV=733,AREA=-99,SLEN=-99,
+                              FLWR=-99,SLAS=-99,FLHST=-99,FHDUR=-99)
+  in_data$ini_cond_properties <- data.frame(C=1,PCR="MZ",ICDAT="50001",ICRT=-99,ICND=-99,ICRN=-99,ICRE=-99,
+                                           ICWD=-99,ICRES=-99,ICREN=-99,ICREP=-99,ICRIP=-99,ICRID=-99,
+                                           ICNAME="inicond1")
+  in_data$ini_cond_profile <- data.frame(C=rep(1,5),ICBL=rep(-99,5),SH2O=rep(-99,5),SNH4=rep(-99,5),
+                                        SNO3=rep(-99,5))
+  in_data$planting <- data.frame(P=1,PDATE="50005",EDATE="50013",PPOP=7,PPOE=7,PLME="S",PLDS="R",PLRS=80,PLRD=-99,PLDP=5,
+                                PLWT=-99,PAGE=-99,PENV=-99,PLPH=-99,SPRL=-99,PLNAME="plant1")
+  in_data$sim_ctrl <- data.frame(N=1,GENERAL="GE",NYERS=3,NREPS=1,START="S",SDATE="50005",RSEED=2150,
+                                SNAME="simctr1",SMODEL=-99,OPTIONS="OP",WATER="Y",NITRO="N",SYMBI="N",
+                                PHOSP="N",POTAS="N",DISES="N",CHEM="N",TILL="N",CO2="D",METHODS="ME",
+                                WTHER="M",INCON="M",LIGHT="E",EVAPO="R",INFIL="S",PHOTO="R",HYDRO="R",
+                                NSWIT=1,MESOM="G",MESEV="S",MESOL=2,MANAGEMENT="MA",PLANT="A",IRRIG="N",
+                                FERTI="N",RESID="N",HARVS="M",OUTPUTS="OU",FNAME="N",OVVEW="Y",
+                                SUMRY="Y",FROPT=1,GROUT="Y",CAOUT="Y",WAOUT="Y",NIOUT="N",MIOUT="Y",
+                                DIOUT="N",VBOSE="Y",CHOUT="N",OPOUT="Y")
+  in_data$auto_mgmt <- data.frame(N=1,PLANTING="PL",PFRST="50005",PLAST="50040",PH2OL=25,PH2OU=100,PH2OD=20,
+                                 PSTMX=40,PSTMN=10,IRRIGATION="IR",IMDEP=30,ITHRL=50,ITHRU=100,
+                                 IROFF="GS000",IMETH="IR001",IRAMT=10,IREFF=1,NITROGEN="NI",NMDEP=30,
+                                 NMTHR=50,NAMNT=25,NCODE="FE001",NAOFF="GS000",RESIDUES="RE",RIPCN=100,
+                                 RTIME=1,RIDEP=20,HARVEST="HA",HFRST=0,HLAST=95001,HPCNP=100,HPCNR=0)
+  return(in_data)
+}

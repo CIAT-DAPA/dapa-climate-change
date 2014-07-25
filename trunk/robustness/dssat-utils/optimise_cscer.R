@@ -1,6 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
-#Apr 2014 #borrows from PhD script called "glam-optimise-functions.R" and from "calibrate.R"
+#Jul 2014 #borrows from PhD script called "glam-optimise-functions.R" and from "calibrate.R"
 
 ##############################################################################################
 ####### function to calibrate GLAM (for as many grid cells as provided), each one individually
@@ -11,79 +11,79 @@
 #2. optimise (i.e. find optimum value for parameter) by running all grid cells simultaneously
 #3. return table of parameter values, RMSE value, and crop yield (obs and simulated)
 
-#note: a first function deals with YGP calibration
+#note: a first function deals with SLPF calibration
 #note: this function should be applicable only to the normal optimisation procedure
 
-# #example:
-# #---------------------------------------------------------------
-# src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
-# source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
-# source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
-# source(paste(src.dir,"/glam-utils/make_sowfile.R",sep=""))
-# source(paste(src.dir,"/glam-utils/make_wth.R",sep=""))
-# source(paste(src.dir,"/glam-utils/make_parameterset.R",sep=""))
-# source(paste(src.dir,"/glam-utils/get_parameterset.R",sep=""))
-# source(paste(src.dir,"/glam-utils/run_glam.R",sep=""))
-# source(paste(src.dir,"/glam-utils/calibrate.R",sep=""))
-# 
-# wd <- "~/Leeds-work/quest-for-robustness"
-# runsDir <- paste(wd,"/crop_model_runs",sep="")
-# calibDir <- paste(runsDir,"/ppe_optimisation",sep="")
-# mdataDir <- paste(wd,"/data/model_data",sep="")
-# metDir <- paste(wd,"/data/meteorology",sep="")
-# binDir <- paste(wd,"/bin/glam-maize-osx",sep="")
-# 
-# #load objects
-# load(paste(mdataDir,"/initial_conditions_major.RData",sep=""))
-# load(paste(mdataDir,"/yield_major.RData",sep=""))
-# 
-# #arguments
-# opt_data <- list()
-# opt_data$CROP <- "maize"
-# opt_data$MODEL <- "glam-maiz"
-# opt_data$BASE_DIR <- calibDir
-# opt_data$BIN_DIR <- binDir
-# opt_data$PAR_DIR <- mdataDir
-# opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
-# opt_data$WTH_ROOT <- "obs_hist_WFD"
-# opt_data$LOC <- c(680,681,682)
-# opt_data$ISYR <- 1981
-# opt_data$IEYR <- 2000
-# opt_data$INI_COND <- xy_main
-# opt_data$YLD_DATA <- xy_main_yield
-# opt_data$PARAMS <- GLAM_get_default(opt_data$PAR_DIR)
-# opt_data$SIM_NAME <- "optim1"
-# opt_data$PARAM <- "TE"
-# opt_data$SECT <- "glam_param.bmass"
-# opt_data$NSTEPS <- 36
-# opt_data$RUN_TYPE <- "RFD"
-# opt_data$METHOD <- "RMSE"
-# opt_data$USE_SCRATCH <- F
-# opt_data$SCRATCH <- NA
-# 
-# #modify parameter value to avoid model failure
-# opt_data$PARAMS$glam_param.maize$TLIMJUV$Value <- 280
-# 
-# paroptim <- GLAM_optimise(opt_data)
-# #---------------------------------------------------------------
+#example:
+#---------------------------------------------------------------
+src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
+source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
+source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
+source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
+source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
+source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
+source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
+source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
+source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
+source(paste(src.dir,"/dssat-utils/calibrate.R",sep=""))
+
+wd <- "~/Leeds-work/quest-for-robustness"
+runsDir <- paste(wd,"/crop_model_runs",sep="")
+calibDir <- paste(runsDir,"/dssat_t1",sep="")
+mdataDir <- paste(wd,"/data/model_data",sep="")
+metDir <- paste(wd,"/data/meteorology",sep="")
+binDir <- paste(wd,"/bin/dssat/csm45_1_23_bin_gfort",sep="")
+
+#load objects
+load(paste(mdataDir,"/initial_conditions_major_dssat.RData",sep=""))
+load(paste(mdataDir,"/yield_major_dssat.RData",sep=""))
+
+#read in parameter list
+param_list <- read.table(paste(mdataDir,"/parameter_list_dssat.txt",sep=""),header=T,sep="\t")
+param_list$DESCRIPTION <- NULL
+
+#arguments
+opt_data <- list()
+opt_data$MODEL <- "MZCER045"
+opt_data$BASENAME <- "AFRB" #basename of runs
+opt_data$BASE_DIR <- calibDir
+opt_data$BIN_DIR <- binDir
+opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
+opt_data$WTH_ROOT <- "obs_hist_WFD"
+opt_data$LOC <- c(680,681,682)
+opt_data$ISYR <- 1980 #1 year before GLAM's because of spin-up year needs in CSM
+opt_data$IEYR <- 2001 #1 extra year so as to include in wth file (but this year won't be run)
+opt_data$INI_COND <- xy_main
+opt_data$YLD_DATA <- xy_main_yield
+opt_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
+opt_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
+opt_data$SPE <- get_spepar(paste(opt_data$BIN_DIR,"/MZCER045.SPE",sep=""))
+opt_data$SIM_NAME <- "optim_01"
+opt_data$PARAM <- "PARSR"
+opt_data$VALS <- seq(0.4,0.6,length.out=9)
+opt_data$IFILE <- "SPE"
+opt_data$SECT <- "photo_param"
+opt_data$NSTEPS <- 9
+opt_data$METHOD <- "RMSE"
+opt_data$USE_SCRATCH <- F
+opt_data$SCRATCH <- NA
+
+#paroptim <- DSSAT_optimise(opt_data)
+#---------------------------------------------------------------
 
 # plot(paroptim$OPTIMISATION$VALUE, paroptim$OPTIMISATION$RMSE, ty='l')
 
 ### note:
 #simulate year before starting one because if sowing date is late then harvest is in this year
 #last year cannot be last year of time series since model runs could fail due to late sowing
-#see function GLAM_calibrate() in calibrate.R for details on how this is done.
+#see function DSSAT_calibrate() in calibrate.R for details on how this is done.
+### end.
 
 #optimise given parameter
-GLAM_optimise <- function(opt_data) {
-  require(snowfall) #parallelisation library
-  
+CSCER_optimise <- function(opt_data) {
   param <- toupper(opt_data$PARAM)
+  ifile <- toupper(opt_data$IFILE)
   sect <- tolower(opt_data$SECT)
-  
-  #put years into parameter set
-  opt_data$PARAMS$glam_param.mod_mgt$ISYR <- opt_data$ISYR
-  opt_data$PARAMS$glam_param.mod_mgt$IEYR <- opt_data$IEYR
   
   #here is the optimisation method
   #RMSE: is yearly root mean square error (classical)
@@ -103,10 +103,7 @@ GLAM_optimise <- function(opt_data) {
   }
   
   #input directories and model
-  exec_name <- opt_data$MODEL
-  
-  #running command
-  glam_cmd <- paste("./",exec_name,sep="")
+  exec_name <- "DSCSM045.EXE"
   
   #output directories
   if (opt_data$USE_SCRATCH) {
@@ -141,17 +138,7 @@ GLAM_optimise <- function(opt_data) {
   }
   
   #create sequence of values
-  if (param %in% c("SLA_INI","NDSLA")) {
-    vals <- seq(opt_data$MINVAL,opt_data$MAXVAL,length.out=opt_data$NSTEPS)
-  } else {
-    vals <- seq(opt_data$PARAMS[[sect]][[param]][,"Min"],opt_data$PARAMS[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
-  }
-  
-  #type of run
-  opt_data$PARAMS$glam_param.mod_mgt$SEASON <- opt_data$RUN_TYPE
-  
-  #params config
-  opt_data$PARAMS$glam_param.mod_mgt$IASCII <- 1 #output only to season file
+  vals <- opt_data$VALS
   
   #file of output
   if (opt_data$USE_SCRATCH) {
@@ -165,13 +152,29 @@ GLAM_optimise <- function(opt_data) {
     #loop through sequence of values
     for (i in 1:length(vals)) {
       #i <- 1
-      cat("\nperforming run ",opt_data$RUN_TYPE," ",i," value = ",vals[i]," (",param,")",sep="","\n")
+      cat("\nperforming run ",i," value = ",vals[i]," (",param,")",sep="","\n")
       
-      #assign values to parameter set
-      if (param %in% c("SLA_INI","NDSLA")) {
-        opt_data$PARAMS[[sect]][[param]] <- vals[i]
+      #assign values to relevant parameter set
+      #see below relevant info:
+      #opt_data[["SPE"]][["photo_param"]][["PARSR"]]
+      #opt_data[["SPE"]][["seed_growth"]][which(gsub(" ","",opt_data[["SPE"]][["seed_growth"]][["PARAM"]]) == "SDSZ"),"VALUE"]
+      #opt_data[["ECO"]][["KCAN"]]
+      #opt_data[["CUL"]][["P1"]]
+      #in_data <- get_xfile_dummy()
+      #in_data[["planting"]][["PPOP"]]
+      #in_data[["auto_mgmt"]][["PH2OL"]]
+      if (ifile == "SPE") {
+        if (param %in% c("SDSZ","RSGRT")) {
+          opt_data[[ifile]][[sect]][which(gsub(" ","",opt_data[[ifile]][[sect]][["PARAM"]]) == param),"VALUE"] <- vals[i]
+        } else {
+          opt_data[[ifile]][[sect]][[param]] <- vals[i]
+        }
+      } else if (ifile == "ECO" | ifile == "CUL") {
+        opt_data[[ifile]][[param]] <- vals[i]
+      } else if (ifile == "XFILE") {
+        opt_data$PARAM_VALUE <- vals[i]
       } else {
-        opt_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
+        stop("invalid ifile, check opt_data$IFILE")
       }
       
       #calibrate model
@@ -183,21 +186,20 @@ GLAM_optimise <- function(opt_data) {
         cal_data$BASE_DIR <- opt_dir
       }
       cal_data$SIM_NAME <- paste("calibration_",cal_data$PARAM,"_run-",i,sep="")
-      cal_data$NSTEPS <- 67
-      ygp_calib <- GLAM_calibrate(cal_data)
+      slpf_calib <- DSSAT_calibrate(cal_data)
       
       #yearly output
-      yr_out <- ygp_calib$RAW_DATA
+      yr_out <- slpf_calib$RAW_DATA
       
       #select optimal ygp of each grid cell
-      ygp_all <- data.frame()
+      slpf_all <- data.frame()
       for (loc in unique(yr_out$LOC)) {
         #loc <- unique(yr_out$LOC)[1]
-        ygp_opt <- min(ygp_calib$CALIBRATION$RMSE[which(ygp_calib$CALIBRATION$LOC == loc)])
-        ygp_opt <- ygp_calib$CALIBRATION$VALUE[which(ygp_calib$CALIBRATION$LOC == loc & ygp_calib$CALIBRATION$RMSE == ygp_opt)]
-        if (length(ygp_opt) > 1) {ygp_opt <- max(ygp_opt)}
-        ygp_loc <- yr_out[which(yr_out$LOC == loc & yr_out$VALUE == ygp_opt),]
-        ygp_all <- rbind(ygp_all, ygp_loc)
+        slpf_opt <- min(slpf_calib$CALIBRATION$RMSE[which(slpf_calib$CALIBRATION$LOC == loc)])
+        slpf_opt <- slpf_calib$CALIBRATION$VALUE[which(slpf_calib$CALIBRATION$LOC == loc & slpf_calib$CALIBRATION$RMSE == slpf_opt)]
+        if (length(slpf_opt) > 1) {slpf_opt <- max(slpf_opt)}
+        slpf_loc <- yr_out[which(yr_out$LOC == loc & yr_out$VALUE == slpf_opt),]
+        slpf_all <- rbind(slpf_all, slpf_loc)
       }
       
       #choose optimisation method (RMSE, CH07, CH10)
@@ -262,9 +264,7 @@ GLAM_optimise <- function(opt_data) {
   return(r_list)
 }
 
-#################################################################################
-#################################################################################
-#### optimise given parameter in parallel
+#optimise given parameter in parallel
 GLAM_optimise_parallel <- function(opt_data) {
   require(snowfall) #parallelisation library
   
