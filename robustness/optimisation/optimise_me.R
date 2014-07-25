@@ -34,6 +34,7 @@ bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
 ###
 #1. load list of parameters and ranges (./data/model_data/parameter_list.txt)
 param_list <- read.csv(paste(mdata_dir,"/parameter_list_glam.txt",sep=""),sep="\t",header=T)
+param_orig <- param_list
 
 ###
 #2. load objects (initial conditions and yields)
@@ -43,7 +44,7 @@ load(paste(mdata_dir,"/yield_major.RData",sep=""))
 ###
 #3. create a list of 100 seeds
 set.seed(2302) #fixed seed to make it replicable
-seed_list <- round(runif(100, 1000, 9999),0)
+seed_list <- round(runif(100, 1000, 9999),0)[1:25]
 seed <- seed_list[1]
 
 #randomise list of parameters
@@ -82,26 +83,53 @@ xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in
 ###
 #6. iteratively optimise over the list of parameters (with a defined number of iterations)
 this_params <- GLAM_get_default(mdata_dir)
-nmaxiter <- 15
+nmaxiter <- 10
 
-#thoughts for arc2 processing
-#** can i submit 100 simulations [100 seeds] as follows: iter=1; param=1; then iter=1, param=2, so on...
-#   note that (15 * 50) this is 750 times the 100 need to be submitted
-#   still inside the 100 i will need enough time to get through all 'param' values and 'ygp' values
+########################################################
+#construct table of simulations
+dfall <- data.frame()
+for (i in 1:length(seed_list)) {
+  cat("i=",i,"\n")
+  
+  seed <- seed_list[i]
+  param_list <- param_orig
+  set.seed(seed)
+  reord <- sample(1:nrow(param_list),replace=F)
+  param_list <- param_list[reord,]
+  row.names(param_list) <- 1:nrow(param_list)
+  
+  dfj <- data.frame()
+  for (j in 1:nmaxiter) {
+    cat("...j=",j,"\n")
+    
+    dfk <- data.frame()
+    for (k in 1:nrow(param_list)) {
+      
+      dfl <- data.frame()
+      for (l in 1:param_list$NSTEPS[k]) {
+        trow <- data.frame(SEED=seed,ITER=j,PARAM_ORDER=k,PARAM_NAME=param_list$PARAM[k],STEP=l)
+        dfl <- rbind(dfl,trow)
+      }
+      dfk <- rbind(dfk, dfl)
+    }
+    dfj <- rbind(dfj, dfk)
+  }
+  dfall <- rbind(dfall, dfj)
+}
 
-#** can i submit 100 seeds * nvalues for a parameter?
-#   max(nvalues) = 23, hence, 100 * 23 = 2300 simulations at a time
-#   these need to be submitted in sequence a total of 750 times (15 * 50)
-#   say each taking 1 hour, this means 31 days ONLY IF i can submit 2300 jobs simultaneously (unlikely)
-#   this will reduce computing time per node since only 'ygp' has to be calibrated
-#   meaning i can probably submit many simulations in a day
+#all the *STEPS and *SEEDS for the first ITER & PARAM can be submitted simultaneously
+iter <- 1; param <- 1 #from a total of 10 * 47 = 470 times
+dfsel <- dfall[which(dfall$ITER == iter & dfall$PARAM_ORDER == param),]
+row.names(dfsel) <- 1:nrow(dfsel)
+dfsel$ITER <- NULL; dfsel$PARAM_ORDER <- NULL
+#nrow(dfsel) = 351, each time calibrate() needs to be run
+
+#this can be submitted to SEE machines: 30*2 (lajefa+eljefe) + 4*20 (foe-linux-0*)
+#this is how to do it:
+#sfInit(parallel=T,cpus=90,socketHosts=c(rep("lajefa",30),rep("foe-linux-01",30),rep("foe-linux-02",30)),type="SOCK")
 
 #need to reduce number of seeds, number of parameters, and number of iterations 
-#to maximum extent possible. seeds=25, param=?, iter=10
-
-#check groundnut runs to see at which iteration the RMSE was stabilising
-
-#try to construct table of simulations
+#to maximum extent possible. seeds=25, param=47, iter=10
 
 ### both are worth trying but from what i've seen in arc1
 ### first test the first one and see how much it takes, if too long then going to second one
