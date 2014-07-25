@@ -1,7 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
 #Feb 2014 #borrows from PhD script called "glam-optimise-functions.R"
-stop("!")
 
 ##############################################################################################
 ####### function to calibrate GLAM (for as many grid cells as provided), each one individually
@@ -16,61 +15,69 @@ stop("!")
 #note: this function should be applicable to both the hypercube and the normal 
 #      optimisation procedure
 
-#example:
-#---------------------------------------------------------------
-src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
-source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
-source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
-source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
-source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
-source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
-source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
-source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
-source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
+#note: DSSAT requires 1 spin up year. Hence simulations should start in 1980 instead of 1981.
+#      the extra year will is removed during the RMSE calculation. As opposed to GLAM, DSSAT
+#      is not run for an extra year at the end (see make_xfile.R), but the object cal_data
+#      has an extra year so as to get the weather data into the file
 
-wd <- "~/Leeds-work/quest-for-robustness"
-runsDir <- paste(wd,"/crop_model_runs",sep="")
-calibDir <- paste(runsDir,"/dssat_t1",sep="")
-mdataDir <- paste(wd,"/data/model_data",sep="")
-metDir <- paste(wd,"/data/meteorology",sep="")
-binDir <- paste(wd,"/bin/dssat/csm45_1_23_bin_gfort",sep="")
-
-#load objects
-load(paste(mdataDir,"/initial_conditions_major_dssat.RData",sep=""))
-load(paste(mdataDir,"/yield_major_dssat.RData",sep=""))
-
-#arguments
-cal_data <- list()
-cal_data$MODEL <- "MZCER045"
-cal_data$BASENAME <- "AFRB" #basename of runs
-cal_data$BASE_DIR <- calibDir
-cal_data$BIN_DIR <- binDir
-cal_data$PAR_DIR <- mdataDir
-cal_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
-cal_data$WTH_ROOT <- "obs_hist_WFD"
-cal_data$LOC <- c(680,681,682)
-cal_data$ISYR <- 1980
-cal_data$IEYR <- 2001
-cal_data$INI_COND <- xy_main
-cal_data$YLD_DATA <- xy_main_yield
-cal_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
-cal_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
-cal_data$SPE <- get_spepar(paste(cal_data$BIN_DIR,"/MZCER045.SPE",sep=""))
-cal_data$SIM_NAME <- "calib_01"
-cal_data$METHOD <- "RMSE"
-cal_data$USE_SCRATCH <- F
-cal_data$SCRATCH <- NA
-
-#ygpcalib <- GLAM_calibrate(cal_data)
-#---------------------------------------------------------------
+# #example:
+# #---------------------------------------------------------------
+# src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
+# source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
+# 
+# wd <- "~/Leeds-work/quest-for-robustness"
+# runsDir <- paste(wd,"/crop_model_runs",sep="")
+# calibDir <- paste(runsDir,"/dssat_t1",sep="")
+# mdataDir <- paste(wd,"/data/model_data",sep="")
+# metDir <- paste(wd,"/data/meteorology",sep="")
+# binDir <- paste(wd,"/bin/dssat/csm45_1_23_bin_gfort",sep="")
+# 
+# #load objects
+# load(paste(mdataDir,"/initial_conditions_major_dssat.RData",sep=""))
+# load(paste(mdataDir,"/yield_major_dssat.RData",sep=""))
+# 
+# #arguments
+# cal_data <- list()
+# cal_data$MODEL <- "MZCER045"
+# cal_data$BASENAME <- "AFRB" #basename of runs
+# cal_data$BASE_DIR <- calibDir
+# cal_data$BIN_DIR <- binDir
+# cal_data$PAR_DIR <- mdataDir
+# cal_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
+# cal_data$WTH_ROOT <- "obs_hist_WFD"
+# cal_data$LOC <- c(680,681,682)
+# cal_data$ISYR <- 1980
+# cal_data$IEYR <- 2001
+# cal_data$INI_COND <- xy_main
+# cal_data$YLD_DATA <- xy_main_yield
+# cal_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
+# cal_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
+# cal_data$SPE <- get_spepar(paste(cal_data$BIN_DIR,"/MZCER045.SPE",sep=""))
+# cal_data$SIM_NAME <- "calib_01"
+# cal_data$METHOD <- "RMSE"
+# cal_data$USE_SCRATCH <- F
+# cal_data$SCRATCH <- NA
+# 
+# slpfcalib <- DSSAT_calibrate(cal_data)
+# #---------------------------------------------------------------
 
 #plotting some of the results
-xx <- ygpcalib$RAW_DATA[which(ygpcalib$RAW_DATA$VALUE==0.87 & ygpcalib$RAW_DATA$LOC==680),]
-plot(xx$YEAR,xx$OBS_ADJ,ty="l",ylim=c(0,1200))
-lines(xx$YEAR,xx$PRED_ADJ,col="red")
+#xx <- slpfcalib$CALIBRATION[which(slpfcalib$CALIBRATION$LOC==682),]
+#plot(xx$VALUE, xx$RMSE, ty="l")
 
-yy <- ygpcalib$CALIBRATION[which(ygpcalib$CALIBRATION$LOC==680),]
-plot(yy$VALUE, yy$RMSE/yy$YOBS_ADJ*100, ty='l',ylim=c(0,100))
+#yy <- slpfcalib$RAW_DATA
+#yy <- yy[which(yy$LOC == 682 & yy$SAT_FAC == 1 & yy$VALUE == 0.66),]
+#plot(yy$YEAR, yy$PRED_ADJ, col="red", ty="l")
+#lines(yy$YEAR, yy$OBS_ADJ)
+#plot(yy$OBS_ADJ, yy$PRED_ADJ,xlim=c(0,1200),ylim=c(0,1200))
+#abline(0,1)
 
 ### note:
 #simulate year before starting one because if sowing date is late then harvest is in this year
@@ -159,10 +166,12 @@ DSSAT_calibrate <- function(cal_data) {
     run_data$SOW_DATE <- sow_date1
     run_data$SOW_WINDOW <- 30 #sow_date2 - sow_date1
     run_data$SOILS <- get_soils(run_data, cal_data$INI_COND)
+    run_data$SOILS_ORIG <- run_data$SOILS #original soil data to avoid over-increasing SSAT
     run_data$CUL <- cal_data$CUL
     run_data$ECO <- cal_data$ECO
     run_data$SPE <- cal_data$SPE
     run_data$XFILE <- get_xfile(run_data)
+    #run_data$XFILE$sim_ctrl$VBOSE <- "0" #write only Summary.OUT outputs (as needed)
     
     #loop through sequence of values
     for (i in 1:length(vals)) {
@@ -176,13 +185,12 @@ DSSAT_calibrate <- function(cal_data) {
       run_data$SOILS[[sect]][[param]] <- vals[i]
       
       #run all sow*sol options for this YGP value and location
-      soils_orig <- run_data$SOILS #original soil data to avoid over-increasing SSAT
       pred_all <- data.frame() 
       for (k in 1:nrow(run_df)) {
         #k <- 1
         #get sow date and SAT multiplier into relevant files
         sow_date <- run_df$sow[k]
-        run_data$SOILS$profile$SSAT <- soils_orig$profile$SSAT * run_df$sol[k]
+        run_data$SOILS$profile$SSAT <- run_data$SOILS_ORIG$profile$SSAT * run_df$sol[k]
         run_data$XFILE$ini_cond_properties$ICDAT <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date),sep="")
         run_data$XFILE$planting$PDATE <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date),sep="")
         run_data$XFILE$planting$EDATE <- paste(substr(as.character(run_data$ISYR),3,4),sprintf("%03d",sow_date+8),sep="")
@@ -200,7 +208,6 @@ DSSAT_calibrate <- function(cal_data) {
             #if (cal_data$USE_SCRATCH) {}
             soilfil <- make_soilfile(run_data$SOILS, paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/SOIL.SOL",sep=""), overwrite=T)
             xfil <- make_xfile(run_data$XFILE, paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/",run_data$BASENAME,substr(paste(run_data$ISYR),3,4),"01.MZX",sep=""),overwrite=T)
-            #thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
             thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",run_data$MODEL," B DSSBatch.v45",sep="")); setwd(thisdir)
           }
         } else {
@@ -235,9 +242,8 @@ DSSAT_calibrate <- function(cal_data) {
       #read in all files and determine best sat multiplier
       if (nrow(pred_all) > 0) { #for existence of output GLAM file
         #average by YEAR and SAT_FAC
-        #pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
-        pred_all$YIELD[which(pred_all$STG == 9)] <- NA #set to NA all STG==0
-        pred_agg <- aggregate(pred_all[,c("SOW","YIELD","PLANTING_DATE","DUR")], by=list(YEAR=pred_all$YEAR, SAT_FAC=pred_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
+        pred_all$HWAM[which(pred_all$HWAM == -99)] <- NA #set to NA all STG==0
+        pred_agg <- aggregate(pred_all[,c("SOW","HWAM","PDAT","MDAT","DUR")], by=list(YEAR=pred_all$YEAR, SAT_FAC=pred_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
         
         #perform this calculation for each value of SAT_FAC
         odf_all <- data.frame()
@@ -245,25 +251,26 @@ DSSAT_calibrate <- function(cal_data) {
           #sfac <- sol_seq[1]
           #grab predicted yield
           pred <- pred_agg[which(pred_agg$SAT_FAC == sfac),]
-          y_p <- pred$YIELD
+          y_p <- pred$HWAM
           y_p[which(is.na(y_p))] <- 0 #set to zero any NAs (product of emergence failure)
+          y_p <- y_p[2:length(y_p)] #remove spin up year (1980)
           
           #grab observed yield
           y_o <- as.data.frame(t(cal_data$YLD_DATA[which(cal_data$YLD_DATA$x == run_data$LON & cal_data$YLD_DATA$y == run_data$LAT),3:ncol(cal_data$YLD_DATA)]))
           y_o <- cbind(YEAR=1982:2005,y_o)
           names(y_o)[2] <- "YIELD"
           row.names(y_o) <- 1:nrow(y_o)
-          y_o <- y_o[which(y_o$YEAR >= cal_data$ISYR & y_o$YEAR <= cal_data$IEYR),]
+          y_o <- y_o[which(y_o$YEAR >= cal_data$ISYR & y_o$YEAR <= (cal_data$IEYR-1)),]
           y_o <- y_o$YIELD
           
           #get simulated yield, depending on which year the crop was actually harvested:
           #** if planted and harvested this year then use simulation from this year to end
           #** if planted this and harvested next year then use simulation from year-1 to end-1
-          har_date <- mean((pred$PLANTING_DATE + pred$DUR)) #get harvest date first
+          har_date <- mean((pred$PDAT + pred$DUR)) #get harvest date first
           if (har_date<365) {y_p <- y_p[2:length(y_p)]} else {y_p <- y_p[1:(length(y_p)-1)]}
-          odf <- data.frame(YEAR=(cal_data$ISYR+1):cal_data$IEYR,VALUE=vals[i],OBS=y_o,PRED=y_p)
+          odf <- data.frame(YEAR=(cal_data$ISYR+2):(cal_data$IEYR-1),VALUE=vals[i],OBS=y_o,PRED=y_p)
           
-          ## detrending (borrows from detrender-functions.R)
+          ## detrending (borrows from detrender-functions.R) [based on Heinemann et al. (2011)]
           #detrend observed yield
           fit_loess <- loess(odf$OBS ~ odf$YEAR) #compute lowess fit
           y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
@@ -307,8 +314,9 @@ DSSAT_calibrate <- function(cal_data) {
       }
       
       odf <- odf_all[which(odf_all$SAT_FAC == sfac),]; odf$RMSE <- NULL
-      out_row <- data.frame(VALUE=vals[i], SAT_FAC=sfac, RMSE=rmse, YOBS=mean(odf$OBS,na.rm=T), YPRED=mean(odf$PRED,na.rm=T), 
-                            YOBS_ADJ=mean(odf$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(odf$PRED_ADJ,na.rm=T))
+      out_row <- data.frame(VALUE=vals[i], SAT_FAC=sfac, RMSE=rmse, YOBS=mean(odf$OBS,na.rm=T), 
+                            YPRED=mean(odf$PRED,na.rm=T), YOBS_ADJ=mean(odf$OBS_ADJ,na.rm=T), 
+                            YPRED_ADJ=mean(odf$PRED_ADJ,na.rm=T))
       
       if (i == 1) {
         out_all <- out_row
@@ -333,7 +341,6 @@ DSSAT_calibrate <- function(cal_data) {
   
   #remove junk from scratch
   if (cal_data$USE_SCRATCH) {
-    #system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     system(paste("rm -rf ",cal_dir,sep=""))
   }
   
