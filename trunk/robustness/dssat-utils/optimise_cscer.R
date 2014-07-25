@@ -14,60 +14,60 @@
 #note: a first function deals with SLPF calibration
 #note: this function should be applicable only to the normal optimisation procedure
 
-#example:
-#---------------------------------------------------------------
-src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
-source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
-source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
-source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
-source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
-source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
-source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
-source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
-source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
-source(paste(src.dir,"/dssat-utils/calibrate.R",sep=""))
-
-wd <- "~/Leeds-work/quest-for-robustness"
-runsDir <- paste(wd,"/crop_model_runs",sep="")
-calibDir <- paste(runsDir,"/dssat_t1",sep="")
-mdataDir <- paste(wd,"/data/model_data",sep="")
-metDir <- paste(wd,"/data/meteorology",sep="")
-binDir <- paste(wd,"/bin/dssat/csm45_1_23_bin_gfort",sep="")
-
-#load objects
-load(paste(mdataDir,"/initial_conditions_major_dssat.RData",sep=""))
-load(paste(mdataDir,"/yield_major_dssat.RData",sep=""))
-
-#read in parameter list
-param_list <- read.table(paste(mdataDir,"/parameter_list_dssat.txt",sep=""),header=T,sep="\t")
-param_list$DESCRIPTION <- NULL
-
-#arguments
-opt_data <- list()
-opt_data$MODEL <- "MZCER045"
-opt_data$BASENAME <- "AFRB" #basename of runs
-opt_data$BASE_DIR <- calibDir
-opt_data$BIN_DIR <- binDir
-opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
-opt_data$WTH_ROOT <- "obs_hist_WFD"
-opt_data$LOC <- c(680,681,682)
-opt_data$ISYR <- 1980 #1 year before GLAM's because of spin-up year needs in CSM
-opt_data$IEYR <- 2001 #1 extra year so as to include in wth file (but this year won't be run)
-opt_data$INI_COND <- xy_main
-opt_data$YLD_DATA <- xy_main_yield
-opt_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
-opt_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
-opt_data$SPE <- get_spepar(paste(opt_data$BIN_DIR,"/MZCER045.SPE",sep=""))
-opt_data$SIM_NAME <- "optim_01"
-opt_data$PARAM <- "PARSR"
-opt_data$VALS <- seq(0.4,0.6,length.out=9)
-opt_data$IFILE <- "SPE"
-opt_data$SECT <- "photo_param"
-opt_data$NSTEPS <- 9
-opt_data$METHOD <- "RMSE"
-opt_data$USE_SCRATCH <- F
-opt_data$SCRATCH <- NA
-opt_data$NPROC <- 3
+# #example:
+# #---------------------------------------------------------------
+# src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
+# source(paste(src.dir,"/dssat-utils/make_xfile.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/make_soilfile.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/make_wth.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/make_parameters.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/get_parameters.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/get_xfile.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/get_soils.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/run_dssat.R",sep=""))
+# source(paste(src.dir,"/dssat-utils/calibrate.R",sep=""))
+# 
+# wd <- "~/Leeds-work/quest-for-robustness"
+# runsDir <- paste(wd,"/crop_model_runs",sep="")
+# calibDir <- paste(runsDir,"/dssat_t1",sep="")
+# mdataDir <- paste(wd,"/data/model_data",sep="")
+# metDir <- paste(wd,"/data/meteorology",sep="")
+# binDir <- paste(wd,"/bin/dssat/csm45_1_23_bin_gfort",sep="")
+# 
+# #load objects
+# load(paste(mdataDir,"/initial_conditions_major_dssat.RData",sep=""))
+# load(paste(mdataDir,"/yield_major_dssat.RData",sep=""))
+# 
+# #read in parameter list
+# param_list <- read.table(paste(mdataDir,"/parameter_list_dssat.txt",sep=""),header=T,sep="\t")
+# param_list$DESCRIPTION <- NULL
+# 
+# #arguments
+# opt_data <- list()
+# opt_data$MODEL <- "MZCER045"
+# opt_data$BASENAME <- "AFRB" #basename of runs
+# opt_data$BASE_DIR <- calibDir
+# opt_data$BIN_DIR <- binDir
+# opt_data$WTH_DIR <- paste(metDir,"/ascii_extract_raw",sep="") #for reading .wth files
+# opt_data$WTH_ROOT <- "obs_hist_WFD"
+# opt_data$LOC <- c(680,681,682)
+# opt_data$ISYR <- 1980 #1 year before GLAM's because of spin-up year needs in CSM
+# opt_data$IEYR <- 2001 #1 extra year so as to include in wth file (but this year won't be run)
+# opt_data$INI_COND <- xy_main
+# opt_data$YLD_DATA <- xy_main_yield
+# opt_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
+# opt_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
+# opt_data$SPE <- get_spepar(paste(opt_data$BIN_DIR,"/MZCER045.SPE",sep=""))
+# opt_data$SIM_NAME <- "optim_01"
+# opt_data$PARAM <- "PARSR"
+# opt_data$VALS <- seq(0.4,0.6,length.out=9)
+# opt_data$IFILE <- "SPE"
+# opt_data$SECT <- "photo_param"
+# opt_data$NSTEPS <- 9
+# opt_data$METHOD <- "RMSE"
+# opt_data$USE_SCRATCH <- F
+# opt_data$SCRATCH <- NA
+# opt_data$NPROC <- 3
 
 # #create meteorology for selected grid cells
 # for (loc in opt_data$LOC) {
@@ -92,6 +92,27 @@ opt_data$NPROC <- 3
 #---------------------------------------------------------------
 
 # plot(paroptim$OPTIMISATION$VALUE, paroptim$OPTIMISATION$RMSE, ty='l')
+
+# xx <- paroptim$RAW_OPTIMISATION
+# xx1 <- xx[which(xx$VALUE == 0.525 & xx$LOC == 680),]
+# xx2 <- xx[which(xx$VALUE == 0.525 & xx$LOC == 681),]
+# xx3 <- xx[which(xx$VALUE == 0.525 & xx$LOC == 682),]
+# 
+# plot(xx1$YEAR, xx1$OBS_ADJ, ty="l", ylim=c(500,1100))
+# lines(xx1$YEAR, xx1$PRED_ADJ, col="red")
+# plot(xx1$OBS_ADJ, xx1$PRED_ADJ, ylim=c(500,1100), xlim=c(500,1100))
+# abline(0,1)
+# 
+# plot(xx2$YEAR, xx2$OBS_ADJ, ty="l", ylim=c(400,800))
+# lines(xx2$YEAR, xx2$PRED_ADJ, col="red")
+# plot(xx2$OBS_ADJ, xx2$PRED_ADJ, ylim=c(400,800), xlim=c(400,800))
+# abline(0,1)
+# 
+# plot(xx3$YEAR, xx3$OBS_ADJ, ty="l", ylim=c(300,700))
+# lines(xx3$YEAR, xx3$PRED_ADJ, col="red")
+# plot(xx3$OBS_ADJ, xx3$PRED_ADJ, ylim=c(300,700), xlim=c(300,700))
+# abline(0,1)
+
 
 ### note:
 #simulate year before starting one because if sowing date is late then harvest is in this year
@@ -463,7 +484,7 @@ CSCER_optimise_parallel <- function(opt_data) {
     #export variables
     sfExport("opt_data")
     sfExport("opt_dir")
-    sfExport("nfs_dir")
+    if (opt_data$USE_SCRATCH) sfExport("nfs_dir")
     sfExport("sect")
     sfExport("ifile")
     sfExport("param")
