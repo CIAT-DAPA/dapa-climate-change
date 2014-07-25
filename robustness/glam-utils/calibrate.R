@@ -208,7 +208,7 @@ GLAM_calibrate <- function(cal_data) {
                                        outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
               sowfil <- make_sowdates(data.frame(CELL=run_data$LOC,SOW_DATE=sow_date),
                                       outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/sow/sowing.txt",sep=""))
-              thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("rm -f ./output/*.out ./",run_data$MODEL,sep="")); setwd(thisdir)
+              thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
             }
           } else {
             run_data$SEAS_FILES <- outfile
