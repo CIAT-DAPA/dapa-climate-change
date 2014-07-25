@@ -84,6 +84,29 @@ xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in
 this_params <- GLAM_get_default(mdata_dir)
 nmaxiter <- 15
 
+#thoughts for arc2 processing
+#** can i submit 100 simulations [100 seeds] as follows: iter=1; param=1; then iter=1, param=2, so on...
+#   note that (15 * 50) this is 750 times the 100 need to be submitted
+#   still inside the 100 i will need enough time to get through all 'param' values and 'ygp' values
+
+#** can i submit 100 seeds * nvalues for a parameter?
+#   max(nvalues) = 23, hence, 100 * 23 = 2300 simulations at a time
+#   these need to be submitted in sequence a total of 750 times (15 * 50)
+#   say each taking 1 hour, this means 31 days ONLY IF i can submit 2300 jobs simultaneously (unlikely)
+#   this will reduce computing time per node since only 'ygp' has to be calibrated
+#   meaning i can probably submit many simulations in a day
+
+#need to reduce number of seeds, number of parameters, and number of iterations 
+#to maximum extent possible. seeds=25, param=?, iter=10
+
+#check groundnut runs to see at which iteration the RMSE was stabilising
+
+#try to construct table of simulations
+
+### both are worth trying but from what i've seen in arc1
+### first test the first one and see how much it takes, if too long then going to second one
+### shouldnt be too complicated
+
 #15 total iterations
 for (iter in 1:nmaxiter) {
   #iter <- 1
