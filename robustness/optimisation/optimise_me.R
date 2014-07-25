@@ -122,18 +122,29 @@ iter <- 1; param <- 1 #from a total of 10 * 47 = 470 times
 dfsel <- dfall[which(dfall$ITER == iter & dfall$PARAM_ORDER == param),]
 row.names(dfsel) <- 1:nrow(dfsel)
 dfsel$ITER <- NULL; dfsel$PARAM_ORDER <- NULL
-#nrow(dfsel) = 351, each time calibrate() needs to be run
+#nrow(dfsel) = 351, each time calibrate() needs to be run. calibrate should take 30-60 min
 
-#this can be submitted to SEE machines: 30*2 (lajefa+eljefe) + 4*20 (foe-linux-0*)
+#this can be submitted to group and SEE machines: 
+#30*2 (lajefa+eljefe) + 4*25 (foe-linux-0*) = 160 jobs simultaneously
+
 #this is how to do it:
 #sfInit(parallel=T,cpus=90,socketHosts=c(rep("lajefa",30),rep("foe-linux-01",30),rep("foe-linux-02",30)),type="SOCK")
 
 #need to reduce number of seeds, number of parameters, and number of iterations 
 #to maximum extent possible. seeds=25, param=47, iter=10
 
-### both are worth trying but from what i've seen in arc1
-### first test the first one and see how much it takes, if too long then going to second one
-### shouldnt be too complicated
+#times for a 10-gridcell calibration (21 ygp steps), mean=35.57 min
+#at this rate a total of 40 calibrations can be done per core per day * 160 cores = 6,400 calib per day
+#164,250 / 6,400 = 26 days, for all calib for a ME to be done
+#
+# 18:44
+# 19:15 --31
+# 19:59 --44
+# 20:37 --38
+# 21:10 --33
+# 21:41 --31
+# 22:25 --44
+# 22:53 --28
 
 #15 total iterations
 for (iter in 1:nmaxiter) {
