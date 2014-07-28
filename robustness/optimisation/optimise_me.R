@@ -44,13 +44,13 @@ load(paste(mdata_dir,"/yield_major.RData",sep=""))
 ###
 #3. create a list of 100 seeds
 set.seed(2302) #fixed seed to make it replicable
-seed_list <- round(runif(100, 1000, 9999),0)[1:25]
+seed_list <- round(runif(100, 1000, 9999),0)[1:10]
 seed <- seed_list[1]
 
 #randomise list of parameters
 set.seed(seed)
 reord <- sample(1:nrow(param_list),replace=F)
-param_list <- param_list[reord,]
+param_list <- param_orig[reord,]
 row.names(param_list) <- 1:nrow(param_list)
 
 ###
@@ -119,34 +119,24 @@ for (i in 1:length(seed_list)) {
 
 #all the *STEPS and *SEEDS for the first ITER & PARAM can be submitted simultaneously
 iter <- 1; param <- 1 #from a total of 10 * 47 = 470 times
+iter
 dfsel <- dfall[which(dfall$ITER == iter & dfall$PARAM_ORDER == param),]
 row.names(dfsel) <- 1:nrow(dfsel)
 dfsel$ITER <- NULL; dfsel$PARAM_ORDER <- NULL
-#nrow(dfsel) = 351, each time calibrate() needs to be run. calibrate should take 30-60 min
+#nrow(dfsel) = 123, each time calibrate() needs to be run. calibrate should take ~36 min
 
-#this can be submitted to group and SEE machines: 
-#30*2 (lajefa+eljefe) + 4*25 (foe-linux-0*) = 160 jobs simultaneously
-
-#this is how to do it:
+#this is how to do it in multiple machines:
 #sfInit(parallel=T,cpus=90,socketHosts=c(rep("lajefa",30),rep("foe-linux-01",30),rep("foe-linux-02",30)),type="SOCK")
 
-#need to reduce number of seeds, number of parameters, and number of iterations 
-#to maximum extent possible. seeds=25, param=47, iter=10
+#mean time for a 10-gridcell calibration (21 ygp steps) = 35.57 min
+#at this rate a total of 40 calibrations can be done per core per day * 123 cores = 4920 calib per day
+#65,700 / 4920 = ~13 days, for all calib for a ME to be done
 
-#times for a 10-gridcell calibration (21 ygp steps), mean=35.57 min
-#at this rate a total of 40 calibrations can be done per core per day * 160 cores = 6,400 calib per day
-#164,250 / 6,400 = 26 days, for all calib for a ME to be done
-#
-# 18:44
-# 19:15 --31
-# 19:59 --44
-# 20:37 --38
-# 21:10 --33
-# 21:41 --31
-# 22:25 --44
-# 22:53 --28
+###
+#note: remember that in each optim run i have to start from a different point in the parameter space
+###
 
-#15 total iterations
+#10 total iterations
 for (iter in 1:nmaxiter) {
   #iter <- 1
   #arguments
@@ -179,6 +169,7 @@ for (iter in 1:nmaxiter) {
     #parameter and loc within
     param <- paste(param_list$PARAM[i]); sect <- paste(param_list$WHERE[i])
     nsteps <- param_list$NSTEPS[i]
+    ovals <- seq(param_list$MIN[i],param_list$MAX[i],length.out=nsteps)
     opt_data$NPROC <- min(c(30,nsteps)) #30 for eljefe / lajefa #3 for mbp
     
     #update arguments
@@ -186,11 +177,12 @@ for (iter in 1:nmaxiter) {
     opt_data$PARAM <- param
     opt_data$SECT <- sect
     opt_data$NSTEPS <- nsteps
+    opt_data$VALS <- ovals
     
-    if (param %in% c("SLA_INI","NDSLA")) {
-      opt_data$MINVAL <- param_list$MIN[i]
-      opt_data$MAXVAL <- param_list$MAX[i]
-    }
+    #if (param %in% c("SLA_INI","NDSLA")) {
+    #  opt_data$MINVAL <- param_list$MIN[i]
+    #  opt_data$MAXVAL <- param_list$MAX[i]
+    #}
     
     #run optim function
     #par_optim <- GLAM_optimise(opt_data)
