@@ -55,7 +55,8 @@
 # opt_data$SIM_NAME <- "optim1"
 # opt_data$PARAM <- "TE"
 # opt_data$SECT <- "glam_param.bmass"
-# opt_data$NSTEPS <- 36
+# opt_data$NSTEPS <- 21
+# opt_data$VALS <- seq(3.3,11,length.out=21)
 # opt_data$RUN_TYPE <- "RFD"
 # opt_data$METHOD <- "RMSE"
 # opt_data$USE_SCRATCH <- F
@@ -141,11 +142,12 @@ GLAM_optimise <- function(opt_data) {
   }
   
   #create sequence of values
-  if (param %in% c("SLA_INI","NDSLA")) {
-    vals <- seq(opt_data$MINVAL,opt_data$MAXVAL,length.out=opt_data$NSTEPS)
-  } else {
-    vals <- seq(opt_data$PARAMS[[sect]][[param]][,"Min"],opt_data$PARAMS[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
-  }
+  #if (param %in% c("SLA_INI","NDSLA")) {
+  #  vals <- seq(opt_data$MINVAL,opt_data$MAXVAL,length.out=opt_data$NSTEPS)
+  #} else {
+  #  vals <- seq(opt_data$PARAMS[[sect]][[param]][,"Min"],opt_data$PARAMS[[sect]][[param]][,"Max"],length.out=opt_data$NSTEPS)
+  #}
+  vals <- opt_data$VALS
   
   #type of run
   opt_data$PARAMS$glam_param.mod_mgt$SEASON <- opt_data$RUN_TYPE
