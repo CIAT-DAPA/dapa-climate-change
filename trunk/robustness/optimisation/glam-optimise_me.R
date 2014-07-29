@@ -217,6 +217,7 @@ for (iter in 1:nmaxiter) {
     
     #if there are param*seeds still not fully done then run the opt function in parallel
     if (nrow(dfsel) > 0) {
+      require(snowfall)
       #parallelisation
       sfInit(parallel=T,cpus=140,socketHosts=c(rep("eljefe",30),rep("lajefa",30),rep("foe-linux-01",20),
                                               rep("foe-linux-02",20),rep("foe-linux-03",20),
