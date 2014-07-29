@@ -105,15 +105,16 @@ if (!file.exists(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))) {
   load(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))
 }
 
-#test only one iter
+#because snow has a limit in number of workers, i decided to drive using two different machines
 driver <- Sys.info()[["nodename"]]
 if (driver == "eljefe") {
   seed_list <- seed_list[1:5]
   socket_list <- c(rep("localhost",30),rep("foe-linux-01",20),rep("foe-linux-02",20))
 } else if (driver == "lajefa") {
-  seed_list <- seed_list[5:10]
+  seed_list <- seed_list[6:10]
   socket_list <- c(rep("localhost",30),rep("foe-linux-03",20),rep("foe-linux-04",20))
 }
+dfall <- dfall[which(dfall$SEED %in% seed_list),]; row.names(dfall) <- 1:nrow(dfall)
 
 #dfall <- dfall[which(dfall$ITER == 1),]
 
@@ -123,7 +124,7 @@ if (driver == "eljefe") {
 done_param <- data.frame()
 for (iter in 1:nmaxiter) {
   #iter <- 1
-  #order of parameters (nparam = 47, hence does not matter)
+  #order of parameters (nparam = 47, hence does not matter not to loop the param name)
   for (i in 1:47) {
     #i <- 1
     cat("...processing iter=",iter," and parameter sequence i=",i,"\n")
@@ -136,6 +137,9 @@ for (iter in 1:nmaxiter) {
     #wrapper function here
     seed_step_run <- function(j) {
       #j <- 1
+      #renice
+      system("renice 19 -u earjr")
+      
       #source all needed functions
       source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
       source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
@@ -196,13 +200,23 @@ for (iter in 1:nmaxiter) {
       opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,"_param-",param,"_step-",pstep,sep="")
       opt_data$RUN_TYPE <- "RFD"
       opt_data$METHOD <- "RMSE"
-      opt_data$USE_SCRATCH <- T
-      opt_data$SCRATCH <- "/scratch/earjr" #paste(wd,"/scratch",sep="")
       opt_data$PARAMS <- this_params
       opt_data$PARAM <- param
       opt_data$SECT <- paste(param_list$WHERE[porder])
       opt_data$NSTEPS <- param_list$NSTEPS[porder]
       opt_data$VALS <- seq(param_list$MIN[porder],param_list$MAX[porder],length.out=opt_data$NSTEPS)[pstep]
+      opt_data$USE_SCRATCH <- T
+      
+      #scratch in /scratch or in /dev/shm
+      if (driver %in% c("eljefe","lajefa")) {
+        if (round(runif(1,0,1)) == 1) {
+          opt_data$SCRATCH <- "/scratch/earjr"
+        } else {
+          opt_data$SCRATCH <- "/dev/shm/earjr"
+        }
+      } else {
+        opt_data$SCRATCH <- paste(wd,"/scratch",sep="")
+      }
       
       #run optimiser
       par_optim <- GLAM_optimise(opt_data)
@@ -229,7 +243,8 @@ for (iter in 1:nmaxiter) {
       sfInit(parallel=T,cpus=70,socketHosts=socket_list,type="SOCK")
       #sfInit(parallel=T,cpus=3)
       sfExport(list=c("dfsel","bin_dir","calib_dir","mdata_dir","met_dir","xy_main","xy_main_yield"))
-      sfExport(list=c("me_sel","param_orig","src.dir","xy_sel","wd","iter","done_param"))
+      sfExport(list=c("me_sel","param_orig","src.dir","xy_sel","wd","iter","done_param","seed_step_run"))
+      sfExport(list=c("driver"))
       run_steps <- sfSapply(as.vector(1:nrow(dfsel)), seed_step_run)
       sfStop()
     }
