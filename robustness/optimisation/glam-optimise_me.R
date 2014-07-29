@@ -174,7 +174,7 @@ for (iter in 1:nmaxiter) {
           t_param <- paste(this_opt$PARAM_NAME[k])
           t_sect <- paste(param_list$WHERE[which(param_list$PARAM == t_param)])
           t_val <- this_opt$OPT_VALUE[k]
-          if (param %in% c("SLA_INI","NDSLA")) {
+          if (t_param %in% c("SLA_INI","NDSLA")) {
             this_params[[t_sect]][[t_param]] <- t_val
           } else {
             this_params[[t_sect]][[t_param]][,"Value"] <- t_val
@@ -247,8 +247,7 @@ for (iter in 1:nmaxiter) {
       sfExport(list=c("driver"))
       run_steps <- sfSapply(as.vector(1:nrow(dfsel)), seed_step_run)
       sfStop()
-      
-      for (a in 1:nrow(dfsel)) {cat(a,"\n"); runstep <- seed_step_run(a)}
+      #for (a in 1:nrow(dfsel)) {cat(a,"\n"); runstep <- seed_step_run(a)}
     }
     
     #determine optimal value per seed for this *iter* and *i* (for parameter "i")
