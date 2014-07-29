@@ -10,6 +10,9 @@
 #5. create meteorology for selected grid cells
 #6. iteratively optimise over the list of parameters (with a defined number of iterations)
 
+#src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
+#source(paste(src.dir,"/optimisation/glam-optimise_me.R",sep=""))
+
 src.dir <- "~/Repositories/dapa-climate-change/trunk/robustness"
 source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
 source(paste(src.dir,"/glam-utils/make_soilfiles.R",sep=""))
