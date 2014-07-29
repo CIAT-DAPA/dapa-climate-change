@@ -105,10 +105,17 @@ if (!file.exists(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))) {
   load(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))
 }
 
-#test only one seed and iter
-seed_list <- seed_list[1]
-nmaxiter <- 1
-dfall <- dfall[which(dfall$SEED == seed_list & dfall$ITER == 1),]
+#test only one iter
+driver <- Sys.info()[["nodename"]]
+if (driver == "eljefe") {
+  seed_list <- seed_list[1:5]
+  socket_list <- c(rep("localhost",30),rep("foe-linux-01",20),rep("foe-linux-02",20))
+} else if (driver == "lajefa") {
+  seed_list <- seed_list[5:10]
+  socket_list <- c(rep("localhost",30),rep("foe-linux-03",20),rep("foe-linux-04",20))
+}
+
+#dfall <- dfall[which(dfall$ITER == 1),]
 
 ####################################################################################
 #all the *STEPS and *SEEDS for the first ITER & PARAM can be submitted simultaneously
@@ -219,9 +226,7 @@ for (iter in 1:nmaxiter) {
     if (nrow(dfsel) > 0) {
       require(snowfall)
       #parallelisation
-      sfInit(parallel=T,cpus=140,socketHosts=c(rep("eljefe",30),rep("lajefa",30),rep("foe-linux-01",20),
-                                              rep("foe-linux-02",20),rep("foe-linux-03",20),
-                                              rep("foe-linux-04",20)),type="SOCK")
+      sfInit(parallel=T,cpus=70,socketHosts=socket_list,type="SOCK")
       #sfInit(parallel=T,cpus=3)
       sfExport(list=c("dfsel","bin_dir","calib_dir","mdata_dir","met_dir","xy_main","xy_main_yield"))
       sfExport(list=c("me_sel","param_orig","src.dir","xy_sel","wd","iter","done_param"))
