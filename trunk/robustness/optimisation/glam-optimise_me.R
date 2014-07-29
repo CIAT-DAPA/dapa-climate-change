@@ -137,8 +137,8 @@ for (iter in 1:nmaxiter) {
     #wrapper function here
     seed_step_run <- function(j) {
       #j <- 1
-      #renice
-      system("renice 19 -u earjr",ignore.stdout=T)
+      #renice only if eljefe/lajefa
+      if (driver %in% c("eljefe","lajefa")) {system("renice 19 -u earjr",ignore.stdout=T)}
       
       #source all needed functions
       source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
@@ -215,7 +215,7 @@ for (iter in 1:nmaxiter) {
           opt_data$SCRATCH <- "/dev/shm/earjr"
         }
       } else {
-        opt_data$SCRATCH <- paste(wd,"/scratch",sep="")
+        opt_data$SCRATCH <- "~/scratch/earjr"
       }
       
       #run optimiser
@@ -247,6 +247,8 @@ for (iter in 1:nmaxiter) {
       sfExport(list=c("driver"))
       run_steps <- sfSapply(as.vector(1:nrow(dfsel)), seed_step_run)
       sfStop()
+      
+      for (a in 1:nrow(dfsel)) {cat(a,"\n"); runstep <- seed_step_run(a)}
     }
     
     #determine optimal value per seed for this *iter* and *i* (for parameter "i")
