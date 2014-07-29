@@ -1,7 +1,7 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
 #Apr 2014
-stop("!")
+#stop("!")
 
 #1. load list of parameters and ranges (./data/model_data/parameter_list.txt)
 #2. load objects (initial conditions and yields)
