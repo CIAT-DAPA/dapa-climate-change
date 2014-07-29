@@ -209,7 +209,7 @@ for (iter in 1:nmaxiter) {
       
       #scratch in /scratch or in /dev/shm
       if (driver %in% c("eljefe","lajefa")) {
-        if (round(runif(1,0,1)) == 1) {
+        if (j%%2 == 0) {
           opt_data$SCRATCH <- "/scratch/earjr"
         } else {
           opt_data$SCRATCH <- "/dev/shm/earjr"
