@@ -138,7 +138,7 @@ for (iter in 1:nmaxiter) {
     seed_step_run <- function(j) {
       #j <- 1
       #renice
-      system("renice 19 -u earjr")
+      system("renice 19 -u earjr",ignore.stdout=T)
       
       #source all needed functions
       source(paste(src.dir,"/glam-utils/make_dirs.R",sep=""))
