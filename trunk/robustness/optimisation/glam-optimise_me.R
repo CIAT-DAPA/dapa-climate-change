@@ -24,8 +24,8 @@ source(paste(src.dir,"/glam-utils/randomise_param_space.R",sep=""))
 source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 
 #input directories
-wd <- "~/Leeds-work/quest-for-robustness"
-#wd <- "/nfs/a101/earjr/quest-for-robustness"
+#wd <- "~/Leeds-work/quest-for-robustness"
+wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
 calib_dir <- paste(runs_dir,"/ppe_optimisation_t4",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
@@ -62,9 +62,6 @@ corr_fac <- mean((xy_sel$SAT[-which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]
 xy_sel$SAT[which(xy_sel$LOC %in% corr_loc)] <- xy_sel$DUL[which(xy_sel$LOC %in% corr_loc)] + corr_fac
 xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in% corr_loc)]
 
-#plot(xy_me$x, xy_me$y)
-#points(xy_sel$x, xy_sel$y, pch=20, col="red")
-
 ###
 #5. create meteorology for selected grid cells
 #for (i in 1:nrow(xy_sel)) {
@@ -79,7 +76,7 @@ nmaxiter <- 10
 
 ########################################################
 #construct table of sequential steps
-if (!file.exists(paste(mdata_dir,"/glam-all_runs.RData",sep=""))) {
+if (!file.exists(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))) {
   dfall <- data.frame()
   for (i in 1:length(seed_list)) {
     cat("i=",i,"\n")
@@ -108,9 +105,10 @@ if (!file.exists(paste(mdata_dir,"/glam-all_runs.RData",sep=""))) {
   load(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))
 }
 
-#test in mbp only one seed
+#test only one seed and iter
 seed_list <- seed_list[1]
-dfall <- dfall[which(dfall$SEED == seed_list),]
+nmaxiter <- 1
+dfall <- dfall[which(dfall$SEED == seed_list & dfall$ITER == 1),]
 
 ####################################################################################
 #all the *STEPS and *SEEDS for the first ITER & PARAM can be submitted simultaneously
@@ -192,7 +190,7 @@ for (iter in 1:nmaxiter) {
       opt_data$RUN_TYPE <- "RFD"
       opt_data$METHOD <- "RMSE"
       opt_data$USE_SCRATCH <- T
-      opt_data$SCRATCH <- paste(wd,"/scratch",sep="") #"/scratch/earjr"
+      opt_data$SCRATCH <- "/scratch/earjr" #paste(wd,"/scratch",sep="")
       opt_data$PARAMS <- this_params
       opt_data$PARAM <- param
       opt_data$SECT <- paste(param_list$WHERE[porder])
@@ -220,10 +218,10 @@ for (iter in 1:nmaxiter) {
     #if there are param*seeds still not fully done then run the opt function in parallel
     if (nrow(dfsel) > 0) {
       #parallelisation
-      #sfInit(parallel=T,cpus=110,socketHosts=c(rep("lajefa",30),rep("foe-linux-01",20),
-      #                                        rep("foe-linux-02",20),rep("foe-linux-03",20),
-      #                                        rep("foe-linux-04",20)),type="SOCK")
-      sfInit(parallel=T,cpus=3)
+      sfInit(parallel=T,cpus=140,socketHosts=c(rep("eljefe",30),rep("lajefa",30),rep("foe-linux-01",20),
+                                              rep("foe-linux-02",20),rep("foe-linux-03",20),
+                                              rep("foe-linux-04",20)),type="SOCK")
+      #sfInit(parallel=T,cpus=3)
       sfExport(list=c("dfsel","bin_dir","calib_dir","mdata_dir","met_dir","xy_main","xy_main_yield"))
       sfExport(list=c("me_sel","param_orig","src.dir","xy_sel","wd","iter","done_param"))
       run_steps <- sfSapply(as.vector(1:nrow(dfsel)), seed_step_run)
