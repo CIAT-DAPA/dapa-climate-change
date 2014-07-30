@@ -189,8 +189,11 @@ seed_step_run <- function(j) {
   opt_data$USE_SCRATCH <- T
   
   #scratch in /scratch or in /dev/shm
+  #scratch in /scratch or in /dev/shm
   if (j%%2 == 0) {
     opt_data$SCRATCH <- "/scratch/earjr"
+  } else if (j%%3 == 0) {
+    opt_data$SCRATCH <- "/nobackup/earjr"
   } else {
     opt_data$SCRATCH <- "/dev/shm/earjr"
   }
