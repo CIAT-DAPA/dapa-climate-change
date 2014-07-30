@@ -15,8 +15,8 @@
 args=(commandArgs(TRUE))
 
 #evaluate the arguments
-for(i in 1:length(args)) {
-  eval(parse(text=args[[i]]))
+for(arg_i in 1:length(args)) {
+  eval(parse(text=args[[arg_i]]))
 }
 #should have read *me_i*, *iter*, *i* (i=param order)
 
