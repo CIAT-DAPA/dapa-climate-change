@@ -214,6 +214,8 @@ for (iter in 1:nmaxiter) {
       if (driver %in% c("eljefe","lajefa")) {
         if (j%%2 == 0) {
           opt_data$SCRATCH <- "/scratch/earjr"
+        } else if (j%%3 == 0) {
+          opt_data$SCRATCH <- "/nobackup/earjr"
         } else {
           opt_data$SCRATCH <- "/dev/shm/earjr"
         }
