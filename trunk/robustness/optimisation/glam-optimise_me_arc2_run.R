@@ -15,8 +15,8 @@
 args=(commandArgs(TRUE))
 
 #evaluate the arguments
-for(i in 1:length(args)) {
-  eval(parse(text=args[[i]]))
+for(arg_i in 1:length(args)) {
+  eval(parse(text=args[[arg_i]]))
 }
 #should have read *me_i*, *iter*, *i* (param order) and *j* (step in parameter)
 #me_i <- 1; iter <- 1; i <- 1; j <- 1
@@ -116,8 +116,8 @@ if (iter > 1 | i > 1) {
       }
     }
   }
+  rm(list=c("iter_i","i_i","seed","dfsel_i","tparam","opt_val"))
 }
-rm(list=c("iter_i","i_i","seed","dfsel_i","tparam","opt_val"))
 
 #wrapper function here
 seed_step_run <- function(j) {
