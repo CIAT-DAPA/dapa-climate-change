@@ -7,7 +7,7 @@ ME=$1
 THOST="arc2"
 
 #go to robustness directory
-cd ~/quest-for-robustness
+cd ~/quest-for-robustness/scratch/runfiles
 
 #number of items in queue, and total number of possible processes
 NPROC=$(qstat -u earjr | grep run.sh | wc -l)
@@ -65,7 +65,7 @@ do
   		cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_collate.R collate.R
 		
 		#run R in batch for desired stuff; /dev/tty will display output in screen
-		R CMD BATCH --vanilla --slave "--args me_i=$ME iter='$ITER' i=$INUM" collate.R /dev/tty
+		R CMD BATCH --vanilla --slave "--args me_i=$ME iter=$ITER i=$INUM" collate.R /dev/tty
   	done
 done
 
