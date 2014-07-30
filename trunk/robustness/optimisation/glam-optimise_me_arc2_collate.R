@@ -25,7 +25,7 @@ for(i in 1:length(args)) {
 #wd <- "/nfs/a101/earjr/quest-for-robustness"
 wd <- "~/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
-calib_dir <- paste(runs_dir,"/ppe_optimisation_t4",sep="")
+calib_dir <- paste(runs_dir,"/ppe_optimisation_t5",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
 met_dir <- paste(wd,"/data/meteorology",sep="")
 bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
