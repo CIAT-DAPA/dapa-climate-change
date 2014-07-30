@@ -56,7 +56,7 @@ do
   		NPROC=$(qstat -u eejarv | grep run.sh | wc -l)
   		while [ ${NPROC} -gt 0 ]
   		do
-  			echo Idle process. (currently at ${NPROC})
+  			echo Idle process. Currently at ${NPROC}
   			NPROC=$(qstat -u earjr | grep run.sh | wc -l)
   			sleep 60
   		done
