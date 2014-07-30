@@ -53,7 +53,7 @@ do
   		
   		#one all processes are submitted need to check when they will all be completed,
   		#when so then need to run the collate script
-  		NPROC=$(qstat -u eejarv | grep run.sh | wc -l)
+  		NPROC=$(qstat -u earjr | grep run.sh | wc -l)
   		while [ ${NPROC} -gt 0 ]
   		do
   			echo Idle process. Currently at ${NPROC}
