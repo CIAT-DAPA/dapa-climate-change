@@ -195,6 +195,10 @@ seed_step_run <- function(j) {
     opt_data$SCRATCH <- "/dev/shm/earjr"
   }
   
+  #remove junk previous tu running (in case of failed runs)
+  trdir <- paste(opt_data$SCRATCH,"/",opt_data$SIM_NAME,sep="")
+  if (file.exists(trdir)) {system(paste("rm -rf ",trdir,sep=""))}
+  
   #run optimiser
   par_optim <- GLAM_optimise(opt_data)
   
