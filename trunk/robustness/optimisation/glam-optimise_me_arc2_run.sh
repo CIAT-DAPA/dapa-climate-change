@@ -13,7 +13,7 @@ JNUM=$4
 PID=${ME}_${ITER}_${INUM}_${JNUM}
 THOST="arc2"
 
-cd ~/quest-for-robustness
+cd ~/quest-for-robustness/scratch/runfiles
 
 #copy run script if it does not exist
 if [ ! -f "run.R" ]
@@ -22,7 +22,7 @@ then
 fi
 
 #run R in batch for desired stuff
-R CMD BATCH --vanilla --slave "--args lim_a=$LIM_A gcm_id='$GCM_ID' exp_id=$EXP_ID" run.R ~/quest-for-robustness/scratch/outfiles/out_${THOST}_${PID}.out
+R CMD BATCH --vanilla --slave "--args me_i=$ME iter=$ITER i=$INUM j=$JNUM" run.R ~/quest-for-robustness/scratch/outfiles/out_${THOST}_${PID}.out
 
 #remove junk
 rm -f ~/quest-for-robustness/scratch/outfiles/out_${THOST}_${PID}.out
