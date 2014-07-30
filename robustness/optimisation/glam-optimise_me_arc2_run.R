@@ -195,7 +195,7 @@ seed_step_run <- function(j) {
     opt_data$SCRATCH <- "/dev/shm/earjr"
   }
   
-  #remove junk previous tu running (in case of failed runs)
+  #remove junk previous tu running (in case of deleted / failed runs)
   trdir <- paste(opt_data$SCRATCH,"/",opt_data$SIM_NAME,sep="")
   if (file.exists(trdir)) {system(paste("rm -rf ",trdir,sep=""))}
   
