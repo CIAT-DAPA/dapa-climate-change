@@ -11,7 +11,7 @@ cd ~/quest-for-robustness/scratch/runfiles
 
 #number of items in queue, and total number of possible processes
 NPROC=$(qstat -u earjr | grep run.sh | wc -l)
-NPROCMAX=170
+NPROCMAX=50
 
 #loop the iterations
 for ITER in {1..10}
