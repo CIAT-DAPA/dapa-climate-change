@@ -11,14 +11,14 @@ cd ~/quest-for-robustness/scratch/runfiles
 
 #number of items in queue, and total number of possible processes
 NPROC=$(qstat -u earjr | grep run.sh | wc -l)
-NPROCMAX=17
+NPROCMAX=170
 
 #loop the iterations
 for ITER in {1..10}
 do
 	for INUM in {1..47}
 	do
-		for JNUM in {1..17}
+		for JNUM in {1..170}
 		do
 			#process name
 			TPID=${ME}_${ITER}_${INUM}_${JNUM}
@@ -56,7 +56,7 @@ do
   		NPROC=$(qstat -u eejarv | grep run.sh | wc -l)
   		while [ ${NPROC} -gt 0 ]
   		do
-  			echo Idle process.
+  			echo Idle process. (currently at ${NPROC})
   			NPROC=$(qstat -u earjr | grep run.sh | wc -l)
   			sleep 60
   		done
