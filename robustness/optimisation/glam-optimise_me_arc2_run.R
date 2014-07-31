@@ -222,9 +222,7 @@ if (j <= nrow(dfsel)) {
   
   #write procfile file
   procfil <- paste(wd,"/scratch/procfiles/out_",me_i,"_",iter,"_",i,"_",j,".proc",sep="")
-  pfil <- file(procfil,open="w")
-  cat("PROCESS COMPLETED\n",file=pfil)
-  close(pfil)
+  if (!file.exists(procfil)) {pfil <- file(procfil,open="w"); cat("Process completed!\n",file=pfil); close(pfil)}
 }
 
 
