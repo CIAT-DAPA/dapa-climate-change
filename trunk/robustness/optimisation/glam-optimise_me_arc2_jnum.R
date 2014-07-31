@@ -32,5 +32,3 @@ jfil <- paste(wd,"/scratch/procfiles/maxjnum_",iter,"_",i,".txt",sep="")
 pfil <- file(jfil,open="w")
 cat(nrow(dfsel),"\n",file=pfil)
 close(pfil)
-
-
