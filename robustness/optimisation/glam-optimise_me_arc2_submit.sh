@@ -81,11 +81,19 @@ do
   			sleep 60
   		done
   		
-  		#now run the collate script from the driver
-  		cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_collate.R collate.R
-		
-		#run R in batch for desired stuff; /dev/tty will display output in screen
-		R CMD BATCH --vanilla --slave "--args me_i=$ME iter=$ITER i=$INUM" collate.R /dev/tty
+  		#count number of .proc files, if below MAXJNUM then dont collate
+  		NPROCFIL=$(ls -l ~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER}_${INUM}_*.proc | grep .proc | wc -l)
+  		if [ ${NPROCFIL} -eq ${MAXJNUM} ]
+  		then
+	  		#now run the collate script from the driver
+  			cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_collate.R collate.R
+			
+			#run R in batch for desired stuff; /dev/tty will display output in screen
+			R CMD BATCH --vanilla --slave "--args me_i=$ME iter=$ITER i=$INUM" collate.R /dev/tty
+		else
+			echo Error. Some submitted jobs have vailed
+			exit 1
+		fi
   	done
 done
 

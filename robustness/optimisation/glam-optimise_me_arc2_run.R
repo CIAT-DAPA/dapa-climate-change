@@ -43,7 +43,14 @@ runs_dir <- paste(wd,"/crop_model_runs",sep="")
 calib_dir <- paste(runs_dir,"/ppe_optimisation_t5",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
 met_dir <- paste(wd,"/data/meteorology",sep="")
-bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
+
+#define bin dir based on node
+nname <- Sys.info()[["nodename"]]
+if (length(grep("arc2",nname)) == 0) {
+  bin_dir <- paste(wd,"/bin/glam-maize-c_arc1",sep="")
+} else {
+  bin_dir <- paste(wd,"/bin/glam-maize-c",sep="")
+}
 
 ###
 #1. load list of parameters and ranges (./data/model_data/parameter_list.txt)
