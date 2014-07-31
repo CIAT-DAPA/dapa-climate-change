@@ -28,7 +28,7 @@ load(paste(mdata_dir,"/glam-all_optim_runs.RData",sep=""))
 dfsel <- dfall[which(dfall$ITER == iter & dfall$PARAM_ORDER == i),]
 
 #write procfile file
-jfil <- paste(wd,"/scratch/procfiles/maxjnum_",iter,"_",i,".txt",sep="")
+jfil <- paste(wd,"/scratch/maxjnum/maxjnum_",iter,"_",i,".txt",sep="")
 pfil <- file(jfil,open="w")
 cat(nrow(dfsel),"\n",file=pfil)
 close(pfil)
