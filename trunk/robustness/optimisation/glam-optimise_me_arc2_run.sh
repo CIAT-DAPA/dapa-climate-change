@@ -3,7 +3,6 @@
 #$ -l h_rt=01:00:00
 #$ -l h_vmem=2G
 #$ -cwd -V
-#$ -l cputype=intel
 
 ME=$1
 ITER=$2
