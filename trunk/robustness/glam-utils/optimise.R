@@ -160,7 +160,7 @@ GLAM_optimise <- function(opt_data) {
       if (!file.exists(nwth_dir)) {dir.create(nwth_dir)}
       if (!file.exists(paste(nwth_dir,"/",opt_data$WTH_ROOT,sep=""))) {dir.create(paste(nwth_dir,"/",opt_data$WTH_ROOT,sep=""))}
       for (tloc in opt_data$LOC) {
-        system(paste("cp -rf ",opt_data$WTH_DIR,"/loc-",tloc," ",nwth_dir,"/",opt_data$WTH_ROOT,"/.",sep=""))
+        system(paste("cp -rf ",opt_data$WTH_DIR,"/",opt_data$WTH_ROOT,"/loc-",tloc," ",nwth_dir,"/",opt_data$WTH_ROOT,"/.",sep=""))
       }
       opt_data$WTH_DIR <- nwth_dir
     }

@@ -19,9 +19,9 @@ do
 	for INUM in {1..47}
 	do
 		#determine MAXJNUM
-		if [ ! -f "~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt" ]
+		if [ ! -f ~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt ]
 		then
-			if [ ! -f "./maxjnum.R" ]
+			if [ ! -f maxjnum.R ]
 			then
 				cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_jnum.R maxjnum.R
 			fi
@@ -39,14 +39,14 @@ do
 			TPID=${ME}_${ITER}_${INUM}_${JNUM}
 			
 			#copy the script first
-			if [ ! -f "./run.sh" ]
+			if [ ! -f run.sh ]
 			then
 				cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_run.sh run.sh
 				chmod 755 run.sh
 			fi
 			
   			#do the model run only if procfile does not exist
-  			if [ ! -f "~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER}_${INUM}_${JNUM}.proc" ]
+  			if [ ! -f ~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER}_${INUM}_${JNUM}.proc ]
   			then
   				echo ----------------------------------------------------------
 				echo ---- submitting ${TPID} -----
