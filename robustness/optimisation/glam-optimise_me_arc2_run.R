@@ -192,10 +192,8 @@ seed_step_run <- function(j) {
   #scratch in /scratch or in /dev/shm
   if (j%%2 == 0) {
     opt_data$SCRATCH <- "/scratch/earjr"
-  } else if (j%%3 == 0) {
-    opt_data$SCRATCH <- "/nobackup/earjr"
   } else {
-    opt_data$SCRATCH <- "/dev/shm/earjr"
+    opt_data$SCRATCH <- "/dev/shm/earjr" #"/nobackup/earjr"
   }
   
   #remove junk previous tu running (in case of deleted / failed runs)
