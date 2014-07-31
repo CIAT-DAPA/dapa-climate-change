@@ -221,6 +221,12 @@ if (j <= nrow(dfsel)) {
   
   #run this *j* if not exists
   if (!file.exists(save_file)) {runstep <- seed_step_run(j)}
+  
+  #write procfile file
+  procfil <- paste(wd,"/scratch/procfiles/out_",me_i,"_",iter,"_",i,"_",j,".proc",sep="")
+  pfil <- file(procfil,open="w")
+  cat("PROCESS COMPLETED\n",file=pfil)
+  close(pfil)
 }
 
 

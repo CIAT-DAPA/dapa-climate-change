@@ -37,8 +37,11 @@ do
 				chmod 755 run.sh
 			fi
 			
-  			#do the model run
-  			qsub run.sh $ME $ITER $INUM $JNUM
+  			#do the model run only if procfile does not exist
+  			if [ ! -f ~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER}_${INUM}_${JNUM}.proc ]
+  			then
+	  			qsub run.sh $ME $ITER $INUM $JNUM
+	  		fi
   			
   			#count number of submitted processes. Never let the queue be above NPROCMAX
   			#this avoids submitting too many jobs simultaneously (max is 170 JNUM anyway)
