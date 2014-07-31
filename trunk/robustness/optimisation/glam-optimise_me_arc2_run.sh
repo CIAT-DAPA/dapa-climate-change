@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#$ -l h_rt=01:00:00
-#$ -l h_vmem=2G
+#$ -l h_rt=01:30:00
+#$ -l h_vmem=4G
 #$ -cwd -V
 
 ME=$1
