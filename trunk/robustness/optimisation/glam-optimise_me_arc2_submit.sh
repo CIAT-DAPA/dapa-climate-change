@@ -91,7 +91,7 @@ do
 			#run R in batch for desired stuff; /dev/tty will display output in screen
 			R CMD BATCH --vanilla --slave "--args me_i=$ME iter=$ITER i=$INUM" collate.R /dev/tty
 		else
-			echo Error. Some submitted jobs have vailed
+			echo Error. Some submitted jobs have failed
 			exit 1
 		fi
   	done
