@@ -18,17 +18,25 @@ for ITER in {1..10}
 do
 	for INUM in {1..47}
 	do
-		for JNUM in {1..170}
+		#determine MAXJNUM
+		if [ ! -f "~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt" ]
+		then
+			if [ ! -f "./maxjnum.R" ]
+			then
+				cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_jnum.R maxjnum.R
+			fi
+			R CMD BATCH --vanilla --slave "--args iter=$ITER i=$INUM" maxjnum.R /dev/tty
+		fi
+		MAXJNUM=$(< ~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt)
+		
+		echo 
+		echo --------- ${MAXJNUM} JNUM processes to submit ------------
+		echo 
+		
+		for JNUM in $(seq 1 $MAXJNUM)
 		do
 			#process name
 			TPID=${ME}_${ITER}_${INUM}_${JNUM}
-			
-			echo ----------------------------------------------------------
-			echo ----------------------------------------------------------
-			echo ---- submitting ${TPID} -----
-			echo ---- ${NPROC} processess queueing currently -----------
-			echo ----------------------------------------------------------
-			echo ----------------------------------------------------------
 			
 			#copy the script first
 			if [ ! -f "./run.sh" ]
@@ -38,9 +46,18 @@ do
 			fi
 			
   			#do the model run only if procfile does not exist
-  			if [ ! -f ~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER}_${INUM}_${JNUM}.proc ]
+  			if [ ! -f "~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER}_${INUM}_${JNUM}.proc" ]
   			then
+  				echo ----------------------------------------------------------
+				echo ---- submitting ${TPID} -----
+				echo ---- ${NPROC} processess queueing currently -----------
+				echo ----------------------------------------------------------
 	  			qsub run.sh $ME $ITER $INUM $JNUM
+	  		else
+  				echo ----------------------------------------------------------
+				echo ---- ${TPID} need not be submitted -----
+				echo ---- ${NPROC} processess queueing currently -----------
+				echo ----------------------------------------------------------
 	  		fi
   			
   			#count number of submitted processes. Never let the queue be above NPROCMAX
