@@ -1,6 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
-#Apr 2014
+#Jul 2014
 #stop("!")
 
 #determine MAXJNUM
