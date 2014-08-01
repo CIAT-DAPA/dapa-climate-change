@@ -357,21 +357,6 @@ CSCER_optimise_parallel <- function(opt_data) {
   opt_dir <- paste(cal_dir,"/",tolower(param),sep="")
   if (!file.exists(opt_dir)) {dir.create(opt_dir)}
   
-  #move model and weather files to scratch
-  if (opt_data$USE_SCRATCH) {
-    #copy bin
-    nbin_dir <- paste(cal_dir,"/glam_bin",sep="")
-    if (!file.exists(nbin_dir)) {dir.create(nbin_dir)}
-    system(paste("cp -f ",opt_data$BIN_DIR,"/",exec_name," ",nbin_dir,"/.",sep=""))
-    opt_data$BIN_DIR <- nbin_dir
-    
-    #copy weather files
-    nwth_dir <- paste(cal_dir,"/weather",sep="")
-    if (!file.exists(nwth_dir)) {dir.create(nwth_dir)}
-    system(paste("cp -rf ",opt_data$WTH_DIR,"/. ",nwth_dir,sep=""))
-    opt_data$WTH_DIR <- nwth_dir
-  }
-  
   #create sequence of values
   vals <- opt_data$VALS
   
@@ -384,6 +369,24 @@ CSCER_optimise_parallel <- function(opt_data) {
   
   #do only if calibration file does not exist
   if (!file.exists(save_file)) {
+    #move model and weather files to scratch
+    if (opt_data$USE_SCRATCH) {
+      #copy bin
+      nbin_dir <- paste(cal_dir,"/dssat_bin",sep="")
+      if (!file.exists(nbin_dir)) {dir.create(nbin_dir)}
+      system(paste("cp -f ",opt_data$BIN_DIR,"/",exec_name," ",nbin_dir,"/.",sep=""))
+      opt_data$BIN_DIR <- nbin_dir
+      
+      #copy weather files
+      nwth_dir <- paste(cal_dir,"/weather",sep="")
+      if (!file.exists(nwth_dir)) {dir.create(nwth_dir)}
+      if (!file.exists(paste(nwth_dir,"/",opt_data$WTH_ROOT,sep=""))) {dir.create(paste(nwth_dir,"/",opt_data$WTH_ROOT,sep=""))}
+      for (tloc in opt_data$LOC) {
+        system(paste("cp -rf ",opt_data$WTH_DIR,"/",opt_data$WTH_ROOT,"/loc-",tloc," ",nwth_dir,"/",opt_data$WTH_ROOT,"/.",sep=""))
+      }
+      opt_data$WTH_DIR <- nwth_dir
+    }
+    
     #calibration value wrapper function
     calib_value <- function(i) {
       #i <- 1
