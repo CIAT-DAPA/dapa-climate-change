@@ -39,6 +39,8 @@ for (i in 1:length(rfil_list)) {
     if (length(grep("arc2",rhost)) != 0) {
       system(paste("ssh ",rhost, "'rm -rf /dev/shm/earjr && rm -rf /scratch/earjr'"))
       #system(paste("ssh ",rhost, "'ls -l /dev/shm/earjr'"))
+    } else {
+      cat("host",rhost,"does not belong to",tsys,"\n")
     }
   } else if (tsys == "arc1") {
     if (length(grep("arc2",rhost)) == 0) {
