@@ -22,6 +22,7 @@ then
 fi
 
 #run R in batch for desired stuff
+TMPDIR=~/workspace/tmp
 R CMD BATCH --vanilla --slave "--args me_i=$ME iter=$ITER i=$INUM j=$JNUM" run.R ~/quest-for-robustness/scratch/outfiles/out_${THOST}_${PID}.out
 
 #remove junk
