@@ -141,7 +141,7 @@ run_dssat <- function(run_data) {
   close(dssfil)
   
   #copy model (-fp to *force and *preserve_attributes)
-  system(paste("cp -fp ",run_data$BIN_DIR,"/DSCSM045.EXE ",run_dir,"/.",sep=""))
+  system(paste("cp -fp ",run_data$BIN_DIR,"/DSCSM045.EXE ",run_dir,"/.",sep=""),ignore.stdout=T)
   
   #copy needed files (.CDE, .WDA, .SDA, DSSATPRO.L45, MODEL.ERR)
   system(paste("cp -fp ",run_data$BIN_DIR,"/*.CDE ",run_dir,"/.",sep=""))

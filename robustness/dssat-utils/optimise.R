@@ -58,12 +58,12 @@
 # opt_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
 # opt_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
 # opt_data$SPE <- get_spepar(paste(opt_data$BIN_DIR,"/MZCER045.SPE",sep=""))
+# opt_data$XFILE <- get_xfile_dummy()
 # opt_data$SIM_NAME <- "optim_01"
 # opt_data$PARAM <- "PARSR"
 # opt_data$VALS <- seq(0.4,0.6,length.out=9)
 # opt_data$IFILE <- "SPE"
 # opt_data$SECT <- "photo_param"
-# opt_data$NSTEPS <- 9
 # opt_data$METHOD <- "RMSE"
 # opt_data$USE_SCRATCH <- F
 # opt_data$SCRATCH <- NA
@@ -121,7 +121,7 @@
 ### end.
 
 #optimise given parameter
-CSCER_optimise <- function(opt_data) {
+DSSAT_optimise <- function(opt_data) {
   param <- toupper(opt_data$PARAM)
   ifile <- toupper(opt_data$IFILE)
   sect <- tolower(opt_data$SECT)
@@ -180,7 +180,12 @@ CSCER_optimise <- function(opt_data) {
       #copy bin
       nbin_dir <- paste(cal_dir,"/dssat_bin",sep="")
       if (!file.exists(nbin_dir)) {dir.create(nbin_dir)}
-      system(paste("cp -f ",opt_data$BIN_DIR,"/",exec_name," ",nbin_dir,"/.",sep=""))
+      system(paste("cp -fp ",opt_data$BIN_DIR,"/",exec_name," ",nbin_dir,"/.",sep=""))
+      system(paste("cp -fp ",opt_data$BIN_DIR,"/*.CDE ",nbin_dir,"/.",sep=""))
+      system(paste("cp -fp ",opt_data$BIN_DIR,"/*.WDA ",nbin_dir,"/.",sep=""))
+      system(paste("cp -fp ",opt_data$BIN_DIR,"/*.SDA ",nbin_dir,"/.",sep=""))
+      system(paste("cp -fp ",opt_data$BIN_DIR,"/DSSATPRO.L45 ",nbin_dir,"/.",sep=""))
+      system(paste("cp -fp ",opt_data$BIN_DIR,"/MODEL.ERR ",nbin_dir,"/.",sep=""))
       opt_data$BIN_DIR <- nbin_dir
       
       #copy weather files
@@ -216,7 +221,7 @@ CSCER_optimise <- function(opt_data) {
       } else if (ifile == "ECO" | ifile == "CUL") {
         opt_data[[ifile]][[param]] <- vals[i]
       } else if (ifile == "XFILE") {
-        opt_data$PARAM_VALUE <- vals[i]
+        opt_data[[ifile]][[sect]][[param]] <- vals[i]
       } else {
         stop("invalid ifile, check opt_data$IFILE")
       }
@@ -312,7 +317,7 @@ CSCER_optimise <- function(opt_data) {
 #################################################################################
 #################################################################################
 #optimise given parameter in parallel
-CSCER_optimise_parallel <- function(opt_data) {
+DSSAT_optimise_parallel <- function(opt_data) {
   require(snowfall) #parallelisation library
   
   #parameter location and type

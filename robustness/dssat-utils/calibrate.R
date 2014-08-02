@@ -59,6 +59,7 @@
 # cal_data$CUL <- data.frame(P1=140,P2=0.3,P5=685,G2=907.9,G3=10.5,PHINT=38.9) #default for missing ones
 # cal_data$ECO <- data.frame(DSGFT=170,RUE=4.2,KCAN=0.85,TSEN=6.0,CDAY=15.0)
 # cal_data$SPE <- get_spepar(paste(cal_data$BIN_DIR,"/MZCER045.SPE",sep=""))
+# cal_data$XFILE <- get_xfile_dummy()
 # cal_data$SIM_NAME <- "calib_01"
 # cal_data$METHOD <- "RMSE"
 # cal_data$USE_SCRATCH <- F
@@ -130,7 +131,6 @@ DSSAT_calibrate <- function(cal_data) {
   if (!file.exists(opt_dir)) {dir.create(opt_dir)}
   
   #create sequence of values
-  #vals <- seq(params[[sect]][[param]][,"Min"],params[[sect]][[param]][,"Max"],length.out=cal_data$NSTEPS)
   #vals <- seq(0,1,length.out=51)[2:51] #0.2, 0.4, ... 1.0 (total of 50)
   vals <- c(0.01,seq(0.05,1,length.out=20)) #(total of 21)
   
@@ -169,13 +169,8 @@ DSSAT_calibrate <- function(cal_data) {
     run_data$CUL <- cal_data$CUL
     run_data$ECO <- cal_data$ECO
     run_data$SPE <- cal_data$SPE
-    run_data$XFILE <- get_xfile(run_data)
+    run_data$XFILE <- get_xfile(run_data, cal_data$XFILE)
     #run_data$XFILE$sim_ctrl$VBOSE <- "0" #write only Summary.OUT outputs (as needed)
-    
-    #when optimisation is done on .MZX parameters
-    if (cal_data$IFILE == "XFILE") {
-      in_data[[cal_data$SECT]][[cal_data$PARAM]] <- cal_data$PARAM_VALUE
-    }
     
     #loop through sequence of values
     for (i in 1:length(vals)) {
@@ -212,7 +207,7 @@ DSSAT_calibrate <- function(cal_data) {
             #if (cal_data$USE_SCRATCH) {}
             soilfil <- make_soilfile(run_data$SOILS, paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/SOIL.SOL",sep=""), overwrite=T)
             xfil <- make_xfile(run_data$XFILE, paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/",run_data$BASENAME,substr(paste(run_data$ISYR),3,4),"01.MZX",sep=""),overwrite=T)
-            thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",run_data$MODEL," B DSSBatch.v45",sep="")); setwd(thisdir)
+            thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",run_data$MODEL," B DSSBatch.v45",sep=""),ignore.stdout=T); setwd(thisdir)
           }
         } else {
           run_data$OUT_FILES <- outfile
@@ -221,7 +216,14 @@ DSSAT_calibrate <- function(cal_data) {
         
         #read in the simulated yield
         if (length(run_data$OUT_FILES) > 0 | length(outfile) > 1) {
-          pred <- read.table(paste(run_data$RUN_DIR,"/Summary.OUT",sep=""),skip=4,header=F,sep="")
+          #pred <- read.table(paste(run_data$RUN_DIR,"/Summary.OUT",sep=""),skip=4,header=F,sep="")
+          pred <- read.fortran(paste(run_data$RUN_DIR,"/Summary.OUT",sep=""),skip=4,
+                               format=c("I9","1X","I6","1X","I2","1X","I2","1X","I2","1X","A2","1X",
+                                        "A8","1X","A25","1X","A8","1X","A8","1X","A10","1X",
+                                        rep(c("I7","1X"),6),"F5","1X",rep(c("F7","1X"),4),"F5","1X",
+                                        "F7","1X","F5","1X","F7","1X",rep(c("F5","1X"),28),
+                                        rep(c("F6","1X"),4),rep(c("F7","1X"),2),rep(c("F8","1X"),12),
+                                        "F5","4F6",rep(c("1X","F6"),3)))
           #HWAM: Harvest Weight At Maturity
           #HIAM: Harvest Index At Maturity
           #LAIX: LAI maXimum
