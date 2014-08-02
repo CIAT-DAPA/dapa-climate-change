@@ -193,7 +193,9 @@ DSSAT_optimise <- function(opt_data) {
       if (!file.exists(nwth_dir)) {dir.create(nwth_dir)}
       if (!file.exists(paste(nwth_dir,"/",opt_data$WTH_ROOT,sep=""))) {dir.create(paste(nwth_dir,"/",opt_data$WTH_ROOT,sep=""))}
       for (tloc in opt_data$LOC) {
-        system(paste("cp -rf ",opt_data$WTH_DIR,"/",opt_data$WTH_ROOT,"/loc-",tloc," ",nwth_dir,"/",opt_data$WTH_ROOT,"/.",sep=""))
+        tlocdir <- paste(nwth_dir,"/",opt_data$WTH_ROOT,"/loc-",tloc,sep="")
+        if (!file.exists(tlocdir)) {dir.create(tlocdir)}
+        system(paste("cp -f ",opt_data$WTH_DIR,"/",opt_data$WTH_ROOT,"/loc-",tloc,"/*.WTH ",tlocdir,"/.",sep=""))
       }
       opt_data$WTH_DIR <- nwth_dir
     }
@@ -204,14 +206,6 @@ DSSAT_optimise <- function(opt_data) {
       cat("\nperforming run ",i," value = ",vals[i]," (",param,")",sep="","\n")
       
       #assign values to relevant parameter set
-      #see below relevant info:
-      #opt_data[["SPE"]][["photo_param"]][["PARSR"]]
-      #opt_data[["SPE"]][["seed_growth"]][which(gsub(" ","",opt_data[["SPE"]][["seed_growth"]][["PARAM"]]) == "SDSZ"),"VALUE"]
-      #opt_data[["ECO"]][["KCAN"]]
-      #opt_data[["CUL"]][["P1"]]
-      #in_data <- get_xfile_dummy()
-      #in_data[["planting"]][["PPOP"]]
-      #in_data[["auto_mgmt"]][["PH2OL"]]
       if (ifile == "SPE") {
         if (param %in% c("SDSZ","RSGRT")) {
           opt_data[[ifile]][[sect]][which(gsub(" ","",opt_data[[ifile]][[sect]][["PARAM"]]) == param),"VALUE"] <- vals[i]

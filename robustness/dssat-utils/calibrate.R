@@ -184,7 +184,7 @@ DSSAT_calibrate <- function(cal_data) {
       run_data$SOILS[[sect]][[param]] <- vals[i]
       
       #run all sow*sol options for this YGP value and location
-      pred_all <- data.frame() 
+      pred_all <- data.frame()
       for (k in 1:nrow(run_df)) {
         #k <- 1
         #get sow date and SAT multiplier into relevant files
@@ -237,9 +237,14 @@ DSSAT_calibrate <- function(cal_data) {
                            "SRADA","DAYLA","CO2A","PRCP","ETCP")
           pred <- cbind(YEAR=pred$SDAT,pred); pred$YEAR <- as.numeric(substr(pred$YEAR,1,4))
           pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","PDAT","MDAT","HWAM")])
+          
+          #when a run fails PDAT will be NA, need to put both PDAT and MDAT as NA as well
+          pred$PDAT[which(pred$PDAT < -90)] <- NA; pred$MDAT[which(is.na(pred$PDAT))] <- NA
+          
+          #day of year and calculation of duration
           pred$PDAT <- as.numeric(substr(pred$PDAT,5,7)); pred$MDAT <- as.numeric(substr(pred$MDAT,5,7))
-          pred$DUR <- NA; pred$DUR[which(pred$MDAT > pred$PDAT)] <- pred$MDAT-pred$PDAT
-          pred$DUR[which(pred$MDAT <= pred$PDAT)] <- (pred$MDAT+365)-pred$PDAT
+          pred$DUR <- NA; pred$DUR[which(pred$MDAT > pred$PDAT)] <- pred$MDAT[which(pred$MDAT > pred$PDAT)]-pred$PDAT[which(pred$MDAT > pred$PDAT)]
+          pred$DUR[which(pred$MDAT <= pred$PDAT)] <- (pred$MDAT[which(pred$MDAT > pred$PDAT)]+365)-pred$PDAT[which(pred$MDAT > pred$PDAT)]
           pred_all <- rbind(pred_all, pred)
           system(paste("rm -f ",run_data$RUN_DIR,"/*.OUT",sep="")) #remove junk
         }

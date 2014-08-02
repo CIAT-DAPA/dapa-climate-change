@@ -239,7 +239,7 @@ for (iter in 1:nmaxiter) {
       opt_data$ECO <- eco_params
       opt_data$SPE <- spe_params
       opt_data$XFILE <- xfi_params
-      opt_data$SIM_NAME <- "optim_02"
+      opt_data$SIM_NAME <- paste("optim_me-",me_sel,"_seed-",seed,"_iter-",iter,"_param-",param,"_step-",pstep,sep="")
       opt_data$PARAM <- param
       opt_data$VALS <- seq(param_list$MIN[porder],param_list$MAX[porder],length.out=param_list$NSTEPS[porder])[pstep]
       opt_data$IFILE <- paste(param_list$FILE[porder])
@@ -271,7 +271,7 @@ for (iter in 1:nmaxiter) {
       #seed <- seed_list[1]
       tdfsel <- dfsel[which(dfsel$SEED == seed),]
       tparam <- paste(dfall$PARAM_NAME[which(dfall$SEED == seed & dfall$ITER == iter & dfall$PARAM_ORDER == i & dfall$STEP == 1)])
-      out_dir <- paste(calib_dir,"/","optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
+      out_dir <- paste(calib_dir,"/optim_me-",me_sel,"_seed-",seed,"_iter-",iter,sep="")
       save_file <- paste(out_dir,"/opt-",tdfsel$PARAM_NAME[1],".RData",sep="")
       if (file.exists(save_file)) {dfsel <- dfsel[-which(dfsel$SEED == seed),]}
     }
@@ -288,7 +288,7 @@ for (iter in 1:nmaxiter) {
       run_steps <- sfSapply(as.vector(1:nrow(dfsel)), seed_step_run)
       sfStop()
       #for (a in 1:nrow(dfsel)) {cat(a,"\n"); runstep <- seed_step_run(a)}
-      #runstep <- seed_step_run(1)
+      #for (a in 1:11) {cat(a,"\n"); runstep <- seed_step_run(a)}
     }
     
     #determine optimal value per seed for this *iter* and *i* (for parameter "i")

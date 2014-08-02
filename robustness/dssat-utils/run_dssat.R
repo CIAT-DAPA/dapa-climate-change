@@ -141,7 +141,7 @@ run_dssat <- function(run_data) {
   close(dssfil)
   
   #copy model (-fp to *force and *preserve_attributes)
-  system(paste("cp -fp ",run_data$BIN_DIR,"/DSCSM045.EXE ",run_dir,"/.",sep=""),ignore.stdout=T)
+  system(paste("cp -fp ",run_data$BIN_DIR,"/DSCSM045.EXE ",run_dir,"/.",sep=""))
   
   #copy needed files (.CDE, .WDA, .SDA, DSSATPRO.L45, MODEL.ERR)
   system(paste("cp -fp ",run_data$BIN_DIR,"/*.CDE ",run_dir,"/.",sep=""))
@@ -151,7 +151,7 @@ run_dssat <- function(run_data) {
   system(paste("cp -fp ",run_data$BIN_DIR,"/MODEL.ERR ",run_dir,"/.",sep=""))
   
   #go to dir, run model, return to where i am
-  thisdir <- getwd(); setwd(run_dir); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",model," B DSSBatch.v45",sep="")); setwd(thisdir)
+  thisdir <- getwd(); setwd(run_dir); system(paste("rm -f *.OUT && ./DSCSM045.EXE ",model," B DSSBatch.v45",sep=""),ignore.stdout=T); setwd(thisdir)
   
   #return run_dir, and out_file for copying of file
   run_data$OUT_FILES <- list.files(run_dir,pattern="\\.OUT")
