@@ -3,6 +3,7 @@
 #Aug 2014
 
 #cleanup junk in nodes
+#works in both arc1 and arc2 systems
 
 #define bin dir based on node
 nname <- Sys.info()[["nodename"]]
