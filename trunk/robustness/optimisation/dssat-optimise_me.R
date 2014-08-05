@@ -27,7 +27,7 @@ source(paste(src.dir,"/dssat-utils/optimise.R",sep=""))
 source(paste(src.dir,"/dssat-utils/randomise_param_space.R",sep=""))
 
 #choose model
-csmodel <- "MZIXM045"
+csmodel <- "MZCER045"
 
 #input directories
 #wd <- "~/Leeds-work/quest-for-robustness"
@@ -52,7 +52,7 @@ set.seed(2302) #fixed seed to make it replicable
 seed_list <- round(runif(10, 1000, 9999),0)
 
 ###
-#4. select ME and grid cells to optimise on
+#select ME and grid cells to optimise on
 me_list <- unique(xy_main$ME_NEW)
 me_sel <- me_list[1]
 
