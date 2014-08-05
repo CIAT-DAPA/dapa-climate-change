@@ -27,8 +27,8 @@ source(paste(src.dir,"/glam-utils/randomise_param_space.R",sep=""))
 source(paste(src.dir,"/meteo/extract_weather.R",sep=""))
 
 #input directories
-#wd <- "~/Leeds-work/quest-for-robustness"
-wd <- "/nfs/a101/earjr/quest-for-robustness"
+wd <- "~/Leeds-work/quest-for-robustness"
+#wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
 calib_dir <- paste(runs_dir,"/ppe_optimisation_t4",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
@@ -52,26 +52,29 @@ seed_list <- round(runif(10, 1000, 9999),0)
 ###
 #4. select ME and grid cells to optimise on
 me_list <- unique(xy_main$ME_NEW)
-me_sel <- me_list[1]
-
-xy_me <- xy_main[which(xy_main$ME_NEW == me_sel),]
-set.seed(2059) #randomly choose grid cells (use fixed seed to make it replicable)
-xy_sel <- xy_me[sample(1:nrow(xy_me), 10, replace=F),]
-row.names(xy_me) <- 1:nrow(xy_me); row.names(xy_sel) <- 1:nrow(xy_sel)
-
-#ensure SAT is not below DUL
-corr_loc <- xy_sel$LOC[which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]
-corr_fac <- mean((xy_sel$SAT[-which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]-xy_sel$DUL[-which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]),na.rm=T)
-xy_sel$SAT[which(xy_sel$LOC %in% corr_loc)] <- xy_sel$DUL[which(xy_sel$LOC %in% corr_loc)] + corr_fac
-xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in% corr_loc)]
-
-###
-#5. create meteorology for selected grid cells
-#for (i in 1:nrow(xy_sel)) {
-#  loc <- xy_sel$LOC[i]; x <- xy_sel$x[i]; y <- xy_sel$y[i]
-#  wval <- extract_weather(cellid=loc, lon=x, lat=y, met_dir=met_dir, data_type="obs", dataset="WFD", 
-#                          sce="hist", years=1950:2001)
-#}
+for (me_i in 4:length(me_list)) {
+  #me_sel <- me_list[3]
+  me_sel <- me_list[me_i]
+  
+  xy_me <- xy_main[which(xy_main$ME_NEW == me_sel),]
+  set.seed(2059) #randomly choose grid cells (use fixed seed to make it replicable)
+  xy_sel <- xy_me[sample(1:nrow(xy_me), 10, replace=F),]
+  row.names(xy_me) <- 1:nrow(xy_me); row.names(xy_sel) <- 1:nrow(xy_sel)
+  
+  #ensure SAT is not below DUL
+  corr_loc <- xy_sel$LOC[which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]
+  corr_fac <- mean((xy_sel$SAT[-which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]-xy_sel$DUL[-which(round(xy_sel$SAT,2) <= round(xy_sel$DUL,2))]),na.rm=T)
+  xy_sel$SAT[which(xy_sel$LOC %in% corr_loc)] <- xy_sel$DUL[which(xy_sel$LOC %in% corr_loc)] + corr_fac
+  xy_main$SAT[which(xy_main$LOC %in% corr_loc)] <- xy_sel$SAT[which(xy_sel$LOC %in% corr_loc)]
+  
+  ###
+  #5. create meteorology for selected grid cells
+  for (i in 1:nrow(xy_sel)) {
+   loc <- xy_sel$LOC[i]; x <- xy_sel$x[i]; y <- xy_sel$y[i]
+   wval <- extract_weather(cellid=loc, lon=x, lat=y, met_dir=met_dir, data_type="obs", dataset="WFD", 
+                           sce="hist", years=1950:2001)
+  }
+}
 
 ###
 #6. iteratively optimise over the list of parameters (with a defined number of iterations)
