@@ -27,7 +27,7 @@ source(paste(src.dir,"/dssat-utils/optimise.R",sep=""))
 source(paste(src.dir,"/dssat-utils/randomise_param_space.R",sep=""))
 
 #choose model
-csmodel <- "MZCER045"
+csmodel <- "MZIXM045"
 
 #input directories
 #wd <- "~/Leeds-work/quest-for-robustness"
