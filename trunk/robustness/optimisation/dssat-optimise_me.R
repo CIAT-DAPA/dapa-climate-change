@@ -26,18 +26,18 @@ source(paste(src.dir,"/dssat-utils/calibrate.R",sep=""))
 source(paste(src.dir,"/dssat-utils/optimise.R",sep=""))
 source(paste(src.dir,"/dssat-utils/randomise_param_space.R",sep=""))
 
+#choose model
+csmodel <- "MZCER045"
+
 #input directories
 #wd <- "~/Leeds-work/quest-for-robustness"
 wd <- "/nfs/a101/earjr/quest-for-robustness"
 runs_dir <- paste(wd,"/crop_model_runs",sep="")
-calib_dir <- paste(runs_dir,"/dssat_t1",sep="")
+calib_dir <- paste(runs_dir,"/dssat_",csmodel,"_optimisation_t1",sep="")
 mdata_dir <- paste(wd,"/data/model_data",sep="")
 met_dir <- paste(wd,"/data/meteorology",sep="")
 bin_dir <- paste(wd,"/bin/dssat/csm45_1_23_bin_gfort",sep="")
 #bin_dir <- paste(wd,"/bin/dssat/csm45_1_23_bin_ifort",sep="")
-
-#choose model
-csmodel <- "MZCER045"
 
 #load objects
 load(paste(mdata_dir,"/initial_conditions_major_dssat.RData",sep=""))
