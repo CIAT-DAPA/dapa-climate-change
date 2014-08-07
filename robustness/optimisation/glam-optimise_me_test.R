@@ -192,7 +192,7 @@ for (iter in 1:nmaxiter) {
     
     #update parameter value with optimal
     opt_val <- par_optim$OPTIMISATION$VALUE[which(par_optim$OPTIMISATION$RMSE == min(par_optim$OPTIMISATION$RMSE))]
-    if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
+    if (length(opt_val) > 1) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
     if (param %in% c("SLA_INI","NDSLA")) {
       this_params[[sect]][[param]] <- opt_val
     } else {
