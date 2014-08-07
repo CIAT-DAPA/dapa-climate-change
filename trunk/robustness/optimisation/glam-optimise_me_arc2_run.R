@@ -114,7 +114,7 @@ if (iter > 1 | i > 1) {
         if (file.exists(save_file)) {
           load(save_file)
           opt_val <- r_list$OPTIMISATION$VALUE[which(r_list$OPTIMISATION$RMSE == min(r_list$OPTIMISATION$RMSE))]
-          if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
+          if (length(opt_val) > 1) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
           done_param <- rbind(done_param, data.frame(ITER=iter_i, PARAM_ORDER=i_i, 
                                                      SEED=seed, PARAM_NAME=tparam,
                                                      OPT_VALUE=opt_val))
