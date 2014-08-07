@@ -335,7 +335,7 @@ for (iter in 1:nmaxiter) {
       }
       #determine optimum value
       opt_val <- r_list$OPTIMISATION$VALUE[which(r_list$OPTIMISATION$RMSE == min(r_list$OPTIMISATION$RMSE))]
-      if (length(opt_val > 1)) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
+      if (length(opt_val) > 1) {opt_val <- opt_val[ceiling(length(opt_val)/2)]}
       
       #append to done param
       done_param <- rbind(done_param, data.frame(ITER=iter, PARAM_ORDER=i, 
