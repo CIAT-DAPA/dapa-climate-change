@@ -228,7 +228,7 @@ if (j <= nrow(dfsel)) {
   if (!file.exists(save_file)) {runstep <- seed_step_run(j)}
   
   #write procfile file
-  procfil <- paste(wd,"/scratch/procfiles/dssat_out_",me_i,"_",iter,"_",i,"_",j,".proc",sep="")
+  procfil <- paste(wd,"/scratch/procfiles/out_",me_i,"_",iter,"/out_",me_i,"_",iter,"_",i,"_",j,".proc",sep="")
   if (!file.exists(procfil)) {pfil <- file(procfil,open="w"); cat("Process completed!\n",file=pfil); close(pfil)}
 }
 

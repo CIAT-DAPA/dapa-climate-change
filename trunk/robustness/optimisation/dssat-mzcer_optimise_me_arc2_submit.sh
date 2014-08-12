@@ -49,8 +49,14 @@ do
 				chmod 755 run_cscer.sh
 			fi
 			
+			#create out folder if it does not exist
+			if [ ! -d ~/quest-for-robustness/scratch/procfiles/dssat_${CSMODEL}_out_${ME}_${ITER} ]
+  			then
+  				$(mkdir ~/quest-for-robustness/scratch/procfiles/dssat_${CSMODEL}_out_${ME}_${ITER})
+  			fi
+			
   			#do the model run only if procfile does not exist
-  			if [ ! -f ~/quest-for-robustness/scratch/procfiles/dssat_${CSMODEL}_out_${ME}_${ITER}_${INUM}_${JNUM}.proc ]
+  			if [ ! -f ~/quest-for-robustness/scratch/procfiles/dssat_${CSMODEL}_out_${ME}_${ITER}/dssat_${CSMODEL}_out_${ME}_${ITER}_${INUM}_${JNUM}.proc ]
   			then
   				echo ----------------------------------------------------------
 				echo ---- submitting ${TPID} -----
@@ -86,7 +92,7 @@ do
   		done
   		
   		#count number of .proc files, if below MAXJNUM then dont collate
-  		NPROCFIL=$(ls -l ~/quest-for-robustness/scratch/procfiles/dssat_${CSMODEL}_out_${ME}_${ITER}_${INUM}_*.proc | grep .proc | wc -l)
+  		NPROCFIL=$(ls -l ~/quest-for-robustness/scratch/procfiles/dssat_${CSMODEL}_out_${ME}_${ITER}/dssat_${CSMODEL}_out_${ME}_${ITER}_${INUM}_*.proc | grep .proc | wc -l)
   		if [ ${NPROCFIL} -eq ${MAXJNUM} ]
   		then
 	  		#now run the collate script from the driver
