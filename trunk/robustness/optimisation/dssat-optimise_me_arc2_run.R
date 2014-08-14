@@ -104,7 +104,8 @@ dfsel$ITER <- NULL
 done_param <- data.frame()
 if (iter > 1 | i > 1) {
   cat("...gathering previous output\n")
-  for (iter_i in 1:iter) {
+  istart <- max(c((iter-1),1))
+  for (iter_i in istart:iter) {
     for (i_i in 1:nrow(param_orig)) {
       dfsel_i <- dfall[which(dfall$ITER == iter_i & dfall$PARAM_ORDER == i_i),]
       for (seed in seed_list) {
