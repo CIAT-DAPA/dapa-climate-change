@@ -41,7 +41,7 @@ names(mthMat) <- c("Mth", "MthMod")
 var_list <- c("Rainf","SWdown","Tmax","Tmin")
 dst_list <- c("WFD","WFDEI")
 wfdei_yrs <- c(1979:2012)
-wfd_yrs <- c(1960:1990)
+wfd_yrs <- c(1971:2000)
 
 #function to process all years and months of a variable and dataset
 process_wfd_wth <- function(dataset,vname) {
@@ -135,8 +135,13 @@ process_wfd_wth <- function(dataset,vname) {
       setwd(odataDir)
       
       cat(" Calculating avg and std daily: future ", fnameout, " avg and std\n")
-      system(paste("cdo -s monavg ", fnameout, " ",  fnameout_avg, sep=""))
-      system(paste("cdo -s monstd ", fnameout, " ",  fnameout_std, sep=""))
+      
+      if (!file.exists(paste(odataDir,"/",fnameout_std,sep=""))) {
+      
+        system(paste("cdo -s monavg ", fnameout, " ",  fnameout_avg, sep=""))
+        system(paste("cdo -s monstd ", fnameout, " ",  fnameout_std, sep=""))
+        
+      }
       
       setwd(wd)
       
@@ -171,7 +176,6 @@ process_wfd_wth <- function(dataset,vname) {
       #Merge WFD files
       cat("...merging=",vname,"\n")
       ncList <- paste(odataDir, "/lat_", vname, suffix, "_", 1971:2000, mthMod, ".nc", sep="")
-      cat("...merging=",ncList,"\n")
       system(paste("cdo mergetime ", paste(ncList, collapse=" "), " ", odataDir, "/lat_",vname,suffix,"_1971_2000_", mthMod, ".nc",sep=""))
     
       }
