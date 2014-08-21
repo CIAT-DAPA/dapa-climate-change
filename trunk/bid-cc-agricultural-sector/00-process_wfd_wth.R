@@ -144,11 +144,11 @@ process_wfd_wth <- function(dataset,vname) {
     
     setwd(odataDir)
         
-    avgNcList <- paste("lat_",vname,suffix,"_",1960:1990,tmth,"_avg.nc",sep="")
-    system(paste("cdo ensavg ", paste(avgNcList, collapse=" "), " ", "lat_",vname,suffix,"_1960_1990_",tmth,"_avg.nc", sep=""))
+    avgNcList <- paste("lat_",vname,suffix,"_",1971:2000,tmth,"_avg.nc",sep="")
+    system(paste("cdo ensavg ", paste(avgNcList, collapse=" "), " ", "lat_",vname,suffix,"_1971_2000_",tmth,"_avg.nc", sep=""))
         
-    stdNcList <- paste("lat_",vname,suffix,"_",1960:1990,tmth,"_std.nc",sep="")
-    system(paste("cdo ensavg ", paste(stdNcList, collapse=" "), " ", "lat_",vname,suffix,"_1960_1990_",tmth,"_std.nc", sep=""))
+    stdNcList <- paste("lat_",vname,suffix,"_",1971:2000,tmth,"_std.nc",sep="")
+    system(paste("cdo ensavg ", paste(stdNcList, collapse=" "), " ", "lat_",vname,suffix,"_1971_2000_",tmth,"_std.nc", sep=""))
     
     for (nc in avgNcList){
       file.remove(paste(nc))
@@ -166,13 +166,13 @@ process_wfd_wth <- function(dataset,vname) {
     mthMod <- paste((mthMat$MthMod[which(mthMat$Mth == mth)]))
     
     
-    if (!file.exists(paste(odataDir, "/lat_",vname,suffix,"_1960_1990_", mthMod, ".nc", sep=""))) {
+    if (!file.exists(paste(odataDir, "/lat_",vname,suffix,"_1971_2000_", mthMod, ".nc", sep=""))) {
       
       #Merge WFD files
       cat("...merging=",vname,"\n")
-      ncList <- paste(odataDir, "/lat_", vname, suffix, "_", 1960:1990, mthMod, ".nc", sep="")
+      ncList <- paste(odataDir, "/lat_", vname, suffix, "_", 1971:2000, mthMod, ".nc", sep="")
       cat("...merging=",ncList,"\n")
-      system(paste("cdo mergetime ", paste(ncList, collapse=" "), " ", odataDir, "/lat_",vname,suffix,"_1960_1990_", mthMod, ".nc",sep=""))
+      system(paste("cdo mergetime ", paste(ncList, collapse=" "), " ", odataDir, "/lat_",vname,suffix,"_1971_2000_", mthMod, ".nc",sep=""))
     
       }
 
