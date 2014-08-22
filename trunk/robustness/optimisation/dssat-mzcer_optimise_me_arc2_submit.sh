@@ -100,6 +100,10 @@ do
 			
 			#run R in batch for desired stuff; /dev/tty will display output in screen
 			R CMD BATCH --vanilla --slave "--args csmodel='$CSMODEL' me_i=$ME iter=$ITER i=$INUM" collate_dssat.R /dev/tty
+			
+			#remove runfiles
+			rm -f ~/quest-for-robustness/scratch/runfiles/run_cscer.sh.e*
+			rm -f ~/quest-for-robustness/scratch/runfiles/run_cscer.sh.o*
 		else
 			echo Error. Some submitted jobs have failed
 			exit 1
