@@ -41,6 +41,8 @@ worldclim = "S:\observed\gridded_products\worldclim\Global_30s"
 for var in variablelist:
 	if var == "bio":
 		num = 19
+	elif var == "cons_mths":
+		num = 1	
 	else:
 		num = 12
 	for month in range (1, num + 1, 1):
