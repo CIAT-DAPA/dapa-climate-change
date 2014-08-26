@@ -105,6 +105,15 @@ for (tloc in loc_list) {
   if (file.exists(save_file)) {loc_sel <- loc_sel[-which(loc_sel == tloc)]}
 }
 
+#create meteorology
+for (tloc in loc_sel) {
+  cat("...creating meteo for loc=",tloc,"\n")
+  #create meteorology for selected grid cells
+  wval <- extract_weather(cellid=tloc, lon=xy_me$x[which(xy_me$LOC == tloc)], 
+                          lat=xy_me$y[which(xy_me$LOC == tloc)], met_dir=met_dir, 
+                          data_type="obs", dataset="WFD", sce="hist", years=1950:2001,ow=F)
+}
+
 #5. use this parameter set to calibrate the model for all locations in parallel
 run_hyp_loc <- function(iloc) {
   if (driver %in% c("eljefe","lajefa")) {system("renice 19 -u earjr",ignore.stdout=T)}
