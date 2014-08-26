@@ -11,6 +11,8 @@ gp = arcgisscripting.create(9.3)
 # python F:\jetarapues\Request\Request_peter\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\tza_adm\tza0 F:\jetarapues\Request\Request_peter rcp26 2040_2069
 # python F:\jetarapues\Request\Request_peter\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble F:\jetarapues\Request\Request_biofuturo\mask\col_narino F:\jetarapues\Request\Request_biofuturo rcp26 2020_2049
 
+# python G:\jetarapues\Request\Request_cnavarro\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\ecu_adm\ecu0 G:\jetarapues\Request\Request_cnavarro\test rcp26 2020_2049 NO
+
 
 # Arguments
 dirbase = sys.argv[1]
@@ -18,6 +20,9 @@ admdir = sys.argv[2]
 dirout = sys.argv[3]
 rcp = sys.argv[4]
 period = sys.argv[5]
+switch = sys.argv[6]
+
+
 
 
 # Clean screen
@@ -33,7 +38,8 @@ print "~~~~~~~~~~~~~~~~~~~~~~"
 endir = dirbase + "\\"  + rcp + "\\Global_30s\\"+period
 
 
-variablelist = ["bio","cons_mths","prec","tmin","tmax","tmean" ]
+# variablelist = ["bio","cons_mths","prec","tmin","tmax","tmean" ]
+variablelist = ["bio" ]
 
 worldclim = "S:\observed\gridded_products\worldclim\Global_30s"
 
@@ -42,7 +48,7 @@ for var in variablelist:
 		num = 19
 	else:
 		num = 12
-	for month in range (1, num + 1, 1):
+	for month in [1,12]:
 		if var == "cons_mths":
 			variable = var
 		else:
@@ -61,7 +67,26 @@ for var in variablelist:
 				gp.ExtractByMask_sa(bio, admdir, OutRaster)
 			else:	
 				print "...ya existe enmsemble!",variable
+
+
 			
+			gp.workspace = diroutraster 	
+			if not os.path.exists(diroutraster + "\\ascii"):
+				os.system('mkdir ' + diroutraster + "\\ascii")	
+			OutAscii = diroutraster + "\\ascii\\" + variable + ".asc"	
+			if not gp.Exists(OutAscii):	
+				gp.RasterToASCII_conversion(OutRaster, OutAscii)
+				gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
+				
+			InZip = diroutraster + "\\ascii\\" + var + "_asc.zip"
+			os.system('7za a ' + InZip + " " + OutAscii)
+			os.remove(OutAscii)				
+			if os.path.exists(OutAscii[:-3]+"prj"):
+				os.remove(OutAscii[:-3]+"prj")
+			if gp.Exists(OutRaster) and switch == "YES":
+				gp.delete_management(OutRaster)
+				
+				
 			# Para cortar datos worldclim
 			dirworldclim = dirout + "\\worldclim\\global_30s"		
 			if not os.path.exists(dirworldclim):
@@ -75,7 +100,7 @@ for var in variablelist:
 				print "...ya existe worldclim!", variable
 
 			# Para calcular anomalias
-			dirouanoma = dirout + "\\anomalies\\"+period		
+			dirouanoma = dirout + "\\anomalies\\"+ rcp+ "\\global_30s\\"+period		
 			if not os.path.exists(dirouanoma):
 				os.system('mkdir ' + dirouanoma)			
 			gp.workspace = diroutraster
@@ -88,7 +113,26 @@ for var in variablelist:
 				print outAnomala
 				gp.SingleOutputMapAlgebra_sa(inexpresion, outAnomala)	
 			else:
-				print "...ya existe anomalia!", variable				
+				print "...ya existe anomalia!", variable			
+
+			gp.workspace = dirouanoma 	
+			if not os.path.exists(dirouanoma + "\\ascii"):
+				os.system('mkdir ' + dirouanoma + "\\ascii")	
+			OutAscii = dirouanoma + "\\ascii\\" + variable + ".asc"	
+			if not gp.Exists(OutAscii):	
+				gp.RasterToASCII_conversion(outAnomala, OutAscii)
+				gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
+				
+			InZip = dirouanoma + "\\ascii\\" + var + "_asc.zip"
+			os.system('7za a ' + InZip + " " + OutAscii)
+			os.remove(OutAscii)				
+			if os.path.exists(OutAscii[:-3]+"prj"):
+				os.remove(OutAscii[:-3]+"prj")
+			if gp.Exists(OutRaster) and switch == "YES":
+				gp.delete_management(OutRaster)
+
+
+				
 	print '...done',var
 						
 gp.AddMessage("\n \t ====> DONE!! <====")  
