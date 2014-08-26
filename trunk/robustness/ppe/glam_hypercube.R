@@ -211,7 +211,7 @@ for (hrun in 1:nrow(out_df)) {
     require(snowfall)
     
     #parallelisation
-    sfInit(parallel=T,cpus=min(c(70,length(loc_sel))),socketHosts=socket_list,type="SOCK")
+    sfInit(parallel=T,cpus=70,socketHosts=socket_list,type="SOCK")
     sfExport(list=c("loc_sel","bin_dir","mdata_dir","met_dir","xy_me","xy_main","xy_main_yield"))
     sfExport(list=c("me_sel","param_list","src.dir","me_hdir","out_hdir","wd","hyp_params"))
     sfExport(list=c("run_hyp_loc","driver","hrun"))
