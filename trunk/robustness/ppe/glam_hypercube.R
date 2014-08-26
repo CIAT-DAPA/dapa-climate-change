@@ -99,12 +99,13 @@ loc_list <- xy_me$LOC
 ###
 #Note: from here onwards the process can be parallelised
 #4. get a given line into a parameter set
-for (hrun in 1:nrow(out_df)) {
+for (hrun in hrun_list) {
+  #hrun <- 1
   cat("\n------------------------------------\n")
   cat("\n...processing hypercube run=",hrun,"\n")
   cat("\n------------------------------------\n")
   
-  #hrun <- 1
+  #get parameter set
   base_params <- GLAM_get_default(mdata_dir)
   hyp_params <- put_param_hyp(out_df[hrun,], params=base_params, p_list=names(out_df), all_param=param_list)
   
