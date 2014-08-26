@@ -36,7 +36,7 @@
 # extract_weather(cellid=xy_main$LOC[231], lon=xy_main$x[231], lat=xy_main$y[231], met_dir=metDir, data_type="gcm", dataset="gfdl-esm2m", sce="rcp26", years=2006:2099)
 # #---------------------------------------------------------------
 
-extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005, write_wthfil=T, use_cdo=T) {
+extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset="WFD", sce="hist", years=1950:2005, write_wthfil=T, use_cdo=T, ow=T) {
   #get arguments in proper format
   data_type <- tolower(data_type); sce <- tolower(sce)
   if (data_type == "obs") {dataset <- toupper(dataset)} else {dataset <- tolower(dataset)}
@@ -183,7 +183,7 @@ extract_weather <- function(cellid, lon, lat, met_dir, data_type="obs", dataset=
   
   if (write_wthfil) {
     xin <- data.frame(CELL=cellid,X=lon,Y=lat)
-    xout <- make_wth(x=xin,wthDir_in=out_adir,wthDir_out=paste(out_adir,"/loc-",cellid,sep=""),years=years,fields=list(CELL="CELL",X="X",Y="Y"))
+    xout <- make_wth(x=xin,wthDir_in=out_adir,wthDir_out=paste(out_adir,"/loc-",cellid,sep=""),years=years,fields=list(CELL="CELL",X="X",Y="Y"),overwrite=ow)
   } else {
     xout <- out_file
   }
