@@ -43,7 +43,7 @@ write_wth <- function(inData,outfile,site.details) {
 # function to make weather for a number of cells
 #################################################################################
 #################################################################################
-make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="X",Y="Y")) {
+make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="X",Y="Y"),overwrite=T) {
   #checks
   if (length(which(toupper(names(fields)) %in% c("CELL","X","Y"))) != 3) {
     stop("field list incomplete")
@@ -103,15 +103,18 @@ make_wth <- function(x,wthDir_in,wthDir_out=NA,years,fields=list(CELL="CELL",X="
     for (yr in years) {
       #the below needs to be changed if you wanna write more than 1 cell
       wthfile <- paste(wthDir_out,"/afrb",row_t,col_t,yr,".wth",sep="")
-      mdat <- metdata[which(metdata$year == yr),]
-      mdat$year <- NULL
       
-      wx <- data.frame(DATE=NA,JDAY=1:365,SRAD=mdat$rsds,TMAX=mdat$tasmax,TMIN=mdat$tasmin,RAIN=mdat$pr)
-      wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
-      wx$DATE[which(wx$JDAY >= 10 & wx$JDAY < 100)] <- paste(substr(yr,3,4),"0",wx$JDAY[which(wx$JDAY >= 10 & wx$JDAY < 100)],sep="")
-      wx$DATE[which(wx$JDAY >= 100)] <- paste(substr(yr,3,4),wx$JDAY[which(wx$JDAY >= 100)],sep="")
-      
-      wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
+      if (!file.exists(wthfile) | overwrite) {
+        mdat <- metdata[which(metdata$year == yr),]
+        mdat$year <- NULL
+        
+        wx <- data.frame(DATE=NA,JDAY=1:365,SRAD=mdat$rsds,TMAX=mdat$tasmax,TMIN=mdat$tasmin,RAIN=mdat$pr)
+        wx$DATE[which(wx$JDAY < 10)] <- paste(substr(yr,3,4),"00",wx$JDAY[which(wx$JDAY < 10)],sep="")
+        wx$DATE[which(wx$JDAY >= 10 & wx$JDAY < 100)] <- paste(substr(yr,3,4),"0",wx$JDAY[which(wx$JDAY >= 10 & wx$JDAY < 100)],sep="")
+        wx$DATE[which(wx$JDAY >= 100)] <- paste(substr(yr,3,4),wx$JDAY[which(wx$JDAY >= 100)],sep="")
+        
+        wthfile <- write_wth(inData=wx,outfile=wthfile,site.details=s_details)
+      }
     }
   }
   return(list(WTH_DIR=wthDir_out))

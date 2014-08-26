@@ -117,8 +117,6 @@ GLAM_calibrate <- function(cal_data) {
   #output directories
   if (cal_data$USE_SCRATCH) {
     cal_dir <- cal_data$SCRATCH #calibration directory
-    #nfs_dir <- paste(cal_data$BASE_DIR,"/",cal_data$SIM_NAME,sep="")
-    #if (!file.exists(nfs_dir)) {dir.create(nfs_dir,recursive=T)}
   } else {
     cal_dir <- cal_data$BASE_DIR #calibration directory
   }
@@ -172,159 +170,147 @@ GLAM_calibrate <- function(cal_data) {
     run_data$IEYR <- cal_data$IEYR
     run_data$PARAMS <- params
     
-    ##file of output
-    #cal_outfile <- paste(opt_dir,"/cal-",run_data$LOC,".txt",sep="") #summary
-    #raw_outfile <- paste(opt_dir,"/cal-",run_data$LOC,"_raw.txt",sep="") #raw
-    
-    #if (!file.exists(cal_outfile)) {
-      #loop through sequence of values
-      for (i in 1:length(vals)) {
-        #i <- 1
-        cat("performing ygp calibration run ",cal_data$RUN_TYPE," ",i," value = ",vals[i],sep="","\n")
+    #loop through sequence of values
+    for (i in 1:length(vals)) {
+      #i <- 1
+      cat("performing ygp calibration run ",cal_data$RUN_TYPE," ",i," value = ",vals[i],sep="","\n")
+      
+      #run id
+      run_data$RUN_ID <- paste("run-",i,"_val-",vals[i],"_loc-",run_data$LOC,sep="")
+      
+      #assign values to parameter set
+      run_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
+      
+      #run all sow*sol options for this YGP value and location
+      pred_all <- data.frame()
+      for (k in 1:nrow(run_df)) {
+        #k <- 1
+        #get sow date and SAT multiplier
+        sow_date <- run_df$sow[k]
+        run_data$SAT <- cal_data$INI_COND$SAT[which(cal_data$INI_COND$LOC == run_data$LOC)] * run_df$sol[k]
         
-        #run id
-        run_data$RUN_ID <- paste("run-",i,"_val-",vals[i],"_loc-",run_data$LOC,sep="")
-        
-        #assign values to parameter set
-        run_data$PARAMS[[sect]][[param]][,"Value"] <- vals[i]
-        
-        #run all sow*sol options for this YGP value and location
-        pred_all <- data.frame()
-        for (k in 1:nrow(run_df)) {
-          #k <- 1
-          #get sow date and SAT multiplier
-          sow_date <- run_df$sow[k]
-          run_data$SAT <- cal_data$INI_COND$SAT[which(cal_data$INI_COND$LOC == run_data$LOC)] * run_df$sol[k]
-          
-          #run the model from scratch if k == 1, otherwise just go to dir, run and grab
-          #check whether the *.out already exists
-          outfile <- list.files(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/output",sep=""),pattern="\\.out")
-          if (length(outfile) == 0) {
-            if (k == 1) {
-              run_data <- run_glam(run_data)
-            } else {
-              #if (cal_data$USE_SCRATCH) {}
-              solfil <- make_soilcodes(outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soilcodes.txt",sep=""))
-              solfil <- make_soiltypes(data.frame(CELL=run_data$LOC,RLL=run_data$RLL,DUL=run_data$DUL,SAT=run_data$SAT),
-                                       outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
-              sowfil <- make_sowdates(data.frame(CELL=run_data$LOC,SOW_DATE=sow_date),
-                                      outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/sow/sowing.txt",sep=""))
-              thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
-            }
+        #run the model from scratch if k == 1, otherwise just go to dir, run and grab
+        #check whether the *.out already exists
+        outfile <- list.files(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/output",sep=""),pattern="\\.out")
+        if (length(outfile) == 0) {
+          if (k == 1) {
+            run_data <- run_glam(run_data)
           } else {
-            run_data$SEAS_FILES <- outfile
-            run_data$RUN_DIR <- paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")
+            #if (cal_data$USE_SCRATCH) {}
+            solfil <- make_soilcodes(outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soilcodes.txt",sep=""))
+            solfil <- make_soiltypes(data.frame(CELL=run_data$LOC,RLL=run_data$RLL,DUL=run_data$DUL,SAT=run_data$SAT),
+                                     outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/soil/soiltypes.txt",sep=""))
+            sowfil <- make_sowdates(data.frame(CELL=run_data$LOC,SOW_DATE=sow_date),
+                                    outfile=paste(run_data$BASE_DIR,"/",run_data$RUN_ID,"/inputs/ascii/sow/sowing.txt",sep=""))
+            thisdir <- getwd(); setwd(paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")); system(paste("./",run_data$MODEL,sep="")); setwd(thisdir)
           }
-          
-          #read in the simulated yield
-          if (length(run_data$SEAS_FILES) == 1 | length(outfile) == 1) {
-            pred <- read.table(paste(run_data$RUN_DIR,"/output/",run_data$SEAS_FILES,sep=""),header=F,sep="\t")
-            names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
-                             "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
-                             "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
-                             "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
-                             "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT",
-                             "IPLANT","LETHAL_YIELD","LETHAL_HI","LETHAL_BMASS","LETHAL_BMASS","LETHAL_DAP",
-                             "SWFAC_TOT","SWFAC_MEAN","SWFAC_COUNT")
-            pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","STG","YIELD","PLANTING_DATE","DUR")])
-            pred_all <- rbind(pred_all, pred)
-            system(paste("rm -f ",run_data$RUN_DIR,"/output/*.out",sep="")) #remove junk
-          }
+        } else {
+          run_data$SEAS_FILES <- outfile
+          run_data$RUN_DIR <- paste(run_data$BASE_DIR,"/",run_data$RUN_ID,sep="")
         }
         
-        #read in all files and determine best sat multiplier
-        if (nrow(pred_all) > 0) { #for existence of output GLAM file
-          #average by YEAR and SAT_FAC
-          #pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
-          pred_all$YIELD[which(pred_all$STG == 9)] <- NA #set to NA all STG==0
-          pred_agg <- aggregate(pred_all[,c("SOW","YIELD","PLANTING_DATE","DUR")], by=list(YEAR=pred_all$YEAR, SAT_FAC=pred_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
-                    
-          #perform this calculation for each value of SAT_FAC
-          odf_all <- data.frame()
-          for (sfac in sol_seq) {
-            #sfac <- sol_seq[1]
-            #grab predicted yield
-            pred <- pred_agg[which(pred_agg$SAT_FAC == sfac),]
-            y_p <- pred$YIELD
-            y_p[which(is.na(y_p))] <- 0 #set to zero any NAs (product of emergence failure)
-            
-            #grab observed yield
-            y_o <- as.data.frame(t(cal_data$YLD_DATA[which(cal_data$YLD_DATA$x == run_data$LON & cal_data$YLD_DATA$y == run_data$LAT),3:ncol(cal_data$YLD_DATA)]))
-            y_o <- cbind(YEAR=1982:2005,y_o)
-            names(y_o)[2] <- "YIELD"
-            row.names(y_o) <- 1:nrow(y_o)
-            y_o <- y_o[which(y_o$YEAR >= cal_data$ISYR & y_o$YEAR <= cal_data$IEYR),]
-            y_o <- y_o$YIELD
-            
-            #get simulated yield, depending on which year the crop was actually harvested:
-            #** if planted and harvested this year then use simulation from this year to end
-            #** if planted this and harvested next year then use simulation from year-1 to end-1
-            har_date <- mean((pred$PLANTING_DATE + pred$DUR)) #get harvest date first
-            if (har_date<365) {y_p <- y_p[2:length(y_p)]} else {y_p <- y_p[1:(length(y_p)-1)]}
-            odf <- data.frame(YEAR=(cal_data$ISYR+1):cal_data$IEYR,VALUE=vals[i],OBS=y_o,PRED=y_p)
-            
-            ## detrending (borrows from detrender-functions.R)
-            #detrend observed yield
-            fit_loess <- loess(odf$OBS ~ odf$YEAR) #compute lowess fit
-            y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
-            odf$LOESS_PRED <- y_loess$fit
-            rd_loess <- (odf$OBS - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
-            odf$OBS_ADJ <- (rd_loess+1) * mean(odf$OBS, na.rm=T) #odf$OBS[nrow(odf)] #loess
-            
-            #detrend simulated yield
-            if (length(which(odf$PRED == 0)) == length(odf$PRED)) {
-              odf$PRED_ADJ <- 0
-            } else {
-              fit_loess <- loess(odf$PRED ~ odf$YEAR, degree=1, span=2) #compute lowess fit
-              y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
-              odf$LOESS_PRED <- y_loess$fit
-              rd_loess <- (odf$PRED - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
-              odf$PRED_ADJ <- (rd_loess+1) * mean(odf$PRED, na.rm=T) #odf$PRED[nrow(odf)] #loess
-            }
-            odf$LOESS_PRED <- NULL #remove extra field
-            
-            #choose optimisation method (RMSE, CH07, CH10)
-            if (opt_meth == "RMSE") {
-              rmse <- sqrt(sum((odf$OBS_ADJ-odf$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(odf$OBS_ADJ)))))
-            } else if (opt_meth == "CH07") {
-              rmse <- (mean(odf$OBS_ADJ,na.rm=T)-mean(odf$PRED_ADJ,na.rm=T))^2 + (sd(odf$OBS_ADJ,na.rm=T)-sd(odf$PRED_ADJ,na.rm=T))^2
-            } else if (opt_meth == "CH10") {
-              rmse <- (mean(odf$OBS_ADJ,na.rm=T)-mean(odf$PRED_ADJ,na.rm=T))^2
-            }
-            odf <- cbind(SAT_FAC=sfac, RMSE=rmse, odf)
-            odf_all <- rbind(odf_all, odf)
-          }
-          
-          #select minimum RMSE
-          rmse_all <- aggregate(odf_all[,c("RMSE")], by=list(SAT_FAC=odf_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
-          sfac <- rmse_all$SAT_FAC[which(rmse_all$x == min(rmse_all$x))][1]
-          rmse <- min(rmse_all$x)
-          
-          #remove junk
-          system(paste("rm -rf ",run_data$RUN_DIR,sep=""))
-        } else {
-          rmse <- NA
-        }
-        
-        odf <- odf_all[which(odf_all$SAT_FAC == sfac),]; odf$RMSE <- NULL
-        out_row <- data.frame(VALUE=vals[i], SAT_FAC=sfac, RMSE=rmse, YOBS=mean(odf$OBS,na.rm=T), YPRED=mean(odf$PRED,na.rm=T), 
-                              YOBS_ADJ=mean(odf$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(odf$PRED_ADJ,na.rm=T))
-        
-        if (i == 1) {
-          out_all <- out_row
-          raw_all <- odf
-        } else {
-          out_all <- rbind(out_all,out_row)
-          raw_all <- rbind(raw_all, odf)
+        #read in the simulated yield
+        if (length(run_data$SEAS_FILES) == 1 | length(outfile) == 1) {
+          pred <- read.table(paste(run_data$RUN_DIR,"/output/",run_data$SEAS_FILES,sep=""),header=F,sep="\t")
+          names(pred) <- c("YEAR","LAT","LON","PLANTING_DATE","STG","RLV_M","LAI","YIELD","BMASS","SLA",
+                           "HI","T_RAIN","SRAD_END","PESW","TRANS","ET","P_TRANS+P_EVAP","SWFAC","EVAP+TRANS",
+                           "RUNOFF","T_RUNOFF","DTPUPTK","TP_UP","DRAIN","T_DRAIN","P_TRANS","TP_TRANS",
+                           "T_EVAP","TP_EVAP","T_TRANS","RLA","RLA_NORM","RAIN_END","DSW","TRADABS",
+                           "DUR","VPDTOT","TRADNET","TOTPP","TOTPP_HIT","TOTPP_WAT","TBARTOT",
+                           "IPLANT","LETHAL_YIELD","LETHAL_HI","LETHAL_BMASS","LETHAL_BMASS","LETHAL_DAP",
+                           "SWFAC_TOT","SWFAC_MEAN","SWFAC_COUNT")
+          pred <- cbind(SOW=sow_date, SAT_FAC=run_df$sol[k], pred[,c("YEAR","STG","YIELD","PLANTING_DATE","DUR")])
+          pred_all <- rbind(pred_all, pred)
+          system(paste("rm -f ",run_data$RUN_DIR,"/output/*.out",sep="")) #remove junk
         }
       }
-      ##write outputs for this grid cell
-      #write.table(out_all,sep="\t",quote=F,file=cal_outfile,row.names=F)
-      #write.table(raw_all,sep="\t",quote=F,file=raw_outfile,row.names=F)
-    #} else {
-    #  out_all <- read.table(cal_outfile,sep="\t",header=T)
-    #  raw_all <- read.table(raw_outfile,sep="\t",header=T)
-    #}
+      
+      #read in all files and determine best sat multiplier
+      if (nrow(pred_all) > 0) { #for existence of output GLAM file
+        #average by YEAR and SAT_FAC
+        #pred_all <- pred_all[which(pred_all$STG != 9),] #first remove STG=9 (no emergence)
+        pred_all$YIELD[which(pred_all$STG == 9)] <- NA #set to NA all STG==0
+        pred_agg <- aggregate(pred_all[,c("SOW","YIELD","PLANTING_DATE","DUR")], by=list(YEAR=pred_all$YEAR, SAT_FAC=pred_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
+                  
+        #perform this calculation for each value of SAT_FAC
+        odf_all <- data.frame()
+        for (sfac in sol_seq) {
+          #sfac <- sol_seq[1]
+          #grab predicted yield
+          pred <- pred_agg[which(pred_agg$SAT_FAC == sfac),]
+          y_p <- pred$YIELD
+          y_p[which(is.na(y_p))] <- 0 #set to zero any NAs (product of emergence failure)
+          
+          #grab observed yield
+          y_o <- as.data.frame(t(cal_data$YLD_DATA[which(cal_data$YLD_DATA$x == run_data$LON & cal_data$YLD_DATA$y == run_data$LAT),3:ncol(cal_data$YLD_DATA)]))
+          y_o <- cbind(YEAR=1982:2005,y_o)
+          names(y_o)[2] <- "YIELD"
+          row.names(y_o) <- 1:nrow(y_o)
+          y_o <- y_o[which(y_o$YEAR >= cal_data$ISYR & y_o$YEAR <= cal_data$IEYR),]
+          y_o <- y_o$YIELD
+          
+          #get simulated yield, depending on which year the crop was actually harvested:
+          #** if planted and harvested this year then use simulation from this year to end
+          #** if planted this and harvested next year then use simulation from year-1 to end-1
+          har_date <- mean((pred$PLANTING_DATE + pred$DUR)) #get harvest date first
+          if (har_date<365) {y_p <- y_p[2:length(y_p)]} else {y_p <- y_p[1:(length(y_p)-1)]}
+          odf <- data.frame(YEAR=(cal_data$ISYR+1):cal_data$IEYR,VALUE=vals[i],OBS=y_o,PRED=y_p)
+          
+          ## detrending (borrows from detrender-functions.R)
+          #detrend observed yield
+          fit_loess <- loess(odf$OBS ~ odf$YEAR) #compute lowess fit
+          y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
+          odf$LOESS_PRED <- y_loess$fit
+          rd_loess <- (odf$OBS - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
+          odf$OBS_ADJ <- (rd_loess+1) * mean(odf$OBS, na.rm=T) #odf$OBS[nrow(odf)] #loess
+          
+          #detrend simulated yield
+          if (length(which(odf$PRED == 0)) == length(odf$PRED)) {
+            odf$PRED_ADJ <- 0
+          } else {
+            fit_loess <- loess(odf$PRED ~ odf$YEAR, degree=1, span=2) #compute lowess fit
+            y_loess <- predict(fit_loess, odf$YEAR, se=T) #theoretical prediction
+            odf$LOESS_PRED <- y_loess$fit
+            rd_loess <- (odf$PRED - odf$LOESS_PRED) / odf$LOESS_PRED #relative difference
+            odf$PRED_ADJ <- (rd_loess+1) * mean(odf$PRED, na.rm=T) #odf$PRED[nrow(odf)] #loess
+          }
+          odf$LOESS_PRED <- NULL #remove extra field
+          
+          #choose optimisation method (RMSE, CH07, CH10)
+          if (opt_meth == "RMSE") {
+            rmse <- sqrt(sum((odf$OBS_ADJ-odf$PRED_ADJ)^2,na.rm=T) / (length(which(!is.na(odf$OBS_ADJ)))))
+          } else if (opt_meth == "CH07") {
+            rmse <- (mean(odf$OBS_ADJ,na.rm=T)-mean(odf$PRED_ADJ,na.rm=T))^2 + (sd(odf$OBS_ADJ,na.rm=T)-sd(odf$PRED_ADJ,na.rm=T))^2
+          } else if (opt_meth == "CH10") {
+            rmse <- (mean(odf$OBS_ADJ,na.rm=T)-mean(odf$PRED_ADJ,na.rm=T))^2
+          }
+          odf <- cbind(SAT_FAC=sfac, RMSE=rmse, odf)
+          odf_all <- rbind(odf_all, odf)
+        }
+        
+        #select minimum RMSE
+        rmse_all <- aggregate(odf_all[,c("RMSE")], by=list(SAT_FAC=odf_all$SAT_FAC), FUN=function(x) {mean(x,na.rm=T)})
+        sfac <- rmse_all$SAT_FAC[which(rmse_all$x == min(rmse_all$x))][1]
+        rmse <- min(rmse_all$x)
+        
+        #remove junk
+        system(paste("rm -rf ",run_data$RUN_DIR,sep=""))
+      } else {
+        rmse <- NA
+      }
+      
+      odf <- odf_all[which(odf_all$SAT_FAC == sfac),]; odf$RMSE <- NULL
+      out_row <- data.frame(VALUE=vals[i], SAT_FAC=sfac, RMSE=rmse, YOBS=mean(odf$OBS,na.rm=T), YPRED=mean(odf$PRED,na.rm=T), 
+                            YOBS_ADJ=mean(odf$OBS_ADJ,na.rm=T), YPRED_ADJ=mean(odf$PRED_ADJ,na.rm=T))
+      
+      if (i == 1) {
+        out_all <- out_row
+        raw_all <- odf
+      } else {
+        out_all <- rbind(out_all,out_row)
+        raw_all <- rbind(raw_all, odf)
+      }
+    }
     
     #append location data
     out_all <- cbind(LOC=loc,out_all)
@@ -340,7 +326,6 @@ GLAM_calibrate <- function(cal_data) {
   
   #remove junk from scratch
   if (cal_data$USE_SCRATCH) {
-    #system(paste("cp -rf ",cal_dir," ",paste(nfs_dir,"/.",sep=""),sep=""))
     system(paste("rm -rf ",cal_dir,sep=""))
   }
   
