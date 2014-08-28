@@ -92,9 +92,9 @@ for country in countrytilelist[int(start):int(end)]:
 					diroutGridsVar = diroutGrids + "\\" + os.path.basename(raster).split("_")[0]+"_tif"
 					if not os.path.exists(diroutGridsVar):
 						os.system('mkdir ' + diroutGridsVar)
-					if model == "current":
-						tileTif= "baseline_1960_1990_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"
-					else:
+					if model != "current":
+						# tileTif= "baseline_1960_1990_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"
+					# else:
 						tileTif= rcp+"_"+period+"_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"
 					
 					if not arcpy.Exists(diroutGridsVar + "\\" + rcp+"_"+period+"_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"):
