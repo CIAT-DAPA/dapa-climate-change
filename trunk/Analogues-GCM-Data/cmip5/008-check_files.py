@@ -162,13 +162,13 @@ for resolution in resoList:
 				diroutGridsVar = diroutGrids + "\\" + os.path.basename(raster).split("_")[0]+"_tif"
 				if not os.path.exists(diroutGridsVar):
 					os.system('mkdir ' + diroutGridsVar)
-				tileTif= rcp+"_"+period+"_"+model+"_"+raster + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"
+				tileTif= rcp+"_"+period+"_"+model+"_"+var + "_" + str(int(str(countryDic [country]).split(" ")[0]) * int(str(countryDic [country]).split(" ")[1]) - 1)+".tif"
 				if not arcpy.Exists(diroutGridsVar + "\\" + tileTif):
-					print "\tspliting .. ",raster
-					arcpy.SplitRaster_management(raster, diroutGridsVar, rcp+"_"+period+"_"+model+"_"+raster + "_", "NUMBER_OF_TILES", "TIFF", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
-					print "\t" + raster,"tiled"					
+					print "\tspliting .. ",tileTif
+					arcpy.SplitRaster_management(raster, diroutGridsVar, rcp+"_"+period+"_"+model+"_"+var + "_", "NUMBER_OF_TILES", "TIFF", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
+					print "\t" + var,"tiled"					
 				else:
-					print "\t" + raster,"tiled"		
+					print "\t" + var,"tiled"	
 		
 		
 		
