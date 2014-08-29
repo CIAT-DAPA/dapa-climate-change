@@ -63,7 +63,7 @@ for resolution in resoList:
 		
 	monthDic = {"bio": "19", "tmean": "12", "dtr": "12", "prec": "12"}
 
-	if mode =="check":
+	if not os.path.exists(dirbase + "\\" + rcp +'_'+resolution+"_check.txt"):
 		if rcp == "baseline":
 			
 			model = "baseline"
@@ -172,4 +172,4 @@ for resolution in resoList:
 		
 		
 		
-		
+print "DONE FIX!"		
