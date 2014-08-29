@@ -12,7 +12,7 @@ from arcpy import env
 if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp26 2_5min,5min,10min 2020_2049 check"
+	print "   - ie: python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp26 2_5min,5min,10min 2020_2049"
 	sys.exit(1)
 
 #Set variables
@@ -21,7 +21,6 @@ dirout = sys.argv[2]
 rcp = sys.argv[3]
 res = sys.argv[4]
 period = sys.argv[5]
-mode = sys.argv[6]
 
 os.system('cls')
 
