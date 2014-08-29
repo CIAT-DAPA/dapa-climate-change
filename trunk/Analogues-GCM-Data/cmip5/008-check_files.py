@@ -113,7 +113,7 @@ for resolution in resoList:
 								
 								tiff = tifdir + "\\" + rcp + "_" + period + "_" + model + "_" + var + "_" + str(month) + "_" + str(tile) + ".tif"
 								
-								if not os.path.exists(tiff):
+								if not arcpy.Exists(tiff):
 									print country,model,os.path.basename(tiff),"NO"
 									outFile = open(dirbase + "\\" + rcp +'_'+resolution+"_check.txt", "a")
 									outFile.write(country.split("\n")[0] + "\t" + model + "\t" + resolution + "\t" + var+ "_" + str(month) + "\n")
