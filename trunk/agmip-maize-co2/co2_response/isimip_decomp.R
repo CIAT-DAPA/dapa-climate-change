@@ -3,6 +3,9 @@
 #Aug 2014
 #stop("!")
 
+#borrows from Ed Hawkins' unccrop.m script and from AKK's script
+#signal_noise_analysis_difffits_forJulian, but plots more individual unc. components
+
 #load libraries
 library(maptools); data(wrld_simpl); library(raster);
 library(rgdal); library(rasterVis); library(sp); library(ggplot2);
