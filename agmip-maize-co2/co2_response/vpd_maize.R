@@ -12,7 +12,8 @@ library(raster); library(maptools)
 #input directories
 shp_dir <- "~/Leeds-work/datasets/shapefiles/Countries"
 isimip_wth <- "/nfs/a101/earak/data/ISIMIP_wth"
-base_dir <- "~/Leeds-work/AgMIP-maize-phase-2"
+#base_dir <- "~/Leeds-work/AgMIP-maize-phase-2"
+base_dir <- "/nfs/a101/earjr/AgMIP-maize-phase-2"
 out_dir <- paste(base_dir,"/co2_resp_analysis",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir)}
 
@@ -43,18 +44,26 @@ if (!file.exists(paste(out_dir,"/masks.RData",sep=""))) {
   rs_fr[which(!is.na(rs_fr[]))] <- 1
   rs_fr <- rs_fr * crop(ahar, ext_fr)
   
+  #load Germany shapefile and make a mask with it
+  shp_ge <- readShapePoly(paste(shp_dir,"/DEU_adm/DEU0.shp",sep=""))
+  ext_ge <- extent(shp_ge)
+  ext_ge@xmin <- ext_ge@xmin - 1; ext_ge@xmax <- ext_ge@xmax + 1
+  ext_ge@ymin <- ext_ge@ymin - 1; ext_ge@ymax <- ext_ge@ymax + 1
+  rs_ge <- rasterize(shp_ge, crop(ahar, ext_ge))
+  rs_ge[which(!is.na(rs_ge[]))] <- 1
+  rs_ge <- rs_ge * crop(ahar, ext_ge)
   
   ####
   #load a mask from the ISIMIP wth data and produce 0.5x0.5 degree masks with it
   rs_wth <- raster(paste(isimip_wth, "/gfdl-esm2m/hist/pr_bced_1960_1999_gfdl-esm2m_hist_1950.nc",sep=""))
   rs_wth_us <- crop(rs_wth, ext_us)
   rs_wth_fr <- crop(rs_wth, ext_fr)
+  rs_wth_ge <- crop(rs_wth, ext_ge)
   
   us_df <- as.data.frame(xyFromCell(rs_us, which(!is.na(rs_us[]))))
   us_df$ahar <- extract(rs_us, us_df[,c("x","y")])
   us_df$cloc <- cellFromXY(rs_wth_us, us_df[,c("x","y")])
   us_df <- aggregate(us_df[,c(1:3)], by=list(cloc=us_df$cloc), FUN=function(x) {mean(x,na.rm=F)})
-  
   msk_us <- rs_wth_us; msk_us[] <- NA
   msk_us[us_df$cloc] <- us_df$ahar
   msk_us[which(msk_us[] < 0.05)] <- NA #final US mask
@@ -63,17 +72,28 @@ if (!file.exists(paste(out_dir,"/masks.RData",sep=""))) {
   fr_df$ahar <- extract(rs_fr, fr_df[,c("x","y")])
   fr_df$cloc <- cellFromXY(rs_wth_fr, fr_df[,c("x","y")])
   fr_df <- aggregate(fr_df[,c(1:3)], by=list(cloc=fr_df$cloc), FUN=function(x) {mean(x,na.rm=F)})
-  
   msk_fr <- rs_wth_fr; msk_fr[] <- NA
   msk_fr[fr_df$cloc] <- fr_df$ahar
   msk_fr[which(msk_fr[] < 0.05)] <- NA #final France mask
   
+  ge_df <- as.data.frame(xyFromCell(rs_ge, which(!is.na(rs_ge[]))))
+  ge_df$ahar <- extract(rs_ge, ge_df[,c("x","y")])
+  ge_df$cloc <- cellFromXY(rs_wth_ge, ge_df[,c("x","y")])
+  ge_df <- aggregate(ge_df[,c(1:3)], by=list(cloc=ge_df$cloc), FUN=function(x) {mean(x,na.rm=F)})
+  msk_ge <- rs_wth_ge; msk_ge[] <- NA
+  msk_ge[ge_df$cloc] <- ge_df$ahar
+  msk_ge[which(msk_ge[] < 0.05)] <- NA #final Germany mask
+  
   #plot(rs_us); plot(shp_us, add=T)
   #plot(rs_fr); plot(shp_fr, add=T)
+  #plot(rs_ge); plot(shp_ge, add=T)
   #plot(msk_us); plot(shp_us,add=T)
   #plot(msk_fr); plot(shp_fr,add=T)
+  #plot(msk_ge); plot(shp_ge,add=T)
+  #points((10+27/60),(52+17/60+24/3600)) #Manderscheid experiment location
   
-  save(list=c("msk_us","msk_fr"),file=paste(out_dir,"/masks.RData",sep=""))
+  #save data
+  save(list=c("msk_us","msk_fr","msk_ge"),file=paste(out_dir,"/masks.RData",sep=""))
 } else {
   load(file=paste(out_dir,"/masks.RData",sep=""))
 }
@@ -86,8 +106,11 @@ rcp_list <- c("rcp2p6","rcp4p5","rcp6p0","rcp8p5")
 #data.frame of locations
 loc_us <- as.data.frame(xyFromCell(msk_us, which(!is.na(msk_us[]))))
 loc_fr <- as.data.frame(xyFromCell(msk_fr, which(!is.na(msk_fr[]))))
+loc_ge <- as.data.frame(xyFromCell(msk_ge, which(!is.na(msk_ge[]))))
 
-#loop GCMs for hist extraction
+loc_all <- rbind(loc_us, loc_fr, loc_ge)
+
+#loop GCMs for his extraction
 his_data <- list()
 for (gcm_i in gcm_list) {
   #gcm_i <- gcm_list[1]
@@ -101,8 +124,8 @@ for (gcm_i in gcm_list) {
   #loop files for data extraction
   i <- 1
   for (ifil in 1:length(tmin_list)) {
-    #ifil <- 2
-    cat("......processing file=",ifil,"\n")
+    #ifil <- 1
+    cat("   ...processing file=",ifil,"\n")
     
     #pre-load data
     tmin_rs <- stack(paste(isimip_wth,"/",gcm_i,"/hist/",tmin_list[ifil],sep=""))
@@ -116,36 +139,98 @@ for (gcm_i in gcm_list) {
     #loop years for extraction of data
     for (year in minyear:maxyear) {
       #year <- c(minyear:maxyear)[1]
-      cat(".........processing year=",year,"\n")
+      cat("      ...processing year=",year,"\n")
       tmin_trs <- tmin_rs[[which(rsnames %in% year)]]
       tmax_trs <- tmax_rs[[which(rsnames %in% year)]]
       
       #extract data for locations in both countries
-      cat("............extracting data for US\n")
-      tmin_us <- extract(tmin_trs, loc_us)
-      tmax_us <- extract(tmax_trs, loc_us)
+      cat("............extracting data\n")
+      tmin_all <- extract(tmin_trs, loc_all)
+      tmax_all <- extract(tmax_trs, loc_all)
       
-      cat("............extracting data for FR\n")
-      tmin_fr <- extract(tmin_trs, loc_fr)
-      tmax_fr <- extract(tmax_trs, loc_fr)
+      #get only JJA data for this year
+      yrcal <- colnames(tmin_all); yrcal <- as.numeric(substr(yrcal, 7, 8))
+      tmin_jja <- tmin_all[,which(yrcal %in% c(6:8))]
+      tmax_jja <- tmax_all[,which(yrcal %in% c(6:8))]
       
       #create/append total matrix
       if (i == 1) {
-        atmin_us <- tmin_us; atmax_us <- tmax_us
-        atmin_fr <- tmin_fr; atmax_fr <- tmax_fr
+        atmin_jja <- tmin_jja; atmax_jja <- tmax_jja
       } else {
-        atmin_us <- cbind(atmin_us, tmin_us); atmax_us <- cbind(atmax_us, tmax_us)
-        atmin_fr <- cbind(atmin_fr, tmin_fr); atmax_fr <- cbind(atmax_fr, tmax_fr)
+        atmin_jja <- cbind(atmin_jja, tmin_jja); atmax_jja <- cbind(atmax_jja, tmax_jja)
       }
       i <- i+1
     }
   }
   
   #append into list
-  hist_data[[gcm_i]][["tmin_us"]] <- atmin_us
-  hist_data[[gcm_i]][["tmax_us"]] <- atmax_us
-  hist_data[[gcm_i]][["tmin_fr"]] <- atmin_fr
-  hist_data[[gcm_i]][["tmax_fr"]] <- atmax_fr
+  his_data[[gcm_i]][["tmin"]] <- atmin_jja
+  his_data[[gcm_i]][["tmax"]] <- atmax_jja
 }
+
+
+#loop RCPs and GCMs for fut extraction
+fut_data <- list()
+for (rcp_i in rcp_list) {
+  #rcp_i <- rcp_list[1]
+  fut_data[[rcp_i]] <- list()
+  
+  rcp_i2 <- rcp_i; substring(rcp_i2, 5, 5) <- ""
+  
+  for (gcm_i in gcm_list) {
+    #gcm_i <- gcm_list[1]
+    fut_data[[rcp_i]][[gcm_i]] <- list()
+    
+    #list of files
+    tmin_list <- list.files(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,sep=""), pattern="tasmin")
+    tmax_list <- list.files(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,sep=""), pattern="tasmin")
+    
+    #loop files for data extraction
+    i <- 1
+    for (ifil in 1:length(tmin_list)) {
+      #ifil <- 1
+      cat("...processing rcp=",rcp_i," gcm=",gcm_i," file=",ifil,"\n")
+      
+      #pre-load data
+      tmin_rs <- stack(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,"/",tmin_list[ifil],sep=""))
+      tmax_rs <- stack(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,"/",tmax_list[ifil],sep=""))
+      
+      #derive years
+      rsnames <- names(tmin_rs)
+      rsnames <- substr(rsnames, 1, 5); rsnames <- as.numeric(gsub("X", "", rsnames))
+      minyear <- min(rsnames); maxyear <- max(rsnames)
+      
+      #loop years for extraction of data
+      for (year in minyear:maxyear) {
+        #year <- c(minyear:maxyear)[1]
+        cat("   ...processing year=",year,"\n")
+        tmin_trs <- tmin_rs[[which(rsnames %in% year)]]
+        tmax_trs <- tmax_rs[[which(rsnames %in% year)]]
+        
+        #extract data for locations in both countries
+        tmin_all <- extract(tmin_trs, loc_all)
+        tmax_all <- extract(tmax_trs, loc_all)
+        
+        #get only JJA data for this year
+        yrcal <- colnames(tmin_all); yrcal <- as.numeric(substr(yrcal, 7, 8))
+        tmin_jja <- tmin_all[,which(yrcal %in% c(6:8))]
+        tmax_jja <- tmax_all[,which(yrcal %in% c(6:8))]
+        
+        #create/append total matrix
+        if (i == 1) {
+          atmin_jja <- tmin_jja; atmax_jja <- tmax_jja
+        } else {
+          atmin_jja <- cbind(atmin_jja, tmin_jja); atmax_jja <- cbind(atmax_jja, tmax_jja)
+        }
+        i <- i+1
+      }
+    }
+    
+    #append into list
+    fut_data[[rcp_i]][[gcm_i]][["tmin"]] <- atmin_jja
+    fut_data[[rcp_i]][[gcm_i]][["tmax"]] <- atmax_jja
+  }
+}
+
 
 
