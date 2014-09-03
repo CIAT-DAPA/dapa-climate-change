@@ -3,9 +3,7 @@
 #Aug 2014
 #stop("!")
 
-#borrows from Ed Hawkins' unccrop.m script and from AKK's script
-#signal_noise_analysis_difffits_forJulian.R, but plots more individual 
-#unc. components
+#plot co2_response ratio fo the three areas analysed for each RCP
 
 #load libraries
 library(maptools); data(wrld_simpl); library(raster);

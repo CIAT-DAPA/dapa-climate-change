@@ -17,6 +17,9 @@ base_dir <- "/nfs/a101/earjr/AgMIP-maize-phase-2"
 out_dir <- paste(base_dir,"/co2_resp_analysis",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir)}
 
+scratch <- "/scratch/earjr/co2_resp_analysis"
+if (!file.exists(scratch)) {dir.create(scratch)}
+
 #create masks
 if (!file.exists(paste(out_dir,"/masks.RData",sep=""))) {
   ####
@@ -98,6 +101,7 @@ if (!file.exists(paste(out_dir,"/masks.RData",sep=""))) {
   load(file=paste(out_dir,"/masks.RData",sep=""))
 }
 
+
 ####
 #calculate JJA VPD for historical period for each GCM
 gcm_list <- c("gfdl-esm2m","hadgem2-es","ipsl-cm5a-lr","miroc-esm-chem","noresm1-m")
@@ -110,90 +114,31 @@ loc_ge <- as.data.frame(xyFromCell(msk_ge, which(!is.na(msk_ge[]))))
 
 loc_all <- rbind(loc_us, loc_fr, loc_ge)
 
-#loop GCMs for his extraction
-his_data <- list()
-for (gcm_i in gcm_list) {
-  #gcm_i <- gcm_list[1]
-  cat("...processing gcm=",gcm_i,"\n")
-  his_data[[gcm_i]] <- list()
-  
-  #list of files
-  tmin_list <- list.files(paste(isimip_wth,"/",gcm_i,"/hist",sep=""), pattern="tasmin")
-  tmax_list <- list.files(paste(isimip_wth,"/",gcm_i,"/hist",sep=""), pattern="tasmin")
-  
-  #loop files for data extraction
-  i <- 1
-  for (ifil in 1:length(tmin_list)) {
-    #ifil <- 1
-    cat("   ...processing file=",ifil,"\n")
-    
-    #pre-load data
-    tmin_rs <- stack(paste(isimip_wth,"/",gcm_i,"/hist/",tmin_list[ifil],sep=""))
-    tmax_rs <- stack(paste(isimip_wth,"/",gcm_i,"/hist/",tmax_list[ifil],sep=""))
-    
-    #derive years
-    rsnames <- names(tmin_rs)
-    rsnames <- substr(rsnames, 1, 5); rsnames <- as.numeric(gsub("X", "", rsnames))
-    minyear <- min(rsnames); maxyear <- max(rsnames)
-    
-    #loop years for extraction of data
-    for (year in minyear:maxyear) {
-      #year <- c(minyear:maxyear)[1]
-      cat("      ...processing year=",year,"\n")
-      tmin_trs <- tmin_rs[[which(rsnames %in% year)]]
-      tmax_trs <- tmax_rs[[which(rsnames %in% year)]]
-      
-      #extract data for locations in both countries
-      cat("............extracting data\n")
-      tmin_all <- extract(tmin_trs, loc_all)
-      tmax_all <- extract(tmax_trs, loc_all)
-      
-      #get only JJA data for this year
-      yrcal <- colnames(tmin_all); yrcal <- as.numeric(substr(yrcal, 7, 8))
-      tmin_jja <- tmin_all[,which(yrcal %in% c(6:8))]
-      tmax_jja <- tmax_all[,which(yrcal %in% c(6:8))]
-      
-      #create/append total matrix
-      if (i == 1) {
-        atmin_jja <- tmin_jja; atmax_jja <- tmax_jja
-      } else {
-        atmin_jja <- cbind(atmin_jja, tmin_jja); atmax_jja <- cbind(atmax_jja, tmax_jja)
-      }
-      i <- i+1
-    }
-  }
-  
-  #append into list
-  his_data[[gcm_i]][["tmin"]] <- atmin_jja
-  his_data[[gcm_i]][["tmax"]] <- atmax_jja
-}
+#constant for calculation of VPD, Tanner and Sinclair (1983) suggest values between 0.65-0.75
+#also see page 182 of http://books.google.co.uk/books?id=xnHT6YOlk00C
+vpd_cte <- 0.7
 
-
-#loop RCPs and GCMs for fut extraction
-fut_data <- list()
-for (rcp_i in rcp_list) {
-  #rcp_i <- rcp_list[1]
-  fut_data[[rcp_i]] <- list()
-  
-  rcp_i2 <- rcp_i; substring(rcp_i2, 5, 5) <- ""
-  
+#### loop GCMs for his extraction
+if (!file.exists(paste(out_dir,"/his_data.RData",sep=""))) {
+  his_data <- list()
   for (gcm_i in gcm_list) {
     #gcm_i <- gcm_list[1]
-    fut_data[[rcp_i]][[gcm_i]] <- list()
+    cat("...processing gcm=",gcm_i,"\n")
+    his_data[[gcm_i]] <- list()
     
     #list of files
-    tmin_list <- list.files(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,sep=""), pattern="tasmin")
-    tmax_list <- list.files(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,sep=""), pattern="tasmin")
+    tmin_list <- list.files(paste(isimip_wth,"/",gcm_i,"/hist",sep=""), pattern="tasmin")
+    tmax_list <- list.files(paste(isimip_wth,"/",gcm_i,"/hist",sep=""), pattern="tasmax")
     
     #loop files for data extraction
     i <- 1
     for (ifil in 1:length(tmin_list)) {
       #ifil <- 1
-      cat("...processing rcp=",rcp_i," gcm=",gcm_i," file=",ifil,"\n")
+      cat("   ...processing file=",ifil,"\n")
       
       #pre-load data
-      tmin_rs <- stack(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,"/",tmin_list[ifil],sep=""))
-      tmax_rs <- stack(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,"/",tmax_list[ifil],sep=""))
+      tmin_rs <- stack(paste(isimip_wth,"/",gcm_i,"/hist/",tmin_list[ifil],sep=""))
+      tmax_rs <- stack(paste(isimip_wth,"/",gcm_i,"/hist/",tmax_list[ifil],sep=""))
       
       #derive years
       rsnames <- names(tmin_rs)
@@ -203,11 +148,12 @@ for (rcp_i in rcp_list) {
       #loop years for extraction of data
       for (year in minyear:maxyear) {
         #year <- c(minyear:maxyear)[1]
-        cat("   ...processing year=",year,"\n")
+        cat("      ...processing year=",year,"\n")
         tmin_trs <- tmin_rs[[which(rsnames %in% year)]]
         tmax_trs <- tmax_rs[[which(rsnames %in% year)]]
         
         #extract data for locations in both countries
+        cat("         ...extracting data\n")
         tmin_all <- extract(tmin_trs, loc_all)
         tmax_all <- extract(tmax_trs, loc_all)
         
@@ -227,10 +173,218 @@ for (rcp_i in rcp_list) {
     }
     
     #append into list
-    fut_data[[rcp_i]][[gcm_i]][["tmin"]] <- atmin_jja
-    fut_data[[rcp_i]][[gcm_i]][["tmax"]] <- atmax_jja
+    his_data[[gcm_i]][["tmin"]] <- atmin_jja
+    his_data[[gcm_i]][["tmax"]] <- atmax_jja
   }
+  save(his_data, file=paste(out_dir,"/his_data.RData",sep=""))
+} else {
+  load(file=paste(out_dir,"/his_data.RData",sep=""))
 }
 
 
+#calculate his vpd
+if (!file.exists(paste(out_dir,"/his_vpd.RData",sep=""))) {
+  his_vpd <- list()
+  for (gcm_i in gcm_list) {
+    #gcm_i <- gcm_list[1]
+    
+    atmin_jja <- his_data[[gcm_i]][["tmin"]]
+    atmax_jja <- his_data[[gcm_i]][["tmax"]]
+    vpd_jja <- atmin_jja; vpd_jja[,] <- NA
+    
+    #loop locations
+    for (i in 1:nrow(atmin_jja)) {
+      #i <- 1 #i <- nrow(atmin_jja)
+      tmin_val <- atmin_jja[i,] - 273.15
+      tmax_val <- atmax_jja[i,] - 273.15
+      
+      #calculate daily vpd
+      esat_min <- 0.61120 * exp((17.67 * tmin_val) / (tmin_val + 243.5))     
+      esat_max <- 0.61120 * exp((17.67 * tmax_val) / (tmax_val + 243.5))
+      vpd <- vpd_cte * (esat_max - esat_min) #kPa
+      vpd_jja[i,] <- vpd
+    }
+    
+    vpd_jja <- as.data.frame(vpd_jja)
+    vpd_jja <- as.data.frame(t(vpd_jja))
+    years <- row.names(vpd_jja); years <- as.numeric(substr(years, 2,5))
+    vpd_jja <- cbind(year=years, vpd_jja)
+    row.names(vpd_jja) <- 1:nrow(vpd_jja)
+    vpd_jja <- aggregate(vpd_jja[,2:ncol(vpd_jja)],by=list(year=vpd_jja$year),FUN=function(x) {mean(x,na.rm=T)})
+    
+    #now calculate average vpd of all locations per region
+    col_us <- c(2:(nrow(loc_us)+1))
+    col_fr <- c((max(col_us)+1):(max(col_us)+nrow(loc_fr)))
+    col_ge <- c((max(col_fr)+1):(max(col_fr)+nrow(loc_ge)))
+    
+    #unweighted
+    #vpd_us <- rowMeans(vpd_jja[,col_us],na.rm=T)
+    #vpd_fr <- rowMeans(vpd_jja[,col_fr],na.rm=T)
+    #vpd_ge <- rowMeans(vpd_jja[,col_ge],na.rm=T)
+    
+    #weighted by growing area
+    calc_wmean <- function(x) {
+      #x <- as.numeric(vpd_jja[1,2:ncol(vpd_jja)])
+      har_frac <- c(extract(msk_us, loc_us), extract(msk_fr, loc_fr), extract(msk_ge, loc_ge))
+      vpd_us <- sum(x[col_us-1] * har_frac[col_us-1]) / sum(har_frac[col_us-1])
+      vpd_fr <- sum(x[col_fr-1] * har_frac[col_fr-1]) / sum(har_frac[col_fr-1])
+      vpd_ge <- sum(x[col_ge-1] * har_frac[col_ge-1]) / sum(har_frac[col_ge-1])
+      return(c(vpd_us, vpd_fr, vpd_ge))
+    }
+    
+    vpd_yearly <- as.data.frame(t(apply(vpd_jja[,2:ncol(vpd_jja)], 1, calc_wmean)))
+    names(vpd_yearly) <- c("US","FR","GE")
+    vpd_yearly <- cbind(year=vpd_jja$year, vpd_yearly)
+    his_vpd[[gcm_i]] <- vpd_yearly
+  }
+} else {
+  load(file=paste(out_dir,"/his_vpd.RData",sep=""))
+}
+
+
+#### loop RCPs and GCMs for fut extraction
+if (!file.exists(paste(out_dir,"/fut_data.RData",sep=""))) {
+  fut_data <- list()
+  for (rcp_i in rcp_list) {
+    #rcp_i <- rcp_list[1]
+    rcp_i2 <- rcp_i; substring(rcp_i2, 5, 5) <- ""
+    fut_data[[rcp_i]] <- list()
+    
+    for (gcm_i in gcm_list) {
+      #gcm_i <- gcm_list[1]
+      fut_data[[rcp_i]][[gcm_i]] <- list()
+      
+      #list of files
+      tmin_list <- list.files(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,sep=""), pattern="tasmin")
+      tmax_list <- list.files(paste(isimip_wth,"/",gcm_i,"/",rcp_i2,sep=""), pattern="tasmax")
+      
+      #loop files for data extraction
+      i <- 1
+      for (ifil in 1:length(tmin_list)) {
+        #ifil <- 1
+        cat("...processing rcp=",rcp_i," gcm=",gcm_i," file=",ifil,"\n")
+        
+        #cut the data to an smaller extent per country
+        for (iso in c("us","fr","ge")) {
+          #iso <- "us"
+          cat("processing iso=",iso,"\n")
+          tmsk <- get(paste("msk_",iso,sep=""))
+          infil <- paste(isimip_wth,"/",gcm_i,"/",rcp_i2,"/",tmin_list[ifil],sep="")
+          oufil <- paste(scratch,"/fut_tmin_",iso,".nc",sep="")
+          system(paste("cdo sellonlatbox,",tmsk@extent@xmin,",",tmsk@extent@xmax,",",tmsk@extent@ymin,",",tmsk@extent@ymax," ",infil," ",oufil,sep=""))
+          
+          infil <- paste(isimip_wth,"/",gcm_i,"/",rcp_i2,"/",tmax_list[ifil],sep="")
+          oufil <- paste(scratch,"/fut_tmax_",iso,".nc",sep="")
+          system(paste("cdo sellonlatbox,",tmsk@extent@xmin,",",tmsk@extent@xmax,",",tmsk@extent@ymin,",",tmsk@extent@ymax," ",infil," ",oufil,sep=""))
+          
+          #load data
+          tmin_rs <- stack(paste(scratch,"/fut_tmin_",iso,".nc",sep="")) #; tmin_rs <- readAll(tmin_rs)
+          tmax_rs <- stack(paste(scratch,"/fut_tmax_",iso,".nc",sep="")) #; tmax_rs <- readAll(tmax_rs)
+          
+          #extract data for locations in both countries
+          tmin_all <- extract(tmin_rs, get(paste("loc_",iso,sep="")))
+          tmax_all <- extract(tmax_rs, get(paste("loc_",iso,sep="")))
+          
+          #get only JJA data for this year
+          yrcal <- colnames(tmin_all); yrcal <- as.numeric(substr(yrcal, 7, 8))
+          itmin_jja <- tmin_all[,which(yrcal %in% c(6:8))]
+          itmax_jja <- tmax_all[,which(yrcal %in% c(6:8))]
+          
+          if (iso == "us") {
+            tmin_jja <- itmin_jja; tmax_jja <- itmax_jja
+          } else {
+            tmin_jja <- rbind(tmin_jja, itmin_jja); tmax_jja <- rbind(tmax_jja, itmax_jja)
+          }
+          
+          #remove junk
+          system(paste("rm -f ",scratch,"/fut_tmin_",iso,".nc",sep=""))
+          system(paste("rm -f ",scratch,"/fut_tmax_",iso,".nc",sep=""))
+        }
+        
+        #create/append total matrix
+        if (i == 1) {
+          atmin_jja <- tmin_jja; atmax_jja <- tmax_jja
+        } else {
+          atmin_jja <- cbind(atmin_jja, tmin_jja); atmax_jja <- cbind(atmax_jja, tmax_jja)
+        }
+        i <- i+1
+      }
+      
+      #append into list
+      fut_data[[rcp_i]][[gcm_i]][["tmin"]] <- atmin_jja
+      fut_data[[rcp_i]][[gcm_i]][["tmax"]] <- atmax_jja
+    }
+  }
+  save(fut_data, file=paste(out_dir,"/fut_data.RData",sep=""))
+} else {
+  load(file=paste(out_dir,"/fut_data.RData",sep=""))
+}
+
+#calculate fut vpd
+if (!file.exists(paste(out_dir,"/fut_vpd.RData",sep=""))) {
+  fut_vpd <- list()
+  
+  for (rcp_i in rcp_list) {
+    #rcp_i <- rcp_list[1]
+    fut_vpd[[rcp_i]] <- list()
+    
+    for (gcm_i in gcm_list) {
+      #gcm_i <- gcm_list[1]
+      
+      atmin_jja <- fut_data[[rcp_i]][[gcm_i]][["tmin"]]
+      atmax_jja <- fut_data[[rcp_i]][[gcm_i]][["tmax"]]
+      vpd_jja <- atmin_jja; vpd_jja[,] <- NA
+      
+      #loop locations
+      for (i in 1:nrow(atmin_jja)) {
+        #i <- 1 #i <- nrow(atmin_jja)
+        tmin_val <- atmin_jja[i,] - 273.15
+        tmax_val <- atmax_jja[i,] - 273.15
+        
+        #calculate daily vpd
+        esat_min <- 0.61120 * exp((17.67 * tmin_val) / (tmin_val + 243.5))     
+        esat_max <- 0.61120 * exp((17.67 * tmax_val) / (tmax_val + 243.5))
+        vpd <- vpd_cte * (esat_max - esat_min) #kPa
+        vpd_jja[i,] <- vpd
+      }
+      
+      vpd_jja <- as.data.frame(vpd_jja)
+      vpd_jja <- as.data.frame(t(vpd_jja))
+      years <- row.names(vpd_jja); years <- as.numeric(substr(years, 2,5))
+      vpd_jja <- cbind(year=years, vpd_jja)
+      row.names(vpd_jja) <- 1:nrow(vpd_jja)
+      vpd_jja <- aggregate(vpd_jja[,2:ncol(vpd_jja)],by=list(year=vpd_jja$year),FUN=function(x) {mean(x,na.rm=T)})
+      
+      #now calculate average vpd of all locations per region
+      col_us <- c(2:(nrow(loc_us)+1))
+      col_fr <- c((max(col_us)+1):(max(col_us)+nrow(loc_fr)))
+      col_ge <- c((max(col_fr)+1):(max(col_fr)+nrow(loc_ge)))
+      
+      #unweighted
+      #vpd_us <- rowMeans(vpd_jja[,col_us],na.rm=T)
+      #vpd_fr <- rowMeans(vpd_jja[,col_fr],na.rm=T)
+      #vpd_ge <- rowMeans(vpd_jja[,col_ge],na.rm=T)
+      
+      #weighted by growing area
+      calc_wmean <- function(x) {
+        #x <- as.numeric(vpd_jja[1,2:ncol(vpd_jja)])
+        har_frac <- c(extract(msk_us, loc_us), extract(msk_fr, loc_fr), extract(msk_ge, loc_ge))
+        vpd_us <- sum(x[col_us-1] * har_frac[col_us-1]) / sum(har_frac[col_us-1])
+        vpd_fr <- sum(x[col_fr-1] * har_frac[col_fr-1]) / sum(har_frac[col_fr-1])
+        vpd_ge <- sum(x[col_ge-1] * har_frac[col_ge-1]) / sum(har_frac[col_ge-1])
+        return(c(vpd_us, vpd_fr, vpd_ge))
+      }
+      
+      vpd_yearly <- as.data.frame(t(apply(vpd_jja[,2:ncol(vpd_jja)], 1, calc_wmean)))
+      names(vpd_yearly) <- c("US","FR","GE")
+      vpd_yearly <- cbind(year=vpd_jja$year, vpd_yearly)
+      fut_vpd[[rcp_i]][[gcm_i]] <- vpd_yearly
+    }
+  }
+} else {
+  load(file=paste(out_dir,"/fut_vpd.RData",sep=""))
+}
+
+
+#### here need to produce plot of VPD variations in time
 
