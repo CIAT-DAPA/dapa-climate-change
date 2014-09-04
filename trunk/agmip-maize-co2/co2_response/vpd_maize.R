@@ -12,16 +12,16 @@ library(raster); library(maptools)
 #input directories
 shp_dir <- "~/Leeds-work/datasets/shapefiles/Countries"
 isimip_wth <- "/nfs/a101/earak/data/ISIMIP_wth"
-#base_dir <- "~/Leeds-work/AgMIP-maize-phase-2"
-base_dir <- "/nfs/a101/earjr/AgMIP-maize-phase-2"
-out_dir <- paste(base_dir,"/co2_resp_analysis",sep="")
+base_dir <- "~/Leeds-work/AgMIP-maize-phase-2/co2_resp_analysis"
+#base_dir <- "/nfs/a101/earjr/AgMIP-maize-phase-2"
+out_dir <- paste(base_dir,"/vpd_variation",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir)}
 
-scratch <- "/scratch/earjr/co2_resp_analysis"
-if (!file.exists(scratch)) {dir.create(scratch)}
+#scratch <- "/scratch/earjr/co2_resp_analysis"
+#if (!file.exists(scratch)) {dir.create(scratch)}
 
 #create masks
-if (!file.exists(paste(out_dir,"/masks.RData",sep=""))) {
+if (!file.exists(paste(base_dir,"/areas_data/masks.RData",sep=""))) {
   ####
   #get global growing areas raster
   ahar <- raster("~/Leeds-work/scaling-effect/calendar/Maize.crop.calendar/harvested.area.fraction.asc")
@@ -96,9 +96,9 @@ if (!file.exists(paste(out_dir,"/masks.RData",sep=""))) {
   #points((10+27/60),(52+17/60+24/3600)) #Manderscheid experiment location
   
   #save data
-  save(list=c("msk_us","msk_fr","msk_ge"),file=paste(out_dir,"/masks.RData",sep=""))
+  save(list=c("msk_us","msk_fr","msk_ge"),file=paste(base_dir,"/areas_data/masks.RData",sep=""))
 } else {
-  load(file=paste(out_dir,"/masks.RData",sep=""))
+  load(file=paste(base_dir,"/areas_data/masks.RData",sep=""))
 }
 
 
@@ -187,6 +187,7 @@ if (!file.exists(paste(out_dir,"/his_vpd.RData",sep=""))) {
   his_vpd <- list()
   for (gcm_i in gcm_list) {
     #gcm_i <- gcm_list[1]
+    cat("...processing gcm=",gcm_i,"\n")
     
     atmin_jja <- his_data[[gcm_i]][["tmin"]]
     atmax_jja <- his_data[[gcm_i]][["tmax"]]
@@ -237,6 +238,7 @@ if (!file.exists(paste(out_dir,"/his_vpd.RData",sep=""))) {
     vpd_yearly <- cbind(year=vpd_jja$year, vpd_yearly)
     his_vpd[[gcm_i]] <- vpd_yearly
   }
+  save(his_vpd, file=paste(out_dir,"/his_vpd.RData",sep=""))
 } else {
   load(file=paste(out_dir,"/his_vpd.RData",sep=""))
 }
@@ -381,10 +383,13 @@ if (!file.exists(paste(out_dir,"/fut_vpd.RData",sep=""))) {
       fut_vpd[[rcp_i]][[gcm_i]] <- vpd_yearly
     }
   }
+  save(fut_vpd, file=paste(out_dir,"/fut_vpd.RData",sep=""))
 } else {
   load(file=paste(out_dir,"/fut_vpd.RData",sep=""))
 }
 
 
-#### here need to produce plot of VPD variations in time
+#### here need to produce plot of VPD variations in time (multi-model ensemble and 5-95 % variations)
+
+
 

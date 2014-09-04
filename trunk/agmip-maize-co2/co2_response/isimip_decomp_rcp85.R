@@ -15,7 +15,7 @@ library(ncdf4); library(lubridate); library(matrixStats)
 ##directories
 base_dir <- "~/Leeds-work/AgMIP-maize-phase-2/co2_resp_analysis"
 data_dir <- paste(base_dir,"/isimip_output",sep="")
-out_dir <- paste(base_dir,"/decomposition",sep="")
+out_dir <- paste(base_dir,"/decomposition_rcp85",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir, recursive=T)}
 
 #get masks for each country
@@ -23,9 +23,9 @@ load(paste(base_dir,"/areas_data/masks.RData",sep=""))
 
 #factors of analysis
 gcm_list <- c("gfdl-esm2m","hadgem2-es","ipsl-cm5a-lr","miroc-esm-chem","noresm1-m")
-rcp_list <- c("rcp2p6","rcp4p5","rcp6p0","rcp8p5")
+rcp_list <- c("rcp8p5")
 co2_list <- c("co2","noco2")
-cgm_list <- c("lpjml","pdssat")
+cgm_list <- c("epic","lpjml","pdssat","pegasus")
 
 #dimensions of arrays
 Ncgm <- length(cgm_list) #number of crop models
@@ -36,7 +36,7 @@ Nrcp <- length(rcp_list) #number of RCPs
 NM <- Ngcm*Nrcp #climate component, i.e. GCM*RCP
 
 #define baseline
-sim_baseline <- 1971 #start of simulations, for the fitting only
+sim_baseline <- 1980 #start of simulations, for the fitting only
 sim_lastyear <- 2099 #last simulated year
 ipcc_baseline <- 1986 #IPCC start, for analyses
 
@@ -54,15 +54,15 @@ model_list <- data.frame(model=c(1:6),span=c(0.75,1,1,NA,NA,NA),degree=c(1,1,2,N
                          name=c("span075_deg1","span1_deg1","span1_deg2","poly2","poly3","poly4"))
 
 #chosen model
-this_model <- 4
-plot_dir <- paste(base_dir,"/figures/decomposition_m",this_model,sep="")
+this_model <- 6
+plot_dir <- paste(base_dir,"/figures/decomposition_rcp85_m",this_model,sep="")
 if (!file.exists(plot_dir)) {dir.create(plot_dir, recursive=T)}
 
 for (runtype in c("noirr","firr")) {
   #runtype <- "noirr"
   #loop iso
   for (iso in c("us","fr","ge")) {
-    #iso <- "fr"
+    #iso <- "us"
     
     if (!file.exists(paste(out_dir,"/decomposition_m",this_model,"_",iso,"_",runtype,".RData",sep=""))) {
       #get mask
@@ -92,9 +92,13 @@ for (runtype in c("noirr","firr")) {
             
             #define baseline and future ranges for data loading
             if (gcm_i == "hadgem2-es") {
-              start_hist <- sim_baseline; end_hist <- 2004; start_fut <- 2005; end_fut <- 2099
+              start_hist <- 1971; end_hist <- 2004; start_fut <- 2005; end_fut <- 2099
             } else {
-              start_hist <- sim_baseline; end_hist <- 2005; start_fut <- 2006; end_fut <- 2099
+              start_hist <- 1971; end_hist <- 2005; start_fut <- 2006; end_fut <- 2099
+            }
+            
+            if (cgm_i == "epic") {
+              start_hist <- sim_baseline; end_hist <- 2010; start_fut <- 2005; end_fut <- 2099
             }
             
             #read in historical
@@ -178,10 +182,18 @@ for (runtype in c("noirr","firr")) {
               }
               
               #fill the hist time period - for different rcps it is the same
-              yield[gcm,rcp,cgm,co2,(sim_baseline-1900):((sim_baseline-1900)+length(data_his)-1)] <- as.numeric(data_his)
+              if (cgm_i == "epic") {
+                yield[gcm,rcp,cgm,co2,(sim_baseline-1900):((sim_baseline-1900)+length(data_his)-1)] <- as.numeric(data_his)
+              } else {
+                yield[gcm,rcp,cgm,co2,(1971-1900):((1971-1900)+length(data_his)-1)] <- as.numeric(data_his)
+              }
               
               #fill the future time period - differs for different rcps
-              yield[gcm,rcp,cgm,co2,((sim_baseline-1900)+length(data_his)):yrstot] <- as.numeric(data_fut)
+              if (cgm_i == "epic") {
+                yield[gcm,rcp,cgm,co2,((sim_baseline-1900)+length(data_his)-4):yrstot] <- as.numeric(data_fut)
+              } else {
+                yield[gcm,rcp,cgm,co2,((1971-1900)+length(data_his)):yrstot] <- as.numeric(data_fut)
+              }
               
               #fitting regressions
               x <- sim_fitrange
@@ -265,7 +277,7 @@ for (runtype in c("noirr","firr")) {
       
       #uncertainty: next calculate s.d. (unc.) due to each source
       gcm_comp[] <- colSds(ygcm[,])
-      rcp_comp[] <- colSds(yrcp[,]) 
+      #rcp_comp[] <- colSds(yrcp[,]) 
       cgm_comp[] <- colSds(ycgm[,])
       co2_comp[] <- colSds(yco2[,])
       
@@ -352,42 +364,37 @@ for (runtype in c("noirr","firr")) {
     
     ############# plot 2: variance fraction plot: gcm vs. rcp vs. crop_model vs. co2 vs. var
     #total error within fitrange
-    total_err_t <- gcm_comp[sim_fitrange]^2 + rcp_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2 + varifit[sim_fitrange]^2
+    total_err_t <- gcm_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2 + varifit[sim_fitrange]^2
     
     #calculate varifit as total.error-varifit
-    varifit_t <- sqrt((total_err_t) * (1 - ((gcm_comp[sim_fitrange]^2 + rcp_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2) / total_err_t)))
+    varifit_t <- sqrt((total_err_t) * (1 - ((gcm_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2) / total_err_t)))
     
     pdf(paste(plot_dir,"/decomp_var_fraction_individual_",iso,"_",runtype,".pdf",sep=""),height=5,width=8)
     par(mar=c(5,5,1,1),las=1,lwd=2)
-    plot(1900+sim_fitrange,gcm_comp[sim_fitrange]^2 / total_err_t,
+    plot(1900+sim_fitrange, gcm_comp[sim_fitrange]^2 / total_err_t,
          type="n",col="blue",xlim=c(2005,2100),ylim=c(0,1),xlab="Year",ylab="Variance Fraction [%]",
          frame.plot=FALSE,axes=FALSE)
     axis(side=1,at=seq(2005,2100,by=10))
     axis(side=2,at=seq(0,1,by=0.1),labels=seq(0,100,by=10))
     
     #gcm
-    plotline1 <- gcm_comp[sim_fitrange]^2 / total_err_t
+    plotline1 <- plotline2 <- gcm_comp[sim_fitrange]^2 / total_err_t
     lines(1900+sim_fitrange, plotline1, col="blue")
     polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)),c(plotline1,rep(0,length(sim_fitrange))),
             col="blue",border=NA)
     
-    #rcp
-    plotline2 <- (gcm_comp[sim_fitrange]^2 + rcp_comp[sim_fitrange]^2) / total_err_t
-    lines((1900+sim_fitrange), plotline2, col="purple")
-    polygon(c((1900+sim_fitrange),rev(1900+sim_fitrange)),c(plotline1,rev(plotline2)),col="purple",border=NA)
-    
     #crop_model
-    plotline3 <- (gcm_comp[sim_fitrange]^2 + rcp_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2) / total_err_t
+    plotline3 <- (gcm_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2) / total_err_t
     lines(1900+sim_fitrange, plotline3, col="seagreen")
     polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)),c(plotline3,rev(plotline2)),col="seagreen",border=NA)
     
     #co2_resp
-    plotline4 <- (gcm_comp[sim_fitrange]^2 + rcp_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2) / total_err_t
+    plotline4 <- (gcm_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2) / total_err_t
     lines(1900+sim_fitrange, plotline4, col="light green")
     polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)),c(plotline4,rev(plotline3)),col="light green",border=NA)
     
     #variability
-    plotline5 <- (gcm_comp[sim_fitrange]^2 + rcp_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2 + varifit_t^2) / total_err_t
+    plotline5 <- (gcm_comp[sim_fitrange]^2 + cgm_comp[sim_fitrange]^2 + co2_comp[sim_fitrange]^2 + varifit_t^2) / total_err_t
     lines(1900+sim_fitrange, plotline5, col="orange")
     polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)),c(plotline5,rev(plotline4)),col="orange",border=NA)
     
@@ -426,14 +433,13 @@ for (runtype in c("noirr","firr")) {
     box()
     
     lines(sim_fitrange+1900, sigfac * gcm_comp[sim_fitrange], col="blue", lwd=2) #gcm component
-    lines(sim_fitrange+1900, sigfac * rcp_comp[sim_fitrange], col="purple", lwd=2) #rcp component
     lines(sim_fitrange+1900, sigfac * cgm_comp[sim_fitrange], col="seagreen", lwd=2) #crop_model component
     lines(sim_fitrange+1900, sigfac * co2_comp[sim_fitrange], col="light green", lwd=2) #co2_resp component
     lines(sim_fitrange+1900, sigfac * varifit[sim_fitrange], col="orange", lwd=2) #variability
     lines(sim_fitrange+1900, tot_mean[sim_fitrange], col="black", lty=2, lwd=2) #signal
     grid(lwd=1)
-    legend("topleft",c("Total","GCM","RCP","Crop model","CO2 resp.","Variability","Signal"),
-           lty=c(1,1,1,1,1,1,2), col=c("black","blue","purple","seagreen","light green","orange","black"), 
+    legend("topleft",c("Total","GCM","Crop model","CO2 resp.","Variability","Signal"),
+           lty=c(1,1,1,1,1,1,2), col=c("black","blue","seagreen","light green","orange","black"), 
            bty="n", cex=1)
     
     dev.off()
