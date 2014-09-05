@@ -126,7 +126,7 @@ run_hyp_loc <- function(iloc) {
   source(paste(src.dir,"/ppe/put_param_hyp.R",sep=""))
   
   #select location
-  loc <- loc_sel[iloc]
+  loc <- loc_list[iloc]
   
   #arguments
   cal_data <- list()
