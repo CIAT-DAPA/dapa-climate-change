@@ -45,7 +45,7 @@ load(paste(mdata_dir,"/yield_major.RData",sep=""))
 
 #select ME and its corresponding initial data
 me_list <- unique(xy_main$ME_NEW)
-me_sel <- me_list[1]
+me_sel <- me_list[2]
 xy_me <- xy_main[which(xy_main$ME_NEW == me_sel),]
 
 #me-specific dir
