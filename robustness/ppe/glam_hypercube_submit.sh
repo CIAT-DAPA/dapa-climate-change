@@ -4,7 +4,7 @@
 ME=$1
 
 #host name
-THOST="arc2"
+THOST="arc1"
 
 #go to robustness directory
 cd ~/quest-for-robustness/scratch/runfiles
@@ -36,7 +36,7 @@ do
 	#copy the script first
 	if [ ! -f run.sh ]
 	then
-		cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_run.sh run.sh
+		cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/ppe/glam_hypercube_run.sh run.sh
 		chmod 755 run.sh
 	fi
 	

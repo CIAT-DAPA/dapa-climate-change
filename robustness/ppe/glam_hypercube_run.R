@@ -183,3 +183,7 @@ run_hyp_loc <- function(iloc) {
 save_file <- paste(out_hdir,"/calib-",hrun_i,"_loc-",loc_sel,".RData",sep="")
 if (!file.exists(save_file)) {runstep <- run_hyp_loc(loc_i)}
 
+#write procfile file
+procfil <- paste(wd,"/scratch/procfiles/out_",me_i,"_",hrun_i,"/out_",me_i,"_",hrun_i,"_",loc_i,".proc",sep="")
+if (!file.exists(procfil)) {pfil <- file(procfil,open="w"); cat("Process completed!\n",file=pfil); close(pfil)}
+
