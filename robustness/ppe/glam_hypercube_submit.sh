@@ -18,9 +18,9 @@ if [ ! -f ~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt ]
 then
 	if [ ! -f maxjnum.R ]
 	then
-		cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/optimisation/glam-optimise_me_arc2_jnum.R maxjnum.R
+		cp -vf ~/Repositories/dapa-climate-change/trunk/robustness/ppe/glam_hypercube_iloc.R maxiloc.R
 	fi
-	R CMD BATCH --vanilla --slave "--args iter=$ITER i=$INUM" maxjnum.R /dev/tty
+	R CMD BATCH --vanilla --slave "--args me_i=$ME" maxiloc.R /dev/tty
 fi
 MAXJNUM=$(< ~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt)
 
