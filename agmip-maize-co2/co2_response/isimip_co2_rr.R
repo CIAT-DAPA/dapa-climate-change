@@ -141,8 +141,7 @@ if (!file.exists(paste(out_dir,"/yield_rr_",iso,".RData",sep=""))) {
             calc_wmean <- function(x) {
               #x <- as.numeric(vpd_jja[1,2:ncol(vpd_jja)])
               nna <- which(!is.na(x))
-              x <- x[nna]
-              har_frac <- loc_list$ahar[nna]
+              x <- x[nna]; har_frac <- loc_list$ahar[nna]
               yval <- sum(x * har_frac) / sum(har_frac)
               return(yval)
             }
