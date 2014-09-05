@@ -28,10 +28,10 @@ echo
 echo --------- ${MAXJNUM} JNUM processes to submit ------------
 echo 
 
-for JNUM in $(seq 1 $MAXJNUM)
+for ILOC in $(seq 1 $MAXJNUM)
 do
 	#process name
-	TPID=${ME}_${ITER}_${INUM}_${JNUM}
+	TPID=${ME}_${ILOC}_${IRUN}
 	
 	#copy the script first
 	if [ ! -f run.sh ]
@@ -41,9 +41,9 @@ do
 	fi
 	
 	#create out folder if it does not exist
-	if [ ! -d ~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER} ]
+	if [ ! -d ~/quest-for-robustness/scratch/procfiles/out_${ME}_${IRUN} ]
 	then
-		$(mkdir ~/quest-for-robustness/scratch/procfiles/out_${ME}_${ITER})
+		$(mkdir ~/quest-for-robustness/scratch/procfiles/out_${ME}_${IRUN})
 	fi
 	
 	#do the model run only if procfile does not exist
@@ -53,7 +53,7 @@ do
 		echo ---- submitting ${TPID} -----
 		echo ---- ${NPROC} processess queueing currently -----------
 		echo ----------------------------------------------------------
-		qsub run.sh $ME $ITER $INUM $JNUM
+		qsub run.sh $ME $ILOC $IRUN
 	else
 		echo ----------------------------------------------------------
 		echo ---- ${TPID} need not be submitted -----

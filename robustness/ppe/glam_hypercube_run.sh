@@ -5,11 +5,11 @@
 #$ -cwd -V
 
 ME=$1
-ILOC=$2
-IRUN=$3
+IRUN=$2
+ILOC=$3
 
 #get process id based on name of screen
-PID=${ME}_${ILOC}_${IRUN}
+PID=${ME}_${IRUN}_${ILOC}
 THOST="arc1"
 
 cd ~/quest-for-robustness/scratch/runfiles
