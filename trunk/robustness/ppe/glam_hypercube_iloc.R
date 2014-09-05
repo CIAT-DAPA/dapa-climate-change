@@ -30,7 +30,7 @@ xy_me <- xy_main[which(xy_main$ME_NEW == me_sel),]
 loc_list <- xy_me$LOC #list of locations
 
 #write procfile file
-jfil <- paste(wd,"/scratch/maxiloc/maxiloc_",me,".txt",sep="")
+jfil <- paste(wd,"/scratch/maxiloc/maxiloc_",me_i,".txt",sep="")
 pfil <- file(jfil,open="w")
 cat(length(loc_list),"\n",file=pfil)
 close(pfil)

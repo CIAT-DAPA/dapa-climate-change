@@ -22,7 +22,7 @@ then
 	fi
 	R CMD BATCH --vanilla --slave "--args me_i=$ME" maxiloc.R /dev/tty
 fi
-MAXJNUM=$(< ~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt)
+MAXILOC=$(< ~/quest-for-robustness/scratch/maxjnum/maxjnum_${ITER}_${INUM}.txt)
 
 echo 
 echo --------- ${MAXJNUM} JNUM processes to submit ------------
