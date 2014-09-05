@@ -54,7 +54,7 @@ model_list <- data.frame(model=c(1:6),span=c(0.75,1,1,NA,NA,NA),degree=c(1,1,2,N
                          name=c("span075_deg1","span1_deg1","span1_deg2","poly2","poly3","poly4"))
 
 #chosen model
-this_model <- 4
+this_model <- 6
 plot_dir <- paste(base_dir,"/figures/decomposition_m",this_model,sep="")
 if (!file.exists(plot_dir)) {dir.create(plot_dir, recursive=T)}
 
@@ -150,9 +150,7 @@ for (runtype in c("noirr","firr")) {
               calc_wmean <- function(x) {
                 #x <- as.numeric(vpd_jja[1,2:ncol(vpd_jja)])
                 nna <- which(!is.na(x))
-                x <- x[nna]
-                har_frac <- loc_list$ahar[nna]
-                har_frac <- loc_list$ahar
+                x <- x[nna]; har_frac <- loc_list$ahar[nna]
                 yval <- sum(x * har_frac) / sum(har_frac)
                 return(yval)
               }
