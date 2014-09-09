@@ -195,8 +195,7 @@ for (iter in 1:nmaxiter) {
       #note: to update the parameter set based on previous optimal value(s)
       #select all *iter* and *param* for this seed
       this_opt <- done_param[which(done_param$SEED == seed),]
-      #if there have been parameters optimised for this *seed* before, then update the parameter set
-      #below needs to be adapted to .CUL, .ECO, .SPE and XFILE
+      #if there have been parameters optimised for this *seed* before, then update the parameter sets
       if (nrow(this_opt) > 0) {
         for (k in 1:nrow(this_opt)) {
           #k <- 1
