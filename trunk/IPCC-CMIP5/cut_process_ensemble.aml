@@ -1,0 +1,56 @@
+/* &r cut_process_ensemble.aml T:\gcm\cmip5\downscaled F:\jetarapues\Request\Request_Uli S:\admin_boundaries\continental-files\GRID-files-continents-10min\na_adm\na0 rcp45 10min YES
+
+/* rootdir = Root folder where are storaged GCM CMIP5 data
+/* outputdir = Output folder
+/* mask =  Input mask data defining areas to extract
+/* rcp = escenarios: rcp26 rcp45 rcp60 rcp85. Use ALL to select all the rcps 
+/* resol = The possibilities are 30s 2.5min 5min 10min
+/* switch = Set YES to convert outputs in ESRI-Ascii files
+
+&args rootdir outputdir mask rcp resol switch ensemble
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&if %rcp% EQ ALL &then &s rcp rcp26 rcp45 rcp60 rcp85
+&else &s rcp %rcp%
+
+&do rcp &list %rcp%
+	&if %resol% EQ 30s &then &s inputdir %rootdir%\ensemble\%rcp%\Global_30s
+	&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\ensemble\%rcp%\global_2_5min
+	&else &if %resol% EQ 5min &then &s inputdir %rootdir%\ensemble\%rcp%\global_5min
+	&else &s inputdir %rootdir%\ensemble\%rcp%\global_10min
+
+	&if not [exists %outputdir%\%rcp%_extracts_ens -dir] &then &sys md %outputdir%\%rcp%_extracts_ens
+
+	&if %resol% EQ 30s &then &s outdir %outputdir%\%rcp%_extracts_ens\Global_30s
+	&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\%rcp%_extracts_ens\Global_2_5min
+	&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts_ens\Global_5min
+	&else &s outdir %outputdir%\%rcp%_extracts_ens\Global_10min
+	
+	&do ts &list 2020_2049 /* 2020_2049 2040_2069 2060_2089 2070_2099		
+		&s outmoddir %outdir%\%ts%
+		&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
+
+			&s outmodtsdir %outmoddir%
+			&s inmodtsdir %inputdir%\%ts%
+			
+			&if not [exists %outdir%\%ts%_cut_done.txt -FILE] &then
+				&do
+					&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
+					&r cut_GCM.aml %inmodtsdir% %outmodtsdir% %outmodtsdir% %mask% %switch%
+					&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%ts%_cut_done.txt
+				&end
+			&else 
+				&do
+					&ty 
+					&ty Model (%ts%, %resol%) processed
+				&end		
+	&end 
+&end	
+
+&ty	
+&ty ======DONE!=======
