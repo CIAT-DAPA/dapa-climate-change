@@ -79,7 +79,7 @@ out_df <- as.data.frame(matrix(NA, nrow=nrep, ncol=nrow(param_list)))
 names(out_df) <- param_list$PARAM
 for (i in 1:nrow(param_list)) {
   #i <- 1
-  pvals <- qunif(lhyp1[1,],min=param_list$MIN[i],max=param_list$MAX[i])
+  pvals <- qunif(lhyp1[,i],min=param_list$MIN[i],max=param_list$MAX[i])
   out_df[,i] <- pvals
 }
 
