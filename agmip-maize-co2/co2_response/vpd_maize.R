@@ -4,7 +4,7 @@
 stop("!")
 
 #load packages
-library(raster); library(maptools)
+library(raster); library(maptools); library(matrixStats)
 
 #calculate yearly JJA VPD using tasmin and tasmax from ISIMIP_wth for maize growing areas
 #in IL, NE, and IA in the US and for France
@@ -15,7 +15,9 @@ isimip_wth <- "/nfs/a101/earak/data/ISIMIP_wth"
 base_dir <- "~/Leeds-work/AgMIP-maize-phase-2/co2_resp_analysis"
 #base_dir <- "/nfs/a101/earjr/AgMIP-maize-phase-2"
 out_dir <- paste(base_dir,"/vpd_variation",sep="")
-if (!file.exists(out_dir)) {dir.create(out_dir)}
+plot_dir <- paste(base_dir,"/figures/vpd_variation",sep="")
+if (!file.exists(out_dir)) {dir.create(out_dir, recursive=T)}
+if (!file.exists(plot_dir)) {dir.create(plot_dir, recursive=T)}
 
 #scratch <- "/scratch/earjr/co2_resp_analysis"
 #if (!file.exists(scratch)) {dir.create(scratch)}
@@ -332,6 +334,7 @@ if (!file.exists(paste(out_dir,"/fut_vpd.RData",sep=""))) {
     
     for (gcm_i in gcm_list) {
       #gcm_i <- gcm_list[1]
+      cat("...processing rcp=",rcp_i,"and gcm=",gcm_i,"\n")
       
       atmin_jja <- fut_data[[rcp_i]][[gcm_i]][["tmin"]]
       atmax_jja <- fut_data[[rcp_i]][[gcm_i]][["tmax"]]
@@ -390,6 +393,82 @@ if (!file.exists(paste(out_dir,"/fut_vpd.RData",sep=""))) {
 
 
 #### here need to produce plot of VPD variations in time (multi-model ensemble and 5-95 % variations)
+#calculate mean of GCMs for each region and RCP
+#define baseline
+sim_baseline <- 1980 #start of simulations
+sim_lastyear <- 2099 #last simulated year
 
+#total number of years for the fitting and range of years for the fits
+yrstot <- length(sim_baseline:sim_lastyear)+(sim_baseline-1900)-1
+sim_fitrange <- (sim_baseline-1900):yrstot
+
+#initialise array for plotting
+vpd_all <- array(NA, dim=c(length(rcp_list), length(gcm_list), 3, yrstot))
+
+for (rcp in 1:length(rcp_list)) {
+  #rcp <- 1
+  rcp_i <- rcp_list[rcp]
+  for (gcm in 1:length(gcm_list)) {
+    #gcm <- 1
+    gcm_i <- gcm_list[gcm]
+    
+    for (reg in 1:3) {
+      #reg <- 1
+      reg_i <- c("US","FR","GE")[reg]
+      
+      #fill historical
+      data_his <- his_vpd[[gcm]]
+      data_his <- data_his[which(data_his$year >= sim_baseline), reg_i]
+      vpd_all[rcp,gcm,reg,(sim_baseline-1900):((sim_baseline-1900)+length(data_his)-1)] <- data_his
+      
+      #fill future
+      data_fut <- fut_vpd[[rcp]][[gcm]]
+      data_fut <- data_fut[, reg_i]
+      vpd_all[rcp,gcm,reg,((sim_baseline-1900)+length(data_his)):yrstot] <- data_fut
+    }
+  }
+}
+
+vpd_mean <- vpd_min <- vpd_max <- array(NA,dim=c(length(rcp_list), 3, yrstot))
+
+for (i in 1:4) {
+  for (j in 1:3) {
+    vpd_mean[i,j,] <- colMedians(vpd_all[i,,j,], na.rm=T)
+    vpd_min[i,j,] <- colQuantiles(vpd_all[i,,j,], probs=0.10, na.rm=T)
+    vpd_max[i,j,] <- colQuantiles(vpd_all[i,,j,], probs=0.90, na.rm=T)
+  }
+}
+
+
+### produce plot
+pdf(paste(plot_dir,"/vpd_rcp85.pdf",sep=""),height=5,width=8)
+par(mar=c(5,5,1,1),las=1,lwd=2)
+
+#initialise plot
+plot(sim_fitrange+1900, vpd_mean[4,1,sim_fitrange], ty="l", axes=F, col=NA, ylim=c(0.5,3.5),
+     xlab="Year", ylab="Vapour pressure deficit (VPD)")
+axis(side=1,at=seq(1950,2100,by=10))
+axis(side=2,at=seq(0.5,3.5,by=0.5),labels=sprintf("%.1f",seq(0.5,3.5,by=0.5)))
+box()
+
+#start rcp=4, region=1 (rcp85, US)
+polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)), c(vpd_min[4,1,sim_fitrange],rev(vpd_max[4,1,sim_fitrange])),
+        col=rgb(red=255,green=0,blue=0,alpha=50,maxColorValue=255),border=NA)
+lines(sim_fitrange+1900, vpd_mean[4,1,sim_fitrange], lwd=1.5, col="red")
+
+#rcp=4, region=3 (rcp85, GE)
+polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)), c(vpd_min[4,3,sim_fitrange],rev(vpd_max[4,3,sim_fitrange])),
+        col=rgb(red=0,green=0,blue=255,alpha=50,maxColorValue=255),border=NA)
+lines(sim_fitrange+1900, vpd_mean[4,3,sim_fitrange], lwd=1.5, col="blue")
+
+#rcp=4, region=2 (rcp85, FR)
+#polygon(c(1900+sim_fitrange,rev(1900+sim_fitrange)), c(vpd_min[4,2,sim_fitrange],rev(vpd_max[4,2,sim_fitrange])),
+#        col=rgb(red=255,green=255,blue=0,alpha=50,maxColorValue=255),border=NA)
+#lines(sim_fitrange+1900, vpd_mean[4,2,sim_fitrange], lwd=1.5, col="orange")
+
+grid(lwd=1)
+legend("topleft",c("US Corn Belt","Germany"),lty=c(1,1), col=c("red","blue"), bty="n", cex=1)
+#legend("topleft",c("US Corn Belt","France","Germany"),lty=c(1,1,1), col=c("red","orange","blue"), bty="n", cex=1)
+dev.off()
 
 
