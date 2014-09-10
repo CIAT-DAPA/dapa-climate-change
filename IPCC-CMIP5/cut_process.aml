@@ -31,7 +31,7 @@
 	&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts\Global_5min
 	&else &s outdir %outputdir%\%rcp%_extracts\Global_10min
 
-	&s modellist [listfile %rootdir%\%rcp%\%resol%\* -dir]
+	&s modellist [listfile %inputdir%\* -dir]
 	&s nmodels [token %modellist% -count]
 	&do md = 1 &to %nmodels%
 		
