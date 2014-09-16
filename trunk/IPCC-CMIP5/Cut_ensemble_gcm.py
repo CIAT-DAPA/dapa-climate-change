@@ -1,17 +1,14 @@
 # ---------------------------------------------------------------------------------
 # Author: Jaime Tarapues
 # Date: August 08th, 2014
-# Purpose: Purpose: Cut by mask worldclim data and Extraction by mask of points
+# Purpose: Purpose: Cut by mask worldclim data, ensemble and anomalies
 # Note: If process is interrupted, you must be erase the last processed period
 # ----------------------------------------------------------------------------------
 
 import arcgisscripting, os, sys, string,glob, shutil
 gp = arcgisscripting.create(9.3)
 
-# python F:\jetarapues\Request\Request_peter\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\tza_adm\tza0 F:\jetarapues\Request\Request_peter rcp26 2040_2069
-# python F:\jetarapues\Request\Request_peter\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble F:\jetarapues\Request\Request_biofuturo\mask\col_narino F:\jetarapues\Request\Request_biofuturo rcp26 2020_2049
-
-# python G:\jetarapues\Request\Request_cnavarro\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\ecu_adm\ecu0 G:\jetarapues\Request\Request_cnavarro\test rcp26 2020_2049 NO
+# python D:\_scripts\dapa-climate-change\IPCC-CMIP5\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\per_adm\per0 D:\Request\Request_miguel\per_adm rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
 
 
 # Arguments
@@ -19,10 +16,10 @@ dirbase = sys.argv[1]
 admdir = sys.argv[2]
 dirout = sys.argv[3]
 rcp = sys.argv[4]
-period = sys.argv[5]
+periods = sys.argv[5]
 switch = sys.argv[6]
-
-
+resol = sys.argv[7]
+variable = sys.argv[8]
 
 
 # Clean screen
@@ -31,108 +28,125 @@ os.system('cls')
 gp.CheckOutExtension("Spatial")
 
 print "~~~~~~~~~~~~~~~~~~~~~~"
-print " EXTRACT BY MASK WORLDCLIM  "
-print "~~~~~~~~~~~~~~~~~~~~~~"
+print " EXTRACT BY MASK ENSEMBLE, ANOMALIES AND WORLDCLIM  "
+print "~~~~~~~~~~~~~~~~~~~~~~\n"
 
-
-endir = dirbase + "\\"  + rcp + "\\Global_30s\\"+period
-
+if periods == "ALL":
+	periodlist = '2020_2049','2040_2069','2060_2089','2070_2099'
+else:
+	periodlist = periods.split(",")
 
 # variablelist = ["bio","cons_mths","prec","tmin","tmax","tmean" ]
 variablelist = ["bio" ]
 
-worldclim = "S:\observed\gridded_products\worldclim\Global_30s"
+if variable == "ALL":
+	variablelist = ["bio","cons_mths","prec","tmin","tmax","tmean" ]
+else:
+	variablelist = variable.split(",")
 
-for var in variablelist:
-	if var == "bio":
-		num = 19
-	else:
-		num = 12
-	for month in [1,12]:
-		if var == "cons_mths":
-			variable = var
+
+
+worldclim = "S:\observed\gridded_products\worldclim\Global_"+resol	
+
+	
+for period in periodlist:
+
+	endir = dirbase + "\\"  + rcp + "\\Global_"+resol+"\\"+period
+
+	for var in variablelist:
+		if var == "bio":
+			num = 19
 		else:
-			variable = var + "_" + str(month)
-			
-			diroutraster = dirout + "\\ensemble\\" + rcp+ "\\global_30s\\"+period
-
-			if not os.path.exists(diroutraster):
-				os.system('mkdir ' + diroutraster)		
-			
-			bio = endir + "\\" + variable
-			OutRaster = diroutraster + "\\" + os.path.basename(bio)
-			
-			if not gp.Exists(OutRaster):
-				print OutRaster
-				gp.ExtractByMask_sa(bio, admdir, OutRaster)
-			else:	
-				print "...ya existe enmsemble!",variable
-
-
-			
-			gp.workspace = diroutraster 	
-			if not os.path.exists(diroutraster + "\\ascii"):
-				os.system('mkdir ' + diroutraster + "\\ascii")	
-			OutAscii = diroutraster + "\\ascii\\" + variable + ".asc"	
-			if not gp.Exists(OutAscii):	
-				gp.RasterToASCII_conversion(OutRaster, OutAscii)
-				gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
-				
-			InZip = diroutraster + "\\ascii\\" + var + "_asc.zip"
-			os.system('7za a ' + InZip + " " + OutAscii)
-			os.remove(OutAscii)				
-			if os.path.exists(OutAscii[:-3]+"prj"):
-				os.remove(OutAscii[:-3]+"prj")
-			if gp.Exists(OutRaster) and switch == "YES":
-				gp.delete_management(OutRaster)
-				
-				
-			# Para cortar datos worldclim
-			dirworldclim = dirout + "\\worldclim\\global_30s"		
-			if not os.path.exists(dirworldclim):
-				os.system('mkdir ' + dirworldclim)			
-			base = worldclim+ "\\" + variable
-			outworldclim =dirworldclim+ "\\" + variable +'_wc'
-			if not gp.Exists(outworldclim):
-				print outworldclim
-				gp.ExtractByMask_sa(base, admdir, outworldclim)
+			num = 12
+		for month in [1,12]:
+			if var == "cons_mths":
+				variable = var
 			else:
-				print "...ya existe worldclim!", variable
-
-			# Para calcular anomalias
-			dirouanoma = dirout + "\\anomalies\\"+ rcp+ "\\global_30s\\"+period		
-			if not os.path.exists(dirouanoma):
-				os.system('mkdir ' + dirouanoma)			
-			gp.workspace = diroutraster
-			inrastertmax = diroutraster + "\\"+variable
-			inrastertmin = dirworldclim + "\\"+variable+'_wc'
-			inexpresion = inrastertmax + " - " + inrastertmin 
-			outAnomala= dirouanoma + "\\"+variable
-			
-			if not gp.Exists(outAnomala):
-				print outAnomala
-				gp.SingleOutputMapAlgebra_sa(inexpresion, outAnomala)	
-			else:
-				print "...ya existe anomalia!", variable			
-
-			gp.workspace = dirouanoma 	
-			if not os.path.exists(dirouanoma + "\\ascii"):
-				os.system('mkdir ' + dirouanoma + "\\ascii")	
-			OutAscii = dirouanoma + "\\ascii\\" + variable + ".asc"	
-			if not gp.Exists(OutAscii):	
-				gp.RasterToASCII_conversion(outAnomala, OutAscii)
-				gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
+				variable = var + "_" + str(month)
 				
-			InZip = dirouanoma + "\\ascii\\" + var + "_asc.zip"
-			os.system('7za a ' + InZip + " " + OutAscii)
-			os.remove(OutAscii)				
-			if os.path.exists(OutAscii[:-3]+"prj"):
-				os.remove(OutAscii[:-3]+"prj")
-			if gp.Exists(OutRaster) and switch == "YES":
-				gp.delete_management(OutRaster)
+				diroutraster = dirout + "\\ensemble\\" + rcp+ "\\Global_"+resol+"\\"+period
 
-
+				if not os.path.exists(diroutraster):
+					os.system('mkdir ' + diroutraster)		
 				
-	print '...done',var
+				bio = endir + "\\" + variable
+				OutRaster = diroutraster + "\\" + os.path.basename(bio)
+				
+				# Para cortar datos ensemble
+				if not gp.Exists(OutRaster):
+					print "... Cuting ensemble "+variable
+					gp.ExtractByMask_sa(bio, admdir, OutRaster)
+				else:	
+					print "...ya existe enmsemble!",variable
+
+
+				#Convierte a ascii
+				gp.workspace = diroutraster 	
+				if not os.path.exists(diroutraster + "\\ascii"):
+					os.system('mkdir ' + diroutraster + "\\ascii")	
+				OutAscii = diroutraster + "\\ascii\\" + variable + ".asc"	
+				if not gp.Exists(OutAscii):	
+					gp.RasterToASCII_conversion(OutRaster, OutAscii)
+					gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
+					
+				# Comprime en un archivo .ZIP	
+				InZip = diroutraster + "\\ascii\\" + var + "_asc.zip"
+				os.system('7za a ' + InZip + " " + OutAscii)
+				os.remove(OutAscii)				
+				if os.path.exists(OutAscii[:-3]+"prj"):
+					os.remove(OutAscii[:-3]+"prj")
+				if gp.Exists(OutRaster) and switch == "YES":
+					gp.delete_management(OutRaster)
+					
+					
+				# Para cortar datos worldclim
+				dirworldclim = dirout + "\\worldclim\\Global_"+resol		
+				if not os.path.exists(dirworldclim):
+					os.system('mkdir ' + dirworldclim)			
+				base = worldclim+ "\\" + variable
+				outworldclim =dirworldclim+ "\\" + variable +'_wc'
+				if not gp.Exists(outworldclim):
+					print outworldclim
+					gp.ExtractByMask_sa(base, admdir, outworldclim)
+				else:
+					print "...ya existe worldclim!", variable
+
+				# Para calcular anomalias
+				dirouanoma = dirout + "\\anomalies\\"+ rcp+ "\\Global_"+resol+"\\"+period		
+				if not os.path.exists(dirouanoma):
+					os.system('mkdir ' + dirouanoma)			
+				gp.workspace = diroutraster
+				inrastertmax = diroutraster + "\\"+variable
+				inrastertmin = dirworldclim + "\\"+variable+'_wc'
+				inexpresion = inrastertmax + " - " + inrastertmin 
+				outAnomala= dirouanoma + "\\"+variable
+				
+				if not gp.Exists(outAnomala):
+					print outAnomala
+					gp.SingleOutputMapAlgebra_sa(inexpresion, outAnomala)	
+				else:
+					print "...ya existe anomalia!", variable			
+				
+				#Convierte a ascii
+				gp.workspace = dirouanoma 	
+				if not os.path.exists(dirouanoma + "\\ascii"):
+					os.system('mkdir ' + dirouanoma + "\\ascii")	
+				OutAscii = dirouanoma + "\\ascii\\" + variable + ".asc"	
+				if not gp.Exists(OutAscii):	
+					gp.RasterToASCII_conversion(outAnomala, OutAscii)
+					gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
+					
+				# Comprime en un archivo .ZIP
+				InZip = dirouanoma + "\\ascii\\" + var + "_asc.zip"
+				os.system('7za a ' + InZip + " " + OutAscii)
+				os.remove(OutAscii)				
+				if os.path.exists(OutAscii[:-3]+"prj"):
+					os.remove(OutAscii[:-3]+"prj")
+				if gp.Exists(OutRaster) and switch == "YES":
+					gp.delete_management(OutRaster)
+
+
+					
+		print '...done',var
 						
 gp.AddMessage("\n \t ====> DONE!! <====")  
