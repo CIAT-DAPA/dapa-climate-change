@@ -11,7 +11,7 @@ from arcpy import env
 if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 005-tiles_countries.py U:\portals\ccafs-analogues\grid_files rcp26 U:\portals\ccafs-analogues\TilesByCountry 30s 2020_2049"
+	print "   - ie: python 005-tiles_countries.py U:\portals\ccafs-analogues\grid_files rcp26 U:\portals\ccafs-analogues\TilesByCountry 30s 2020_2049 0 200"
 	sys.exit(1)
 
 #Set variables
@@ -71,14 +71,14 @@ for country in countrytilelist[int(start):int(end)]:
 		modellist = sorted(os.listdir(input))
 		
 		print "~~~~~~~~~~~~~~~~~~~"
-		print "  TILES COUNTRIES  "
+		print "  TILES COUNTRIES  RCP: ",rcp
 		print "~~~~~~~~~~~~~~~~~~~"
 		
 		for model in modellist:
-			if model == "current":
-				arcpy.env.workspace = input + "\\" + model
-				diroutGrids = dirout + "\\baseline_new\\" + country + "_" + str(resolution) + "\\" + model + "\\1960_1990"
-			else:
+			if model != "current":
+				# arcpy.env.workspace = input + "\\" + model
+				# diroutGrids = dirout + "\\baseline_new\\" + country + "_" + str(resolution) + "\\" + model + "\\1960_1990"
+			# else:
 				arcpy.env.workspace = input + "\\" + model + "\\" + str(period)
 				diroutGrids = out + "\\" + model + "\\" + str(period)
 				
@@ -108,9 +108,9 @@ for country in countrytilelist[int(start):int(end)]:
 						# rasterdeleteList = sorted(glob.glob(diroutGridsVar + "\\" + os.path.basename(raster) + "_*"))
 						# for rasterdelete in rasterdeleteList:
 							# arcpy.Delete_management(rasterdelete)
-						if model == "current":
-							arcpy.SplitRaster_management(raster, diroutGridsVar, "baseline_1960_1990_"+model+"_"+raster + "_", "NUMBER_OF_TILES", "TIFF", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
-						else:
+						if model != "current":
+							# arcpy.SplitRaster_management(raster, diroutGridsVar, "baseline_1960_1990_"+model+"_"+raster + "_", "NUMBER_OF_TILES", "TIFF", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
+						# else:
 							arcpy.SplitRaster_management(raster, diroutGridsVar, rcp+"_"+period+"_"+model+"_"+raster + "_", "NUMBER_OF_TILES", "TIFF", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
 						# arcpy.SplitRaster_management(raster,diroutGridsVar,raster + "_","NUMBER_OF_TILES","TIFF","NEAREST","4 4","2048 2048","0","PIXELS","#","#")
 						# arcpy.SplitRaster_management(raster, diroutGridsVar, raster + "_", "NUMBER_OF_TILES", "GRID", "#", str(countryDic [country]), "#", "0", "PIXELS", "#", "#")
