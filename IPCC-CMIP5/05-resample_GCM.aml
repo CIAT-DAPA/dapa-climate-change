@@ -35,7 +35,7 @@
 &ty          /\/\/\/\GCM MODELS RESAMPLE/\/\/\/\
 &ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
-&s gridlist [listfile %inputfolder%\tmin* -grid %outputfolder%\listgrids.list]
+&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
 &s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
 
 &if %OPENSTATUS% NE 0 &then
@@ -50,14 +50,14 @@
 			&s gridname [READ %openlist% READSTATUS]
 			
 			&s res [calc %resolution% / 60]
-			
-			&ty
-			&ty   -> .Processing %gridname%
-			
-			&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname% all /* &ty Output grid exists
-			
-			setwindow %inputfolder%\%gridname% %mask%		
-			%outputfolder%\%gridname% = RESAMPLE(%inputfolder%\%gridname%, %res%, %method%)
+			&if not [exists %outputfolder%\%gridname% -grid] &then
+				&ty
+				&ty   -> .Processing %gridname%
+				
+				/*&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname% all /* &ty Output grid exists
+				
+				setwindow %inputfolder%\%gridname% %mask%		
+				%outputfolder%\%gridname% = RESAMPLE(%inputfolder%\%gridname%, %res%, %method%)
 		&end
 	&end
 &s closefile [close %openlist%]

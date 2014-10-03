@@ -1,4 +1,4 @@
-/* &r 05-resampling_process.aml T:\gcm\cmip5\downscaled T:\gcm\cmip5\downscaled rcp26 r1i1p1 10min D:\jetarapues\cmip5_process\masks\mask10m
+/* &r 05-resampling_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp26 r1i1p1 10 D:\jetarapues\cmip5_process\masks\mask10m
 
 &args rootdir outfolder rcp ensemble resol mask
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument
