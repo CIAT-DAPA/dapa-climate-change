@@ -1,4 +1,4 @@
-baseDir="G:/jetarapues/temp/-83.65-9.89"
+baseDir="G:/jetarapues/temp/Extract_values_-83.65-9.89/raw"
 yi <- '2040'
 yf <- '2069'
 otp <- get_loc_data(baseDir,yi,yf)
@@ -40,27 +40,37 @@ get_loc_data <- function(baseDir,yi,yf) {
             loc_data <- subset(loc_data,loc_data$YEAR>=yi & loc_data$YEAR<=yf)         
             
             if(varName == "tas" || varName == "tasmax" || varName == "tasmin"){
-              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
-              names(loc_data) <- c("MONTH","VALUE")
+              #loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean) #datos promedios mensuales
+              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$DAY),mean) #datos promedios diarios              
+              #names(loc_data) <- c("MONTH","VALUE") #datos promedios mensuales
+              names(loc_data) <- c("MONTH","DAY","VALUE")
               loc_data$VALUE <- loc_data$VALUE - 273.15
             }
             if(varName == "hur"){
-              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
-              names(loc_data) <- c("MONTH","VALUE")
+              #loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
+              #names(loc_data) <- c("MONTH","VALUE")
+              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$DAY),mean)
+              names(loc_data) <- c("MONTH","DAY","VALUE")             
             }         
             if(varName == "rsds"){
-              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
-              names(loc_data) <- c("MONTH","VALUE")
+              #loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
+              #names(loc_data) <- c("MONTH","VALUE")
+              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$DAY),mean)
+              names(loc_data) <- c("MONTH","DAY","VALUE")             
             }   
             if(varName == "sfcWind"){
-              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
-              names(loc_data) <- c("MONTH","VALUE")
+              #loc_data = aggregate(loc_data[,6],list(loc_data$MONTH),mean)
+              #names(loc_data) <- c("MONTH","VALUE")
+              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$DAY),mean)
+              names(loc_data) <- c("MONTH","DAY","VALUE")
             }          
             if (varName=="pr"){
-              sumxyear=aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$YEAR),sum)
-              names(sumxyear) <- c("MONTH","YEAR","VALUE")
-              loc_data=aggregate(sumxyear[,3],list(sumxyear$MONTH),mean)
-              names(loc_data) <- c("MONTH","VALUE")
+              #sumxyear=aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$YEAR),sum) #datos promedios mensuales
+              #names(sumxyear) <- c("MONTH","YEAR","VALUE") #datos promedios mensuales
+              #loc_data=aggregate(sumxyear[,3],list(sumxyear$MONTH),mean) #datos promedios mensuales
+              loc_data = aggregate(loc_data[,6],list(loc_data$MONTH,loc_data$DAY),mean) #datos promedios diarios              
+              #names(loc_data) <- c("MONTH","VALUE") #datos promedios mensuales
+              names(loc_data) <- c("MONTH","DAY","VALUE")
               loc_data$VALUE <- loc_data$VALUE * 86400
             }
   
