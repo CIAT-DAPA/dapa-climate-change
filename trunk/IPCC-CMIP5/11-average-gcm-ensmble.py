@@ -12,7 +12,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print "   Syntax	: 11-average-gcm-ensmble.py <dirbase> <dirout> <scenario> <resolution> <period> <mask> <models>"
-	print "   - ex: python 11-average-gcm-ensmble.py T:\gcm\cmip5\downscaled T:\gcm\cmip5\downscaled\ensemble rcp26 30s 2020_2049 ALL"
+	print "   - ex: python 11-average-gcm-ensmble.py T:\data\gcm\cmip5\downscaled T:\data\gcm\cmip5\downscaled\ensemble rcp60 30s 2020_2049 ALL"
 	print "   dirbase	: Root folder where are storaged GCM data"
 	print "   dirout	: Output folder of averaged data"
 	print "   rcp		: IPCC Emission Escenario"
@@ -78,12 +78,11 @@ for variable in variablelist:
 			else:
 				raster = gp.workspace + "\\" + variable + "_" + str(month)
 
-			print ".. processing", model, os.path.basename(raster)
-
 			OutRasterMean =  diroutMean + "\\" + os.path.basename(raster)
-			OutRasterSTD =  diroutMean + "\\" + os.path.basename(raster) + "_std"			
-
-			lista = lista + ";" + raster
+			OutRasterSTD =  diroutMean + "\\" + os.path.basename(raster) + "_std"	
+			if not gp.Exists(OutRasterMean) and not gp.Exists(OutRasterMean + "_"):
+				print ".. processing", model, os.path.basename(raster)
+				lista = lista + ";" + raster
 		LIST = "\"" + lista[1:] + "\""	
 			
 		# Cell statistic function
@@ -109,4 +108,4 @@ for variable in variablelist:
 		else:
 			print "\t",os.path.basename(OutRasterSTD), "calcs done"			
 			
-print "Process done!!!"    
+print "Process done!!!" 
