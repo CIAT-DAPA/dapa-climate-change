@@ -82,7 +82,7 @@ for country in countrytilelist[int(start):int(end)]:
 				arcpy.env.workspace = input + "\\" + model + "\\" + str(period)
 				diroutGrids = out + "\\" + model + "\\" + str(period)
 				
-			print "\nProcessing",country,model,period,"\n"
+			print "\nProcessing",rcp,country,model,period,"\n"
 
 			rasterList = arcpy.ListRasters("*", "GRID")
 			for raster in rasterList:
