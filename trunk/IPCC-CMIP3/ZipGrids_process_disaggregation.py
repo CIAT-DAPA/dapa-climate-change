@@ -77,7 +77,7 @@ for model in modellist:
 				if os.path.exists(gp.workspace + "\\" + var):
 					print "\ncompressing...",var
 					inZip = gp.workspace + "\\" + var + "_grd.zip"
-					os.system('7za a -mx=1 -mmt=on -mtc=on ' + inZip + " " + gp.workspace  + "\\" + var)
+					os.system('7za a -mx=9 -mmt=on -mtc=on ' + inZip + " " + gp.workspace  + "\\" + var)
 				if os.path.exists(gp.workspace + "\\" + var) and os.path.exists(inZip):
 					os.system('rmdir /s /q ' + gp.workspace + "\\" + var)
 					#os.system("del "+gp.workspace + "\\" +var+'.aux')
