@@ -7,7 +7,7 @@
 
 import os, sys, string,glob, shutil
 
-# python G:\_scripts\dapa-climate-change\dapa-toolbox\IPCC-CMIP5\ExtractDataFromNC.py T:\gcm\cmip5\raw G:\jetarapues\temp rcp26 r1i1p1 daily 2006 2100
+# python G:\_scripts\dapa-climate-change\dapa-toolbox\IPCC-CMIP5\ExtractDataFromNC.py T:\gcm\cmip5\raw G:\jetarapues\Request\Request_camilo rcp26 r1i1p1 daily 2020 2070
 
 
 #Syntax
@@ -34,21 +34,20 @@ os.system('cls')
 if not os.path.exists(dirout):
 	os.system('mkdir ' + dirout)
 	
-print "~~~~~~~~~~~~~~~~~~~~~~"
-print " EXTRACT VALUES  "
-print "~~~~~~~~~~~~~~~~~~~~~~"
-
-# coor=['-86.15,11.9','-83.65,9.89']
-coor=['-86.15,11.9']
+coor=['-72.301412,5.339301']
+# coor=['-75.210150,3.271258','-74.950259,3.951141','-73.470392,4.037831','-72.301412,5.339301','-75.854628,8.812796']
 
 for xy in coor:
+	print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	print "Extract by coordinate:",xy
+	print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 	lon= xy.split(",")[0]
 	lat= xy.split(",")[1]
-	dirout = dirout +"\\"+str(lon)+"-"+str(lat)	
-	if not os.path.exists(dirout):
-		os.system('mkdir ' + dirout)	
+	outFiles = dirout +"\\"+str(lon)+"-"+str(lat)
 	if float(lon) < 0:
-		lon = float(lon) + 360
+		lon = float(lon) + 360		
+	if not os.path.exists(outFiles):
+		os.system('mkdir ' + outFiles)	
 	for root, dirs, files in os.walk(dirbase + "\\"  + time + "\\" + rcp):
 		for name in files:
 			if name.endswith((".nc", ".nc")): # formato de archivo
@@ -59,7 +58,7 @@ for xy in coor:
 				ens=name.split("_")[4]
 				yearI=name.split("_")[5].split(".")[0].split("-")[0][0:4]
 				yearF=name.split("_")[5].split(".")[0].split("-")[1][0:4]
-				if ens == ensem and root.split('\\')[-1]==ens:
+				if ens == ensem and root.split('\\')[-1]==ens and var!='hur' and var!='sfcWind':
 					if int(yearI) >= int(yi):
 						yei = yearI
 					if int(yearI) <= int(yi):	
@@ -68,7 +67,7 @@ for xy in coor:
 						yef = yearF
 					if int(yearF) >= int(yf):	
 						yef =yf						
-					odat = dirout+'/'+rcp+'_'+var+'_'+model+'_'+str(yei)+'-'+str(yef)+".tab"
+					odat = outFiles+'/'+rcp+'_'+var+'_'+model+'_'+str(yei)+'-'+str(yef)+".tab"
 					if not os.path.exists(odat):
 						print '\n...Extracting',name,'lon:'+str(lon)+' lat:'+lat,'Date:'+str(yei)+'-'+str(yef),'\n'
 						if var == 'hur':
@@ -77,4 +76,5 @@ for xy in coor:
 							os.system("G:\jetarapues\cdo160\cdo.exe -outputtab,year,month,day,lon,lat,value -remapnn,lon="+str(lon)+"_lat="+lat+' -selyear,'+str(yei)+'/'+str(yef)+' -selname,'+var+' '+root+"\\"+name+" > "+odat)
 					else:
 						print '\t...Extracted',name
+
 print "DONE!!"	
