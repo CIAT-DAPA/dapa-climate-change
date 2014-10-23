@@ -109,7 +109,7 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
-GCMCalcFutureYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1971_2000", outDir="G:/cenavarro/Request/urippke", cruDir="S:/data/observed/gridded_products/cru-ts-v3-21") {
+GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", outDir="D:/CIAT/Workspace/urippke", wclDir="S:/observed/gridded_products/worldclim/Global_30min/_asciis") {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -120,77 +120,69 @@ GCMCalcFutureYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly",
   # List of variables and months
   varList <- c("prec", "tmax", "tmin")
   
-  # Get a list of month with and withour 0 in one digit numbers
-  monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
-  monthListMod <- c(1:12)
-  
-  # Set number of days by month
-  ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
-  
-  # Combirn number of month and days in one single data frame
-  ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
-  names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
-  
-  gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
-  
-  # Loop around gcms and ensembles
-  for (i in 1:nrow(gcmStats)){
+  # Loop around months
+  for (mth in 1:12) {
     
-    # Don't include variables without all three variables
-    if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
+    # Loop around variables
+    for (var in varList) {
       
-      if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
+      if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mth, ".tif", sep=""))){
         
-        if(paste(as.matrix(gcmStats)[i,3]) == "r1i1p1"){
-          # Get gcm and ensemble names
-          gcm <- paste(as.matrix(gcmStats)[i,2])
+        year <- 2006:2099
+        cruAsc <- raster(paste(wclDir, "/", var, "_", mth, ".asc", sep=""))
+        anomDir <- paste(outDir, "/anomalies_1975s_yearly/", rcp, "/", gcm, "/", ens, sep="")
+        anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mth, ".nc", sep=""),FUN=raster)
+        anomNc <- stack(anomNc)
+        outFut <- cruAsc + anomNc
+        ext <- extent(-26, 64, -47, 38)
+        outFut <- crop(outFut, ext)
+        
+        for (i in 1:dim(outFut)[[3]]){
           
-          cat("\tFuture Calcs over: ", rcp, " ", gcm, " ", ens, " \n\n")
+          futDir <- paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
+          if (!file.exists(futDir)) {dir.create(futDir, recursive = TRUE)}
           
-          # Loop around months
-          for (mth in monthList) {
+          futTif <- paste(futDir, "/", var, "_", mth, ".tif", sep="")
+          
+          if (!file.exists(futTif)) {
             
-            mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+            if (var == "prec"){outFut[[i]][outFut[[i]]<0]=0}
             
-            # Loop around variables
-            for (var in varList) {
-              
-              if (!file.exists(paste(outDir, "/africa_cmip5_30min_yearly/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mthMod, ".tif", sep=""))){
-                
-                year <- 2006:2099
-                cruAsc <- raster(paste(cruDir, "/30yr_averages/", basePer, "/", var, "_", mthMod, ".asc", sep=""))
-                anomDir <- paste(outDir, "/world_anomalies_cmip5_raw_resolution/", rcp, "/", gcm, "/", ens, sep="")
-                anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mthMod, ".nc", sep=""),FUN=raster)
-                anomNc <- stack(anomNc)
-                outFut <- cruAsc + anomNc
-                ext <- extent(-26, 64, -47, 38)
-                outFut <- crop(outFut, ext)
-                
-                
-                if (var == "prec"){outFut[][outFut[]<0]=0}
-                
-                for (i in 1:dim(outFut)[[3]]){
-                  
-                  futDir <- paste(outDir, "/africa_cmip5_30min_yearly/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
-                  if (!file.exists(futDir)) {dir.create(futDir, recursive = TRUE)}
-                  
-                  futTif <- paste(futDir, "/", var, "_", mthMod, ".tif", sep="")
-                  
-                  
-                  if (!file.exists(futTif)) {
-                    
-                    outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=FALSE)
-                    
-                    cat(" .> ", paste("\t ", var, "_", mthMod, " ", year[i], sep=""), "\tdone!\n")
-                  }  else {cat(" .> ", paste("\t ", var, " ", mthMod, " ", year[i], sep=""), "\tdone!\n")}
-                  
-                }
-              }
-            }
-          }  
+            outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=FALSE)
+            
+            
+          }
         }
       }
+    } 
+
+  }
+
+  if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", 2099, "/tmean_12.tif", sep=""))){
+    
+    for (yr in 2006:2099){
+      
+      futDir <- paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", yr, sep="")
+      
+      for (mth in 1:12){
+        
+        outTmin <- paste(futDir, "/tmin_", mth, ".tif", sep="")  
+        outTmax <- paste(futDir, "/tmax_", mth, ".tif", sep="")
+        outTmean <- paste(futDir, "/tmean_", mth, ".tif", sep="")
+        
+        if (!file.exists(outTmean)) {
+          
+          tmean <- ( raster(outTmax) + raster(outTmin) ) / 2
+          
+          outRs <- writeRaster(tmean, outTmean, format='GTiff', overwrite=FALSE)
+         
+        }
+        
+      }
+      
     }
-  } 
+    
+  }
+  
   cat("GCM Future Calcs Process Done!")
 }
