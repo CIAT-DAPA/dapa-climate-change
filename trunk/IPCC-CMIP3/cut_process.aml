@@ -1,4 +1,4 @@
-/* &r cut_process.aml M:\climate_change\IPCC_CMIP3\SRES_A1B\downscaled D:\Workspace\Requests_Name\GCM_extract D:\Workspace\Requests_Name\_mask\mask 30s NO 
+/* &r cut_process.aml S:\gcm\cmip3\downscaled\sres_a1b D:\cenavarro\Request\Request_lcalderer\sres_a1b D:\cenavarro\Request\Request_lcalderer\_mask\mask 30s NO 
 
 &args rootdir outputdir mask resol switch
 &if [null %rootdir%] &then &return Use the root_folder argument
@@ -30,12 +30,12 @@
 			&ty
 			&ty Model %modname% (%year%, %resol%)
 			
-			&if not [exists %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt -file] &then
+			&if not [exists %outdir%\%modname%\%year%_CutGCM_done.txt -file] &then
 				&do
 					&if not [exists %outdir%\%modname%\%year% -dir] &then &sys md %outdir%\%modname%\%year%
 					&if [exists %outdir%\%modname%\%year%\_asciis -dir] &then &sys del %outdir%\%modname%\%year%\_asciis\*.zip
-					&r cut_GCM.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %outdir%\%modname%\%year% %mask% %switch%
-					&s verfile [listfile %outdir%\%modname%\%year%\_asciis\*.zip -file %outdir%\%modname%\%year%_Grd2AsciiZip_done.txt]
+					&r cut_GCM_coordinates.aml %inputdir%\%modname%\%year% %outdir%\%modname%\%year% %outdir%\%modname%\%year% %mask% %switch%
+					&s verfile [listfile %outdir%\%modname%\%year%\* -grid %outdir%\%modname%\%year%_CutGCM_done.txt]
 				&end
 				
 	&end
