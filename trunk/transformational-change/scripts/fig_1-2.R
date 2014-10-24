@@ -35,21 +35,21 @@ library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 
 #i/o directories
 #mbp at CIAT
-#b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
-#base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
+b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
+base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
 
 #mbp at UoL
-b_dir <- "/nfs/a101/earjr/cul-de-sacs"
-base_run <- paste(b_dir,"/cru_select_corNames",sep="")
+#b_dir <- "/nfs/a101/earjr/cul-de-sacs"
+#base_run <- paste(b_dir,"/cru_select_corNames",sep="")
 
 #output dirs
 out_dir <- paste("~/Google Drive/papers/transformational-adaptation") #mbp
 fig_dir <- paste(out_dir,"/figures",sep="")
-dfil_dir <- paste(out_dir,"/data_files_new",sep="")
+dfil_dir <- paste(out_dir,"/data_files_v3",sep="")
 if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
 
 #rcp input dir
-rcp <- "RCP_85" #RCP_60_new RCP_85
+rcp <- "RCP_60_new" #RCP_60_new RCP_85
 rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
 
 #read in thresholds and crop names
@@ -76,7 +76,7 @@ dc_list <- c((min(yr_list)+10):(max(yr_list)-9))
 
 #loop through crops
 for (i in 1:nrow(thresh_val)) {
-  #i <- 1
+  #i <- 3
   crop_name <- paste(thresh_val$crops[i])
   thr <- thresh_val$threshold[i]
   cat("\n...processing crop=",crop_name,"\n")
@@ -116,9 +116,9 @@ for (i in 1:nrow(thresh_val)) {
           if (is.na(x_b)) {
             y <- NA
           } else if (x_b == 0) {
-            y <- -2
+            y <- NA
           } else if (x_b < thr) {
-            y <- -1
+            y <- NA
           } else {
             y <- length(which(x_d < thr))# / length(x_d)
           }
