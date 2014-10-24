@@ -1,6 +1,6 @@
 import os, sys, glob, string
 
-# python RenamingTiles.py \\dapadfs\data_cluster_4\gcm\cmip3\downscaled_tiled \\dapadfs\data_cluster_4\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_tiled
+# python RenamingTiles.py S:\gcm\cmip3\downscaled_tiled S:\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_tiled
 # Examples
 # bccr_bcm2_0_A1B_2020s_bio_ZoneA1_asc.zip
 # bccr_bcm2_0_sres_a1b_2020s_bio_30s_no_tile_asc.zip
@@ -18,21 +18,24 @@ for sres in sreslist:
 	for model in modellist:
 		periodlist = sorted(os.listdir(dirbase + "\\" + sres + "\\global_30s\\" + model))
 		for period in periodlist:
-			indir = dirbase + "\\" + sres + "\\global_30s\\" + model + "\\" + period + "\\_tiles"
-			outdir = dirout + "\\" + sres + "\\" + periodDc[period] + "\\" + model + "\\30s"	
+
+			if not os.path.isfile(dirbase + "\\" + sres + "\\global_30s\\" + model + "\\" + period):
+
+				indir = dirbase + "\\" + sres + "\\global_30s\\" + model + "\\" + period + "\\_tiles"
+				outdir = dirout + "\\" + sres + "\\" + periodDc[period] + "\\" + model + "\\30s"	
 			
-			if not os.path.exists(outdir):
-				os.system('mkdir ' + outdir)
-				
-			for var in varlist:
-				# var = os.path.basename(file).split("_")[0]
-				
-				for zone in zonelist:
-					infilename = model + "_" + sres.split("_")[1] + "_" + periodDc[period] + "_" + var + "_Zone" + zone + "_asc.zip"
-					outfilename = model + "_" + sres + "_" + periodDc[period] + "_" + var + "_30s_tile_" + zone.lower() + "_asc.zip"
+				if not os.path.exists(outdir):
+					os.system('mkdir ' + outdir)
 					
-					if os.path.exists(indir + "\\" + infilename):
-						print "Renaming ", indir + "\\" + infilename, outdir + "\\" + outfilename
-						os.rename(indir + "\\" + infilename, outdir + "\\" + outfilename)
+				for var in varlist:
+					# var = os.path.basename(file).split("_")[0]
+					
+					for zone in zonelist:
+						infilename = model + "_" + sres.split("_")[1] + "_" + periodDc[period] + "_" + var + "_Zone" + zone + "_asc.zip"
+						outfilename = model + "_" + sres + "_" + periodDc[period] + "_" + var + "_30s_tile_" + zone.lower() + "_asc.zip"
+						
+						if os.path.exists(indir + "\\" + infilename):
+							print "Renaming ", indir + "\\" + infilename, outdir + "\\" + outfilename
+							os.rename(indir + "\\" + infilename, outdir + "\\" + outfilename)
 					
 print "Moving process done!"

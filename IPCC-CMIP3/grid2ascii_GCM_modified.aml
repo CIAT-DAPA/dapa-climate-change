@@ -41,7 +41,7 @@
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		
-		&s gridlist [listfile %inputfolder%\* -grid %outfolder%\listgrids.list]
+		/* &s gridlist [listfile %inputfolder%\* -grid %outfolder%\listgrids.list]
 		&s openlist [OPEN %outfolder%\listgrids.list OPENSTATUS -READ]
 		
 		&if %OPENSTATUS% NE 0 &then
@@ -93,13 +93,10 @@
 &if [exists %outfolder%\listgrids.list -file] &then &sys del %outfolder%\listgrids.list
 &if [exists %basedir%\log -file] &then &sys del %basedir%\log
 
-&s finalfolder %outcopyfolder%\_asciis
+/* &s finalfolder %outcopyfolder%\_asciis
 /* &if not [exists %finalfolder% -dir] &then &sys md %finalfolder%
 
-&ty
-&ty   -> .Now copying...
-
-&sys robocopy %outfolder% %finalfolder% /z /e
+/* &sys robocopy %outfolder% %finalfolder% /z /e
 /* &s copystat [COPY %outfolder%\bio_asc.zip %finalfolder%\bio_asc.zip]
 /* &s copystat [COPY %outfolder%\cons_asc.zip %finalfolder%\cons_asc.zip]
 /* &s copystat [COPY %outfolder%\prec_asc.zip %finalfolder%\prec_asc.zip]
@@ -107,7 +104,7 @@
 /* &s copystat [COPY %outfolder%\tmean_asc.zip %finalfolder%\tmean_asc.zip]
 /* &s copystat [COPY %outfolder%\tmin_asc.zip %finalfolder%\tmin_asc.zip]
 
-&s delstat [DELETE %outputfolder% -DIRECTORY]
+/* &s delstat [DELETE %outputfolder% -DIRECTORY]
 
 /* &if %copystat% EQ 0 &then 
 	/* &do
@@ -121,5 +118,5 @@
 		/* &return
 	/* &end
 
-&ty
-&ty Process done!
+/* &ty
+/* &ty Process done!
