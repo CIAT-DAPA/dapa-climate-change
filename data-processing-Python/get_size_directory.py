@@ -26,5 +26,5 @@ def get_size(start_path = '.'):
 	
 folderList = next(os.walk(dirbase))[1]
 for folder in folderList:
-	print folder+":\t",get_size(dirbase+"\\"+folder),'\t'
+	print folder+":\t",get_size(dirbase+"\\"+folder)
 
