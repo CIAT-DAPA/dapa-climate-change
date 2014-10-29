@@ -1,4 +1,6 @@
-/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp26 r1i1p1 10 G:\jetarapues\cmip5_process\masks\mask10m
+/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp45 r1i1p1 10 G:\jetarapues\cmip5_process\masks\mask10m
+/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp45 r1i1p1 5 G:\jetarapues\cmip5_process\masks\mask5m
+/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp45 r1i1p1 2.5 G:\jetarapues\cmip5_process\masks\mask2_5m
 
 &args rootdir outfolder rcp ensemble resol mask
 &if [null %rootdir%] &then &return Use scenario and/or root_folder argument
@@ -32,10 +34,11 @@
 			&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%ts%_resampled.txt
 		&end
 	&else 
-		&do
-			&ty 
-			&ty Model %modname% (%ts%, %resol%) processed
-		&end
+		&ty (%ts%, %resol%) processed
+		/*&do
+			/*&ty 
+			/*&ty (%ts%, %resol%) processed
+		/*&end
 
 &end
 
