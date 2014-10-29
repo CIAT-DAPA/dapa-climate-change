@@ -6,7 +6,7 @@
 
 import arcgisscripting, os, sys, string
 gp = arcgisscripting.create(9.3)
-
+# python 11-average-gcm-ensmble.py T:\gcm\cmip5\downscaled T:\gcm\cmip5\downscaled\ensemble rcp45 30s 2040_2069 ALL
 #Syntax 
 if len(sys.argv) < 6:
 	os.system('cls')
@@ -83,6 +83,9 @@ for variable in variablelist:
 			if not gp.Exists(OutRasterMean) and not gp.Exists(OutRasterMean + "_"):
 				print ".. processing", model, os.path.basename(raster)
 				lista = lista + ";" + raster
+			if not gp.Exists(OutRasterSTD) and not gp.Exists(OutRasterSTD + "_"):
+				print ".. processing", model, os.path.basename(raster)
+				lista = lista + ";" + raster				
 		LIST = "\"" + lista[1:] + "\""	
 			
 		# Cell statistic function
