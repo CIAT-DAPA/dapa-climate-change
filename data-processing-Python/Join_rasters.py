@@ -89,6 +89,7 @@ for model in modellist:
 					
 					if not arcpy.Exists(OutRaster):
 						arcpy.CopyRaster_management(variable+ "_1",OutRaster,"#","#","#","NONE","NONE","#")
+						arcpy.DeleteField_management(OutRaster,"COUNT")						
 						print "    Copied " + variable+ "_1"
 						
 					if variable + "_" + str(month)!=variable+ "_1":
