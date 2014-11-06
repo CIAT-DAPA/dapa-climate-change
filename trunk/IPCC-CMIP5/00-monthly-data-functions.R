@@ -788,7 +788,7 @@ GCMAnomaliesYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", 
   gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
 
   # Loop around gcms and ensembles
-  for (i in 1:nrow(gcmStats)){
+  for (i in 41:nrow(gcmStats)){
     
     # Don't include variables without all three variables
     if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
@@ -830,7 +830,7 @@ GCMAnomaliesYearly <- function(rcp='rcp26', baseDir="L:/gcm/cmip5/raw/monthly", 
               # Create anomalies output directory 
               if (basePer == "1961_1990"){
                 
-                anomDir <- paste(outDir, "/anomalies_1975s_yearly/", gcm, "/", ens, "/", year, sep="")
+                anomDir <- paste(outDir, "/anomalies_1975s_yearly/", rcp, "/", gcm, "/", ens, "/", year, sep="")
                             
               } else if (basePer == "1971_2000") {
                 

@@ -44,8 +44,8 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
       
       
       # List of variables and months
-      varList <- c("prec", "tmax", "tmin")
-      
+#       varList <- c("prec", "tmax", "tmin")
+      var <- "prec"
       
       # Get a list of month with and withour 0 in one digit numbers
       monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
@@ -60,7 +60,7 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
       
       
       # Loop around variables
-      for (var in varList) {
+#       for (var in varList) {
         
         # Loop around months
         for (mth in monthList) {
@@ -84,8 +84,12 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
               futMthNc <- rotate(futMthNc) - 272.15
             }
             
+            if (var == "prec" || var == "rsds"){
+              anomNc <- (futMthNc - curAvgNc) / curAvgNc
+            } else {
+              anomNc <- futMthNc - curAvgNc  
+            }
             
-            anomNc <- futMthNc - curAvgNc
             
             # resAnomNc  <- resample(anomNc, rs, method='ngb')                
             
@@ -98,10 +102,10 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
             
             cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")
             
-          } else {cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")}
+          } # else {cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")}
           
         }    
-      } 
+#       } 
     }
   }
 }
@@ -118,22 +122,31 @@ GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", out
   cat(" \n")
   
   # List of variables and months
-  varList <- c("prec", "tmax", "tmin")
+#   varList <- c("prec", "tmax", "tmin")
+  var <- "prec"
   
   # Loop around months
   for (mth in 1:12) {
     
     # Loop around variables
-    for (var in varList) {
+#     for (var in varList) {
       
-      if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mth, ".tif", sep=""))){
+#       if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mth, ".tif", sep=""))){
         
         year <- 2006:2099
         cruAsc <- raster(paste(wclDir, "/", var, "_", mth, ".asc", sep=""))
         anomDir <- paste(outDir, "/anomalies_1975s_yearly/", rcp, "/", gcm, "/", ens, sep="")
         anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mth, ".nc", sep=""),FUN=raster)
         anomNc <- stack(anomNc)
-        outFut <- cruAsc + anomNc
+       
+        
+        if (var == "prec" || var == "rsds"){
+          outFut <- cruAsc * (1 + anomNc)
+        } else {
+          outFut <- cruAsc + anomNc
+        }
+        
+        
         ext <- extent(-26, 64, -47, 38)
         outFut <- crop(outFut, ext)
         
@@ -148,13 +161,13 @@ GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", out
             
             if (var == "prec"){outFut[[i]][outFut[[i]]<0]=0}
             
-            outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=FALSE)
+            outYrAsc <- writeRaster(outFut[[i]], futTif, format='GTiff', overwrite=TRUE)
             
             
           }
         }
-      }
-    } 
+#       }
+#     } 
 
   }
 

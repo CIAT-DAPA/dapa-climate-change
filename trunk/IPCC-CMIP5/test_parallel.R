@@ -1,7 +1,7 @@
 ## Parameters ###
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=2) #initiate cluster
+sfInit(parallel=T,cpus=8) #initiate cluster
 
 stop("error")
 source("00-monthly-data-anomalies-yearly.R")
@@ -30,92 +30,95 @@ gcmStats <- gcmStats[which(gcmStats$ensemble == ens),]
 gcmStats <- gcmStats[which(gcmStats$obs == "no"),]
 
 # Loop around gcms and ensembles
-# for (i in 1:nrow(gcmStats)){
-#   
-#   # Don't include variables without all three variables
-#   if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
-#     
-#     if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
-#       
-#       # Get gcm and ensemble names
-#       gcm <- paste(as.matrix(gcmStats)[i,2])
-#       
-#       # Path of each ensemble
-#       curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
-#       
-#       # Average directory
-#       curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
-#       
-#       # #export functions
-#       sfExport("GCMAnomaliesYearly")
-#       
-#       #export variables
-#       sfExport("rcp")
-#       sfExport("gcm")
-#       sfExport("ens")
-#       sfExport("futDir")
-#       sfExport("curAvgDir")
-#       sfExport("basePer")
-#       sfExport("outDir")
-#       
-#       cat(" .> ", paste("\t ", gcm, sep=""), "\t\n")
-#       
-#       for (i in 2006:2099) {      
-#         
-#         controlIntpol <- function(i) { #define a new function
-#           library(raster)
-#           
-#           GCMAnomaliesYearly(rcp, gcm, ens, i, futDir, curAvgDir, basePer, outDir)
-#         }
-#         
-#         system.time(sfSapply(as.vector(2006:2099), controlIntpol))
-#         
-#       }
-#       
-#       
-#       
-#     }
-#   }
-# }
-# 
-# cat("GCM Anomalies Process Done!")
-# 
-# 
-# #stop the cluster calculation
-# sfStop()
-# 
-# 
-# sfInit(parallel=T,cpus=2) #initiate cluster
-
-# #export functions
-sfExport("GCMCalcFutureYearly")
-
-#export variables
-sfExport("rcp")
-sfExport("ens")
-sfExport("outDir")
-sfExport("wclDir")
-
 for (i in 1:nrow(gcmStats)){
   
-  gcm <- paste(as.matrix(gcmStats)[i,2])
-  sfExport("gcm")    
-  
-  controlIntpol <- function(i) { #define a new function
+  # Don't include variables without all three variables
+  if(!paste(as.matrix(gcmStats)[i,10]) == "ins-var"){
     
-    library(raster)
-    cat(" .> ", paste("\t ", i, sep=""), "\tdone!\n")
-    GCMCalcFutureYearly(rcp, i, ens, outDir, wclDir)
-    
+    if(!paste(as.matrix(gcmStats)[i,10]) == "ins-yr"){
+      
+      # Get gcm and ensemble names
+      gcm <- paste(as.matrix(gcmStats)[i,2])
+      
+      # Path of each ensemble
+      curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
+      
+      # Average directory
+      curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
+      
+      # #export functions
+      sfExport("GCMAnomaliesYearly")
+      
+      #export variables
+      sfExport("rcp")
+      sfExport("gcm")
+      sfExport("ens")
+      sfExport("futDir")
+      sfExport("curAvgDir")
+      sfExport("basePer")
+      sfExport("outDir")
+      
+      cat(" .> ", paste("\t ", gcm, sep=""), "\t\n")
+      
+      for (i in 2006:2099) {      
+        
+        control <- function(i) { #define a new function
+          library(raster)
+          
+          GCMAnomaliesYearly(rcp, gcm, ens, i, futDir, curAvgDir, basePer, outDir)
+        }
+        
+        system.time(sfSapply(as.vector(2006:2099), control))
+        
+      }
+      
+      
+      
+    }
   }
-  
-  system.time(sfSapply(as.vector(paste(as.matrix(gcmStats)[1:nrow(gcmStats),2])), controlIntpol))
-  
 }
 
-}
+cat("GCM Anomalies Process Done!")
+
 
 #stop the cluster calculation
 sfStop()
 
-cat("GCM Disaggregation Process Done!")
+
+# 
+# 
+# 
+# sfInit(parallel=T,cpus=2) #initiate cluster
+# 
+# # #export functions
+# sfExport("GCMCalcFutureYearly")
+# 
+# #export variables
+# sfExport("rcp")
+# sfExport("ens")
+# sfExport("outDir")
+# sfExport("wclDir")
+# 
+# for (i in 1:nrow(gcmStats)){
+#   
+#   gcm <- paste(as.matrix(gcmStats)[i,2])
+#   sfExport("gcm")    
+#   
+#   controlIntpol <- function(i) { #define a new function
+#     
+#     library(raster)
+#     cat(" .> ", paste("\t ", i, sep=""), "\tdone!\n")
+#     GCMCalcFutureYearly(rcp, i, ens, outDir, wclDir)
+#     
+#   }
+#   
+#   system.time(sfSapply(as.vector(paste(as.matrix(gcmStats)[1:nrow(gcmStats),2])), controlIntpol))
+#   
+# }
+# 
+# }
+# 
+# #stop the cluster calculation
+# sfStop()
+# 
+# cat("GCM Disaggregation Process Done!")
