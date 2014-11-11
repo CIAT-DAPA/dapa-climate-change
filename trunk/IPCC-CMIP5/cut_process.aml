@@ -39,7 +39,7 @@
 		&s outmoddir %outdir%\%modname%\r1i1p1
 		&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
 		
-		&do ts &list 2020_2049 2040_2069 /* 2020_2049 2040_2069 2060_2089 2070_2099
+		&do ts &list 2040_2069 /* 2020_2049 2040_2069 2060_2089 2070_2099
 			&s outmodtsdir %outmoddir%\%ts% 
 			&s inmodtsdir %inputdir%\%modname%\r1i1p1\%ts%
 			
@@ -48,7 +48,7 @@
 					&ty
 					&ty Model %modname% (%rcp%, %ts%, %resol%)
 					&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
-					&r cut_GCM.aml %inmodtsdir% %outmodtsdir% %outmodtsdir% %mask% %switch%
+					&r cut_GCM_coordinates.aml %inmodtsdir% %outmodtsdir% %outmodtsdir% %mask% %switch%
 					&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt
 				&end
 			&else 
