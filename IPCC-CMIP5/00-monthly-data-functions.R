@@ -44,8 +44,6 @@ require(sp)
 #####################################################################################################
 # Description: This function is to calcute tmax or tmin if it is possible
 #####################################################################################################
-
-
 GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly") {
   
   gcmStats <- read.table(paste(baseDir, "/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
@@ -123,12 +121,9 @@ GCMTmpCalc <- function(rcp='historical', baseDir="T:/data/gcm/cmip5/raw/monthly"
   return("Temperature Calcs Process Done!")
 }
 
-
 #####################################################################################################
 # Description: This function is to calculate the averaging surfaces of the CMIP5 monhtly climate data
 #####################################################################################################
-
-
 GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
   
   cat(" \n")
@@ -281,7 +276,8 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   cat(" \n")
 
   # List of variables and months
-  varList <- c("prec", "tmax", "tmin")
+#   varList <- c("prec", "tmax", "tmin")
+  var <- "prec" 
   monthList <- c(1:12)
   
   curDir <- paste(baseDir, "/historical", sep="")
@@ -328,61 +324,81 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
             
           }
-          
-          
-          if (!file.exists(anomDir)) {dir.create(anomDir)}
-          if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
-          
-          # Loop around variables
-          for (var in varList) {
-            
-            # Loop around months
-            for (mth in monthList) {
-              
-              
-              outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
-              if (!file.exists(outNc)) {
-              
-                curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
-                futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
-                
-                anomNc <- futAvgNc - curAvgNc
 
-                # resAnomNc  <- resample(anomNc, rs, method='ngb')
-                
-                # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
-                # anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
-                # resAnomNcExt  <- resample(anomNcExt, rs, method='bilinear')
-                anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
-                
-              }
+          checkFile <- paste(anomDir, "/anomalies_", staYear, "_", endYear, "_done.txt", sep="")
+
+          if (!file.exists(checkFile)){
+            
+            if (!file.exists(anomDir)) {dir.create(anomDir)}
+            if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
+            
+            listNc <- list.files(anomPerDir, full.names=T, pattern="prec*")
+            do.call(unlink,list(listNc))
+            
+            # Loop around variables
+#             for (var in varList) {
               
-              outShp <- paste(anomPerDir, "/", var, "_", mth, ".shp", sep="")
-              
-              if (!file.exists(outShp)) {
+              # Loop around months
+              for (mth in monthList) {
                 
-                anomPts <- rasterToPoints(raster(outNc)) 
                 
-                coords <- data.frame(anomPts[,1:2])
-                colnames(coords) <- c("LON", "LAT")
+                outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
                 
-                values <- data.frame(anomPts[,3])
-                colnames(values) <- c("VALUE")
+                if (!file.exists(outNc)) {
                 
-                anomPts <- SpatialPointsDataFrame(coords,values)
-                anomShp <- writePointsShape(anomPts, paste(anomPerDir, "/", var, "_", mth, sep=""))
+                  curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                  futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                  
+                  
+                  if (var == "prec" || var == "rsds"){
+                    anomNc <- (futAvgNc - curAvgNc) / (curAvgNc + 0.5)
+                  } else {
+                    anomNc <- futAvgNc - curAvgNc  
+                  }
+                  
+                  # resAnomNc  <- resample(anomNc, rs, method='ngb')
+                  
+                  # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
+                  # anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
+                  # resAnomNcExt  <- resample(anomNcExt, rs, method='bilinear')
+                  anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
+                  
+                }
                 
-                cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
-              
-              } else {cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
-              
-            }    
-          } 
+                outShp <- paste(anomPerDir, "/", var, "_", mth, ".shp", sep="")
+                
+                if (!file.exists(outShp)) {
+                  
+                  anomPts <- rasterToPoints(raster(outNc)) 
+                  
+                  coords <- data.frame(anomPts[,1:2])
+                  colnames(coords) <- c("LON", "LAT")
+                  
+                  values <- data.frame(anomPts[,3])
+                  colnames(values) <- c("VALUE")
+                  
+                  anomPts <- SpatialPointsDataFrame(coords,values)
+                  anomShp <- writePointsShape(anomPts, paste(anomPerDir, "/", var, "_", mth, sep=""))
+                  
+                  cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+                
+                } else {cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
+                
+                
+              }    
+#             } 
+          }
         }  
       }  
+      
+      write.table("Done!", checkFile, row.names=F)
+      
     }
+    
   }
+  
   cat("GCM Anomalies Process Done!")
+  
 }
 
 
