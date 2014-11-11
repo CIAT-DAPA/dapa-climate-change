@@ -65,7 +65,7 @@ for sres in sorted(sresDc):
 
 						indir = dirbase + "\\" + sres + "\\" + period + "\\" + model + "\\" + res
 					
-						outfilename = model + "_" + sres + "_" + period  + "_" + var + "_30s_tile_" + zone.lower() + "_asc.zip"
+						outfilename = model + "_" + sres + "_" + period  + "_" + var + "_30s_r1i1p1_" + zone.lower() + "_asc.zip"
 						# outfilename = model + "_" + sres + "_" + period  + "_" + var + "_" + res  + "_r1i1p1_no_tile" + "_grd.zip"
 						localurl = "/data/ipcc_5ar_ciat_tiled/" + sres + "/" + period + "/" + model + "/" + res
 						if os.path.exists(indir + "\\" + outfilename):
