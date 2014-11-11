@@ -6,7 +6,7 @@ import sys, os, string,glob, shutil
 dirbase = sys.argv[1]
 dirouttxt = sys.argv[2]
 
-format = "2" ## asc
+format = "1" ## asc
 method = "1" ##Delta Method
 fileset = "12" ##IPCC 5AR (CIAT)
 region = "2" ##tile
