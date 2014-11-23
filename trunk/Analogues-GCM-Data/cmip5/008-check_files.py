@@ -18,7 +18,14 @@
 # python 008-check_files.py U:\data\portals\ccafs-analogues\TilesByCountry U:\data\portals\ccafs-analogues\TilesByCountry rcp85 30s 2020_2049 165 fix 20000 25000
 # python 008-check_files.py U:\data\portals\ccafs-analogues\TilesByCountry U:\data\portals\ccafs-analogues\TilesByCountry rcp85 30s 2020_2049 165 fix 25000 30870
 
+	# ++++ NINA ++++++
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 0 1000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 1000 2000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 2000 3000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 3000 4522
 
+	
+	
 import arcpy, os, sys, string, glob, grid2asciitiff_tiles,os.path, time,datetime
 from arcpy import env
 
