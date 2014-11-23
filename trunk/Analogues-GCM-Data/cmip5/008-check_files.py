@@ -24,6 +24,12 @@
 # python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 2000 3000
 # python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 3000 4522
 
+	# ++++ GISDE ++++++
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp45 30s 2020_2049 165 fix 0 3000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp45 30s 2020_2049 165 fix 3000 6000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp45 30s 2020_2049 165 fix 6000 9000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp45 30s 2020_2049 165 fix 9000 12000
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp45 30s 2020_2049 165 fix 12000 15345
 	
 	
 import arcpy, os, sys, string, glob, grid2asciitiff_tiles,os.path, time,datetime
