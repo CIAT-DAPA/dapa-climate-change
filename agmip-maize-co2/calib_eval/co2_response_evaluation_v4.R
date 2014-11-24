@@ -16,7 +16,7 @@
 
 #i/o directories
 wd <- "~/Leeds-work/AgMIP-maize-phase-2"
-runs_dir <- paste(wd,"/model_runs/laimax_stg3_co2_parameterisation",sep="") #input dir
+runs_dir <- paste(wd,"/model_runs/laimax_stg3_co2_parameterisation_v4",sep="") #input dir
 obs_dir <- paste(wd,"/observed",sep="")
 rep_dir <- paste(runs_dir,"/amb_face_reporting",sep="")
 out_dir <- paste(runs_dir, "/amb_face_eval_plots_full_obs",sep="")
@@ -37,7 +37,8 @@ names(growth_data)[c(4,7,10)] <- c("LAI_OBS","BIOMASS_OBS","YIELD_OBS")
 
 swater_data <- read.table(paste(obs_dir,"/swater_data_high.txt",sep=""),header=T)
 
-#plot per year
+#plot and rmse calculation per year
+rmse_df <- data.frame()
 for (year in 2007:2008) {
   #year <- 2007
   cat("processing year=",year,"\n")
@@ -61,6 +62,28 @@ for (year in 2007:2008) {
   wet_amb <- read.table(paste(rep_dir,"/wet_amb_",year,".txt",sep=""), header=T)
   wet_amb_obs <- growth_data[which(growth_data$YEAR == year & growth_data$TREATMENT == "WET_AMB"),]
   wet_amb_swat <- swater_data[which(swater_data$YEAR == year & swater_data$TREATMENT == "WET_AMB"),]
+  
+  #calculate rmse values
+  for (treat in c("dry_face","dry_amb","wet_face","wet_amb")) {
+    #treat <- "dry_face"
+    obs_df <- get(paste(treat,"_obs",sep=""))
+    sim_df <- get(treat)
+    all_df <- merge(obs_df[,c("DOY","LAI_OBS","BIOMASS_OBS","YIELD_OBS")], sim_df[,c("DOY","LAI","YIELD","BIOMASS")], by="DOY", all.x=T, all.y=F)
+    
+    lai_rmse <- sqrt(sum((all_df$LAI_OBS - all_df$LAI)^2) / nrow(all_df)) / mean(all_df$LAI_OBS) * 100
+    bms_rmse <- sqrt(sum((all_df$BIOMASS_OBS - all_df$BIOMASS)^2) / nrow(all_df)) / mean(all_df$BIOMASS_OBS) * 100
+    yld_rmse <- sqrt(sum((all_df$YIELD_OBS - all_df$YIELD)^2,na.rm=T) / 1) / mean(all_df$YIELD_OBS,na.rm=T) * 100
+    
+    #swater
+    obs_df <- get(paste(treat,"_swat",sep=""))
+    all_df <- merge(obs_df[,c("DOY","SW_mm")], sim_df[,c("DOY","PESW")], by="DOY", all.x=T, all.y=F)
+    all_df$PESW <- all_df$PESW * 10
+    swt_rmse <- sqrt(sum((all_df$SW_mm - all_df$PESW)^2) / nrow(all_df)) / mean(all_df$SW_mm) * 100
+    
+    #output row and append
+    out_row <- data.frame(TREATMENT=treat,YEAR=year, LAI=lai_rmse, BIOMASS=bms_rmse, YIELD=yld_rmse, SWATER=swt_rmse)
+    rmse_df <- rbind(rmse_df, out_row)
+  }
   
   ### biomass and yield 
   #wet plots
@@ -167,6 +190,7 @@ for (year in 2007:2008) {
   dev.off()
 }
 
+write.csv(rmse_df, paste(out_dir,"/rmse_all_treatments.csv",sep=""), row.names=F, quote=T)
 
 
 
