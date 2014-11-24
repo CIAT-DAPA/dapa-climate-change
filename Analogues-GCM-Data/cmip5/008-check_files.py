@@ -23,7 +23,9 @@
 # python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 2000 3000
 # python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 165 fix 3000 4522
 
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp26 30s 2020_2049 0 check 3000 4522
 # python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp60 30s 2020_2049 0 check 3000 4522
+# python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp85 30s 2020_2049 0 check 3000 4522
 
 	# ++++ GISDE ++++++
 # python 008-check_files.py U:\portals\ccafs-analogues\TilesByCountry U:\portals\ccafs-analogues\TilesByCountry rcp45 30s 2020_2049 165 fix 0 3000
@@ -165,15 +167,15 @@ for resolution in resoList:
 									print country,model,os.path.basename(tiff),"OK"
 								
 				print "\n",country," checked!"
-				
-		l = open(dirbase + "\\" + rcp +'_'+resolution+"_check.txt", "r")	
-		checkRaw = [i for i in l.readlines()]
-		check = sorted(list(set(checkRaw)))
-		
-		if not os.path.exists(dirbase + "\\" + rcp +'_'+resolution+"_check_unique.txt"):
-			file = open(dirbase + "\\" + rcp +'_'+resolution+"_check_unique.txt", "w")
-			file.writelines(["%s" % item  for item in check])			
-		l.close()
+		if os.path.exists(dirbase + "\\" + rcp +'_'+resolution+"_check.txt"):	
+			l = open(dirbase + "\\" + rcp +'_'+resolution+"_check.txt", "r")	
+			checkRaw = [i for i in l.readlines()]
+			check = sorted(list(set(checkRaw)))
+			
+			if not os.path.exists(dirbase + "\\" + rcp +'_'+resolution+"_check_unique.txt"):
+				file = open(dirbase + "\\" + rcp +'_'+resolution+"_check_unique.txt", "w")
+				file.writelines(["%s" % item  for item in check])			
+			l.close()
 		print "\n Checking " + rcp + " done!"
 
 	elif type=="fix" and os.path.exists(dirbase + "\\" + rcp +'_'+resolution+"_check.txt"):							
