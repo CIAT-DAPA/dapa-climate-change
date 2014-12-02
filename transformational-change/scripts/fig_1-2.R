@@ -35,8 +35,9 @@ library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 
 #i/o directories
 #mbp at CIAT
-b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
-base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
+b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/modelling/Cul_de_sacs"
+#base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
+base_run <- paste(b_dir,"/current_runs/CRU_30min_thres/all_crops",sep="")
 
 #mbp at UoL
 #b_dir <- "/nfs/a101/earjr/cul-de-sacs"
@@ -44,31 +45,28 @@ base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",s
 
 #output dirs
 out_dir <- paste("~/Google Drive/papers/transformational-adaptation") #mbp
-fig_dir <- paste(out_dir,"/figures",sep="")
-dfil_dir <- paste(out_dir,"/data_files_v3",sep="")
-if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
+fig_dir <- paste(out_dir,"/figures/figures_CRU_updated",sep="")
+dfil_dir <- paste(out_dir,"/data_files_v3/data_files_CRU",sep="")
+if (!file.exists(dfil_dir)) {dir.create(dfil_dir,recursive=T)}
 
 #rcp input dir
-rcp <- "RCP_60_new" #RCP_60_new RCP_85
-rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
+rcp <- "rcp85" #rcp60 rcp85
+rcp_run <- paste(b_dir,"/future_runs/CRU/",rcp,sep="")
 
 #read in thresholds and crop names
 if (!file.exists(paste(dfil_dir,"/thres_compl.csv",sep=""))) {
-  thresh_val <- read.csv(paste(b_dir,"/thres_compl.csv",sep=""))
+  thresh_val <- read.csv(paste(b_dir,"/TA_analyses/thresh_v2.csv", sep=""))
   write.csv(thresh_val, paste(dfil_dir,"/thres_compl.csv",sep=""))
 } else {
   thresh_val <- read.csv(paste(dfil_dir,"/thres_compl.csv",sep=""))
 }
 
 #load baseline suitability rasters
-base_stk <- stack(paste(base_run,"/",thresh_val$crops,sep=""))
-names(base_stk) <- paste(thresh_val$crops)
+base_stk <- stack(paste(base_run,"/",thresh_val$Crop,"_suit.tif",sep=""))
+names(base_stk) <- paste(thresh_val$Crop)
 
 #list of GCMs
 gcm_list <- list.files(rcp_run)
-#gcm_list <- list.files(paste(dfil_dir,"/Maize_suit",sep=""),pattern=rcp)
-#gcm_list <- gsub(paste("crossing_",rcp,"_",sep=""),"",gcm_list)
-#gcm_list <- gsub(".RData","",gcm_list)
 
 #list of years and decades
 yr_list <- c(2006:2098)
@@ -77,8 +75,8 @@ dc_list <- c((min(yr_list)+10):(max(yr_list)-9))
 #loop through crops
 for (i in 1:nrow(thresh_val)) {
   #i <- 3
-  crop_name <- paste(thresh_val$crops[i])
-  thr <- thresh_val$threshold[i]
+  crop_name <- paste(thresh_val$Crop[i])
+  thr <- thresh_val$Thr_CRU30[i]
   cat("\n...processing crop=",crop_name,"\n")
   
   #folder of dfil_dir per crop
@@ -96,7 +94,7 @@ for (i in 1:nrow(thresh_val)) {
     
     if (!file.exists(paste(dfil_crop,"/crossing_",rcp,"_",gcm,".RData",sep=""))) {
       #raster stack with all years
-      yr_stk <- stack(paste(rcp_run,"/",gcm,"/",yr_list,"/",crop_name,sep=""))
+      yr_stk <- stack(paste(rcp_run,"/",gcm,"/r1i1p1/",yr_list,"/",crop_name,"_suit.tif",sep=""))
       
       #loop decades
       dc_out_stk <- c()
