@@ -256,18 +256,18 @@ GCMDailyProcessHistorical <- function(startModel=1, endModel=2){
   dirbase <- "S:/observed/gridded_products/wfd"
   gcmHisDir <- "T:/gcm/cmip5/raw/daily/historical"
   gcmFutDir <- "T:/gcm/cmip5/raw/daily/rcp_45"
-  dirout <- "D:/cenavarro/bid/gcm_raw_res"
-  diroutcut <- "D:/cenavarro/bid/gcm_0_5deg_lat"
+  dirout <- "Z:/bid/gcm_raw_res"
+  diroutcut <- "Z:/bid/cenavarro/bid/gcm_0_5deg_lat"
   # diroutcut <- "W:/bid/gcm_0_5deg_lat"
   
 #   gcmList <- list.dirs(dirout, recursive = FALSE, full.names = FALSE)
   
   gcmList <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "cnrm_cm5", "csiro_mk3_6_0", "gfld_esm2g", "gfld_esm2m", "inm_cm4", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "ipsl_cm5b_lr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_cc", "mohc_hadgem2_es", "mpi_esm_lr", "mpi_esm_mr", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
-  
+  gcm <- gcmList[19]
 #   varlist <- c("tasmax", "tasmin", "pr", "rsds")
   varlist <- c("pr", "rsds")  
   mthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
-  
+  var <- varlist[2]
   metList <- c("avg", "std")
   
   # Get a list of month with and withour 0 in one digit numbers
@@ -305,6 +305,20 @@ GCMDailyProcessHistorical <- function(startModel=1, endModel=2){
           system(paste("cdo seldate,1950-01-01,2000-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1950_2000_day.nc", sep=""))
         }
         
+        
+        system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "D:/Documents/Downloads/cmip5/rsds_day_MRI-CGCM3_historical_r1i1p1_19600101-19691231.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
+        system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "D:/Documents/Downloads/cmip5/rsds_day_HadGEM2-CC_historical_r1i1p1_19541201-19591130.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
+        
+        system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "D:/Documents/Downloads/cmip5/rsds_day_MRI-CGCM3_historical_r1i1p1_19600101-19691231.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
+        system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
+
+        system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "D:/Documents/Downloads/cmip5/rsds_day_MRI-CGCM3_historical_r1i1p1_19700101-19791231.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
+        system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
+        
+        system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "T:/gcm/cmip5/raw/daily/corrected-raw-cmip5-data/rsds_day_MRI-CGCM3_historical_r1i1p1_20000101-20051231.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
+        system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
+        
+        
         system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", diroutgcmhis, "/", var, "_1950_2000_day.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
         file.remove(paste(diroutgcmhis, "/", var, "_1950_2000_day.nc", sep=""))
         
@@ -314,19 +328,19 @@ GCMDailyProcessHistorical <- function(startModel=1, endModel=2){
         
         system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
         
-        for (yr in 1950:2000){
+        for (yr in 1960:2000){
           system(paste("cdo splitmon ", diroutgcmhis, "/by-month/", var, "_", yr, ".nc ", diroutgcmhis, "/by-month/", var, "_", yr, "_", sep=""))
           file.remove(paste(diroutgcmhis, "/by-month/", var, "_", yr, ".nc", sep=""))
         }
       }
 
       
-      if (!file.exists(paste(diroutgcmhis, "/", var, "_1950_2000_day_lat_std.nc", sep=""))) {
-        
-        system(paste("cdo ydayavg ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc", " ",  diroutgcmhis, "/", var, "_1950_2000_day_lat_avg.nc", sep=""))
-        system(paste("cdo ydaystd ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc", " ",  diroutgcmhis, "/", var, "_1950_2000_day_lat_std.nc", sep=""))
-        
-      }
+#       if (!file.exists(paste(diroutgcmhis, "/", var, "_1950_2000_day_lat_std.nc", sep=""))) {
+#         
+#         system(paste("cdo ydayavg ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc", " ",  diroutgcmhis, "/", var, "_1950_2000_day_lat_avg.nc", sep=""))
+#         system(paste("cdo ydaystd ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc", " ",  diroutgcmhis, "/", var, "_1950_2000_day_lat_std.nc", sep=""))
+#         
+#       }
     }
 
     ## Reggrid GCM Historical

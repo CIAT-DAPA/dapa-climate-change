@@ -1,0 +1,123 @@
+
+R version 3.1.1 (2014-07-10) -- "Sock it to Me"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/1971_2000/by_month")
+> 
+> library(snowfall)
+Loading required package: snow
+> sfInit( parallel=TRUE, cpus=4)
+R Version:  R version 3.1.1 (2014-07-10) 
+
+snowfall 1.84-6 initialized (using snow 0.3-13): parallel execution on 4 CPUs.
+
+> sfLibrary(snowfall)
+Library snowfall loaded.
+Library snowfall loaded in cluster.
+
+> sfLibrary(raster)
+Library raster loaded.
+Library raster loaded in cluster.
+
+Loading required package: sp
+> sfLibrary (sp)
+Library sp loaded.
+Library sp loaded in cluster.
+
+> sfLibrary (rgdal)
+Library rgdal loaded.
+Library rgdal loaded in cluster.
+
+rgdal: version: 0.9-1, (SVN revision 518)
+Geospatial Data Abstraction Library extensions to R successfully loaded
+Loaded GDAL runtime: GDAL 1.11.0, released 2014/04/16
+Path to GDAL shared files: /usr/share/gdal
+Loaded PROJ.4 runtime: Rel. 4.8.0, 6 March 2012, [PJ_VERSION: 480]
+Path to PROJ.4 shared files: (autodetected)
+> sfLibrary (maps)
+Library maps loaded.
+Library maps loaded in cluster.
+
+> sfLibrary (mapproj)
+Library mapproj loaded.
+Library mapproj loaded in cluster.
+
+> sfLibrary(stringr)    ## libreria necesaria para las funciones de tipo caracter
+Library stringr loaded.
+Library stringr loaded in cluster.
+
+> sfLibrary(date)       ## configuracion de fecha tipo dia juliano
+Library date loaded.
+Library date loaded in cluster.
+
+> sfLibrary(ncdf)
+Library ncdf loaded.
+Library ncdf loaded in cluster.
+
+> 
+> sfSource("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/_scripts/mainFunctions.R", encoding="latin1")
+Source /mnt/workspace_cluster_3/bid-cc-agricultural-sector/_scripts/mainFunctions.R loaded.
+Source /mnt/workspace_cluster_3/bid-cc-agricultural-sector/_scripts/mainFunctions.R loaded in cluster.
+
+
+> Meses = c(paste("_0", sep = "", 1:9, ".nc"), paste("_", 
++     sep = "", 10:12, ".nc"))
+
+> Años_Prec = c(paste("prec_19", sep = "", 71:99), 
++     paste("prec_2000"))
+
+> Años_TemMax <- c(paste("tmax_19", sep = "", 71:99), 
++     paste("prec_2000"))
+
+> Años_TemMin <- c(paste("tmin_19", sep = "", 71:99), 
++     paste("prec_2000"))
+
+> Años_Rad <- c(paste("rsds_19", sep = "", 71:99), 
++     paste("prec_2000"))
+
+> SerieAnual_Prec = lapply(1:30, function(i) paste(Años_Prec[i], 
++     Meses, sep = ""))
+
+> SerieAnual_Tmax <- lapply(1:30, function(i) paste(Años_TemMax[i], 
++     Meses, sep = ""))
+
+> SerieAnual_Tmin <- lapply(1:30, function(i) paste(Años_TemMin[i], 
++     Meses, sep = ""))
+
+> SerieAnual_Rad <- lapply(1:30, function(i) paste(Años_Rad[i], 
++     Meses, sep = ""))
+
+> lecturabandas = function(data) {
++     data = paste(data)
++     lectura = raster(paste(data), band = T)
++     dias = sfSapply(1:lectura@file@nbands, .... [TRUNCATED] 
+
+> extraerfechas = function(data, año) {
++     tamaño = sapply(1:12, function(i) dim(data[[año]][[i]])[3])
++     fecha = unlist(lapply(1:length(tamaño) .... [TRUNCATED] 
+
+> Extraervalores_grilla = function(data, año, grilla) {
++     tamdias = sfSapply(1:12, function(i) dim(data[[año]][[i]])[3])
++     return(unlist(sappl .... [TRUNCATED] 
+
+> Create_dir <- function(path) {
++     dir.create(path, showWarnings = F, recursive = T)
++ }
+> sfExportAll()
+> 
+> Raster_precipitacion=sfLapply(1:30,function(j) sfLapply(1:12,function(i) lecturabandas(SerieAnual_Prec[[j]][i])))
