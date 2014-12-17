@@ -1,0 +1,48 @@
+setwd("Z:/bid-cc-agricultural-sector/08-Cells_toRun")
+
+load("Maize.loc.cal.Rdat")
+ind_good = which(is.na(Maize.loc.cal$mirca.irr.start)==F|is.na(Maize.loc.cal$mirca.rf.start)==F)
+maize_coord = Maize.loc.cal[ind_good,c('Longitude','Latitude')]
+
+load("Potatoes.loc.cal.Rdat")
+ind_good = which(is.na(Potatoes.loc.cal$mirca.irr.start)==F|is.na(Potatoes.loc.cal$mirca.rf.start)==F)
+potato_coord = Potatoes.loc.cal[ind_good,c('Longitude','Latitude')]
+
+load("Rice.loc.cal.Rdat")
+ind_good = which(is.na(Rice.loc.cal$mirca.irr.start)==F|is.na(Rice.loc.cal$mirca.rf.start)==F)
+rice_coord = Rice.loc.cal[ind_good,c('Longitude','Latitude')]
+
+load("Soybeans.loc.cal.Rdat")
+ind_good = which(is.na(Soybeans.loc.cal$mirca.irr.start)==F|is.na(Soybeans.loc.cal$mirca.rf.start)==F)
+soy_coord = Soybeans.loc.cal[ind_good,c('Longitude','Latitude')]
+
+load("Wheat.loc.cal.Rdat")
+ind_good = which(is.na(Wheat.loc.cal$mirca.irr.start)==F|is.na(Wheat.loc.cal$mirca.rf.start)==F)
+wheat_coord = Wheat.loc.cal[ind_good,c('Longitude','Latitude')]
+
+#Merge todos las coordenatas
+todos_coord = rbind(maize_coord,potato_coord,rice_coord,soy_coord,wheat_coord)
+todos_coord = unique(todos_coord)
+
+#Comparar con coordenatas de datos climaticos
+load('coord_climaticos.Rdat')
+ind_clim = match(paste(todos_coord$Longitude,todos_coord$Latitude),paste(coordenadas$x,coordenadas$y))
+ind_bad = which(is.na(ind_clim))
+todos_coord = todos_coord[-ind_bad,]
+
+#Agregar indice de datos de suelo
+load('soil_coord.Rdat')
+ind_soils = match(paste(todos_coord$Longitude,todos_coord$Latitude),paste(soil_coord[,1],soil_coord[,2]))
+todos_coord$soils = soil_coord[ind_soils,3]
+
+#save coordinate info
+save(todos_coord,file='coordenadas_todos.Rdat')
+
+class(ind_soils)
+dim(todos_coord)
+
+x<-rnorm(100)
+
+boxplot(x)
+fivenum(x)
+summary(x)

@@ -1,0 +1,14 @@
+## Lectura de Archivos Linea Base  se sabe que van desde 1960-1990 en total 31 años de evaluacion
+## se crea la funcion de los archivos anuales para su posterior lectura  (Precipitacion) (Temperatura Maxima)
+
+Meses=c(paste("_0",sep="",1:9,".nc"),paste("_",sep="",10:12,".nc"))
+Años_Prec=c(paste("prec_19",sep="",71:99),paste("prec_2000"))
+Años_TemMax<-c(paste("tmax_19",sep="",71:99),paste("prec_2000"))
+Años_TemMin<-c(paste("tmin_19",sep="",71:99),paste("prec_2000"))
+Años_Rad<-c(paste("rsds_19",sep="",71:99),paste("prec_2000"))
+
+## se escriben los datos de tal forma que se tenga toda la serie para un mes en especifico
+SerieAnual_Prec=lapply(1:30,function(i) paste(Años_Prec[i],Meses,sep=""))
+SerieAnual_Tmax<-lapply(1:30,function(i) paste(Años_TemMax[i],Meses,sep=""))
+SerieAnual_Tmin<-lapply(1:30,function(i) paste(Años_TemMin[i],Meses,sep=""))
+SerieAnual_Rad<-lapply(1:30,function(i) paste(Años_Rad[i],Meses,sep=""))

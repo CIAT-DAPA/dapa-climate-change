@@ -1,0 +1,26 @@
+setwd("D:/CIAT/Simulacion Modelos/datos riego Mirca2000")
+library(raster)
+library(rgdal)
+
+
+x<-raster("MONTHLY_GROWING_AREA_TOTAL_MONTH_01_HA.ASC")
+## so rather than
+## writeRaster(x, "file.flt")
+writeGDAL(as(x, "SpatialGridDataFrame"), "file.flt", drivername = "EHdr")
+
+h <- read.table(paste("crop_01_irrigated_12", ".hdr", sep=""), 
+                col.names=c("field", "value"), as.is=TRUE)
+#
+# Extract the header values.
+#
+header <- type.convert(h[1:6,"value"]); names(header) <- h[1:6,"field"]
+nodata <- header["NODATA_value"]
+x0 <- header["xllcorner"]
+y0 <- header["yllcorner"]
+cellsize <- header["cellsize"]
+byteorder <- ifelse(h[7, "value"]=="LSBFIRST", "little", "big")
+#
+# Read the data.
+#
+x <- readBin(paste("crop_01_irrigated_12", ".flt", sep=""), 
+             double(), n=2160*4320, endian=byteorder)
