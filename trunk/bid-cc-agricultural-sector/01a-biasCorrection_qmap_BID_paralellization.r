@@ -1,16 +1,16 @@
 ## Parameters ###
 library(snowfall)
-sfInit(parallel=T,cpus=1) #initiate cluster
+sfInit(parallel=T,cpus=10) #initiate cluster
 
 stop("error")
 source("01a-biasCorrection_qmap_BID.R")
 
 #Set directories
 wfdDir <- "//dapadfs/data_cluster_4/observed/gridded_products/wfd"
-gcmHistDir <- "Z:/bid/gcm_0_5deg_lat"
+gcmHistDir <- "D:/cenavarro/bid/gcm_0_5deg_lat"
 gcmFutDir <- "//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/gcm_0_5deg_lat/"
-outDir <- "Z:/bid/bc_0_5deg_lat"
-var <- "prec"
+outDir <- "D:/cenavarro/bid/bc_0_5deg_lat"
+var <- "rsds"
 
 # Export functions
 sfExport("BC_Qmap")

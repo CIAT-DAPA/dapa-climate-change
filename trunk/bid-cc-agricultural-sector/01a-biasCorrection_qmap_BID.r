@@ -11,7 +11,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   setwd(outDir)
   
   if (!file.exists(paste(outDir, "/", gcm, "/1971_2000", sep=""))) {dir.create(paste(outDir, "/", gcm, "/1971_2000", sep=""), recursive=T)}
-  if (!file.exists(paste(outDir, "/", gcm, "/2020_2049", sep=""))) {dir.create(paste(outDir, "/", gcm, "/1971_2000", sep=""), recursive=T)}
+  if (!file.exists(paste(outDir, "/", gcm, "/2020_2049", sep=""))) {dir.create(paste(outDir, "/", gcm, "/2020_2049", sep=""), recursive=T)}
   
   #Load mask for Latin America
   maskWFDLat <- raster(paste(wfdDir,"/raw/mask_wfd_lat.nc",sep=''))
@@ -49,7 +49,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   
   for (j in 1:length(years.gcm.hist))  {
     for (k in 1:12)  {
-      gcmHist = stack(paste(gcmHisDir,'/',gcm,'/1950_2000/by-month/',var,'_',years.gcm.hist[j],'_',months[k],'.nc',sep=''))  
+      gcmHist = stack(paste(gcmHistDir, '/',gcm,'/1950_2000/by-month/',var,'_',years.gcm.hist[j],'_',months[k],'.nc',sep=''))  
       gcmHist = mask(gcmHist, maskWFDLat)  #cut to Latin America
       gcmHist.dat = rasterToPoints(gcmHist)
       n = dim(gcmHist.dat)[2] - 2  #calculate number of days in month
@@ -66,7 +66,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   gcmFut.dat.all = array(NA,dim=c(ncell,length(dates.gcm.fut)))
   for (j in 1:length(years.gcm.fut)) {
     for (k in 1:12)  {
-      gcmFut = stack(paste(gcmFutDir,'/',gcm,'/2020_2049/by-month/',var,'/',years.gcm.fut[j],'_',months[k],'.nc',sep=''))
+      gcmFut = stack(paste(gcmFutDir,'/',gcm,'/2020_2049/by-month/',var,'_',years.gcm.fut[j],'_',months[k],'.nc',sep=''))
       gcmFut = mask(gcmFut, maskWFDLat)  #cut to Latin America
       gcmFut.dat = rasterToPoints(gcmFut)  #extract values (gridcells by days)
       n = dim(gcmFut.dat)[2] - 2  #calculate number of days in month
@@ -78,68 +78,78 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   }
   
   
-  batchs <- floor(ncell / 10) + 1
+  batchs <- floor(ncell / 1000) + 1
+
+  month.hist = month(dates.gcm.hist)
+  mday.hist = mday(dates.gcm.hist)
+  month.hist2 = month(dates.gcm.fut)
+  mday.hist2 = mday(dates.gcm.fut)
+  dates_nonleap = seq(as.Date('2001-01-01'),as.Date('2001-12-31'),by=1)  #example year  
   
   for (n in 1:batchs){
     
-    staCell <- ((n - 1) * 10) + 1
-    if (n == batchs){endCell <- ncell} else {endCell <- staCell + 9}
+    staCell <- ((n - 1) * 1000) + 1
+    if (n == batchs){endCell <- ncell} else {endCell <- staCell + 999}
     
     ncellArray <- endCell - staCell + 1
     
     #Apply bias-correction looping by gridcell (j) and day of year (k)
     gcmHistBC = array(NA,dim=c(ncellArray,length(dates.gcm.hist)))
-    gcmFutBC = array(NA,dim=c(ncellArray,length(dates.gcm.fut)))
-    month.hist = month(dates.gcm.hist)
-    mday.hist = mday(dates.gcm.hist)
-    month.hist2 = month(dates.gcm.fut)
-    mday.hist2 = mday(dates.gcm.fut)
-    dates_nonleap = seq(as.Date('2001-01-01'),as.Date('2001-12-31'),by=1)  #example year    
+    gcmFutBC = array(NA,dim=c(ncellArray,length(dates.gcm.fut)))  
     
+    row <- 1
     
-    for (j in staCell:endCell){ #cells
-      for (k in 1:365) {  #loop through days of year, selecting 30-day moving window around each day
-        #do not fit Feb. 29 (NA for GCM's)
+    if (!file.exists(paste(outDir, "/", gcm, "/2020_2049/", "bc_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))) {
+    
+      for (j in staCell:endCell){ #cells
         
-        #Need to find indices of all days "k" and then 15 days before and after by year
-        ind_k = which(month.hist == month(dates_nonleap[k]) & mday.hist == mday(dates_nonleap[k]))  #historical
-        ind_k2 = which(month.hist2 == month(dates_nonleap[k]) & mday.hist2 == mday(dates_nonleap[k]))  #future
-        for (d in 1:length(ind_k))  {
-          if (d==1) {ind.all = (ind_k[d]-15):(ind_k[d]+15)}  else{
-            ind.all = c(ind.all,(ind_k[d]-15):(ind_k[d]+15))
+        for (k in 1:365) {  #loop through days of year, selecting 30-day moving window around each day
+          #do not fit Feb. 29 (NA for GCM's)
+          
+          #Need to find indices of all days "k" and then 15 days before and after by year
+          ind_k = which(month.hist == month(dates_nonleap[k]) & mday.hist == mday(dates_nonleap[k]))  #historical
+          ind_k2 = which(month.hist2 == month(dates_nonleap[k]) & mday.hist2 == mday(dates_nonleap[k]))  #future
+          for (d in 1:length(ind_k))  {
+            if (d==1) {ind.all = (ind_k[d]-15):(ind_k[d]+15)}  else{
+              ind.all = c(ind.all,(ind_k[d]-15):(ind_k[d]+15))
+            }
           }
+          ind.all = ind.all[ind.all>0 & ind.all<dim(hist.dat.all)[2]]  #get rid of values outside of historical range
+          
+          #Extract all years (for cell j and day k with moving window) for historical obs, GCM past 
+          hist.dat.i = hist.dat.all[j,ind.all]
+          gcmHist.dat.i = gcmHist.dat.all[j,ind.all]
+          
+          #Fit model b/w historical obs & GCM past
+          #make sure years are consistent here between past obs & GCM hist!
+          if (var == "prec"){
+            qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=T, na.rm=T)  
+          } else {
+            qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=F, na.rm=T)  
+          }
+          
+          #Then apply bias correction to GCM past & future (just day k)
+          error.p = tryCatch( { #keep going if can't apply model (all zeros in obs)  
+            gcmHistBC[row,ind_k] = doQmap(x=gcmHist.dat.all[j,ind_k],qm.hist.fit, type="linear")  #should this be j,ind_k for model input?  verify!
+            gcmFutBC[row,ind_k2] = doQmap(x=gcmFut.dat.all[j,ind_k2],qm.hist.fit, type="linear")}
+          , error=function(e) e
+          )
+          if(inherits(error.p,'Error'))  next
+    
+  #         #MAYBE SAVE RESULTS FOR BLOCKS OF 100 CELLS TO AVOID LOSING STUFF ON CRASHES?
+  #         if ((j %% 1000)==0){  #multiples of 100
+  #           #GUARDAR!!
+  #           save(gcmHistBC,file=paste('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/1971_2000/gcmHistBC_1950_2000_cells',(j-99),'_',j,'.Rdat',sep=''))
+  #           save(gcmFutBC,file=paste('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/2020_2049/gcmFutBC_1950_2000_cells',(j-99),'_',j,'.Rdat',sep=''))
+  #         }
+            print(paste(j,k))
         }
-        ind.all = ind.all[ind.all>0 & ind.all<dim(hist.dat.all)[2]]  #get rid of values outside of historical range
-        
-        #Extract all years (for cell j and day k with moving window) for historical obs, GCM past 
-        hist.dat.i = hist.dat.all[j,ind.all]
-        gcmHist.dat.i = gcmHist.dat.all[j,ind.all]
-        
-        #Fit model b/w historical obs & GCM past
-        #make sure years are consistent here between past obs & GCM hist!
-        if (var == "prec"){
-          qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=T, na.rm=T)  
-        } else {
-          qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=F, na.rm=T)  
-        }
-        
-        #Then apply bias correction to GCM past & future (just day k)
-        gcmHistBC[j,ind_k] = doQmap(x=gcmHist.dat.all[j,ind_k],qm.hist.fit, type="linear")  #should this be j,ind_k for model input?  verify!
-        gcmFutBC[j,ind_k] = doQmap(x=gcmFut.dat.all[j,ind_k2],qm.hist.fit, type="linear")
   
-#         #MAYBE SAVE RESULTS FOR BLOCKS OF 100 CELLS TO AVOID LOSING STUFF ON CRASHES?
-#         if ((j %% 1000)==0){  #multiples of 100
-#           #GUARDAR!!
-#           save(gcmHistBC,file=paste('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/1971_2000/gcmHistBC_1950_2000_cells',(j-99),'_',j,'.Rdat',sep=''))
-#           save(gcmFutBC,file=paste('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/2020_2049/gcmFutBC_1950_2000_cells',(j-99),'_',j,'.Rdat',sep=''))
-#         }
-        
-        # Saving Results
-        save(gcmHistBC, file=paste(outDir, "/", gcm, "/1971_2000/", "bc_1950_2000_cells_", staCell, '_', endCell, '.Rdat',sep=''))
-        save(gcmFutBC, file=paste(outDir, "/", gcm, "/2020_2049/", "bc_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))
-
-        print(paste(j,k))
+      row <- row + 1
       }
+      # Saving Results
+      save(gcmHistBC, file=paste(outDir, "/", gcm, "/1971_2000/", "bc_1950_2000_cells_", staCell, '_', endCell, '.Rdat',sep=''))
+      save(gcmFutBC, file=paste(outDir, "/", gcm, "/2020_2049/", "bc_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))
     }
   }
 }
