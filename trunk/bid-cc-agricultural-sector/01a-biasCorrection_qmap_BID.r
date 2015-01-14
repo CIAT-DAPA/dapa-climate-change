@@ -8,6 +8,9 @@ library(lubridate)
 
 BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/wfd", gcmHistDir="Z:/bid/gcm_0_5deg_lat", gcmFutDir="//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/gcm_0_5deg_lat", outDir="Z:/bid/bc_0_5deg_lat", var="prec", gcm="bcc_csm1_1") {
   
+  if(var == "prec"){varmod <- "Rainf"}
+  if(var == "rsds"){varmod <- "SWdown"}
+  
   setwd(outDir)
   
   if (!file.exists(paste(outDir, "/", gcm, "/1971_2000", sep=""))) {dir.create(paste(outDir, "/", gcm, "/1971_2000", sep=""), recursive=T)}
@@ -26,7 +29,13 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   
   for (j in 1:length(years.hist))  {
     for (k in 1:12)  {
-      WFD = stack(paste(wfdDir,'/nc-files/wfd_0_5_deg_lat/Rainf_daily_WFD_GPCC/lat_Rainf_daily_WFD_GPCC_',years.hist[j],months[k],'.nc',sep=''))
+      
+      if (var == "prec"){
+        WFD = stack(paste(wfdDir,'/nc-files/wfd_0_5_deg_lat/', varmod, '_daily_WFD_GPCC/lat_', varmod, '_daily_WFD_GPCC_',years.hist[j],months[k],'.nc',sep=''))        
+      } else {
+        WFD = stack(paste(wfdDir,'/nc-files/wfd_0_5_deg_lat/', varmod, '_daily_WFD/lat_', varmod, '_daily_WFD_',years.hist[j],months[k],'.nc',sep=''))        
+      }
+      
       xmin(WFD) = xmin(WFD) - 360  #shift to proper longitude
       xmax(WFD) = xmax(WFD) - 360
       WFD = mask(WFD, maskWFDLat)  #cut to Latin America
@@ -99,7 +108,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
     
     row <- 1
     
-    if (!file.exists(paste(outDir, "/", gcm, "/2020_2049/", "bc_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))) {
+    if (!file.exists(paste(outDir, "/", gcm, "/2020_2049/", "bc_", var, "_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))) {
     
       for (j in staCell:endCell){ #cells
         
@@ -148,8 +157,8 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
       row <- row + 1
       }
       # Saving Results
-      save(gcmHistBC, file=paste(outDir, "/", gcm, "/1971_2000/", "bc_1950_2000_cells_", staCell, '_', endCell, '.Rdat',sep=''))
-      save(gcmFutBC, file=paste(outDir, "/", gcm, "/2020_2049/", "bc_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))
+      save(gcmHistBC, file=paste(outDir, "/", gcm, "/1971_2000/", "bc_", var, "_1950_2000_cells_", staCell, '_', endCell, '.Rdat',sep=''))
+      save(gcmFutBC, file=paste(outDir, "/", gcm, "/2020_2049/", "bc_", var, "_2020_2049_cells_", staCell, '_', endCell, '.Rdat',sep=''))
     }
   }
 }
