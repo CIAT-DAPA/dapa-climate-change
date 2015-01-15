@@ -27,27 +27,44 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   ncell <- dim(rasterToPoints(maskWFDLat))[1]
   hist.dat.all = array(NA,dim=c(ncell,length(dates.hist)))  #gridcells x dates
   
-  for (j in 1:length(years.hist))  {
-    for (k in 1:12)  {
+  for (j in 1:length(years.hist)){
+    for (k in 1:12){
       
       if (var == "prec"){
+        
         WFD = stack(paste(wfdDir,'/nc-files/wfd_0_5_deg_lat/', varmod, '_daily_WFD_GPCC/lat_', varmod, '_daily_WFD_GPCC_',years.hist[j],months[k],'.nc',sep=''))        
+        
+        xmin(WFD) = xmin(WFD) - 360  #shift to proper longitude
+        xmax(WFD) = xmax(WFD) - 360
+        WFD = mask(WFD, maskWFDLat)  #cut to Latin America
+        hist.dat = rasterToPoints(WFD)  #extract values (gridcells by days)
+        if (j==1 & k==1)  {
+          cells.loc = hist.dat[,1:2]  #extract lat/ long's of gridcells
+        }
+        n = dim(hist.dat)[2] - 2  #calculate number of days in month
+        dates.mo = seq(as.Date(paste(years.hist[j],'-',months[k],'-01',sep='')),as.Date(paste(years.hist[j],'-',months[k],'-',n,sep='')),by=1)
+        ind.mo = match(dates.mo,dates.hist)  #find indices of this month in big dates vector
+        hist.dat.all[,ind.mo] = hist.dat[,3:(n+2)]*86400  #convert to mm before putting in big matrix
+        print(paste(j,k))  #print month & year of loop
+        
       } else {
+        
         WFD = stack(paste(wfdDir,'/nc-files/wfd_0_5_deg_lat/', varmod, '_daily_WFD/lat_', varmod, '_daily_WFD_',years.hist[j],months[k],'.nc',sep=''))        
+        
+        xmin(WFD) = xmin(WFD) - 360  #shift to proper longitude
+        xmax(WFD) = xmax(WFD) - 360
+        WFD = mask(WFD, maskWFDLat)  #cut to Latin America
+        hist.dat = rasterToPoints(WFD)  #extract values (gridcells by days)
+        if (j==1 & k==1)  {
+          cells.loc = hist.dat[,1:2]  #extract lat/ long's of gridcells
+        }
+        n = dim(hist.dat)[2] - 2  #calculate number of days in month
+        dates.mo = seq(as.Date(paste(years.hist[j],'-',months[k],'-01',sep='')),as.Date(paste(years.hist[j],'-',months[k],'-',n,sep='')),by=1)
+        ind.mo = match(dates.mo,dates.hist)  #find indices of this month in big dates vector
+        hist.dat.all[,ind.mo] = hist.dat[,3:(n+2)]  #convert to mm before putting in big matrix
+        print(paste(j,k))  #print month & year of loop
+        
       }
-      
-      xmin(WFD) = xmin(WFD) - 360  #shift to proper longitude
-      xmax(WFD) = xmax(WFD) - 360
-      WFD = mask(WFD, maskWFDLat)  #cut to Latin America
-      hist.dat = rasterToPoints(WFD)  #extract values (gridcells by days)
-      if (j==1 & k==1)  {
-        cells.loc = hist.dat[,1:2]  #extract lat/ long's of gridcells
-      }
-      n = dim(hist.dat)[2] - 2  #calculate number of days in month
-      dates.mo = seq(as.Date(paste(years.hist[j],'-',months[k],'-01',sep='')),as.Date(paste(years.hist[j],'-',months[k],'-',n,sep='')),by=1)
-      ind.mo = match(dates.mo,dates.hist)  #find indices of this month in big dates vector
-      hist.dat.all[,ind.mo] = hist.dat[,3:(n+2)]*86400  #convert to mm before putting in big matrix
-      print(paste(j,k))  #print month & year of loop
     }
   }
   
@@ -87,7 +104,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   }
   
   
-  batchs <- floor(ncell / 1000) + 1
+  batchs <- floor(ncell / 10) + 1
 
   month.hist = month(dates.gcm.hist)
   mday.hist = mday(dates.gcm.hist)
@@ -100,7 +117,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
     staCell <- ((n - 1) * 1000) + 1
     if (n == batchs){endCell <- ncell} else {endCell <- staCell + 999}
     
-    ncellArray <- endCell - staCell + 1
+    ncellArray <- endCell - staCell + 1000
     
     #Apply bias-correction looping by gridcell (j) and day of year (k)
     gcmHistBC = array(NA,dim=c(ncellArray,length(dates.gcm.hist)))
