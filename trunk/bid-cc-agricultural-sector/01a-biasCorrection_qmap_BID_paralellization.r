@@ -1,6 +1,6 @@
 ## Parameters ###
 library(snowfall)
-sfInit(parallel=T,cpus=10) #initiate cluster
+sfInit(parallel=T,cpus=20) #initiate cluster
 
 stop("error")
 source("01a-biasCorrection_qmap_BID.R")
