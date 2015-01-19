@@ -148,27 +148,25 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
           
           #Fit model b/w historical obs & GCM past
           #make sure years are consistent here between past obs & GCM hist!
-          if (var == "prec"){
-            qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=T, na.rm=T)  
-          } else {
-            qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=F, na.rm=T)  
-          }
+
           
           #Then apply bias correction to GCM past & future (just day k)
           error.p = tryCatch( { #keep going if can't apply model (all zeros in obs)  
+            
+            if (var == "prec"){
+              qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=T, na.rm=T)  
+            } else {
+              qm.hist.fit = fitQmap(obs = hist.dat.i, mod = gcmHist.dat.i, method="RQUANT",qstep=0.01,wet.day=F, na.rm=T)  
+            }
+            
             gcmHistBC[row,ind_k] = doQmap(x=gcmHist.dat.all[j,ind_k],qm.hist.fit, type="linear")  #should this be j,ind_k for model input?  verify!
             gcmFutBC[row,ind_k2] = doQmap(x=gcmFut.dat.all[j,ind_k2],qm.hist.fit, type="linear")}
+            
           , error=function(e) e
           )
           if(inherits(error.p,'Error'))  next
     
-  #         #MAYBE SAVE RESULTS FOR BLOCKS OF 100 CELLS TO AVOID LOSING STUFF ON CRASHES?
-  #         if ((j %% 1000)==0){  #multiples of 100
-  #           #GUARDAR!!
-  #           save(gcmHistBC,file=paste('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/1971_2000/gcmHistBC_1950_2000_cells',(j-99),'_',j,'.Rdat',sep=''))
-  #           save(gcmFutBC,file=paste('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat/bcc_csm1_1/2020_2049/gcmFutBC_1950_2000_cells',(j-99),'_',j,'.Rdat',sep=''))
-  #         }
-            print(paste(j,k))
+          print(paste(j,k))
         }
   
       row <- row + 1
