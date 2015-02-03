@@ -1,5 +1,4 @@
 require(raster)
-require(chron)
 
 extractDailyValues <- function(var="prec"){
   
@@ -146,6 +145,88 @@ extractDailyValues <- function(var="prec"){
     
   }
   
+}
+
+
+extractDailyValuesGCMRaw <- function(var="tasmin"){
+  #Arguments
+  require(raster)
+  require(ncdf)
+  require(rgdal)
+  
+  var <- "tasmin"
+  iDir <- "D:/cenavarro/bid/gcm_raw_res"
+  stFile <- "W:/bid-cc-agricultural-sector/01-climate-data/sample_type_climates.csv"
+  oDir <- "W:/bid-cc-agricultural-sector/01-climate-data/bc_extracts"
+  
+  gcmList <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "cnrm_cm5", "csiro_mk3_6_0", "gfld_esm2g", "gfld_esm2m", "inm_cm4", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "ipsl_cm5b_lr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_cc", "mohc_hadgem2_es", "mpi_esm_lr", "mpi_esm_mr", "mri_cgcm3", "ncc_noresm1_m")
+  
+  if (!file.exists(oDir)) {dir.create(oDir)}
+  
+  stFile <- read.csv(stFile)
+  coordinates <- stFile[8:9]
+  
+  years.gcm.hist = 1971:2000
+  years.gcm.fut = 2020:2049
+  
+  months = c(paste(0,1:9,sep=''),10:12)
+  
+  dates.gcm.hist = seq(as.Date('1971-01-01'),as.Date('2000-12-31'),by=1)
+  dates.gcm.fut = seq(as.Date('2020-01-01'),as.Date('2049-12-31'),by=1)
+  
+  if (var == "tasmax"){varmod <- "tmax"}
+  if (var == "tasmin"){varmod <- "tmin"}
+  if (var == "pr"){varmod <- "prec"}
+  if (var == "rsds"){varmod <- "rsds"}
+  
+  dataMatrix <- c()
+  
+  for (i in 8:20){
+    
+    for (j in 1:length(years.gcm.hist)){
+      
+      for(k in 1:12){
+        
+        cat(paste(gcmList[i], years.gcm.hist[j], months[k], "\n"))
+        
+        gcmHist <- stack(paste(iDir, "/", gcmList[i], "/1950_2000/by-month/", var, "_", years.gcm.hist[j], "_", months[k], ".nc",sep=""))
+        
+        xmin(gcmHist) <- xmin(gcmHist)-360
+        xmax(gcmHist) <- xmax(gcmHist)-360
+        
+        value <- extract(gcmHist, coordinates)
+        value <- value - 273.15
+        
+        dataMatrix <- rbind(dataMatrix, cbind(gcmList[i], years.gcm.hist[j], months[k], t(value)))
+      }
+      
+    }
+    
+    for (j in 1:length(years.gcm.fut)){
+      
+      for(k in 1:12){
+        
+        cat(paste(gcmList[i], years.gcm.fut[j], months[k], "\n"))
+        
+        gcmFut <- stack(paste("W:/bid-cc-agricultural-sector/01-climate-data/gcm_raw_res", "/", gcmList[i], "/2020_2049/by-month/", var, "_", years.gcm.fut[j], "_", months[k], ".nc",sep=""))
+        
+        xmin(gcmFut) <- xmin(gcmFut)-360
+        xmax(gcmFut) <- xmax(gcmFut)-360
+        
+        value <- extract(gcmFut, coordinates)
+        value <- value - 273.15
+        
+        dataMatrix <- rbind(dataMatrix, cbind(gcmList[i], years.gcm.fut[j], months[k], t(value)))
+      }
+      
+    }
+    
+  }
+  
+  colnames(dataMatrix) <- c("GCM", "Year", "Month", stFile$Cell_ID_prec_rsds)
+  
+  #   Writting csv file 
+  write.csv(dataMatrix, paste(oDir, "/gcm_raw_daily_", varmod, ".csv", sep=""), row.names=F)
 }
 
 
