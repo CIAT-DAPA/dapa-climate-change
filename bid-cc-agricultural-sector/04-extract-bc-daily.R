@@ -1,14 +1,15 @@
 require(raster)
 require(chron)
 
-extractDailyValues <- function(var="rain"){
+extractDailyValues <- function(var="prec"){
   
   #Arguments
-  iDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_0_5deg_lat"
+  iDir <- "W:/bid-cc-agricultural-sector/01-climate-data/bc_0_5deg_lat"
   stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates.csv"
   oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
   
   gcmList <- list.dirs(iDir, recursive = FALSE, full.names = FALSE)
+  gcmList <- c(gcmList[1:14], gcmList[16:20])
   
   if (!file.exists(oDir)) {dir.create(oDir)}
   
@@ -67,74 +68,81 @@ extractDailyValues <- function(var="rain"){
     
   } else {
     
-    databygcmhist <- c()   
-    cellsID <- stFile$Cell_ID_prec_rsds
     
-    for (i in 1:length(gcmList)){
+    if (!file.exists(paste(oDir, "/bc_daily_", var, "_hist.csv", sep=""))){
       
-      gcmHist <- load(paste(iDir, "/", gcmList[i], "/1971_2000/bc_", var, "_1950_2000.Rdat",sep=""))
+      databygcmhist <- c()   
+      cellsID <- stFile$Cell_ID_prec_rsds
       
-      #       dates <- names(dataMatrix[,4:length])
-      
-      Years <- format(as.Date(dates.gcm.hist), "%Y")
-      Months <- format(as.Date(dates.gcm.hist), "%m")
-      Days <- format(as.Date(dates.gcm.hist), "%d")
-      
-      databyid <- c()
-      
-      for(j in 1:length(cellsID)){
+      for (i in 1:length(gcmList)){
         
-        selID <- dataMatrix[which(dataMatrix$CellID == cellsID[j]),]
+        gcmHist <- load(paste(iDir, "/", gcmList[i], "/1971_2000/bc_", var, "_1950_2000.Rdat",sep=""))
         
-        databyid <- cbind(databyid, t(selID[,7674:ncol(selID)]))
+        #       dates <- names(dataMatrix[,4:length])
         
-        cat(gcmList[i], cellsID[j], "\n")
+        Years <- format(as.Date(dates.gcm.hist), "%Y")
+        Months <- format(as.Date(dates.gcm.hist), "%m")
+        Days <- format(as.Date(dates.gcm.hist), "%d")
+        
+        databyid <- c()
+        
+        for(j in 1:length(cellsID)){
+          
+          selID <- dataMatrix[which(dataMatrix$CellID == cellsID[j]),]
+          
+          databyid <- cbind(databyid, t(selID[,7674:ncol(selID)]))
+          
+          cat(gcmList[i], cellsID[j], "\n")
+        }
+        
+        databygcmhist <- rbind(databygcmhist, cbind(gcmList[i], Years, Months, Days, databyid))
+        
       }
       
-      databygcmhist <- rbind(databygcmhist, cbind(gcmList[i], Years, Months, Days, databyid))
+      colnames(databygcmhist) <- c("GCM", "Year", "Month", "Day", stFile$Cell_ID_prec_rsds)
       
+      #   Writting csv file 
+      write.csv(databygcmhist, paste(oDir, "/bc_daily_", var, "_hist.csv", sep=""), row.names=F)
     }
     
-    colnames(databygcmhist) <- c("GCM", "Year", "Month", "Day", stFile$Cell_ID_prec_rsds)
     
-    #   Writting csv file 
-    write.csv(databygcmhist, paste(oDir, "/bc_daily_", var, "_hist.csv", sep=""), row.names=F)
     
-#     
-#     databygcmfut <- c()   
-#     cellsID <- stFile$Cell_ID_prec_rsds
-#     
-#     for (i in 1:length(gcmList)){
-#       
-#       gcmHist <- load(paste(iDir, "/", gcmList[i], "/2020_2049/bc_", var, "_2020_2049.Rdat",sep=""))
-#       
-#       #       dates <- names(dataMatrix[,4:length])
-#       
-#       Years <- format(as.Date(dates.gcm.fut), "%Y")
-#       Months <- format(as.Date(dates.gcm.fut), "%m")
-#       Days <- format(as.Date(dates.gcm.fut), "%d")
-#       
-#       databyid <- c()
-#       
-#       for(j in 1:length(cellsID)){
-#         
-#         selID <- dataMatrix[which(dataMatrix$CellID == cellsID[j]),]
-#         
-#         databyid <- cbind(databyid, t(selID))
-#         
-#         cat(gcmList[i], cellsID[j], "\n")
-#       }
-#       
-#       databygcmfut <- rbind(databygcmfut, cbind(gcmList[i], Years, Months, Days, databyid))
-#       
-#     }
-#     
-#     colnames(databygcmfut) <- c("GCM", "Year", "Month", "Day", stFile$Cell_ID_prec_rsds)
-#     
-#     #   Writting csv file 
-#     write.csv(databygcmfut, paste(oDir, "/bc_daily_", var, "_hist.csv", sep=""), row.names=F)
-#     
-#     
+    if (!file.exists(paste(oDir, "/bc_daily_", var, "_fut.csv", sep=""))){
+      
+      databygcmfut <- c()   
+      cellsID <- stFile$Cell_ID_prec_rsds
+      
+      Years <- format(as.Date(dates.gcm.fut), "%Y")
+      Months <- format(as.Date(dates.gcm.fut), "%m")
+      Days <- format(as.Date(dates.gcm.fut), "%d")
+      
+      for (i in 1:length(gcmList)){
+        
+        gcmFut <- load(paste(iDir, "/", gcmList[i], "/2020_2049/bc_", var, "_2020_2049.Rdat",sep=""))
+        
+        #       dates <- names(dataMatrix[,4:length])
+        
+        databyid <- c()
+        
+        for(j in 1:length(cellsID)){
+          
+          selID <- dataMatrixFut[which(dataMatrixFut$CellID == cellsID[j]),]
+          
+          databyid <- cbind(databyid, t(selID[,4:ncol(selID)]))
+          
+          cat(gcmList[i], cellsID[j], "\n")
+        }
+        
+        databygcmfut <- rbind(databygcmfut, cbind(gcmList[i], Years, Months, Days, databyid))
+        
+      }
+      
+      colnames(databygcmfut) <- c("GCM", "Year", "Month", "Day", stFile$Cell_ID_prec_rsds)
+      
+      #   Writting csv file 
+      write.csv(databygcmfut, paste(oDir, "/bc_daily_", var, "_fut.csv", sep=""), row.names=F)
+    }
+    
     
   }
   
@@ -228,22 +236,130 @@ extractDailyValuesWFD <- function(var="prec"){
 }
 
 
-aggregateDailyValuesGCM <- function(var="prec"){
+aggregateDailyValuesGCM <- function(var="tmax"){
   
   #Arguments
-  iDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_0_5deg_lat"
-  stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates.csv"
-  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
+  iDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
   
   stFile <- read.csv(stFile)
+  
+  if(!file.exists(paste(iDir, "/bc_monthly_", var, ".csv", sep=""))){
+    
+    outExt <- read.csv(paste(iDir, "/bc_daily_", var, ".csv", sep=""))   
+    
+    if (var == "prec"){
+      mthMean <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN="sum")
+      
+      outExt[outExt == 0] <- NA
+      fun <- function(x) { sd(x, na.rm=T) }
+      mthStd <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN=fun)
+      
+    } else {
+      mthMean <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN="mean")
+      
+      fun <- function(x) { sd(x) }
+      mthStd <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year, outExt$Month), FUN=fun)
+      
+    }
 
-  years.wfd.hist = c(1971:2000, 2020:2049)
+    colnames(mthMean) <- c("GCM","Year", "Month", stFile$Cell_ID_prec_rsds)
+    colnames(mthStd) <- c("GCM","Year", "Month", stFile$Cell_ID_prec_rsds)
+    
+    # Writting csv file 
+    write.csv(mthMean, paste(iDir, "/bc_monthly_", var, ".csv", sep=""), row.names=F)
+    write.csv(mthStd, paste(iDir, "/bc_monthly_", var, "_std.csv", sep=""), row.names=F)
+    
+  }
+    
+}
+
+
+aggregateDailyValuesGCMRaw <- function(var="tmin"){
+  
+  #Arguments
+  stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates.csv"
+  iDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  stFile <- read.csv(stFile)
+  
+  if(!file.exists(paste(iDir, "/gcm_raw_monthly_", var, ".csv", sep=""))){
+    
+    outExt <- read.csv(paste(iDir, "/gcm_raw_daily_", var, ".csv", sep=""))   
+    
+    if (var == "prec"){
+      mthMean <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN="sum")
+      
+      outExt[outExt == 0] <- NA
+      fun <- function(x) { sd(x, na.rm=T) }
+      mthStd <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN=fun)
+      
+    } else {
+      mthMean <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN="mean")
+      
+      fun <- function(x) { sd(x) }
+      mthStd <- aggregate(outExt[,4:length(outExt)], by=list(outExt$GCM, outExt$Year,outExt$Month), FUN=fun)
+      
+    }
+    
+    colnames(mthMean) <- c("GCM","Year", "Month", stFile$Cell_ID_prec_rsds)
+    colnames(mthStd) <- c("GCM","Year", "Month", stFile$Cell_ID_prec_rsds)
+    
+    # Writting csv file 
+    write.csv(mthMean, paste(iDir, "/gcm_raw_monthly_", var, ".csv", sep=""), row.names=F)
+    write.csv(mthStd, paste(iDir, "/gcm_raw_monthly_", var, "_std.csv", sep=""), row.names=F)
+    
+  }
+  
+}
+
+
+aggregateDailyValuesWFD <- function(var="rsds"){
+  
+  #Arguments
+  stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
+  iDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  stFile <- read.csv(stFile)
+  
+  if(!file.exists(paste(iDir, "/wfd_monthly_", var, ".csv", sep=""))){
+    
+    outExt <- read.csv(paste(iDir, "/wfd_daily_", var, ".csv", sep=""))
+    
+    if (var == "prec"){
+      mthMean <- aggregate(outExt[,4:length(outExt)], by=list(outExt$Year,outExt$Month), FUN="sum")
+    } else {
+      mthMean <- aggregate(outExt[,4:length(outExt)], by=list(outExt$Year,outExt$Month), FUN="mean")
+    }
+    
+    fun <- function(x) { sd(x) }
+    mthStd <- aggregate(outExt[,4:length(outExt)], by=list(outExt$Year,outExt$Month), FUN=fun)
+    
+    
+    colnames(mthMean) <- c("Year", "Month", stFile$Cell_ID_prec_rsds)
+    colnames(mthStd) <- c("Year", "Month", stFile$Cell_ID_prec_rsds)
+    
+    # Writting csv file 
+    write.csv(mthMean, paste(iDir, "/wfd_monthly_", var, ".csv", sep=""), row.names=F)
+    write.csv(mthStd, paste(iDir, "/wfd_monthly_", var, "_std.csv", sep=""), row.names=F)
+    
+  }
+  
+}
+
+
+countZeros <- function(var="tmax"){
+  
+  #Arguments
+  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  years = c(1971:2000, 2020:2049)
   
   months = c(paste(0,1:9,sep=''),10:12)
   
-  gcmList <- list.dirs(iDir, recursive = FALSE, full.names = FALSE)
-  
-  if(!file.exists(paste(oDir, "/bc_monthly_", var, ".csv", sep=""))){
+  gcmList <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "cnrm_cm5", "csiro_mk3_6_0", "gfld_esm2g", "gfld_esm2m", "inm_cm4", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "ipsl_cm5b_lr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mpi_esm_lr", "mpi_esm_mr", "mri_cgcm3", "ncc_noresm1_m")
+    
+  if(!file.exists(paste(oDir, "/bc_monthly_", var, "_freq.csv", sep=""))){
     
     outExt <- read.csv(paste(oDir, "/bc_daily_", var, ".csv", sep=""))
     
@@ -253,35 +369,243 @@ aggregateDailyValuesGCM <- function(var="prec"){
       
       selGCM <- outExt[which(outExt$GCM == gcmList[i]),]
       
-      for (j in 1:length(years.wfd.hist)){
+      for (j in 1:length(years)){
         
-        selYr <- selGCM[which(selGCM$Year == years.wfd.hist[j]),]
+        selYr <- selGCM[which(selGCM$Year == years[j]),]
         
         for(k in 1:12){
           
           selMth <- selYr[which(selYr$Month == k),]
           
           if (var == "prec"){
-            mthMean <- colSums(selMth[,4:length(selMth)], na.rm = FALSE, dims = 1)
+            mthZeros <- colSums(selMth[,5:length(selMth)] >= 1, na.rm=T)
+            stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
+            
           } else {
-            mthMean <- colMeans(selMth[,4:length(selMth)], na.rm = FALSE, dims = 1)
+            mthZeros <- colSums(selMth[,4:length(selMth)] >= 30, na.rm=T)
+            stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
           }
           
-          dataMatrix <- rbind(dataMatrix, cbind(gcmList[i], years.wfd.hist[j], k, t(mthMean)))
+          dataMatrix <- rbind(dataMatrix, cbind(gcmList[i], years[j], k, t(mthZeros)))
           
-          cat(gcmList[i], years.wfd.hist[j], k, "\n")
+          cat(gcmList[i], years[j], k, "\n")
           
         }
       }
     }
     
-    colnames(dataMatrix) <- c("GCM","Year", "Month", stFile$Cell_ID_prec_rsds)
+    stFile <- read.csv(stFile)
+    
+    colnames(dataMatrix) <- c("GCM", "Year", "Month", stFile$Cell_ID_prec_rsds)
     
     # Writting csv file 
-    write.csv(dataMatrix, paste(oDir, "/bc_monthly_", var, ".csv", sep=""), row.names=F)
+    write.csv(dataMatrix, paste(oDir, "/bc_monthly_", var, "_freq.csv", sep=""), row.names=F)
+    
   }
   
+}
+
+
+countZerosWfd <- function(var="tmax"){
+  
+  #Arguments
+  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  years = c(1971:2000)
+  
+  months = c(paste(0,1:9,sep=''),10:12)
+  
+  if(!file.exists(paste(oDir, "/wfd_monthly_", var, "_freq.csv", sep=""))){
+    
+    outExt <- read.csv(paste(oDir, "/wfd_daily_", var, ".csv", sep=""))
+    
+    dataMatrix <- c()
+    
+    for (j in 1:length(years)){
+      
+      selYr <- outExt[which(outExt$Year == years[j]),]
+      
+      for(k in 1:12){
+        
+        selMth <- selYr[which(selYr$Month == k),]
+        
+        if (var == "prec"){
+          mthZeros <- colSums(selMth[,4:length(selMth)] != 0, na.rm=T)
+          stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
+          
+        } else {
+          mthZeros <- colSums(selMth[,4:length(selMth)] > 30, na.rm=T)
+          stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates.csv"
+        }
+        
+        dataMatrix <- rbind(dataMatrix, c(years[j], k, as.vector(mthZeros)))
+        
+        cat(years[j], k, "\n")
+        
+      }
+    }
+    
+    
+    stFile <- read.csv(stFile)
+    
+    colnames(dataMatrix) <- c("Year", "Month", stFile$Cell_ID_prec_rsds)
+    
+    # Writting csv file 
+    write.csv(dataMatrix, paste(oDir, "/wfd_monthly_", var, "_freq.csv", sep=""), row.names=F)
+    
+  }
+  
+}
+
+
+30yrStd <- function(var="tmin"){
+  
+  #Arguments
+  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  if(!file.exists(paste(oDir, "/bc_monthly_", var, "_std_30yrfut.csv", sep=""))){
+    
+    outExt <- read.csv(paste(oDir, "/bc_monthly_", var, ".csv", sep=""))
+    outExt[outExt == 0] <- NA
+    
+    selYrHist <- outExt[which(1971 <= outExt$Year & outExt$Year <= 2000),]
+    selYrFut <- outExt[which(2020 <= outExt$Year & outExt$Year <= 2049),]
+    
+    fun <- function(x) { sd(x) }
+    
+    stdHist <- aggregate(selYrHist[,4:length(selYrHist)], by=list(selYrHist$GCM, selYrHist$Month), FUN=fun)
+    stdFut <- aggregate(selYrFut[,4:length(selYrFut)], by=list(selYrFut$GCM, selYrFut$Month), FUN=fun)
+    
+    if (var == "prec"){
+      stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
+    } else {
+      stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates.csv"
+    }
+    
+    stFile <- read.csv(stFile)
+    
+    colnames(stdHist) <- c("GCM", "Month", stFile$Cell_ID_prec_rsds)
+    colnames(stdFut) <- c("GCM", "Month", stFile$Cell_ID_prec_rsds)
+    
+    # Writting csv file 
+    write.csv(stdHist, paste(oDir, "/bc_monthly_", var, "_std_30yrhis.csv", sep=""), row.names=F)
+    write.csv(stdFut, paste(oDir, "/bc_monthly_", var, "_std_30yrfut.csv", sep=""), row.names=F)
+    
+  }
+  
+}
+
+
+30yrStdWfd <- function(var="rsds"){
+  
+  #Arguments
+  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  if(!file.exists(paste(oDir, "/wfd_monthly_", var, "_std_30yr.csv", sep=""))){
+    
+    outExt <- read.csv(paste(oDir, "/wfd_monthly_", var, ".csv", sep=""))
+    
+    fun <- function(x) { sd(x) }
+    std30yrWfd <- aggregate(outExt[,4:length(outExt)], by=list(outExt$Month), FUN=fun)
+    
+    stFile <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/sample_type_climates_without_1.csv"
+    stFile <- read.csv(stFile)
+    
+    colnames(std30yrWfd) <- c("Month", stFile$Cell_ID_prec_rsds)
+    
+    # Writting csv file 
+    write.csv(std30yrWfd, paste(oDir, "/wfd_monthly_", var, "_std_30yr.csv", sep=""), row.names=F)
+    
+  }
+  
+}
+
+
+changesGCMTemp <- function(var="tmin"){
+  
+  #Arguments
+  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  years = c(2020:2049)
+  months = c(paste(0,1:9,sep=''),10:12)
+
+
+  if(!file.exists(paste(oDir, "/bc_monthly_", var, "_chg.csv", sep=""))){
+    
+    outExt <- read.csv(paste(oDir, "/bc_monthly_", var, ".csv", sep=""))
+    outExt <- outExt[which(2020 <= outExt$Year & outExt$Year <= 2049),]
+
+    bsl <- read.csv(paste(oDir, "/bc_monthly_", var, "_bsl.csv", sep=""))
+    
+    dataMatrix <- c()
+    
+    for (i in 1:nrow(outExt)){
+     
+      gcm_yr <- outExt[i,1:3]
+      mth <- as.numeric(outExt[i,3])
+      
+      values_bc <- as.numeric(outExt[i,4:length(outExt)])
+      values_bsl <- as.numeric(bsl[,mth+3])
+      values_chg <- values_bc - values_bsl
+      
+      dataMatrix <- rbind(dataMatrix, cbind(gcm_yr, t(values_chg)))
+    }
+    
+    colnames(dataMatrix) <- c("GCM", "Year","Month", bsl$CellID)
+    
+    # Writting csv file 
+    write.csv(dataMatrix, paste(oDir, "/bc_monthly_", var, "_chg.csv", sep=""), row.names=F)
+    
+  }
   
   
 }
 
+
+changesGCM <- function(var="prec"){
+  
+  #Arguments
+  iDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_0_5deg_lat"
+  oDir <- "D:/CIAT/Projects/lat-bid-cc-agricultural-sector/02_climate_data/bc_extracts"
+  
+  years = c(2020:2049)
+  months = c(paste(0,1:9,sep=''),10:12)
+ 
+  if(!file.exists(paste(oDir, "/bc_monthly_", var, "_chg_mod.csv", sep=""))){
+    
+    outExt <- read.csv(paste(oDir, "/bc_monthly_", var, ".csv", sep=""))
+    outExt <- outExt[which(2020 <= outExt$Year & outExt$Year <= 2049),]
+    
+    dataMatrix <- c()
+    
+    for (i in 1:nrow(outExt)){
+      
+      gcm <- as.character(outExt[i,1])
+      gcm_yr <- outExt[i,1:3]
+      mth <- as.numeric(outExt[i,3])
+      
+      values_bc <- as.numeric(outExt[i,4:length(outExt)])
+      
+      bsl <- read.csv(paste(iDir,"/", gcm,  "/1971_2000/bsl_", var, ".csv", sep=""))
+      values_bsl <- as.numeric(bsl[,mth+3])
+      bslmod <- bsl[bsl < 1] == 1
+      
+      if (var == "prec"){
+        values_chg <- values_bc - values_bsl
+      } else{
+        values_chg <- values_bc - values_bsl
+      }
+      
+      
+      dataMatrix <- rbind(dataMatrix, cbind(gcm_yr, t(values_chg)))
+    }
+    
+    colnames(dataMatrix) <- c("GCM", "Year","Month", bsl$CellID)
+    
+    # Writting csv file 
+    write.csv(dataMatrix, paste(oDir, "/bc_monthly_", var, "_chg_mod.csv", sep=""), row.names=F)
+    
+  }
+  
+  
+}
