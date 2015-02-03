@@ -7,10 +7,10 @@ source("01a-biasCorrection_qmap_BID.R")
 
 #Set directories
 wfdDir <- "//dapadfs/data_cluster_4/observed/gridded_products/wfd"
-gcmHistDir <- "D:/cenavarro/bid/gcm_0_5deg_lat"
-gcmFutDir <- "//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/gcm_0_5deg_lat/"
+gcmHistDir <- "//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/gcm_0_5deg_lat"
+gcmFutDir <- "//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/01-climate-data/gcm_0_5deg_lat"
 outDir <- "D:/cenavarro/bid/bc_0_5deg_lat"
-var <- "rsds"
+var <- "prec"
 
 # Export functions
 sfExport("BC_Qmap")
