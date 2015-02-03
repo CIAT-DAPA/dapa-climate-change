@@ -303,11 +303,10 @@ GCMDailyProcessHistorical <- function(startModel=1, endModel=2){
           system(paste("cdo seldate,1971-01-01,2000-12-31 ", ncList[1], " ", diroutgcmhis, "/", var, "_1971_2000_day.nc", sep=""))
         }
         
-         system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "T:/gcm/cmip5/raw/daily/corrected-raw-cmip5-data/rsds_day_MRI-CGCM3_historical_r1i1p1_20000101-20051231.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
-         system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
-        
-        
         system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", diroutgcmhis, "/", var, "_1971_2000_day.nc ", diroutgcmhis, "/", var, "_1971_2000_day_lat.nc",sep=""))
+#          system(paste("cdo sellonlatbox,",bbox@xmin+360-10,",",bbox@xmax+360+10,",",bbox@ymin-10,",",bbox@ymax+10," ", "T:/gcm/cmip5/raw/daily/corrected-raw-cmip5-data/rsds_day_MRI-CGCM3_historical_r1i1p1_20000101-20051231.nc ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc",sep=""))
+#          system(paste("cdo splityear ", diroutgcmhis, "/", var, "_1950_2000_day_lat.nc ", diroutgcmhis, "/by-month/", var, "_", sep=""))
+        
 #         file.remove(paste(diroutgcmhis, "/", var, "_1971_2000_day.nc", sep=""))
         
       }
