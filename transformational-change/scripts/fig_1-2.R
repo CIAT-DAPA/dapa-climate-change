@@ -3,22 +3,6 @@
 #May 2014
 stop("!")
 
-### directories where model output is
-#Baseline suitability simulation (using CRU)
-#\\DAPADFS\workspace_cluster_6\VULNERABILITY_ANALYSIS_CC_SAM\ECOCROP_DEVELOPMENT_CC_SAM\ULI\Uli_modelling\CRU_30min_1971-2000_af\analyses\cru_select_corNames
-
-#RCP6.0 runs
-#\\DAPADFS\workspace_cluster_6\VULNERABILITY_ANALYSIS_CC_SAM\ECOCROP_DEVELOPMENT_CC_SAM\ULI\Uli_modelling\FUTURE_af\RCP_60_new\analyses\runs-future
-
-#RCP8.5 runs
-#\\DAPADFS\workspace_cluster_6\VULNERABILITY_ANALYSIS_CC_SAM\ECOCROP_DEVELOPMENT_CC_SAM\ULI\Uli_modelling\FUTURE_af\RCP_85\analyses\runs-future
-
-#thresholds
-#\\DAPADFS\workspace_cluster_6\VULNERABILITY_ANALYSIS_CC_SAM\ECOCROP_DEVELOPMENT_CC_SAM\ULI\Uli_modelling\thres_ov_short.csv
-
-#Results of cumulated transformation
-#\\DAPADFS\workspace_cluster_6\VULNERABILITY_ANALYSIS_CC_SAM\ECOCROP_DEVELOPMENT_CC_SAM\ULI\Uli_modelling\results\cumulated_transf
-
 #load needed libraries
 library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 
@@ -35,35 +19,37 @@ library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 
 #i/o directories
 #mbp at CIAT
-b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/modelling/Cul_de_sacs"
-#base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
-base_run <- paste(b_dir,"/current_runs/CRU_30min_thres/all_crops",sep="")
-
-#mbp at UoL
-#b_dir <- "/nfs/a101/earjr/cul-de-sacs"
-#base_run <- paste(b_dir,"/cru_select_corNames",sep="")
+dataset <- "wcl"
+b_dir <- "/mnt/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/modelling/Cul_de_sacs"
+base_run <- paste(b_dir,"/model_runs/",dataset,"_hist",sep="")
 
 #output dirs
-out_dir <- paste("~/Google Drive/papers/transformational-adaptation") #mbp
-fig_dir <- paste(out_dir,"/figures/figures_CRU_updated",sep="")
-dfil_dir <- paste(out_dir,"/data_files_v3/data_files_CRU",sep="")
+#out_dir <- paste("~/Google Drive/papers/transformational-adaptation") #mbp
+out_dir <- paste(b_dir,"/analysis_outputs",sep="") #mbp
+fig_dir <- paste(out_dir,"/figures_",dataset,sep="")
+dfil_dir <- paste(out_dir,"/data_files_",dataset,sep="")
 if (!file.exists(dfil_dir)) {dir.create(dfil_dir,recursive=T)}
+if (!file.exists(fig_dir)) {dir.create(fig_dir,recursive=T)}
 
 #rcp input dir
-rcp <- "rcp85" #rcp60 rcp85
-rcp_run <- paste(b_dir,"/future_runs/CRU/",rcp,sep="")
+rcp <- "rcp60" #rcp60 rcp85
+rcp_run <- paste(b_dir,"/model_runs/",dataset,"_futclim_bc/",rcp,sep="")
 
 #read in thresholds and crop names
-if (!file.exists(paste(dfil_dir,"/thres_compl.csv",sep=""))) {
-  thresh_val <- read.csv(paste(b_dir,"/TA_analyses/thresh_v2.csv", sep=""))
-  write.csv(thresh_val, paste(dfil_dir,"/thres_compl.csv",sep=""))
-} else {
-  thresh_val <- read.csv(paste(dfil_dir,"/thres_compl.csv",sep=""))
-}
+thresh_val <- read.csv(paste(b_dir,"/model_data/thresholds.csv", sep=""))
+thresh_val <- thresh_val[which(thresh_val$dataset == dataset),]
+thresh_val <- thresh_val[c(1:3,10:13,15:16),]
+thresh_val$dataset <- NULL; row.names(thresh_val) <- 1:nrow(thresh_val)
+thresh_val$AUC <- thresh_val$MinROCdist <- thresh_val$MaxKappa <- NULL
+names(thresh_val)[2] <- "value"
+thresh_val$value <- thresh_val$value * 100
+thresh_val$crop[which(thresh_val$crop == "fmillet_EAF_SAF")] <- "fmillet"
+thresh_val$crop[which(thresh_val$crop == "yam_WAF")] <- "yam"
+thresh_val$crop <- paste(thresh_val$crop)
 
 #load baseline suitability rasters
-base_stk <- stack(paste(base_run,"/",thresh_val$Crop,"_suit.tif",sep=""))
-names(base_stk) <- paste(thresh_val$Crop)
+base_stk <- stack(paste(base_run,"/",thresh_val$crop,"_suit.tif",sep=""))
+names(base_stk) <- paste(thresh_val$crop)
 
 #list of GCMs
 gcm_list <- list.files(rcp_run)
@@ -74,13 +60,13 @@ dc_list <- c((min(yr_list)+10):(max(yr_list)-9))
 
 #loop through crops
 for (i in 1:nrow(thresh_val)) {
-  #i <- 3
-  crop_name <- paste(thresh_val$Crop[i])
-  thr <- thresh_val$Thr_CRU30[i]
+  #i <- 9
+  crop_name <- paste(thresh_val$crop[i])
+  thr <- thresh_val$value[i]
   cat("\n...processing crop=",crop_name,"\n")
   
   #folder of dfil_dir per crop
-  dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
+  dfil_crop <- paste(dfil_dir,"/",crop_name,sep="")
   if (!file.exists(dfil_crop)) {dir.create(dfil_crop)}
   
   #extract data from baseline raster
@@ -112,8 +98,6 @@ for (i in 1:nrow(thresh_val)) {
           x_b <- x[1]
           x_d <- x[2:length(x)]
           if (is.na(x_b)) {
-            y <- NA
-          } else if (x_b == 0) {
             y <- NA
           } else if (x_b < thr) {
             y <- NA
@@ -148,25 +132,23 @@ for (i in 1:nrow(thresh_val)) {
         #plot(as.numeric(xy_all[12540,3:ncol(xy_all)]),ty="l")
         if (is.na(x[1])) { #pixel is orignally NA
           y <- NA
-        } else if (length(which(x < 0)) > 0) { #pixel is below zero (meaning either was 0 suit, or below threshold)
-          y <- -2
-        } else if (length(which(x == 0)) == length(x)) { #pixel equals zero (meaning it never crosses any threshold)
-          y <- length(dc_list)+1
+        } else if (length(which(x == 0)) == length(x)) { #pixel equals zero (meaning it never crosses threshold)
+          y <- 99 #length(dc_list)+1
         } else {
-          if (adap==1) { #preparatory phase when >=5 and < 10 bad years occur
-            #1. if all years are < 5 then we return length(dc_list)+1 (pixel never damaged)
-            #2. if some years are >= 5 but no years are above 10 then we return length(dc_list)+1 
+          if (adap==1) { #preparatory phase when >5 and < 10 bad years occur
+            #1. if all years are <= 5 then we return length(dc_list)+1 (pixel never damaged)
+            #2. if some years are > 5 but no years are above 10 then we return length(dc_list)+1 
             #   (pixel never suffering transformation, thus no need for anticipation)
-            #3. if some years are >= 5 AND some years are above 10 then we return minimum date of cross
+            #3. if some years are > 5 AND some years are above 10 then we return minimum date of cross
             #   as the date of preparatory phase
-            if (length(which(x >= 5)) == 0) {
-              y <- length(dc_list)+1
-            } else if (length(which(x >= 5)) > 0) {
+            if (length(which(x > 5)) == 0) { #if frequency > 5 never occurs then never crosses
+              y <- 99 #length(dc_list)+1
+            } else if (length(which(x > 5)) > 0) {
               if (length(which(x > 10)) == 0) { #no trans. hence no prep. but perhaps systemic
-                if (length(which(x < 5)) == 0) { #no years below 5 (i.e. all years between 5 and 10), meaning min is needed
-                  y <- min(which(x > 5))+1 #systemic occurring at beginning of period
+                if (length(which(x <= 5)) == 0) { #no years below 5 (i.e. all years between 5 and 10), meaning min is needed
+                  y <- min(which(x > 5)) #systemic occurring at beginning of period
                 } else {
-                  y <- max(which(x < 5))+1 #when crossed and stays below
+                  y <- max(which(x <= 5))+1 #when crossed and stays below
                   #systemic change pixels can be identified by knowing areas of no trans (i.e. where eq. length(dc_list)+1)
                   #but there is a lower value for the prep. (in this case systemic)
                 }
@@ -174,7 +156,7 @@ for (i in 1:nrow(thresh_val)) {
                 if (length(which(x > 10)) == length(x)) {
                   y <- 0 #preparatory is now
                 } else {
-                  y <- min(which(x >= 5 & x <= 10)) #first time of cross is preparatory
+                  y <- min(which(x > 5 & x <= 10)) #first time of cross is preparatory
                 }
               }
             }
@@ -182,7 +164,7 @@ for (i in 1:nrow(thresh_val)) {
             #1. if all years are < 10 then we return length(dc_list)+1
             #2. else we return first date of cross
             if (length(which(x > 10)) == 0) {
-              y <- length(dc_list)+1 #doesn't cross in analysis period
+              y <- 99 #length(dc_list)+1 #doesn't cross in analysis period
             } else if (length(which(x > 10)) > 0) {
               y <- min(which(x > 10)) #minimum possible date of crossing
             }
@@ -193,9 +175,7 @@ for (i in 1:nrow(thresh_val)) {
         return(y)
       }
       
-      #value NA is NA in baseline
-      #value -1 is baseline = 0
-      #value -2 is baseline < thr
+      #value NA is NA, 0 or < threshold in baseline
       #value >= 0 is actual frequency
       xy_all <- as.data.frame(xyFromCell(dc_out_stk, 1:ncell(dc_out_stk)))
       xy_all <- cbind(xy_all, as.data.frame(extract(dc_out_stk, xy_all[,c("x","y")])))
@@ -203,13 +183,13 @@ for (i in 1:nrow(thresh_val)) {
       #run calculation for all grid cells
       cross_stk <- c()
       for (adaptype in 1:2) {
-        #adaptype <- 1
+        #adaptype <- 2
         cat("...calculating adaptation time=",adaptype,"\n")
         xy_all$crossval <- apply(xy_all[,grep("dec.",names(xy_all))], 1, FUN=calc_ctime, adaptype)
         crosstime_val <- data.frame(crossval=1:length(dc_list), crosstime=dc_list)
-        crosstime_val <- rbind(crosstime_val,c(-1,-1))
-        crosstime_val <- rbind(crosstime_val,c(0,2015))
-        crosstime_val <- rbind(crosstime_val,c((length(dc_list)+1),(max(dc_list)+1)))
+        crosstime_val <- rbind(crosstime_val,c(0,2015)) #2015 is "now" (only relevant for systemic, i.e. adap=1)
+        crosstime_val <- rbind(crosstime_val,c(99,(max(dc_list)+1))) #2090 is no crossing
+        crosstime_val <- rbind(crosstime_val,c(NA,NA))
         xy_all <- merge(xy_all, crosstime_val, by="crossval", all.x=T, all.y=F)
         names(xy_all)[ncol(xy_all)] <- paste("crosstime",adaptype,sep="")
         
