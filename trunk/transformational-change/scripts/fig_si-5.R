@@ -24,32 +24,36 @@ library(raster); library(maptools); library(rasterVis); data(wrld_simpl)
 #b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/ULI/Uli_modelling"
 #base_run <- paste(b_dir,"/CRU_30min_1971-2000_af/analyses/cru_select_corNames",sep="")
 
-#mbp at UoL
-b_dir <- "/nfs/a101/earjr/cul-de-sacs"
-base_run <- paste(b_dir,"/cru_select_corNames",sep="")
+#mbp at CIAT
+dataset <- "cru"
+b_dir <- "/nfs/workspace_cluster_6/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/modelling/Cul_de_sacs"
+base_run <- paste(b_dir,"/model_runs/",dataset,"_hist",sep="")
 
 #output directories
-out_dir <- "~/Google Drive/papers/transformational-adaptation" #mbp
-#out_dir <- b_dir #see servers
-fig_dir <- paste(out_dir,"/figures",sep="")
-dfil_dir <- paste(out_dir,"/data_files_new",sep="")
-if (!file.exists(dfil_dir)) {dir.create(dfil_dir)}
+#out_dir <- "~/Google Drive/papers/transformational-adaptation" #mbp
+out_dir <- paste(b_dir,"/analysis_outputs",sep="") #mbp
+fig_dir <- paste(out_dir,"/figures_",dataset,sep="")
+dfil_dir <- paste(out_dir,"/data_files_",dataset,sep="")
 
 #rcp input dir
-rcp <- "RCP_85" #RCP_60_new RCP_85
-rcp_run <- paste(b_dir,"/FUTURE_af/",rcp,"/analyses/runs-future",sep="")
+rcp <- "rcp85" #rcp60 rcp85
+rcp_run <- paste(b_dir,"/model_runs/",dataset,"_futclim_bc/",rcp,sep="")
 
 #read in thresholds and crop names
-if (!file.exists(paste(dfil_dir,"/thres_compl.csv",sep=""))) {
-  thresh_val <- read.csv(paste(b_dir,"/thres_compl.csv",sep=""))
-  write.csv(thresh_val, paste(dfil_dir,"/thres_compl.csv",sep=""))
-} else {
-  thresh_val <- read.csv(paste(dfil_dir,"/thres_compl.csv",sep=""))
-}
+thresh_val <- read.csv(paste(b_dir,"/model_data/thresholds.csv", sep=""))
+thresh_val <- thresh_val[which(thresh_val$dataset == dataset),]
+thresh_val <- thresh_val[c(1:3,10:13,15:16),]
+thresh_val$dataset <- NULL; row.names(thresh_val) <- 1:nrow(thresh_val)
+thresh_val$AUC <- thresh_val$MinROCdist <- thresh_val$MaxKappa <- NULL
+names(thresh_val)[2] <- "value"
+thresh_val$value <- thresh_val$value * 100
+thresh_val$crop[which(thresh_val$crop == "fmillet_EAF_SAF")] <- "fmillet"
+thresh_val$crop[which(thresh_val$crop == "yam_WAF")] <- "yam"
+thresh_val$crop <- paste(thresh_val$crop)
 
 #load baseline suitability rasters
-base_stk <- stack(paste(base_run,"/",thresh_val$crops,sep=""))
-names(base_stk) <- paste(thresh_val$crops)
+base_stk <- stack(paste(base_run,"/",thresh_val$crop,"_suit.tif",sep=""))
+names(base_stk) <- paste(thresh_val$crop)
 
 #list of GCMs
 gcm_list <- list.files(rcp_run)
@@ -60,14 +64,13 @@ dc_list <- c((min(yr_list)+10):(max(yr_list)-9))
 
 #loop through crops
 for (i in 1:nrow(thresh_val)) {
-  #i <- 2
-  crop_name <- paste(thresh_val$crops[i])
-  thr <- thresh_val$threshold[i]
+  #i <- 1
+  crop_name <- paste(thresh_val$crop[i])
+  thr <- thresh_val$value[i]
   cat("\n...processing crop=",crop_name,"\n")
   
   #folder of dfil_dir per crop
-  dfil_crop <- paste(dfil_dir,"/",gsub("\\.tif","",crop_name),sep="")
-  if (!file.exists(dfil_crop)) {dir.create(dfil_crop)}
+  dfil_crop <- paste(dfil_dir,"/",crop_name,sep="")
   
   #extract data from baseline raster
   xy_allb <- as.data.frame(xyFromCell(base_stk[[crop_name]], 1:ncell(base_stk[[crop_name]])))
@@ -80,7 +83,7 @@ for (i in 1:nrow(thresh_val)) {
     
     if (!file.exists(paste(dfil_crop,"/crossinverse_",rcp,"_",gcm,".RData",sep=""))) {
       #raster stack with all years
-      yr_stk <- stack(paste(rcp_run,"/",gcm,"/",yr_list,"/",crop_name,sep=""))
+      yr_stk <- stack(paste(rcp_run,"/",gcm,"/r1i1p1/",yr_list,"/",crop_name,"_suit.tif",sep=""))
       
       #loop decades
       dc_out_stk <- c()
@@ -103,7 +106,7 @@ for (i in 1:nrow(thresh_val)) {
           } else if (x_b == 0 | x_b < thr) { #if baseline == 0 (unsuitable) then perform calculation
             y <- length(which(x_d < thr))
           } else { #if not below threshold then return -1
-            y <- -1 #length(which(x_d < thr))
+            y <- NA #length(which(x_d < thr))
           }
           return(y)
         }
@@ -132,26 +135,23 @@ for (i in 1:nrow(thresh_val)) {
         #plot(x,ty="l")
         if (is.na(x[1])) { #pixel is orignally NA
           y <- NA
-        } else if (length(which(x < 0)) > 0) { #pixel is below zero (meaning it was suitable in baseline)
-          y <- -1
         } else if (length(which(x == 20)) == length(x)) { #pixel equals 20 (meaning it was always below threshold), thus in fact never crosses
-          y <- length(dc_list)+1 #i.e. no gain (redundant with length(x<=10) eq. 0 below)
+          y <- 99 #length(dc_list)+1 #i.e. no gain (redundant with length(x<=10) eq. 0 below)
         } else {
-          #1. if all years are < 10 then we return length(dc_list)+1
+          #1. if there are no periods < 10 then we return 99
           #2. else we return first date of cross
-          if (length(which(x <= 10)) == 0) {
-            y <- length(dc_list)+1 #doesn't cross in analysis period
+          if (length(which(x < 10)) == 0) {
+            y <- 99 #length(dc_list)+1 #doesn't cross in analysis period
           } else if (length(which(x > 10)) > 0) {
-            y <- max(which(x > 10)) #crosses and stays below
-          } else if (length(which(x <= 10)) == length(x)) {
+            y <- max(which(x > 10))+1 #crosses and stays below
+          } else if (length(which(x < 10)) == length(x)) {
             y <- 0 #gained is now --meaning there is some error involved in baseline thresholding
           }
         }
         return(y)
       }
       
-      #value NA is NA in baseline
-      #value -1 is baseline being suitable
+      #value NA is NA or suitable in baseline
       #value >= 0 is actual frequency
       xy_all <- as.data.frame(xyFromCell(dc_out_stk, 1:ncell(dc_out_stk)))
       xy_all <- cbind(xy_all, as.data.frame(extract(dc_out_stk, xy_all[,c("x","y")])))
@@ -162,9 +162,9 @@ for (i in 1:nrow(thresh_val)) {
       cat("...calculating positive adaptation time=",adaptype,"\n")
       xy_all$crossval <- apply(xy_all[,grep("dec.",names(xy_all))], 1, FUN=calc_ctime)
       crosstime_val <- data.frame(crossval=1:length(dc_list), crosstime=dc_list)
-      crosstime_val <- rbind(crosstime_val,c(-1,-1))
       crosstime_val <- rbind(crosstime_val,c(0,2015))
-      crosstime_val <- rbind(crosstime_val,c((length(dc_list)+1),(max(dc_list)+1)))
+      crosstime_val <- rbind(crosstime_val,c(99,(max(dc_list)+1)))
+      crosstime_val <- rbind(crosstime_val,c(NA,NA))
       xy_all <- merge(xy_all, crosstime_val, by="crossval", all.x=T, all.y=F)
       names(xy_all)[ncol(xy_all)] <- paste("crosstime",adaptype,sep="")
       
