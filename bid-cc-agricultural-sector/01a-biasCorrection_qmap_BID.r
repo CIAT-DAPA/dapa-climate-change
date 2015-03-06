@@ -104,7 +104,7 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   }
   
   
-  batchs <- floor(ncell / 10) + 1
+  batchs <- floor(ncell / 100) + 1
 
   month.hist = month(dates.gcm.hist)
   mday.hist = mday(dates.gcm.hist)
@@ -114,10 +114,10 @@ BC_Qmap <- function(wfdDir="//dapadfs/data_cluster_4/observed/gridded_products/w
   
   for (n in 1:batchs){
     
-    staCell <- ((n - 1) * 1000) + 1
-    if (n == batchs){endCell <- ncell} else {endCell <- staCell + 999}
+    staCell <- ((n - 1) * 100) + 1
+    if (n == batchs){endCell <- ncell} else {endCell <- staCell + 99}
     
-    ncellArray <- endCell - staCell + 1000
+    ncellArray <- endCell - staCell + 100
     
     #Apply bias-correction looping by gridcell (j) and day of year (k)
     gcmHistBC = array(NA,dim=c(ncellArray,length(dates.gcm.hist)))
