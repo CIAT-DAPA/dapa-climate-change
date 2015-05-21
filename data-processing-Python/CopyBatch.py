@@ -1,5 +1,9 @@
 import os, sys, glob, string, shutil
+<<<<<<< .mine
+# # python CopyBatch.py \\dapadfs\data_cluster_2\gcm\cmip5\raw\monthly\historical D:\CIAT\Projects\ecu-hidroelectrica\03_future_climate_data\historical_cmip5
+=======
 # # # python CopyBatch.py S:\data\gcm\cmip3\disaggregated\sres_a1b\Global_30s S:\data\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_disaggregated\sres_a1b
+>>>>>>> .r2699
 
 # periodDc = {"2010_2039": "2020s", "2020_2049": "2030s", "2030_2059": "2040s", "2040_2069": "2050s", "2050_2079": "2060s", "2060_2089": "2070s", "2070_2099": "2080s"}
 # dirbase = sys.argv[1]
@@ -19,7 +23,46 @@ import os, sys, glob, string, shutil
 # Para renombrar los archivos
 #python CopyBatch.py S:\data\portals\ccafs_climate\download_data\files\data\ipcc_4ar_ciat_disaggregated
 
+# dirbase = sys.argv[1]
+# # sreslist = sorted(os.listdir(dirbase))
+# # for sres in sreslist:
+# sres = "sres_b1"
+# periodlist = sorted(os.listdir(dirbase + "\\" + sres))
+# for period in periodlist:
+	# # modelist = sorted(os.listdir(dirbase + "\\" + sres + "\\" + period))
+	# modellist = "ipsl_cm4", "miroc3_2_hires", "miroc3_2_medres", "miub_echo_g", "mpi_echam5", "mri_cgcm2_3_2a", "ncar_ccsm3_0", "ukmo_hadcm3"
+	# for model in modellist:
+		# # resolutions = sorted(os.listdir(dirbase + "\\" + sres + "\\" + period + "\\" + model))
+		# # for res in resolutions:
+		# res = "30s"
+		# indir = dirbase + "\\" + sres + "\\" + period + "\\" + model + "\\" + res
+		# filelist = sorted(glob.glob(indir + "\\*"))
+		# for file in filelist:
+			# var = os.path.basename(file).split("_")[0]
+			# format = os.path.basename(file).split("_")[1]
+			# filenamemod = model + "_" + sres + "_" + period + "_" + var + "_" + res + "_no_tile_" + format
+			
+			# print "Renaming ", filenamemod
+			# os.rename(file, dirbase + "\\" + sres + "\\" + period + "\\" + model + "\\" + res + "\\" + filenamemod)
+
+			
+			
+			
+# python CopyBatch.py D:\CIAT\Projects\ecu-hidroelectrica\03_future_climate_data\cmip5\historical D:\CIAT\Projects\ecu-hidroelectrica\03_future_climate_data\cmip5\historical
+
 dirbase = sys.argv[1]
+<<<<<<< .mine
+dirout = sys.argv[2]
+modellist = sorted(glob.glob(dirbase + "\\*"))
+
+for model in modellist:
+
+	indir = model + "\\1981_2005"
+	outdir = dirout + "\\" + os.path.basename(model)
+	
+	print indir
+	os.system("robocopy " + indir + " " + outdir + " /z /e")
+=======
 sreslist = sorted(os.listdir(dirbase))
 for sres in sreslist:
 # sres = "sres_b1"
@@ -40,3 +83,4 @@ for sres in sreslist:
 					
 					print "Renaming ", filenamemod
 					os.rename(file, dirbase + "\\" + sres + "\\" + period + "\\" + model + "\\" + res + "\\" + filenamemod)
+>>>>>>> .r2699

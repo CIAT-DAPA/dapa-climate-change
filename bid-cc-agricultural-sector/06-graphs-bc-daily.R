@@ -335,7 +335,29 @@ frequencyRainfallComparison <- function(var="tmax"){
     multiplot(p1, p2, p5, cols=1)
     dev.off()
     
-    
+
+# theme(text = element_text(size=15, colour = "black"),
+#       axis.text.x = element_text(angle=0, vjust=1, colour = "black"),
+#       axis.text.y = element_text(angle=0, vjust=1, colour = "black"),
+#       axis.line = element_line(colour = 'black', size = 1),
+#       axis.ticks = element_line(colour = 'black', size = 1),
+#       axis.ticks.length = unit(0.3, "cm"),
+#       axis.title.y=element_text(vjust=0.4),
+#       legend.position = "none") + 
+#   
+#   theme(axis.line=element_blank(),
+#         axis.text.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.ticks=element_blank(),
+#         axis.title.x=element_blank(),
+#         axis.title.y=element_blank(),
+#         legend.position="none",
+#         panel.background=element_blank(),
+#         panel.border=element_blank(),
+#         panel.grid.major=element_blank(),
+#         panel.grid.minor=element_blank(),
+#         plot.background=element_blank())
+
 #     ggsave(filename = paste(iDir, "/plots/", var, "_frequency_", stFile$Type[i], ".png", sep=""), width=12, height=3, dpi = 100)
     
 #   }

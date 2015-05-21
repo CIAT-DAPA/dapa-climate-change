@@ -1,19 +1,20 @@
 ## Parameters ###
 #parallelisation
 library(snowfall)
-sfInit(parallel=T,cpus=8) #initiate cluster
+sfInit(parallel=T,cpus=4) #initiate cluster
 
 stop("error")
 source("00-monthly-data-anomalies-yearly.R")
 
-setwd("G:/_scripts/dapa-climate-change/IPCC-CMIP5")
+setwd("D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5")
 
 rcp <- "rcp60"
 baseDir <- "T:/gcm/cmip5/raw/monthly"
 basePer <- "1961_1990"
 ens <- "r1i1p1"
 outDir <- "X:/VULNERABILITY_ANALYSIS_CC_SAM/ECOCROP_DEVELOPMENT_CC_SAM/climate/4dup"
-wclDir <- "S:/observed/gridded_products/worldclim/Global_30min/_asciis"
+obsDir <- "S:/observed/gridded_products/cru-ts-v3-21/30yr_averages/1961_1990"
+dataset <- "cru"
 
 cat(" \n")
 cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -25,7 +26,7 @@ cat(" \n")
 curDir <- paste(baseDir, "/historical", sep="")
 futDir <- paste(baseDir, "/", rcp, sep="")
 
-gcmStats <- read.table(paste("G:/_scripts/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
+gcmStats <- read.table(paste("D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5", "/data/cmip5-", rcp, "-monthly-data-summary.txt", sep=""), sep="\t", na.strings = "", header = TRUE)
 gcmStats <- gcmStats[which(gcmStats$ensemble == ens),]
 gcmStats <- gcmStats[which(gcmStats$obs == "no"),]
 
@@ -62,13 +63,13 @@ for (i in 1:nrow(gcmStats)){
       
       for (i in 2006:2099) {      
         
-        control <- function(i) { #define a new function
+        controlIntpol <- function(i) { #define a new function
           library(raster)
           
           GCMAnomaliesYearly(rcp, gcm, ens, i, futDir, curAvgDir, basePer, outDir)
         }
         
-        system.time(sfSapply(as.vector(2006:2099), control))
+        system.time(sfSapply(as.vector(2006:2099), controlIntpol))
         
       }
       
@@ -77,48 +78,44 @@ for (i in 1:nrow(gcmStats)){
     }
   }
 }
-
 cat("GCM Anomalies Process Done!")
-
 
 #stop the cluster calculation
 sfStop()
 
 
-# 
-# 
-# 
-# sfInit(parallel=T,cpus=2) #initiate cluster
-# 
-# # #export functions
-# sfExport("GCMCalcFutureYearly")
-# 
-# #export variables
-# sfExport("rcp")
-# sfExport("ens")
-# sfExport("outDir")
-# sfExport("wclDir")
-# 
-# for (i in 1:nrow(gcmStats)){
-#   
-#   gcm <- paste(as.matrix(gcmStats)[i,2])
-#   sfExport("gcm")    
-#   
-#   controlIntpol <- function(i) { #define a new function
-#     
-#     library(raster)
-#     cat(" .> ", paste("\t ", i, sep=""), "\tdone!\n")
-#     GCMCalcFutureYearly(rcp, i, ens, outDir, wclDir)
-#     
-#   }
-#   
-#   system.time(sfSapply(as.vector(paste(as.matrix(gcmStats)[1:nrow(gcmStats),2])), controlIntpol))
-#   
-# }
-# 
-# }
-# 
-# #stop the cluster calculation
-# sfStop()
-# 
-# cat("GCM Disaggregation Process Done!")
+
+
+# #export functions
+sfExport("GCMCalcFutureYearly")
+
+#export variables
+sfExport("rcp")
+sfExport("ens")
+sfExport("outDir")
+sfExport("obsDir")
+sfExport("dataset")
+
+for (i in 1:nrow(gcmStats)){
+  
+  gcm <- paste(as.matrix(gcmStats)[i,2])
+  sfExport("gcm")    
+  
+  controlIntpol <- function(i) { #define a new function
+    
+    library(raster)
+    cat(" .> ", paste("\t ", i, sep=""), "\tdone!\n")
+    GCMCalcFutureYearly(rcp, i, ens, outDir, obsDir, dataset)
+    
+  }
+  
+  system.time(sfSapply(as.vector(paste(as.matrix(gcmStats)[1:nrow(gcmStats),2])), controlIntpol))
+  
+}
+
+}
+
+#stop the cluster calculation
+sfStop()
+
+cat("GCM Disaggregation Process Done!")

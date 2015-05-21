@@ -69,6 +69,7 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
           
           outNc <- paste(anomDir, "/", var, "_", mthMod, ".nc", sep="")
           if (!file.exists(outNc)) {
+
             
             curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mthMod, ".nc", sep="")) ##variables in mm and deg
             futMthNc <- raster(paste(futMthDir, "/", var, "_", mth, ".nc", sep=""))
@@ -77,7 +78,7 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
             if (var == "prec"){
               
               daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
-              futMthNc <- rotate(futMthNc) * 86400 * (daysmth)
+              futMthNc <- rotate(futMthNc * 86400 * (daysmth))
               
             } else {
               
@@ -102,7 +103,7 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
             
             cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")
             
-          } # else {cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")}
+          } else {cat(" .> ", paste("\t ", var, "_", mthMod, sep=""), "\tdone!\n")}
           
         }    
 #       } 
@@ -113,7 +114,7 @@ GCMAnomaliesYearly <- function(rcp="rcp60", gcm="bcc_csm1_1", ens="r1i1p1", year
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
-GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", outDir="D:/CIAT/Workspace/urippke", wclDir="S:/observed/gridded_products/worldclim/Global_30min/_asciis") {
+GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", outDir="D:/CIAT/Workspace/urippke", obsDir="S:/observed/gridded_products/worldclim/Global_30min/_asciis", dataset="wcl") {
   
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
@@ -122,42 +123,48 @@ GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", out
   cat(" \n")
   
   # List of variables and months
-#   varList <- c("prec", "tmax", "tmin")
-  var <- "prec"
+  varList <- c("prec", "tmax", "tmin")
+#   var <- "prec"
   
   # Loop around months
   for (mth in 1:12) {
     
     # Loop around variables
-#     for (var in varList) {
+    for (var in varList) {
       
-#       if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mth, ".tif", sep=""))){
+      if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_", dataset, "/", rcp, "/", gcm, "/", ens, "/", 2099, "/", var, "_", mth, ".tif", sep=""))){
         
         year <- 2006:2099
-        cruAsc <- raster(paste(wclDir, "/", var, "_", mth, ".asc", sep=""))
+        
+        obsAsc <- raster(paste(obsDir, "/", var, "_", mth, ".asc", sep=""))
+                
         anomDir <- paste(outDir, "/anomalies_1975s_yearly/", rcp, "/", gcm, "/", ens, sep="")
         anomNc <- lapply(paste(anomDir, "/", year, "/", var, "_", mth, ".nc", sep=""),FUN=raster)
         anomNc <- stack(anomNc)
        
         
         if (var == "prec" || var == "rsds"){
-          outFut <- cruAsc * (1 + anomNc)
+          outFut <- obsAsc * (1 + anomNc)
+          
         } else {
-          outFut <- cruAsc + anomNc
+          outFut <- obsAsc + anomNc
         }
         
         
         ext <- extent(-26, 64, -47, 38)
         outFut <- crop(outFut, ext)
+        crs(outFut) <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+        
         
         for (i in 1:dim(outFut)[[3]]){
           
-          futDir <- paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
+          futDir <- paste(outDir, "/diss_africa_1975s_yearly_", dataset, "/", rcp, "/", gcm, "/", ens, "/", year[i], sep="")
           if (!file.exists(futDir)) {dir.create(futDir, recursive = TRUE)}
           
           futTif <- paste(futDir, "/", var, "_", mth, ".tif", sep="")
           
           if (!file.exists(futTif)) {
+
             
             if (var == "prec"){outFut[[i]][outFut[[i]]<0]=0}
             
@@ -166,16 +173,16 @@ GCMCalcFutureYearly <- function(rcp='rcp26', gcm="bcc_csm1_1", ens="r1i1p1", out
             
           }
         }
-#       }
-#     } 
+      }
+    } 
 
   }
 
-  if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", 2099, "/tmean_12.tif", sep=""))){
+  if (!file.exists(paste(outDir, "/diss_africa_1975s_yearly_", dataset, "/", rcp, "/", gcm, "/", ens, "/", 2099, "/tmean_12.tif", sep=""))){
     
     for (yr in 2006:2099){
       
-      futDir <- paste(outDir, "/diss_africa_1975s_yearly_wcl/", rcp, "/", gcm, "/", ens, "/", yr, sep="")
+      futDir <- paste(outDir, "/diss_africa_1975s_yearly_", dataset, "/", rcp, "/", gcm, "/", ens, "/", yr, sep="")
       
       for (mth in 1:12){
         

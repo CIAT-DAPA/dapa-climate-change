@@ -50,7 +50,7 @@ historical	cmcc_cesm	r1i1p1	1850-2005	1960-2005	1850-2005	1960-2005	no	no
 historical	cmcc_cm	r1i1p1	1850-2005	no	1850-2005	no	no	no	ins-var
 historical	cmcc_cms	r1i1p1	1850-2005	no	1850-2005	no	no	no	ins-var
 historical	cnrm_cm5	r10i1p1	1850-2005	1850-2005	1850-2005	1850-2005	no	no	
-historical	cnrm_cm5	r1i1p1	1850-2005	no	1850-2005	no	no	no	ins-var
+historical	cnrm_cm5	r1i1p1	1850-2005	1850-2005	1850-2005	1850-2005	no	no	
 historical	cnrm_cm5	r2i1p1	1850-2005	1850-2005	1850-2005	no	no	no	tmin
 historical	cnrm_cm5	r3i1p1	1850-2005	1850-2005	1850-2005	1850-2005	no	no	
 historical	cnrm_cm5	r4i1p1	1850-2005	1850-2005	1850-2005	1850-2005	no	no	

@@ -9,7 +9,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python SetNull.py D:\EcoCrop-development\Monfreda\monfreda_crop_groups D:\EcoCrop-development\Monfreda\monfreda_crop_groups_without0"
+	print "   - ie: python SetNull.py D:\CIAT\Articles\lat-maxent-coffe\occurrence_files\raw D:\CIAT\Articles\lat-maxent-coffe\occurrence_files\raw"
 	sys.exit(1)
 
 # Arguments
@@ -30,13 +30,13 @@ print "\t ..listing grids into " + gp.workspace
 	# raster = gp.workspace + "\\tean_" + str(month)
 	# gp.copy_management(raster, dirout + "\\tmean_" + str(month))
 	
-rasters = sorted(gp.ListRasters("*_ha", "GRID"))
+rasters = sorted(gp.ListRasters("*spam*", "GRID"))
 for raster in rasters:
 	# gp.copy_management(raster, dirout + "\\" + raster)
 	gp.CheckOutExtension("Spatial")
-	InExpression = 'setnull("' + raster + '" == 0,"' + raster + '")'
+	InExpression = 'setnull("' + raster + '" < 700,"' + raster + '")'
 	print InExpression
-	OutRaster = dirout + "\\" + raster
+	OutRaster = dirout + "\\" + raster + "_t"
 	gp.SingleOutputMapAlgebra_sa(InExpression, OutRaster)
     # Check out Spatial Analyst extension license
     

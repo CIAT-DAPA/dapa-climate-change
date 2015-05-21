@@ -9,7 +9,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python Sum_grids.py D:\climate_change\RCM_Data\SRES_A1B\HadCM3Q3\daily_grids\1959\SurPress D:\Workspace\temp Sum1"
+	print "   - ie: python Sum_grids.py D:\CIAT\Workspace\test D:\Workspace\temp Sum1"
 	sys.exit(1)
 
 # Arguments
