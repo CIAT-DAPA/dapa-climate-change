@@ -13,7 +13,7 @@ if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python Join_Field.py <dirbase> <inityear> <finalyear> <outdir>"
-	print "   - ie: python JoinField.py D:\Workspace\request_miguel\points_extract\_extract_WC"
+	print "   - ie: python JoinField.py DD:\Documents\Desktop\reproj_soils_gaza"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -32,10 +32,9 @@ dirbase = sys.argv[1]
 		# data.close()
 		# out.close()
 		
-dbfList = sorted(glob.glob(dirbase + "\\*.dbf"))
-for dbf in dbfList:
-	InData = dirbase + "\\" + "bio_1.dbf"
-	if not os.path.basename(dbf)[-9:] == "bio_1.dbf":
-		fields = os.path.basename(dbf)[:-4].split("_")[-2:]
-		gp.joinfield (InData, "mask", dbf, "mask", fields[0] + "_" + fields[1])
-		print dbf + " joined"
+shpList = sorted(glob.glob(dirbase + "\\*.shp"))
+for shp in shpList:
+	InData = dirbase + "\\" + "classes.dbf"
+	# fields = os.path.basename(dbf)[:-4].split("_")[-2:]
+	gp.joinfield (shp, "LAND SUITA", InData, "Suitabilit", "Value")
+	print shp + " joined"

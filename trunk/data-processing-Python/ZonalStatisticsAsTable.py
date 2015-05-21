@@ -11,7 +11,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python ZonalStatisticsAsTable.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ie: python ZonalStatisticsAsTable.py D:\Workspace D:\Workspace\_zonal_calcs D:\Workspace\mask\shapefile.shp ALL"
+	print "   - ie: python ZonalStatisticsAsTable.py S:\observed\gridded_products\worldclim\Global_30s D:\CIAT\_tools\AdminBoundaries\SHP_files\ARG_adm\ARG1.shp D:\CIAT\Workspace\arg_cc_agr_familiar\statitics_ens ALL"
 	sys.exit(1)
 
 # Set variables
@@ -47,34 +47,41 @@ else:
 	
 # Lopping around the grids
 for raster in rasters:
-	
-	# Set output
-	outTable = dirout + "\\" + os.path.basename(raster)[:-4] + ".dbf"
-	
-	# Zonal Statistical as table function
-	gp.ZonalStatisticsAsTable_sa(mask, "FID", ds, outTable, "DATA")
-	
-	gp.joinfield (diroutzonal + "\\tmean1_5_01.dbf", "FID_", outTable, "FID_", "MEAN")
-	if not os.path.basename(ds) == "tmean1_5_01.asc":	
-		gp.delete_management(outTable)
 
-# Join dbfs files extracted
-print "\n .. Joining outputs"
+	outTable = dirout + "\\" + os.path.basename(raster) + ".dbf"
+	
+	if not gp.Exists(outTable):
 		
-dbfList = sorted(glob.glob(dirout + "\\*.dbf"))
-for dbf in dbfList:
-	InData = dbf[0]
-	if not dbf == dbf[0]:
-		fielraster = os.path.basename(dbf)[:-4].split("_")[-2:]
-		gp.joinfield (InData, "mask", dbf, "mask", fielraster[0] + "_" + fielraster[1])
-		os.remove(dbf)
-
-os.rename(InData, dirout + "\\extracts.dbf")
-
-xmlList = sorted(glob.glob(dirout + "\\*.xml"))
-for xml in xmlList:
-	os.remove(xml)
+		print raster
 		
-print "Process done!!"
+		# Set output
+		
+		
+		# # Zonal Statistical as table function
+		# gp.ZonalStatisticsAsTable_sa(mask, "FID", raster, outTable, "DATA")
+		
+		# # gp.joinfield (diroutzonal + "\\tmean1_5_01.dbf", "FID_", outTable, "FID_", "MEAN")
+		# # if not os.path.basename(ds) == "tmean1_5_01.asc":	
+			# # gp.delete_management(outTable)
+
+# # Join dbfs files extracted
+# print "\n .. Joining outputs"
+		
+# dbfList = sorted(glob.glob(dirout + "\\*.dbf"))
+# for dbf in dbfList:
+	# print dbf
+	# InData = dbfList[0]
+	# if not dbf == dbfList[0]:
+		# fielraster = os.path.basename(dbf)[:-4].split("_")[-2:]
+		# gp.joinfield (InData, "FID_", dbf, "FID_", "MEAN")
+		# os.remove(dbf)
+
+# os.rename(InData, dirout + "\\extracts.dbf")
+
+# xmlList = sorted(glob.glob(dirout + "\\*.xml"))
+# for xml in xmlList:
+	# os.remove(xml)
+		
+# print "Process done!!"
 
 		

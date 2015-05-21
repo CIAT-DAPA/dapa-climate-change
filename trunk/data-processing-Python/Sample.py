@@ -4,7 +4,7 @@
 # Actualizado: 25/08/10
 #--------------------------------------------------
 
-import arcgisscripting, os, sys
+import arcgisscripting, os, sys, glob
 gp = arcgisscripting.create(9.3)
 
 
@@ -16,13 +16,14 @@ print "   EXTRACT VALUES   "
 print "~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
-gp.workspace = "D:\Workspace\summary\2020_2049"
-mask = "D:\Workspace\col_summarice\col_centroids.shp"
+gp.workspace = "D:\\CIAT\\Articles\\lat-maxent-coffe\\raw_climate_data\\Baseline"
+mask = "D:\\CIAT\\Articles\\lat-maxent-coffe\\occurrence_files\\occurrence_files\\coffea_arabica.shp"
 # variables = ["prec", "tmin", "tmax", "tmean"]
-
+print mask
 # Get a list of grids in the workspace of each folder
-dsList = gp.ListRasters("*", "")
-
+dsList = gp.ListRasters("*", "ALL")
+# dsList = glob.glob(gp.workspace + "\\*.asc")
+print dsList
 lista = ""
 for ds in dsList:
 	print ds

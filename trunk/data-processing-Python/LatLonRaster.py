@@ -8,7 +8,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python LatLonRaster.py S:\observed\gridded_products\srtm\Altitude_30s\alt D:\CIAT\Workspace\eluengas\_region col"
+	print "   - ie: python LatLonRaster.py H:\CIAT\climate_change\strm_data\altitude_30s\alt D:\CIAT\Projects\ecu-hidroelectrica\02_baseline\_region ecu"
 	sys.exit(1)
 
 # Arguments
@@ -25,9 +25,9 @@ res = float(2.5) / 60
 OutAltRes = dirout + "\\alt_30s"
 OutAlt = dirout + "\\altitude"
 if not gp.Exists(OutAlt):
-	gp.clip_management(dem, "-74.5 5.2 -73.8 4.6", OutAlt)
-	# gp.Resample_management(OutAltRes, OutAlt , res, "NEAREST")
-	# gp.delete_management(OutAltRes)
+	gp.clip_management(dem, "-81 2 -77 -5", OutAltRes)
+	gp.Resample_management(OutAltRes, OutAlt , res, "NEAREST")
+	gp.delete_management(OutAltRes)
 	
 	
 print "\n CREATING MASK"

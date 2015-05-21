@@ -8,6 +8,7 @@ cesm1_cam5,O,O,O,O,O
 csiro_access1_0,O,X,O,X,O
 csiro_access1_3,O,X,O,X,O
 csiro_mk3_6_0,O,O,O,O,O
+cnrm_cm5,O,O,O,X,O
 ec_earth,O,X,X,X,O
 fio_esm,O,O,O,O,O
 gfdl_cm3,O,O,O,O,O

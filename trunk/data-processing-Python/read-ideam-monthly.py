@@ -10,7 +10,7 @@ from csv import writer as csvwriter, reader as cvsreader
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python read-ideam-daily.py \\dapadfs\data_cluster_4\observed\weather_station\ideam-col\raw-monthly\ideam-stations-request-2014_03\CIAT.txt S:\observed\weather_station\ideam-col\organized-monthly\conventional-madr-2nd-request ideam_stations"
+	print "   - ie: python read-ideam-daily.py S:\observed\weather_station\col-ideam\monthly-raw\_primary_files\raw\Merge.txt S:\observed\weather_station\col-ideam\monthly-raw\_primary_files\raw\st-llanos-col ideam_stations"
 	sys.exit(1)
 
 #Set variables 

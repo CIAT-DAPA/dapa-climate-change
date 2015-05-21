@@ -35,7 +35,7 @@ for (gcm in gcmList[1:20]){
       
       dataMatrix <- cbind(cellID[1:8000,], dataMatrix)
       colnames(dataMatrix) <- c("CellID","Lon", "Lat", as.vector(as.matrix(histDates)))
-      a <- save(dataMatrix, file=paste(outDir, "/", gcm, "/1971_2000/", "bc_", var, "_1950_2000.Rdat", sep=''))
+      a <- save(dataMatrix, file=paste(outDir, "/", gcm, "/1971_2000/", "bc_", var, "_1950_2000_daily.Rdat", sep=''))
       
       
       
@@ -51,7 +51,7 @@ for (gcm in gcmList[1:20]){
       
       dataMatrixFut <- cbind(cellID[1:8000,], dataMatrixFut)
       colnames(dataMatrixFut) <- c("CellID", "Lon", "Lat", as.vector(as.matrix(futDates)))
-      b <- save(dataMatrixFut, file=paste(outDir, "/", gcm, "/2020_2049/", "bc_", var, "_2020_2049.Rdat", sep=''))
+      b <- save(dataMatrixFut, file=paste(outDir, "/", gcm, "/2020_2049/", "bc_", var, "_2020_2049_daily.Rdat", sep=''))
       
     }
     
@@ -60,6 +60,7 @@ for (gcm in gcmList[1:20]){
   
   
 }
+
 
 
 
@@ -103,8 +104,8 @@ for (gcm in gcmList[1:20]){
     stdHist <- aggregate(dataMatrixFut[,4:length(selYrHist)], by=list(selYrHist$GCM, selYrHist$Month), FUN=fun)
     
     
+  }
     
-    
-    
+}
     
     
