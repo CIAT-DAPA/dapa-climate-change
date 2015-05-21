@@ -181,7 +181,7 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
         
         } else {
           
-          periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+          periodList <- c("2010","2020", "2030", "2040", "2050", "2060", "2070")
           
         }
         
@@ -276,8 +276,8 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   cat(" \n")
 
   # List of variables and months
-#   varList <- c("prec", "tmax", "tmin")
-  var <- "prec" 
+  varList <- c("prec", "tmax", "tmin")
+#   var <- "prec" 
   monthList <- c(1:12)
   
   curDir <- paste(baseDir, "/historical", sep="")
@@ -296,7 +296,7 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
     # Average directory
     curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
     
-    periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+    periodList <- c("2010", "2020", "2030", "2040", "2050", "2060", "2070")
     
     for (period in periodList) {
       
@@ -332,11 +332,11 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             if (!file.exists(anomDir)) {dir.create(anomDir)}
             if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
             
-            listNc <- list.files(anomPerDir, full.names=T, pattern="prec*")
-            do.call(unlink,list(listNc))
+#             listNc <- list.files(anomPerDir, full.names=T, pattern="prec*")
+#             do.call(unlink,list(listNc))
             
             # Loop around variables
-#             for (var in varList) {
+            for (var in varList) {
               
               # Loop around months
               for (mth in monthList) {
@@ -358,10 +358,10 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
                   
                   # resAnomNc  <- resample(anomNc, rs, method='ngb')
                   
-                  # rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
-                  # anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
-                  # resAnomNcExt  <- resample(anomNcExt, rs, method='bilinear')
-                  anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
+                  rs <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90)
+                  anomNcExt <- setExtent(anomNc, extent(rs), keepres=TRUE, snap=FALSE)
+                  resAnomNcExt  <- resample(anomNcExt, rs, method='bilinear')
+                  anomNc <- writeRaster(resAnomNcExt, outNc, format='CDF', overwrite=FALSE)
                   
                 }
                 
@@ -386,10 +386,10 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
                 
                 
               }    
-#             } 
+            } 
           }
         }  
-      }  
+      }
       
       write.table("Done!", checkFile, row.names=F)
       
