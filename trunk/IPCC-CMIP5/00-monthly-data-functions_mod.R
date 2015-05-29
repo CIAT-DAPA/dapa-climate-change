@@ -361,30 +361,47 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
               
               curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
               futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
+              
+              curAvgNc[curAvgNc[]>0.5] <- NA 
+              futAvgNc[futAvgNc[]>200] <- NA 
+              
+              plot(curAvgNc)
+              plot(futAvgNc)
+              
+              library(maptools)
+              data(wrld_simpl)
+              windows()
+              
+              plot(wrld_simpl, add=T)
+              
+              setMinMax(futAvgNc)
 
               curAvgNc[curAvgNc[]<0.5] <- 0.5 
               futAvgNc[futAvgNc[]<0.5] <- 0.5
+              
+              curAvgNc[curAvgNc[]<1] <- 1 
+              futAvgNc[futAvgNc[]<1] <- 1
               
               #length(curAvgNc[curAvgNc[]==1])
               
               curCheck=curAvgNc[curAvgNc[]<=0]
 
               if (var == "prec" || var == "rsds"){
-                anomNc <- (futAvgNc - curAvgNc) / (curAvgNc)
+                anomNc <- (futAvgNc - curAvgNc) / (curAvgNc) + 0.1)
               } else {
                 anomNc <- futAvgNc - curAvgNc  
               }
                 
 #               anomNc[anomNc[]>100] 
-#               
-#               centroids=rasterToPoints(anomNc)
-#               df <- data.frame(centroids)
-#               lon=df[which.max(df[,3]),]$x
-#               lat=df[which.max(df[,3]),]$y
-#               cur=extract(curAvgNc,cbind(lon, lat))
-#               favg=extract(futAvgNc,cbind(lon, lat))     
-#               (favg-cur)/cur
-#               extract(anomNc,cbind(lon, lat))   
+              
+              centroids=rasterToPoints(anomNc)
+              df <- data.frame(centroids)
+              lon=df[which.max(df[,3]),]$x
+              lat=df[which.max(df[,3]),]$y
+              cur=extract(curAvgNc,cbind(lon, lat))
+              favg=extract(futAvgNc,cbind(lon, lat))     
+              (favg-cur)/cur
+              extract(anomNc,cbind(lon, lat))   
               
                                    
 
