@@ -31,6 +31,7 @@
 ### BC: Bias Correction approach including variability
 ### DEL: Change Factor approach excluding variability
 ### CF: Change Factor approach including variability
+### QM: Quantile mappong approach including variability
 ######################################################################################################################
 
 ## Extract Observations Time Series Function
@@ -799,7 +800,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
 }
 
 ## Comparison methods (plots)
-bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5, lat=3.4, dirbase="/home/cnavarro/bc"){
+bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
   
   ## Load libraries
   library(lubridate); library(ggplot2); library(reshape)
@@ -843,7 +844,7 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   if (varmod == "rsds"){ylabel <- "Shortwave Sol. Radiation (W/m2)"; limit = c(0, 400)}
   
   # Personalized colors 
-  gray='gray40';blue="#122F6B";blue2="#1F78B4";blue3="#A6CEE3";green="#33A02C";green2="#B2DF8A";red="#E31A1C";red2="#FB9A99";orange="#FF7F00";orange2="#FDBF6F"
+  gray='gray50';blue="#122F6B";blue2="#1F78B4";blue3="#A6CEE3";green="#33A02C";green2="#B2DF8A";red="#E31A1C";red2="#FB9A99";orange="#FF7F00";orange2="#FDBF6F"
   
   # Long name months list
   f_names <- list("1"="January", "2"="February", "3"="March", "4"="April", "5"="May", "6"="June", "7"="July", "8"="August", "9"="September", "10"="October", "11"="November", "12"="December")
@@ -853,7 +854,8 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   ##### Timeseries Line Plot for all methods
   
   ## Define enviroment to plot ggplot functions in command line
-  assign("merge", merge,  envir = .GlobalEnv)
+  merge_mod <- merge[which(year(as.Date(merge$date)) %in% yi:yf),]
+  assign("merge_mod", merge_mod,  envir = .GlobalEnv)
   
   ## Looping through GCMs 
   for (i in 1:ngcm){
@@ -861,23 +863,23 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
     assign("i", i,  envir = .GlobalEnv)
     
     ## GCM name
-    gcm <- colnames(merge)[i+3]
+    gcm <- colnames(merge_mod)[i+3]
     
     ## Define output plot file
     ots <- paste0(dirout, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
     
     if (!file.exists(ots)) {
-
+      
       if (rcp == "historical"){  # Historical plot includes observations
         
         cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
         
-        tiff(paste0(dirout, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=4000, height=1000, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=merge) + 
-          geom_line(aes(x=as.Date(date), y=merge[,3], color=" OBS"), size=0.2, shape=1) +   # Observations
-          geom_line(aes(x=as.Date(date), y=merge[,i+3], colour=factor(method)), shape=1, size=0.2) +   # GCMs (historical)
+        tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
+        p <- ggplot(data=merge_mod) + 
+          geom_line(aes(x=as.Date(date), y=merge_mod[,3], color=" OBS"), size=0.2, shape=1) +   # Observations
+          geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2) +   # GCMs (historical)
           facet_wrap(~ method, ncol=1) +
-          scale_color_manual(values=c(green, gray, red, orange, blue)) +
+          scale_color_manual(values=c(gray, red, red2, orange, green)) +
           theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
           ggtitle(paste0("BC Methods  Model : ",gcm)) +
           labs(x="Date (days)", y=ylabel)
@@ -886,9 +888,9 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
         
         cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
         
-        tiff(paste0(dirout, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1000, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=merge) +  
-          geom_line(aes(x=as.Date(date), y=merge[,i+3], colour=factor(method)), shape=1, size=0.2)+   # GCMs (future)
+        tiff(ots, width=1200, height=1400, pointsize=8, compression='lzw',res=100)
+        p <- ggplot(data=merge_mod) +  
+          geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2)+   # GCMs (future)
           facet_wrap(~ method, ncol=1) + 
           scale_color_manual(values=c(green, orange, red, red2, blue, blue2)) +
           theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
@@ -908,9 +910,9 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   
   
   ##### Spread Line Plot for all methods and all GCMs
-
+  
   ## Melt all GCM in a single column
-  merge_mod <- merge
+  merge_mod <- merge[which(year(as.Date(merge$date)) %in% yi:yf),]
   merge_mod$obs <- NULL
   merge_mod <- melt(merge_mod,id=c("method","date"))
   
@@ -918,7 +920,7 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   assign("merge_mod", merge_mod,  envir = .GlobalEnv)
   
   ## Define output plot file
-  ots <- paste0(dirout, "/ts_spread_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
+  ots <- paste0(dirout, "/spread_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
   
   if (!file.exists(ots)){
     
@@ -926,10 +928,10 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
       
       cat(paste0("\nTime series plot  ", rcp, " ", varmod))
       
-      tiff(paste0(dirout, "/ts_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=4000, height=1000, pointsize=8, compression='lzw',res=100)
+      tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
       p <- ggplot() + 
         geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
-        scale_color_manual(values=c(green2, orange2, red2, blue3)) +
+        scale_color_manual(values=c(green, orange, red, red2)) +
         facet_wrap(~ method, ncol=1) +
         theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
         scale_y_continuous(limits = limit) +
@@ -940,10 +942,10 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
       
       cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
       
-      tiff(paste0(dirout, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1000, pointsize=8, compression='lzw',res=100)
+      tiff(ots, width=1200, height=1600, pointsize=8, compression='lzw',res=100)
       p <- ggplot() + 
         geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
-        scale_color_manual(values=c(green2, orange2, red, red2, blue, blue3)) +
+        scale_color_manual(values=c(green, orange2, red, red2, blue, blue3)) +
         facet_wrap(~ method, ncol=1) +
         theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
         scale_y_continuous(limits = limit) +
@@ -965,7 +967,7 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   ##### Interannual Variability Boxplot
   
   ## Define output metrics file
-  intannvar <- paste0(dirout, "/intannvar_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
+  intannvar <- paste0(dirout, "/var_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
   
   if (!file.exists(intannvar)) {
     
@@ -1007,11 +1009,11 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
         
         cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
         
-        tiff(paste0(dirout, "/intannvar_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=800, height=1000, pointsize=8, compression='lzw',res=100)
+        tiff(paste0(dirout, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1600, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=stdgcm) +  
           geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity") +  # GCMs (historical)
           facet_wrap(~ method, ncol=1) + 
-          scale_fill_manual(values=c(green2, orange, red, blue, gray)) +
+          scale_fill_manual(values=c(green2, orange, red, red2, gray)) +
           theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
           ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
           labs(x="Date (days)", y=ylabel)
@@ -1040,7 +1042,7 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
         
         cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
         
-        tiff(paste0(dirout, "/intannvar_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1000, pointsize=8, compression='lzw',res=100)
+        tiff(paste0(dirout, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=stdgcm) +  
           geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
           facet_wrap(~ method, ncol=1) + 
@@ -1166,26 +1168,26 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
 
 ###################### Wrapper ##########################
 
+## D:\CIAT\_tools\dapa-climate-change\IPCC-CMIP5\bias_correction
 ## source("gcm_calibration_bc.R")
 
 ## Input parameters via CCAFS-Climate website
 varlist <- c("pr", "tasmax")      # varlist <- c("tasmax", "tasmin", "pr", "rsds")
 gcmlist <- c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2")  # gcmlist <- list.files(path=dirrcp, full.names=FALSE)  ## The gcm list is a parameters set by user through a check list
 rcp <- "rcp45"
-ts_hist <- "1950_2000"
-ts_fut <- "2020_2049"
+ts_hist <- "1971_1980"
+ts_fut <- "2030_2039"
 lon <- -73.5
 lat <- 3.4
 dataset <- "wfd"
 
 ## Preset parameters 
-dirout <- "/home/cnavarro/bc"
+dirout <- "D:/CIAT/Workspace/bc"
 dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily"
 dirobs <- "/mnt/data_cluster_4/observed/gridded_products/wfd/daily/nc-files"
 
 # Warnings off
 # options(warn=-1)
-
 
 # Run functions by looping GCMs and variables
 for (var in varlist){
@@ -1193,6 +1195,7 @@ for (var in varlist){
   ## Renaming variables
   if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
   
+  ## Runinng functions
   obs_extraction(dataset, var, ts, lon, lat, dirobs, dirout)  
   gcm_extraction(gcm, var, "historical", ts_hist, gcmlist, lon, lat, dirgcm, dirout)
   gcm_extraction(gcm, var, rcp, ts_fut, gcmlist, lon, lat, dirgcm, dirout)
