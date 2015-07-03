@@ -73,7 +73,7 @@ obs_extraction <- function(dataset="wfd", var="tasmax", ts="1950_2000", lon=-73.
     names(datobs) <- c("date","year","value")
     datobs <- datobs[which(datobs$year %in% yi:yf),]
     datobs$year <- NULL
-
+    
     ## Convert units to mm/day, W/m2 and Celsius Degrees
     if (varmod == "prec"){
       datobs$value <- datobs$value * 86400
@@ -99,7 +99,7 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax", rcp="historical", ts=
   
   ## Path where are stored the daily GCM data 
   if (rcp == "historical"){dirrcp <- paste0(dirgcm, "/", rcp)} else {dirrcp <- paste0(dirgcm, "/", rcp)}
-
+  
   # Loop through GCMs
   for (gcm in gcmlist){
     
@@ -131,7 +131,11 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax", rcp="historical", ts=
       if (!file.exists(odat)) {
         
         ## CDO command line to extract daily TS
-        system(paste0("/usr/bin/cdo -s -outputtab,date,year,value -remapnn,lon=", lonmod, "_lat=", lat, " ", ncvar[1], " > ", dirtemp, "/", odat))
+        if (gcm == "gfdl_cm3" || gcm == "gfdl_esm2g" || gcm == "gfdl_esm2m"){
+          system(paste0("/usr/bin/cdo -s -outputtab,date,year,value -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
+        } else {
+          system(paste0("/usr/bin/cdo -s -outputtab,date,year,value -remapnn,lon=", lonmod, "_lat=", lat, " ", ncvar[1], " > ", dirtemp, "/", odat))
+        }
         
         ## Read and organize daily TS
         datgcm <- read.table(odat, header=F, sep="")
@@ -172,7 +176,7 @@ merge_extraction <- function(varmod="prec", rcp="historical", ts="1950_2000", gc
   if (!file.exists(odat)) {
     
     cat("\nMerging OBS and GCMs ", varmod, " ... ")
-        
+    
     ## Define end and start year from TS period and 
     yi <- substr(ts, 1, 4)
     yf <- substr(ts, 6, 9)
@@ -390,7 +394,7 @@ bc_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
       # Calculate statistical metrics for future GCM
       avggcm <- aggregate(odat_f[3:length(odat_f)], by=list(months_f), FUN="mean", na.rm=T)
       stdgcm <- aggregate(odat_f[3:length(odat_f)], by=list(months_f), FUN=fun)
-
+      
       # Set replicates at the same length of GCMs future metrics
       avgobs_m_f <- rep(rep(avgobs[,2], nyears_f), nday_f[,3])
       stdobs_m_f <- rep(rep(stdobs[,2], nyears_f), nday_f[,3])
@@ -422,7 +426,7 @@ bc_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
         } else {
           bc_values[,j] <- avgobs_m + ( (stdobs_m / stdgcm_l[[j]]) * (odat[,j+2] - avggcm_l[[j]]))
         }  
-         
+        
       }
       
       ## Output matrix with BC values
@@ -486,7 +490,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     ## Load merged file (future)
     odat_f <- paste0("raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat_f <- read.table(odat_f, header=T, sep=" ")
-
+    
     ## Get GCM months and years, number of dates, years and GCMs (historical)
     months <- month(as.Date(odat$date))
     years <- year(as.Date(odat$date))
@@ -499,7 +503,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     years_f <- year(as.Date(odat_f$date))
     nday_f <- aggregate(odat_f[,1], list(months_f, years_f), length)
     nyears_f <- max(years_f) - min(years_f) + 1
-
+    
     ## Standarize length of future and historical periods by the middle point
     if (nyears > nyears_f){
       
@@ -959,8 +963,8 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
     dev.off()
     
   }
-    
-
+  
+  
   
   
   
@@ -1078,7 +1082,7 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
       months <- month(as.Date(merge$date))
       years <- year(as.Date(merge$date))
       methods <- year(as.Date(merge$date))
-
+      
       ## Calculate frequencies of rainy and hot days
       merge_mod <- merge[,3:length(merge)]
       if (varmod == "prec"){merge_mod[merge_mod < 1] <- 0 ; merge_mod[merge_mod > 1] <- 1} 
@@ -1173,7 +1177,7 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
 
 ## Input parameters via CCAFS-Climate website
 varlist <- c("pr", "tasmax")      # varlist <- c("tasmax", "tasmin", "pr", "rsds")
-gcmlist <- c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2")  # gcmlist <- list.files(path=dirrcp, full.names=FALSE)  ## The gcm list is a parameters set by user through a check list
+gcmlist <-  c("gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m") # c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2")  # gcmlist <- list.files(path=dirrcp, full.names=FALSE)  ## The gcm list is a parameters set by user through a check list
 rcp <- "rcp45"
 ts_hist <- "1971_1980"
 ts_fut <- "2030_2039"
@@ -1182,7 +1186,7 @@ lat <- 3.4
 dataset <- "wfd"
 
 ## Preset parameters 
-dirout <- "D:/CIAT/Workspace/bc"
+dirout <- "/home/cnavarro/bc_test1"
 dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily"
 dirobs <- "/mnt/data_cluster_4/observed/gridded_products/wfd/daily/nc-files"
 
