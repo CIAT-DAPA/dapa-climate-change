@@ -8,7 +8,7 @@
 import arcgisscripting, os, sys, string,glob, shutil
 gp = arcgisscripting.create(9.3)
 
-# python D:\_scripts\dapa-climate-change\IPCC-CMIP5\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\per_adm\per0 D:\Request\Request_miguel\per_adm rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
+# python D:\_scripts\dapa-climate-change\IPCC-CMIP5\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\rwa_adm\rwa0 D:\Request\Request_miguel\rwa_adm rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
 
 
 # Arguments
@@ -118,7 +118,10 @@ for period in periodlist:
 				gp.workspace = diroutraster
 				inrastertmax = diroutraster + "\\"+variable
 				inrastertmin = dirworldclim + "\\"+variable+'_wc'
-				inexpresion = inrastertmax + " - " + inrastertmin 
+				if variable=="bio_1":
+					inexpresion = "( "+inrastertmax + " - " + inrastertmin + " ) * 0.1"
+				else:
+					inexpresion = inrastertmax + " - " + inrastertmin
 				outAnomala= dirouanoma + "\\"+variable
 				
 				if not gp.Exists(outAnomala):
