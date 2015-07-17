@@ -128,7 +128,7 @@ for rcp in rcpList:
 					if variable=="bio_1":
 						inexpresion = "( "+inrastertmax + " - " + inrastertmin + " ) * 0.1"
 					else:
-						inexpresion =  'float ( ' +inrastertmax + ' - ' + inrastertmin + ' ) / ' +inrastertmin
+						inexpresion =  'float ( ' +inrastertmax + ' - ' + inrastertmin + ' ) / ' +inrastertmin + ' * 100'
 						# inexpresion =  inrastertmax + ' - ' + inrastertmin
 					outAnomala= dirouanoma + "\\"+variable
 					
