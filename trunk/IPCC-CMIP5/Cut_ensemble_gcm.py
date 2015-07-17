@@ -58,7 +58,8 @@ for period in periodlist:
 			num = 19
 		else:
 			num = 12
-		for month in [1,12]:
+		# for month in [1,12]:
+		for month in range(1,num+1):
 			if var == "cons_mths":
 				variable = var
 			else:
@@ -121,7 +122,8 @@ for period in periodlist:
 				if variable=="bio_1":
 					inexpresion = "( "+inrastertmax + " - " + inrastertmin + " ) * 0.1"
 				else:
-					inexpresion = inrastertmax + " - " + inrastertmin
+					inexpresion =  'float ( ' +inrastertmax + ' - ' + inrastertmin + ' ) / ' +inrastertmin
+					# inexpresion =  inrastertmax + ' - ' + inrastertmin
 				outAnomala= dirouanoma + "\\"+variable
 				
 				if not gp.Exists(outAnomala):
