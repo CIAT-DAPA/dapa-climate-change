@@ -18,6 +18,7 @@ gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
+#loc_list <- loc_list[which(loc_list$id == ".INMET.00303" | loc_list$id == ".INMET.00304" | loc_list$id == ".INMET.511"),]
 
 for (wst in loc_list$id) {
   #wst <- paste(loc_list$id[1])

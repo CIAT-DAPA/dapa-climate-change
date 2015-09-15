@@ -7,6 +7,9 @@
 #3. Run bias correction, summary stats / plots
 #4. Create oryza2000 files as needed
 
+#source dir
+src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+
 #directories
 wd <- "/nfs/a101/earjr/rice-future-tpe"
 #wd <- "~/Leeds-work/rice-future-tpe"
@@ -17,7 +20,7 @@ obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
 #source functions (fron CN / JT)
-source(paste(wd,"/scripts/gcm_calibration_bc_v2.R",sep=""))
+source(paste(src.dir,"/gcm_calibration_bc_v2.R",sep=""))
 
 # #create list of GCMs that have all scenarios
 # gcmlist_his <- data.frame(gcm=list.files(paste(gcm_idir,"/historical",sep="")), present.his=1)
@@ -57,6 +60,7 @@ ts_fut <- "2040_2069"
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
+#loc_list <- loc_list[which(loc_list$id == ".INMET.00303" | loc_list$id == ".INMET.00304" | loc_list$id == ".INMET.511"),]
 
 # ####
 # # 1. extract historical and future GCM data

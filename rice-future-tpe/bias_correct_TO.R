@@ -10,9 +10,12 @@ require(qmap)
 #4. Apply bias correction on period 1980-1989, as if GCM=wfdei
 #5. Create single time series 1980-2005, and merge with precipitation data
 
+#source dir
+src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
-#wd <- "~/Leeds-work/rice-future-tpe"
+#wd <- "/nfs/a101/earjr/rice-future-tpe"
+wd <- "~/Leeds-work/rice-future-tpe"
 obs_idir <- "/mnt/data_cluster_4/observed/gridded_products/wfdei/daily/nc-files"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 obs_odir <- "~/scratch/obs_meteorology"
@@ -20,7 +23,7 @@ obs_odir <- "~/scratch/obs_meteorology"
 obs_fdir <- paste(obs_dir,"/INMET_stations",sep="")
 
 #source functions (fron CN / JT)
-source(paste(wd,"/scripts/gcm_calibration_bc_v2.R",sep=""))
+source(paste(src.dir,"/gcm_calibration_bc_v2.R",sep=""))
 
 ## variable list
 varlist <- c("tasmax", "tasmin", "rsds")
@@ -81,7 +84,7 @@ for (wst in loc_list$id) {
 
 #2. Get original 1990-2010 observations into format needed by CN/JT scripts
 for (wst in loc_list$id) {
-  #wst <- paste(loc_list$id[1])
+  #wst <- paste(loc_list$id[2])
   wst_name <- gsub(".","",wst,fixed=T)
   lon <- loc_list$lon[which(loc_list$id == wst)]
   lat <- loc_list$lat[which(loc_list$id == wst)]
@@ -90,7 +93,12 @@ for (wst in loc_list$id) {
   cat("...loading observed weather data for wst=",wst_name,"\n")
   ws_data <- read.csv(paste(obs_fdir,"/",tolower(wst_name),"/",toupper(wst_name),".csv",sep=""))
   ws_data <- unique(ws_data)
-  names(ws_data) <- c("date","id","srad","tmax","tmin","prec")
+  if (wst_name == "INMET00303") {
+    names(ws_data) <- c("date","id","srad","tmax","tmin","prec")
+  } else {
+    names(ws_data) <- c("date","id","prec","srad","tmax","tmin")
+    ws_data <- ws_data[,c(1,2,4,5,6,3)]
+  }
   
   #if data is incomplete
   #output directory
@@ -245,7 +253,14 @@ for (wst in loc_list$id) {
   #load full precipitation time series
   pr1 <- read.csv(paste(obs_fdir,"/",tolower(wst_name),"/",toupper(wst_name),".csv",sep="")) #1983-2013
   pr2 <- read.csv(paste(obs_fdir,"/",tolower(wst_name),"/",tolower(wst_name),"_1980_1982.csv",sep="")) #1983-2013
-  names(pr1) <- names(pr2) <- c("date","id","srad","tmax","tmin","prec")
+  if (wst_name == "INMET00303") {
+    names(pr1) <- names(pr2) <- c("date","id","srad","tmax","tmin","prec")
+  } else {
+    names(pr2) <- c("date","id","srad","tmax","tmin","prec")
+    names(pr1) <- c("date","id","prec","srad","tmax","tmin")
+    pr1 <- pr1[,c(1,2,4,5,6,3)]
+  }
+  
   pr1 <- pr1[,c("date","id","prec")]; pr2 <- pr2[,c("date","id","prec")]
   pr_data <- rbind(pr2, pr1)
   pr_data$date <- as.Date(pr_data$date)

@@ -4,6 +4,9 @@
 
 #Get outputs from bias_correct_met.R and write Oryza2000 formatted weather files
 
+#source dir
+src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+
 #directories
 wd <- "/nfs/a101/earjr/rice-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
@@ -11,7 +14,7 @@ gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
 ory_odir <- paste(wd,"/oryza_meteorology",sep="")
 if (!file.exists(ory_odir)) {dir.create(ory_odir)}
 
-source(paste(wd,"/scripts/Oryza_v4.R",sep=""))
+source(paste(src.dir,"/Oryza_v4.R",sep=""))
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
