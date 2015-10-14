@@ -50,11 +50,11 @@ ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995,
   require(sp)
   require(chron)
   
-  cat(" \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXX ETA CUT HOURLY XXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat(" \n")
+  cat(" /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXX ETA CUT HOURLY XXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat(" /n")
   
   ## Convert to NetCDF (multiband) file format and cut lateral boundaries
   
@@ -71,14 +71,14 @@ ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995,
       scenName <- sapply(strsplit(basename(scen), '[_]'), "[[", 5)
       if (scenName == "futuro"){scenName <- "sres_a1b"} else {scenName <- "historical"}
       
-      cat("\n Cut ETA Daily files for: ", scenName, " ", modName, "\n\n")
+      cat("/n Cut ETA Daily files for: ", scenName, " ", modName, "/n/n")
       
       ctlList <- list.files(paste(scen, "/", sep=""), full.names = TRUE, pattern=".ctl")
       
       procDir <- paste(scen, "/temp", sep="")
       if (!file.exists(paste(procDir))) {dir.create(procDir, recursive=TRUE)}
       
-      cat("\n .> Corverting grads files to NetCDF format \n\n")
+      cat("/n .> Corverting grads files to NetCDF format /n/n")
       
       for (ctl in ctlList) {
         
@@ -93,7 +93,7 @@ ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995,
           ## Cut borders 
           system(paste("cdo sellonlatbox,", xmin, ",", xmax, ",", ymin, ",", ymax, " ", procDir, "/", ctlName, ".nc", " ", outNc , sep=""))
           
-          cat("\t .> ", ctlName, " converted\n")
+          cat("/t .> ", ctlName, " converted/n")
           
         }
       }
@@ -104,7 +104,7 @@ ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995,
     
       if (shift == "yes"){
         
-        cat("\n .> Split NetCDF files in daily data \n\n")
+        cat("/n .> Split NetCDF files in daily data /n/n")
         
         outNcDir <- paste(outDir, "/", scenName, "/", modName, sep="")
         if (!file.exists(paste(outNcDir))) {dir.create(outNcDir, recursive=TRUE)}
@@ -134,7 +134,7 @@ ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995,
               
               if (!file.exists(paste(outNcDir, "/", year, "/", var, "_123118.nc", sep=""))) {
                 
-                cat("\t .> Split ", var, " ", year, " \n")
+                cat("/t .> Split ", var, " ", year, " /n")
                 
                 if (!file.exists(paste(outNcDir, "/", year, sep=""))) {dir.create(paste(outNcDir, "/", year, sep=""))}
                 
@@ -184,13 +184,13 @@ ETA_Cut_Hourly <- function(baseDir="U:/rcm/eta/raw/hadcm_40km", xmin=-81.999995,
               
             }
             
-            cat("\n .> Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " ", staYear, "_", endYear," done!\n\n")
+            cat("/n .> Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " ", staYear, "_", endYear," done!/n/n")
             
             opnFile <- file(verFile, open="w")
             cat(paste("ETA Cut daily ", scenName, " ", modName, " for extent ", xmin, ",", xmax, ",", ymin, ",", ymax, " was processed on ", date(), sep=""), file=opnFile)
             close.connection(opnFile)
             
-          } else {cat("\n .> Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " ", staYear, "_", endYear, " done!\n\n")}
+          } else {cat("/n .> Cut ETA Daily files for: ", scenName, " ", modName, " ", var, " ", staYear, "_", endYear, " done!/n/n")}
           
         } 
         
@@ -213,11 +213,11 @@ ETA_Calcs_Monthly <- function(baseDir="U:/data/rcm/eta/processed/sa_20min", scen
   require(sp)
   require(chron)
   
-  cat(" \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXX ETA CALCS MONTHLY XXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat(" \n")
+  cat(" /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXX ETA CALCS MONTHLY XXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat(" /n")
   
   monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
   varList <- c("prec", "tmax", "tmin", "tmean")
@@ -242,7 +242,7 @@ ETA_Calcs_Monthly <- function(baseDir="U:/data/rcm/eta/processed/sa_20min", scen
       
       year <- basename(yr)
       
-      cat("\n Avg ETA Monthly files for: ", scen, " ", modName, " ", year, "\n\n")
+      cat("/n Avg ETA Monthly files for: ", scen, " ", modName, " ", year, "/n/n")
       
       outNcDir <- paste(outDir, "/", scen, "/", modName, "/", year, sep="")
       if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
@@ -268,7 +268,7 @@ ETA_Calcs_Monthly <- function(baseDir="U:/data/rcm/eta/processed/sa_20min", scen
               
               ncMth <- writeRaster(ncMthStack, outNc, format='CDF', overwrite=TRUE)
             
-              cat("\n .> Average : ", var, " ",  mth," done! \n")
+              cat("/n .> Average : ", var, " ",  mth," done! /n")
               
             }
             
@@ -293,11 +293,11 @@ ETA_Calcs_Daily <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/hourly",
   require(sp)
   require(chron)
   
-  cat(" \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXX ETA CALCS DAILY XXxxXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat(" \n")
+  cat(" /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXX ETA CALCS DAILY XXxxXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat(" /n")
   
   monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
   varList <- c("prec", "tmax", "tmin", "tmean")
@@ -327,7 +327,7 @@ ETA_Calcs_Daily <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/hourly",
       names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
       
       
-      cat("\n Avg ETA Daily files for: ", scen, " ", modName, " ", year, "\n\n")
+      cat("/n Avg ETA Daily files for: ", scen, " ", modName, " ", year, "/n/n")
       
       outNcDir <- paste(outDir, "/", scen, "/", modName, "/", year, sep="")
       if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
@@ -359,7 +359,7 @@ ETA_Calcs_Daily <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/hourly",
                 
                 ncDay <- writeRaster(ncDayStack, outNc, format='CDF', overwrite=TRUE)
                 
-                cat("\n .> Average : ", var, " ",  mth, day, " done!")
+                cat("/n .> Average : ", var, " ",  mth, day, " done!")
                 
               }
               
@@ -383,11 +383,11 @@ ETA_Calcs_30yrAvg <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/monthl
   require(rgdal)
   require(sp)
   
-  cat(" \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXX ETA CALCS 30YR AVG XXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat(" \n")
+  cat(" /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXX ETA CALCS 30YR AVG XXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat(" /n")
   
   monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
   varList <- c("prec", "tmax", "tmin", "tmean")
@@ -413,7 +413,7 @@ ETA_Calcs_30yrAvg <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/monthl
       outNcDir <- paste(outDir, "/", scen, "/", modName, "/", staYear, "_1990", sep="")
       if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
       
-      cat("\n Avg ETA 30yrAvg files for: ", scen, " ", modName, " ", staYear, "-", endYear, "\n\n")
+      cat("/n Avg ETA 30yrAvg files for: ", scen, " ", modName, " ", staYear, "-", endYear, "/n/n")
       varList <- c("tmax", "tmin")
       for (var in varList){
         
@@ -429,9 +429,9 @@ ETA_Calcs_30yrAvg <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/monthl
             
             ncMth <- writeRaster(ncMthStack, outAsc, format='ascii', overwrite=TRUE)
             
-            cat("\n .> Average : ", var, " ",  mth," done! \n")
+            cat("/n .> Average : ", var, " ",  mth," done! /n")
             
-          } else{cat("\n .> Average : ", var, " ",  mth," done! \n")}
+          } else{cat("/n .> Average : ", var, " ",  mth," done! /n")}
           
         }
       }
@@ -452,7 +452,7 @@ ETA_Calcs_30yrAvg <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/monthl
         
         if (period == "2070") {endYear <- as.integer(period) + 28}
         
-        cat("\n Avg ETA 30yrAvg files for: ", scen, " ", modName, " ", staYear, "-", endYear, "\n\n")
+        cat("/n Avg ETA 30yrAvg files for: ", scen, " ", modName, " ", staYear, "-", endYear, "/n/n")
         
         for (var in varList){
           
@@ -470,9 +470,9 @@ ETA_Calcs_30yrAvg <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/monthl
               
                 ncMth <- writeRaster(ncMthStack, outAsc, format='ascii', overwrite=TRUE)
                 
-                cat(" .> Average : ", var, " ",  mth," done! \n")
+                cat(" .> Average : ", var, " ",  mth," done! /n")
                 
-              } else {cat(" .> Average : ", var, " ",  mth," done! \n")}
+              } else {cat(" .> Average : ", var, " ",  mth," done! /n")}
             }
           }
         }
@@ -488,11 +488,11 @@ ETA_Zip_Asciis <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/30yrAvera
 
   gcmList <- list.dirs(paste(baseDir, "/", scen,  sep=""), recursive = FALSE, full.names = FALSE)
   
-  cat(" \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXX ETA PUBLISH DATA XXXXXXXXXXXXXX \n")
-  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
-  cat(" \n")
+  cat(" /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXX ETA PUBLISH DATA XXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat(" /n")
 
   for (gcm in gcmList) {
     
@@ -510,7 +510,7 @@ ETA_Zip_Asciis <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/30yrAvera
       } else if (basename(period) == "2040_2069") {periodName <- "2050s"
       } else if (basename(period) == "2070_2099") {periodName <- "2080s"}
 
-      cat("\n Publish files from: ", scenName, " ", modName, " ", periodName, "\n\n")
+      cat("/n Publish files from: ", scenName, " ", modName, " ", periodName, "/n/n")
       
       ascList <- list.files(paste(period, sep=""), full.names = TRUE, pattern=".asc")
   
@@ -525,11 +525,144 @@ ETA_Zip_Asciis <- function(baseDir="U:/data/rcm/eta/processed/sa_20min/30yrAvera
           
         system(paste("7za a ", outZipDir, "/", outZipName, " ", asc, sep=""))
         
-        cat(" .> Compress: ", basename(asc), " done! \n")
-        } else {cat(" .> Compress: ", basename(asc), " done! \n")}
+        cat(" .> Compress: ", basename(asc), " done! /n")
+        } else {cat(" .> Compress: ", basename(asc), " done! /n")}
       }
     }
   }
 }
 
+########################## CORDEX ######################
+
+
+CORDEX_Calcs_Monthly <- function(baseDir="U:/rcm/cordex/AFR-44", scen="historical", region="AFR-44",time="mon",ens="r1i1p1",ver="v1") {
+  
+  require(maptools)
+  require(raster)
+  require(ncdf)
+  require(rgdal)
+  require(sp)
+  require(chron)
+  
+  baseDir="U:/rcm/cordex/AFR-44"
+  scen="historical"
+  region="AFR-44"
+  time="mon"
+  ens="r1i1p1"
+  ver="v1"
+  
+  
+  cat(" /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXX ETA CALCS MONTHLY XXXXXXXXXXXXX /n")
+  cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
+  cat(" /n")
+  
+  outDir="U:/rcm/cordex/organized"
+  
+  #monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
+  #varList <- c("prec", "tmax", "tmin", "tmean")
+  #monthListMod <- c(1:12)
+  
+  # Set number of days by month
+  #ndays <- c(31,28,31,30,31,30,31,31,30,31,30,31)
+  
+  # Combirn number of month and days in one single data frame
+  #ndaymtx <- as.data.frame(cbind(monthList, ndays, monthListMod))
+  #names(ndaymtx) <- c("Month", "Ndays", "MonthMod")
+  
+  
+  
+  gcmList <- list.dirs(paste0(baseDir,"/",time,"/", scen), recursive = FALSE, full.names = FALSE)
+  varList<- c("pr","tas","tasmax","tasmin","rsds","sfcwind")
+  
+  for (gcm in gcmList) {
+    outNcDir <- paste0(outDir,"/",region, "/",scen,"/",gcm,"/",ens,"/",ver)
+    
+    if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
+    monNC=paste0(outNcDir,"/monthly-files")  
+    if (!file.exists(paste(monNC, sep=""))) {dir.create(paste(monNC, sep=""), recursive=TRUE)}
+    
+    
+    for(var in varList[5]){
+      
+      yrList <- list.files(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens), recursive = FALSE, full.names = FALSE,pattern = paste0(var,"_"))
+      if(length(yrList)>0){
+        nyear=c()
+        for( yr in yrList){
+          ver=sapply(strsplit(yr, '[_]'), "[[", 7)
+          if(ver=="v1"){
+            years <- gsub(".nc","",sapply(strsplit(yr, '[_]'), "[[", 9))  
+            staYear <- as.numeric(substr(sapply(strsplit(years, '[-]'), "[[", 1),1,4))
+            endYear <- as.numeric(gsub(".nc","",substr(sapply(strsplit(years, '[-]'), "[[", 2), 1, 4)))
+            nyear=c(nyear,staYear,endYear)
+          }
+        }
+        if(!is.null(nyear)){
+          cat(region,scen,gcm,var)
+          cat("\n")
+          if(length(yrList)==length(seq(min(nyear),max(nyear),by = 10))+1){
+            setwd(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens))
+
+            outfile=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'_tmp.nc')
+            outfileTemp=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'.nc')
+            
+            
+            if (!file.exists(outfile)){
+              system(paste0('cdo -f nc mergetime ',paste(yrList, collapse = ' '),' ',outfile),intern=TRUE)
+              cat("..Done ",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+            }else{
+              cat("..exist!")
+            }
+            
+            if (file.exists(outfile) && !file.exists(outfileTemp) ){
+              if (var == "pr"){
+                varmod="prec"
+                system(paste0("cdo -f nc -mulc,86400 ", outfile,' ',outfileTemp))
+              } else if (var == "tas") {
+                varmod="tmean"
+                system(paste0("cdo -f nc -subc,273.15 ", outfile,' ',outfileTemp))
+              } else if (var == "tasmax") {
+                varmod="tmax"
+                system(paste0("cdo -f nc -subc,273.15 ", outfile,' ',outfileTemp))
+              }else if (var == "tasmin") {
+                varmod="tmin"
+                system(paste0("cdo -f nc -subc,273.15 ", outfile,' ',outfileTemp))
+              }else{
+                system(paste0("cdo -f nc ", outfile,' ',outfileTemp))
+                varmod=var
+              }
+              unlink(outfile)
+              system(paste("cdo splityear ", outfileTemp, " ", monNC, "/",  var, "_", sep=""))
+            }
+            
+            for(nmon in seq(min(nyear),max(nyear),by = 1)){
+              if(!file.exists(paste0(monNC, "/",nmon, "/",varmod, "_12.nc", sep=""))){
+                if (!file.exists(paste0(monNC,"/",nmon))) {dir.create(paste0(monNC,"/",nmon), recursive=TRUE)}
+                ncyear=paste0(monNC,"/",var,"_",nmon,".nc")
+                system(paste("cdo splitmon ", ncyear, " ", monNC, "/",nmon, "/",varmod, "_", sep=""))
+                unlink(ncyear)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  
+}
+
+
+
+cord=bind("U:/rcm/cordex/organized/AFR-44/historical/KNMI-RACMO22T/r1i1p1/v1/monthly-files/1950/prec_01.nc")
+cordi=raster("U:/rcm/cordex/MNA-44i/mon/rcp85/SMHI-RCA4/r1i1p1/tasmin_MNA-44i_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_SMHI-RCA4_v1_mon_201101-202012.nc",band=50000)
+shp=shapefile("S:/admin_boundaries/adminFiles/world_no_antarctica.shp")
+
+
+plot(cord)
+plot(shp,add=T)
+
+
+writeRaster(cord, "D:/Documentos/CIAT/rotategrid/test/test.tiff", format="GTiff", overwrite=T)
 
