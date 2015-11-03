@@ -544,13 +544,18 @@ CORDEX_Calcs_Monthly <- function(baseDir="U:/rcm/cordex/AFR-44", scen="historica
   require(sp)
   require(chron)
   
-  baseDir="U:/rcm/cordex/AFR-44"
   scen="historical"
-  region="AFR-44"
+  region="SAM-44"
   time="mon"
-  ens="r1i1p1"
-  ver="v1"
-  
+  #ens="r1i1p1"
+  vers="r2"
+  #basegrid="U:/rcm/cordex/organized/base_grid" # "/mnt/data_cluster_5/rcm/cordex/organized/base_grid"# para convertir las coordenadas tipo curvilinear a regular grid esto es only for files con r2
+  baseDir=paste0("U:/rcm/cordex/",region) #  paste0("/mnt/data_cluster_5/rcm/cordex/",region)#
+  outDir="U:/rcm/cordex/organized" # "/mnt/data_cluster_5/rcm/cordex/organized"# 
+  boxExtent=extent(-87,-32,-56.5,18.5)
+  #maskWorld=raster("S:/admin_boundaries/masks_world/mask15m")
+  #maskbase=crop(maskWorld,boxExtent)
+
   
   cat(" /n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
@@ -558,7 +563,6 @@ CORDEX_Calcs_Monthly <- function(baseDir="U:/rcm/cordex/AFR-44", scen="historica
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX /n")
   cat(" /n")
   
-  outDir="U:/rcm/cordex/organized"
   
   #monthList <- c(paste(0,c(1:9),sep=""),paste(c(10:12)))
   #varList <- c("prec", "tmax", "tmin", "tmean")
@@ -574,95 +578,322 @@ CORDEX_Calcs_Monthly <- function(baseDir="U:/rcm/cordex/AFR-44", scen="historica
   
   
   gcmList <- list.dirs(paste0(baseDir,"/",time,"/", scen), recursive = FALSE, full.names = FALSE)
-  varList<- c("pr","tas","tasmax","tasmin","rsds","sfcwind")
+  varList<- c("pr","tas","tasmax","tasmin","rsds","sfcwind","hur")
   
   for (gcm in gcmList) {
-    outNcDir <- paste0(outDir,"/",region, "/",scen,"/",gcm,"/",ens,"/",ver)
     
-    if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
-    monNC=paste0(outNcDir,"/monthly-files")  
-    if (!file.exists(paste(monNC, sep=""))) {dir.create(paste(monNC, sep=""), recursive=TRUE)}
-    
-    
-    for(var in varList[5]){
-      
-      yrList <- list.files(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens), recursive = FALSE, full.names = FALSE,pattern = paste0(var,"_"))
-      if(length(yrList)>0){
-        nyear=c()
-        for( yr in yrList){
-          ver=sapply(strsplit(yr, '[_]'), "[[", 7)
-          if(ver=="v1"){
-            years <- gsub(".nc","",sapply(strsplit(yr, '[_]'), "[[", 9))  
-            staYear <- as.numeric(substr(sapply(strsplit(years, '[-]'), "[[", 1),1,4))
-            endYear <- as.numeric(gsub(".nc","",substr(sapply(strsplit(years, '[-]'), "[[", 2), 1, 4)))
-            nyear=c(nyear,staYear,endYear)
-          }
-        }
-        if(!is.null(nyear)){
-          cat(region,scen,gcm,var)
-          cat("\n")
-          if(length(yrList)==length(seq(min(nyear),max(nyear),by = 10))+1){
-            setwd(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens))
 
-            outfile=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'_tmp.nc')
-            outfileTemp=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'.nc')
-            
-            
-            if (!file.exists(outfile)){
-              system(paste0('cdo -f nc mergetime ',paste(yrList, collapse = ' '),' ',outfile),intern=TRUE)
-              cat("..Done ",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
-            }else{
-              cat("..exist!")
-            }
-            
-            if (file.exists(outfile) && !file.exists(outfileTemp) ){
-              if (var == "pr"){
-                varmod="prec"
-                system(paste0("cdo -f nc -mulc,86400 ", outfile,' ',outfileTemp))
-              } else if (var == "tas") {
-                varmod="tmean"
-                system(paste0("cdo -f nc -subc,273.15 ", outfile,' ',outfileTemp))
-              } else if (var == "tasmax") {
-                varmod="tmax"
-                system(paste0("cdo -f nc -subc,273.15 ", outfile,' ',outfileTemp))
-              }else if (var == "tasmin") {
-                varmod="tmin"
-                system(paste0("cdo -f nc -subc,273.15 ", outfile,' ',outfileTemp))
+    for(var in varList){
+      
+      if (var == "pr"){
+        varmod="prec"
+      } else if (var == "tas") {
+        varmod="tmean"
+      } else if (var == "tasmax") {
+        varmod="tmax"
+      }else if (var == "tasmin") {
+        varmod="tmin"
+      }else{
+        varmod=var
+      }      
+      ensList <- list.dirs(paste0(baseDir,"/",time,"/", scen,"/",gcm), recursive = FALSE, full.names = FALSE)
+      
+      for(ens in ensList){
+        yrList <- list.files(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens), recursive = FALSE, full.names = FALSE,pattern = paste0(var,"_"))
+        if(length(yrList)>0){
+          nyear=c()
+          for( yr in yrList){
+            ver=sapply(strsplit(yr, '[_]'), "[[", 7)
+            #if(ver=="r2"){
+              years <- gsub(".nc","",sapply(strsplit(yr, '[_]'), "[[", 9))  
+              staYear <- as.numeric(substr(sapply(strsplit(years, '[-]'), "[[", 1),1,4))
+              endYear <- as.numeric(gsub(".nc","",substr(sapply(strsplit(years, '[-]'), "[[", 2), 1, 4)))
+              nyear=c(nyear,staYear,endYear)
+            #} # if ver
+          }          
+          if(!is.null(nyear)){
+            cat(region,scen,gcm,var)
+            cat("\n")
+            if(length(yrList)==length(seq(min(nyear),max(nyear),by = 9))-1){
+              setwd(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens))
+              
+              outNcDir <- paste0(outDir,"/",region, "/",scen,"/",gcm,"/",ens,"/",ver)
+              if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
+              monNC=paste0(outNcDir,"/monthly-files")  
+              if (!file.exists(paste(monNC, sep=""))) {dir.create(paste(monNC, sep=""), recursive=TRUE)}
+              
+              outfile=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'_tmp.nc')
+              outfilePrj=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'_prj.nc')
+              
+              outfileTemp=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'.nc')
+              
+              if (!file.exists(outfile) && !file.exists(outfileTemp)){
+                cat("-> processing mergetime")
+                system(paste0('cdo -f nc  mergetime ',paste(yrList, collapse = ' '),' ',outfile),intern=TRUE)
+                cat(" ..Done mergetime",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+                
+                #               if (var == "rsds" || var == "sfcwind" ){
+                #                 system(paste0('cdo -f nc mergetime ',paste(yrList, collapse = ' '),' ',outfileTemp),intern=TRUE)
+                #                 cat(" ..Done mergetime",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+                #               }else{
+                #                 system(paste0('cdo -f nc  mergetime ',paste(yrList, collapse = ' '),' ',outfile),intern=TRUE)
+                #                 cat(" ..Done mergetime",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+                #               }
+                cat("\n")
               }else{
-                system(paste0("cdo -f nc ", outfile,' ',outfileTemp))
-                varmod=var
+                cat("..exist mergetime!")
+                cat("\n")
               }
-              unlink(outfile)
-              system(paste("cdo splityear ", outfileTemp, " ", monNC, "/",  var, "_", sep=""))
-            }
-            
-            for(nmon in seq(min(nyear),max(nyear),by = 1)){
-              if(!file.exists(paste0(monNC, "/",nmon, "/",varmod, "_12.nc", sep=""))){
-                if (!file.exists(paste0(monNC,"/",nmon))) {dir.create(paste0(monNC,"/",nmon), recursive=TRUE)}
-                ncyear=paste0(monNC,"/",var,"_",nmon,".nc")
-                system(paste("cdo splitmon ", ncyear, " ", monNC, "/",nmon, "/",varmod, "_", sep=""))
-                unlink(ncyear)
+              
+              if (file.exists(outfile) && !file.exists(outfileTemp)){
+                cat("-> processing converting units")
+                
+                
+                system(paste0('cdo remapbil,U:/rcm/cordex/organized/targetgrid -setgrid,U:/rcm/cordex/organized/sam44_grid,',' ',outfile,' ',outfilePrj),intern=TRUE)
+                
+
+                cat("\n")
+                if (var == "pr"){
+                  varmod="prec"
+                  system(paste0("cdo -mulc,86400 -sellonlatbox,",boxExtent@xmin,',',boxExtent@xmax,',',boxExtent@ymin,',',boxExtent@ymax,' ', outfilePrj,' ',outfileTemp))
+                } else if (var == "tas") {
+                  varmod="tmean"
+                  system(paste0("cdo -subc,273.15 -sellonlatbox,",boxExtent@xmin,',',boxExtent@xmax,',',boxExtent@ymin,',',boxExtent@ymax,' ', outfilePrj,' ',outfileTemp))
+                } else if (var == "tasmax") {
+                  varmod="tmax"
+                  system(paste0("cdo -subc,273.15 -sellonlatbox,",boxExtent@xmin,',',boxExtent@xmax,',',boxExtent@ymin,',',boxExtent@ymax,' ', outfilePrj,' ',outfileTemp))
+                }else if (var == "tasmin") {
+                  varmod="tmin"
+                  system(paste0("cdo -subc,273.15 -sellonlatbox,",boxExtent@xmin,',',boxExtent@xmax,',',boxExtent@ymin,',',boxExtent@ymax,' ', outfilePrj,' ',outfileTemp))
+                }else{
+                  system(paste0("cdo sellonlatbox,",boxExtent@xmin,',',boxExtent@xmax,',',boxExtent@ymin,',',boxExtent@ymax,' ', outfilePrj,' ',outfileTemp))
+                  varmod=var
+                }
+                
               }
-            }
-          }
+              if (file.exists(outfileTemp) && !file.exists(paste0(monNC, "/", max(nyear),"/", varmod, "_12.nc"))){
+                if (file.exists(outfileTemp) && !file.exists(paste0(monNC, "/",  var, "_",max(nyear),'.nc'))){
+                  cat("-> processing splityear")
+                  cat("\n")
+                  system(paste("cdo splityear ", outfileTemp, " ", monNC, "/",  var, "_", sep=""))              
+                  
+                }
+              }
+              for(nmon in seq(min(nyear),max(nyear),by = 1)){
+                if(!file.exists(paste0(monNC, "/",nmon, "/",varmod, "_12.nc", sep=""))){
+                  if (!file.exists(paste0(monNC,"/",nmon))) {dir.create(paste0(monNC,"/",nmon), recursive=TRUE)}
+                  ncyear=paste0(monNC,"/",var,"_",nmon,".nc")
+                  system(paste("cdo splitmon ", ncyear, " ", monNC, "/",nmon, "/",varmod, "_", sep=""))
+                  unlink(ncyear)
+                }
+              }             
+              
+              if (file.exists(outfileTemp)){
+                unlink(outfile)
+                unlink(outfilePrj)
+              }
+              cat("done!")
+            }            
+          }          
         }
+        
       }
+      
     }
+    
   }
   
   
 }
 
+  
+  ############### Para AFR-44 ##################
+  yrList <- list.files(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens), recursive = FALSE, full.names = FALSE,pattern = paste0(var,"_"))
+  if(length(yrList)>0){
+    nyear=c()
+    for( yr in yrList){
+      ver=sapply(strsplit(yr, '[_]'), "[[", 7)
+      if(ver=="r2"){
+        years <- gsub(".nc","",sapply(strsplit(yr, '[_]'), "[[", 9))  
+        staYear <- as.numeric(substr(sapply(strsplit(years, '[-]'), "[[", 1),1,4))
+        endYear <- as.numeric(gsub(".nc","",substr(sapply(strsplit(years, '[-]'), "[[", 2), 1, 4)))
+        nyear=c(nyear,staYear,endYear)
+      }
+    }
+    if(!is.null(nyear)){
+      cat(region,scen,gcm,var)
+      cat("\n")
+      if(length(yrList)==length(seq(min(nyear),max(nyear),by = 10))+1){
+        setwd(paste0(baseDir,"/",time,"/", scen,"/", gcm,"/",ens))
+        
+        outNcDir <- paste0(outDir,"/",region, "/",scen,"/",gcm,"/",ens,"/",ver)
+        if (!file.exists(paste(outNcDir, sep=""))) {dir.create(paste(outNcDir, sep=""), recursive=TRUE)}
+        monNC=paste0(outNcDir,"/monthly-files")  
+        if (!file.exists(paste(monNC, sep=""))) {dir.create(paste(monNC, sep=""), recursive=TRUE)}
+        
+        outfile=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'_tmp.nc')
+        outfilePrj=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'_prj.nc')
+        
+        outfileTemp=paste0(outNcDir,'/',substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear),'.nc')
+        
+        if (!file.exists(outfile) && !file.exists(outfileTemp)){
+          cat("-> processing mergetime")
+          system(paste0('cdo -f nc  mergetime ',paste(yrList, collapse = ' '),' ',outfile),intern=TRUE)
+          cat(" ..Done mergetime",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+          
+          #               if (var == "rsds" || var == "sfcwind" ){
+          #                 system(paste0('cdo -f nc mergetime ',paste(yrList, collapse = ' '),' ',outfileTemp),intern=TRUE)
+          #                 cat(" ..Done mergetime",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+          #               }else{
+          #                 system(paste0('cdo -f nc  mergetime ',paste(yrList, collapse = ' '),' ',outfile),intern=TRUE)
+          #                 cat(" ..Done mergetime",paste0(substr(yrList[1], 1, nchar(yrList[1])-16),min(nyear),'_',max(nyear)))
+          #               }
+          cat("\n")
+        }else{
+          cat("..exist mergetime!")
+          cat("\n")
+        }
+        
+        if (file.exists(outfile) && !file.exists(outfileTemp)){
+          cat("-> processing converting units")
+          
+          
+          system(paste0('cdo setgrid,',basegrid,' ',outfile,' ',outfilePrj),intern=TRUE)
+          
+          cat("\n")
+          if (var == "pr"){
+            varmod="prec"
+            system(paste0("cdo -mulc,86400 -setgridtype,lonlat ", outfilePrj,' ',outfileTemp))
+          } else if (var == "tas") {
+            varmod="tmean"
+            system(paste0("cdo -subc,273.15 -setgridtype,lonlat ", outfilePrj,' ',outfileTemp))
+          } else if (var == "tasmax") {
+            varmod="tmax"
+            system(paste0("cdo -subc,273.15 -setgridtype,lonlat ", outfilePrj,' ',outfileTemp))
+          }else if (var == "tasmin") {
+            varmod="tmin"
+            system(paste0("cdo -subc,273.15 -setgridtype,lonlat ", outfilePrj,' ',outfileTemp))
+          }else{
+            system(paste0("cdo -setgridtype,lonlat ", outfilePrj,' ',outfileTemp))
+            varmod=var
+          }
+          
+        }
+        if (file.exists(outfileTemp) && !file.exists(paste0(monNC, "/",  var, "_",max(nyear),'.nc'))){
+          cat("-> processing splityear")
+          cat("\n")
+          system(paste("cdo splityear ", outfileTemp, " ", monNC, "/",  var, "_", sep=""))              
+          
+        }
+        for(nmon in seq(min(nyear),max(nyear),by = 1)){
+          if(!file.exists(paste0(monNC, "/",nmon, "/",varmod, "_12.nc", sep=""))){
+            if (!file.exists(paste0(monNC,"/",nmon))) {dir.create(paste0(monNC,"/",nmon), recursive=TRUE)}
+            ncyear=paste0(monNC,"/",var,"_",nmon,".nc")
+            system(paste("cdo splitmon ", ncyear, " ", monNC, "/",nmon, "/",varmod, "_", sep=""))
+            unlink(ncyear)
+          }
+        }             
+        
+        if (file.exists(outfileTemp)){
+          unlink(outfile)
+          unlink(outfilePrj)
+        }
+        cat("done!")
+      }
+    }
+  }
+  
+  ##########################################
 
 
-cord=bind("U:/rcm/cordex/organized/AFR-44/historical/KNMI-RACMO22T/r1i1p1/v1/monthly-files/1950/prec_01.nc")
-cordi=raster("U:/rcm/cordex/MNA-44i/mon/rcp85/SMHI-RCA4/r1i1p1/tasmin_MNA-44i_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_SMHI-RCA4_v1_mon_201101-202012.nc",band=50000)
+af_44i=raster("C:/Users/jetarapues/Desktop/TEMP_ESC/rotated_pole_test/afr-44i.nc",band=1)
+af_44=raster("C:/Users/jetarapues/Desktop/TEMP_ESC/rotated_pole_test/afr-44.nc",band=1)
+af_44mod=raster("C:/Users/jetarapues/Desktop/TEMP_ESC/rotated_pole_test/output_file.nc",band=1)
+
+sam_44=raster("D:/TEMP/test/cordex/tas_sam44.nc",band=1)
+sam_44_con=raster("D:/TEMP/test/cordex/prj_tas_sam44.nc",band=1)
+sam_44_t=raster("D:/TEMP/test/cordex/tra_tas_sam44.nc",band=1)
+
+
+cordi2=raster("U:/rcm/cordex/organized/SAM-44/historical/SMHI-RCA4/r12i1p1/v3/monthly-files/1951/tmean_01.nc",band=1)
+cordi3=raster("D:/Documentos/CIAT/PhD-master/Future/Results/outfile2.nc",band=1)
 shp=shapefile("S:/admin_boundaries/adminFiles/world_no_antarctica.shp")
 
+plot(raster("U:/rcm/cordex/organized/AFR-44/historical/KNMI-RACMO22T/r1i1p1/v1/tas_AFR-44_MetEir-ECEARTH_historical_r1i1p1_KNMI-RACMO22T_v1_mon_1950_2005.nc",band=1),add=T)
 
-plot(cord)
+plot(cordi2)
+plot(shp)
+extlat <- extent(-80,-40,-25,10)
+
+plot(shp)
 plot(shp,add=T)
 
 
-writeRaster(cord, "D:/Documentos/CIAT/rotategrid/test/test.tiff", format="GTiff", overwrite=T)
+
+writeRaster(sam_44, "D:/TEMP/test/sam_44.tiff", format="GTiff", overwrite=T)
+
+crds <- matrix(data=c(9.05, 48.52), ncol=2) 
+library(rgdal)
+project(crds*(pi/180), paste("+proj=ob_tran +o_proj=longlat","+o_lon_p=-162 +o_lat_p=39.25 +lon_0=180 +ellps=sphere +no_defs"), TRUE) 
+
+spPoint <- SpatialPoints(coords=crds*(pi/180), 
+                         proj4string=CRS(paste("+proj=ob_tran +o_proj=longlat +o_lon_p=-162", 
+                                               "+o_lat_p=39.25 +lon_0=180 +ellps=sphere +no_defs"))) 
+spTransform(spPoint, CRS("+proj=longlat +ellps=sphere +no_defs")) 
+
+
+########################################
+#cdo griddes rotated.nc > mygrid
+#cdo remapbil,rs -setgrid,sourcegrid tas_sam44.nc prj_tas_sam44.nc
+# cdo -setgridtype,lonlat prj_tas_sam44.nc tra_tas_sam44.nc
+
+# res=0.44
+# loni=254.28
+# lonf=343.02
+# lati=-52.66
+# latf=18.50
+# chec=c(254.28)
+# gridLat=c(-52.66)
+# Nx=146
+# Ny=167
+# 
+# while(loni <= lonf) {
+#   loni <- loni+res; 
+#   print(loni);
+#   chec=c(chec,loni)
+# }
+# while(lati <= latf) {
+#   lati <- lati+res; 
+#   print(lati);
+#   gridLat=c(gridLat,lati)
+# }
+# 
+# te=split(chec,as.numeric(gl(length(chec),7,length(chec)))) 
+# telat=split(gridLat,as.numeric(gl(length(gridLat),7,length(gridLat)))) 
+# 
+# 
+# verFile="D:/TEMP/test/griddone.txt"
+# opnFile <- file(verFile, open="w")
+# for(i in 1:length(te)){
+#     cat("xvals     =",do.call(rbind, te[i]),"\n", file=opnFile)
+# 
+# }
+# for(i in 1:length(te)){
+#   cat("xvals     =",do.call(rbind, te[i]),"\n", file=opnFile)
+#   
+# }
+# close.connection(opnFile)
+
+
+lonI=265.88 -360
+latMax=18.50
+rs <- raster(xmn=lonI, xmx=146*0.44+lonI, ymn=latMax-167*0.44, ymx=latMax, ncols=146, nrows=167)
+rs[] <- 1
+writeRaster(rs, "D:/TEMP/test/rs.ncf", format="CDF", overwrite=T)
+
+admin=shapefile("S:/admin_boundaries/adminFiles/world_adm0_no_antarctica.shp")
+plot(raster(outfileTemp))
+plot(admin,add=T)
+plot(extent(rs),add=T)
+plot(extent(-87,-32,-56.5,18.5),add=T)
 
