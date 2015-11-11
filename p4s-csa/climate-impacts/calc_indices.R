@@ -7,20 +7,24 @@ stop("!")
 library(raster); library(sp); library(rgdal)
 
 #directories
+src_dir <- "~/Repositories/dapa-climate-change/p4s-csa"
 wd <- "~/Leeds-work/p4s-csa"
-bcsd_dir <- paste(wd,"/climate-impacts/bcsd_data",sep="")
 adm_dir <- paste(wd,"/climate-impacts/adm_data",sep="")
-agmerra_dir <- paste(wd,"/hh-analyses/AgMERRA_data",sep="")
 isric_dir <- paste(wd,"/hh-analyses/ISRIC_soil",sep="")
 out_dir <- paste(wd,"/climate-impacts/outputs",sep="")
 if (!file.exists(out_dir)) {dir.create(out_dir)}
 
+agmerra_dir <- "~/Leeds-work/datasets/AgMERRA_data"
+bcsd_dir <- "~/Leeds-work/datasets/bcsd_data"
+#bcsd_dir <- paste(wd,"/climate-impacts/bcsd_data",sep="")
+#agmerra_dir <- paste(wd,"/hh-analyses/AgMERRA_data",sep="")
+
 #sourcing scripts
-source(paste(wd,"/hh-analyses/scripts/extract_AgMERRA.R",sep=""))
-source(paste(wd,"/hh-analyses/scripts/wgen_srad.R",sep=""))
-source(paste(wd,"/climate-impacts/scripts/extract_bcsd.R",sep=""))
-source(paste(wd,"/hh-analyses/scripts/calc_risk_indices.R",sep=""))
-source(paste(wd,"/hh-analyses/scripts/calc_phdate.R",sep=""))
+source(paste(src_dir,"/hh-analyses/extract_AgMERRA.R",sep=""))
+source(paste(src_dir,"/hh-analyses/wgen_srad.R",sep=""))
+source(paste(src_dir,"/climate-impacts/extract_bcsd.R",sep=""))
+source(paste(src_dir,"/hh-analyses/calc_risk_indices.R",sep=""))
+source(paste(src_dir,"/hh-analyses/calc_phdate.R",sep=""))
 
 #list of GCMs and scenarios
 gcm_list <- c("bcc-csm1-1","GFDL-ESM2M","BNU-ESM","IPSL-CM5A-LR","MIROC-ESM-CHEM","NorESM1-M","CCSM4")

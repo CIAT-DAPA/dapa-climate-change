@@ -21,7 +21,7 @@ extract_bcsd <- function(sce, gcm, years, bbox, loc_xy, bcsd_dir) {
   for (yr in years) {
     #yr <- years[1]
     cat("...extracting BCSD data for year=",yr,"\n")
-    nc_indir <- paste(bcsd_dir,"/",sce,sep="")
+    nc_indir <- bcsd_dir
     
     #create dates for this year
     tdates <- lapply(1:nrow(loc_xy), FUN=function(x) {tdates <- format(seq(as.Date(paste0(yr,"/1/1")), as.Date(paste0(yr,"/12/31")), "days") ,"%Y-%m-%d"); tdates <- data.frame(date=tdates); return(tdates)})
