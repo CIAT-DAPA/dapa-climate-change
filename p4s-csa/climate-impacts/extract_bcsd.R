@@ -32,11 +32,11 @@ extract_bcsd <- function(sce, gcm, years, bbox, loc_xy, bcsd_dir) {
       
       #cut to study area
       setwd(nc_indir)
-      if (file.exists("tempfile.nc")) {sytem("rm -f tempfile.nc")}
-      system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",nc_file," tempfile.nc",sep=""))
+      if (file.exists("~/scratch/earjr/tempfile.nc")) {sytem("rm -f ~/scratch/earjr/tempfile.nc")}
+      system(paste("cdo sellonlatbox,",bbox@xmin,",",bbox@xmax,",",bbox@ymin,",",bbox@ymax," ",nc_file," ~/scratch/earjr/tempfile.nc",sep=""))
       
       #read stack
-      rstk <- stack("tempfile.nc",varname=vname)
+      rstk <- stack("~/scratch/earjr/tempfile.nc",varname=vname)
       
       ## Convert units to mm/day and celsius Degrees
       if (vname == "pr") {rstk <- rstk * 86400} else {rstk <- rstk - 273.15}
@@ -53,7 +53,7 @@ extract_bcsd <- function(sce, gcm, years, bbox, loc_xy, bcsd_dir) {
       }
       
       #clean up and return to home
-      system("rm -f tempfile.nc")
+      system("rm -f ~/scratch/earjr/tempfile.nc")
       setwd("~")
       rm(list=c("values","rstk"))
     }

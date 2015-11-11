@@ -27,7 +27,8 @@ source(paste(src_dir,"/hh-analyses/calc_risk_indices.R",sep=""))
 source(paste(src_dir,"/hh-analyses/calc_phdate.R",sep=""))
 
 #list of GCMs and scenarios
-gcm_list <- c("bcc-csm1-1","GFDL-ESM2M","BNU-ESM","IPSL-CM5A-LR","MIROC-ESM-CHEM","NorESM1-M","CCSM4")
+gcm_list <- c("bcc-csm1-1","GFDL-ESM2M","BNU-ESM","IPSL-CM5A-LR","MIROC-ESM-CHEM",
+              "NorESM1-M","CCSM4")
 sce_list <- c("historical","rcp45")
 
 #1. load the admin area of interest
@@ -43,7 +44,7 @@ shp <- readRDS(paste(adm_dir,"/MLI_adm1.rds",sep=""))
 shp <- shp[which(shp$NAME_1 == "Sikasso"),]
 
 #2. convert to grid based on BCSD resolution
-rs_ref <- raster(paste(bcsd_dir,"/historical/pr_day_BCSD_historical_r1i1p1_GFDL-ESM2M_2000.nc",sep=""))
+rs_ref <- raster(paste(bcsd_dir,"/pr_day_BCSD_historical_r1i1p1_GFDL-ESM2M_2000.nc",sep=""))
 rs_ref <- rotate(rs_ref)
 rs_ext <- extent(shp)
 rs_ext@xmin <- rs_ext@xmin - xres(rs_ref)*2; rs_ext@xmax <- rs_ext@xmax + xres(rs_ref)*2
@@ -68,7 +69,7 @@ if (!file.exists(paste(out_dir,"/agmerra_data.RData",sep=""))) {
 
 #5. extract pr, tasmin, tasmax for n years from BCSD data
 ##############
-sce <- sce_list[2]; gcm <- gcm_list[1]
+sce <- sce_list[1]; gcm <- gcm_list[1]
 if (sce == "historical") {years <- c(1986:2005)} else {years <- c(2006:2100)}
 ##############
 
