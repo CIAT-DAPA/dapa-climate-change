@@ -35,10 +35,10 @@
 ######################################################################################################################
 
 ## Extract Observations Time Series Function
-obs_extraction <- function(dataset="wfd", var="tasmax",yi=1971, yf=1981,ts="1950_2001", lon=-73.5, lat=3.4, dirobs="S:/observed/gridded_products", dirout="C:/Temp/bc", dircdo="cdo"){
-  
+obs_extraction <- function(dataset="wfd", varmod="tmax",yi=1971, yf=1981, lon=-73.5, lat=3.4, dirobs="S:/observed/gridded_products", dirout="C:/Temp/bc", dircdo="cdo"){
+
   ## Load libraries
-  library(raster); library(ncdf); #library(rgdal)
+  #library(raster); library(ncdf); library(rgdal);
   
   ## Create and set working directory
   dirtemp <- paste0(dirout, "/obs/", dataset)
@@ -56,8 +56,10 @@ obs_extraction <- function(dataset="wfd", var="tasmax",yi=1971, yf=1981,ts="1950
   #####  Extract TS OBS  #####
   
   ## NetCDF observation file
-  ncvar <- paste0(dirobs,'/',dataset,"/daily/nc-files/", varmod, "_daily_ts_", tolower(dataset), "_", ts, ".nc")
-  
+  #ncvar <- paste0(dirobs,'/',dataset,"/daily/nc-files/", varmod, "_daily_ts_", tolower(dataset), "_", ts, ".nc")
+  ncvarlis <- paste0(dirobs,'/',dataset,"/daily/nc-files")
+  ncvar <- list.files(ncvarlis, pattern=paste0(varmod,"_daily_ts_", tolower(dataset), "_*" ),full.names = T)
+ 
   ## Define extraction output file
   odat <- paste0("obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab")
   
@@ -92,13 +94,17 @@ obs_extraction <- function(dataset="wfd", var="tasmax",yi=1971, yf=1981,ts="1950
 }
 
 ## Extract GCM Time Series Function
-gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax", rcp="historical", ts="1971_1981", gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4, dirgcm="T:/gcm/cmip5/raw/daily", dirout="C:/Temp/bc",dircdo="cdo"){
+gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historical",yi=1971, yf=1981, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4, dirgcm="T:/gcm/cmip5/raw/daily", dirout="C:/Temp/bc",dircdo="cdo"){
   
   ## Load libraries
-  library(raster); library(ncdf); library(rgdal);
+  #library(raster); library(ncdf); library(rgdal);
   
   ## Path where are stored the daily GCM data 
   if (rcp == "historical"){dirrcp <- paste0(dirgcm, "/", rcp)} else {dirrcp <- paste0(dirgcm, "/", rcp)}
+  
+  ## Define end and start year from TS period
+  #yi <- substr(ts, 1, 4)
+  #yf <- substr(ts, 6, 9)
   
   # Loop through GCMs
   for (gcm in gcmlist){
@@ -107,10 +113,6 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax", rcp="historical", ts=
     dirtemp <- paste0(dirout, "/gcm/", basename(gcm))
     if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
     setwd(dirtemp)
-    
-    ## Define end and start year from TS period
-    yi <- substr(ts, 1, 4)
-    yf <- substr(ts, 6, 9)
     
     ## Change longitude in 0-360 x axis
     if (lon < 0){lonmod <- lon + 360}
@@ -131,11 +133,11 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax", rcp="historical", ts=
       if (!file.exists(odat)) {
         
         ## CDO command line to extract daily TS
-        if (gcm == "gfdl_cm3" || gcm == "gfdl_esm2g" || gcm == "gfdl_esm2m"){
+#         if (gcm == "gfdl_cm3" || gcm == "gfdl_esm2g" || gcm == "gfdl_esm2m"){
           system(paste0(dircdo," -s -outputtab,date,year,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
-        } else {
-          system(paste0(dircdo," -s -outputtab,date,year,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " ", ncvar[1], " > ", dirtemp, "/", odat))
-        }
+#         } else {
+#           system(paste0(dircdo," -s -outputtab,date,year,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " ", ncvar[1], " > ", dirtemp, "/", odat))
+#         }
         
         ## Read and organize daily TS
         datgcm <- read.table(odat, header=F, sep="")
@@ -161,11 +163,10 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax", rcp="historical", ts=
     }
   }
   
-  
-}
+} 
 
 ## Merge OBS and GCM in a Single Matrix
-merge_extraction <- function(varmod="tmax", rcp="historical", ts="1971_1981", gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"), lon=-73.5, lat=3.4, dataset="wfd", dirbase="C:/Temp/bc"){
+merge_extraction <- function(varmod="tmax", rcp="historical", yi=1971, yf=1981, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"), lon=-73.5, lat=3.4, dataset="wfd", dirbase="C:/Temp/bc"){
   
   # Set working directory
   setwd(dirbase)
@@ -178,8 +179,8 @@ merge_extraction <- function(varmod="tmax", rcp="historical", ts="1971_1981", gc
     cat("\nMerging OBS and GCMs ", varmod, " ... ")
     
     ## Define end and start year from TS period and 
-    yi <- substr(ts, 1, 4)
-    yf <- substr(ts, 6, 9)
+    #yi <- substr(ts, 1, 4)
+    #yf <- substr(ts, 6, 9)
     
     ## Create a sequence of dates at daily timestep for TS 
     dates <- format(seq(as.Date(paste0(yi,"/1/1")), as.Date(paste0(yf,"/12/31")), "days") ,"%Y-%m-%d")
@@ -189,7 +190,7 @@ merge_extraction <- function(varmod="tmax", rcp="historical", ts="1971_1981", gc
     ogcm <- paste0("raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     oobs <- paste0("obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     gcmdat <- lapply(paste0(dirbase, "/gcm/",gcmlist, "/", ogcm), function(x){read.table(x,header=T,sep=" ")})
-    names(gcmdat)
+
     ## Insert GCM data in a data frame object
     gcmmat <- as.data.frame(matrix(NA, nrow(dates), length(gcmdat) + 1))
     for(j in 1:length(gcmdat)) {
@@ -220,13 +221,16 @@ merge_extraction <- function(varmod="tmax", rcp="historical", ts="1971_1981", gc
 sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
   
   ## Load libraries
-  library(lubridate)
+  #library(lubridate)
   
   # Set working directory
   setwd(dirbase)
   
+  dirtemp <- paste0(dirbase, "/Bias_Correction_no_variability")
+  if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
+  
   ## Define SH output file
-  bcdat <- paste0("sh_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+  bcdat <- paste0(dirtemp,"/sh_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
   
   if (!file.exists(bcdat)) {
     
@@ -320,12 +324,14 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       }
     }
     
-    
     ## Write output matrix with SH values
     colnames(gcmmat) <- names(odat)
     gcmmat <- write.table(gcmmat, bcdat, sep=" ",row.names=F, quote=F)
     
-    cat(" done!... ")
+#     tablist <- list.files(dirbase, pattern="sh_ts_*",full.names = FALSE)
+#     file.copy(tablist, dirtemp)
+    
+    cat(" done!... ")    
     
   }
   
@@ -335,13 +341,16 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
 bc_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
   
   ## Load libraries
-  library(lubridate)
+  #library(lubridate)
   
   # Set working directory
   setwd(dirbase)
+
+  dirtemp <- paste0(dirbase, "/Bias_Correction_variability")
+  if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define BC output file
-  bcdat <- paste0("bc_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+  bcdat <- paste0(dirtemp,"/bc_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
   
   if (!file.exists(bcdat)) {
     
@@ -471,13 +480,16 @@ bc_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
 del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
   
   ## Load libraries
-  library(lubridate)
+  #library(lubridate)
   
   # Set working directory
   setwd(dirbase)
+
+  dirtemp <- paste0(dirbase, "/Change_Factor_no_variability")
+  if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define DEL output file
-  bcdat <- paste0("del_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+  bcdat <- paste0(dirtemp,"/del_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
   
   if (!file.exists(bcdat)) {
     
@@ -577,13 +589,16 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
 cf_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
   
   ## Load libraries
-  library(lubridate)
+  #library(lubridate)
   
   # Set working directory
   setwd(dirbase)
+
+  dirtemp <- paste0(dirbase, "/Change_Factor_variability")
+  if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define DEL output file
-  bcdat <- paste0("cf_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+  bcdat <- paste0(dirtemp,"/cf_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
   
   if (!file.exists(bcdat)) {
     
@@ -690,13 +705,16 @@ cf_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
 qm_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
   
   ## Load libraries
-  library(qmap); library(lubridate)
+  #library(qmap); library(lubridate);
   
   # Set working directory
   setwd(dirbase)
   
+  dirtemp <- paste0(dirbase, "/quantile_mapping")
+  if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
+  
   ## Define QM output file
-  bcdat <- paste0("qm_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+  bcdat <- paste0(dirtemp,"/qm_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
   
   if (!file.exists(bcdat)) {
     
@@ -803,11 +821,11 @@ qm_calcs <- function(varmod="tmax", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
   
 }
 
-## Comparison methods (plots)
-bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc"){
-  
+## Comparison methods (plots) *si se cambia extencion de los .tab cambiar codigo
+bc_stats <- function(varmod="prec", rcp="historical", yi=1971, yf=1981, lon=-73.5, lat=3.4, dirbase="C:/Temp/bc",stat){
+
   ## Load libraries
-  library(lubridate); library(ggplot2); library(reshape)
+  #library(lubridate); library(ggplot2); library(reshape);
   
   ## Set working directory
   setwd(dirbase)
@@ -817,21 +835,28 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}
   
   ## Define end and start year to plot
-  yi <- substr(ts, 1, 4)
-  yf <- substr(ts, 6, 9)
-  
+#   yi <- substr(ts, 1, 4)
+#   yf <- substr(ts, 6, 9)
+  listbcAll=list.files(path = dirbase, full.names=TRUE, recursive = TRUE)
+
+  list.dirs(dirbase,recursive=F,full.names=F)
+
   ## Define methods to plot
   if (rcp == "historical"){
-    methods <- c("bc", "sh", "qm", "raw")
+    methods <- c("bc_", "sh_", "qm_", "raw_")
     methods_ln <- c("BC Var", "BC", "QM", "RAW")
+    listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
   } else {
-    methods <- c("cf", "del", "bc", "sh", "qm", "raw")
+    methods <- c("cf_", "del_", "bc_", "sh_", "qm_", "raw_",".tab")
     methods_ln <- c("CF Var", "CF", "BC Var", "BC", "QM", "RAW")
+    listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
   }
-  
+
+  listbc=listbc[file_ext(listbc)=="tab"]
+
   ## Load all bias corrected data
-  odat <- lapply(paste0(dirbase,"/", methods, "_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab"), function(x){read.table(x,header=T,sep=" ")})
-  
+  odat <- lapply(listbc, function(x){read.table(x,header=T,sep=" ")})
+
   # Get GCMs names and length
   ngcm <- length(odat[[1]]) - 2
   gcmlist <- names(odat[[1]])[3:length(odat[[1]])]
@@ -842,10 +867,15 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   rownames(merge) <- NULL
   
   # Y-axis labels by variable
-  if (varmod == "prec"){ylabel <- "Precipitation (mm/day)"; flabel <- "Rainfall Frequency (days/month)"; limit = c(0,250)}
-  if (varmod == "tmin"){ylabel <- "Min. Temperature (°C)"; limit = c(-10, 25)}
-  if (varmod == "tmax"){ylabel <- "Max. Temperature (°C)"; flabel <- "Hot days Frequency (days/month)"; limit = c(0, 40)}
-  if (varmod == "rsds"){ylabel <- "Shortwave Sol. Radiation (W/m2)"; limit = c(0, 400)}
+  if(varmod == "prec"){
+    ylabel <- "Precipitation (mm/day)"; flabel <- "Rainfall Frequency (days/month)";limit = c(0,250);
+  }else if(varmod == "tmin"){
+    ylabel <- "Min. Temperature (C)"; limit = c(-10, 25);
+  }else if(varmod == "tmax"){
+    ylabel <- "Max. Temperature (C)"; flabel <- "Hot days Frequency (days/month)"; limit = c(0, 40);
+  }else if(varmod == "rsds"){
+    ylabel <- "Shortwave Sol. Radiation (W/m2)"; limit = c(0, 400);
+  }
   
   # Personalized colors 
   gray='gray50';blue="#122F6B";blue2="#1F78B4";blue3="#A6CEE3";green="#33A02C";green2="#B2DF8A";red="#E31A1C";red2="#FB9A99";orange="#FF7F00";orange2="#FDBF6F"
@@ -861,56 +891,57 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   merge_mod <- merge[which(year(as.Date(merge$date)) %in% yi:yf),]
   assign("merge_mod", merge_mod,  envir = .GlobalEnv)
   
-  ## Looping through GCMs 
-  for (i in 1:ngcm){
-    
-    assign("i", i,  envir = .GlobalEnv)
-    
-    ## GCM name
-    gcm <- colnames(merge_mod)[i+3]
-    
-    ## Define output plot file
-    ots <- paste0(dirout, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
-    
-    if (!file.exists(ots)) {
+  if(stat=='3'){
+    ## Looping through GCMs 
+    for (i in 1:ngcm){
       
-      if (rcp == "historical"){  # Historical plot includes observations
+      assign("i", i,  envir = .GlobalEnv)
+      
+      ## GCM name
+      gcm <- colnames(merge_mod)[i+3]
+      
+      ## Define output plot file
+      ots <- paste0(dirout, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
+      
+      if (!file.exists(ots)) {
         
-        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+        if (rcp == "historical"){  # Historical plot includes observations
+          
+          cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+          
+          tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
+          p <- ggplot(data=merge_mod) + 
+            geom_line(aes(x=as.Date(date), y=merge_mod[,3], color=" OBS"), size=0.2, shape=1) +   # Observations
+            geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2) +   # GCMs (historical)
+            facet_wrap(~ method, ncol=1) +
+            scale_color_manual(values=c(gray, red, red2, orange, green)) +
+            theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
+            ggtitle(paste0("BC Methods  Model : ",gcm)) +
+            labs(x="Date (days)", y=ylabel)
+          
+        } else {
+          
+          cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+          
+          tiff(ots, width=1200, height=1400, pointsize=8, compression='lzw',res=100)
+          p <- ggplot(data=merge_mod) +  
+            geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2)+   # GCMs (future)
+            facet_wrap(~ method, ncol=1) + 
+            scale_color_manual(values=c(green, orange, red, red2, blue, blue2)) +
+            theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
+            ggtitle(paste0("BC Methods  Model : ", gcm)) +
+            labs(x="Date (days)", y=ylabel) 
+          
+        }
         
-        tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=merge_mod) + 
-          geom_line(aes(x=as.Date(date), y=merge_mod[,3], color=" OBS"), size=0.2, shape=1) +   # Observations
-          geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2) +   # GCMs (historical)
-          facet_wrap(~ method, ncol=1) +
-          scale_color_manual(values=c(gray, red, red2, orange, green)) +
-          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-          ggtitle(paste0("BC Methods  Model : ",gcm)) +
-          labs(x="Date (days)", y=ylabel)
-        
-      } else {
-        
-        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        
-        tiff(ots, width=1200, height=1400, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=merge_mod) +  
-          geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2)+   # GCMs (future)
-          facet_wrap(~ method, ncol=1) + 
-          scale_color_manual(values=c(green, orange, red, red2, blue, blue2)) +
-          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-          ggtitle(paste0("BC Methods  Model : ", gcm)) +
-          labs(x="Date (days)", y=ylabel) 
+        # Plot and save
+        print(p)
+        dev.off()
         
       }
       
-      # Plot and save
-      print(p)
-      dev.off()
-      
     }
-    
   }
-  
   
   
   ##### Spread Line Plot for all methods and all GCMs
@@ -923,50 +954,48 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
   ## Define enviroment to plot ggplot functions in command line
   assign("merge_mod", merge_mod,  envir = .GlobalEnv)
   
-  ## Define output plot file
-  ots <- paste0(dirout, "/spread_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
-  
-  if (!file.exists(ots)){
+  if(stat=='3'){
+    ## Define output plot file
+    ots <- paste0(dirout, "/spread_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
     
-    if (rcp == "historical"){  # Historical plot includes observations
+    if (!file.exists(ots)){
       
-      cat(paste0("\nTime series plot  ", rcp, " ", varmod))
+      if (rcp == "historical"){  # Historical plot includes observations
+        
+        cat(paste0("\nTime series plot  ", rcp, " ", varmod))
+        
+        tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
+        p <- ggplot() + 
+          geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
+          scale_color_manual(values=c(green, orange, red, red2)) +
+          facet_wrap(~ method, ncol=1) +
+          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
+          scale_y_continuous(limits = limit) +
+          ggtitle(paste0("BC Methods Spread")) +
+          labs(x="Date (days)", y=ylabel)
+        
+      } else {
+        
+        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+        
+        tiff(ots, width=1200, height=1600, pointsize=8, compression='lzw',res=100)
+        p <- ggplot() + 
+          geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
+          scale_color_manual(values=c(green, orange2, red, red2, blue, blue3)) +
+          facet_wrap(~ method, ncol=1) +
+          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
+          scale_y_continuous(limits = limit) +
+          ggtitle(paste0("BC Methods Spread")) +
+          labs(x="Date (days)", y=ylabel)
+        
+      }
       
-      tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
-      p <- ggplot() + 
-        geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
-        scale_color_manual(values=c(green, orange, red, red2)) +
-        facet_wrap(~ method, ncol=1) +
-        theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-        scale_y_continuous(limits = limit) +
-        ggtitle(paste0("BC Methods Spread")) +
-        labs(x="Date (days)", y=ylabel)
-      
-    } else {
-      
-      cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-      
-      tiff(ots, width=1200, height=1600, pointsize=8, compression='lzw',res=100)
-      p <- ggplot() + 
-        geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
-        scale_color_manual(values=c(green, orange2, red, red2, blue, blue3)) +
-        facet_wrap(~ method, ncol=1) +
-        theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-        scale_y_continuous(limits = limit) +
-        ggtitle(paste0("BC Methods Spread")) +
-        labs(x="Date (days)", y=ylabel)
+      # Plot and save
+      print(p)
+      dev.off()
       
     }
-    
-    # Plot and save
-    print(p)
-    dev.off()
-    
   }
-  
-  
-  
-  
   
   ##### Interannual Variability Boxplot
   
@@ -1002,68 +1031,74 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
       ## Define variables to plot ggplot functions in command line
       assign("stdgcm", stdgcm,  envir = .GlobalEnv)
       
-      ## Loop through GCMs 
-      for (i in 1:ngcm){
-        
-        ## GCM name
-        gcm <- colnames(stdgcm)[i+2]
-        
-        ## Define variables to plot ggplot functions in command line
-        assign("i", i,  envir = .GlobalEnv)
-        
-        cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
-        
-        tiff(paste0(dirout, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1600, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=stdgcm) +  
-          geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity") +  # GCMs (historical)
-          facet_wrap(~ method, ncol=1) + 
-          scale_fill_manual(values=c(green2, orange, red, red2, gray)) +
-          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-          ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
-          labs(x="Date (days)", y=ylabel)
-        
-        # Plot and save
-        print(p)
-        dev.off()
-        
-      }
+      if(stat=='3'){
+        ## Loop through GCMs 
+        for (i in 1:ngcm){
+          
+          ## GCM name
+          gcm <- colnames(stdgcm)[i+2]
+          
+          ## Define variables to plot ggplot functions in command line
+          assign("i", i,  envir = .GlobalEnv)
+          
+          cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
+          
+          tiff(paste0(dirout, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1600, pointsize=8, compression='lzw',res=100)
+          p <- ggplot(data=stdgcm) +  
+            geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity") +  # GCMs (historical)
+            facet_wrap(~ method, ncol=1) + 
+            scale_fill_manual(values=c(green2, orange, red, red2, gray)) +
+            theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
+            ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
+            labs(x="Date (days)", y=ylabel)
+          
+          # Plot and save
+          print(p)
+          dev.off()
+          
+        }
+      } 
       
-      ## Write metrics data
-      freq <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
+      if(stat=='2'){
+        ## Write metrics data
+        freq <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
+      }
       
     } else {
       
       ## Define variables to plot ggplot functions in command line
       assign("stdgcm", stdgcm,  envir = .GlobalEnv)
       
-      for (i in 1:ngcm){
-        
-        ## GCM name
-        gcm <- colnames(stdgcm)[i+2]
-        
-        ## Define variables to plot ggplot functions in command line
-        assign("i", i,  envir = .GlobalEnv)
-        
-        cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
-        
-        tiff(paste0(dirout, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=stdgcm) +  
-          geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
-          facet_wrap(~ method, ncol=1) + 
-          scale_fill_manual(values=c(green2, orange, red, red2, blue, blue2)) +
-          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-          ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ", gcm)) +
-          labs(x="Date (days)", y=ylabel)     
-        
-        # Plot and save
-        print(p)
-        dev.off()
-        
+      if(stat=='3'){
+        for (i in 1:ngcm){
+          
+          ## GCM name
+          gcm <- colnames(stdgcm)[i+2]
+          
+          ## Define variables to plot ggplot functions in command line
+          assign("i", i,  envir = .GlobalEnv)
+          
+          cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
+          
+          tiff(paste0(dirout, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
+          p <- ggplot(data=stdgcm) +  
+            geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
+            facet_wrap(~ method, ncol=1) + 
+            scale_fill_manual(values=c(green2, orange, red, red2, blue, blue2)) +
+            theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
+            ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ", gcm)) +
+            labs(x="Date (days)", y=ylabel)     
+          
+          # Plot and save
+          print(p)
+          dev.off()
+          
+        }
       }
-      
-      ## Write output metrics file
-      stdgcm <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
-      
+      if(stat=='2'){
+        ## Write output metrics file
+        stdgcm <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
+      }
     }
     
   }
@@ -1102,64 +1137,71 @@ bc_stats <- function(varmod="prec", rcp="historical", ts="1950_2000", lon=-73.5,
         freq <- rbind(freq, cbind("method"=rep("OBS", dim(obs)[1]),freq[which(freq$method == "BC"),][2:3], obs))
         rownames(freq) <- NULL
         
-        ## Loop through GCMs
-        for (i in 1:ngcm){
-          
-          if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
-          
-          freq_mod <- freq
-          colnames(freq_mod)[i+3] <- "model"
-          
-          assign("freq_mod", freq_mod,  envir = .GlobalEnv)
-          assign("i", i,  envir = .GlobalEnv)
-          
-          tiff(paste0(dirout, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=300, pointsize=8, compression='lzw',res=100)
-          f <- ggplot(data=freq_mod, aes(x=method, y=model, fill=method)) + 
-            theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_text(size=rel(1.4)), axis.title.y = element_text(size = rel(0.8))) +
-            scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3, "white")) +
-            geom_boxplot(outlier.size = 1) +
-            labs(x="Months", y=flabel) +
-            facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
-          
-          # Plot 
-          print(f)
-          dev.off()
-          
+        if(stat=='3'){
+          ## Loop through GCMs
+          for (i in 1:ngcm){
+            
+            if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
+            
+            freq_mod <- freq
+            colnames(freq_mod)[i+3] <- "model"
+            
+            assign("freq_mod", freq_mod,  envir = .GlobalEnv)
+            assign("i", i,  envir = .GlobalEnv)
+            
+            tiff(paste0(dirout, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=300, pointsize=8, compression='lzw',res=100)
+            f <- ggplot(data=freq_mod, aes(x=method, y=model, fill=method)) + 
+              theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_text(size=rel(1.4)), axis.title.y = element_text(size = rel(0.8))) +
+              scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3, "white")) +
+              geom_boxplot(outlier.size = 1) +
+              labs(x="Months", y=flabel) +
+              facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
+            
+            # Plot 
+            print(f)
+            dev.off()
+            
+          }
+        }  
+        if(stat=='2'){
+          #Write plot data
+          freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
         }
-        
-        #Write plot data
-        freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
         
       } else {
         
         assign("freq", freq,  envir = .GlobalEnv)
         
-        for (i in 1:ngcm){
-          
-          if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
-          
-          freq_mod <- freq
-          colnames(freq_mod)[i+3] <- "model"
-          
-          assign("freq_mod", freq,  envir = .GlobalEnv)
-          assign("i", i,  envir = .GlobalEnv)
-          
-          tiff(paste0(dirout, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=300, pointsize=8, compression='lzw',res=100)
-          f <- ggplot(data=freq_mod, aes(x=method, y=model, fill=method)) + # GCMs (historical)
-            theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-            scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3)) +
-            geom_boxplot(outlier.size = 1) +
-            labs(x="Months", y=flabel) +
-            facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
-          
-          # Plot and save
-          print(f)
-          dev.off()
-          
-        }
+        if(stat=='3'){
+          for (i in 1:ngcm){
+            
+            if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
+            
+            freq_mod <- freq
+            colnames(freq_mod)[i+3] <- "model"
+            
+            assign("freq_mod", freq,  envir = .GlobalEnv)
+            assign("i", i,  envir = .GlobalEnv)
+            
+            tiff(paste0(dirout, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=300, pointsize=8, compression='lzw',res=100)
+            f <- ggplot(data=freq_mod, aes(x=method, y="model", fill=method)) + # GCMs (historical)
+              theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
+              scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3)) +
+              geom_boxplot(outlier.size = 1) +
+              labs(x="Months", y=flabel) +
+              facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
+            
+            # Plot and save
+            print(f)
+            dev.off()
+            
+          }
+        } 
         
-        #Write output metrics file
-        freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
+        if(stat=='2'){
+          #Write output metrics file
+          freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
+        }
         
       }
       
@@ -1186,6 +1228,9 @@ lon <- -73.5
 lat <- 3.4
 dataset <- "wfd"
 
+
+
+
 ## Preset parameters 
 dirout <- "/home/jtarapues/bc" #"C:/Temp/bc"
 dircdo <- "cdo"
@@ -1194,8 +1239,18 @@ dirobs <- "/mnt/data_cluster_4/observed/gridded_products" # "S:/observed/gridded
 yi=1971
 yf=1981
 
+yi=2030
+yf=2039
+
+rcp="historical"
+rcp="rcp45"
+
 var="tasmax"
 varmod <- "tmax"
+
+server="/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" #"S:/portals/ccafs_climate/download_data/files/data/bc_platform"
+
+downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform"
 
 # Warnings off
 # options(warn=-1)
@@ -1207,11 +1262,11 @@ for (var in varlist){
   if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
   
   ## Runinng functions
-  obs_extraction(dataset, var, yi,yf, lon, lat, dirobs, dirout,dircdo)  
-  gcm_extraction(gcm, var, "historical", ts_hist, gcmlist, lon, lat, dirgcm, dirout,dircdo)
+  obs_extraction(dataset, var, yi,yf,ts, lon, lat, dirobs, dirout,dircdo)  
+  gcm_extraction(gcm, var, "historical", yi,yf, gcmlist, lon, lat, dirgcm, dirout,dircdo)
   gcm_extraction(gcm, var, rcp, ts_fut, gcmlist, lon, lat, dirgcm, dirout)
-  merge_extraction(varmod, "historical", ts_hist, gcmlist, lon, lat, dataset, dirout)
-  merge_extraction(varmod, rcp,  ts_fut, gcmlist, lon, lat, dataset, dirout)
+  merge_extraction(varmod, "historical",yi,yf, gcmlist, lon, lat, dataset, dirout)
+  merge_extraction(varmod, rcp,yi,yf, gcmlist, lon, lat, dataset, dirout)
   sh_calcs(varmod, "historical", lon, lat, dirout)
   sh_calcs(varmod, rcp, lon, lat, dirout)
   bc_calcs(varmod, "historical", lon, lat, dirout)    
@@ -1219,8 +1274,96 @@ for (var in varlist){
   del_calcs(varmod, rcp, lon, lat, dirout)
   cf_calcs(varmod, rcp, lon, lat, dirout)
   qm_calcs(varmod, rcp, lon, lat, dirout)
-  bc_stats(varmod, "historical", ts_hist, lon, lat, dirout)
-  bc_stats(varmod, rcp, ts_fut, lon, lat, dirout)
+  bc_stats(varmod, "historical",yi,yf, lon, lat, dirout)
+  bc_stats(varmod, rcp, yi,yf, lon, lat, dirout)
   
 }  
+
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList){
+
+  ## Load libraries
+  library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2); library(reshape); library(tools);
+  
+  dircdo <- "cdo"
+  dateDownl=paste0("bc_",gsub("\\.",'-',gsub(':','_',gsub(" ", "_", as.character(Sys.time()))))) # 'bc_2015-11-12_08_52_33'#
+  dirout <- paste0(dirWork,'/',dateDownl) 
+  dataset <- tolower(dataset)
+  
+  for (var in varlist){
+    if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
+    
+    obs_extraction(dataset, varmod, Obyi,Obyf, lon, lat, dirobs, dirout,dircdo)  
+    gcm_extraction(gcm, var,varmod, "historical", Obyi,Obyf, gcmlist, lon, lat, dirgcm, dirout,dircdo)
+    
+    merge_extraction(varmod, "historical",Obyi,Obyf, gcmlist, lon, lat, dataset, dirout)
+    
+    for(rcp in rcpList){
+      gcm_extraction(gcm, var,varmod, rcp, fuyi,fuyf, gcmlist, lon, lat, dirgcm, dirout)
+      merge_extraction(varmod, rcp,fuyi,fuyf, gcmlist, lon, lat, dataset, dirout)
+    
+      for(methBC in methBCList){
+        if(methBC=='1'){
+          sh_calcs(varmod, "historical", lon, lat, dirout)
+          sh_calcs(varmod, rcp, lon, lat, dirout)  
+
+        }else if(methBC=='2'){
+          bc_calcs(varmod, "historical", lon, lat, dirout)    
+          bc_calcs(varmod, rcp, lon, lat, dirout)          
+        }else if(methBC=='3'){
+          del_calcs(varmod, rcp, lon, lat, dirout)
+          cf_calcs(varmod, rcp, lon, lat, dirout)          
+        }else{
+          qm_calcs(varmod, rcp, lon, lat, dirout)
+        }
+      }
+      for(stat in statList){
+        if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
+        if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}    
+        if(stat=='2' || stat=='3'){
+          bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout,stat)
+          bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout,stat)            
+        }
+          
+      }     
+    }
+  }
+  
+  if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
+  if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
+  system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
+  system(paste0('rm -r ',dirout),intern=TRUE)
+  
+  return(paste0(file.path(downData,dateDownl),'.zip'))
+  
+}
+
+serverData="/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" #"S:/portals/ccafs_climate/download_data/files/data/bc_platform"
+downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform"
+dirWork="/home/jtarapues" #"C:/Temp/bc"
+dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/data_cluster_2/gcm/cmip5/raw/daily" #
+dirobs <- "/mnt/data_cluster_4/observed/gridded_products" # "S:/observed/gridded_products/wfd" #  
+dataset <- "wfd"
+methBCList <-  c('1')
+varlist <- c("tasmax")
+Obyi <- 1975
+Obyf <- 1980
+fuyi <- 2030
+fuyf <- 2035
+rcpList <- c("rcp45")
+lon <- -73.5
+lat <- 3.4
+gcmlist <-  c("bcc_csm1_1") #, "bcc_csm1_1_m")
+statList<- c('1','2','3')
+
+
+# methBCList = unlist(strsplit(methBCList, split=","))
+# varlist = unlist(strsplit(varlist, split=","))
+# gcmlist = unlist(strsplit(gcmlist, split=","))
+# rcpList = unlist(strsplit(rcpList, split=","))
+# statList = unlist(strsplit(stat, split=","))
+
+bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList)
+
+
+
 
