@@ -1,0 +1,1 @@
+cuando se mueve a otra máquina, hay que crear un folder, luego hacer import.., luego el checkout y luego si se puede hacer commit . 

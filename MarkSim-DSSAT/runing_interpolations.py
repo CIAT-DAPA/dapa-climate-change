@@ -122,7 +122,7 @@ def main():
   for p in zip.namelist():
     if p[-4:] == '.dat':
       contents = zip.read(p)
-      f_name = p.split('/')[1][:-4] 
+      f_name = p[:-4]# f_name = p.split('/')[1][:-4] 
       f_parent = str(int(f_name) + 100000)[0:3]
       if not os.path.exists(tmp_dir + "/" + base + "/data/" + f_parent): 
         os.mkdir(tmp_dir + "/" + base + "/data/" + f_parent)

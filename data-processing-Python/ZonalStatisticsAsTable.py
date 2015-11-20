@@ -11,7 +11,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python ZonalStatisticsAsTable.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ie: python ZonalStatisticsAsTable.py S:\observed\gridded_products\worldclim\Global_30s D:\CIAT\_tools\AdminBoundaries\SHP_files\ARG_adm\ARG1.shp D:\CIAT\Workspace\arg_cc_agr_familiar\statitics_ens ALL"
+	print "   - ie: python ZonalStatisticsAsTable.py S:\observed\gridded_products\worldclim\Global_30s D:\CIAT\Projects\ecu-hidroelectrica\01_station_data\study_area\sf\DIVISION_HIDROGRAFICA\Cuenca_Jubones_rep.shp D:\CIAT\Projects\ecu-hidroelectrica\02_baseline\annual_cycle ALL"
 	sys.exit(1)
 
 # Set variables
@@ -45,6 +45,7 @@ if wildcard == "ALL":
 else:	
 	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
 	
+print rasters 
 # Lopping around the grids
 for raster in rasters:
 
