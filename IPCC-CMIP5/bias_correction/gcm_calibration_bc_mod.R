@@ -35,7 +35,7 @@
 ######################################################################################################################
 
 ## Extract Observations Time Series Function
-obs_extraction <- function(dataset="wfd", varmod="tmax",yi=1971, yf=1981, lon=-73.5, lat=3.4, dirobs="S:/observed/gridded_products", dirout="C:/Temp/bc", dircdo="cdo"){
+obs_extraction <- function(dataset="agcfsr", varmod="tmax",yi=1971, yf=1981, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="C:/Temp/bc", dircdo="cdo"){
 
   ## Load libraries
   #library(raster); library(ncdf); library(rgdal);
@@ -58,7 +58,8 @@ obs_extraction <- function(dataset="wfd", varmod="tmax",yi=1971, yf=1981, lon=-7
   ## NetCDF observation file
   #ncvar <- paste0(dirobs,'/',dataset,"/daily/nc-files/", varmod, "_daily_ts_", tolower(dataset), "_", ts, ".nc")
   ncvarlis <- paste0(dirobs,'/',dataset,"/daily/nc-files")
-  ncvar <- list.files(ncvarlis, pattern=paste0(varmod,"_daily_ts_", tolower(dataset), "_*" ),full.names = T)
+  ncvar <- list.files(ncvarlis, pattern=paste0(varmod,"_daily_ts_", tolower(dataset), "_*" ),full.names = T,ignore.case=F)
+  ncvar <- ncvar[sapply(strsplit(basename(ncvar), '[_]'), "[[", 1)==varmod]
  
   ## Define extraction output file
   odat <- paste0("obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab")
@@ -1339,21 +1340,21 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 
 serverData="/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" #"S:/portals/ccafs_climate/download_data/files/data/bc_platform"
 downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform"
-dirWork="/home/jtarapues" #"C:/Temp/bc"
+dirWork="/home/temp" #"C:/Temp/bc"
 dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/data_cluster_2/gcm/cmip5/raw/daily" #
-dirobs <- "/mnt/data_cluster_4/observed/gridded_products" # "S:/observed/gridded_products/wfd" #  
-dataset <- "wfd"
+dirobs <- "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/wfd" #  
+dataset <- "agcfsr"
 methBCList <-  c('1')
-varlist <- c("tasmax")
-Obyi <- 1975
-Obyf <- 1980
+varlist <- c("pr")
+Obyi <- 1985
+Obyf <- 1987
 fuyi <- 2030
 fuyf <- 2035
 rcpList <- c("rcp45")
 lon <- -73.5
 lat <- 3.4
 gcmlist <-  c("bcc_csm1_1") #, "bcc_csm1_1_m")
-statList<- c('1','2','3')
+statList<- c('1')#c('1','2','3')
 
 
 # methBCList = unlist(strsplit(methBCList, split=","))
