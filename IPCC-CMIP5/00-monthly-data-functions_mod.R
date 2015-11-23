@@ -267,6 +267,11 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly") {
 #################################################################################################################
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
+require(maptools)
+require(raster)
+require(ncdf)
+require(rgdal)
+require(sp)
 
 rcp='rcp85'
 baseDir="T:/gcm/cmip5/raw/monthly"
@@ -274,7 +279,7 @@ ens="r1i1p1"
 basePer="1961_1990"
 GCMAnomalies(rcp,baseDir,ens,basePer)
 
-GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990") {
+GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990") {
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
   cat("XXXXXXXXX GCM ANOMALIES CALCULATION XXXXXXXX \n")
@@ -290,6 +295,10 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   
   curDir <- paste(baseDir, "/historical", sep="")
   futDir <- paste(baseDir, "/", rcp, sep="")
+  
+  # Define min value for prec and cut by percentil 98 (after doing many test we chose this value)
+  corr=0.1
+  conf=0.98
   
   gcmList <- list.dirs(curDir, recursive = FALSE, full.names = FALSE)
   
@@ -335,119 +344,87 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
           
           checkFile <- paste(anomDir, "/anomalies_", staYear, "_", endYear, "_done.txt", sep="")
           
-          #if (!file.exists(checkFile)){
+          if (!file.exists(checkFile)){
             
             if (!file.exists(anomDir)) {dir.create(anomDir)}
             if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
-            #if (!file.exists(paste(anomPerDir,'/+0',sep=''))) {dir.create(anomPerDir)}
-            
-#             listNc <- list.files(anomPerDir, full.names=T, pattern="prec*")
-#             do.call(unlink,list(listNc))
             
             # Loop around variables
-            #for (var in varList) {
-            
-            dataMatrix <- c("rcp","model","var")
-            #pdf(paste(anomPerDir,nameFileOut,gcm,'-',period,'-',var,'.pdf',sep=''))
-            #par(mfrow = c(4,3), mar=c(4, 4, 2, 2), oma=c(0, 2, 0, 0),cex.axis=1.3)
-            #layout()
-            # Loop around months
-            for (mth in monthList) {
+            for (var in varList) {
               
+              dataMatrix <- c("rcp","model","var")
               
-              outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
-              
-              #if (!file.exists(outNc)) {
-              
-              curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
-              futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
-              
-              curAvgNc[curAvgNc[]>0.5] <- NA 
-              futAvgNc[futAvgNc[]>200] <- NA 
-              
-              plot(curAvgNc)
-              plot(futAvgNc)
-              
-              library(maptools)
-              data(wrld_simpl)
-              windows()
-              
-              plot(wrld_simpl, add=T)
-              
-              setMinMax(futAvgNc)
-
-              curAvgNc[curAvgNc[]<0.5] <- 0.5 
-              futAvgNc[futAvgNc[]<0.5] <- 0.5
-              
-              curAvgNc[curAvgNc[]<1] <- 1 
-              futAvgNc[futAvgNc[]<1] <- 1
-              
-              #length(curAvgNc[curAvgNc[]==1])
-              
-              curCheck=curAvgNc[curAvgNc[]<=0]
-
-              if (var == "prec" || var == "rsds"){
-                anomNc <- (futAvgNc - curAvgNc) / (curAvgNc) + 0.1)
-              } else {
-                anomNc <- futAvgNc - curAvgNc  
-              }
+              # Loop around months
+              for (mth in monthList) {
                 
-#               anomNc[anomNc[]>100] 
-              
-              centroids=rasterToPoints(anomNc)
-              df <- data.frame(centroids)
-              lon=df[which.max(df[,3]),]$x
-              lat=df[which.max(df[,3]),]$y
-              cur=extract(curAvgNc,cbind(lon, lat))
-              favg=extract(futAvgNc,cbind(lon, lat))     
-              (favg-cur)/cur
-              extract(anomNc,cbind(lon, lat))   
-              
-                                   
-
-              anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=T)
-              
-              
-              
-              outShp <- paste(anomPerDir, "/", var, "_", mth, ".shp", sep="")
-             
-              
-               if (file.exists(outShp)) {
-                 file.remove(outShp) 
-               }
-              
-                anomPts <- rasterToPoints(raster(outNc)) 
+                outNc <- paste(anomPerDir, "/", var, "_", mth, ".nc", sep="")
                 
-               
-                coords <- data.frame(anomPts[,1:2])
-                colnames(coords) <- c("LON", "LAT")
+                if (!file.exists(outNc)) {
+                  
+                  curAvgNc <- raster(paste(curAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                  futAvgNc <- raster(paste(futAvgDir, "/", var, "_", mth, ".nc", sep=""))
+                  
+                  if (var == "prec"){
+                    
+                    curAvgNc[curAvgNc[]<corr] <- corr
+                    futAvgNc[futAvgNc[]<corr] <- corr
+                    anomNc <- (futAvgNc - curAvgNc) / (curAvgNc)
+                    
+                    centroids=rasterToPoints(anomNc)
+                    df <- data.frame(centroids)
+                    
+                    value=df[,3]
+                    
+                    
+                    qdev=quantile(value,conf,na.rm=T)
+                    qdev=data.frame(id=names(qdev), values=unname(qdev), stringsAsFactors=FALSE)
+                    
+                    values(anomNc) <- ifelse(values(anomNc) >=qdev$values, qdev$values, values(anomNc)) 
+                    
+                    
+                  } else {
+                    anomNc <- futAvgNc - curAvgNc  
+                  }
+                  
+                  
+                  anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=T)
+                  
+                  
+                  outShp <- paste(anomPerDir, "/", var, "_", mth, ".shp", sep="")
+                  
+                  
+                  if (file.exists(outShp)) {
+                    file.remove(outShp) 
+                  }
+                  
+                  anomPts <- rasterToPoints(raster(outNc)) 
+                  
+                  
+                  coords <- data.frame(anomPts[,1:2])
+                  colnames(coords) <- c("LON", "LAT")
+                  
+                  values <- data.frame(anomPts[,3])
+                  colnames(values) <- c("VALUE")
+                  
+                  anomPts <- SpatialPointsDataFrame(coords,values)
+                  anomShp <- writePointsShape(anomPts, paste(anomPerDir, "/", var, "_", mth, sep=""))
+                  
+                  cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
+                  
+                } else {cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
                 
-                values <- data.frame(anomPts[,3])
-                colnames(values) <- c("VALUE")
-                
-                anomPts <- SpatialPointsDataFrame(coords,values)
-                anomShp <- writePointsShape(anomPts, paste(anomPerDir, "/", var, "_", mth, sep=""))
-                
-                cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")
-                
-#               } else {cat(" .> Anomalies ", paste("\t ", var, "_", mth, sep=""), "\tdone!\n")}
+              } #mth
               
-            } #mth
-            
-#             if(!is.null(nrow(dataMatrix))){
-#               write.csv(dataMatrix, paste(anomPerDir,'/historical-valuesMenores0-',rcp,'-',gcm,'-',var,".csv", sep=""), row.names=F)
-#             }
-            #dev.off()            
-            
-          #}  # checkFile  
-          #               		} # var
+              
+            }  # checkFile  
+          } # var
         }
       }  
       write.table("Done!", checkFile, row.names=F)      
       
     } # period  
     
-
+    
     
   } #gcm
   
@@ -456,7 +433,6 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   cat("GCM Anomalies Process Done!")
   
 }
-
 
 
 
