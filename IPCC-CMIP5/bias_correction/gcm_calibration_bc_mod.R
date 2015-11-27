@@ -50,9 +50,10 @@ obs_extraction <- function(dataset="agcfsr", varmod="tmax",yi=1971, yf=1981, lon
  # yf <- substr(ts, 6, 9)
   
   ## Change longitude in 0-360 x-axis
-  if (lon < 0){lonmod <- lon + 360}
-  
-  
+  if (lon < 0){
+    lonmod <- lon + 360
+  }else{lonmod <- lon }
+
   #####  Extract TS OBS  #####
   
   ## NetCDF observation file
@@ -116,7 +117,9 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historica
     setwd(dirtemp)
     
     ## Change longitude in 0-360 x axis
-    if (lon < 0){lonmod <- lon + 360}
+    if (lon < 0){
+      lonmod <- lon + 360
+    }else{lonmod <- lon }
     
     
     #####  Extract TS GCM  #####
@@ -1296,7 +1299,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
   dataset <- tolower(dataset)
   
   for (var in varlist){
-    if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
+    if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"} else if (var == "tasmax") {varmod <- "tmean"}
     
     obs_extraction(dataset, varmod, Obyi,Obyf, lon, lat, dirobs, dirout,dircdo)  
     gcm_extraction(gcm, var,varmod, "historical", Obyi,Obyf, gcmlist, lon, lat, dirgcm, dirout,dircdo)
