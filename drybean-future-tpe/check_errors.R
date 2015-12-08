@@ -10,12 +10,8 @@ stop("!")
 ########################################################################
 
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
-#wd <- "~/Leeds-work/rice-future-tpe"
-gcm_idir <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily"
+wd <- "~/Leeds-work/drybean-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
-#gcm_odir <- "~/scratch/gcm_meteorology"
-#if (!file.exists(gcm_odir)) {dir.create(gcm_odir)}
 gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
 #location list
@@ -25,7 +21,7 @@ loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
 varlist <- c("prec", "tmax", "tmin", "srad")
 
 for (wst in loc_list$id) {
-  #wst <- paste(loc_list$id[4])
+  #wst <- paste(loc_list$id[1])
   wst_name <- gsub(".","",wst,fixed=T)
   lon <- loc_list$lon[which(loc_list$id == wst)]
   lat <- loc_list$lat[which(loc_list$id == wst)]
@@ -33,12 +29,6 @@ for (wst in loc_list$id) {
   
   wst_odir <- paste(gcm_fdir,"/loc_",wst_name,sep="")
   gcmlist <- list.files(paste(wst_odir,"/gcm",sep=""))
-  
-  #remove GCMs without some of the variables
-  gcmlist <- gcmlist[which(gcmlist != "cesm1_cam5")]
-  gcmlist <- gcmlist[which(gcmlist != "ncar_ccsm4")]
-  gcmlist <- gcmlist[which(gcmlist != "mri_cgcm3")]
-  gcmlist <- gcmlist[which(gcmlist != "ipsl_cm5a_lr")]
   
   for (gcm in gcmlist) {
     #gcm <- "miroc_esm"

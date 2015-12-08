@@ -2,19 +2,19 @@
 #UoL / CCAFS / CIAT
 #July 2015
 
-#Get outputs from bias_correct_met.R and write Oryza2000 formatted weather files
+#Get outputs from bias_correct_met.R and write DSSAT formatted weather files
 
 #source dir
-src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+src.dir <- "~/Repositories/dapa-climate-change/drybean-future-tpe"
 
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
+wd <- "~/Leeds-work/drybean-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
-ory_odir <- paste(wd,"/oryza_meteorology",sep="")
-if (!file.exists(ory_odir)) {dir.create(ory_odir)}
+dss_odir <- paste(wd,"/dssat_meteorology",sep="")
+if (!file.exists(dss_odir)) {dir.create(dss_odir)}
 
-source(paste(src.dir,"/Oryza_v4.R",sep=""))
+source(paste(src.dir,"/make_wthfile.R",sep=""))
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
@@ -24,10 +24,18 @@ varlist <- c("prec", "tmax", "tmin", "srad")
 rcplist <- c("rcp26","rcp45","rcp60","rcp85")
 mthlist <- c("cf","del")
 gcmlist <- list.files(paste(gcm_dir,"/loc_",gsub(".","",loc_list$id[1],fixed=T),"/gcm",sep=""))
-gcmlist <- gcmlist[which(gcmlist != "cesm1_cam5")]
-gcmlist <- gcmlist[which(gcmlist != "ncar_ccsm4")]
-gcmlist <- gcmlist[which(gcmlist != "mri_cgcm3")]
-gcmlist <- gcmlist[which(gcmlist != "ipsl_cm5a_lr")]
+
+#CO2 concentrations (2021-2045)
+#scenario  period	    co2_ppm
+#hist	     1981-2005	352.9
+#rcp26	   2016-2040	446.5
+#rcp45	   2016-2040	468.2
+#rcp60	   2016-2040	452.5
+#rcp85	   2016-2040	501.8
+
+#canopy Pn response to CO2 (unc. bounds)
+#!  65.0  2.05 .0116                         CCMP,CCMAX,CCEFF; CO2 EFFECT ON PGCAN (high)
+#!  65.0  1.95 .0116                         CCMP,CCMAX,CCEFF; CO2 EFFECT ON PGCAN (low)
 
 for (mth in mthlist) {
   #mth <- mthlist[1]
@@ -35,8 +43,8 @@ for (mth in mthlist) {
     #rcp <- rcplist[1]
     for (gcm in gcmlist) {
       #gcm <- gcmlist[1]
-      if (!file.exists(paste(ory_odir,"/method_",mth,"_",rcp,"_",gcm,".tar.bz2",sep=""))) {
-        gcm_odir <- paste(ory_odir,"/method_",mth,"_",rcp,"_",gcm,sep="")
+      if (!file.exists(paste(dss_odir,"/method_",mth,"_",rcp,"_",gcm,".tar.bz2",sep=""))) {
+        gcm_odir <- paste(dss_odir,"/method_",mth,"_",rcp,"_",gcm,sep="")
         if (!file.exists(gcm_odir)) {dir.create(gcm_odir)}
         
         for (wst in loc_list$id) {
@@ -47,6 +55,7 @@ for (mth in mthlist) {
           ele <- loc_list$elev[which(loc_list$id == wst)]
           sta <- paste(loc_list$uf[which(loc_list$id == wst)])
           mun <- paste(loc_list$municipio[which(loc_list$id == wst)])
+          stn <- paste(loc_list$file_name[which(loc_list$id == wst)])
           
           cat("writing method=",mth," / rcp=",rcp," / gcm=",gcm," / wst=",wst,"\n",sep="")
           
@@ -55,10 +64,6 @@ for (mth in mthlist) {
           wst_idir <- paste(gcm_dir,"/loc_",wst_name,sep="")
           
           if (file.exists(paste(wst_idir,"/obs",sep=""))) {
-            #output folder
-            wst_odir <- paste(gcm_odir,"/",sta,"/",tolower(gsub(" ","",mun)),sep="")
-            if (!file.exists(wst_odir)) {dir.create(wst_odir, recursive=T)}
-            
             #read in data for location
             for (vname in varlist) {
               #vname <- varlist[2]
@@ -82,28 +87,31 @@ for (mth in mthlist) {
             for (year in yearlist) {
               #year <- yearlist[1]
               yrdata <- ws_data[which(ws_data$year == year),]
+              yrdata$year <- NULL
+              names(yrdata) <- c("DATE","RAIN","TMAX","TMIN","SRAD")
               
-              #create file
-              fname <- paste(wst_odir,"/",substr(toupper(gsub(" ","",mun)),1,5),"1.",sprintf("%03d",year%%2000),sep="")
-              tfile <- file(fname,"w")
+              #retrieve header
+              yrhdr <- retrieve_header(yrdata, xy_loc=data.frame(lon=lon,lat=lat,elev=ele,mun=mun),
+                                       years=year,basename=stn)
+              if (rcp == "rcp26") {yrhdr$CO2 <- 446.5}
+              if (rcp == "rcp45") {yrhdr$CO2 <- 468.2}
+              if (rcp == "rcp60") {yrhdr$CO2 <- 452.5}
+              if (rcp == "rcp85") {yrhdr$CO2 <- 501.8}
               
-              #write header
-              cabecalho(arquivo=tfile,ano=year,estacao=wst,municipio=mun,latitude=lat,longitude=lon,altitude=ele)
+              #make date field in DSSAT format
+              yrdata$jday <- sprintf("%03d",as.numeric(format(as.Date(yrdata$DATE), "%j")))
+              yrdata$year <- substr(paste(as.numeric(format(as.Date(yrdata$DATE), "%Y"))),3,4)
+              yrdata$DATE <- paste(yrdata$year,yrdata$jday,sep="")
               
-              for (i in 1:nrow(yrdata)) {
-                #i <- 1
-                writeLines(paste("1",year,as.integer(format(as.Date(yrdata$date[i], "%Y-%m-%d"),"%j")),
-                                 round(yrdata$srad[i]*1000,3),round(yrdata$tmin[i],3),
-                                 round(yrdata$tmax[i],3),"-99","-99",
-                                 round(yrdata$prec[i],3),sep=','),tfile)
-              }
-              close(tfile)
+              #write file
+              wth_fil <- paste(gcm_odir,"/",yrhdr$FNAME,sep="")
+              wth_fil <- write_wth(yrdata,wth_fil,yrhdr,append=F)
             }
           }
         }
         
         #tar -cjvf
-        setwd(ory_odir)
+        setwd(dss_odir)
         system(paste("tar -cjf method_",mth,"_",rcp,"_",gcm,".tar.bz2"," method_",mth,"_",rcp,"_",gcm,sep=""))
         system(paste("rm -rf method_",mth,"_",rcp,"_",gcm,sep=""))
       } else {

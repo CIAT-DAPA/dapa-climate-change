@@ -568,10 +568,10 @@ for (year in yr_list) {
       #bail out and delete folder
       setwd("~")
       system(paste("rm -rf ",trun_dir,sep=""))
+      
+      #clean up
+      rm(list=c("summary_all"))
     }
-    
-    #clean up
-    rm(list=c("summary_all"))
   }
 }
 

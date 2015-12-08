@@ -8,6 +8,7 @@ library(raster); library(rgdal); library(RMAWGEN); library(sp); library(maptools
 library(lhs); library(MASS); library(RColorBrewer)
 
 #directories
+src_dir <- "~/Repositories/dapa-climate-change/p4s-csa/hh-analyses"
 wd <- "~/Leeds-work/p4s-csa/hh-analyses"
 agmerra_dir <- paste(wd,"/AgMERRA_data",sep="")
 chirps_dir <- paste(wd,"/CHIRPS_data/chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/africa_daily/tifs/p05",sep="")
@@ -18,23 +19,23 @@ ifprisoil_dir <- paste(wd,"/IFPRI_soil_profiles",sep="")
 dssat_dir <- paste(wd,"/dssat_bin/dssat-csm-4.6.1.0_bin",sep="")
 mdata_outdir <- paste(wd,"/model_data",sep="")
 if (!file.exists(mdata_outdir)) {dir.create(mdata_outdir)}
-runs_dir <- paste(mdata_outdir,"/model_runs_mill",sep="")
+runs_dir <- paste(mdata_outdir,"/model_runs_mill_calib",sep="")
 if (!file.exists(runs_dir)) {dir.create(runs_dir)}
 
 #source all functions
-source(paste(wd,"/scripts/extract_CHIRPS.R",sep=""))
-source(paste(wd,"/scripts/extract_CRU.R",sep=""))
-source(paste(wd,"/scripts/extract_AgMERRA.R",sep=""))
-source(paste(wd,"/scripts/wgen_srad.R",sep=""))
-source(paste(wd,"/scripts/extract_weather_loc.R",sep=""))
-source(paste(wd,"/scripts/calc_phdate.R",sep=""))
-source(paste(wd,"/scripts/calc_risk_indices.R",sep=""))
-source(paste(wd,"/scripts/get_soils_obj.R",sep=""))
-source(paste(wd,"/scripts/get_xfile_obj.R",sep=""))
-source(paste(wd,"/scripts/update_soil_xfile.R",sep=""))
-source(paste(wd,"/scripts/make_soilfile.R",sep=""))
-source(paste(wd,"/scripts/make_xfile.R",sep=""))
-source(paste(wd,"/scripts/make_wthfile.R",sep=""))
+source(paste(src_dir,"/extract_CHIRPS.R",sep=""))
+source(paste(src_dir,"/extract_CRU.R",sep=""))
+source(paste(src_dir,"/extract_AgMERRA.R",sep=""))
+source(paste(src_dir,"/wgen_srad.R",sep=""))
+source(paste(src_dir,"/extract_weather_loc.R",sep=""))
+source(paste(src_dir,"/calc_phdate.R",sep=""))
+source(paste(src_dir,"/calc_risk_indices.R",sep=""))
+source(paste(src_dir,"/get_soils_obj.R",sep=""))
+source(paste(src_dir,"/get_xfile_obj.R",sep=""))
+source(paste(src_dir,"/update_soil_xfile.R",sep=""))
+source(paste(src_dir,"/make_soilfile.R",sep=""))
+source(paste(src_dir,"/make_xfile.R",sep=""))
+source(paste(src_dir,"/make_wthfile.R",sep=""))
 
 #load Niger shp
 shp <- readRDS(paste(adm_dir,"/NER_adm1.rds",sep=""))
@@ -356,4 +357,55 @@ for (hh_i in 1:nrow(hh_mill_xy)) {
   #clean up
   rm(list=c("hh_output","kdata","summary_all","yield","seasdur","k_dens"))
 }
+
+
+### plot observed vs. simulated yield
+obssim_yield <- data.frame()
+for (hh_i in 1:nrow(hh_mill_xy)) {
+  #hh_i <- 1
+  cat("...gathering sim vs. obs for hhid=",hh_mill_xy$hhid[hh_i],"\n")
+  hhid <- hh_mill_xy$hhid[hh_i]
+  lon <- hh_mill_xy$lon[hh_i]; lat <- hh_mill_xy$lat[hh_i]
+  load(file=paste(runs_dir,"/model_selected_hhid_",hh_mill_xy$hhid[hh_i],".RData",sep=""))
+  out_row <- data.frame(hhid=hhid,lon=lon,lat=lat,YSIM=median(hh_output$SEL_RUNS$HWAM),
+                        YSIM_p95=as.numeric(quantile(hh_output$SEL_RUNS$HWAM,probs=0.95)),
+                        YSIM_p05=as.numeric(quantile(hh_output$SEL_RUNS$HWAM,probs=0.05)),
+                        YOBS=hh_output$OBS_YIELD,DSIM=mean(hh_output$SEL_RUNS$NDCH),
+                        DSIM_p95=as.numeric(quantile(hh_output$SEL_RUNS$NDCH,probs=0.95)),
+                        DSIM_p05=as.numeric(quantile(hh_output$SEL_RUNS$NDCH,probs=0.05)),
+                        DEST=hh_output$EST_DUR)
+  obssim_yield <- rbind(obssim_yield, out_row)
+  rm(list=c("hh_output","out_row"))
+}
+obssim_yield <- obssim_yield[which(obssim_yield$hhid != 6212),]
+
+#plot figure
+pdf(paste(runs_dir,"/scatterplot_obs_sim_yield.pdf",sep=""),height=5,width=6)
+par(mar=c(5,5,1,1))
+plot(obssim_yield$YOBS, obssim_yield$YSIM,xlim=c(0,2000),ylim=c(0,2000),pch=20,col="black",
+     xlab="Observed yield (kg/ha)",ylab="Simulated yield (kg/ha)")
+for (hh_i in 1:nrow(obssim_yield)) {
+  lines(x=c(obssim_yield$YOBS[hh_i], obssim_yield$YOBS[hh_i]),
+        y=c(obssim_yield$YSIM_p05[hh_i], obssim_yield$YSIM_p95[hh_i]),col="black")
+}
+abline(0,1)
+grid()
+rmse <- sqrt(sum((obssim_yield$YSIM - obssim_yield$YOBS)^2) / nrow(obssim_yield))
+rmsep <- rmse / (max(obssim_yield$YOBS)-min(obssim_yield$YOBS)) * 100
+r2_mean <- cor(obssim_yield$YSIM, obssim_yield$YOBS)^2
+r2label <- bquote(italic(R)[italic(M)]^2 == .(sprintf("%4.3f",r2_mean)))
+rmselabel <- bquote(italic(RMSE)[italic(M)] == .(sprintf("%4.1f",rmse)) ~ "kg / ha")
+rmseplabel <- bquote(italic(NRMSE)[italic(M)] == .(sprintf("%4.2f",rmsep)) ~ "%")
+text(x=-50,y=1900,pos=4,r2label)
+text(x=-50,y=1750,pos=4,rmselabel)
+text(x=-50,y=1600,pos=4,rmseplabel)
+dev.off()
+
+
+### run models for period 1980-2010, for:
+# 1. standard setup (with parametric variability)
+# 2. setup without water stress
+# 3. setup without N stress
+# 4. setup without water and N stress
+
 
