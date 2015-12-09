@@ -11,7 +11,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python Resample.py <dirbase> <dirout> <resolution> <method> <wildcard>"
-	print "    - ie: python Resample.py D:\Workspace D:\Workspace\_resampled 0.5 NEAREST ALL"
+	print "    - ie: python Resample.py D:\Documents\Desktop\agrihack_climate_data\observed\worldclim\Global_10min D:\Documents\Desktop\agrihack_climate_data\observed\worldclim\Global_10min\_resampled 0.5 NEAREST ALL"
 	print " Units Resolution: arcminutes"
 	print " Resample types:"
 	print "\t NEAREST Nearest neighbor assignment This is the default" 
@@ -43,6 +43,7 @@ print "~~~~~~~~~~~\n"
 
 # Set workspace
 gp.workspace = dirbase 
+gp.CheckOutExtension("Spatial")
 
 # Get a list of grids in the workspace
 print "\t ..listing grids into " + dirbase
@@ -50,7 +51,10 @@ if wildcard == "ALL":
 	rasters = sorted(gp.ListRasters("*", "GRID"))
 else:	
 	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
-	
+
+gp.toolbox = "SA"
+gp.Extent = "-26 -47 53 38"
+
 # Lopping around the grids
 for raster in rasters:
 	
