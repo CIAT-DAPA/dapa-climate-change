@@ -279,7 +279,7 @@ ens="r1i1p1"
 basePer="1961_1990"
 GCMAnomalies(rcp,baseDir,ens,basePer)
 
-GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990") {
+GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", oDir="D:/cormacarena") {
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
   cat("XXXXXXXXX GCM ANOMALIES CALCULATION XXXXXXXX \n")
@@ -313,7 +313,8 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
     # Average directory
     curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
     
-    periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+    # periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
+    periodList <- c("2030")
     
     for (period in periodList) {
       
@@ -339,6 +340,11 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             
             anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s", sep="")
             anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
+            
+          } else if (basePer == "1981_2005") {
+           
+            anomDir <- paste(oDir, "/", gcm, "/", ens, "/anomalies_1985s", sep="")
+            anomPerDir <- paste(oDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
             
           }
           
