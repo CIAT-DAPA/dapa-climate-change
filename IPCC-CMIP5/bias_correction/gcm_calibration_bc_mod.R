@@ -35,7 +35,7 @@
 ######################################################################################################################
 
 ## Extract Observations Time Series Function
-obs_extraction <- function(dataset="agcfsr", varmod="tmax",yi=1971, yf=1981, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="C:/Temp/bc", dircdo="cdo"){
+obs_extraction <- function(dataset="wfd", varmod="tmax",yi=1971, yf=1981, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="C:/Temp/bc", dircdo="cdo"){
 
   ## Load libraries
   #library(raster); library(ncdf); library(rgdal);
@@ -96,7 +96,7 @@ obs_extraction <- function(dataset="agcfsr", varmod="tmax",yi=1971, yf=1981, lon
 }
 
 ## Extract GCM Time Series Function
-gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historical",yi=1971, yf=1981, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4, dirgcm="T:/gcm/cmip5/raw/daily", dirout="C:/Temp/bc",dircdo="cdo"){
+gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historical",yi=1980, yf=2010, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4, dirgcm="T:/gcm/cmip5/raw/daily", dirout="C:/Temp/bc",dircdo="cdo"){
   
   ## Load libraries
   #library(raster); library(ncdf); library(rgdal);
@@ -129,6 +129,28 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historica
     
     if (length(ncvar) > 0){
       
+      years <- sapply(strsplit(basename(ncvar), '[_]'), "[[", 6)  
+      staYear <- sapply(strsplit(years, '[-]'), "[[", 1)
+      endYear <- gsub(".nc","",substr(sapply(strsplit(years, '[-]'), "[[", 2), 1, 8))
+      
+      yearI<- strftime(as.Date(as.character(staYear), "%Y%m%d"),"%Y")
+      yearF<- strftime(as.Date(as.character(endYear), "%Y%m%d"),"%Y")
+      
+      if(yearI >= yi){
+        yei = yearI
+      }
+      if (yearI <= yi){
+        yei = yi
+      }	
+      if (yearF <= yf){
+        yef = yearF
+      }	
+      if (yearF >= yf){
+        yef =yf
+      }
+      yi<-yei
+      yf<-yef
+      
       cat("\nExtracting GCM data : ", " ", basename(gcm), " ", rcp,  " ", varmod, " \n")
       
       ## Define extraction output file
@@ -138,7 +160,7 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historica
         
         ## CDO command line to extract daily TS
 #         if (gcm == "gfdl_cm3" || gcm == "gfdl_esm2g" || gcm == "gfdl_esm2m"){
-          system(paste0(dircdo," -s -outputtab,date,year,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
+          system(paste0(dircdo," -s -outputtab,date,year,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
 #         } else {
 #           system(paste0(dircdo," -s -outputtab,date,year,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " ", ncvar[1], " > ", dirtemp, "/", odat))
 #         }
@@ -170,7 +192,7 @@ gcm_extraction <- function(gcm="bcc_csm1_1", var="tasmax",varmod, rcp="historica
 } 
 
 ## Merge OBS and GCM in a Single Matrix
-merge_extraction <- function(varmod="tmax", rcp="historical", yi=1971, yf=1981, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"), lon=-73.5, lat=3.4, dataset="wfd", dirbase="C:/Temp/bc"){
+merge_extraction <- function(varmod="prec", rcp="rcp45", yi=2030, yf=2035, gcmlist=c("bcc_csm1_1"), lon=-73.5, lat=3.4, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-11_08_01_03",sepFile="\t"){
   
   # Set working directory
   setwd(dirbase)
@@ -185,7 +207,9 @@ merge_extraction <- function(varmod="tmax", rcp="historical", yi=1971, yf=1981, 
     ## Define end and start year from TS period and 
     #yi <- substr(ts, 1, 4)
     #yf <- substr(ts, 6, 9)
-    
+    if(dataset!="station"){
+      sepFile=" "
+    }
     ## Create a sequence of dates at daily timestep for TS 
     dates <- format(seq(as.Date(paste0(yi,"/1/1")), as.Date(paste0(yf,"/12/31")), "days") ,"%Y-%m-%d")
     dates <- cbind.data.frame("date"=dates, NA)
@@ -203,7 +227,7 @@ merge_extraction <- function(varmod="tmax", rcp="historical", yi=1971, yf=1981, 
     }
     
     # Load and join observations to the matrix
-    oobs <- read.table(paste0(dirbase,"/obs/",dataset, "/", oobs),header=T,sep=" ")
+    oobs <- read.table(paste0(dirbase,"/obs/",dataset, "/", oobs),header=T,sep=sepFile)
     merge <- merge(dates, oobs, by="date", all.x=T)
     gcmmat[,1] <- merge[,3]
     
@@ -211,7 +235,9 @@ merge_extraction <- function(varmod="tmax", rcp="historical", yi=1971, yf=1981, 
     gcmmat <- cbind(dates, gcmmat)
     gcmmat <-gcmmat[,-2]
     names(gcmmat) <- c("date", "obs", gcmlist)
-    
+    if(rcp=="historical"){
+      gcmmat=na.omit(gcmmat) # remueve los na
+    }
     ## Write merged output file (include OBS and GCM)
     gcmmat <- write.table(gcmmat, odat, sep=" ",row.names=F, quote=F)
     
@@ -1223,72 +1249,8 @@ bc_stats <- function(varmod="prec", rcp="historical", yi=1971, yf=1981, lon=-73.
 
 ###################### Wrapper ##########################
 
-## D:\CIAT\_tools\dapa-climate-change\IPCC-CMIP5\bias_correction
-## source("gcm_calibration_bc.R")
 
-## Input parameters via CCAFS-Climate website
-varlist <- c("tasmax") #c("pr", "tasmax")      # varlist <- c("tasmax", "tasmin", "pr", "rsds")
-gcmlist <-  c("bcc_csm1_1", "bcc_csm1_1_m") # c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2")  # gcmlist <- list.files(path=dirrcp, full.names=FALSE)  ## The gcm list is a parameters set by user through a check list
-rcp <- "rcp45"
-ts="1950_2001"
-ts_hist <- "1971_1980"
-ts_fut <- "2030_2039"
-lon <- -73.5
-lat <- 3.4
-dataset <- "wfd"
-
-
-
-
-## Preset parameters 
-dirout <- "/home/jtarapues/bc" #"C:/Temp/bc"
-dircdo <- "cdo"
-dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/data_cluster_2/gcm/cmip5/raw/daily" #
-dirobs <- "/mnt/data_cluster_4/observed/gridded_products" # "S:/observed/gridded_products/wfd" # 
-yi=1971
-yf=1981
-
-yi=2030
-yf=2039
-
-rcp="historical"
-rcp="rcp45"
-
-var="tasmax"
-varmod <- "tmax"
-
-server="/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" #"S:/portals/ccafs_climate/download_data/files/data/bc_platform"
-
-downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform"
-
-# Warnings off
-# options(warn=-1)
-
-# Run functions by looping GCMs and variables
-for (var in varlist){
-  
-  ## Renaming variables
-  if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
-  
-  ## Runinng functions
-  obs_extraction(dataset, var, yi,yf,ts, lon, lat, dirobs, dirout,dircdo)  
-  gcm_extraction(gcm, var, "historical", yi,yf, gcmlist, lon, lat, dirgcm, dirout,dircdo)
-  gcm_extraction(gcm, var, rcp, ts_fut, gcmlist, lon, lat, dirgcm, dirout)
-  merge_extraction(varmod, "historical",yi,yf, gcmlist, lon, lat, dataset, dirout)
-  merge_extraction(varmod, rcp,yi,yf, gcmlist, lon, lat, dataset, dirout)
-  sh_calcs(varmod, "historical", lon, lat, dirout)
-  sh_calcs(varmod, rcp, lon, lat, dirout)
-  bc_calcs(varmod, "historical", lon, lat, dirout)    
-  bc_calcs(varmod, rcp, lon, lat, dirout)
-  del_calcs(varmod, rcp, lon, lat, dirout)
-  cf_calcs(varmod, rcp, lon, lat, dirout)
-  qm_calcs(varmod, rcp, lon, lat, dirout)
-  bc_stats(varmod, "historical",yi,yf, lon, lat, dirout)
-  bc_stats(varmod, rcp, yi,yf, lon, lat, dirout)
-  
-}  
-
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,file,sepFile){
 
   ## Load libraries
   library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2); library(reshape); library(tools);
@@ -1299,50 +1261,67 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
   dataset <- tolower(dataset)
   
   for (var in varlist){
-    if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"} else if (var == "tasmax") {varmod <- "tmean"}
-    
-    obs_extraction(dataset, varmod, Obyi,Obyf, lon, lat, dirobs, dirout,dircdo)  
-    gcm_extraction(gcm, var,varmod, "historical", Obyi,Obyf, gcmlist, lon, lat, dirgcm, dirout,dircdo)
-    
-    merge_extraction(varmod, "historical",Obyi,Obyf, gcmlist, lon, lat, dataset, dirout)
-    
-    for(rcp in rcpList){
-      gcm_extraction(gcm, var,varmod, rcp, fuyi,fuyf, gcmlist, lon, lat, dirgcm, dirout)
-      merge_extraction(varmod, rcp,fuyi,fuyf, gcmlist, lon, lat, dataset, dirout)
-    
-      for(methBC in methBCList){
-        if(methBC=='1'){
-          sh_calcs(varmod, "historical", lon, lat, dirout)
-          sh_calcs(varmod, rcp, lon, lat, dirout)  
-
-        }else if(methBC=='2'){
-          bc_calcs(varmod, "historical", lon, lat, dirout)    
-          bc_calcs(varmod, rcp, lon, lat, dirout)          
-        }else if(methBC=='3'){
-          del_calcs(varmod, rcp, lon, lat, dirout)
-          cf_calcs(varmod, rcp, lon, lat, dirout)          
-        }else{
-          qm_calcs(varmod, rcp, lon, lat, dirout)
+    if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"} else if (var == "tas") {varmod <- "tmean"}
+#     if(length(ncvar)!=0){
+      if(dataset=="station"){
+        dirtemp <- paste0(dirout, "/obs/station")
+        if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
+        df = read.table(file, header = TRUE,sep='\t')
+        dateSta=strftime(as.Date(as.character(df$Date[!is.na(df$Date)] ), "%Y%m%d"),"%Y-%m-%d")
+        valueSta=df$Value[!is.na(df$Value)] 
+        station=data.frame(cbind(dateSta,valueSta))   
+        names(station)=c("date","value")
+        write.table(station,paste0(dirtemp,"/obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab"), sep="\t",row.names=F,quote = FALSE)    
+      }else{
+        ncvarlis <- paste0(dirobs,'/',dataset,"/daily/nc-files")
+        ncvar <- list.files(ncvarlis, pattern=paste0(varmod,"_daily_ts_", tolower(dataset), "_*" ),full.names = T,ignore.case=F)
+        ncvar <- ncvar[sapply(strsplit(basename(ncvar), '[_]'), "[[", 1)==varmod]        
+        obs_extraction(dataset, varmod, Obyi,Obyf, lon, lat, dirobs, dirout,dircdo)  
+      }      
+      gcm_extraction(gcm, var,varmod, "historical", Obyi,Obyf, gcmlist, lon, lat, dirgcm, dirout,dircdo)
+      
+      merge_extraction(varmod, "historical",Obyi,Obyf, gcmlist, lon, lat, dataset, dirout,sepFile)
+      
+      for(rcp in rcpList){
+        gcm_extraction(gcm, var,varmod, rcp, fuyi,fuyf, gcmlist, lon, lat, dirgcm, dirout)
+        merge_extraction(varmod, rcp,fuyi,fuyf, gcmlist, lon, lat, dataset, dirout,sepFile)
+      
+        for(methBC in methBCList){
+          if(methBC=='1'){
+            sh_calcs(varmod, "historical", lon, lat, dirout)
+            sh_calcs(varmod, rcp, lon, lat, dirout)  
+  
+          }else if(methBC=='2'){
+            bc_calcs(varmod, "historical", lon, lat, dirout)    
+            bc_calcs(varmod, rcp, lon, lat, dirout)          
+          }else if(methBC=='3'){
+            del_calcs(varmod, rcp, lon, lat, dirout)
+            cf_calcs(varmod, rcp, lon, lat, dirout)          
+          }else{
+            qm_calcs(varmod, rcp, lon, lat, dirout)
+          }
         }
+        for(stat in statList){
+          if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
+          if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}    
+          if(stat=='2' || stat=='3'){
+            bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout,stat)
+            bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout,stat)            
+          }
+            
+        }     
       }
-      for(stat in statList){
-        if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
-        if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}    
-        if(stat=='2' || stat=='3'){
-          bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout,stat)
-          bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout,stat)            
-        }
-          
-      }     
-    }
+#     }
   }
   
-  if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
-  if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
-  system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
-  system(paste0('rm -r ',dirout),intern=TRUE)
-  
-  return(paste0(file.path(downData,dateDownl),'.zip'))
+  if(length(list.files(dirout,recursive=T))!=0){
+    if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
+    if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
+    system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
+    system(paste0('rm -r ',dirout),intern=TRUE)
+    
+    #return(paste0(file.path(downData,dateDownl),'.zip'))
+  }
   
 }
 
@@ -1351,7 +1330,7 @@ downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform"
 dirWork="/home/temp" #"C:/Temp/bc"
 dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/data_cluster_2/gcm/cmip5/raw/daily" #
 dirobs <- "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/wfd" #  
-dataset <- "agcfsr"
+dataset <- "wfd" # station
 methBCList <-  c('1')
 varlist <- c("pr")
 Obyi <- 1985
@@ -1363,7 +1342,8 @@ lon <- -73.5
 lat <- 3.4
 gcmlist <-  c("bcc_csm1_1") #, "bcc_csm1_1_m")
 statList<- c('1')#c('1','2','3')
-
+fileStat<-"/home/jtarapues/pr_1_CATIE_daily_raw_prec.txt" #"C:/Temp/bc/Estacion_Turrialba/pr_1_CATIE_daily_raw_prec.txt"
+sepFile="\t"
 
 # methBCList = unlist(strsplit(methBCList, split=","))
 # varlist = unlist(strsplit(varlist, split=","))
@@ -1371,8 +1351,23 @@ statList<- c('1')#c('1','2','3')
 # rcpList = unlist(strsplit(rcpList, split=","))
 # statList = unlist(strsplit(stat, split=","))
 
-bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList)
 
+if(dataset=="station" && file.exists(file)){
+  df = read.table(file, header = TRUE,sep='\t')
+  dateSta=strftime(as.Date(as.character(df$Date[!is.na(df$Date)] ), "%Y%m%d"),"%Y-%m-%d")
+  valueSta=df$Value[!is.na(df$Value)] 
+  var=sapply(strsplit(basename(file), '[_]'), "[[", 1)
+  
+  if(length(seq(as.Date(min(from=dateSta)),to=as.Date(max(dateSta)),by="day"))==length(dateSta)){
+  }
+  Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
+  Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
+  varlist <-c(var)
+  bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile)
+  
+}else{
+  bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile)
+}
 
 
 
