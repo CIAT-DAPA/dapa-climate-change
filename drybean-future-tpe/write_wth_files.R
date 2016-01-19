@@ -18,6 +18,8 @@ source(paste(src.dir,"/make_wthfile.R",sep=""))
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
+loc_list$file_name <- paste(loc_list$file_name)
+loc_list$file_name[which(loc_list$municipio == "Goias")] <- "TOIA"
 
 ## variable, scenario, gcm and method list
 varlist <- c("prec", "tmax", "tmin", "srad")
