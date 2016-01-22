@@ -35,6 +35,11 @@
 ### CF: Change Factor approach including variability
 ### QM: Quantile mappong approach including variability
 ######################################################################################################################
+##  file structure station (fileStat):
+## colnames = date  prec	tmin	tmax	hur	srad	swind
+## Values =   19980101	0	17.3	27.2	85.9	10.13	0.59
+######################################################################################################################
+
 
 ## Extract Observations Time Series Function
 obs_extraction <- function(dataset="wfd", varmod="rsds",yi=1971, yf=1981, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="C:/Temp/bc", dircdo="cdo"){
@@ -1483,7 +1488,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
         df = read.table(url(fileStat), header = TRUE,sep='\t')
         
-        dateSta=strftime(as.Date(as.character(df$Date[!is.na(df$Date)] ), "%Y%m%d"),"%Y-%m-%d")
+        dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
         #valueSta=df$Value[!is.na(df$Value)] 
         
 #         selvar=colnames(df)[!colnames(df) %in% colnames(df)[1]]
@@ -1582,7 +1587,7 @@ if(length(checkALL)==1){
 if(dataset=="station"){
   if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
   df = read.table(url(fileStat), header = TRUE,sep=sepFile)
-  dateSta=strftime(as.Date(as.character(df$Date[!is.na(df$Date)]), "%Y%m%d"),"%Y-%m-%d")
+  dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
   varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
   Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
   Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
