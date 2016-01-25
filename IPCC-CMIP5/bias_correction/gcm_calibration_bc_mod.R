@@ -208,7 +208,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1985, yf=1
 } 
 
 ## Merge OBS and GCM in a Single Matrix
-merge_extraction <- function(varmod="swind", rcp="rcp45", yi=2015, yf=2050, gcmlist=c("bcc_csm1_1"), lon=9.883333, lat=-83.633333, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42",sepFile="\t"){
+merge_extraction <- function(varmod="swind", rcp="rcp45", yi=2015, yf=2050, gcmlist=c("bcc_csm1_1_m"), lon=9.883333, lat=-83.633333, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42",sepFile="\t"){
   
   # Set working directory
   setwd(dirbase)
@@ -1448,7 +1448,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
   library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape); 
   
   dircdo <- "cdo"
-  dateDownl= paste0("bc_",gsub("\\.",'-',gsub(':','_',gsub(" ", "_", as.character(Sys.time()))))) # "bc_2015-12-14_05_46_42"  #  
+  dateDownl= "bc_2015-12-14_05_46_42"  #  paste0("bc_",gsub("\\.",'-',gsub(':','_',gsub(" ", "_", as.character(Sys.time()))))) # 
   dirout <- paste0(dirWork,'/',dateDownl) 
   dataset <- tolower(dataset)
 
@@ -1559,16 +1559,16 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 
 ############################################# Wrapper ##############################################
 
-serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #
-downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform"
-dirWork=  "/home/jtarapues/request/request_oriana" # "C:/Temp/bc" # "/home/temp" #
-dirgcm <-  "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/cmip5/raw/daily" #
-dirobs <-   "/mnt/data_cluster_5/cropdata/"
-dataset <- "station" # wfd, wfdi, agmerra, grasp, agcfsr, princenton
+serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #  si se corre local no es necesario modificar esta variable
+downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform" # si se corre local no es necesario modificar esta variable
+dirWork=  "C:/Temp/bc" #"/home/jtarapues/request/request_oriana" #  "/home/temp" # directorio de salida
+dirgcm <-  "T:/gcm/cmip5/raw/daily" # "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # 
+dirobs <-  "U:/cropdata" # "/mnt/data_cluster_5/cropdata/" # 
+dataset <- "wfd"  #"station" # wfd, wfdei, agmerra, grasp, agcfsr, princenton
 methBCList <-  c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM
-varlist <- c("pr","tasmax")
-Obyi <- 1985
-Obyf <- 1987
+varlist <- c("pr")
+Obyi <- 1998#1985
+Obyf <- 2012#1987
 fuyi <- 2015
 fuyf <- 2050
 rcpList <- c("rcp45")
@@ -1576,7 +1576,7 @@ lon <- 9.883333 #
 lat <- -83.633333 # 
 gcmlist <-  c("bcc_csm1_1_m") # ALL #
 statList<- c('1','2','3') #
-fileStat<- "http://172.22.52.48/bias_tmp/file_1452865604.txt"
+fileStat<- "http://172.22.52.48/bias_tmp/file_1452865604.txt" # para cargar archivos desde la plataforma
 sepFile<-"tab"
 
 
