@@ -39,6 +39,8 @@
 ## colnames = date  prec	tmin	tmax	hur	srad	swind
 ## Values =   19980101	0	17.3	27.2	85.9	10.13	0.59
 ######################################################################################################################
+## Nota: Este script fue ajustado para funcionar en una plataforma online sobre un servidor
+######################################################################################################################
 
 
 ## Extract Observations Time Series Function
@@ -1558,6 +1560,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 
 
 ############################################# Wrapper ##############################################
+#===== SOLO MODIFICAR ESTOS PARAMETROS Y CORRER HASTA LA LINEA FINAL: =====
 
 serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #  si se corre local no es necesario modificar esta variable
 downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform" # si se corre local no es necesario modificar esta variable
@@ -1575,10 +1578,11 @@ rcpList <- c("rcp45")
 lon <- 9.883333 # 
 lat <- -83.633333 # 
 gcmlist <-  c("bcc_csm1_1_m") # ALL #
-statList<- c('1','2','3') #
-fileStat<- "http://172.22.52.48/bias_tmp/file_1452865604.txt" # para cargar archivos desde la plataforma
+statList<- c('1','2','3') # 1=files,2=tables,3=graphics
+fileStat<- "http://172.22.52.48/bias_tmp/file_1452865604.txt" # para cargar archivos desde la plataforma no funciona para local
 sepFile<-"tab"
 
+#=============================================
 
 checkALL=gcmlist[which(gcmlist=="ALL")]
 if(length(checkALL)==1){
