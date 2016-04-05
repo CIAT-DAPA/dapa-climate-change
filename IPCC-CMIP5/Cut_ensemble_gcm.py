@@ -8,7 +8,7 @@
 import arcgisscripting, os, sys, string,glob, shutil
 gp = arcgisscripting.create(9.3)
 
-# python D:\_scripts\dapa-climate-change\IPCC-CMIP5\Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\rwa_adm\rwa0 D:\Request\Request_miguel\rwa_adm rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
+# python Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files\sen_adm\sen0 D:\CIAT\climate_change\CSA_Profiles\sen rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
 
 
 # Arguments
@@ -65,7 +65,7 @@ for rcp in rcpList:
 			else:
 				num = 12
 			# for month in [1,12]:
-			for month in range(1,num+1):
+			for month in [1, 12]:
 				if var == "cons_mths":
 					variable = var
 				else:

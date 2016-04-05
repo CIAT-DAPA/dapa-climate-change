@@ -1,69 +1,27 @@
 require(raster)
-library(maptools)
+require(maptools)
+require(rgdal)
 
-dirbase <- list.dirs(paste("D:/CIAT/Workspace/fnc", sep=""), recursive = FALSE, full.names = TRUE)
-country <- "COL"
-dept <- "Valle del Cauca" 
+dirbase <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/average"
+mask <- readOGR("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/buffer_llanos/Llanos.shp", layer= "Llanos")
 
-mask <- getData('GADM', country=country, level=0)
+# setwd(dirbase)
 
-mask1 <- readOGR("D:/CIAT/_tools/AdminBoundaries/SHP_files/COL_adm/COL1.shp", layer= "COL1")
-mask1 <- subset(mask1, mask1$NAME_1 == dept)
+rsList <- list.files(dirbase, pattern=".asc", full.names = TRUE)
 
+outDir <- paste(dir, "/_cropped", sep="")
+if (!file.exists(outDir)) {dir.create(outDir)}
 
-for (dir in dirbase){
+for(rs in rsList){
   
-  setwd(dir)
+  rsName <- basename(rs)
   
-  rsList <- list.files(dir, pattern=".asc", full.names = TRUE)
-  
-  outDir <- paste(dir, "/cut_", country, sep="")
-  if (!file.exists(outDir)) {dir.create(outDir)}
-  
-  for(rs in rsList){
+  if (!file.exists(paste0(outDir, "/", rsName, sep=""))) {
+    rsCrop <- crop(raster(rs), extent(mask))
+    rsMask <- mask(rsCrop, mask)
     
-    rsName <- basename(rs)
-    
-    if (!file.exists(paste0(outDir, "/", rsName, sep=""))) {
-      rsCrop <- crop(raster(rs), extent(mask))
-      rsMask <- mask(rsCrop, mask)
-      
-      ascWrite <- writeRaster(rsMask, paste0(outDir, "/", rsName, sep=""), overwrite=F)
-      cat(paste0(" ", rsName, " cut done\n"))
-    }
-    
+    ascWrite <- writeRaster(rsMask, paste0(outDir, "/", rsName, sep=""), overwrite=F)
+    cat(paste0(" ", rsName, " cut done\n"))
   }
-  
-  cat(" ..done\n")
-  
-  
-  
-  outDir <- paste(dir, "/cut_", dept, sep="")
-  if (!file.exists(outDir)) {dir.create(outDir)}
-  
-  for(rs in rsList){
-    
-    rsName <- basename(rs)
-    
-    if (!file.exists(paste0(outDir, "/", rsName, sep=""))) {
-      rsCrop <- crop(raster(rs), extent(mask1))
-      rsMask <- mask(rsCrop, mask1)
-      
-      ascWrite <- writeRaster(rsMask, paste(outDir, "/", rsName, sep=""), overwrite=F)
-      cat(paste0(" ", rsName, " cut done\n"))
-    }
-    
-  }
-  
-  cat(" ..done\n")
   
 }
-
-
-
-
-
-
-
-
-
