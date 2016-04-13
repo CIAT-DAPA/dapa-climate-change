@@ -205,7 +205,7 @@ for (wst in loc_list$id) {
   for (var in varlist) {
     #var <- varlist[1]
     if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
-    merge_extraction(varmod, rcp="historical", ts="1981_2005", gcmlist, lon, lat, dataset="wst", dirbase=wst_odir)
+    merge_extraction(varmod, rcp="historical", ts="1981_2005", gcmlist, lon, lat, dataset="wst", dirbase=wst_odir, leap=1, typeData=1)
   }
   
   #rcps
@@ -214,9 +214,9 @@ for (wst in loc_list$id) {
     for (vname in varlist) {
       #vname <- varlist[1]
       if  (vname == "pr") {varmod <- "prec"} else if (vname == "rsds") {varmod <- "srad"} else if (vname == "tasmax") {varmod <- "tmax"} else if (vname == "tasmin") {varmod <- "tmin"}
-      merge_extraction(varmod, rcp, ts="2041_2065", gcmlist, lon, lat, dataset="wst", dirbase=wst_odir)
-      del_calcs(varmod, rcp, lon, lat, wst_odir) #only to means
-      cf_calcs(varmod, rcp, lon, lat, wst_odir) #means and variability
+      merge_extraction(varmod, rcp, ts="2041_2065", gcmlist, lon, lat, dataset="wst", dirbase=wst_odir, leap=1, typeData=1)
+      del_calcs(varmod, rcp, lon, lat, wst_odir,leap=1) #only to means
+      cf_calcs(varmod, rcp, lon, lat, wst_odir,leap=1) #means and variability
       bc_stats(varmod, rcp, "2041_2065", lon, lat, wst_odir) #plotting / statistics
     }
   }

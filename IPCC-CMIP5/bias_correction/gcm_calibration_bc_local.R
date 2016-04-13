@@ -253,7 +253,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
 } 
 
 ## Merge OBS and GCM in a Single Matrix
-merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcmlist=c("bnu_esm"), lon=9.883333, lat=-83.633333, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42",sepFile="\t",leep,typeData){
+merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcmlist=c("bnu_esm"), lon=9.883333, lat=-83.633333, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42",sepFile="\t",leap,typeData){
   
   # Set working directory
   setwd(dirbase)
@@ -314,13 +314,13 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
         #gcmmat <- gcmmat[,-2]
       }
       
-      if(leep==1){ # rellena los leep year con el promedio del dia antes y despues
+      if(leap==1){ # rellena los leap year con el promedio del dia antes y despues
         poslist=which(gcmmat$date %in% grep("02-29",gcmmat$date, value = TRUE))
         for(pos in poslist){
           gcmmat[pos,]
           gcmmat[pos,names(gcmmat)!="date"]=(gcmmat[pos-1,names(gcmmat)!="date"]+gcmmat[pos+1,names(gcmmat)!="date"])/2
         }
-      }else if(leep==2){ # quita los leep year
+      }else if(leap==2){ # quita los leap year
         poslist=which(gcmmat$date %in% grep("02-29",gcmmat$date, value = TRUE))
         if(length(poslist)>0){
           gcmmat=gcmmat[-poslist,]
@@ -348,7 +348,7 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
 }
 
 ## Bias Correction Calculation exluding variability (SH)
-sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leep){
+sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leap){
   
   ## Load libraries
   #library(lubridate)
@@ -370,7 +370,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
     odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
     
-    if(leep==1){ # quita los leep year
+    if(leap==1){ # quita los leap year
       poslist=which(odat$date %in% grep("02-29",odat$date, value = TRUE))
       if(length(poslist)>0){
         odat=odat[-poslist,]
@@ -403,7 +403,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
       odat_f <- read.table(odat_f, header=T, sep=" ")  
       
-      if(leep==1){ # quita los leep year
+      if(leap==1){ # quita los leap year
         poslist=which(odat_f$date %in% grep("02-29",odat_f$date, value = TRUE))
         if(length(poslist)>0){
           odat_f=odat_f[-poslist,]
@@ -481,7 +481,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       #gcmmat <- gcmmat[,-2]
     }
     
-    if(leep==1){ # rellena los leep year con el promedio del dia antes y despues
+    if(leap==1){ # rellena los leap year con el promedio del dia antes y despues
       dates <- format(seq(as.Date(paste0(min(year(as.Date(gcmmat$date))),"/1/1")), as.Date(paste0(max(year(as.Date(gcmmat$date))),"/12/31")), "days") ,"%Y-%m-%d")
       dates <- cbind.data.frame("date"=dates)
       gcmmat <- merge(dates, gcmmat, by="date", all.x=T)       
@@ -646,7 +646,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
 }
 
 ## Change Factor Calculation exluding variability (DEL)
-del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leep){
+del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leap){
   
   ## Load libraries
   #library(lubridate)
@@ -667,7 +667,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     # Load merged file (historical)
     odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
-    # quita los leep year
+    # quita los leap year
     poslist=which(odat$date %in% grep("02-29",odat$date, value = TRUE))
     if(length(poslist)>0){
       odat=odat[-poslist,]
@@ -681,7 +681,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat_f <- read.table(odat_f, header=T, sep=" ")
     
-    # quita los leep year
+    # quita los leap year
     poslist_f=which(odat_f$date %in% grep("02-29",odat_f$date, value = TRUE))
     if(length(poslist_f)>0){
       odat_f=odat_f[-poslist_f,]
@@ -757,7 +757,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     if(rcp!="historical"){
       #gcmmat <- gcmmat[,-2]
     }
-    if(leep==1){ # rellena los leep year con el promedio del dia antes y despues
+    if(leap==1){ # rellena los leap year con el promedio del dia antes y despues
       dates <- format(seq(as.Date(paste0(min(year(as.Date(gcmmat$date))),"/1/1")), as.Date(paste0(max(year(as.Date(gcmmat$date))),"/12/31")), "days") ,"%Y-%m-%d")
       dates <- cbind.data.frame("date"=dates)
       gcmmat <- merge(dates, gcmmat, by="date", all.x=T)       
@@ -776,7 +776,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
 }
 
 ## Change Factor approach with variability
-cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leep){
+cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leap){
   
   ## Load libraries
   #library(lubridate)
@@ -797,7 +797,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     # Load merged file (historical)
     odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
-    # quita los leep year
+    # quita los leap year
     poslist=which(odat$date %in% grep("02-29",odat$date, value = TRUE))
     if(length(poslist)>0){
       odat=odat[-poslist,]
@@ -811,7 +811,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     # Load merged file (future)
     odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat_f <- read.table(odat_f, header=T, sep=" ")
-    # quita los leep year
+    # quita los leap year
     poslist_f=which(odat_f$date %in% grep("02-29",odat_f$date, value = TRUE))
     if(length(poslist_f)>0){
       odat_f=odat_f[-poslist_f,]
@@ -892,7 +892,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     if(rcp!="historical"){
       #gcmmat <- gcmmat[,-2]
     }
-    if(leep==1){ # rellena los leep year con el promedio del dia antes y despues
+    if(leap==1){ # rellena los leap year con el promedio del dia antes y despues
       dates <- format(seq(as.Date(paste0(min(year(as.Date(gcmmat$date))),"/1/1")), as.Date(paste0(max(year(as.Date(gcmmat$date))),"/12/31")), "days") ,"%Y-%m-%d")
       dates <- cbind.data.frame("date"=dates)
       gcmmat <- merge(dates, gcmmat, by="date", all.x=T)       
@@ -911,7 +911,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
 }
 
 ## Quantile mapping approach
-qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leep){
+qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:/CIAT/Workspace/bc",leap){
   
   ## Load libraries
   #library(qmap); library(lubridate);
@@ -937,7 +937,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
     #odatALL <- odatALL[1:5,]
     ngcm <- length(odatALL)- 2
     
-    if(leep==1){ # quita los leep year
+    if(leap==1){ # quita los leap year
       poslist=which(odatALL$date %in% grep("02-29",odatALL$date, value = TRUE))
       if(length(poslist)>0){
         odatALL=odatALL[-poslist,]
@@ -951,7 +951,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
       odat_fALL <- paste0("raw_merge/raw_ts_", rcp, "_",varmod,"_lon_",lon,"_lat_",lat,".tab")
       odat_fALL <- read.table(odat_fALL, header=T, sep=" ")
       #odat_fALL <- odat_fALL[1:5,]
-      if(leep==1){ # quita los leep year
+      if(leap==1){ # quita los leap year
         poslist=which(odat_fALL$date %in% grep("02-29",odat_fALL$date, value = TRUE))
         if(length(poslist)>0){
           odat_fALL=odat_fALL[-poslist,]
@@ -1052,7 +1052,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
     qm_histALL <- cbind(odatALL[,1:2], qm_histALL)
     colnames(qm_histALL) <- names(odatALL)
     
-    if(leep==1){ # rellena los leep year con el promedio del dia antes y despues
+    if(leap==1){ # rellena los leap year con el promedio del dia antes y despues
       dates <- format(seq(as.Date(paste0(min(year(as.Date(qm_histALL$date))),"/1/1")), as.Date(paste0(max(year(as.Date(qm_histALL$date))),"/12/31")), "days") ,"%Y-%m-%d")
       dates <- cbind.data.frame("date"=dates)
       qm_histALL <- merge(dates, qm_histALL, by="date", all.x=T)       
@@ -1071,7 +1071,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
       colnames(qm_futALL) <- names(odat_fALL)
       
       #qm_futALL <- qm_futALL[,-2]
-      if(leep==1){ # rellena los leep year con el promedio del dia antes y despues
+      if(leap==1){ # rellena los leap year con el promedio del dia antes y despues
         dates <- format(seq(as.Date(paste0(min(year(as.Date(qm_futALL$date))),"/1/1")), as.Date(paste0(max(year(as.Date(qm_futALL$date))),"/12/31")), "days") ,"%Y-%m-%d")
         dates <- cbind.data.frame("date"=dates)
         qm_futALL <- merge(dates, qm_futALL, by="date", all.x=T)       
@@ -1090,7 +1090,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
 }
 
 ## Comparison methods (plots) ** modificado
-bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.28, lat=-16.47, dirbase="D:/jetarapues/Request/Request_jramirez/bc_-49.28_-16.47",stat){
+bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.28, lat=-16.47, dirbase="D:/jetarapues/Request/Request_jramirez/bc_-49.28_-16.47"){
   
   ## Load libraries
   library(lubridate); library(ggplot2); library(reshape)
@@ -1608,7 +1608,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
 }
 
 ## Comparison methods (plots ALL)
-bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985, lon=38.35, lat=-4.75, dirbase="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75",stat){
+bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985, lon=38.35, lat=-4.75, dirbase="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75"){
   
   ## Load libraries
   #library(lubridate); library(ggplot2); library(reshape)
@@ -2525,7 +2525,7 @@ bc_statsInd <- function(varmod="prec", rcp="historical",yi=1998, yf=2013, lon=-7
 }
 
 ## Main function
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leep,typeData,ver_python,dirScript_py){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py){
   
   ## Load libraries
   library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) 
@@ -2595,11 +2595,11 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         if(length(check)>0){
           gcm_extraction(var,varmod, "historical", Obyi,Obyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
           
-          merge_extraction(varmod, "historical",Obyi,Obyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leep,typeData)
+          merge_extraction(varmod, "historical",Obyi,Obyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
           
           for(rcp in rcpList){
             gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
-            merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leep,typeData)
+            merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
             
             odat <- paste0(dirout,"/raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
             hdat <- paste0(dirout,"/raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
@@ -2607,30 +2607,30 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
             if(file.exists(odat) && file.exists(hdat)){
               for(methBC in methBCList){
                 if(methBC=='1'){
-                  sh_calcs(varmod, "historical", lon, lat, dirout,leep)
-                  sh_calcs(varmod, rcp, lon, lat, dirout,leep)  
+                  sh_calcs(varmod, "historical", lon, lat, dirout,leap)
+                  sh_calcs(varmod, rcp, lon, lat, dirout,leap)  
                 }else if(methBC=='2'){
                   bc_calcs(varmod, "historical", lon, lat, dirout)   
                   bc_calcs(varmod, rcp, lon, lat, dirout)          
                 }else if(methBC=='3'){
-                  del_calcs(varmod, rcp, lon, lat, dirout,leep)
+                  del_calcs(varmod, rcp, lon, lat, dirout,leap)
                 }else if(methBC=='4'){
-                  cf_calcs(varmod, rcp, lon, lat, dirout,leep)
+                  cf_calcs(varmod, rcp, lon, lat, dirout,leap)
                 }else{
-                  qm_calcs(varmod, rcp, lon, lat, dirout,leep)
+                  qm_calcs(varmod, rcp, lon, lat, dirout,leap)
                 }
               }
               for(stat in statList){
                 if(stat=='2' || stat=='3'){
-                  bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout,stat)
-                  bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout,stat)  
+                  bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout)
+                  bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout)  
                 }
               }  
             }
           }
           
           if(stat=='2' || stat=='3'){
-            bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout,stat)
+            bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
             bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
           }
         }else{cat(paste0("no exite obs ",varmod,'\n'))}
@@ -2672,7 +2672,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
 # fileStat<-  "D:/jetarapues/Request/Request_jramirez/stat_-49.28_-16.47.txt" # "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" #
 # sepFile<-"tab"# puntocoma,space,Comma
-# leep<-1 # 1=rellena los leep year con el promedio del dia antes y despues, 2=quita los dias leep year, 3=conserva los datos con leeps NA
+# leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
 # typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
 # 
 # ## For run on windows:
@@ -2697,7 +2697,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 #     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
 #     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
 #     cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
-#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leep,typeData,ver_python,dirScript_py)
+#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
 #   }
 #   
 # }else{
@@ -2705,7 +2705,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 #     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
 #     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
 #     cat(paste0(" -> Processing coordinate: ",xy,"\n"))
-#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat='',sepFile='',leep,typeData,ver_python,dirScript_py)
+#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat='',sepFile='',leap,typeData,ver_python,dirScript_py)
 #   }  
 # }
 
