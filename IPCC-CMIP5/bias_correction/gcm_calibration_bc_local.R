@@ -442,7 +442,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
         
         ## Main Bias Correction equation excluding variability (Hawkins et al., 2012)
         if (varmod == "prec" || varmod == "rsds"){ 
-          bc_values[,j] <- odat[,j+2] * ( ( avgobs_m - avggcm_l[[j]] ) / avggcm_l[[j]] + 1 )
+          bc_values[,j] <- odat[,j+2] * ( ( avgobs_m - avggcm_l[[j]] ) / max(c(avggcm_l[[j]], 0.01)) )
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- odat[,j+2] + (avgobs_m - avggcm_l[[j]])
@@ -463,7 +463,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
         
         ## Main Bias Correction equation excluding variability (Hawkins et al., 2012) for future
         if (varmod == "prec" || varmod == "rsds"){ 
-          bc_values[,j] <- odat_f[,j+2] * ( ( avgobs_m_f - avggcm_l_f[[j]] ) / avggcm_l_f[[j]] + 1 )
+          bc_values[,j] <- odat_f[,j+2] * ( ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avggcm_l_f[[j]], 0.01)) )
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- odat_f[,j+2] + (avgobs_m_f - avggcm_l_f[[j]])
@@ -591,9 +591,9 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
         
         ## Main Bias Correction equation including variability (Hawkins et al., 2012)
         if (varmod == "prec" || varmod == "rsds"){
-          bc_values[,j] <- avgobs_m *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( odat[,j+2] - avggcm_l[[j]]) / avgobs_m ) )  
+          bc_values[,j] <- odat[,j+2] * ( ( avgobs_m - avggcm_l[[j]] ) / max(c(avggcm_l[[j]], 0.01)) )
+          #bc_values[,j] <- avgobs_m *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( odat[,j+2] - avggcm_l[[j]]) / avgobs_m ) )  
           # bc_values[,j] <- odat[,j+2] *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( avggcm_l[[j]] - avgobs_m ) / avgobs_m ) )  ## Need double-check
-          
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- avgobs_m + ( (stdobs_m / stdgcm_l[[j]]) * (odat[,j+2] - avggcm_l[[j]]))
@@ -615,9 +615,9 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
         
         ## Main Bias Correction equation including variability (Hawkins et al., 2012) for future
         if (varmod == "prec" || varmod == "rsds"){
-          bc_values[,j] <- avgobs_m_f *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( odat_f[,j+2] - avggcm_l_f[[j]]) / avgobs_m_f ) )
+          bc_values[,j] <- odat_f[,j+2] * ( ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avggcm_l_f[[j]], 0.01)) )
+          #bc_values[,j] <- avgobs_m_f *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( odat_f[,j+2] - avggcm_l_f[[j]]) / avgobs_m_f ) )
           # bc_values[,j] <- odat_f[,j+2] *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( avggcm_l_f[[j]] - avgobs_m_f ) / avgobs_m_f ) ) ## Need double-check
-          
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- avgobs_m_f + ( (stdobs_m_f / stdgcm_l_f[[j]]) * (odat_f[,j+2] - avggcm_l_f[[j]]))
@@ -743,7 +743,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
       
       ## Main Change Factor equation excluding variability (Hawkins et al., 2012)
       if (varmod == "prec" || varmod == "rsds"){ 
-        bc_values[,j] <- odat[,2] * ( (avggcm_l_f[[j]] - avggcm_l[[j]]) / avggcm_l[[j]] + 1 )
+        bc_values[,j] <- odat[,2] * ( (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
         bc_values[bc_values<0] <- 0
       } else {
         bc_values[,j] <- odat[,2] + ( avggcm_l_f[[j]] - avggcm_l[[j]])
@@ -875,7 +875,8 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
       
       ## Main Change Factor equation including variability (Hawkins et al., 2012)
       if (varmod == "prec" || varmod == "rsds"){
-        bc_values[,j] <-  avggcm_l_f[[j]] * (1 + ( stdgcm_l_f[[j]] / stdgcm_l[[j]]  * ( odat[,2] - avggcm_l[[j]] ) / avggcm_l_f[[j]] ) )
+        bc_values[,j] <- odat[,2] * ( (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
+        #bc_values[,j] <-  avggcm_l_f[[j]] * (1 + ( stdgcm_l_f[[j]] / stdgcm_l[[j]]  * ( odat[,2] - avggcm_l[[j]] ) / avggcm_l_f[[j]] ) )
         # bc_values[,j] <- odat[,2] * (1 + ( stdgcm_l_f[[i]] / stdgcm_l[[i]]  * ( avggcm_l_f[[j]] - avggcm_l[[j]] ) / avggcm_l[[j]] ) ) ## Need double check
         bc_values[bc_values<0] <- 0
       }else{
@@ -2653,59 +2654,59 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 
 #===== SOLO MODIFICAR ESTOS PARAMETROS Y CORRER HASTA LA LINEA FINAL: =====
 
-serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #  si se corre local no es necesario modificar esta variable
-downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform" # si se corre local no es necesario modificar esta variable
-dirWork=  "D:/jetarapues/Request/Request_jramirez" #"/home/jtarapues/request/request_oriana" #  "/home/temp" # directorio de salida
-dirgcm <-  "T:/gcm/cmip5/raw/daily" # "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # 
-dirobs <-  "U:/cropdata" # "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #
-dataset <- "station"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princenton, princenton-afr
-methBCList <- c('3','4','5') #c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
-varlist <- c("pr","tasmax","tasmin","rsds")
-Obyi <- 1980#1985
-Obyf <- 2010#1987
-fuyi <- 2040
-fuyf <- 2069
-rcpList <- c("rcp85") # rcp26, rcp45, rcp60, rcp85 "rcp26", "rcp45", "rcp60",  # aun no esta funcionando bien para varios rcps
-xyList <-   c("-49.28,-16.47") #c("-51.82,-16.97") #
-gcmlist <-  c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
-statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
-fileStat<-  "D:/jetarapues/Request/Request_jramirez/stat_-49.28_-16.47.txt" # "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" #
-sepFile<-"tab"# puntocoma,space,Comma
-leep<-1 # 1=rellena los leep year con el promedio del dia antes y despues, 2=quita los dias leep year, 3=conserva los datos con leeps NA
-typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opción 2 pone problema en qmap dejarlo en valor 1
-
-## For run on windows:
-ver_python<-"C:\\Python27\\ArcGIS10.1\\python.exe"
-dirScript_py<-"D:\\jetarapues\\_scripts\\bc_extract_gcm.py"
-#=======================================
-
-
-
-checkALL=gcmlist[which(gcmlist=="ALL")]
-if(length(checkALL)==1){
-  gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
-}
-if(dataset=="station"){
-  if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
-  df = read.table(fileStat, header = TRUE,sep=sepFile)
-  dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
-  varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
-  Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
-  Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
-  for(xy in xyList){
-    lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-    lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-    cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
-    bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leep,typeData,ver_python,dirScript_py)
-  }
-  
-}else{
-  for(xy in xyList){
-    lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-    lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-    cat(paste0(" -> Processing coordinate: ",xy,"\n"))
-    bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat='',sepFile='',leep,typeData,ver_python,dirScript_py)
-  }  
-}
+# serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #  si se corre local no es necesario modificar esta variable
+# downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform" # si se corre local no es necesario modificar esta variable
+# dirWork=  "D:/jetarapues/Request/Request_jramirez" #"/home/jtarapues/request/request_oriana" #  "/home/temp" # directorio de salida
+# dirgcm <-  "T:/gcm/cmip5/raw/daily" # "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # 
+# dirobs <-  "U:/cropdata" # "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #
+# dataset <- "station"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princenton, princenton-afr
+# methBCList <- c('3','4','5') #c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
+# varlist <- c("pr","tasmax","tasmin","rsds")
+# Obyi <- 1980#1985
+# Obyf <- 2010#1987
+# fuyi <- 2040
+# fuyf <- 2069
+# rcpList <- c("rcp85") # rcp26, rcp45, rcp60, rcp85 "rcp26", "rcp45", "rcp60",  # aun no esta funcionando bien para varios rcps
+# xyList <-   c("-49.28,-16.47") #c("-51.82,-16.97") #
+# gcmlist <-  c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
+# statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
+# fileStat<-  "D:/jetarapues/Request/Request_jramirez/stat_-49.28_-16.47.txt" # "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" #
+# sepFile<-"tab"# puntocoma,space,Comma
+# leep<-1 # 1=rellena los leep year con el promedio del dia antes y despues, 2=quita los dias leep year, 3=conserva los datos con leeps NA
+# typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
+# 
+# ## For run on windows:
+# ver_python<-"C:\\Python27\\ArcGIS10.1\\python.exe"
+# dirScript_py<-"D:\\jetarapues\\_scripts\\bc_extract_gcm.py"
+# #=======================================
+# 
+# 
+# 
+# checkALL=gcmlist[which(gcmlist=="ALL")]
+# if(length(checkALL)==1){
+#   gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
+# }
+# if(dataset=="station"){
+#   if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
+#   df = read.table(fileStat, header = TRUE,sep=sepFile)
+#   dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
+#   varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
+#   Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
+#   Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
+#   for(xy in xyList){
+#     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
+#     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
+#     cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
+#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leep,typeData,ver_python,dirScript_py)
+#   }
+#   
+# }else{
+#   for(xy in xyList){
+#     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
+#     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
+#     cat(paste0(" -> Processing coordinate: ",xy,"\n"))
+#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat='',sepFile='',leep,typeData,ver_python,dirScript_py)
+#   }  
+# }
 
 
