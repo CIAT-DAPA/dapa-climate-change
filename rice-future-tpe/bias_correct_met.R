@@ -232,6 +232,7 @@ for (wst in loc_list$id) {
     #var <- varlist[1]
     if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
     bc_stats(varmod, rcp="historical", yi=1981, yf=2005, lon, lat, wst_odir) #plotting / statistics
+    bc_changes(varmod, rcpList=rcplist, gcmlist=gcmlist, lon, lat, wst_odir) #plotting / statistics
   }
 }
 

@@ -1842,8 +1842,8 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
         
         #calculate change
         if (varmod == "prec") {
-          data_g2$chg_rw <- (data_g2$fut_raw - data_g2$his_raw) / data_g2$his_raw * 100
-          data_g2$chg_bc <- (data_g2$bc - data_g2$obs) / data_g2$obs * 100
+          data_g2$chg_rw <- (data_g2$fut_raw - data_g2$his_raw) / max(c(data_g2$his_raw,0.01)) * 100
+          data_g2$chg_bc <- (data_g2$bc - data_g2$obs) / max(c(data_g2$obs,0.01)) * 100
           ylabel=c("%")
         } else {
           data_g2$chg_rw <- data_g2$fut_raw - data_g2$his_raw
