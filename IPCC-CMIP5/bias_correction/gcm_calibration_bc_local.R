@@ -441,8 +441,8 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       for (j in 1:ngcm) {
         
         ## Main Bias Correction equation excluding variability (Hawkins et al., 2012)
-        if (varmod == "prec" || varmod == "rsds"){ 
-          bc_values[,j] <- odat[,j+2] * ( ( avgobs_m - avggcm_l[[j]] ) / max(c(avggcm_l[[j]], 0.01)) )
+        if (varmod == "prec" || varmod == "srad"){ 
+          bc_values[,j] <- odat[,j+2] * (1 + ( avgobs_m - avggcm_l[[j]] ) / max(c(avgobs_m, 0.01)) )
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- odat[,j+2] + (avgobs_m - avggcm_l[[j]])
@@ -462,8 +462,8 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       for (j in 1:ngcm) {
         
         ## Main Bias Correction equation excluding variability (Hawkins et al., 2012) for future
-        if (varmod == "prec" || varmod == "rsds"){ 
-          bc_values[,j] <- odat_f[,j+2] * ( ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avggcm_l_f[[j]], 0.01)) )
+        if (varmod == "prec" || varmod == "srad"){ 
+          bc_values[,j] <- odat_f[,j+2] * (1 + ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avgobs_m_f, 0.01)) )
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- odat_f[,j+2] + (avgobs_m_f - avggcm_l_f[[j]])
@@ -590,8 +590,8 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
       for (j in 1:ngcm) {
         
         ## Main Bias Correction equation including variability (Hawkins et al., 2012)
-        if (varmod == "prec" || varmod == "rsds"){
-          bc_values[,j] <- odat[,j+2] * ( ( avgobs_m - avggcm_l[[j]] ) / max(c(avggcm_l[[j]], 0.01)) )
+        if (varmod == "prec" || varmod == "srad"){
+          bc_values[,j] <- odat[,j+2] * (1 + ( avgobs_m - avggcm_l[[j]] ) / max(c(avgobs_m, 0.01)) )
           #bc_values[,j] <- avgobs_m *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( odat[,j+2] - avggcm_l[[j]]) / avgobs_m ) )  
           # bc_values[,j] <- odat[,j+2] *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( avggcm_l[[j]] - avgobs_m ) / avgobs_m ) )  ## Need double-check
           bc_values[bc_values<0] <- 0
@@ -614,8 +614,8 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
       for (j in 1:ngcm) {
         
         ## Main Bias Correction equation including variability (Hawkins et al., 2012) for future
-        if (varmod == "prec" || varmod == "rsds"){
-          bc_values[,j] <- odat_f[,j+2] * ( ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avggcm_l_f[[j]], 0.01)) )
+        if (varmod == "prec" || varmod == "srad"){
+          bc_values[,j] <- odat_f[,j+2] * (1 + ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avgobs_m_f, 0.01)) )
           #bc_values[,j] <- avgobs_m_f *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( odat_f[,j+2] - avggcm_l_f[[j]]) / avgobs_m_f ) )
           # bc_values[,j] <- odat_f[,j+2] *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( avggcm_l_f[[j]] - avgobs_m_f ) / avgobs_m_f ) ) ## Need double-check
           bc_values[bc_values<0] <- 0
@@ -742,8 +742,8 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     for (j in 1:ngcm) {
       
       ## Main Change Factor equation excluding variability (Hawkins et al., 2012)
-      if (varmod == "prec" || varmod == "rsds"){ 
-        bc_values[,j] <- odat[,2] * ( (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
+      if (varmod == "prec" || varmod == "srad"){ 
+        bc_values[,j] <- odat[,2] * (1 + (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
         bc_values[bc_values<0] <- 0
       } else {
         bc_values[,j] <- odat[,2] + ( avggcm_l_f[[j]] - avggcm_l[[j]])
@@ -874,8 +874,8 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     for (j in 1:ngcm) {
       
       ## Main Change Factor equation including variability (Hawkins et al., 2012)
-      if (varmod == "prec" || varmod == "rsds"){
-        bc_values[,j] <- odat[,2] * ( (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
+      if (varmod == "prec" || varmod == "srad"){
+        bc_values[,j] <- odat[,2] * (1 + (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
         #bc_values[,j] <-  avggcm_l_f[[j]] * (1 + ( stdgcm_l_f[[j]] / stdgcm_l[[j]]  * ( odat[,2] - avggcm_l[[j]] ) / avggcm_l_f[[j]] ) )
         # bc_values[,j] <- odat[,2] * (1 + ( stdgcm_l_f[[i]] / stdgcm_l[[i]]  * ( avggcm_l_f[[j]] - avggcm_l[[j]] ) / avggcm_l[[j]] ) ) ## Need double check
         bc_values[bc_values<0] <- 0
@@ -1107,20 +1107,12 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   dirout <- paste0(dirbase, "/statistics")
   dirout_var <- paste0(dirbase, "/statistics/Interannual_Variability")
   dirout_ts <- paste0(dirbase, "/statistics/Timeseries")
-  dirout_spread <- paste0(dirbase, "/statistics/Spread_Line")
   dirout_freq <- paste0(dirbase, "/statistics/Indicators")
   
   if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}
   if (!file.exists(dirout_var)) {dir.create(dirout_var, recursive=T)}
   if (!file.exists(dirout_ts)) {dir.create(dirout_ts, recursive=T)}
-  if (!file.exists(dirout_spread)) {dir.create(dirout_spread, recursive=T)}
   if (!file.exists(dirout_freq)) {dir.create(dirout_freq, recursive=T)}
-  
-  
-  ## Define end and start year to plot
-  #yi <- substr(ts, 1, 4)
-  #yf <- substr(ts, 6, 9)
-  
   
   listbcAll=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_",varmod, "_*"))
   #   listbcAll=c(listbcAll,list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0("historical_",varmod, "_*")))
@@ -1134,7 +1126,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
     methods <- c("sh_","bc_","del_","cf_","qm_","raw_")
     listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
     methods_ln <- unique(dirname(listbc))  # c("CF Var", "CF", "BC Var", "BC", "QM", "RAW") #
-  }  
+  }
   
   ## Load all bias corrected data
   odat <- lapply(listbcAll, function(x){read.table(x,header=T,sep=" ")})
@@ -1150,11 +1142,9 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   rownames(merge) <- NULL
   
   # cambio de nombre raw_merge to raw
-  indexName=which(merge$method=='raw_merge')
-  levels(merge$method) <- c(levels(merge$method), "raw")
-  merge$method[indexName]='raw'
-  shortL=c(levels(merge$method)[c(-which(levels(merge$method)=="raw_merge"))])
-  merge$method=factor(merge$method,levels=shortL)
+  merge$method <- paste(merge$method)
+  merge$method[which(merge$method == "raw_merge")] <- "raw"
+  merge$method <- as.factor(merge$method)
   
   # Y-axis labels by variable
   if(varmod == "prec"){
@@ -1186,6 +1176,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   
   ## Define enviroment to plot ggplot functions in command line
   merge_mod <- merge[which(year(as.Date(merge$date)) %in% yi:yf),]
+  merge_mod$date <- as.Date(merge_mod$date)
+  merge_mod$leg <- "obs"
   assign("merge_mod", merge_mod,  envir = .GlobalEnv)
   
   ## Looping through GCMs 
@@ -1207,8 +1199,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         
         tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=merge_mod) + 
-          geom_line(aes(x=as.Date(date), y=merge_mod[,3], color=" obs"), size=0.2, shape=1) +   # Observations
-          geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2) +   # GCMs (historical)
+          geom_line(aes_string(x="date", y=names(merge_mod)[3], colour="leg"), size=0.2, shape=1) +   # Observations
+          geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
           facet_wrap(~ method, ncol=1) +
           scale_color_manual(values=c(gray, red, red2, orange, green)) +
           theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
@@ -1221,12 +1213,12 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         
         tiff(ots, width=1200, height=1400, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=merge_mod) +  
-          geom_line(aes(x=as.Date(date), y=merge_mod[,i+3], colour=factor(method)), shape=1, size=0.2)+   # GCMs (future)
+          geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2)+   # GCMs (future)
           facet_wrap(~ method, ncol=1) + 
           scale_color_manual(values=c(green, orange, red, red2, blue, blue2)) +
           theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
           ggtitle(paste0("BC Methods  Model : ", gcm)) +
-          labs(x="Date (days)", y=ylabel) 
+          labs(x="Date (days)", y=ylabel)
         
       }
       
@@ -1238,197 +1230,35 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
     
   }
   
-  ##### Spread Line Plot for all methods and all GCMs
-  
-  ## Melt all GCM in a single column
-  merge_mod <- merge[which(year(as.Date(merge$date)) %in% yi:yf),]
-  obs=merge_mod[which(merge_mod$method=='raw'),c(1,2,3)] #
-  levels(obs$method) <- c(levels(obs$method), "obs")
-  obs$method='obs'
-  merge_mod$obs <- NULL
-  merge_mod <- melt(merge_mod,id=c("method","date"))
-  
-  ## Define enviroment to plot ggplot functions in command line
-  assign("merge_mod", merge_mod,  envir = .GlobalEnv)
-  
-  ## Define output plot file
-  ots <- paste0(dirout_spread, "/spread_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
-  
-  if (!file.exists(ots)){
-    
-    if (rcp == "historical"){  # Historical plot includes observations
-      
-      cat(paste0("\nSpread series plot  ", rcp, " ", varmod))
-      
-      tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
-      p <- ggplot() + 
-        geom_point(data=obs, aes(x=as.Date(date), y=obs, color=" obs"), size=0.2, shape=1) +   # Observations
-        geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
-        scale_color_manual(values=c(green, orange, red, red2)) +
-        facet_wrap(~ method, ncol=1) +
-        theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-        scale_y_continuous(limits = limit) +
-        ggtitle(paste0("BC Methods Spread")) +
-        labs(x="Date (days)", y=ylabel)
-      
-    } else {
-      
-      cat(paste0("\nSpread series plot  ", rcp, " ", varmod, " ", gcm))
-      
-      tiff(ots, width=1200, height=1600, pointsize=8, compression='lzw',res=100)
-      p <- ggplot() + 
-        geom_point(data=merge_mod, aes(x=as.Date(date), y=value, colour=factor(method)), size=0.2) +
-        scale_color_manual(values=c(green, orange2, red, red2, blue, blue3)) +
-        facet_wrap(~ method, ncol=1) +
-        theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-        scale_y_continuous(limits = limit) +
-        ggtitle(paste0("BC Methods Spread")) +
-        labs(x="Date (days)", y=ylabel)
-      
-    }
-    
-    # Plot and save
-    print(p)
-    dev.off()
-    
-  }
-  
   
   ##### Interannual Variability Boxplot
   
-    merge2=subset(merge,merge$method!="Change_Factor_no_variability" & merge$method!="Bias_Correction_no_variability" & merge$method!="quantile_mapping")
-
-  
-    if(varmod!="prec" & varmod!="srad"){
-      ## Define output metrics file
-      intannvar <- paste0(dirout_var, "/var_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
-      if (!file.exists(intannvar)&nrow(merge2)>0&length(unique(merge2$method))>1) {
-        
-        subset(merge2,merge2$method=="Change_Factor_no_variability"|merge2$method=="Bias_Correction_no_variability")
-        ## Get months and years from merged file
-        months <- month(as.Date(merge2$date))
-        years <- year(as.Date(merge2$date))
-        
-        ## Std calculation for all TS
-        fun <- function(x) { sd(x, na.rm=T) }
-        stdgcm <- aggregate(merge2[3:length(merge2)], by=list("method"=merge2$method, "month"=months), FUN=fun)
-        
-        ## Rename Months 
-        stdgcm$month=month.abb[stdgcm$month]
-        stdgcm$month=factor(stdgcm$month,levels=month.abb)
-        
-        ## Set apart observations
-        obs <- stdgcm[which(stdgcm$method == stdgcm$method[1]), ]$obs
-        stdgcm$obs <- NULL
-        
-        if (rcp == "historical"){   # Historical plot includes observations
-          
-          # Join observations at the end of std GCM values
-          obs <- matrix(1, length(obs)[1], ngcm) * obs
-          colnames(obs) <- gcmlist
-          stdgcm <- rbind(stdgcm, cbind("method"=rep("obs", dim(obs)[1]),stdgcm[which(stdgcm$method == stdgcm$method[1]),][2], obs))
-          rownames(stdgcm) <- NULL
-          
-          shortLevels=c('raw','obs',levels(stdgcm$method)[c(-which(levels(stdgcm$method)=="obs"),-which(levels(stdgcm$method)=="raw"),-which(levels(stdgcm$method)=="raw_merge"))])
-          stdgcm$method=factor(stdgcm$method,levels=shortLevels)
-          
-          ## Define variables to plot ggplot functions in command line
-          assign("stdgcm", stdgcm,  envir = .GlobalEnv)
-          
-          ## Loop through GCMs 
-          for (i in 1:ngcm){
-            
-            ## GCM name
-            gcm <- colnames(stdgcm)[i+2]
-            
-            ## Define variables to plot ggplot functions in command line
-            assign("i", i,  envir = .GlobalEnv)
-            
-            cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
-            
-            tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1300, height=700, pointsize=8, compression='lzw',res=100)
-            #p <- ggplot(data=stdgcm) +  
-            p <- ggplot(stdgcm, aes(x=month, y=stdgcm[,i+2], fill=factor(method))) + 
-              #geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity") +  # GCMs (historical)
-              geom_bar(width=0.75,stat="identity",position=position_dodge(),size=0.5) + 
-              #facet_wrap(~ method, ncol=1) + #facet_wrap(~ method, ncol=1) + 
-              scale_fill_manual(values=c(green2, orange, red, red2, gray)) +
-              theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-              ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
-              labs(x="Date (days)", y=ylabel)
-            
-            # Plot and save
-            print(p)
-            dev.off()
-            
-          }
-          
-          ## Write metrics data
-          freq <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
-          
-        } else {
-          
-          ## Define variables to plot ggplot functions in command line
-          assign("stdgcm", stdgcm,  envir = .GlobalEnv)
-          
-          for (i in 1:ngcm){
-            
-            ## GCM name
-            gcm <- colnames(stdgcm)[i+2]
-            
-            ## Define variables to plot ggplot functions in command line
-            assign("i", i,  envir = .GlobalEnv)
-            
-            cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
-            
-            tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
-            p <- ggplot(data=stdgcm) +  
-              geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
-              facet_wrap(~ method, ncol=1) + 
-              scale_fill_manual(values=c(green2, orange, red, red2, blue, blue2)) +
-              theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-              ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ", gcm)) +
-              labs(x="Date (days)", y=ylabel)     
-            
-            # Plot and save
-            print(p)
-            dev.off()
-            
-          }
-          
-          ## Write output metrics file
-          stdgcm <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
-          
-        }
-        
-      }         
-    }
-  
-    merge3=subset(merge,merge$method=="quantile_mapping"|merge$method=='raw')
-    intannvar <- paste0(dirout_var, "/var_qmap_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
-    if (!file.exists(intannvar)&nrow(merge3)>0) {
-      
-      subset(merge3,merge3$method=="Change_Factor_no_variability"|merge3$method=="Bias_Correction_no_variability")
+    merge3=merge #subset(merge,merge$method=="quantile_mapping"|merge$method=='raw')
+    intannvar <- paste0(dirout_var, "/var_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
+    if (!file.exists(intannvar) & nrow(merge3) > 0) {
+      #subset(merge3,merge3$method=="Change_Factor_no_variability"|merge3$method=="Bias_Correction_no_variability")
       ## Get months and years from merged file
       months <- month(as.Date(merge3$date))
       years <- year(as.Date(merge3$date))
       
       ## Std calculation for all TS
-      fun <- function(x) { sd(x, na.rm=T) }
-      stdgcm <- aggregate(merge3[3:length(merge3)], by=list("method"=merge3$method, "month"=months), FUN=fun)
+      fun <- function(x) {sd(x, na.rm=T) }
+      stdgcm <- aggregate(merge3[,3:ncol(merge3)], by=list("method"=merge3$method, "month"=months, "year"=years), FUN=fun)
+      stdgcm <- aggregate(stdgcm[,3:ncol(stdgcm)], by=list("method"=stdgcm$method, "month"=stdgcm$month), FUN=fun)
+      stdgcm$year <- NULL
       
       ## Rename Months 
       stdgcm$month=month.abb[stdgcm$month]
       stdgcm$month=factor(stdgcm$month,levels=month.abb)
       
       ## Set apart observations
-      obs <- stdgcm[which(stdgcm$method == stdgcm$method[1]), ]$obs
+      obs <- stdgcm[which(stdgcm$method == stdgcm$method[1]),"obs"]
       stdgcm$obs <- NULL
       
       if (rcp == "historical"){   # Historical plot includes observations
         
         # Join observations at the end of std GCM values
-        obs <- matrix(1, length(obs)[1], ngcm) * obs
+        obs <- matrix(1, length(obs), ngcm) * obs
         colnames(obs) <- gcmlist
         stdgcm <- rbind(stdgcm, cbind("method"=rep("obs", dim(obs)[1]),stdgcm[which(stdgcm$method == stdgcm$method[1]),][2], obs))
         rownames(stdgcm) <- NULL
@@ -1450,12 +1280,9 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           
           cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
           
-          tiff(paste0(dirout_var, "/var_qmap_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1300, height=700, pointsize=8, compression='lzw',res=100)
-          #p <- ggplot(data=stdgcm) +  
-          p <- ggplot(stdgcm, aes(x=month, y=stdgcm[,i+2], fill=factor(method))) + 
-            #geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity") +  # GCMs (historical)
+          tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1300, height=700, pointsize=8, compression='lzw',res=100)
+          p <- ggplot(stdgcm, aes_string(x="month", y=names(stdgcm)[i+2], fill="method")) + 
             geom_bar(width=0.75,stat="identity",position=position_dodge(),size=0.5) + 
-            #facet_wrap(~ method, ncol=1) + #facet_wrap(~ method, ncol=1) + 
             scale_fill_manual(values=c(green2, orange, red, red2, gray)) +
             theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
             ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
@@ -1485,10 +1312,10 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           
           cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
           
-          tiff(paste0(dirout_var, "/var_qmap_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
-          p <- ggplot(data=stdgcm) +  
-            geom_bar(aes(x=month, y=stdgcm[,i+2], fill=factor(method)), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
+          tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
+          p <- ggplot(data=stdgcm, aes_string(x="month", y=names(stdgcm)[i+2], fill="method")) +  
             facet_wrap(~ method, ncol=1) + 
+            geom_bar(aes_string(x="month", y=names(stdgcm)[i+2], fill="method"), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
             scale_fill_manual(values=c(green2, orange, red, red2, blue, blue2)) +
             theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
             ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ", gcm)) +
@@ -1522,14 +1349,14 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
       methods <- year(as.Date(merge$date))
       
       ## Calculate frequencies of rainy and hot days
-      merge_mod <- merge[,3:length(merge)]
-      if (varmod == "prec"){merge_mod[merge_mod < 1] <- 0 ; merge_mod[merge_mod > 1] <- 1} 
-      if (varmod == "tmax"){merge_mod[merge_mod < 30] <- 0 ; merge_mod[merge_mod > 30] <- 1}
-      merge_mod <- cbind(merge[1:2], merge_mod)
+      merge_mod <- merge[,3:ncol(merge)]
+      if (varmod == "prec"){merge_mod[merge_mod < 1] <- 0 ; merge_mod[merge_mod >= 1] <- 1} 
+      if (varmod == "tmax"){merge_mod[merge_mod < 30] <- 0 ; merge_mod[merge_mod >= 30] <- 1}
+      merge_mod <- cbind(merge[,c(1:2)], merge_mod)
       freq <- aggregate(merge_mod[3:length(merge_mod)], by=list("method"=merge_mod$method, "year"=years, "month"=months), FUN="sum", na.rm=T)
       
       ## Set apart observations
-      obs <- freq[which(freq$method == levels(freq$method)[1]), ]$obs
+      obs <- freq[which(freq$method == levels(freq$method)[1]),"obs"]
       freq$obs <- NULL
       
       if (rcp == "historical"){ # Historical plot includes observations
@@ -1577,7 +1404,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[l]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[l]))}
           
           freq_mod <- freq;
-          colnames(freq_mod)[l+3]<- "model_f";
+          colnames(freq_mod)[l+3]<- "model_f"
           
           #assign("freq_mod", freq,  envir = .GlobalEnv)
           #assign("l", l,  envir = .GlobalEnv)
@@ -2204,7 +2031,7 @@ bc_statsInd <- function(varmod="prec", rcp="historical",yi=1998, yf=2013, lon=-7
   
   ######################
   
-  ##### Rainfall frequency and hot days frequency comparisson
+  ##### Rainfall frequency and hot days frequency comparison
   
   ## Define output metrics file
   ofreq <- paste0(dirout, "/freq_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
