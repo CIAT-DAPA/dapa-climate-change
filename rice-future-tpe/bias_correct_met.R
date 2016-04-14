@@ -8,22 +8,22 @@
 #4. Create oryza2000 files as needed
 
 library(lubridate); library(qmap); library(ggplot2)
-library(tools); library(reshape); require(grid) 
+library(tools); library(reshape); require(grid)
 
 #source dir
 src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
 bc.dir <- "~/Repositories/dapa-climate-change/IPCC-CMIP5/bias_correction"
 
 #directories
-#wd <- "/nfs/a101/earjr/rice-future-tpe"
-wd <- "~/Leeds-work/rice-future-tpe"
+wd <- "/nfs/a101/earjr/rice-future-tpe"
+#wd <- "~/Leeds-work/rice-future-tpe"
 gcm_idir <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 #gcm_odir <- "~/scratch/gcm_meteorology"
 #if (!file.exists(gcm_odir)) {dir.create(gcm_odir)}
 gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
-#source functions (fron CN / JT)
+#source functions (from CN / JT)
 source(paste(bc.dir,"/gcm_calibration_bc_local.R",sep=""))
 
 # #create list of GCMs that have all scenarios

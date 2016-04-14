@@ -1,6 +1,6 @@
 #Julian Ramirez-Villegas
 #UoL / CCAFS / CIAT
-#August 2015
+#April 2016
 stop("!")
 
 ########################################################################
@@ -8,17 +8,13 @@ stop("!")
 ########################################################################
 
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
-#wd <- "~/Leeds-work/rice-future-tpe"
-gcm_idir <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily"
+#wd <- "/nfs/a101/earjr/drybean-future-tpe"
+wd <- "~/Leeds-work/drybean-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
-#gcm_odir <- "~/scratch/gcm_meteorology"
-#if (!file.exists(gcm_odir)) {dir.create(gcm_odir)}
 gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
-#loc_list <- loc_list[which(loc_list$id == ".INMET.00303" | loc_list$id == ".INMET.00304" | loc_list$id == ".INMET.511"),]
 
 for (wst in loc_list$id) {
   #wst <- paste(loc_list$id[1])
@@ -38,6 +34,7 @@ for (wst in loc_list$id) {
     if (file.exists(paste(wst_odir,"/",tfil,sep=""))) {system(paste("rm -f ",wst_odir,"/",tfil,sep=""))}
   }
 }
+
 
 
 
