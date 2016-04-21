@@ -208,6 +208,92 @@ for (rcp in rcpList){
 
 
 
+# 04-Anomalies Bioclimatic variables Tropico
+
+# Load libraries
+require(raster)
+require(rasterVis)
+require(maptools)
+require(rgdal)
+
+# iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/downscaling/llanos"
+iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias/tropico"
+oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/02-anomalies"
+if (!file.exists(oDir)) {dir.create(oDir, recursive=T)}
+
+varList <- c("prec", "tmax", "tmin")
+rcpList <- c("rcp26", "rcp45", "rcp85")
+mask <- readOGR("D:/CIAT/_tools/AdminBoundaries/Regions/SouthAmerica/LatinAmerica_lev0_10min.shp", layer= "LatinAmerica_lev0_10min")
+
+id <- c("RCP 2.6", "RCP 4.5", "RCP 8.5")
+
+# for (rcp in rcpList){
+
+for (var in varList){
+  
+  # stk_bsl <- stack(paste0(bDir, "/", var, "_", 1:12, ".asc"))
+  # stk_fut <- stack(paste0(iDir, "/", rcp, "/", var, "_", 1:12, ".asc"))
+  
+  # if (var == "prec"){
+  
+  # stk_anom <- ( stk_fut / stk_bsl ) - 1 
+  
+  # }else{
+  
+  # stk_anom <- stk_fut - stk_bsl
+  
+  # }
+  
+  stk_anom <- stack(paste0(iDir, "/", rcpList, "/", var, "_ann.tif"))
+  # stk_mask <- mask(crop(stk_anom, extent(mask)), mask)
+  
+  if (var == "prec"){
+    
+    stk_crop <- stk_anom
+    # stk_crop[stk_crop>40] = 40
+    # stk_crop[stk_crop<-40] = -40
+    
+    plot <- setZ(stk_crop, id)
+    names(plot) <- id
+    
+    zvalues <- seq(-50, 50, 5) # Define limits
+    myTheme <- BuRdTheme() # Define squeme of colors
+    myTheme$regions$col=colorRampPalette(c("darkred","red","snow","blue", "darkblue"))(length(zvalues)-1) # Set new colors
+    myTheme$strip.border$col = "white" # Eliminate frame from maps
+    myTheme$axis.line$col = 'white' # Eliminate frame from maps
+    # myTheme=rasterTheme(region=brewer.pal('Blues', n=9))  
+    
+  } else {
+    
+    stk_crop <- stk_anom/10
+    stk_crop[stk_crop>4] = 4
+    
+    plot <- setZ(stk_crop, id)
+    names(plot) <- id
+    
+    zvalues <- c(0, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4)
+    myTheme <- BuRdTheme()
+    myTheme$regions$col=colorRampPalette(c("snow","yellow","orange", "red", "darkred"))(length(zvalues)-1)
+    myTheme$strip.border$col = "white"
+    myTheme$axis.line$col = 'white'
+    # myTheme=rasterTheme(region=brewer.pal('YlOrRd', n=9))  
+    
+  }
+  
+  tiff(paste(oDir, "/anomalies_tropico_", var, ".tif", sep=""), width=1200, height=450, pointsize=8, compression='lzw',res=130)
+  
+  print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), par.settings = myTheme, colorkey = list(space = "bottom")) + layer(sp.polygons(mask)))
+  
+  dev.off()
+  
+} 
+  
+
+
+
+
+
+
 
 ## Scatter plot comparisson
 a <- raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/monthly-interpolations/outputs/tmax/fold-1/tile-1/tmax_1.asc")
