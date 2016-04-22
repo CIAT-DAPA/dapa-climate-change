@@ -8,7 +8,8 @@
 src.dir <- "~/Repositories/dapa-climate-change/drybean-future-tpe"
 
 #directories
-wd <- "~/Leeds-work/drybean-future-tpe"
+#wd <- "~/Leeds-work/drybean-future-tpe"
+wd <- "/nfs/a101/earjr/drybean-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
 dss_odir <- paste(wd,"/dssat_meteorology",sep="")
@@ -25,6 +26,7 @@ loc_list$file_name[which(loc_list$municipio == "Goias")] <- "TOIA"
 varlist <- c("prec", "tmax", "tmin", "srad")
 rcplist <- c("rcp26","rcp45","rcp60","rcp85")
 mthlist <- c("cf","del")
+mthstr <- c("Change_Factor_variability","Change_Factor_no_variability")
 gcmlist <- list.files(paste(gcm_dir,"/loc_",gsub(".","",loc_list$id[1],fixed=T),"/gcm",sep=""))
 
 #CO2 concentrations (2021-2045)
@@ -39,8 +41,9 @@ gcmlist <- list.files(paste(gcm_dir,"/loc_",gsub(".","",loc_list$id[1],fixed=T),
 #!  65.0  2.05 .0116                         CCMP,CCMAX,CCEFF; CO2 EFFECT ON PGCAN (high)
 #!  65.0  1.95 .0116                         CCMP,CCMAX,CCEFF; CO2 EFFECT ON PGCAN (low)
 
-for (mth in mthlist) {
-  #mth <- mthlist[1]
+for (m_i in 1:2) {
+  #m_i <- 1
+  mth <- mthlist[m_i]; mth_str <- mthstr[m_i]
   for (rcp in rcplist) {
     #rcp <- rcplist[1]
     for (gcm in gcmlist) {
@@ -69,7 +72,7 @@ for (mth in mthlist) {
             #read in data for location
             for (vname in varlist) {
               #vname <- varlist[2]
-              wsdata <- read.table(paste(wst_idir,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              wsdata <- read.table(paste(wst_idir,"/",mth_str,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
               wsdata <- wsdata[,c("date",gcm)]; names(wsdata) <- c("date",vname)
               wsdata$date <- paste(wsdata$date)
               if (vname == varlist[1]) {

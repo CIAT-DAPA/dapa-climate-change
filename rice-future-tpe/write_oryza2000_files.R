@@ -23,14 +23,16 @@ loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
 varlist <- c("prec", "tmax", "tmin", "srad")
 rcplist <- c("rcp26","rcp45","rcp60","rcp85")
 mthlist <- c("cf","del")
+mthstr <- c("Change_Factor_variability","Change_Factor_no_variability")
 gcmlist <- list.files(paste(gcm_dir,"/loc_",gsub(".","",loc_list$id[1],fixed=T),"/gcm",sep=""))
 gcmlist <- gcmlist[which(gcmlist != "cesm1_cam5")]
 gcmlist <- gcmlist[which(gcmlist != "ncar_ccsm4")]
 gcmlist <- gcmlist[which(gcmlist != "mri_cgcm3")]
 gcmlist <- gcmlist[which(gcmlist != "ipsl_cm5a_lr")]
 
-for (mth in mthlist) {
-  #mth <- mthlist[1]
+for (m_i in 1:2) {
+  #m_i <- 1
+  mth <- mthlist[m_i]; mth_str <- mthstr[m_i]
   for (rcp in rcplist) {
     #rcp <- rcplist[1]
     for (gcm in gcmlist) {
@@ -62,7 +64,7 @@ for (mth in mthlist) {
             #read in data for location
             for (vname in varlist) {
               #vname <- varlist[2]
-              wsdata <- read.table(paste(wst_idir,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              wsdata <- read.table(paste(wst_idir,"/",mth_str,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
               wsdata <- wsdata[,c("date",gcm)]; names(wsdata) <- c("date",vname)
               wsdata$date <- paste(wsdata$date)
               if (vname == varlist[1]) {

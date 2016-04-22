@@ -87,11 +87,11 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
       
       #load historical data (only once)
       if (vname == "prec") {
-        dat_his <- read.table(paste(wst_odir,"/raw_ts_historical_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+        dat_his <- read.table(paste(wst_odir,"/raw_merge/raw_ts_historical_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
         dat_his <- dat_his[,c("date","obs")]
       } else {
-        dat_his1 <- read.table(paste(wst_odir,"/raw_ts_historical_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
-        dat_his2 <- read.table(paste(wst_odir,"/raw_ts_historical_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+        dat_his1 <- read.table(paste(wst_odir,"/raw_merge/raw_ts_historical_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+        dat_his2 <- read.table(paste(wst_odir,"/raw_merge/raw_ts_historical_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
         dat_his1 <- dat_his1[,c("date","obs")]; dat_his2 <- dat_his2[,c("date","obs")]
         dat_his <- data.frame(date=dat_his1$date,obs=((dat_his1$obs+dat_his2$obs)*.5))
       }
@@ -123,17 +123,19 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
         for (mth in mthlist) {
           #mth <- mthlist[1]
           cat("...processing all GCMs for wst=",wst_name,"/ rcp=",rcp,"/ method=",mth,"/ variable=",vname,"\n")
+          if (mth == "cf") {mthstr <- "Change_Factor_variability"}
+          if (mth == "del") {mthstr <- "Change_Factor_no_variability"}
           for (gcm in gcmlist) {
             #gcm <- gcmlist[1]
             
             #load future data
             if (vname == "prec") {
-              dat_rcp <- read.table(paste(wst_odir,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              dat_rcp <- read.table(paste(wst_odir,"/",mthstr,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
               dat_rcp <- dat_rcp[,c("date",gcm)]
               names(dat_rcp)[2] <- "gcm"
             } else {
-              dat_rcp1 <- read.table(paste(wst_odir,"/",mth,"_ts_",rcp,"_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
-              dat_rcp2 <- read.table(paste(wst_odir,"/",mth,"_ts_",rcp,"_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              dat_rcp1 <- read.table(paste(wst_odir,"/",mthstr,"/",mth,"_ts_",rcp,"_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              dat_rcp2 <- read.table(paste(wst_odir,"/",mthstr,"/",mth,"_ts_",rcp,"_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
               dat_rcp1 <- dat_rcp1[,c("date",gcm)]; names(dat_rcp1)[2] <- "gcm"
               dat_rcp2 <- dat_rcp2[,c("date",gcm)]; names(dat_rcp2)[2] <- "gcm"
               dat_rcp <- data.frame(date=dat_rcp1$date,gcm=((dat_rcp1$gcm+dat_rcp2$gcm)*.5))
