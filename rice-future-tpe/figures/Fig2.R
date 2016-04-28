@@ -8,13 +8,17 @@ stop("!")
 library(sp); library(maptools); library(raster); library(rgeos)
 library(ggplot2); library(grid); library(gridExtra)
 
+#source code directory
+src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
+#wd <- "/nfs/a101/earjr/rice-future-tpe"
+wd <- "~/Leeds-work/rice-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
 fig_odir <- paste(wd,"/figures",sep="")
 
-source(paste(wd,"/scripts/thiessen_polygons.R",sep=""))
+source(paste(src.dir,"/thiessen_polygons.R",sep=""))
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
@@ -217,7 +221,8 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
 }
 
 #append these data to thiessen polygons
-fpols <- data_out; names(data_out)[1] <- "id"
+names(data_out)[1] <- "id"
+fpols <- data_out
 fpols <- SpatialPolygonsDataFrame(f_thiepol, fpols, match.ID=T)
 fpols.points <- fortify(fpols, region="id")
 fpols.df <- merge(fpols.points, fpols@data, by="id")
@@ -242,12 +247,12 @@ for (rcp in rcplist) {
     #details
     cat("...printing variable=",vname,"/ rcp=",rcp,"\n")
     cname <- paste(rcp,".",vname,".change",sep="")
-    lims <- ceiling(c(1.4,get(paste(vname,"_max",sep="")))*10)*0.1
+    lims <- ceiling(c(1,get(paste(vname,"_max",sep="")))*10)*0.1
     
     #plot object
     viz <- ggplot() + geom_polygon(data=fpols.df, aes_string(x="long", y="lat", group="group", fill=cname), colour='grey 80')
     if (vname == "tmean") {
-      brks <- c(ceiling(seq(1.4,get(paste(vname,"_max",sep="")),length.out=10)*10)*0.1)
+      brks <- c(ceiling(seq(1.1,get(paste(vname,"_max",sep="")),length.out=10)*10)*0.1)
       viz <- viz + scale_fill_gradient(low="#ffeda0",high="#e31a1c",na.value="grey50",guide="colourbar",
                                       space="Lab",breaks=brks,limits=lims)
     } else {

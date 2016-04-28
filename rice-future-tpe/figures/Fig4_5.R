@@ -32,7 +32,7 @@ loc_list <- loc_list[which(loc_list$allyears),]
 loc_list <- loc_list[which(loc_list$id != ".IPGO.00007"),]
 row.names(loc_list) <- NULL
 
-#list of RCPs
+#list of RCPs, GCMs, bc methods, co2 responses
 rcplist <- c("rcp26","rcp45","rcp60","rcp85")
 co2list <- c("High","Low")
 bclist <- c("cf","del")
@@ -122,7 +122,7 @@ system(paste("convert -verbose -density 300 fig_4_CDF_historical.pdf -quality 10
 setwd("~")
 
 ###
-#plot yield CDF of stress_cluster, for each env_cluster
+#plot historical yield CDF of stress_cluster, for each env_cluster
 for (clus in clusname) {
   #clus <- clusname[1]
   hisq <- his_quant[which(his_quant$env_name == clus & his_quant$stress_cluster != 0),]
