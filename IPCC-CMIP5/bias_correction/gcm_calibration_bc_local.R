@@ -540,6 +540,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
     
     ## Set replicates at the same length of OBS metrics
     avgobs_m <- rep(rep(avgobs[,2], nyears), nday[,3])
+    avgobs_m <- sapply(avgobs_m,FUN=function(x) {max(c(x,0.01))})
     stdobs_m <- rep(rep(stdobs[,2], nyears), nday[,3])
     
     ## Set replicates at the same length of GCM metrics (index by each GCM)
@@ -591,7 +592,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
         
         ## Main Bias Correction equation including variability (Hawkins et al., 2012)
         if (varmod == "prec" || varmod == "srad"){
-          bc_values[,j] <- odat[,j+2] * (1 + ( avgobs_m - avggcm_l[[j]] ) / max(c(avgobs_m, 0.01)) )
+          bc_values[,j] <- odat[,j+2] * (1 + ( avgobs_m - avggcm_l[[j]] ) / avgobs_m )
           #bc_values[,j] <- avgobs_m *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( odat[,j+2] - avggcm_l[[j]]) / avgobs_m ) )  
           # bc_values[,j] <- odat[,j+2] *  (1 + ( stdobs_m / stdgcm_l[[j]] * ( avggcm_l[[j]] - avgobs_m ) / avgobs_m ) )  ## Need double-check
           bc_values[bc_values<0] <- 0
