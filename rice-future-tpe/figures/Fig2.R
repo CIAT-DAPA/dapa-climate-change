@@ -12,8 +12,8 @@ library(ggplot2); library(grid); library(gridExtra)
 src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
 
 #directories
-#wd <- "/nfs/a101/earjr/rice-future-tpe"
-wd <- "~/Leeds-work/rice-future-tpe"
+wd <- "/nfs/a101/earjr/rice-future-tpe"
+#wd <- "~/Leeds-work/rice-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
 fig_odir <- paste(wd,"/figures",sep="")
@@ -169,7 +169,7 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
             
             #change value
             if (vname == "prec") {
-              chgval <- (rcpval - hisval) / max(c(hisval,0.001)) * 100
+              chgval <- (rcpval - hisval) / max(c(hisval,0.01)) * 100
             } else {
               chgval <- rcpval - hisval
             }
