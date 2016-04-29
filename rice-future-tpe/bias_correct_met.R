@@ -15,8 +15,8 @@ src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
 bc.dir <- "~/Repositories/dapa-climate-change/IPCC-CMIP5/bias_correction"
 
 #directories
-#wd <- "/nfs/a101/earjr/rice-future-tpe"
-wd <- "~/Leeds-work/rice-future-tpe"
+wd <- "/nfs/a101/earjr/rice-future-tpe"
+#wd <- "~/Leeds-work/rice-future-tpe"
 gcm_idir <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 #gcm_odir <- "~/scratch/gcm_meteorology"
@@ -227,7 +227,7 @@ for (wst in loc_list$id) {
     }
   }
   
-  #historical
+  #historical and projected changes
   for (var in varlist) {
     #var <- varlist[1]
     if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}

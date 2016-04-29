@@ -8,8 +8,8 @@ stop("!")
 ########################################################################
 
 #directories
-#wd <- "/nfs/a101/earjr/drybean-future-tpe"
-wd <- "~/Leeds-work/drybean-future-tpe"
+wd <- "/nfs/a101/earjr/drybean-future-tpe"
+#wd <- "~/Leeds-work/drybean-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
