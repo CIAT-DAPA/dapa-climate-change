@@ -392,7 +392,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
     
     ## Set replicates at the same length of OBS metrics
     avgobs_m <- rep(rep(avgobs[,2], nyears), nday[,3])
-    avgobs_m <- as.numeric(sapply(avgobs_m, FUN=function(x) {max(c(x,0.01))}))
+    if (varmod == "prec" || varmod == "srad") {avgobs_m <- as.numeric(sapply(avgobs_m, FUN=function(x) {max(c(x,0.01))}))}
     
     ## Set replicates at the same length of GCM metrics (index by each GCM)
     avggcm_l <- list(); for (i in 1:ngcm) { avggcm_l[[i]] <- rep(rep(avggcm[,i+1], nyears), nday[,3] ) }
@@ -422,7 +422,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       
       ## Set replicates at the same length of OBS metrics
       avgobs_m_f <- rep(rep(avgobs[,2], nyears_f), nday_f[,3])
-      avgobs_m_f <- as.numeric(sapply(avgobs_m_f, FUN=function(x) {max(c(x,0.01))}))
+      if (varmod == "prec" || varmod == "srad") {avgobs_m_f <- as.numeric(sapply(avgobs_m_f, FUN=function(x) {max(c(x,0.01))}))}
       
       ## Set replicates at the same length of GCMs metrics (index by each GCM)
       avggcm_l_f <- list(); for (i in 1:ngcm) { avggcm_l_f[[i]] <- rep(rep(avggcm[,i+1], nyears_f), nday_f[,3] ) }
@@ -533,14 +533,14 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
     fun <- function(x) { sd(x, na.rm=T) }
     
     ## Calculate statistical metrics for OBS & GCM
-    avgobs <- aggregate(odat$obs, by=list(months), FUN="mean", na.rm=T)
+    avgobs <- aggregate(odat$obs, by=list(months), FUN=function(x) {mean(x, na.rm=T)})
     stdobs <- aggregate(odat$obs, by=list(months), FUN=fun)
     avggcm <- aggregate(odat[,c(3:ncol(odat))], by=list(months), FUN=function(x) {mean(x,na.rm=T)})
     stdgcm <- aggregate(odat[,c(3:ncol(odat))], by=list(months), FUN=fun)
     
     ## Set replicates at the same length of OBS metrics
     avgobs_m <- rep(rep(avgobs[,2], nyears), nday[,3])
-    avgobs_m <- as.numeric(sapply(avgobs_m,FUN=function(x) {max(c(x,0.01))}))
+    if (varmod == "prec" || varmod == "srad") {avgobs_m <- as.numeric(sapply(avgobs_m, FUN=function(x) {max(c(x,0.01))}))}
     stdobs_m <- rep(rep(stdobs[,2], nyears), nday[,3])
     
     ## Set replicates at the same length of GCM metrics (index by each GCM)
@@ -569,7 +569,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
       
       # Set replicates at the same length of GCMs future metrics
       avgobs_m_f <- rep(rep(avgobs[,2], nyears_f), nday_f[,3])
-      avgobs_m_f <- as.numeric(sapply(avgobs_m_f,FUN=function(x) {max(c(x,0.01))}))
+      if (varmod == "prec" || varmod == "srad") {avgobs_m_f <- as.numeric(sapply(avgobs_m_f,FUN=function(x) {max(c(x,0.01))}))}
       stdobs_m_f <- rep(rep(stdobs[,2], nyears_f), nday_f[,3])
       
       ## Set replicates at the same length of GCMs future metrics (index by each GCM)
@@ -724,13 +724,14 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     }
     
     ## Calculate statistical metrics for GCM
-    avggcm <- aggregate(odat[3:length(odat)], by=list(months), FUN="mean", na.rm=T)
-    avggcm_f <- aggregate(odat_f[3:length(odat_f)], by=list(months_f), FUN="mean", na.rm=T)
+    avggcm <- aggregate(odat[3:length(odat)], by=list(months), FUN=function(x) {mean(x, na.rm=T)})
+    avggcm_f <- aggregate(odat_f[3:length(odat_f)], by=list(months_f), FUN=function(x) {mean(x, na.rm=T)})
     
     ## Set replicates at the same length of GCM metrics (index by each GCM)
     avggcm_l <- list(); avggcm_l_f <- list()
     for (i in 1:ngcm) {
       avggcm_l[[i]] <- rep(rep(avggcm[,i+1], nyears), nday[,3] )
+      if (varmod == "prec" || varmod == "srad") {avggcm_l[[i]] <- as.numeric(sapply(avggcm_l[[i]], FUN=function(x) {max(c(x,0.01))}))}
       avggcm_l_f[[i]] <- rep(rep(avggcm_f[,i+1], nyears), nday_f[,3] )
     }
     
@@ -745,7 +746,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
       
       ## Main Change Factor equation excluding variability (Hawkins et al., 2012)
       if (varmod == "prec" || varmod == "srad"){ 
-        bc_values[,j] <- odat[,2] * (1 + (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
+        bc_values[,j] <- odat[,2] * (1 + (avggcm_l_f[[j]] - avggcm_l[[j]]) / avggcm_l[[j]] )
         bc_values[bc_values<0] <- 0
       } else {
         bc_values[,j] <- odat[,2] + ( avggcm_l_f[[j]] - avggcm_l[[j]])
@@ -862,6 +863,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     for (i in 1:ngcm) {
       stdgcm_l[[i]] <- rep(rep(stdgcm[,i+1], nyears), nday[,3] )
       avggcm_l[[i]] <- rep(rep(avggcm[,i+1], nyears), nday[,3] )
+      if (varmod == "prec" || varmod == "srad") {avggcm_l[[i]] <- as.numeric(sapply(avggcm_l[[i]], FUN=function(x) {max(c(x,0.01))}))}
       stdgcm_l_f[[i]] <- rep(rep(stdgcm_f[,i+1], nyears), nday[,3] )
       avggcm_l_f[[i]] <- rep(rep(avggcm_f[,i+1], nyears), nday[,3] )
     }
@@ -877,7 +879,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
       
       ## Main Change Factor equation including variability (Hawkins et al., 2012)
       if (varmod == "prec" || varmod == "srad"){
-        bc_values[,j] <- odat[,2] * (1 + (avggcm_l_f[[j]] - avggcm_l[[j]]) / max(c(avggcm_l[[j]],0.001)) )
+        bc_values[,j] <- odat[,2] * (1 + (avggcm_l_f[[j]] - avggcm_l[[j]]) / avggcm_l[[j]] )
         #bc_values[,j] <-  avggcm_l_f[[j]] * (1 + ( stdgcm_l_f[[j]] / stdgcm_l[[j]]  * ( odat[,2] - avggcm_l[[j]] ) / avggcm_l_f[[j]] ) )
         # bc_values[,j] <- odat[,2] * (1 + ( stdgcm_l_f[[i]] / stdgcm_l[[i]]  * ( avggcm_l_f[[j]] - avggcm_l[[j]] ) / avggcm_l[[j]] ) ) ## Need double check
         bc_values[bc_values<0] <- 0
@@ -1781,6 +1783,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
     
     #bias-corrected projections
     for (rcp in rcpList) {
+      #rcp <- rcpList[1]
       listbcAll=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_",varmod, "_*")) # 
       #   listbcAll=c(listbcAll,list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0("historical_",varmod, "_*")))
       
@@ -1795,7 +1798,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
         methods_ln <- unique(dirname(listbc))  # c("CF Var", "CF", "BC Var", "BC", "QM", "RAW") #
       } 
       
-      for(j in length(listbc)){
+      for(j in 1:length(listbc)){
         tmp=sapply(strsplit(listbc[j], '[/]'), "[[", 2)
         databc <- read.table(paste(dirbase,"/",listbc[j],sep=""),header=T)
         databc$year <- as.integer(format(as.Date(databc$date, "%Y-%m-%d"),"%Y"))
@@ -1841,11 +1844,16 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
         #merge data
         data_g2 <- merge(databc_agg, datarw_agg, by=c("model","month"))
         data_g2 <- merge(obs_agg, data_g2, by=c("model","month"),all=T)
+
+        if (varmod == "prec" | varmod == "srad") {
+          data_g2$his_raw <- as.numeric(sapply(data_g2$his_raw, FUN=function(x) {max(c(x,0.01))}))
+          data_g2$obs <- as.numeric(sapply(data_g2$obs, FUN=function(x) {max(c(x,0.01))}))
+        }
         
         #calculate change
-        if (varmod == "prec") {
-          data_g2$chg_rw <- (data_g2$fut_raw - data_g2$his_raw) / max(c(data_g2$his_raw,0.01)) * 100
-          data_g2$chg_bc <- (data_g2$bc - data_g2$obs) / max(c(data_g2$obs,0.01)) * 100
+        if (varmod == "prec" | varmod == "srad") {
+          data_g2$chg_rw <- (data_g2$fut_raw - data_g2$his_raw) / data_g2$his_raw * 100
+          data_g2$chg_bc <- (data_g2$bc - data_g2$obs) / data_g2$obs * 100
           ylabel=c("%")
         } else {
           data_g2$chg_rw <- data_g2$fut_raw - data_g2$his_raw
