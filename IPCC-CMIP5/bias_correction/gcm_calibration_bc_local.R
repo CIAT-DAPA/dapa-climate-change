@@ -387,11 +387,12 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
     ngcm <- length(odat)- 2    
     
     ## Calculate statistical metrics for OBS & GCM
-    avgobs <- aggregate(odat$obs, by=list(months), FUN="mean", na.rm=T)
-    avggcm <- aggregate(odat[3:length(odat)], by=list(months), FUN="mean", na.rm=T)
+    avgobs <- aggregate(odat$obs, by=list(months), FUN=function(x) {mean(x, na.rm=T)})
+    avggcm <- aggregate(odat[,c(3:ncol(odat))], by=list(months), FUN=function(x) {mean(x, na.rm=T)})
     
     ## Set replicates at the same length of OBS metrics
     avgobs_m <- rep(rep(avgobs[,2], nyears), nday[,3])
+    avgobs_m <- as.numeric(sapply(avgobs_m, FUN=function(x) {max(c(x,0.01))}))
     
     ## Set replicates at the same length of GCM metrics (index by each GCM)
     avggcm_l <- list(); for (i in 1:ngcm) { avggcm_l[[i]] <- rep(rep(avggcm[,i+1], nyears), nday[,3] ) }
@@ -416,13 +417,12 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
       nday_f <- aggregate(odat_f[,1], list(months_f, years_f), length)
       nyears_f <- max(years_f) - min(years_f) +1
       
-      
       yearsLeap_f <- min(years_f):max(years_f)      
       leepYears_f=yearsLeap_f[leap_year(yearsLeap_f)]
       
-      
       ## Set replicates at the same length of OBS metrics
       avgobs_m_f <- rep(rep(avgobs[,2], nyears_f), nday_f[,3])
+      avgobs_m_f <- as.numeric(sapply(avgobs_m_f, FUN=function(x) {max(c(x,0.01))}))
       
       ## Set replicates at the same length of GCMs metrics (index by each GCM)
       avggcm_l_f <- list(); for (i in 1:ngcm) { avggcm_l_f[[i]] <- rep(rep(avggcm[,i+1], nyears_f), nday_f[,3] ) }
@@ -442,7 +442,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
         
         ## Main Bias Correction equation excluding variability (Hawkins et al., 2012)
         if (varmod == "prec" || varmod == "srad"){ 
-          bc_values[,j] <- odat[,j+2] * (1 + ( avgobs_m - avggcm_l[[j]] ) / max(c(avgobs_m, 0.01)) )
+          bc_values[,j] <- odat[,j+2] * (1 + ( avgobs_m - avggcm_l[[j]] ) / avgobs_m )
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- odat[,j+2] + (avgobs_m - avggcm_l[[j]])
@@ -463,7 +463,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
         
         ## Main Bias Correction equation excluding variability (Hawkins et al., 2012) for future
         if (varmod == "prec" || varmod == "srad"){ 
-          bc_values[,j] <- odat_f[,j+2] * (1 + ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avgobs_m_f, 0.01)) )
+          bc_values[,j] <- odat_f[,j+2] * (1 + ( avgobs_m_f - avggcm_l_f[[j]] ) / avgobs_m_f )
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- odat_f[,j+2] + (avgobs_m_f - avggcm_l_f[[j]])
@@ -535,12 +535,12 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
     ## Calculate statistical metrics for OBS & GCM
     avgobs <- aggregate(odat$obs, by=list(months), FUN="mean", na.rm=T)
     stdobs <- aggregate(odat$obs, by=list(months), FUN=fun)
-    avggcm <- aggregate(odat[3:length(odat)], by=list(months), FUN="mean", na.rm=T)
-    stdgcm <- aggregate(odat[3:length(odat)], by=list(months), FUN=fun)
+    avggcm <- aggregate(odat[,c(3:ncol(odat))], by=list(months), FUN=function(x) {mean(x,na.rm=T)})
+    stdgcm <- aggregate(odat[,c(3:ncol(odat))], by=list(months), FUN=fun)
     
     ## Set replicates at the same length of OBS metrics
     avgobs_m <- rep(rep(avgobs[,2], nyears), nday[,3])
-    avgobs_m <- sapply(avgobs_m,FUN=function(x) {max(c(x,0.01))})
+    avgobs_m <- as.numeric(sapply(avgobs_m,FUN=function(x) {max(c(x,0.01))}))
     stdobs_m <- rep(rep(stdobs[,2], nyears), nday[,3])
     
     ## Set replicates at the same length of GCM metrics (index by each GCM)
@@ -564,11 +564,12 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
       nyears_f <- max(years_f) - min(years_f) +1
       
       # Calculate statistical metrics for future GCM
-      avggcm <- aggregate(odat_f[3:length(odat_f)], by=list(months_f), FUN="mean", na.rm=T)
-      stdgcm <- aggregate(odat_f[3:length(odat_f)], by=list(months_f), FUN=fun)
+      #avggcm <- aggregate(odat_f[,c(3:ncol(odat_f))], by=list(months_f), FUN=function(x) {mean(x,na.rm=T)})
+      #stdgcm <- aggregate(odat_f[,c(3:ncol(odat_f))], by=list(months_f), FUN=fun)
       
       # Set replicates at the same length of GCMs future metrics
       avgobs_m_f <- rep(rep(avgobs[,2], nyears_f), nday_f[,3])
+      avgobs_m_f <- as.numeric(sapply(avgobs_m_f,FUN=function(x) {max(c(x,0.01))}))
       stdobs_m_f <- rep(rep(stdobs[,2], nyears_f), nday_f[,3])
       
       ## Set replicates at the same length of GCMs future metrics (index by each GCM)
@@ -616,9 +617,9 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
         
         ## Main Bias Correction equation including variability (Hawkins et al., 2012) for future
         if (varmod == "prec" || varmod == "srad"){
-          bc_values[,j] <- odat_f[,j+2] * (1 + ( avgobs_m_f - avggcm_l_f[[j]] ) / max(c(avgobs_m_f, 0.01)) )
+          bc_values[,j] <- odat_f[,j+2] * (1 + ( avgobs_m_f - avggcm_l_f[[j]] ) / avgobs_m_f )
           #bc_values[,j] <- avgobs_m_f *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( odat_f[,j+2] - avggcm_l_f[[j]]) / avgobs_m_f ) )
-          # bc_values[,j] <- odat_f[,j+2] *  (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( avggcm_l_f[[j]] - avgobs_m_f ) / avgobs_m_f ) ) ## Need double-check
+          #bc_values[,j] <- odat_f[,j+2] * (1 + ( stdobs_m_f / stdgcm_l_f[[j]] * ( avggcm_l_f[[j]] - avgobs_m_f ) / avgobs_m_f ) ) ## Need double-check
           bc_values[bc_values<0] <- 0
         } else {
           bc_values[,j] <- avgobs_m_f + ( (stdobs_m_f / stdgcm_l_f[[j]]) * (odat_f[,j+2] - avggcm_l_f[[j]]))
