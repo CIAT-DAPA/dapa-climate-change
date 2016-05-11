@@ -13,7 +13,7 @@ Abbreviations used for bias-correction variables
 _________________________________________________________________________
 label	units 	variable
 -------------------------------------------------------------------------		
-pre 	milimeters	precipitation
+prec 	milimeters	precipitation
 tmean	degrees celcius	daily mean temperature
 tmin	degrees celcius	monthly average daily minimun temperature
 tmax	degrees celcius	monthly average daily maxmium temperature

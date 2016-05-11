@@ -1,10 +1,9 @@
 ######################################################################################################################
-#### Author : Carlos Navarro
-#### MOdified: Jaime Tarapues
-#### Date   : May 2015
+#### Author : Carlos Navarro, Jaime Tarapues, Julian Rami?rez
+#### Date   : April 2016
 #### updated : January 2016
-#### Contact: c.e.navarro@cgiar.org, jaime.tm8@gmail.com
-#### OS     : Linux (all functions), Windows (might not work for extraction functions)
+#### Contact: c.e.navarro@cgiar.org, j.e.tarapues@cgiar.org, j.r.villegas@cgiar.org
+#### OS     : Linux (all functions), Windows(need python script to extract data)
 ######################################################################################################################
 
 ######################################################################################################################
@@ -44,7 +43,27 @@
 ## Nota: if run script in windows copy python script in the same folder: bc_extract_gcm.py
 ## version python: C:\\Python27\\ArcGIS10.1\\python.exe
 ######################################################################################################################
-
+## Meteorological series of Reanalysis
+# agmerra, grasp, agcfsr:
+#______________________
+# label  units
+# ---------------------
+# prec 	mm/day
+# tmean	C
+# tmin	C
+# tmax	C
+# srad	MJ m-2 day-1
+# 
+# nnrp, princeton, wfd, wfdei:
+#______________________
+# label  units
+# ---------------------
+# prec   kg/m2/s
+# tmean	K
+# tmin	K
+# tmax	K
+# srad	W/m2
+######################################################################################################################
 
 ## Extract Observations Time Series Function
 obs_extraction <- function(dataset="wfd", varmod="prec",yi=2007, yf=2013, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="D:/jetarapues/Request/Request_cnavarro/bc", dircdo="cdo",ver_python,dirScript_py){
@@ -1093,8 +1112,8 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
   
 }
 
-## Comparison methods (plots) ** modificado
-bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.28, lat=-16.47, dirbase="D:/jetarapues/Request/Request_jramirez/bc_-49.28_-16.47"){
+## Comparison methods (plots)
+bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.28, lat=-16.47, dirbase="C:/Temp/bc/Request_jramirez/bc_-49.28_-16.47"){
   
   ## Load libraries
   library(lubridate); library(ggplot2); library(reshape)
@@ -1106,6 +1125,11 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   
   ## Set working directory
   setwd(dirbase)
+  
+  #set size file tif ouput graphic
+  w=1000
+  h_timeseries=800
+  h=400  
   
   ## Set and create output directory
   dirout <- paste0(dirbase, "/statistics")
@@ -1147,12 +1171,18 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   
   # cambio de nombre raw_merge to raw
   merge$method <- paste(merge$method)
-  merge$method[which(merge$method == "raw_merge")] <- "raw"
-  merge$method <- as.factor(merge$method)
+  merge$method[which(merge$method == "raw_merge")] <- "Raw"
+  merge$method[which(merge$method == "Bias_Correction_no_variability")] <- "Bias correction no variability"
+  merge$method[which(merge$method == "Bias_Correction_variability")] <- "Bias correction variability"
+  merge$method[which(merge$method == "Change_Factor_no_variability")] <- "Change factor no variability"
+  merge$method[which(merge$method == "Change_Factor_variability")] <- "Change factor variability"
+  merge$method[which(merge$method == "quantile_mapping")] <- "Quantile mapping"
+  merge$method <- as.factor(merge$method)  
   
+  #merge=subset(merge,merge$method!="quantile_mapping"& merge$method!="Bias_Correction_no_variability")
   # Y-axis labels by variable
   if(varmod == "prec"){
-    ylabel <- "Precipitation (mm/day)"; flabel <- "Rainfall Frequency (days/month)";limit = c(0,250);
+    ylabel <- "Precipitation (mm)"; flabel <- "Rainfall Frequency (days/month)";limit = c(0,250);
   }else if(varmod == "tmin"){
     ylabel <- "Min. Temperature (C)"; limit = c(-10, 25);
   }else if(varmod == "tmax"){
@@ -1170,6 +1200,9 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   # Personalized colors 
   gray='gray50';blue="#122F6B";blue2="#1F78B4";blue3="#A6CEE3";green="#33A02C";green2="#B2DF8A";red="#E31A1C";red2="#FB9A99";orange="#FF7F00";orange2="#FDBF6F"
   
+  ## colors methods
+  colorBC=data.frame(method=c("Bias correction no variability","Bias correction variability","Change factor no variability","Change factor variability","Quantile mapping","Raw","Obs"),hex=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','sandybrown','gray50'),color=c('rojo','azul','varde','morado','naranja','cafe','gris'))
+  
   # Long name months list
   f_names <- list("1"="January", "2"="February", "3"="March", "4"="April", "5"="May", "6"="June", "7"="July", "8"="August", "9"="September", "10"="October", "11"="November", "12"="December")
   f_labeller <- function(variable, value){return(f_names[value])}
@@ -1181,10 +1214,18 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   ## Define enviroment to plot ggplot functions in command line
   merge_mod <- merge[which(year(as.Date(merge$date)) %in% yi:yf),]
   merge_mod$date <- as.Date(merge_mod$date)
-  merge_mod$leg <- "obs"
+  #merge_mod$leg <- "obs"
   assign("merge_mod", merge_mod,  envir = .GlobalEnv)
   
-  ## Looping through GCMs 
+  obs <- merge_mod[which(merge_mod$method == merge_mod$method[1]),"obs"]
+  obs <- matrix(1, length(obs), ngcm) * obs
+  colnames(obs) <- gcmlist
+  obs_agg <- rbind(merge_mod, cbind("method"=rep("Obs", dim(obs)[1]),merge_mod[which(merge_mod$method == merge_mod$method[1]),c("date","obs")], obs))
+  obs_agg$method <- as.factor(obs_agg$method)
+  
+  hecolor=colorBC[which(colorBC$method %in% levels(merge_mod$method)),]
+  hex_color=as.character(hecolor[,2])  
+  ## Looping through GCMs * daily
   for (i in 1:ngcm){
     
     assign("i", i,  envir = .GlobalEnv)
@@ -1198,32 +1239,24 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
     if (!file.exists(ots)) {
       
       if (rcp == "historical"){  # Historical plot includes observations
-        
         cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        
-        tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
-        p <- ggplot(data=merge_mod) + 
-          geom_line(aes_string(x="date", y=names(merge_mod)[3], colour="leg"), size=0.2, shape=1) +   # Observations
-          geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
+        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        p <- ggplot(data=obs_agg) + 
+          #geom_line(aes_string(x="date", y=names(obs_agg)[3],linetype = "leg"),colour='gray50',size=0.2, shape=1) +   # Observations
+          geom_line(aes_string(x="date", y=names(obs_agg)[i+3], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
           facet_wrap(~ method, ncol=1) +
-          scale_color_manual(values=c(gray, red, red2, orange, green)) +
-          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-          ggtitle(paste0("BC Methods  Model : ",gcm)) +
-          labs(x="Date (days)", y=ylabel)
-        
+          scale_color_manual(breaks=c(as.character(hecolor[,1]),"Obs"), values=c(hex_color,'gray50'))+
+          theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
+          labs(x="Date (days)", y=ylabel)+guides(fill=guide_legend(ncol=3,byrow=TRUE))
       } else {
-        
         cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        
-        tiff(ots, width=1200, height=1400, pointsize=8, compression='lzw',res=100)
+        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=merge_mod) +  
           geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2)+   # GCMs (future)
           facet_wrap(~ method, ncol=1) + 
-          scale_color_manual(values=c(green, orange, red, red2, blue, blue2)) +
-          theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-          ggtitle(paste0("BC Methods  Model : ", gcm)) +
+          scale_color_manual(values=hex_color) +
+          theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
           labs(x="Date (days)", y=ylabel)
-        
       }
       
       # Plot and save
@@ -1235,109 +1268,279 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   }
   
   
-  ##### Interannual Variability Boxplot
+  #for calculate monthly means
+  if (varmod == "prec"||varmod == "srad") {
+    obs_agg <- aggregate(merge_mod[,c("obs",gcmlist)],by=list(method=merge_mod$method,month=month(as.Date(merge_mod$date)),year=year(as.Date(merge_mod$date))),FUN=function(x) {sum(x, na.rm=any(!is.na(x)))})
+  } else {
+    obs_agg <- aggregate(merge_mod[,c("obs",gcmlist)],by=list(method=merge_mod$method,month=month(as.Date(merge_mod$date)),year=year(as.Date(merge_mod$date))),FUN=function(x) {mean(x, na.rm=any(!is.na(x)))})
+  }
+  #obs_agg <- aggregate(obs_agg[,c("obs",gcmlist)],by=list(month=obs_agg$month),FUN=function(x) {mean(x,na.rm=T)})
+  #obs_agg$leg <- "obs"
+  obs_agg$date <- as.Date(paste0(obs_agg$year,'-',obs_agg$month,'-01'))
   
-    merge3=merge #subset(merge,merge$method=="quantile_mapping"|merge$method=='raw')
-    intannvar <- paste0(dirout_var, "/var_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
-    if (!file.exists(intannvar) & nrow(merge3) > 0) {
-      #subset(merge3,merge3$method=="Change_Factor_no_variability"|merge3$method=="Bias_Correction_no_variability")
-      ## Get months and years from merged file
-      months <- month(as.Date(merge3$date))
-      years <- year(as.Date(merge3$date))
+  #obs_sel=obs_agg[which(obs_agg$method==obs_agg$method[1]),]
+  #obs_sel$method="obs"
+  #obs_sel[,c("month","year","obs")]
+  
+  assign("obs_agg", obs_agg,  envir = .GlobalEnv)
+  
+  obs <- obs_agg[which(obs_agg$method == obs_agg$method[1]),"obs"]
+  obs <- matrix(1, length(obs), ngcm) * obs
+  colnames(obs) <- gcmlist
+  obs_agg <- rbind(obs_agg, cbind("method"=rep("Obs", dim(obs)[1]),obs_agg[which(obs_agg$method == obs_agg$method[1]),c("month","year","obs")], obs,'date'=obs_agg[which(obs_agg$method == obs_agg$method[1]),'date']))
+  obs_agg$method <- as.factor(obs_agg$method)
+  obs_agg=obs_agg[-which(is.na(obs_agg[,names(obs_agg)[i+4]])),]  
+  
+  hecolor=colorBC[which(colorBC$method %in% levels(merge_mod$method)),]
+  hex_color=as.character(hecolor[,2])  
+  
+  ## Looping through GCMs * monthly
+  for (i in 1:ngcm){
+    
+    assign("i", i,  envir = .GlobalEnv)
+    
+    ## GCM name
+    gcm <- colnames(obs_agg)[i+4]
+    
+    ## Define output plot file
+    ots <- paste0(dirout_ts, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,"_monthly.tif")
+    
+    if (!file.exists(ots)) {
       
-      ## Std calculation for all TS
-      fun <- function(x) {sd(x, na.rm=T) }
-      stdgcm <- aggregate(merge3[,3:ncol(merge3)], by=list("method"=merge3$method, "month"=months, "year"=years), FUN=fun)
-      stdgcm <- aggregate(stdgcm[,3:ncol(stdgcm)], by=list("method"=stdgcm$method, "month"=stdgcm$month), FUN=fun)
-      stdgcm$year <- NULL
-      
-      ## Rename Months 
-      stdgcm$month=month.abb[stdgcm$month]
-      stdgcm$month=factor(stdgcm$month,levels=month.abb)
-      
-      ## Set apart observations
-      obs <- stdgcm[which(stdgcm$method == stdgcm$method[1]),"obs"]
-      stdgcm$obs <- NULL
-      
-      if (rcp == "historical"){   # Historical plot includes observations
-        
-        # Join observations at the end of std GCM values
-        obs <- matrix(1, length(obs), ngcm) * obs
-        colnames(obs) <- gcmlist
-        stdgcm <- rbind(stdgcm, cbind("method"=rep("obs", dim(obs)[1]),stdgcm[which(stdgcm$method == stdgcm$method[1]),][2], obs))
-        rownames(stdgcm) <- NULL
-        
-        shortLevels=c('raw','obs',levels(stdgcm$method)[c(-which(levels(stdgcm$method)=="obs"),-which(levels(stdgcm$method)=="raw"),-which(levels(stdgcm$method)=="raw_merge"))])
-        stdgcm$method=factor(stdgcm$method,levels=shortLevels)
-        
-        ## Define variables to plot ggplot functions in command line
-        assign("stdgcm", stdgcm,  envir = .GlobalEnv)
-        
-        ## Loop through GCMs 
-        for (i in 1:ngcm){
-          
-          ## GCM name
-          gcm <- colnames(stdgcm)[i+2]
-          
-          ## Define variables to plot ggplot functions in command line
-          assign("i", i,  envir = .GlobalEnv)
-          
-          cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
-          
-          tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1300, height=700, pointsize=8, compression='lzw',res=100)
-          p <- ggplot(stdgcm, aes_string(x="month", y=names(stdgcm)[i+2], fill="method")) + 
-            geom_bar(width=0.75,stat="identity",position=position_dodge(),size=0.5) + 
-            scale_fill_manual(values=c(green2, orange, red, red2, gray)) +
-            theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-            ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
-            labs(x="Date (days)", y=ylabel)
-          
-          # Plot and save
-          print(p)
-          dev.off()
-          
-        }
-        
-        ## Write metrics data
-        freq <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
-        
+      if (rcp == "historical"){  # Historical plot includes observations
+        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        p <- ggplot(data=obs_agg) + 
+          #geom_line(aes_string(x="date", y="obs",linetype = "method"),colour='gray50',size=0.2, shape=1,data=obs_sel) +   # Observations
+          geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
+          facet_wrap(~ method, ncol=1) +
+          scale_color_manual(breaks=c(as.character(hecolor[,1]),"Obs"), values=c(hex_color,'gray50'))+
+          theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
+          labs(x="Date (days)", y=ylabel)
       } else {
+        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        p <- ggplot(data=obs_agg) +  
+          geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2)+   # GCMs (future)
+          facet_wrap(~ method, ncol=1) + 
+          scale_color_manual(values=hex_color) +
+          theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
+          labs(x="Date (days)", y=ylabel)
+      }
+      
+      # Plot and save
+      print(p)
+      dev.off()
+      
+    }
+    
+  }
+  
+  ##### moving average
+  #   seasons <- c()
+  #   #seasons <- cbind(c("ANN", "DJF", "MAM", "JJA", "SON"), c(paste(1:12,collapse=','), paste(c(12,1,2),collapse=','), paste(3:5,collapse=','), paste(6:8,collapse=','), paste(9:11,collapse=',')))
+  #   seasons <- cbind(c("DJF", "MAM", "JJA", "SON"), c(paste(c(12,1,2),collapse=','), paste(3:5,collapse=','), paste(6:8,collapse=','), paste(9:11,collapse=',')))
+  #   #colnames(seasons) <- c("season", "staMth", "endMth") 
+  #   merge_mod_s=merge_mod
+  #   merge_mod_s$season=NA
+  #   merge_mod_s$date_s=NA
+  #   #yi=min(year(as.Date(merge_mod_s$date)))
+  #   #yf=max(year(as.Date(merge_mod_s$date)))
+  #   
+  #   for (i in 1:nrow(seasons)){
+  #     merge_mod_s[which(month(as.Date(merge_mod_s$date)) %in% unlist(strsplit(seasons[i,2], "[,]")) ),]$season=seasons[i,1]
+  #     ty=merge_mod_s[which(month(as.Date(merge_mod_s$date)) %in% unlist(strsplit(seasons[i,2], "[,]")) ),]
+  #     merge_mod_s[which(month(as.Date(merge_mod_s$date)) %in% unlist(strsplit(seasons[i,2], "[,]")) ),]$date_s=paste0(year(as.Date(ty$date)),'-0',i,'-01')
+  #     #seq(as.Date(paste0(yi,'-12-01')), as.Date(paste0(yf,'-12-01')), by = "quarter")
+  #   }
+  #   
+  #   if (varmod == "prec"||varmod == "srad") {
+  #     obs_agg_s <- aggregate(merge_mod_s[,c("obs",gcmlist)],by=list(method=merge_mod_s$method,date_s=merge_mod_s$date_s,season=merge_mod_s$season,year=year(as.Date(merge_mod_s$date))),FUN=function(x) {sum(x, na.rm=any(!is.na(x)))})
+  #   } else {
+  #     obs_agg_s <- aggregate(merge_mod_s[,c("obs",gcmlist)],by=list(method=merge_mod_s$method,season=merge_mod_s$season,year=year(as.Date(merge_mod_s$date))),FUN=function(x) {mean(x, na.rm=any(!is.na(x)))})
+  #   }  
+  #   
+  #   #obs_agg_s$leg <- "obs"
+  #   obs_agg_s$date_s=as.Date(obs_agg_s$date_s)
+  #   #write.table(obs_agg_s, "clipboard", sep="\t", row.names=FALSE)
+  #   
+  #   obs <- obs_agg_s[which(obs_agg_s$method == obs_agg_s$method[1]),"obs"] 
+  #   
+  #   ## Looping through GCMs * seasons
+  #   for (i in 1:ngcm){
+  #     
+  #     assign("i", i,  envir = .GlobalEnv)
+  #     
+  #     ## GCM name
+  #     gcm <- colnames(obs_agg)[i+4]
+  #     
+  #     ## Define output plot file
+  #     ots <- paste0(dirout_ts, "/ts_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
+  #     
+  #     if (!file.exists(ots)) {
+  #       
+  #       if (rcp == "historical"){  # Historical plot includes observations
+  #         
+  #         
+  #         obs <- matrix(1, length(obs), ngcm) * obs
+  #         colnames(obs) <- gcmlist
+  #         obs_agg_s <- rbind(obs_agg_s, cbind("method"=rep("obs", dim(obs)[1]),obs_agg_s[which(obs_agg_s$method == obs_agg_s$method[1]),][c(2,3,4,5)], obs))
+  #         obs_agg_s$method <- as.factor(obs_agg_s$method)
+  #         
+  #         cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+  #         tiff(ots, width=1200, height=1000, pointsize=8, compression='lzw',res=100)
+  # #         p <- ggplot(data=obs_agg_s) + 
+  # #           geom_line(aes_string(x=names(obs_agg_s)[4],linetype = "leg"),colour='gray50',size=0.2, shape=1,stat="density") +   # Observations
+  # #           geom_line(aes_string(x=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2,stat="density") +   # GCMs (historical)
+  # #           #facet_wrap(~ method, ncol=1) +
+  # #           facet_grid(method ~ season,scales="free_y", drop=T) +
+  # #           scale_color_manual(breaks=c(sort(as.character(unique(obs_agg$method))),'obs'), values=c(hex_color,'gray50'))+
+  # #           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
+  # #           labs(x="Date (days)", y=ylabel)
+  #         
+  #         #obs_agg_s$year=paste0(obs_agg_s$year,'-',obs_agg_s$season)
+  #         p <- ggplot(data=obs_agg_s) + 
+  #           #geom_line(aes_string(x="date_s", y=names(obs_agg_s)[5],linetype = "leg"),colour='gray50',size=0.2, shape=1) +   # Observations
+  #           geom_line(aes_string(x="date_s", y=names(obs_agg_s)[i+5], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
+  #           facet_wrap(~ method, ncol=1) +
+  #           scale_color_manual(breaks=c(sort(as.character(unique(obs_agg$method))),'obs'), values=c(hex_color,'gray50'))+
+  #           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
+  #           labs(x="Date (days)", y=ylabel)        
+  #         
+  #       } else {
+  #         cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
+  #         tiff(ots, width=1200, height=1400, pointsize=8, compression='lzw',res=100)
+  #         p <- ggplot(data=merge_mod) +  
+  #           geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2)+   # GCMs (future)
+  #           facet_wrap(~ method, ncol=1) + 
+  #           scale_color_manual(values=hex_color) +
+  #           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
+  #           labs(x="Date (days)", y=ylabel)
+  #       }
+  #       
+  #       # Plot and save
+  #       print(p)
+  #       dev.off()
+  #       
+  #     }
+  #     
+  #   }  
+  #   
+  ##### Interannual Variability Barblot
+  
+  merge3=merge #subset(merge,merge$method=="quantile_mapping"|merge$method=='raw')
+  merge3$method <- as.factor(merge3$method)  
+  intannvar <- paste0(dirout_var, "/var_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
+  if (!file.exists(intannvar) & nrow(merge3) > 0) {
+    #subset(merge3,merge3$method=="Change_Factor_no_variability"|merge3$method=="Bias_Correction_no_variability")
+    ## Get months and years from merged file
+    months <- month(as.Date(merge3$date))
+    years <- year(as.Date(merge3$date))
+    
+    ## Std calculation for all TS
+    fun <- function(x) {mean(x, na.rm=any(!is.na(x))) }
+    fun_sum <- function(x) {sum(x, na.rm=any(!is.na(x))) }
+    if(varmod=="prec"||varmod=="srad"){
+      stdgcm <- aggregate(merge3[,3:ncol(merge3)], by=list("method"=merge3$method, "month"=months, "year"=years), FUN=fun_sum)
+    }else{
+      stdgcm <- aggregate(merge3[,3:ncol(merge3)], by=list("method"=merge3$method, "month"=months, "year"=years), FUN=fun)
+    }
+    #stdgcm <- aggregate(stdgcm[,3:ncol(stdgcm)], by=list("method"=stdgcm$method, "month"=stdgcm$month), FUN=fun)
+    stdgcm$year <- NULL
+    
+    ## Rename Months 
+    stdgcm$month=month.abb[stdgcm$month]
+    stdgcm$month=factor(stdgcm$month,levels=month.abb)
+    
+    ## Set apart observations
+    obs <- stdgcm[which(stdgcm$method == stdgcm$method[1]),"obs"] 
+    stdgcm$obs <- NULL
+    
+    if (rcp == "historical"){   # Historical plot includes observations
+      
+      # Join observations at the end of std GCM values
+      obs <- matrix(1, length(obs), ngcm) * obs
+      colnames(obs) <- gcmlist
+      stdgcm <- rbind(stdgcm, cbind("method"=rep("Obs", dim(obs)[1]),stdgcm[which(stdgcm$method == stdgcm$method[1]),][2], obs))
+      rownames(stdgcm) <- NULL
+      
+      #shortLevels=c('raw','obs',levels(stdgcm$method)[c(-which(levels(stdgcm$method)=="obs"),-which(levels(stdgcm$method)=="raw"),-which(levels(stdgcm$method)=="raw_merge"))])
+      #stdgcm$method=factor(stdgcm$method,levels=shortLevels)
+      
+      ## Define variables to plot ggplot functions in command line
+      assign("stdgcm", stdgcm,  envir = .GlobalEnv)
+      
+      hex_color=as.character(colorBC[which(colorBC$method %in% unique(stdgcm$method)),][,2])
+      
+      ## Loop through GCMs 
+      for (i in 1:ngcm){
+        
+        ## GCM name
+        gcm <- colnames(stdgcm)[i+2]
         
         ## Define variables to plot ggplot functions in command line
-        assign("stdgcm", stdgcm,  envir = .GlobalEnv)
+        assign("i", i,  envir = .GlobalEnv)
         
-        for (i in 1:ngcm){
-          
-          ## GCM name
-          gcm <- colnames(stdgcm)[i+2]
-          
-          ## Define variables to plot ggplot functions in command line
-          assign("i", i,  envir = .GlobalEnv)
-          
-          cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
-          
-          tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=1900, pointsize=8, compression='lzw',res=100)
-          p <- ggplot(data=stdgcm, aes_string(x="month", y=names(stdgcm)[i+2], fill="method")) +  
-            facet_wrap(~ method, ncol=1) + 
-            geom_bar(aes_string(x="month", y=names(stdgcm)[i+2], fill="method"), shape=1, size=1, width=.5, stat="identity")+   # GCMs (future)
-            scale_fill_manual(values=c(green2, orange, red, red2, blue, blue2)) +
-            theme(panel.background = element_rect(fill = 'gray92'), legend.title=element_blank()) +
-            ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ", gcm)) +
-            labs(x="Date (days)", y=ylabel)     
-          
-          # Plot and save
-          print(p)
-          dev.off()
-          
-        }
+        cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
         
-        ## Write output metrics file
-        stdgcm <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
+        tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
+        p <- ggplot(stdgcm, aes_string(x="method", y=names(stdgcm)[i+2], fill="method")) + 
+          geom_boxplot(outlier.size = 1)+
+          theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
+          #scale_fill_manual(breaks=as.character(unique(stdgcm$method)), values=hex_color)+
+          scale_fill_manual(breaks=levels(stdgcm$method), values=hex_color)+
+          ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
+          labs(x=" " ,y=ylabel)+
+          facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
+        
+        # Plot and save
+        print(p)
+        dev.off()
         
       }
       
-    }     
-   
+      ## Write metrics data
+      freq <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
+      
+    } else {
+      
+      ## Define variables to plot ggplot functions in command line
+      assign("stdgcm", stdgcm,  envir = .GlobalEnv)
+      
+      hex_color=as.character(colorBC[which(colorBC$method %in% unique(stdgcm$method)),][,2])
+      
+      for (i in 1:ngcm){
+        
+        ## GCM name
+        gcm <- colnames(stdgcm)[i+2]
+        
+        ## Define variables to plot ggplot functions in command line
+        assign("i", i,  envir = .GlobalEnv)
+        
+        cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
+        
+        tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
+        p <- ggplot(stdgcm, aes_string(x="method", y=names(stdgcm)[i+2], fill="method")) + 
+          geom_boxplot(outlier.size = 1)+
+          theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
+          scale_fill_manual(breaks=levels(stdgcm$method), values=hex_color)+
+          ggtitle(paste0("Interannual Variability (STD) BC Methods  Model : ",gcm)) +
+          labs(x=" " ,y=ylabel)+
+          facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)    
+        
+        # Plot and save
+        print(p)
+        dev.off()
+        
+      }
+      
+      ## Write output metrics file
+      stdgcm <- write.table(stdgcm, intannvar, sep=" ", row.names=F, quote=F)
+      
+    }
+    
+  }     
+  
   ##### Rainfall frequency and hot days frequency comparisson - Indicators
   
   if (varmod == "prec" || varmod == "tmax"){
@@ -1368,13 +1571,15 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         # Join observations at the end of std GCM values
         obs <- matrix(1, length(obs)[1], ngcm) * obs
         colnames(obs) <- gcmlist
-        freq <- rbind(freq, cbind("method"=rep("obs", dim(obs)[1]),freq[which(freq$method == levels(freq$method)[1]),][2:3], obs))
+        freq <- rbind(freq, cbind("method"=rep("Obs", dim(obs)[1]),freq[which(freq$method == levels(freq$method)[1]),][2:3], obs))
         rownames(freq) <- NULL
+        
+        hex_color=as.character(colorBC[which(colorBC$method %in% unique(freq$method)),][,2])
         
         ## Loop through GCMs
         for (i in 1:ngcm){
           
-          if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
+          if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ",varmod, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ",varmod, " ", gcmlist[i]))}
           
           freq_mod <- freq
           colnames(freq_mod)[i+3] <- "model"
@@ -1382,10 +1587,11 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           assign("freq_mod", freq_mod,  envir = .GlobalEnv)
           assign("i", i,  envir = .GlobalEnv)
           
-          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=300, pointsize=8, compression='lzw',res=100)
+          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
           f <- ggplot(data=freq_mod, aes(x=method, y=model, fill=method)) + 
-            theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_text(size=rel(1.4)), axis.title.y = element_text(size = rel(0.8))) +
-            scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3, "white")) +
+            theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
+            #scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3, "white")) +
+            scale_fill_manual(breaks=as.character(unique(freq$method)), values=hex_color)+
             geom_boxplot(outlier.size = 1) +
             labs(x="Months", y=flabel) +
             facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
@@ -1403,6 +1609,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         
         assign("freq", freq,  envir = .GlobalEnv)
         
+        hex_color=as.character(colorBC[which(colorBC$method %in% unique(freq$method)),][,2])
+        
         for (l in 1:ngcm){
           
           if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[l]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[l]))}
@@ -1413,10 +1621,11 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           #assign("freq_mod", freq,  envir = .GlobalEnv)
           #assign("l", l,  envir = .GlobalEnv)
           
-          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[l],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1200, height=300, pointsize=8, compression='lzw',res=100)
+          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[l],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
           f <- ggplot(data=freq_mod, aes(x=method, y=model_f, fill=method)) + # GCMs (historical)
-            theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-            scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3)) +
+            theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(),axis.title.y = element_text(size = rel(0.8))) +
+            #scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3)) +
+            scale_fill_manual(breaks=as.character(unique(freq$method)), values=hex_color)+
             geom_boxplot(outlier.size = 1) +
             labs(x="Months", y=flabel) +
             facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
@@ -1458,6 +1667,13 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
   if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}
   if (!file.exists(dirout_d)) {dir.create(dirout_d, recursive=T)}
   
+  ## set size text x plot
+  if(length(dirsel)>2){
+    sizeTxt=11
+  }else{
+    sizeTxt=18
+  }
+  
   ## Define end and start year to plot
   #yi <- substr(ts, 1, 4)
   #yf <- substr(ts, 6, 9)
@@ -1495,9 +1711,29 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
     }
     rownames(merge) <- NULL
     
+    #merge=merge[,1:5] #******************************
+    
+    # cambio de nombre raw_merge to raw
+    merge$method <- paste(merge$method)
+    merge$method[which(merge$method == "raw_merge")] <- "Raw"
+    merge$method[which(merge$method == "Bias_Correction_no_variability")] <- "Bias correction no variability"
+    merge$method[which(merge$method == "Bias_Correction_variability")] <- "Bias correction variability"
+    merge$method[which(merge$method == "Change_Factor_no_variability")] <- "Change factor no variability"
+    merge$method[which(merge$method == "Change_Factor_variability")] <- "Change factor variability"
+    merge$method[which(merge$method == "quantile_mapping")] <- "Quantile mapping"
+    merge$method <- as.factor(merge$method)  
+    
+    #     merge$rcp <- paste(merge$rcp)
+    #     merge$rcp[which(merge$rcp == "historical")] <- "Historical"
+    #     merge$rcp[which(merge$rcp == "rcp26")] <- "RCP26"
+    #     merge$rcp[which(merge$rcp == "rcp45")] <- "rcp45"
+    #     merge$rcp[which(merge$rcp == "rcp60")] <- "rcp60"
+    #     merge$rcp[which(merge$rcp == "rcp85")] <- "rcp85"
+    #     merge$rcp <- as.factor(merge$rcp)  
+    
     # Y-axis labels by variable
     if(varmod == "prec"){
-      xlabel <- "Precipitation (mm/day)"; flabel <- "Rainfall Frequency (days/month)";#ylimit =c(0, 0.005);xlimit=c(0, 2000); 
+      xlabel <- "Precipitation (mm/month)"; flabel <- "Rainfall Frequency (days/month)";#ylimit =c(0, 0.005);xlimit=c(0, 2000); 
       ylabel <- "Density"
     }else if(varmod == "tmin"){
       xlabel <- "Min. Temperature (C)"; #xlimit = c(-10, 25);ylimit = c(0, 0.2);
@@ -1506,7 +1742,7 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
       xlabel <- "Max. Temperature (C)"; flabel <- "Hot days Frequency (days/month)";# ylimit = c(0, 0.2);xlimit=c(0, 50);
       ylabel <- "Density"
     }else if(varmod == "srad"){
-      xlabel <- "Shortwave Sol. Radiation (MJ/m2 day)"; #ylimit = c(0, 0.2);xlimit = c(0, 400);
+      xlabel <- "Shortwave Sol. Radiation (MJ/m2 month)"; #ylimit = c(0, 0.2);xlimit = c(0, 400);
       ylabel <- "Density"
     }else if(varmod == "hur"){
       xlabel <- "Relative Humidity (%)"; #ylimit = c(0, 0.2);xlimit = c(0, 100);
@@ -1525,26 +1761,52 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
     filset <- names(merge[4:length(merge)])
     model <- names(merge[5:length(merge)])
     
-    ## Para datos diarios
+    ##### Para calcular datos monthly
+    if (varmod=="prec"){
+      mongcm <- aggregate(merge[4:length(merge)], by=list("method"=merge$method,"rcp"=merge$rcp,"year"=year(as.Date(merge$date)), "month"=month(as.Date(merge$date))), sum) #,"year"=year(as.Date(merge$date))
+    }else if(varmod=="tmax" || varmod=="tmin" || varmod=='tmean'||varmod=='hur'||varmod=='swind'||varmod=='srad'){
+      mongcm <- aggregate(merge[4:length(merge)], by=list("method"=merge$method,"rcp"=merge$rcp,"year"=year(as.Date(merge$date)), "month"=month(as.Date(merge$date))), mean) #,"year"=year(as.Date(merge$date))
+    }
     if(length(model)>1){
-      m=merge[,5:length(merge)] #pos=which(is.na(m)==TRUE)
+      mod=mongcm[names(mongcm)!="date"]
+      m=mod[,6:length(mod)] #pos=which(is.na(m)==TRUE)
       gcm="ensemble"
       Value=rowMeans(m, na.rm = TRUE)
-      dataset=merge[1]
-      date=merge$date
-      rcp=merge$rcp
-      dataAll <-rbind(dataAll,cbind(dataset,rcp,date,gcm,Value))
-      
+      dataset=mongcm[1]
+      mongcm$date=paste(mongcm$year,mongcm$month,sep='-')
+      rcp=mongcm$rcp
+      dataAll <-rbind(dataAll,cbind(dataset,rcp,mongcm$date,gcm,Value))
     }
     for(i in 1:length(filset)){
-      gcm=rep(filset[i],nrow(merge)) 
-      Value=merge[i+3]
-      dataset=merge[1]
+      gcm=rep(filset[i],nrow(mongcm)) 
+      Value=mongcm[i+4]
+      dataset=mongcm[1]
       colnames(Value) <- c("Value")
-      date=merge$date
-      rcp=merge$rcp
-      dataAll <-rbind(dataAll,cbind(dataset,rcp,date,gcm, Value))
+      mongcm$date=paste(mongcm$year,mongcm$month,sep='-')
+      rcp=mongcm$rcp
+      dataAll <-rbind(dataAll,cbind(dataset,rcp,mongcm$date,gcm, Value))
     }    
+    
+    ## Para datos diarios
+    #     if(length(model)>1){
+    #       m=merge[,5:length(merge)] #pos=which(is.na(m)==TRUE)
+    #       gcm="ensemble"
+    #       Value=rowMeans(m, na.rm = TRUE)
+    #       dataset=merge[1]
+    #       date=merge$date
+    #       rcp=merge$rcp
+    #       dataAll <-rbind(dataAll,cbind(dataset,rcp,date,gcm,Value))
+    #       
+    #     }
+    #     for(i in 1:length(filset)){
+    #       gcm=rep(filset[i],nrow(merge)) 
+    #       Value=merge[i+3]
+    #       dataset=merge[1]
+    #       colnames(Value) <- c("Value")
+    #       date=merge$date
+    #       rcp=merge$rcp
+    #       dataAll <-rbind(dataAll,cbind(dataset,rcp,date,gcm, Value))
+    #     }    
     
     
     colnames(dataAll) <- c("Dataset","RCP", "Date","GCM","Value")
@@ -1556,348 +1818,338 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
     for(rcps in rcpLists){
       for(sets in levels(dataAll$Dataset)){
         if(length(model)>1){
-          ens=subset(dataAll,dataAll$GCM=="ensemble"&dataAll$RCP==rcps&dataAll$Dataset==sets)
-        }else{
-          if(rcps!="historical"){
-            ens=subset(dataAll,dataAll$GCM==levels(dataAll$GCM)[2]&dataAll$Dataset==sets&dataAll$RCP==rcps)
+          for(gcm in c("ensemble","obs")){
+            ens=subset(dataAll,dataAll$GCM==gcm&dataAll$RCP==rcps&dataAll$Dataset==sets)
+            if(nrow(ens)>0 & length(ens$Value)>0 & all(is.na(ens$Value))!=TRUE){ 
+              d=density(as.numeric(na.omit(ens$Value)))
+              ymax=c(ymax,d$y[which.max(d$y)])         
+              valuesq=as.numeric(as.character(ens$Value))
+              qdevMax=quantile(valuesq,0.95,na.rm=T)
+              deMax=data.frame(id=names(qdevMax), values=unname(qdevMax), stringsAsFactors=FALSE)
+              qdMax=c(qdMax,deMax$values)
+              qdevMin=quantile(valuesq,0.03,na.rm=T)
+              devMin=data.frame(id=names(qdevMin), values=unname(qdevMin), stringsAsFactors=FALSE)          
+              qdMin=c(qdMin,devMin$values)          
+            }   
           }
+        }else{
+          #if(rcps!="historical"){
+          for(gcm in levels(dataAll$GCM)){
+            ens=subset(dataAll,dataAll$GCM==gcm&dataAll$Dataset==sets&dataAll$RCP==rcps)
+            if(nrow(ens)>0 & length(ens$Value)>0 & all(is.na(ens$Value))!=TRUE){ 
+              d=density(as.numeric(na.omit(ens$Value)))
+              ymax=c(ymax,d$y[which.max(d$y)])         
+              valuesq=as.numeric(as.character(ens$Value))
+              qdevMax=quantile(valuesq,0.95,na.rm=T)
+              deMax=data.frame(id=names(qdevMax), values=unname(qdevMax), stringsAsFactors=FALSE)
+              qdMax=c(qdMax,deMax$values)
+              qdevMin=quantile(valuesq,0.03,na.rm=T)
+              devMin=data.frame(id=names(qdevMin), values=unname(qdevMin), stringsAsFactors=FALSE)          
+              qdMin=c(qdMin,devMin$values)          
+            }            
+          }
+          #}
         }
-        if(nrow(ens)>0 & length(ens$Value)>0 & all(is.na(ens$Value))!=TRUE){ 
-          d=density(as.numeric(na.omit(ens$Value)))
-          ymax=c(ymax,d$y[which.max(d$y)])         
-          valuesq=as.numeric(as.character(ens$Value))
-          qdevMax=quantile(valuesq,0.95,na.rm=T)
-          deMax=data.frame(id=names(qdevMax), values=unname(qdevMax), stringsAsFactors=FALSE)
-          qdMax=c(qdMax,deMax$values)
-          qdevMin=quantile(valuesq,0.03,na.rm=T)
-          devMin=data.frame(id=names(qdevMin), values=unname(qdevMin), stringsAsFactors=FALSE)          
-          qdMin=c(qdMin,devMin$values)          
-        }
+        
       }
     }
     if(length(ymax)>0){
-      ymax=round(min(ymax)*2,digits = 3)
+      ymax=max(ymax)+max(ymax)*0.1 #round(min(ymax)*2,dxigits = 3)
     }else{ymax=1}
-    xmax=round(mean(qdMax)) #round(max(ens$Value))
-    xmin=round(min(qdMin))
+    xmax=round(max(qdMax)) #round(max(ens$Value))
+    xmin=min(qdMin)
     
-    xlimit = c(xmin,xmax);ylimit = c(0, ymax*2);
+    xlimit = c(xmin,xmax);ylimit = c(0, ymax);
     
     #       p <- ggplot(data=dataValuesF,aes(x=Date, y=Value, group = factor(GCM), colour=factor(GCM))) + 
     #         geom_point() + geom_line() + facet_wrap(~ Dataset, ncol=1)
     #       plot(p)
     
+    dataValuesF$class=NA
+    dataValuesF$class[which(dataValuesF$GCM!="ensemble" & dataValuesF$GCM!="obs")]="GCM"
+    dataValuesF$class[which(dataValuesF$GCM=="ensemble")]="Ensemble"
+    dataValuesF$class[which(dataValuesF$GCM=="obs")]="Obs"
+    dataValuesF$class <- as.factor(dataValuesF$class)  
     
-    shortLevels=c(levels(dataValuesF$GCM)[c(-which(levels(dataValuesF$GCM)=="obs"),-which(levels(dataValuesF$GCM)=="ensemble"))],levels(dataValuesF$GCM)[which(levels(dataValuesF$GCM)=="obs")],levels(dataValuesF$GCM)[which(levels(dataValuesF$GCM)=="ensemble")])
-    dataValuesF$GCM2=factor(dataValuesF$GCM,levels=shortLevels)      
     
-    p1 <- ggplot(data = dataValuesF, aes(x=as.numeric(as.character(Value)), group=factor(GCM2), colour=factor(GCM2),size=factor(GCM2))) + #
+    
+    shortLevels=c(levels(dataValuesF$GCM)[c(-which(levels(dataValuesF$GCM)=="obs"),-which(levels(dataValuesF$GCM)=="ensemble"))],levels(dataValuesF$GCM)[which(levels(dataValuesF$GCM)=="ensemble")],levels(dataValuesF$GCM)[which(levels(dataValuesF$GCM)=="obs")])
+    dataValuesF$GCM=factor(dataValuesF$GCM,levels=shortLevels)   
+    
+    dataValuesF$Dataset =factor(dataValuesF$Dataset,levels=c("Raw",levels(dataValuesF$Dataset)[-which(levels(dataValuesF$Dataset)=="Raw")]))
+    
+    if(length(model)>1){
+      breaksColor=c("Obs","Ensemble","GCM");hex_color=c("#000000","#D52ED7","#B2AFAF");
+      dataValuesF$class=factor(dataValuesF$class,levels=c("Obs","Ensemble","GCM"))
+      sizeLine=c(1,1,0.8)
+    }else{
+      breaksColor=c("Obs","GCM");hex_color=c("#000000","#B2AFAF");
+      dataValuesF$class=factor(dataValuesF$class,levels=c("Obs","GCM"))
+      sizeLine=c(1,0.8)
+    }
+    
+    dataValuesF$RCP <- paste(dataValuesF$RCP)
+    dataValuesF$RCP[which(dataValuesF$RCP == "historical")] <- "Historical"
+    dataValuesF$RCP[which(dataValuesF$RCP == "rcp26")] <- "RCP 2.6"
+    dataValuesF$RCP[which(dataValuesF$RCP == "rcp45")] <- "RCP 4.5"
+    dataValuesF$RCP[which(dataValuesF$RCP == "rcp60")] <- "RCP 6.0"
+    dataValuesF$RCP[which(dataValuesF$RCP == "rcp85")] <- "RCP 8.5"
+    dataValuesF$RCP <- as.factor(dataValuesF$RCP)  
+    
+    p1 <- ggplot(data = dataValuesF, aes(x=as.numeric(as.character(Value)), group=factor(GCM), colour=factor(class),size=factor(class)),fill=factor(class)) + #
       #                 theme(legend.title=element_blank(),panel.background=element_blank(),
       #                       axis.text=element_text(size=14),legend.text = element_text(colour="blue", size = 15, face = "bold"),
       #                       panel.grid.major = element_line(colour = "#81DAF5", size=0.2),panel.grid.minor = element_line(colour = "#CEECF5", size=0.1),   #,legend.position="bottom"
       #                       strip.text.x = element_text(size = 14),strip.text.y = element_text(size = 17),text = element_text(size = 19)#,panel.margin = unit(2, "lines")
       #                 )+
-      theme_light() + theme(panel.margin = unit(1, "lines"),legend.text = element_text(size = 15, face = "bold"),legend.title=element_blank(),axis.text=element_text(size=11,face = "bold"),strip.text.x = element_text(size = 14,colour="black",face = "bold"),strip.text.y = element_text(size = 17,colour="black",face = "bold"),text = element_text(size = 19))+
+      theme_light() + theme(panel.margin = unit(1, "lines"),legend.text = element_text(size = 14, face = "bold"),legend.title=element_blank(),
+                            axis.text=element_text(size=11,face = "bold"),strip.text.x = element_text(size = sizeTxt,colour="black",face = "bold"),
+                            strip.text.y = element_text(size = 18,colour="black",face = "bold"),text = element_text(size = 15,vjust=1),
+                            legend.position="bottom",axis.title.x = element_text(vjust=-0.3))+
       labs(x=xlabel, y=ylabel) +
       geom_line(stat="density") + #,size=1.2
       facet_grid(RCP ~ Dataset,scales="free_y", drop=T) +
-      scale_size_manual(values=c(rep(0.8,nlevels(dataValuesF$GCM2)-2),1.2,1.2))+
-      scale_color_manual(values=c(rep("#B2AFAF", nlevels(dataValuesF$GCM2)-2),"#000000","#D52ED7"))+
+      scale_size_manual(values=sizeLine)+
+      #scale_color_manual(values=c(rep("#B2AFAF", nlevels(dataValuesF$GCM)-2),"#000000","#D52ED7"))+
+      
+      scale_color_manual(breaks=breaksColor, values=hex_color)+
       #       scale_x_continuous(limits = c(20, 32),breaks=seq(20,32,by=1),expand = c(0, 0)) +
       #       scale_y_continuous(limits = c(0, 0.4),expand = c(0, 0))   
-      scale_x_continuous(limits = xlimit,expand = c(0, 0)) + #breaks=seq(0,400,by=100), 
-      scale_y_continuous(limits = ylimit,expand = c(0, 0))  # 
+      #scale_x_continuous(limits = xlimit,expand = c(0, 0)) + #breaks=seq(0,400,by=100),
+      #scale_y_continuous(limits = ylimit,expand = c(0, 0))  # 
+      coord_cartesian(xlim = xlimit,ylim=ylimit) +guides(fill=FALSE)
+    
     
     #ggtitle(paste("Eta and WorldClim ->",var)) +
     #guides(colour = guide_legend(override.aes = list(size=4)))
     
-    tiff(ofile, width=3000, height=1600, pointsize=8, compression='lzw',res=100)
+    tiff(ofile, width=1200, height=720, pointsize=8, compression='lzw',res=80)
     plot(p1)
     dev.off()
-    cat(paste0("..done density: ",varmod,"\n"))
-    
-    ##=================================================== PLOT DE DIFRENCIAS ==================================================================
-    
-  
-    #### Para calcular datos monthly
-#     if (varmod=="prec"){
-#       mongcm <- aggregate(merge[4:length(merge)], by=list("method"=merge$method,"rcp"=merge$rcp,"year"=year(as.Date(merge$date)), "month"=month(as.Date(merge$date))), sum) #,"year"=year(as.Date(merge$date))
-#     }else if(varmod=="tmax" || varmod=="tmin" || varmod=='tmean'||varmod=='hur'||varmod=='swind'||varmod=='srad'){
-#       mongcm <- aggregate(merge[4:length(merge)], by=list("method"=merge$method,"rcp"=merge$rcp,"year"=year(as.Date(merge$date)),month=month(as.Date(merge$date))), mean) #,"year"=year(as.Date(merge$date))
-#     }
-#     mongcm <- aggregate(mongcm[4:length(mongcm)],by=list("method"=mongcm$method,"rcp"=mongcm$rcp, month=mongcm$month),FUN=function(x) {mean(x,na.rm=T)})
-#     mongcm <- mongcm[,c("method","rcp","month","obs",model)]
-#   
-#     if(length(model)>1){
-#       mongcm$ensemble <- rowMeans(mongcm[,model],na.rm=T)
-#     }
-#     obs_agg <- melt(mongcm, id.vars=c("method","rcp","month","obs"))
-#     sub1=subset(obs_agg,obs_agg$method=='raw_merge' & obs_agg$rcp=="historical")
-#     sub2=subset(obs_agg,obs_agg$method=='raw_merge' & obs_agg$rcp=="rcp85")
-#     raw_del=sub2$value-sub1$value
-#     obs_del=sub2$value-sub1$value
-# 
-#     
-#     if (!file.exists(ofileDif)) {
-#       dataDiff<- data.frame()
-#       dataDiffAll<- data.frame()
-#       for(sets in levels(merge$method)){
-#         sub1=subset(merge,merge$method==sets & merge$rcp=="historical")
-#         for(rcps in rcpList){
-#           sub2=subset(merge,merge$method==sets & merge$rcp==rcps)
-#           if(nrow(sub1)==nrow(sub2)){
-#             dif=sub2[,5:length(sub2)]-sub1[,5:length(sub1)]
-#             dataDiff <-rbind(dataDiff,cbind(sets,paste0("Diff_",rcps,"-Hist"),dif))
-#           }
-#         }
-#       }
-#       if(length(dataDiff)>0){
-#         colnames(dataDiff) <- c("Dataset","RCP",names(merge[,5:length(merge)]))
-#         if(length(model)>1){
-#           m=dataDiff[,3:length(dataDiff)] #pos=which(is.na(m)==TRUE)
-#           gcm="ensemble"
-#           Value=rowMeans(m, na.rm = TRUE)
-#           dataset=dataDiff[1]
-#           rcp=dataDiff$RCP
-#           dataDiffAll <-rbind(dataDiffAll,cbind(dataset,rcp,gcm,Value))
-#         }
-#         for(i in 1:length(model)){
-#           gcm=rep(model[i],nrow(dataDiff)) 
-#           Value=dataDiff[i+2]
-#           dataset=dataDiff[1]
-#           colnames(Value) <- c("Value")
-#           rcp=dataDiff$RCP
-#           dataDiffAll <-rbind(dataDiffAll,cbind(dataset,rcp,gcm, Value))
-#         }    
-#         colnames(dataDiffAll) <- c("Dataset","RCP", "GCM","Value")
-#         dataValuesF=dataDiffAll
-#         ymax=c()
-#         qdMax=c()
-#         qdMin=c()
-#         for(rcps in levels(dataValuesF$RCP)){
-#           for(sets in levels(dataValuesF$Dataset)){
-#             if(length(model)>1){
-#               ens=subset(dataValuesF,dataValuesF$GCM=="ensemble"&dataValuesF$RCP==rcps&dataValuesF$Dataset==sets)
-#             }else{
-#               ens=subset(dataAll,dataAll$Dataset==sets)
-#             }
-#             if(nrow(ens)>0 & length(ens$Value)>0){ 
-#               d=density(as.numeric(na.omit(ens$Value)))
-#               ymax=c(ymax,d$y[which.max(d$y)])
-#               valuesq=as.numeric(as.character(ens$Value))
-#               qdevMax=quantile(valuesq,0.95,na.rm=T)
-#               deMax=data.frame(id=names(qdevMax), values=unname(qdevMax), stringsAsFactors=FALSE)
-#               qdMax=c(qdMax,deMax$values)
-#               qdevMin=quantile(valuesq,0.03,na.rm=T)
-#               devMin=data.frame(id=names(qdevMin), values=unname(qdevMin), stringsAsFactors=FALSE)          
-#               qdMin=c(qdMin,devMin$values)
-#             }
-#           }
-#         }
-#         ymax=round(max(ymax)*2,digits = 3)
-#         xmax=round(max(qdMax)) #round(max(ens$Value))
-#         xmin=round(min(qdMin))
-#         
-#         xlimit = c(xmin,xmax);ylimit = c(0, ymax);
-#         
-#         if(length(model)>1){
-#           shortLevels=c(levels(dataValuesF$GCM)[c(-which(levels(dataValuesF$GCM)=="obs"),-which(levels(dataValuesF$GCM)=="ensemble"))],levels(dataValuesF$GCM)[which(levels(dataValuesF$GCM)=="obs")],levels(dataValuesF$GCM)[which(levels(dataValuesF$GCM)=="ensemble")])
-#           dataValuesF$GCM2=factor(dataValuesF$GCM,levels=shortLevels)      
-#           
-#           p1 <- ggplot(data = dataValuesF, aes(x=as.numeric(as.character(Value)), group=factor(GCM2), colour=factor(GCM2),size=factor(GCM2))) + #
-#             theme_light() + theme(panel.margin = unit(1, "lines"),legend.text = element_text(size = 15, face = "bold"),legend.title=element_blank(),axis.text=element_text(size=11,face = "bold"),strip.text.x = element_text(size = 14,colour="black",face = "bold"),strip.text.y = element_text(size = 17,colour="black",face = "bold"),text = element_text(size = 19))+
-#             labs(x=xlabel, y=ylabel) +
-#             geom_line(stat="density") + #,size=1.2
-#             facet_grid(RCP ~ Dataset,scales="free_y", drop=T) +
-#             scale_size_manual(values=c(rep(0.8,nlevels(dataValuesF$GCM2)-1),1.2))+
-#             scale_color_manual(values=c(rep("#B2AFAF", nlevels(dataValuesF$GCM2)-1),"#D52ED7"))+
-#             scale_x_continuous(limits = xlimit,expand = c(0, 0)) + #breaks=seq(0,400,by=100), 
-#             scale_y_continuous(limits = ylimit,expand = c(0, 0))  # 
-#         }else{
-#           
-#           p1 <- ggplot(data = dataValuesF, aes(x=as.numeric(as.character(Value)), group=factor(GCM), colour=factor(GCM),size=factor(GCM))) + #
-#             theme_light() + theme(panel.margin = unit(1, "lines"),legend.text = element_text(size = 15, face = "bold"),legend.title=element_blank(),axis.text=element_text(size=11,face = "bold"),strip.text.x = element_text(size = 14,colour="black",face = "bold"),strip.text.y = element_text(size = 17,colour="black",face = "bold"),text = element_text(size = 19))+
-#             labs(x=xlabel, y=ylabel) +
-#             geom_line(stat="density") + #,size=1.2
-#             facet_grid(RCP ~ Dataset,scales="free_y", drop=T)
-#         }
-#         
-#         tiff(ofileDif, width=3000, height=1600, pointsize=8, compression='lzw',res=100)
-#         plot(p1)
-#         dev.off()
-#         cat(paste0("..done density diff: ",varmod,"\n"))
-#       }
-#     }
-    #========================================================================================
-    
-    
+    cat(paste0("..done density: ",varmod,"\n"))    
   }
   
 }
 
 ##plot changes
 bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat=-4.75, dirbase="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75"){
-    #var <- varlist[1]
-
-    dirsBC=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw_merge")
-    listBC=list.dirs(dirbase,recursive=F,full.names=F)
-    
-    dirsel=intersect(dirsBC,listBC) 
-    
-
-    ## Set working directory
-    setwd(dirbase)
-    
-    diroutGrap<-paste(dirbase,"/statistics/Projected_change",sep="")
-    if (!file.exists(diroutGrap)) {dir.create(diroutGrap, recursive=T)}
-    
-    #read baseline (observed + raw)
-    obs <- read.table(paste(dirbase,"/raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
-    gcmlist=colnames(obs)[c(-1,-2)]
-    obs$year <- as.integer(format(as.Date(obs$date, "%Y-%m-%d"),"%Y"))
-    obs$month <- as.integer(format(as.Date(obs$date, "%Y-%m-%d"),"%m"))
-    
-    
-    #calculate monthly means
-    if (varmod == "prec") {
-      obs_agg <- aggregate(obs[,c("obs",gcmlist)],by=list(month=obs$month,year=obs$year),FUN=function(x) {sum(x,na.rm=T)})
-    } else {
-      obs_agg <- aggregate(obs[,c("obs",gcmlist)],by=list(month=obs$month,year=obs$year),FUN=function(x) {mean(x,na.rm=T)})
-    }
-    obs_agg <- aggregate(obs_agg[,c("obs",gcmlist)],by=list(month=obs_agg$month),FUN=function(x) {mean(x,na.rm=T)})
-    
-    #calculate annual total and multi-model-mean (ensemble)
-    if (varmod == "prec") {
-      obs_agg <- rbind(obs_agg,c(13,colSums(obs_agg[,c("obs",gcmlist)],na.rm=T)))
-    } else {
-      obs_agg <- rbind(obs_agg,c(13,colMeans(obs_agg[,c("obs",gcmlist)],na.rm=T)))
-    }
+  #var <- varlist[1]
+  
+  dirsBC=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw_merge")
+  listBC=list.dirs(dirbase,recursive=F,full.names=F)
+  
+  dirsel=intersect(dirsBC,listBC) 
+  
+  ## colors methods
+  colorBC=data.frame(method=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw","obs"),hex=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','sandybrown','gray50'),color=c('rojo','azul','varde','morado','naranja','cafe','gris'))
+  
+  ## Set working directory
+  setwd(dirbase)
+  
+  # Y-axis labels by variable
+  if(varmod == "prec"){
+    ylabel <- "Percentage %"
+  }else if(varmod == "tmin"){
+    ylabel <- "Temperature (C)"
+  }else if(varmod == "tmax"){
+    ylabel <- "Temperature (C)"
+  }else if(varmod == "srad"){
+    ylabel <- "Radiation ((MJ/m2 day)"
+  }else if(varmod == "hur"){
+    ylabel <- "Relative Humidity (%)"
+  }else if(varmod == "swind"){
+    ylabel <- "Wind speed (m/s)"
+  }else if(varmod == "tmean"){
+    ylabel <- "Temperature (C)"
+  }
+  
+  diroutGrap<-paste(dirbase,"/statistics/Projected_change",sep="")
+  if (!file.exists(diroutGrap)) {dir.create(diroutGrap, recursive=T)}
+  
+  #read baseline (observed + raw)
+  obs <- read.table(paste(dirbase,"/raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+  gcmlist=colnames(obs)[c(-1,-2)]
+  obs$year <- as.integer(format(as.Date(obs$date, "%Y-%m-%d"),"%Y"))
+  obs$month <- as.integer(format(as.Date(obs$date, "%Y-%m-%d"),"%m"))
+  
+  #calculate monthly means
+  if (varmod == "prec") {
+    obs_agg <- aggregate(obs[,c("obs",gcmlist)],by=list(month=obs$month,year=obs$year),FUN=function(x) {sum(x,na.rm=T)})
+  } else {
+    obs_agg <- aggregate(obs[,c("obs",gcmlist)],by=list(month=obs$month,year=obs$year),FUN=function(x) {mean(x,na.rm=T)})
+  }
+  obs_agg <- aggregate(obs_agg[,c("obs",gcmlist)],by=list(month=obs_agg$month),FUN=function(x) {mean(x,na.rm=T)})
+  
+  #calculate annual total and multi-model-mean (ensemble)
+  #   if (varmod == "prec") {
+  #     obs_agg <- rbind(obs_agg,colSums(obs_agg[,c("obs",gcmlist)],na.rm=T))
+  #   } else {
+  #     obs_agg <- rbind(obs_agg,colMeans(obs_agg[,c("obs",gcmlist)],na.rm=T))
+  #   }
+  if(length(gcmlist)>1){
     obs_agg$ensemble <- rowMeans(obs_agg[,gcmlist],na.rm=T)
     his_agg <- obs_agg <- obs_agg
-    obs_agg[,c(gcmlist,"ensemble")] <- NA; his_agg[,"obs"] <- NA
-    obs_agg <- melt(obs_agg, id.vars="month"); names(obs_agg) <- c("month","model","obs")
-    obs_agg <- obs_agg[which(obs_agg$model == "obs"),]; obs_agg$model <- NULL
-    his_agg <- melt(his_agg, id.vars="month"); names(his_agg) <- c("month","model","his_raw")
-    his_agg <- his_agg[which(his_agg$model != "obs"),]
-    obs_agg <- merge(his_agg, obs_agg, by=c("month"),all=T)
+    obs_agg[,c(gcmlist,"ensemble")] <- NA; 
+  }else{
+    his_agg <- obs_agg <- obs_agg
+    obs_agg[,c(gcmlist)] <- NA; 
+  }
+  
+  his_agg[,"obs"] <- NA
+  obs_agg <- melt(obs_agg, id.vars="month"); names(obs_agg) <- c("month","model","obs")
+  obs_agg <- obs_agg[which(obs_agg$model == "obs"),]; obs_agg$model <- NULL
+  his_agg <- melt(his_agg, id.vars="month"); names(his_agg) <- c("month","model","his_raw")
+  his_agg <- his_agg[which(his_agg$model != "obs"),]
+  obs_agg <- merge(his_agg, obs_agg, by=c("month"),all=T)
+  
+  #bias-corrected projections
+  for (rcp in rcpList) {
+    #rcp <- rcpList[1]
+    listbcAll=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_",varmod, "_*")) # 
+    #   listbcAll=c(listbcAll,list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0("historical_",varmod, "_*")))
     
-    #bias-corrected projections
-    for (rcp in rcpList) {
-      #rcp <- rcpList[1]
-      listbcAll=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_",varmod, "_*")) # 
-      #   listbcAll=c(listbcAll,list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0("historical_",varmod, "_*")))
+    ## Define methods to plot
+    if (rcp == "historical"){
+      methods <- c("sh_","bc_", "qm_")
+      listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
+      methods_ln <-unique(dirname(listbc))  #c("BC Var", "BC", "QM", "RAW") # 
+    } else {
+      methods <- c("sh_","bc_","del_","cf_","qm_")
+      listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
+      methods_ln <- unique(dirname(listbc))  # c("CF Var", "CF", "BC Var", "BC", "QM", "RAW") #
+    } 
+    #methods_ln <- gsub("_"," ",methods_ln)
+    #methods_ln <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", methods_ln, perl=TRUE)
+    
+    for(j in 1:length(listbc)){
+      tmp=sapply(strsplit(listbc[j], '[/]'), "[[", 2)
+      databc <- read.table(paste(dirbase,"/",listbc[j],sep=""),header=T)
+      databc$year <- as.integer(format(as.Date(databc$date, "%Y-%m-%d"),"%Y"))
+      databc$month <- as.integer(format(as.Date(databc$date, "%Y-%m-%d"),"%m"))
       
-      ## Define methods to plot
-      if (rcp == "historical"){
-        methods <- c("sh_","bc_", "qm_")
-        listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
-        methods_ln <-unique(dirname(listbc))  #c("BC Var", "BC", "QM", "RAW") # 
+      #calculate monthly means
+      if (varmod == "prec") {
+        databc_agg <- aggregate(databc[,gcmlist],by=list(month=databc$month,year=databc$year),FUN=function(x) {sum(x,na.rm=T)})
       } else {
-        methods <- c("sh_","bc_","del_","cf_","qm_")
-        listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
-        methods_ln <- unique(dirname(listbc))  # c("CF Var", "CF", "BC Var", "BC", "QM", "RAW") #
-      } 
-      
-      for(j in 1:length(listbc)){
-        tmp=sapply(strsplit(listbc[j], '[/]'), "[[", 2)
-        databc <- read.table(paste(dirbase,"/",listbc[j],sep=""),header=T)
-        databc$year <- as.integer(format(as.Date(databc$date, "%Y-%m-%d"),"%Y"))
-        databc$month <- as.integer(format(as.Date(databc$date, "%Y-%m-%d"),"%m"))
-        
-        #calculate monthly means
-        if (varmod == "prec") {
-          databc_agg <- aggregate(databc[,gcmlist],by=list(month=databc$month,year=databc$year),FUN=function(x) {sum(x,na.rm=T)})
-        } else {
-          databc_agg <- aggregate(databc[,gcmlist],by=list(month=databc$month,year=databc$year),FUN=function(x) {mean(x,na.rm=T)})
-        }
-        databc_agg <- aggregate(databc_agg[,gcmlist],by=list(month=databc_agg$month),FUN=function(x) {mean(x,na.rm=T)})
-#         if (var == "pr") {
-#           databc_agg <- rbind(databc_agg,c(13,colSums(databc_agg[,gcmlist],na.rm=T)))
-#         } else {
-#           databc_agg <- rbind(databc_agg,c(13,colMeans(databc_agg[,gcmlist],na.rm=T)))
-#         }
+        databc_agg <- aggregate(databc[,gcmlist],by=list(month=databc$month,year=databc$year),FUN=function(x) {mean(x,na.rm=T)})
+      }
+      colnames(databc_agg)=c("month","year",gcmlist)
+      databc_agg <- aggregate(databc_agg[,gcmlist],by=list(month=databc_agg$month),FUN=function(x) {mean(x,na.rm=T)})
+      colnames(databc_agg)=c("month",gcmlist)
+      #         if (var == "pr") {
+      #           databc_agg <- rbind(databc_agg,c(13,colSums(databc_agg[,gcmlist],na.rm=T)))
+      #         } else {
+      #           databc_agg <- rbind(databc_agg,c(13,colMeans(databc_agg[,gcmlist],na.rm=T)))
+      #         }
+      if(length(gcmlist)>1){
         databc_agg$ensemble <- rowMeans(databc_agg[,gcmlist],na.rm=T)
-        databc_agg <- melt(databc_agg, id.vars="month")
-        names(databc_agg) <- c("month","model","bc")
-        
-        #raw projections
-        datarw <- read.table(paste(dirbase,"/raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
-        datarw$year <- as.integer(format(as.Date(datarw$date, "%Y-%m-%d"),"%Y"))
-        datarw$month <- as.integer(format(as.Date(datarw$date, "%Y-%m-%d"),"%m"))
-        
-        #calculate monthly means
-        if (varmod == "prec") {
-          datarw_agg <- aggregate(datarw[,gcmlist],by=list(month=datarw$month,year=datarw$year),FUN=function(x) {sum(x,na.rm=T)})
-        } else {
-          datarw_agg <- aggregate(datarw[,gcmlist],by=list(month=datarw$month,year=datarw$year),FUN=function(x) {mean(x,na.rm=T)})
-        }
-        datarw_agg <- aggregate(datarw_agg[,gcmlist],by=list(month=datarw_agg$month),FUN=function(x) {mean(x,na.rm=T)})
-#         if (var == "pr") {
-#           datarw_agg <- rbind(datarw_agg,c(13,colSums(datarw_agg[,gcmlist],na.rm=T)))
-#         } else {
-#           datarw_agg <- rbind(datarw_agg,c(13,colMeans(datarw_agg[,gcmlist],na.rm=T)))
-#         }
+      }
+      databc_agg <- melt(databc_agg, id.vars="month")
+      names(databc_agg) <- c("month","model","bc")
+      
+      #raw projections
+      datarw <- read.table(paste(dirbase,"/raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+      datarw$year <- as.integer(format(as.Date(datarw$date, "%Y-%m-%d"),"%Y"))
+      datarw$month <- as.integer(format(as.Date(datarw$date, "%Y-%m-%d"),"%m"))
+      
+      #calculate monthly means
+      if (varmod == "prec") {
+        datarw_agg <- aggregate(datarw[,gcmlist],by=list(month=datarw$month,year=datarw$year),FUN=function(x) {sum(x,na.rm=T)})
+      } else {
+        datarw_agg <- aggregate(datarw[,gcmlist],by=list(month=datarw$month,year=datarw$year),FUN=function(x) {mean(x,na.rm=T)})
+      }
+      colnames(datarw_agg)=c("month","year",gcmlist)
+      datarw_agg <- aggregate(datarw_agg[,gcmlist],by=list(month=datarw_agg$month),FUN=function(x) {mean(x,na.rm=T)})
+      colnames(datarw_agg)=c("month",gcmlist)
+      #         if (var == "pr") {
+      #           datarw_agg <- rbind(datarw_agg,c(13,colSums(datarw_agg[,gcmlist],na.rm=T)))
+      #         } else {
+      #           datarw_agg <- rbind(datarw_agg,c(13,colMeans(datarw_agg[,gcmlist],na.rm=T)))
+      #         }
+      if(length(gcmlist)>1){
         datarw_agg$ensemble <- rowMeans(datarw_agg[,gcmlist],na.rm=T)
-        datarw_agg <- melt(datarw_agg, id.vars="month")
-        names(datarw_agg) <- c("month","model","fut_raw")
-        
-        #merge data
-        data_g2 <- merge(databc_agg, datarw_agg, by=c("model","month"))
-        data_g2 <- merge(obs_agg, data_g2, by=c("model","month"),all=T)
-
-        if (varmod == "prec" | varmod == "srad") {
-          data_g2$his_raw <- as.numeric(sapply(data_g2$his_raw, FUN=function(x) {max(c(x,0.01))}))
-          data_g2$obs <- as.numeric(sapply(data_g2$obs, FUN=function(x) {max(c(x,0.01))}))
-        }
-        
-        #calculate change
-        if (varmod == "prec" | varmod == "srad") {
-          data_g2$chg_rw <- (data_g2$fut_raw - data_g2$his_raw) / data_g2$his_raw * 100
-          data_g2$chg_bc <- (data_g2$bc - data_g2$obs) / data_g2$obs * 100
-          ylabel=c("%")
-        } else {
-          data_g2$chg_rw <- data_g2$fut_raw - data_g2$his_raw
-          data_g2$chg_bc <- data_g2$bc - data_g2$obs
-          ylabel=c("")
-        }
-        
-        #plot by GCM
-        for (gcm in c(gcmlist,"ensemble")) {
-          #gcm <- "ensemble" #gcmlist[1]
-          plotdata <- data_g2[which(data_g2$model == gcm),]
-          plotdata$his_raw <- plotdata$obs <- plotdata$bc <- plotdata$fut_raw <- plotdata$model <- NULL
-          plotdata <- melt(plotdata, id.vars="month")
-          p <- ggplot(plotdata, aes(x=month, y=value, fill=variable)) + 
-            geom_bar(width=0.75,stat="identity",position=position_dodge(),size=0.5) + 
-            scale_fill_discrete(name="Type",
-                                labels=c("raw", sapply(strsplit(tmp, '[_]'), "[[", 1))) +
-            scale_x_continuous("Month",limits=c(0,13),breaks=seq(0,13,by=1)) + 
-            scale_y_continuous(paste0("Projected change ",ylabel))+ 
-            theme_bw() +
-            theme(axis.text.x=element_text(size=13),
-                  axis.text.y=element_text(size=13),
-                  axis.title.x=element_text(size=15),
-                  axis.title.y=element_text(size=15),
-                  legend.position="right",
-                  legend.title = element_text(size=14),
-                  legend.text = element_text(size=14),
-                  legend.key = element_rect(color="white")
-                  )
+        gcmlistMod=c(gcmlist,"ensemble")
+      }else{
+        gcmlistMod=c(gcmlist)
+      }
+      datarw_agg <- melt(datarw_agg, id.vars="month")
+      names(datarw_agg) <- c("month","model","fut_raw")
+      
+      #merge data
+      data_g2 <- merge(databc_agg, datarw_agg, by=c("model","month"))
+      data_g2 <- merge(obs_agg, data_g2, by=c("model","month"),all=T)
+      
+      if (varmod == "prec" | varmod == "srad") {
+        data_g2$his_raw <- as.numeric(sapply(data_g2$his_raw, FUN=function(x) {max(c(x,0.01))}))
+        data_g2$obs <- as.numeric(sapply(data_g2$obs, FUN=function(x) {max(c(x,0.01))}))
+      }
+      
+      #calculate change
+      if (varmod == "prec" | varmod == "srad") {
+        data_g2$chg_bc <- (data_g2$bc - data_g2$obs) / data_g2$obs * 100
+        data_g2$chg_rw <- (data_g2$fut_raw - data_g2$his_raw) / data_g2$his_raw * 100
+      } else {
+        data_g2$chg_bc <- data_g2$bc - data_g2$obs
+        data_g2$chg_rw <- data_g2$fut_raw - data_g2$his_raw
+      }
+      
+      # Long name months list
+      #       f_names <- c("","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December","")
+      f_names <- list("1"="January", "2"="February", "3"="March", "4"="April", "5"="May", "6"="June", "7"="July", "8"="August", "9"="September", "10"="October", "11"="November", "12"="December")
+      f_labeller <- function(variable, value){return(f_names[value])}
+      
+      
+      hecolor=colorBC[which(colorBC$method %in% c("raw",methods_ln[j])),]
+      hex_color=as.character(hecolor[,2])
+      methodtemp <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", gsub("_"," ",hecolor$method), perl=TRUE)
+      
+      #plot by GCM
+      for (gcm in gcmlistMod) {
+        #gcm <- "ensemble" #gcmlist[1]
+        plotdata <- data_g2[which(data_g2$model == gcm),]
+        plotdata$his_raw <- plotdata$obs <- plotdata$bc <- plotdata$fut_raw <- plotdata$model <- NULL
+        plotdata <- melt(plotdata, id.vars="month")
+        ofileDif=paste0(diroutGrap,"/",sapply(strsplit(tmp, '[_]'), "[[", 1),'_',rcp,'_',gcm,'_',varmod,".tif")
+        if (!file.exists(ofileDif)){        
+          #           p <- ggplot(plotdata, aes(x=month, y=value, fill=variable)) + 
+          #             geom_bar(width=0.75,stat="identity",position=position_dodge(),size=0.5) + 
+          #             scale_fill_discrete(name="Type",
+          #                                 labels=c("raw", sapply(strsplit(tmp, '[_]'), "[[", 1))) +
+          #             scale_x_continuous("Month",limits=c(0.5,12.5),breaks=seq(0,13,by=1),labels=f_names) + 
+          #             scale_y_continuous(paste0("Projected change ",ylabel))+ 
+          #             theme_bw() +
+          #             theme(axis.text.x=element_text(size=11,angle = 30, hjust = 1),
+          #                   axis.text.y=element_text(size=11),
+          #                   axis.title.x=element_text(size=12),
+          #                   axis.title.y=element_text(size=12),
+          #                   legend.position="bottom",
+          #                   legend.title = element_blank(), #element_text(size=14),
+          #                   legend.text = element_text(size=14),
+          #                   legend.key = element_rect(color="white")
+          #             )
+          #plotdata$variable =factor(plotdata$variable ,levels(plotdata$variable)[c(2,1)])
+          p <- ggplot(plotdata, aes(x=variable, y=value, fill=variable)) +  
+            geom_bar(width=0.95,stat="identity",position=position_dodge(),size=0.5)+   # GCMs (future)
+            #scale_fill_discrete(name="Type",labels=c("raw",methods_ln[j]))+
+            scale_fill_manual(breaks=c("chg_bc","chg_rw"), values=hex_color,labels=methodtemp)+
+            theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
+            #ggtitle(paste0("Comparison projected change : ", gcm)) +
+            labs(x=" " ,y=ylabel)+
+            facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
           
           
-          ofileDif=paste0(diroutGrap,"/",sapply(strsplit(tmp, '[_]'), "[[", 1),'_',rcp,'_',gcm,'_',varmod,".tif")
-          if (!file.exists(ofileDif)){
-            tiff(ofileDif, width=600, height=400, pointsize=8, compression='lzw',res=100)
-            plot(p)
-            dev.off()
-            cat(paste('Projected change:',rcp,gcm,varmod,'...done',sep='\t'))
-            cat('\n')
-          }
+          tiff(ofileDif, width=700, height=500, pointsize=8, compression='lzw',res=80)
+          plot(p)
+          cat(paste('Projected change:',rcp,gcm,varmod,'...done',sep='\t'))
+          cat('\n')
+          dev.off()
         }
         
       }
+      
     }
-   
+  }
+  
 }
 
 ##indicadores * no se esta usando
