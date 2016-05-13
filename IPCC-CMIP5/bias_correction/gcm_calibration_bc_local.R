@@ -1,7 +1,7 @@
 ######################################################################################################################
 #### Author : Carlos Navarro, Jaime Tarapues, Julian Rami?rez
-#### Date   : April 2016
-#### updated : January 2016
+#### Date   : May 2016
+#### updated : May 2016
 #### Contact: c.e.navarro@cgiar.org, j.e.tarapues@cgiar.org, j.r.villegas@cgiar.org
 #### OS     : Linux (all functions), Windows(need python script to extract data)
 ######################################################################################################################
@@ -43,26 +43,26 @@
 ## Nota: if run script in windows copy python script in the same folder: bc_extract_gcm.py
 ## version python: C:\\Python27\\ArcGIS10.1\\python.exe
 ######################################################################################################################
-## Meteorological series of Reanalysis
+## Climate Forcing Dataset
 # agmerra, grasp, agcfsr:
-#______________________
-# label  units
-# ---------------------
-# prec 	mm/day
-# tmean	C
-# tmin	C
-# tmax	C
-# srad	MJ m-2 day-1
+#   _______________
+#   label  units
+#   --------------
+#   prec 	mm/day
+#   tmean	C
+#   tmin	C
+#   tmax	C
+#   srad	MJ m-2 day-1
 # 
 # nnrp, princeton, wfd, wfdei:
-#______________________
-# label  units
-# ---------------------
-# prec   kg/m2/s
-# tmean	K
-# tmin	K
-# tmax	K
-# srad	W/m2
+#   ________________
+#   label  units
+#   ---------------
+#   prec   kg/m2/s
+#   tmean	K
+#   tmin	K
+#   tmax	K
+#   srad	W/m2
 ######################################################################################################################
 
 ## Extract Observations Time Series Function
@@ -277,7 +277,7 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
   # Set working directory
   setwd(dirbase)
   
-  dirtemp <- paste0(dirbase, "/raw_merge")
+  dirtemp <- paste0(dirbase, "/Raw_merge")
   if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}  
   
   ## Define extraction merged file (include OBS and GCM)
@@ -375,7 +375,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
   # Set working directory
   setwd(dirbase)
   
-  dirtemp <- paste0(dirbase, "/Bias_Correction_no_variability")
+  dirtemp <- paste0(dirbase, "/Bias_correction_no_variability")
   if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define SH output file
@@ -386,7 +386,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
     cat("\nBias Correction (excluding variability) calcs over: ", rcp, "\t", varmod, "\t", lon, "\t", lat," ... ")
     
     ## Load merged file
-    odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odat <- paste0("Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
     
     if(leap==1){ # quita los leap year
@@ -420,7 +420,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
     if (rcp != "historical"){
       
       ## Load future GCM merged file
-      odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+      odat_f <- paste0("Raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
       odat_f <- read.table(odat_f, header=T, sep=" ")  
       
       if(leap==1){ # quita los leap year
@@ -520,7 +520,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
 }
 
 ## Bias Correction Calculation including variability (BC)
-bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42"){
+bc_calcs <- function(varmod="prec", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42"){
   
   ## Load libraries
   #library(lubridate)
@@ -528,7 +528,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
   # Set working directory
   setwd(dirbase)
   
-  dirtemp <- paste0(dirbase, "/Bias_Correction_variability")
+  dirtemp <- paste0(dirbase, "/Bias_correction_variability")
   if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define BC output file
@@ -538,7 +538,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
     
     cat("\nBias Correction (with variability) Calcs: ", rcp, "\t", varmod, "\t", lon, "\t", lat, " ... ")
     
-    odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odat <- paste0("Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
     
     years <- year(as.Date(odat$date))
@@ -573,7 +573,7 @@ bc_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="C:
     if (rcp != "historical"){
       
       # Load future GCM merged file
-      odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+      odat_f <- paste0("Raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
       odat_f <- read.table(odat_f, header=T, sep=" ")
       
       ## Get GCM months and years, number of dates and years
@@ -675,7 +675,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
   # Set working directory
   setwd(dirbase)
   
-  dirtemp <- paste0(dirbase, "/Change_Factor_no_variability")
+  dirtemp <- paste0(dirbase, "/Change_factor_no_variability")
   if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define DEL output file
@@ -686,7 +686,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     cat("\nChange Factor (without variability) Calcs: ", rcp, "\t", varmod, "\t", lon, "\t", lat, " ... ")
     
     # Load merged file (historical)
-    odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odat <- paste0("Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
     # quita los leap year
     poslist=which(odat$date %in% grep("02-29",odat$date, value = TRUE))
@@ -699,7 +699,7 @@ del_calcs <- function(varmod="prec", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D
     nyears <- max(years) - min(years) +1    
     
     ## Load merged file (future)
-    odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odat_f <- paste0("Raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat_f <- read.table(odat_f, header=T, sep=" ")
     
     # quita los leap year
@@ -806,7 +806,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
   # Set working directory
   setwd(dirbase)
   
-  dirtemp <- paste0(dirbase, "/Change_Factor_variability")
+  dirtemp <- paste0(dirbase, "/Change_factor_variability")
   if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define DEL output file
@@ -817,7 +817,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     cat("\nChange Factor (with variability) Calcs: ", rcp, "\t", varmod, "\t", lon, "\t", lat, " ... ")
     
     # Load merged file (historical)
-    odat <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odat <- paste0("Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat <- read.table(odat, header=T, sep=" ")
     # quita los leap year
     poslist=which(odat$date %in% grep("02-29",odat$date, value = TRUE))
@@ -831,7 +831,7 @@ cf_calcs <- function(varmod="tmin", rcp="rcp45", lon=-73.5, lat=3.4, dirbase="D:
     nyears <- max(years) - min(years) +1     
     
     # Load merged file (future)
-    odat_f <- paste0("raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odat_f <- paste0("Raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odat_f <- read.table(odat_f, header=T, sep=" ")
     # quita los leap year
     poslist_f=which(odat_f$date %in% grep("02-29",odat_f$date, value = TRUE))
@@ -942,7 +942,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
   # Set working directory
   setwd(dirbase)
   
-  dirtemp <- paste0(dirbase, "/quantile_mapping")
+  dirtemp <- paste0(dirbase, "/Quantile_mapping")
   if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
   
   ## Define QM output file
@@ -955,7 +955,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
     cat("\nQuantile MApping Calcs: ", rcp, " ", varmod, " ... ")
     
     ## Load merged file (historical)
-    odatALL <- paste0("raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+    odatALL <- paste0("Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
     odatALL <- read.table(odatALL, header=T, sep=" ")
     #odatALL <- odatALL[1:5,]
     ngcm <- length(odatALL)- 2
@@ -971,7 +971,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
     
     if (rcp != "historical"){
       ## Load merged file (future)
-      odat_fALL <- paste0("raw_merge/raw_ts_", rcp, "_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+      odat_fALL <- paste0("Raw_merge/raw_ts_", rcp, "_",varmod,"_lon_",lon,"_lat_",lat,".tab")
       odat_fALL <- read.table(odat_fALL, header=T, sep=" ")
       #odat_fALL <- odat_fALL[1:5,]
       if(leap==1){ # quita los leap year
@@ -1118,7 +1118,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   ## Load libraries
   library(lubridate); library(ggplot2); library(reshape)
   
-  dirsBC=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw_merge")
+  dirsBC=c("Bias_correction_no_variability","Bias_correction_variability","Change_factor_no_variability","Change_factor_variability","Quantile_mapping","Raw_merge")
   listBC=list.dirs(dirbase,recursive=F,full.names=F)
   
   dirsel=intersect(dirsBC,listBC)  
@@ -1127,15 +1127,22 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   setwd(dirbase)
   
   #set size file tif ouput graphic
-  w=1000
-  h_timeseries=800
-  h=400  
+  if(length(dirsel)>2){
+    w=1000
+    h_timeseries=800
+    h=400  
+  }else{
+    w=800
+    h_timeseries=600
+    h=300
+  }  
+
   
   ## Set and create output directory
-  dirout <- paste0(dirbase, "/statistics")
-  dirout_var <- paste0(dirbase, "/statistics/Interannual_Variability")
-  dirout_ts <- paste0(dirbase, "/statistics/Timeseries")
-  dirout_freq <- paste0(dirbase, "/statistics/Indicators")
+  dirout <- paste0(dirbase, "/Statistics")
+  dirout_var <- paste0(dirbase, "/Statistics/Interannual_Variability")
+  dirout_ts <- paste0(dirbase, "/Statistics/Timeseries")
+  dirout_freq <- paste0(dirbase, "/Statistics/Indicators")
   
   if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}
   if (!file.exists(dirout_var)) {dir.create(dirout_var, recursive=T)}
@@ -1169,17 +1176,17 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   
   rownames(merge) <- NULL
   
-  # cambio de nombre raw_merge to raw
+  # cambio de nombre Raw_merge to raw
   merge$method <- paste(merge$method)
-  merge$method[which(merge$method == "raw_merge")] <- "Raw"
-  merge$method[which(merge$method == "Bias_Correction_no_variability")] <- "Bias correction no variability"
-  merge$method[which(merge$method == "Bias_Correction_variability")] <- "Bias correction variability"
-  merge$method[which(merge$method == "Change_Factor_no_variability")] <- "Change factor no variability"
-  merge$method[which(merge$method == "Change_Factor_variability")] <- "Change factor variability"
-  merge$method[which(merge$method == "quantile_mapping")] <- "Quantile mapping"
+  merge$method[which(merge$method == "Raw_merge")] <- "Raw"
+  merge$method[which(merge$method == "Bias_correction_no_variability")] <- "Bias correction no variability"
+  merge$method[which(merge$method == "Bias_correction_variability")] <- "Bias correction variability"
+  merge$method[which(merge$method == "Change_factor_no_variability")] <- "Change factor no variability"
+  merge$method[which(merge$method == "Change_factor_variability")] <- "Change factor variability"
+  merge$method[which(merge$method == "Quantile_mapping")] <- "Quantile mapping"
   merge$method <- as.factor(merge$method)  
   
-  #merge=subset(merge,merge$method!="quantile_mapping"& merge$method!="Bias_Correction_no_variability")
+  #merge=subset(merge,merge$method!="Quantile_mapping"& merge$method!="Bias_correction_no_variability")
   # Y-axis labels by variable
   if(varmod == "prec"){
     ylabel <- "Precipitation (mm)"; flabel <- "Rainfall Frequency (days/month)";limit = c(0,250);
@@ -1239,8 +1246,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
     if (!file.exists(ots)) {
       
       if (rcp == "historical"){  # Historical plot includes observations
-        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        cat(paste0("\nTime series daily plot  ", rcp, " ", varmod, " ", gcm))
+        tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=obs_agg) + 
           #geom_line(aes_string(x="date", y=names(obs_agg)[3],linetype = "leg"),colour='gray50',size=0.2, shape=1) +   # Observations
           geom_line(aes_string(x="date", y=names(obs_agg)[i+3], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
@@ -1249,8 +1256,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
           labs(x="Date (days)", y=ylabel)+guides(fill=guide_legend(ncol=3,byrow=TRUE))
       } else {
-        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        cat(paste0("\nTime series daily plot  ", rcp, " ", varmod, " ", gcm))
+        tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=merge_mod) +  
           geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2)+   # GCMs (future)
           facet_wrap(~ method, ncol=1) + 
@@ -1287,9 +1294,11 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   obs <- obs_agg[which(obs_agg$method == obs_agg$method[1]),"obs"]
   obs <- matrix(1, length(obs), ngcm) * obs
   colnames(obs) <- gcmlist
-  obs_agg <- rbind(obs_agg, cbind("method"=rep("Obs", dim(obs)[1]),obs_agg[which(obs_agg$method == obs_agg$method[1]),c("month","year","obs")], obs,'date'=obs_agg[which(obs_agg$method == obs_agg$method[1]),'date']))
+  if (rcp == "historical"){ 
+    obs_agg <- rbind(obs_agg, cbind("method"=rep("Obs", dim(obs)[1]),obs_agg[which(obs_agg$method == obs_agg$method[1]),c("month","year","obs")], obs,'date'=obs_agg[which(obs_agg$method == obs_agg$method[1]),'date']))
+  }
   obs_agg$method <- as.factor(obs_agg$method)
-  obs_agg=obs_agg[-which(is.na(obs_agg[,names(obs_agg)[i+4]])),]  
+  #obs_agg=obs_agg[-which(is.na(obs_agg[,names(obs_agg)[i+4]])),]  
   
   hecolor=colorBC[which(colorBC$method %in% levels(merge_mod$method)),]
   hex_color=as.character(hecolor[,2])  
@@ -1308,8 +1317,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
     if (!file.exists(ots)) {
       
       if (rcp == "historical"){  # Historical plot includes observations
-        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        cat(paste0("\nTime series monthly plot  ", rcp, " ", varmod, " ", gcm))
+        tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=obs_agg) + 
           #geom_line(aes_string(x="date", y="obs",linetype = "method"),colour='gray50',size=0.2, shape=1,data=obs_sel) +   # Observations
           geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
@@ -1318,8 +1327,8 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14)) +
           labs(x="Date (days)", y=ylabel)
       } else {
-        cat(paste0("\nTime series plot  ", rcp, " ", varmod, " ", gcm))
-        tiff(ots, width=1000, height=h_timeseries, pointsize=8, compression='lzw',res=100)
+        cat(paste0("\nTime series monthly plot  ", rcp, " ", varmod, " ", gcm))
+        tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=obs_agg) +  
           geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2)+   # GCMs (future)
           facet_wrap(~ method, ncol=1) + 
@@ -1428,11 +1437,11 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   #   
   ##### Interannual Variability Barblot
   
-  merge3=merge #subset(merge,merge$method=="quantile_mapping"|merge$method=='raw')
+  merge3=merge #subset(merge,merge$method=="Quantile_mapping"|merge$method=='raw')
   merge3$method <- as.factor(merge3$method)  
   intannvar <- paste0(dirout_var, "/var_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
   if (!file.exists(intannvar) & nrow(merge3) > 0) {
-    #subset(merge3,merge3$method=="Change_Factor_no_variability"|merge3$method=="Bias_Correction_no_variability")
+    #subset(merge3,merge3$method=="Change_factor_no_variability"|merge3$method=="Bias_correction_no_variability")
     ## Get months and years from merged file
     months <- month(as.Date(merge3$date))
     years <- year(as.Date(merge3$date))
@@ -1464,7 +1473,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
       stdgcm <- rbind(stdgcm, cbind("method"=rep("Obs", dim(obs)[1]),stdgcm[which(stdgcm$method == stdgcm$method[1]),][2], obs))
       rownames(stdgcm) <- NULL
       
-      #shortLevels=c('raw','obs',levels(stdgcm$method)[c(-which(levels(stdgcm$method)=="obs"),-which(levels(stdgcm$method)=="raw"),-which(levels(stdgcm$method)=="raw_merge"))])
+      #shortLevels=c('raw','obs',levels(stdgcm$method)[c(-which(levels(stdgcm$method)=="obs"),-which(levels(stdgcm$method)=="raw"),-which(levels(stdgcm$method)=="Raw_merge"))])
       #stdgcm$method=factor(stdgcm$method,levels=shortLevels)
       
       ## Define variables to plot ggplot functions in command line
@@ -1483,7 +1492,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         
         cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
         
-        tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
+        tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=w, height=h, pointsize=8, compression='lzw',res=80)
         p <- ggplot(stdgcm, aes_string(x="method", y=names(stdgcm)[i+2], fill="method")) + 
           geom_boxplot(outlier.size = 1)+
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
@@ -1519,7 +1528,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         
         cat(paste0("\nInterannual variability boxplot  ", rcp, " ", varmod, " ", gcm))
         
-        tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
+        tiff(paste0(dirout_var, "/var_", rcp,"_",gcm,"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=w, height=h, pointsize=8, compression='lzw',res=80)
         p <- ggplot(stdgcm, aes_string(x="method", y=names(stdgcm)[i+2], fill="method")) + 
           geom_boxplot(outlier.size = 1)+
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
@@ -1587,7 +1596,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           assign("freq_mod", freq_mod,  envir = .GlobalEnv)
           assign("i", i,  envir = .GlobalEnv)
           
-          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
+          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[i],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=w, height=h, pointsize=8, compression='lzw',res=80)
           f <- ggplot(data=freq_mod, aes(x=method, y=model, fill=method)) + 
             theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
             #scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3, "white")) +
@@ -1621,7 +1630,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
           #assign("freq_mod", freq,  envir = .GlobalEnv)
           #assign("l", l,  envir = .GlobalEnv)
           
-          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[l],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=h, pointsize=8, compression='lzw',res=80)
+          tiff(paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[l],"_",varmod,"_lon_",lon,"_lat_",lat,".tif"), width=w, height=h, pointsize=8, compression='lzw',res=80)
           f <- ggplot(data=freq_mod, aes(x=method, y=model_f, fill=method)) + # GCMs (historical)
             theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), legend.title=element_blank(),axis.title.y = element_text(size = rel(0.8))) +
             #scale_fill_manual(values=c(green2, orange, red, red2, blue2, blue3)) +
@@ -1653,7 +1662,7 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
   ## Load libraries
   #library(lubridate); library(ggplot2); library(reshape)
   
-  dirsBC=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw_merge")
+  dirsBC=c("Bias_correction_no_variability","Bias_correction_variability","Change_factor_no_variability","Change_factor_variability","Quantile_mapping","Raw_merge")
   listBC=list.dirs(dirbase,recursive=F,full.names=F)
   
   dirsel=intersect(dirsBC,listBC)  
@@ -1662,16 +1671,20 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
   setwd(dirbase)
   
   ## Set and create output directory
-  dirout <- paste0(dirbase, "/statistics")
-  dirout_d <- paste0(dirbase, "/statistics/Density")
+  dirout <- paste0(dirbase, "/Statistics")
+  dirout_d <- paste0(dirbase, "/Statistics/Density")
   if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}
   if (!file.exists(dirout_d)) {dir.create(dirout_d, recursive=T)}
   
   ## set size text x plot
   if(length(dirsel)>2){
     sizeTxt=11
+    w=1200
+    h=720
   }else{
     sizeTxt=18
+    w=1000
+    h=500    
   }
   
   ## Define end and start year to plot
@@ -1713,14 +1726,14 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
     
     #merge=merge[,1:5] #******************************
     
-    # cambio de nombre raw_merge to raw
+    # cambio de nombre Raw_merge to raw
     merge$method <- paste(merge$method)
-    merge$method[which(merge$method == "raw_merge")] <- "Raw"
-    merge$method[which(merge$method == "Bias_Correction_no_variability")] <- "Bias correction no variability"
-    merge$method[which(merge$method == "Bias_Correction_variability")] <- "Bias correction variability"
-    merge$method[which(merge$method == "Change_Factor_no_variability")] <- "Change factor no variability"
-    merge$method[which(merge$method == "Change_Factor_variability")] <- "Change factor variability"
-    merge$method[which(merge$method == "quantile_mapping")] <- "Quantile mapping"
+    merge$method[which(merge$method == "Raw_merge")] <- "Raw"
+    merge$method[which(merge$method == "Bias_correction_no_variability")] <- "Bias correction no variability"
+    merge$method[which(merge$method == "Bias_correction_variability")] <- "Bias correction variability"
+    merge$method[which(merge$method == "Change_factor_no_variability")] <- "Change factor no variability"
+    merge$method[which(merge$method == "Change_factor_variability")] <- "Change factor variability"
+    merge$method[which(merge$method == "Quantile_mapping")] <- "Quantile mapping"
     merge$method <- as.factor(merge$method)  
     
     #     merge$rcp <- paste(merge$rcp)
@@ -1923,7 +1936,7 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
     #ggtitle(paste("Eta and WorldClim ->",var)) +
     #guides(colour = guide_legend(override.aes = list(size=4)))
     
-    tiff(ofile, width=1200, height=720, pointsize=8, compression='lzw',res=80)
+    tiff(ofile, width=w, height=h, pointsize=8, compression='lzw',res=80)
     plot(p1)
     dev.off()
     cat(paste0("..done density: ",varmod,"\n"))    
@@ -1935,13 +1948,13 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
 bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat=-4.75, dirbase="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75"){
   #var <- varlist[1]
   
-  dirsBC=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw_merge")
+  dirsBC=c("Bias_correction_no_variability","Bias_correction_variability","Change_factor_no_variability","Change_factor_variability","Quantile_mapping","Raw_merge")
   listBC=list.dirs(dirbase,recursive=F,full.names=F)
   
   dirsel=intersect(dirsBC,listBC) 
   
   ## colors methods
-  colorBC=data.frame(method=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw","obs"),hex=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','sandybrown','gray50'),color=c('rojo','azul','varde','morado','naranja','cafe','gris'))
+  colorBC=data.frame(method=c("Bias_correction_no_variability","Bias_correction_variability","Change_factor_no_variability","Change_factor_variability","Quantile_mapping","raw","obs"),hex=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','sandybrown','gray50'),color=c('rojo','azul','varde','morado','naranja','cafe','gris'))
   
   ## Set working directory
   setwd(dirbase)
@@ -1963,11 +1976,11 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
     ylabel <- "Temperature (C)"
   }
   
-  diroutGrap<-paste(dirbase,"/statistics/Projected_change",sep="")
+  diroutGrap<-paste(dirbase,"/Statistics/Projected_change",sep="")
   if (!file.exists(diroutGrap)) {dir.create(diroutGrap, recursive=T)}
   
   #read baseline (observed + raw)
-  obs <- read.table(paste(dirbase,"/raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+  obs <- read.table(paste(dirbase,"/Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
   gcmlist=colnames(obs)[c(-1,-2)]
   obs$year <- as.integer(format(as.Date(obs$date, "%Y-%m-%d"),"%Y"))
   obs$month <- as.integer(format(as.Date(obs$date, "%Y-%m-%d"),"%m"))
@@ -2048,7 +2061,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
       names(databc_agg) <- c("month","model","bc")
       
       #raw projections
-      datarw <- read.table(paste(dirbase,"/raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+      datarw <- read.table(paste(dirbase,"/Raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
       datarw$year <- as.integer(format(as.Date(datarw$date, "%Y-%m-%d"),"%Y"))
       datarw$month <- as.integer(format(as.Date(datarw$date, "%Y-%m-%d"),"%m"))
       
@@ -2138,7 +2151,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
             facet_grid(~month, scales="free_y", drop=T, labeller=f_labeller)
           
           
-          tiff(ofileDif, width=700, height=500, pointsize=8, compression='lzw',res=80)
+          tiff(ofileDif, width=700, height=400, pointsize=8, compression='lzw',res=80)
           plot(p)
           cat(paste('Projected change:',rcp,gcm,varmod,'...done',sep='\t'))
           cat('\n')
@@ -2158,7 +2171,7 @@ bc_statsInd <- function(varmod="prec", rcp="historical",yi=1998, yf=2013, lon=-7
   ## Load libraries
   library(lubridate); library(ggplot2); library(reshape)
   
-  dirsBC=c("Bias_Correction_no_variability","Bias_Correction_variability","Change_Factor_no_variability","Change_Factor_variability","quantile_mapping","raw_merge")
+  dirsBC=c("Bias_correction_no_variability","Bias_correction_variability","Change_factor_no_variability","Change_factor_variability","Quantile_mapping","Raw_merge")
   listBC=list.dirs(dirbase,recursive=F,full.names=F)
   
   dirsel=intersect(dirsBC,listBC)  
@@ -2335,7 +2348,7 @@ bc_statsInd <- function(varmod="prec", rcp="historical",yi=1998, yf=2013, lon=-7
     
     
     ## Set apart observations
-    obs <- freq_py[which(freq_py$method == "quantile_mapping"), ]$obs
+    obs <- freq_py[which(freq_py$method == "Quantile_mapping"), ]$obs
     freq_py$obs <- NULL
     freq_tx$obs <- NULL
     freq_tn$obs <- NULL
@@ -2350,13 +2363,13 @@ bc_statsInd <- function(varmod="prec", rcp="historical",yi=1998, yf=2013, lon=-7
       # Join observations at the end of std GCM values
       obs <- matrix(1, length(obs)[1], ngcm) * obs
       colnames(obs) <- gcmlist
-      freq_p <- rbind(freq_p, cbind("method_p"=rep("OBS", dim(obs)[1]),freq_p[which(freq_p$method == "quantile_mapping"),][2:3], obs))
-      freq_py <- rbind(freq_py, cbind("method_py"=rep("OBS", dim(obs)[1]),freq_py[which(freq_py$method == "quantile_mapping"),][2:3], obs))
-      freq_tmx <- rbind(freq_tmx, cbind("method_tmx"=rep("OBS", dim(obs)[1]),freq_tmx[which(freq_tmx$method == "quantile_mapping"),][2:3], obs))
-      freq_tmn <- rbind(freq_tmn, cbind("method_tmn"=rep("OBS", dim(obs)[1]),freq_tmn[which(freq_tmn$method == "quantile_mapping"),][2:3], obs))
-      freq_tx <- rbind(freq_tx, cbind("method_tmx"=rep("OBS", dim(obs)[1]),freq_tx[which(freq_tx$method == "quantile_mapping"),][2:3], obs))
-      freq_tn <- rbind(freq_tn, cbind("method_tmn"=rep("OBS", dim(obs)[1]),freq_tn[which(freq_tn$method == "quantile_mapping"),][2:3], obs))
-      freq_s <- rbind(freq_s, cbind("method_s"=rep("OBS", dim(obs)[1]),freq_s[which(freq_s$method == "quantile_mapping"),][2:3], obs))
+      freq_p <- rbind(freq_p, cbind("method_p"=rep("OBS", dim(obs)[1]),freq_p[which(freq_p$method == "Quantile_mapping"),][2:3], obs))
+      freq_py <- rbind(freq_py, cbind("method_py"=rep("OBS", dim(obs)[1]),freq_py[which(freq_py$method == "Quantile_mapping"),][2:3], obs))
+      freq_tmx <- rbind(freq_tmx, cbind("method_tmx"=rep("OBS", dim(obs)[1]),freq_tmx[which(freq_tmx$method == "Quantile_mapping"),][2:3], obs))
+      freq_tmn <- rbind(freq_tmn, cbind("method_tmn"=rep("OBS", dim(obs)[1]),freq_tmn[which(freq_tmn$method == "Quantile_mapping"),][2:3], obs))
+      freq_tx <- rbind(freq_tx, cbind("method_tmx"=rep("OBS", dim(obs)[1]),freq_tx[which(freq_tx$method == "Quantile_mapping"),][2:3], obs))
+      freq_tn <- rbind(freq_tn, cbind("method_tmn"=rep("OBS", dim(obs)[1]),freq_tn[which(freq_tn$method == "Quantile_mapping"),][2:3], obs))
+      freq_s <- rbind(freq_s, cbind("method_s"=rep("OBS", dim(obs)[1]),freq_s[which(freq_s$method == "Quantile_mapping"),][2:3], obs))
       
       rownames(freq_py) <- NULL
       
@@ -2690,8 +2703,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
             gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
             merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
             
-            odat <- paste0(dirout,"/raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
-            hdat <- paste0(dirout,"/raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+            odat <- paste0(dirout,"/Raw_merge/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
+            hdat <- paste0(dirout,"/Raw_merge/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
             
             if(file.exists(odat) && file.exists(hdat)){
               for(methBC in methBCList){
@@ -2748,7 +2761,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # dirWork=  "D:/jetarapues/Request/Request_jramirez" #"/home/jtarapues/request/request_oriana" #  "/home/temp" # directorio de salida
 # dirgcm <-  "T:/gcm/cmip5/raw/daily" # "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # 
 # dirobs <-  "U:/cropdata" # "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #
-# dataset <- "station"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princenton, princenton-afr
+# dataset <- "station"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princeton, princenton-afr
 # methBCList <- c('3','4','5') #c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
 # varlist <- c("pr","tasmax","tasmin","rsds")
 # Obyi <- 1980#1985
