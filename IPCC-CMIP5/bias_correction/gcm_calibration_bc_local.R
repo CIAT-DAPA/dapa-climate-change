@@ -66,7 +66,7 @@
 ######################################################################################################################
 
 ## Extract Observations Time Series Function
-obs_extraction <- function(dataset="wfd", varmod="prec",yi=2007, yf=2013, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="D:/jetarapues/Request/Request_cnavarro/bc", dircdo="cdo",ver_python,dirScript_py){
+obs_extraction <- function(dataset="wfd", varmod="tmean",yi=2007, yf=2013, lon=-73.5, lat=3.4, dirobs="U:/cropdata", dirout="D:/jetarapues/Request/Request_cnavarro/bc", dircdo="cdo",ver_python,dirScript_py){
   
   ## Load libraries
   #library(raster); library(ncdf); library(rgdal);
@@ -120,7 +120,7 @@ obs_extraction <- function(dataset="wfd", varmod="prec",yi=2007, yf=2013, lon=-7
           datobs$value[datobs$value<0] <- NA            
         }else if (varmod == "srad") {
           datobs$value <- datobs$value * 0.0864  # W m-2 to MJ m-2 day-1
-        }else if(varmod =="tmax" || varmod =="tmin") {
+        }else if(varmod =="tmax" || varmod =="tmin" || varmod =="tmean") {
           datobs$value <- datobs$value - 273.15
           datobs$value[datobs$value>60] <- NA    
           datobs$value[datobs$value<50*-1] <- NA            
@@ -251,7 +251,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
             datgcm$value[datgcm$value<0] <- NA                 
           } else if (varmod == "srad") {
             datgcm$value <- datgcm$value * 0.0864  # W m-2 to MJ m-2 day-1
-          } else if(varmod =="tmax" || varmod =="tmin") {
+          } else if(varmod =="tmax" || varmod =="tmin" || varmod =="tmean") {
             datgcm$value <- datgcm$value- 273.15 #as.numeric(as.character(datgcm$value))
             #datgcm$value =as.numeric(as.character(datgcm$value))
             datgcm$value[datgcm$value>60] <- NA    

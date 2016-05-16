@@ -100,7 +100,7 @@ obs_extraction <- function(dataset="wfd", varmod="prec",yi=2007, yf=2013, lon=-7
           datobs$value[datobs$value<0] <- NA            
         }else if (varmod == "srad") {
           datobs$value <- datobs$value * 0.0864  # W m-2 to MJ m-2 day-1
-        }else if(varmod =="tmax" || varmod =="tmin") {
+        }else if(varmod =="tmax" || varmod =="tmin" || varmod =="tmean") {
           datobs$value <- datobs$value - 273.15
           datobs$value[datobs$value>60] <- NA    
           datobs$value[datobs$value<50*-1] <- NA            
@@ -231,7 +231,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
             datgcm$value[datgcm$value<0] <- NA                 
           } else if (varmod == "srad") {
             datgcm$value <- datgcm$value * 0.0864  # W m-2 to MJ m-2 day-1
-          } else if(varmod =="tmax" || varmod =="tmin") {
+          }else if(varmod =="tmax" || varmod =="tmin" || varmod =="tmean") {
             datgcm$value <- datgcm$value- 273.15 #as.numeric(as.character(datgcm$value))
             #datgcm$value =as.numeric(as.character(datgcm$value))
             datgcm$value[datgcm$value>60] <- NA    
@@ -2655,7 +2655,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
       if(dataset=="station"){
         dirtemp <- paste0(dirout, "/obs/station")
         if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
-        df = read.table(fileStat, header = TRUE,sep=sepFile)
+        df = read.table(url(fileStat), header = TRUE,sep=sepFile)
         dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
         station=data.frame(cbind(dateSta,df[,which(colnames(df)==varmod)]))   
         names(station)=c("date","value")
@@ -2766,7 +2766,7 @@ lat <- 3.502600#9.883333 #
 #gcmlist <-c("bcc_csm1_1","bnu_esm","cccma_canesm2","gfdl_esm2g","inm_cm4","ipsl_cm5a_lr","miroc_miroc5","mpi_esm_mr","ncc_noresm1_m")#c("cesm1_cam5") # "ALL" #  bcc_csm1_1_m
 gcmlist <-c("bcc_csm1_1","bnu_esm")
 statList<-c('1','2','3') # 1=files bc, 2=tables, 3=graphics c('1')# 
-fileStat<- "http://172.22.52.48/bias_tmp/1_Turrialba_daily_raw.txt" # para cargar archivos desde la plataforma no funciona para local
+fileStat<- "http://172.22.52.48/bias_tmp/stat_-49.28_-16.47.txt" # para cargar archivos desde la plataforma no funciona para local
 sepFile<-"tab"# tab,puntocoma,space,Comma
 leep<-1 # 1=rellena los leep year con el promedio del dia antes y despues, 2=quita los dias leep year, 3=conserva los datos con leeps NA
 typeData<-1 #1=Remueve los NA si todos los modelos lo???s tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # 2 no funciona para qmap
