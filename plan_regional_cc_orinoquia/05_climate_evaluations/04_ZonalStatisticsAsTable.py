@@ -11,7 +11,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: python ZonalStatisticsAsTable.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ie: python ZonalStatisticsAsTable.py \\dapadfs\workspace_cluster_6\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\anomalias\ideam \\dapadfs\workspace_cluster_6\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\_masks\llanos_adm2.shp D:\outdir"
+	print "   - ie: python ZonalStatisticsAsTable.py X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\anomalias\hur\anomalies \\dapadfs\workspace_cluster_6\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\_masks\llanos_adm2.shp X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\evaluaciones\02-anomalies\dptos_statistics"
 	sys.exit(1)
 
 # Set variables
@@ -37,23 +37,24 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 # Set workspace
 gp.workspace = dirbase 
 rcplist = "rcp26", "rcp45", "rcp85"
-varlist = "prec", "tmax", "tmin"
+# varlist = "prec", "tmax", "tmin"
+var = "hur"
 
 for rcp in rcplist:
 	
-	for var in varlist:
+	# for var in varlist:
 	
-		for month in range(1, 12+1, 1):
+	# for month in range(1, 12+1, 1):
+
+	raster = dirbase + "\\" + rcp + "\\ensemble\\" + var + "_ann.tif"
+	outTable = dirout + "\\" + rcp + "_" + os.path.basename(raster)[:-4] + ".dbf"
+	
+	if not gp.Exists(outTable):
 		
-			raster = dirbase + "\\" + rcp + "\\" + var + "_" + month + ".tif"
-			outTable = dirout + "\\" + rcp + "_" + os.path.basename(raster)[:-4] + ".dbf"
-			
-			if not gp.Exists(outTable):
-				
-				print raster
-				
-				# Zonal Statistical as table function
-				gp.ZonalStatisticsAsTable_sa(mask, "FID", raster, outTable, "DATA")
+		print raster
+		
+		# Zonal Statistical as table function
+		gp.ZonalStatisticsAsTable_sa(mask, "FID", raster, outTable, "DATA")
 
 
 # Join dbfs files extracted

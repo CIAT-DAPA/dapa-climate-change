@@ -1,0 +1,16 @@
+mv tmax*.log out
+mv tmax*.res out
+mv tmax*.opt out
+mv tmax*.sur out
+mv tmax*.lis out
+mv tmax*.cov out
+mv tmax*.out out
+mv tmax*.gcv out
+mv tmax*.grd out
+mv tcov*.grd out
+mv tmax*.img out
+mv tmax*.doc out
+mv tcov*.img out
+mv tcov*.doc out
+mv tmax*.not out
+mv tmax*.rej out

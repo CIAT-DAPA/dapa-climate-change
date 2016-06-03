@@ -1,5 +1,5 @@
 import os, sys, glob, string, shutil
-#python 06-MoveOutputsMS.py F:\cenavarro\ms\tmp X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\datos_diarios rcp85
+#python 06-MoveOutputsMS.py D:\cenavarro\ms\tmp X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\datos_diarios rcp26
 
 dirbase = sys.argv[1]
 dirout = sys.argv[2]
@@ -22,7 +22,7 @@ for fold in range(1, 23+1, 1):
 			# dsList = glob.glob(dirbase + "\\" + scenario + "_fold-" + str(fold).zfill(2) + "\\data\\10" + str(run) + "\\*")
 			# for ds in dsList:
 			
-			os.system('robocopy ' + dirbase + "\\" + scenario + "_fold-" + str(fold).zfill(2) + "\\data\\10" + str(run) + " " + outdir +' /MT:28 /NFL /NDL /E /MOVE')
+			os.system('robocopy ' + dirbase + "\\" + scenario + "_fold-" + str(fold).zfill(2) + "\\data\\10" + str(run) + " " + outdir +' /MT:8 /NFL /NDL /E /MOVE')
 			# try:
 				# # shutil.copy(ds, outdir)
 				

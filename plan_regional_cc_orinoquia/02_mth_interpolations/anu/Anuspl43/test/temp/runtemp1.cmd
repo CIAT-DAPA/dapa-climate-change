@@ -1,0 +1,15 @@
+../../exec/splina1 < tmaxa.cmd > tmaxa.log
+../../exec/gcvgml1 < tmaxagcv.cmd > tmaxagcv.log
+../../exec/lappnt1 < tmaxapnt.cmd > tmaxapnt.log
+../../exec/lapgrd1 < tmaxasum1.cmd > tmaxasum1.log
+../../exec/lapgrd1 < tmaxasum2.cmd > tmaxasum2.log
+../../exec/lapgrd1 < tmaxagrd.cmd > tmaxagrd.log
+../../exec/lapgrd1 < tmaxxygrd.cmd > tmaxxygrd.log
+../../exec/lapgrd1 < tmaxaimg.cmd > tmaxaimg.log
+../../exec/selnot1 < tmaxsel.cmd > tmaxsel.log
+../../exec/splinb1 < tmaxb.cmd > tmaxb.log
+../../exec/gcvgml1 < tmaxbgcv.cmd > tmaxbgcv.log
+../../exec/lapgrd1 < tmaxbgrd.cmd > tmaxbgrd.log
+../../exec/addnot1 < tmaxad1.cmd > tmaxad1.log
+../../exec/addnot1 < tmaxad2.cmd > tmaxad2.log
+../../exec/delnot1 < tmaxdel.cmd > tmaxdel.log

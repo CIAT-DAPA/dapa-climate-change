@@ -178,15 +178,98 @@ mths <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
 colnames(monthly_avg) <- c("Station", mths)
 
 
-## Add coordinates to the climatologies files
 
-st_loc <- read.table("S:/observed/weather_station/col-ideam/stations_location.txt", header=T)
-st_loc$Station <- paste0("X", st_loc$Station, "0") 
+## Add coordinates and location
 
-clim <- na.omit(merge(st_loc, monthly_avg, by = "Station", all = TRUE))
-clim$Station <- gsub("X", "", clim$Station)
+varList <- c("prec", 'tmin', "tmax")
+for (var in varList){
+  for (yr in c(1982,1983,1997,1998)){
+    
+    monthly_var <- read.csv(paste0(oDir, "/", var, "_monthly_all.csv"), header=T)
+    st_loc <- read.csv("S:/observed/weather_station/col-ideam/stations_names.csv", header=T)
+    
+    monthly_var <- monthly_var[which(monthly_var$Year == yr),]
+    year <- monthly_var$Year
+    month <- monthly_var$Month
+    date <- paste0(year, "_", month)
+    st_code <- data.frame(Station=gsub("X", "", names(monthly_var[3:length(monthly_var)])))
+    
+    monthly_var_t <- cbind(st_code, data.frame(t(monthly_var[3:length(monthly_var)])))
+    names(monthly_var_t) <- c("Station", date)
+    
+    c("ID", "SOURCE", "OLD_ID","NAME","COUNTRY","LONG","LAT","ALT","JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC","NYEARS")
+    
+    cbind(1:length(), "IDEAM", monthly_var_t$Station, )
+    
+    join <- merge(st_loc, monthly_var_t, by = "Station", all = FALSE)
+    write.csv(join, paste0(oDir, "/", var, "_", yr, ".csv"), row.names=F)
+  }
+  
+}
 
-write.csv(clim, paste0(oDir, "/", var, "_monthly_climatology.csv"), row.names=F)
+
+
+## Averages by departament 
+join$Station <- NULL
+join$Lon <- NULL
+join$Lat <- NULL
+join$Alt <- NULL
+join$Name <- NULL
+
+
+
+
+if (var == "prec"){
+  
+  sum22=function(a,na.rm=T){
+    na.x=sum(is.na(a))/length(a)
+    if(na.x>=0.2){
+      x=NA
+    }else{x=sum(a,na.rm=any(!is.na(a)))}
+    
+    return(x)
+  }
+  
+} else {
+  
+  
+  sum22=function(a,na.rm=T){
+    na.x=mean(is.na(a))/length(a)
+    if(na.x>=0.3){
+      x=NA
+    }else{x=mean(a,na.rm=any(!is.na(a)))}
+    
+    return(x)
+  }
+  
+}
+
+
+avg_2=function(a,na.rm=T){
+  na.x=mean(is.na(a))/length(a)
+  if(na.x>=1){
+    x=NA
+  }else{x=mean(a,na.rm=any(!is.na(a)))}
+  
+  return(x)
+}
+join_avg_mun <- aggregate(join[,3:length(join)], list(Municipality=join$Municipality, Departament=join$Departament), avg_2)
+
+ann_avg <- aggregate(t(join_avg_mun[,3:length(join_avg_mun)]), list(Year=year), sum22)
+year_agg <- ann_avg$Year
+ann_avg$Year <- NULL
+ann_avg_t <- data.frame(t(ann_avg))
+names(ann_avg_t) <- year_agg
+ann_avg_mun <- cbind("Municipality"=join_avg_mun$Municipality, "Departament"=join_avg_mun$Departament, ann_avg_t)
+
+write.csv(ann_avg_mun, paste0(oDir, "/", var, "_annual_by_mun.csv"), row.names=F)
+write.csv(join_avg_mun, paste0(oDir, "/", var, "_monthly_by_mun.csv"), row.names=F)
+write.csv(join, paste0(oDir, "/", var, "_monthly_by_stations.csv"), row.names=F)
+
+write.csv(t(ann_avg_mun), paste0(oDir, "/", var, "_annual_by_mun_t.csv"), row.names=F)
+
+ann_avg_mun_sort <- melt(ann_avg_mun, id.vars = c("Departament", "Municipality"), measure.vars = c("1965", "1966", "1967", "1968", "1969", "1970", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"))
+write.csv(ann_avg_mun_sort, paste0(oDir, "/", var, "_annual_by_mun_sort.csv"), row.names=F)
 
 
 ### To remove stations uncomment the following lines

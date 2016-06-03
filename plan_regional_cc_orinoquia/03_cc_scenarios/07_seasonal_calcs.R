@@ -30,6 +30,34 @@ for (var in varList){
 
 
 
+iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/average"
+varList <- c("rhum")
+# varList <- c("prec", "tmax", "tmin")
+seasons <- list("ann"=1:12, "def"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11)
+ext <- ".asc"
+
+for (var in varList){
+  
+  for(i in 1:length(seasons)){
+    
+    if (!file.exists(paste(iDir, "/", var, "_", names(seasons)[i], ext, sep=""))) {
+      
+      stk <- stack(paste0(iDir, "/", var, "_", seasons[[i]], ext))
+      
+      if (var == "prec"){
+        mean <- sum(stk)
+      } else {
+        mean <- mean(stk)
+      }
+      
+      writeRaster(mean, paste(iDir, "/", var, "_", names(seasons)[i], ext, sep=""), overwrite=F)
+      
+    }
+  }
+  
+}
+
+
 ### CHanges by seasons
 
 require(raster)

@@ -1,0 +1,22 @@
+file title  : tas4.img
+data type   : real
+file type   : ascii
+columns     :    16
+rows        :    16
+ref. system : latlong
+ref. units  : deg
+unit dist.  :  1.0
+min. X      :   144.5
+max. X      :   149.5
+min. Y      :   -44.0
+max. Y      :   -40.0
+pos'n error :  0.0
+resolution  :   0.25
+min. value  : 
+max. value  :
+value units : m
+value error : 
+flag value  : -99.0
+flag def'n  : no data
+legend cats :  0
+lineage     : HAND CONSTRUCTED BY MIKE FROM TAS4.DEM

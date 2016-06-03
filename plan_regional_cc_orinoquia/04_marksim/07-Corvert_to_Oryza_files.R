@@ -5,11 +5,11 @@
 require(raster)
 
 iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/datos_diarios"
-rcp <- "rcp26"
+rcp <- "baseline"
 pts <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/04-Crop_Modelling/rice/00_mask/rice_points_llanos.txt"
 oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/04-Crop_Modelling/rice/01_climate_data"
 dem <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/_region/altitude"
-period <- 2030
+period <- 1995
 
 convertOryza <- function(iDir, rcp, pts, oDir, period, alt, index, i){
 
@@ -114,3 +114,53 @@ controlconv <- function(i) { #define a new function
 }
 
 system.time(sfSapply(as.vector(1:nrow(index)), controlconv))
+
+
+
+
+
+
+# ##Remove empty folder
+# rcpList <- c("baseline","rcp26","rcp45", "rcp85")
+# pts <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/04-Crop_Modelling/rice/00_mask/rice_points_llanos.txt"
+# oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/04-Crop_Modelling/rice/01_climate_data"
+# index <- read.table(pts, header = T)
+# 
+# for (rcp in rcpList){
+#   
+#   if (rcp == "baseline"){
+#     period <- 1995    
+#   } else {
+#     period <- 2030
+#   }
+#   
+#   for (i in 1:nrow(index)){
+#     
+#     fd <- sprintf("%02d",index$Fold[i])
+#     id <- sprintf("%04d", index$Point[i])
+#     ptsDir <- paste0(oDir, "/", rcp, "/", fd, id)
+#     
+#     cat(rcp,"fold",fd,"id",id," point",i, "of",nrow(index),"\n")
+#     
+#     if(!file.exists(paste0(ptsDir, "/CORM99.", substr(period, 2,4)))){
+#       
+#       write(paste0(fd, id), paste0(oDir, "/errors.txt"),append=TRUE)
+#       
+#     }
+#   }
+# }
+
+
+# rcpList <- c("baseline","rcp26","rcp45", "rcp85")
+# rmdirs <- read.table(paste0(oDir, "/errors.txt"), header = F)
+# 
+# for (rcp in rcpList){
+#   
+#   for(j in 1:nrow(rmdirs)){
+#     
+#     cat(rcp,"foldid",sprintf("%06d", rmdirs$V1[j])," point",j, "of",nrow(rmdirs),"\n")
+#     ptsDir <- paste0(oDir, "/", rcp, "/", sprintf("%06d", rmdirs$V1[j]))
+#     unlink(ptsDir, recursive = T)
+#   }
+#   
+# }

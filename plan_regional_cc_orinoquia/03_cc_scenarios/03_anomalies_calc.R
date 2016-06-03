@@ -154,7 +154,7 @@ for (rcp in rcpList) {
   gcmPath <-paste0(iDir, "/", rcp,"/",gcmList)
   
   oDir<-paste0(iDir, "/", rcp, "/ensemble")
-  if (!file.exists(oDir)) {dir.create(oDir, recursive=T)}  
+  if (!file.exists(oDir)) {dir.create(oDir, recursive=T)}
   
   for (var in varList){
     
@@ -242,3 +242,40 @@ for (var in varList) {
     
   } #mth
 } # var
+
+
+
+
+###############################################################################################
+## Agregación anual
+
+require(raster)
+rcp <- "rcp26"
+msk <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/tropico/_region/alt-prj-ame.asc"
+mask <- raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/mask_tropico.tif")
+
+bDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias/tropico"
+iDir <- paste0(bDir , "/", rcp)
+
+varList <- c("prec", "tmax", "tmin")
+
+for (var in varList){
+  
+  if (!file.exists(paste0(iDir, "/", var, "_ann.tif"))){
+    
+    cat(rcp, var)
+    stk <- stack(paste0(iDir, "/", var, "_", 1:12, ".tif"))
+    varStk_mean <- mean(stk)
+    
+    rsCrop <- crop(varStk_mean, extent(mask))
+    mask2 <- crop(mask, extent(rsCrop))
+    rsMask <- mask(rsCrop, mask2)
+    
+    varStk_mean <- writeRaster(rsMask, paste0(iDir, "/", var, "_ann.tif"), format="GTiff", overwrite=F, datatype='INT2S')
+    
+  }
+}
+
+
+
+

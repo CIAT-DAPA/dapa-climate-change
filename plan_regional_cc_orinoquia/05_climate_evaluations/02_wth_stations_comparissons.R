@@ -4,13 +4,13 @@
 
 require(raster)
 
-iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/tropico/stations-averages"
-aDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/tropico/average"
+iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/stations-averages"
+aDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/average"
 oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/01-skill_interpolation"
-wDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/tropico/baseline_wcl"
-xt <- extent(raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/tropico/_region/alt-prj-ame.asc"))
-rg <- "ame"
-ext <- "tif"
+wDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/llanos/tropico/baseline_wcl"
+xt <- extent(raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/_region/alt-prj-lla.asc"))
+rg <- "lla"
+ext <- "asc"
 
 mths = c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
 varList <- c("rain", "tmax", "tmin")
@@ -20,6 +20,7 @@ for(var in varList){
   # Observados
   st <- read.csv(paste0(iDir, "/", var, "_", rg, ".csv"))
   st.reg <- st[which(st$LONG >= xt@xmin & st$LONG <= xt@xmax & st$LAT >= xt@ymin & st$LAT <= xt@ymax),]
+  st.reg <- st.reg[which(st.reg$SOURCE=="ideam"),]
   coor <- st.reg[,6:7]
   
   #Ajustados

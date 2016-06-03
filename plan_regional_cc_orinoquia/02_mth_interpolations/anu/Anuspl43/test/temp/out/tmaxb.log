@@ -1,0 +1,344 @@
+SPLINB  VERSION 4.36  17/03/06
+COPYRIGHT AUSTRALIAN NATIONAL UNIVERSITY
+
+TITLE OF FITTED SURFACES (60 CHARS):
+-----------------------------------
+Maximum Temperature Using Knots
+
+SURFACE VALUE UNITS CODE AND MISSING DATA VALUE:
+-----------------------------------------------
+  0 - UNDEFINED
+  1 - METRES
+  2 - FEET
+  3 - KILOMETRES
+  4 - MILES
+  5 - DEGREES
+  6 - RADIANS
+  7 - MILLIMETRES
+  8 - MEGAJOULES
+    5
+
+INDEPENDENT VARIABLES
+---------------------
+NUMBER OF INDEPENDENT SPLINE VARIABLES (0 TO 10):
+    2
+
+NUMBER OF INDEPENDENT COVARIATES (0 TO  8):
+    1
+
+NUMBER OF SURFACE SPLINE VARIABLES (0 TO  7):
+    0
+
+NUMBER OF SURFACE COVARIATES (0 TO  7):
+    0
+
+TRANSFORMATION CODES            REFERENCE UNIT CODES
+--------------------            --------------------
+  0 - NO TRANSFORMATION           0 - UNDEFINED
+  1 - X/A                         1 - METRES
+  2 - X*A                         2 - FEET
+  3 - A*LOG(X + B)                3 - KILOMETRES
+  4 - (X/B)**A                    4 - MILES
+  5 - A*EXP(X/B)                  5 - DEGREES
+  6 - A*TANH(X/B)                 6 - RADIANS
+  7 - ANISOTROPY ANGLE            7 - MILLIMETRES
+  8 - ANISOTROPY FACTOR           8 - MEGAJOULES
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  1:
+   140.000       150.000        0         5
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  2:
+  -45.0000      -39.0000        0         5
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  3:
+  -50.0000       3000.00        1         1
+ENTER  1 TRANSFORMATION COEFFICIENT(S):
+   1000.00    
+
+SURFACE DIRECTIVES
+------------------
+DEPENDENT VARIABLE TRANSFORMATION:
+  0 - NO TRANSFORMATION
+  1 - NATURAL LOGARITHM
+  2 - SQUARE ROOT
+  5 - OCCURRENCE
+    0
+
+ORDER OF SPLINE (AT LEAST 2):
+    2
+
+NUMBER OF SURFACES (AT LEAST 1):
+   12
+
+NUMBER OF RELATIVE VARIANCES (0, 1 OR  12):
+    0
+
+OPTIMIZATION DIRECTIVE (NORMALLY 1):
+  0 - COMMON SMOOTHING PARAMETER FOR ALL SURFACES
+  1 - COMMON SMOOTHING DIRECTIVE FOR ALL SURFACES
+  2 - DIFFERENT SMOOTHING DIRECTIVE FOR EACH SURFACE
+    1
+
+SMOOTHING DIRECTIVE (NORMALLY 1):
+  0 - FIXED SMOOTHING PARAMETER FOR EACH SURFACE
+  1 - MINIMIZE GCV FOR EACH SURFACE
+  2 - MINIMIZE TRUE MEAN SQUARE ERROR FOR EACH SURFACE
+  3 - FIXED SIGNAL FOR EACH SURFACE
+  4 - MINIMIZE GML FOR EACH SURFACE
+    1
+
+DATA FILE NAME:
+--------------
+tmaxb.dat
+
+MAXIMUM NUMBER OF DATA POINTS (AT LEAST  4):
+     200
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+   20
+
+DATA FORMAT (SITE LABEL,  3 INDEP VARS, 12 SURFACES,  0 REL VARIANCES):
+(a20,2f10.3,f8.1/12f7.1)
+
+KNOT INDEX FILE NAME:
+tmaxb.not
+
+MAXIMUM NUMBER OF DATA KNOTS (AT LEAST  1):
+      60
+
+INPUT BAD DATA FLAG FILE NAME (BLANK IF NOT REQUIRED):
+
+
+OUTPUT BAD DATA FLAG FILE NAME (BLANK IF NOT REQUIRED):
+
+
+OUTPUT LARGE RESIDUAL FILE NAME (BLANK IF NOT REQUIRED):
+tmaxb.res
+
+OUTPUT OPTIMIZATION PARAMETERS FILE NAME (BLANK IF NOT REQUIRED):
+tmaxb.opt
+
+OUTPUT SURFACE COEFFICIENTS FILE NAME (BLANK IF NOT REQUIRED):
+tmaxb.sur
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+tmaxb.lis
+
+OUTPUT ERROR COVARIANCE FILE NAME (BLANK IF NOT REQUIRED):
+tmaxb.cov
+
+VALIDATION DATA FILE NAME (BLANK IF NOT REQUIRED):
+-------------------------------------------------
+
+
+DATA SUMMARY
+------------
+NUMBER OF DATA POINTS READ     =     72
+NUMBER OF POINTS WITHIN LIMITS =     72
+MIN NUMBER OF POINTS WITH DATA =     72
+
+ SURF  MEAN RELATIVE VARIANCE  ROOT MEAN REL VAR
+    1                1.00               1.00    
+
+NUMBER OF KNOTS      =     40
+
+SURFACE STATISTICS
+------------------
+SURF       RHO    NPTS     ERROR    SIGNAL    SURF     MEAN     STD DEV
+   1 0.267E-02      72      39.6      32.4       1   20.796       2.274    
+   2 0.882E-02      72      46.3      25.7       2   21.251       2.304    
+   3 0.870E-02      72      46.2      25.8       3   19.243       2.227    
+   4 0.260E-01      72      52.8      19.2       4   16.265       2.269    
+   5 0.109E+00      72      59.7      12.3       5   13.486       2.312    
+   6 0.536E-02      72      43.3      28.7       6   11.262       2.319    
+   7 0.414E-02      72      41.9      30.1       7   10.683       2.403    
+   8 0.489E-01      72      56.2      15.8       8   11.574       2.485    
+   9 0.469E-02      72      42.6      29.4       9   13.168       2.380    
+  10 0.299E-02      72      40.1      31.9      10   15.288       2.211    
+  11 0.734E-02      72      45.2      26.8      11   16.969       2.267    
+  12 0.829E-02      72      45.9      26.1      12   18.890       2.257    
+ AVG 0.198E-01      72      46.6      25.4           15.740       2.310    
+
+SURF       GCV       MSR       VAR     SURF   RTGCV     RTMSR     RTVAR
+   1     0.337     0.102     0.185        1   0.580     0.319     0.430    
+   2     0.825     0.341     0.530        2   0.908     0.584     0.728    
+   3     0.309     0.128     0.199        3   0.556     0.357     0.446    
+   4     0.304     0.163     0.223        4   0.551     0.404     0.472    
+   5     0.235     0.162     0.195        5   0.485     0.402     0.442    
+   6     0.227     0.823E-01 0.137        6   0.477     0.287     0.370    
+   7     0.178     0.601E-01 0.103        7   0.422     0.245     0.322    
+   8     0.229     0.139     0.179        8   0.479     0.373     0.423    
+   9     0.176     0.617E-01 0.104        9   0.420     0.248     0.323    
+  10     0.269     0.835E-01 0.150       10   0.519     0.289     0.387    
+  11     0.371     0.146     0.233       11   0.609     0.382     0.483    
+  12     0.405     0.165     0.258       12   0.636     0.406     0.508    
+ AVG     0.322     0.136     0.208            0.567     0.369     0.456    
+
+SURF       GML       MSE       VAR     SURF   RTGML     RTMSE     RTVAR
+   1      1.56     0.833E-01 0.170        1    1.25     0.289     0.412    
+   2      2.00     0.189     0.503        2    1.41     0.435     0.709    
+   3     0.775     0.711E-01 0.194        3   0.880     0.267     0.440    
+   4     0.525     0.594E-01 0.230        4   0.725     0.244     0.480    
+   5     0.338     0.332E-01 0.234        5   0.582     0.182     0.484    
+   6     0.567     0.545E-01 0.104        6   0.753     0.233     0.322    
+   7     0.495     0.433E-01 0.753E-01    7   0.704     0.208     0.274    
+   8     0.328     0.393E-01 0.182        8   0.572     0.198     0.426    
+   9     0.526     0.427E-01 0.875E-01    9   0.725     0.207     0.296    
+  10     0.979     0.663E-01 0.117       10   0.989     0.258     0.341    
+  11      1.01     0.867E-01 0.227       11    1.01     0.294     0.477    
+  12      1.13     0.934E-01 0.274       12    1.06     0.306     0.524    
+ AVG     0.853     0.719E-01 0.200            0.923     0.268     0.447    
+
+SURF   COVARIATES AND STANDARD ERRORS
+   1    -7.65        0.231    
+   2    -7.38        0.375    
+   3    -7.62        0.230    
+   4    -7.61        0.231    
+   5    -7.60        0.201    
+   6    -7.40        0.194    
+   7    -7.92        0.170    
+   8    -8.54        0.200    
+   9    -8.63        0.170    
+  10    -7.97        0.207    
+  11    -8.08        0.250    
+  12    -7.90        0.262    
+
+RANKED ROOT MEAN SQUARE RESIDUALS
+---------------------------------
+     1     44  HASTINGS_CHALET         1.07    
+     2     -5  LOW_HEAD_LIGHTHOUSE    0.689    
+     3     53  PALMERS_LOOKOUT        0.652    
+     4    -63  CAPE_SORELL_LIGHTHOU   0.625    
+     5      8  REDPATH                0.600    
+     6    -43  CAPE_BRUNY_LIGHTHOUS   0.557    
+     7    -30  ROSSARDEN_(ABERFOYLE   0.535    
+     8     26  SCOTTSDALE_2           0.524    
+     9    -27  MARRAWAH_(MARSHALL)    0.523    
+    10     41  CAMBRIDGE_AERO_AMO     0.512    
+    11    -54  BOTHWELL               0.505    
+    12    -39  PALMERSTON_(COMPOSIT   0.499    
+    13    -46  KINGSTON               0.479    
+    14     29  GUNNS_PLAINS           0.459    
+    15     57  NEW_NORFOLK            0.440    
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  1
+     1     44  HASTINGS_CHALET        -1.16             20.6     19.4
+     2     -5  LOW_HEAD_LIGHTHOUSE    0.669             20.1     20.8
+     3    -63  CAPE_SORELL_LIGHTHOU   0.619             18.2     18.8
+     4    -43  CAPE_BRUNY_LIGHTHOUS   0.573             18.1     18.7
+     5    -39  PALMERSTON_(COMPOSIT  -0.548             23.8     23.3
+     6     33  ST_HELENS_POST_OFFIC  -0.546             22.7     22.2
+     7     53  PALMERS_LOOKOUT       -0.532             18.5     18.0
+     8     -1  BRIDPORT_POST_OFFICE   0.531             21.9     22.4
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  2
+     1     53  PALMERS_LOOKOUT        -1.62             20.5     18.9
+     2    -63  CAPE_SORELL_LIGHTHOU    1.35             18.5     19.9
+     3     44  HASTINGS_CHALET        -1.22             20.8     19.6
+     4     41  CAMBRIDGE_AERO_AMO      1.11             21.0     22.1
+     5      8  REDPATH                 1.05             19.3     20.3
+     6     -5  LOW_HEAD_LIGHTHOUSE     1.04             20.7     21.7
+     7     26  SCOTTSDALE_2           -1.01             23.4     22.4
+     8    -39  PALMERSTON_(COMPOSIT   -1.00             24.8     23.8
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  3
+     1     44  HASTINGS_CHALET        -1.07             19.0     17.9
+     2     -5  LOW_HEAD_LIGHTHOUSE    0.893             19.4     20.3
+     3    -63  CAPE_SORELL_LIGHTHOU   0.772             17.5     18.3
+     4    -30  ROSSARDEN_(ABERFOYLE  -0.674             18.8     18.1
+     5    -58  BRONTE_PARK           -0.606             18.1     17.5
+     6      8  REDPATH                0.584             18.3     18.9
+     7     33  ST_HELENS_POST_OFFIC  -0.566             21.6     21.0
+     8    -43  CAPE_BRUNY_LIGHTHOUS   0.549             17.5     18.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  4
+     1     44  HASTINGS_CHALET        -1.14             16.5     15.4
+     2    -30  ROSSARDEN_(ABERFOYLE  -0.960             15.6     14.6
+     3    -46  KINGSTON              -0.879             18.3     17.4
+     4     -5  LOW_HEAD_LIGHTHOUSE    0.869             16.9     17.8
+     5    -24  DELORAINE_EAST        -0.850             17.8     16.9
+     6     41  CAMBRIDGE_AERO_AMO     0.754             17.0     17.8
+     7    -54  BOTHWELL              -0.724             17.0     16.3
+     8    -63  CAPE_SORELL_LIGHTHOU   0.702             15.4     16.1
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  5
+     1     44  HASTINGS_CHALET       -0.942             13.7     12.8
+     2    -54  BOTHWELL              -0.878             13.5     12.6
+     3    -24  DELORAINE_EAST        -0.859             14.5     13.6
+     4     -5  LOW_HEAD_LIGHTHOUSE    0.754             14.4     15.2
+     5    -35  EDDYSTONE_POINT_LIGH   0.731             15.3     16.0
+     6    -46  KINGSTON              -0.698             15.2     14.5
+     7    -64  PORT_DAVEY_(LAST RET   0.693             12.9     13.6
+     8     41  CAMBRIDGE_AERO_AMO     0.686             14.1     14.8
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  6
+     1     57  NEW_NORFOLK            0.876             10.9     11.8
+     2     44  HASTINGS_CHALET       -0.835             11.9     11.1
+     3    -46  KINGSTON              -0.722             12.8     12.1
+     4    -54  BOTHWELL              -0.540             10.9     10.4
+     5    -60  CRADLE_VALLEY          0.501              5.1      5.6
+     6     10  SMITHTON_COMPOSITE    -0.498             13.5     13.0
+     7     51  MOUNT_WELLINGTON      -0.467              3.4      2.9
+     8    -58  BRONTE_PARK           -0.460              8.7      8.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  7
+     1    -46  KINGSTON              -0.791             12.5     11.7
+     2     57  NEW_NORFOLK            0.603             10.9     11.5
+     3     44  HASTINGS_CHALET       -0.578             11.2     10.6
+     4    -54  BOTHWELL              -0.544             10.6     10.1
+     5     16  WYNYARD_WEST_(JACKSO  -0.461             12.7     12.2
+     6      8  REDPATH                0.448             11.3     11.7
+     7     -5  LOW_HEAD_LIGHTHOUSE    0.436             11.7     12.1
+     8     10  SMITHTON_COMPOSITE    -0.393             12.7     12.3
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  8
+     1     44  HASTINGS_CHALET        -1.16             12.4     11.2
+     2     53  PALMERS_LOOKOUT       -0.887             12.3     11.4
+     3    -60  CRADLE_VALLEY          0.807              4.9      5.7
+     4    -50  TASMAN_LIGHTHOUSE      0.764             10.2     11.0
+     5     29  GUNNS_PLAINS          -0.747             13.4     12.7
+     6    -54  BOTHWELL              -0.729             11.7     11.0
+     7     -5  LOW_HEAD_LIGHTHOUSE    0.669             12.3     13.0
+     8    -35  EDDYSTONE_POINT_LIGH   0.616             13.2     13.8
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  9
+     1     44  HASTINGS_CHALET       -0.823             13.7     12.9
+     2     21  LAUNCESTON_7EX         0.544             13.9     14.4
+     3     57  NEW_NORFOLK            0.537             14.7     15.2
+     4     51  MOUNT_WELLINGTON       0.463              3.9      4.4
+     5     -5  LOW_HEAD_LIGHTHOUSE    0.409             13.3     13.7
+     6     53  PALMERS_LOOKOUT       -0.399             12.9     12.5
+     7      8  REDPATH                0.394             12.9     13.3
+     8     26  SCOTTSDALE_2          -0.377             14.0     13.6
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 10
+     1     44  HASTINGS_CHALET        -1.12             16.0     14.9
+     2    -43  CAPE_BRUNY_LIGHTHOUS   0.531             14.3     14.8
+     3     -5  LOW_HEAD_LIGHTHOUSE    0.527             14.8     15.3
+     4     41  CAMBRIDGE_AERO_AMO     0.523             16.5     17.0
+     5     10  SMITHTON_COMPOSITE    -0.523             16.2     15.7
+     6     53  PALMERS_LOOKOUT       -0.518             14.4     13.9
+     7      8  REDPATH                0.503             14.1     14.6
+     8    -11  STANLEY_POST_OFFICE    0.446             15.3     15.7
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 11
+     1     44  HASTINGS_CHALET        -1.27             17.3     16.0
+     2      8  REDPATH                0.798             15.1     15.9
+     3     28  LAUNCESTON_(TI_TREE   -0.754             20.7     19.9
+     4     53  PALMERS_LOOKOUT       -0.743             15.6     14.9
+     5     -5  LOW_HEAD_LIGHTHOUSE    0.726             16.7     17.4
+     6    -30  ROSSARDEN_(ABERFOYLE  -0.643             16.6     16.0
+     7    -43  CAPE_BRUNY_LIGHTHOUS   0.602             15.4     16.0
+     8    -27  MARRAWAH_(MARSHALL)   -0.598             16.2     15.6
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 12
+     1     44  HASTINGS_CHALET        -1.25             18.9     17.7
+     2     21  LAUNCESTON_7EX         0.969             20.4     21.4
+     3    -39  PALMERSTON_(COMPOSIT  -0.897             21.7     20.8
+     4     26  SCOTTSDALE_2          -0.866             20.5     19.6
+     5      8  REDPATH                0.706             17.1     17.8
+     6     29  GUNNS_PLAINS          -0.686             20.8     20.1
+     7    -71  ROSEBERY_SUB_STATION  -0.674             20.8     20.1
+     8     28  LAUNCESTON_(TI_TREE   -0.665             22.7     22.0
+
+PROGRAM SPLINB  VERSION 4.36  DATE 18/07/2006  TIME 15.18.45

@@ -43,10 +43,10 @@ require(sp)
 #####################################################################################################
 
 # source("00-monthly-data-functions-mod.R")
-# rcp <- "historical"
-# scrDir <- "D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5/data"
-# baseDir <- "T:/gcm/cmip5/raw/monthly"
-# otp <- GCMAverage(rcp, baseDir)
+rcp <- "historical"
+scrDir <- "D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5/data"
+baseDir <- "T:/gcm/cmip5/raw/monthly"
+otp <- GCMAverage(rcp, baseDir)
 
 GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", scrDir="D:/CIAT/_tools/dapa-climate-change/IPCC-CMIP5/data") {
   
@@ -102,7 +102,7 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", scrDir="
         if (rcp == "historical"){
           
 #           periodList <- c("1961", "1971", "1981")
-          period <- "1981"
+          period <- "1986"
         } else {
           
           periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
@@ -114,48 +114,55 @@ GCMAverage <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", scrDir="
           
           # Define start and end year
           staYear <- as.integer(period)
-          endYear <- as.integer(period) + 24
+          endYear <- as.integer(period) + 19
           
           cat("\nAverage over: ", rcp, " ", gcm, " ", ens, " ", paste(staYear, "_", endYear, sep="")," \n\n")
   
-          # Loop around variables
-          for (var in varList) {
+          if (gcm != "lasg_fgoals_g2" && gcm != "gfdl_esm2g" && gcm != "gfdl_esm2m"){
             
-            # Loop around months
-            for (mth in monthList) {
-              
-              if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
-              {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
-              
-              # Define month without 0 in one digit number
-              mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
-              outNcAvg <- paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mthMod, ".nc", sep="")
-              
-              if (!file.exists(outNcAvg)){
+            if (ens == "r1i1p1"){
+              # Loop around variables
+              for (var in varList) {
                 
-                # List of NetCDF files by month for all 30yr period
-                mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
-                
-                # Create a stack of list of NC, rotate and convert units in mm/monnth and deg celsious
-                if (var == "prec"){
+                # Loop around months
+                for (mth in monthList) {
                   
-                  daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
-                  mthNcAvg <- rotate(mean(stack(mthNc))) * 86400 * (daysmth)
+                  if (!file.exists(paste(avgDir, "/", staYear, "_", endYear, sep=""))) 
+                  {dir.create(paste(avgDir, "/", staYear, "_", endYear, sep=""))}
                   
-                } else {
+                  # Define month without 0 in one digit number
+                  mthMod <- as.numeric(paste((ndaymtx$MonthMod[which(ndaymtx$Month == mth)])))
+                  outNcAvg <- paste(avgDir, "/", staYear, "_", endYear, "/", var, "_", mthMod, ".nc", sep="")
                   
-                  mthNcAvg <- rotate(mean(stack(mthNc))) - 272.15
+                  if (!file.exists(outNcAvg)){
+                    
+                    # List of NetCDF files by month for all 30yr period
+                    mthNc <- lapply(paste(mthDir, "/", staYear:endYear, "/", var, "_", mth, ".nc", sep=""), FUN=raster)
+                    
+                    # Create a stack of list of NC, rotate and convert units in mm/monnth and deg celsious
+                    if (var == "prec"){
+                      
+                      daysmth <- as.numeric(paste((ndaymtx$Ndays[which(ndaymtx$Month == mth)])))
+                      mthNcAvg <- rotate(mean(stack(mthNc))) * 86400 * (daysmth)
+                      
+                    } else {
+                      
+                      mthNcAvg <- rotate(mean(stack(mthNc))) - 272.15
+                    }
+                    
+                    # Write output average NetCDF file
+                    mthNcAvg <- writeRaster(mthNcAvg, outNcAvg, format='CDF', overwrite=T)
+                    
+                    cat(" .> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
+                    
+                  } else {cat(" .>", paste(var, "_", mthMod, sep=""), "\tdone!\n")}
+                  
                 }
-                
-                # Write output average NetCDF file
-                mthNcAvg <- writeRaster(mthNcAvg, outNcAvg, format='CDF', overwrite=T)
-              
-                cat(" .> ", paste(var, "_", mthMod, sep=""), "\tdone!\n")
-              
-              } else {cat(" .>", paste(var, "_", mthMod, sep=""), "\tdone!\n")}
-              
               }
             }
+
+          }
+
 #           
 #           if(ens == "r1i1p1") {
 #           

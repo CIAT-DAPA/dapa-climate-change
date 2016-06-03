@@ -4,12 +4,16 @@
 #############################################################################
 ################### CALCULATE BIOCLIMATIC VARIABLES #########################
 #############################################################################
-# 
-# source("06_bioclim_calcs.R")
-# bDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/downscaling/llanos"
-# rcp <- "rcp45"
-# ext <- "nc"
-# otp <- bioclim_calc(bDir, rcp, ext)
+
+source("04_bioclim_calcs.R")
+bDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos"
+rcp <- "average"
+rcpList <- c("rcp26", "rcp45", "rcp85")
+ext <- "asc"
+
+for (rcp in rcpList){
+  otp <- bioclim_calc(bDir, rcp, ext)
+}
 
 bioclim_calc <- function(bDir, rcp, ext){
   
@@ -30,7 +34,7 @@ bioclim_calc <- function(bDir, rcp, ext){
   
   for(i in 1:19){
     
-    cat("Writting bio", i)
+    cat("Writting bio", rcp, i, "\n")
     bioAsc <- writeRaster(bios[[i]], paste0(downDir, "/bio_", i, ".asc"))
     cat(" .. done")
   }

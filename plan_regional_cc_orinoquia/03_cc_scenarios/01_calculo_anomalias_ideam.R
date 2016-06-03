@@ -199,3 +199,8 @@ spatialIDW <- function(bDir="X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoq
 }
 
 spatialIDW(bDir, st_loc, rg, rcp, msk)
+
+
+
+
+
