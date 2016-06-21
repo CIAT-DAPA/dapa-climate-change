@@ -3,9 +3,9 @@ README
 www.ccafs-climate.org
 ###################
 
-Author : Carlos Navarro, Jaime Tarapues, Julian Ramirez
-Date   : 2016
-Contact: c.e.navarro@cgiar.org, j.e.tarapues@cgiar.org, j.r.villegas@cgiar.org
+Author : Jaime Tarapues, Carlos Navarro, Julian Ramirez
+Date   : 2016-06-21
+Contact: j.e.tarapues@cgiar.org, c.e.navarro@cgiar.org, j.r.villegas@cgiar.org
 
 _________________________________________________________________________
 Abbreviations used for bias-correction variables
