@@ -40,7 +40,7 @@
 ## Units:prec->mm/day; temperature->C; hur->%; srad->MJ m-2 day-1; swind->m/s
 ######################################################################################################################
 ## For RUN on WINDOWS:
-## Nota: if run script in windows copy python script in the same folder: bc_extract_gcm.py
+## Note: if run script in windows copy python script in the same folder: bc_extract_gcm.py
 ## version python: C:\\Python27\\ArcGIS10.1\\python.exe
 ######################################################################################################################
 ## Climate Forcing Dataset
