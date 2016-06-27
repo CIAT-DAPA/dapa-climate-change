@@ -1209,9 +1209,9 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   if(varmod == "prec"){
     ylabel <- "Precipitation (mm)"; flabel <- "Rainfall Frequency (days per month)";limit = c(0,250);
   }else if(varmod == "tmin"){
-    ylabel <- "Min. Temperature (ºC)"; limit = c(-10, 25);
+    ylabel <- "Min. Temperature (deg C)"; limit = c(-10, 25);
   }else if(varmod == "tmax"){
-    ylabel <- "Max. Temperature (ºC)"; flabel <- "Hot days Frequency (days per month)"; limit = c(0, 40);
+    ylabel <- "Max. Temperature (deg C)"; flabel <- "Hot days Frequency (days per month)"; limit = c(0, 40);
   }else if(varmod == "srad"){
     ylabel <- "Shortwave Sol. Radiation (MJ/m2 day)"; limit = c(0, 400);
   }else if(varmod == "hur"){
@@ -1219,7 +1219,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   }else if(varmod == "swind"){
     ylabel <- "Wind Speed (m/s)"; limit = c(0, 400);
   }else if(varmod == "tmean"){
-    ylabel <- "Mean Temperature (ºC)"; limit = c(0, 100);
+    ylabel <- "Mean Temperature (deg C)"; limit = c(0, 100);
   }
   
   # Personalized colors 
@@ -1698,10 +1698,10 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
       xlabel <- "Precipitation (mm/month)"; flabel <- "Rainfall Frequency (days/month)";#ylimit =c(0, 0.005);xlimit=c(0, 2000); 
       ylabel <- "Density"
     }else if(varmod == "tmin"){
-      xlabel <- "Min. Temperature (ºC)"; #xlimit = c(-10, 25);ylimit = c(0, 0.2);
+      xlabel <- "Min. Temperature (deg C)"; #xlimit = c(-10, 25);ylimit = c(0, 0.2);
       ylabel <- "Density"
     }else if(varmod == "tmax"){
-      xlabel <- "Max. Temperature (ºC)"; flabel <- "Hot days Frequency (days/month)";# ylimit = c(0, 0.2);xlimit=c(0, 50);
+      xlabel <- "Max. Temperature (deg C)"; flabel <- "Hot days Frequency (days/month)";# ylimit = c(0, 0.2);xlimit=c(0, 50);
       ylabel <- "Density"
     }else if(varmod == "srad"){
       xlabel <- "Shortwave Sol. Radiation (MJ/m2 month)"; #ylimit = c(0, 0.2);xlimit = c(0, 400);
@@ -1713,7 +1713,7 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
       xlabel <- "Wind Speed (m/s)"; #ylimit = c(0, 0.2);xlimit = c(0, 400);
       ylabel <- "Density"
     }else if(varmod == "tmean"){
-      xlabel <- "Mean Temperature (ºC)"; #xlimit = c(0, 100);ylimit = c(0, 0.2);
+      xlabel <- "Mean Temperature (deg C)"; #xlimit = c(0, 100);ylimit = c(0, 0.2);
       ylabel <- "Density"
     }
     
@@ -1930,9 +1930,9 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   if(varmod == "prec"){
     ylabel <- "Precipitation Change (%)"
   }else if(varmod == "tmin"){
-    ylabel <- "Min. Temperature Change (ºC)"
+    ylabel <- "Min. Temperature Change (deg C)"
   }else if(varmod == "tmax"){
-    ylabel <- "Max. Temperature Change (ºC)"
+    ylabel <- "Max. Temperature Change (deg C)"
   }else if(varmod == "srad"){
     ylabel <- "Shortwave Sol. Radiation Change (%)"
   }else if(varmod == "hur"){
@@ -1940,7 +1940,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   }else if(varmod == "swind"){
     ylabel <- "Wind Speed (m/s)"
   }else if(varmod == "tmean"){
-    ylabel <- "Temperature (ºC)"
+    ylabel <- "Temperature (deg C)"
   }
   
   diroutGrap<-paste(dirbase,"/stats/projected_change",sep="")
