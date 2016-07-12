@@ -1,4 +1,5 @@
-/* &r cut_process_ensemble.aml T:\gcm\cmip5\downscaled F:\jetarapues\Request\Request_Uli S:\admin_boundaries\continental-files\GRID-files-continents-10min\na_adm\na0 rcp45 10min YES
+/* &r cut_process_ensemble.aml T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_pablo\dom0 D:\jetarapues\Request\Request_pablo\mask\dom0 ALL 30s YES YES
+/* &r cut_process_ensemble.aml T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_pablo\hti0 D:\jetarapues\Request\Request_pablo\mask\hti0 ALL 30s YES YES
 
 /* rootdir = Root folder where are storaged GCM CMIP5 data
 /* outputdir = Output folder
@@ -6,14 +7,24 @@
 /* rcp = escenarios: rcp26 rcp45 rcp60 rcp85. Use ALL to select all the rcps 
 /* resol = The possibilities are 30s 2.5min 5min 10min
 /* switch = Set YES to convert outputs in ESRI-Ascii files
-
-&args rootdir outputdir mask rcp resol switch ensemble
+/* wcl = worldclim
+&args rootdir outputdir mask rcp resol switch wcl
 &if [null %rootdir%] &then &return Use the root_folder argument
 &terminal 9999
 &sys cls
 
 &amlpath .
 &s bdir [show &amlpath]
+
+&if %resol% EQ 30s &then &s wcl_res Global_30s
+&else &if %resol% EQ 2.5min &then &s wcl_res global_2_5min
+&else &if %resol% EQ 5min &then &s wcl_res global_5min
+&else &s wcl_res global_10min
+&if %wcl% EQ YES &then 
+	&do
+		&if not [exists %outputdir%\wcl_%wcl_res% -dir] &then &sys md %outputdir%\wcl_%wcl_res%
+		&r cut_GCM.aml S:\observed\gridded_products\worldclim\%wcl_res% %outputdir%\wcl_%wcl_res% %outputdir%\wcl_%wcl_res% %mask% %switch%
+	&end
 
 &if %rcp% EQ ALL &then &s rcp rcp26 rcp45 rcp60 rcp85
 &else &s rcp %rcp%
@@ -31,7 +42,7 @@
 	&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts_ens\Global_5min
 	&else &s outdir %outputdir%\%rcp%_extracts_ens\Global_10min
 	
-	&do ts &list 2020_2049 /* 2020_2049 2040_2069 2060_2089 2070_2099		
+	&do ts &list 2020_2049 2040_2069/* 2020_2049 2040_2069 2060_2089 2070_2099		
 		&s outmoddir %outdir%\%ts%
 		&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
 
@@ -52,5 +63,7 @@
 	&end 
 &end	
 
+
+	
 &ty	
 &ty ======DONE!=======
