@@ -68,7 +68,7 @@
 					&ty Model %modname% (%rcp%, %ts%, %resol%)
 					&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
 					&r cut_GCM.aml %inmodtsdir% %outmodtsdir% %mask% %var% %switch%
-					&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt
+					/* &sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt
 				&end
 			&else 
 				&do
@@ -87,11 +87,11 @@
 
 &if %wcl% EQ YES &then 
 	&do
-		&if not [exists %outputdir%\wcl_%wcl_res%\wcl_%wcl_res%_cut_done.txt -FILE] &then
+		&if not [exists %outputdir%\wcl_%resol%\_asciis\%var%_asc.zip -FILE] &then
 			&do	
-				&if not [exists %outputdir%\wcl_%wcl_res% -dir] &then &sys md %outputdir%\wcl_%wcl_res%
-				&r cut_GCM.aml S:\observed\gridded_products\worldclim\%wcl_res% %outputdir%\wcl_%wcl_res% %mask% %var% %switch%
-				&sys dir /d /b /o %outputdir%\wcl_%wcl_res%\* > %outputdir%\wcl_%wcl_res%\wcl_%wcl_res%_cut_done.txt
+				&if not [exists %outputdir%\wcl_%resol% -dir] &then &sys md %outputdir%\wcl_%resol%
+				&r cut_GCM.aml S:\observed\gridded_products\worldclim\%wcl_res% %outputdir%\wcl_%resol% %mask% %var% %switch%
+				/* &sys dir /d /b /o %outputdir%\wcl_%wcl_res%\* > %outputdir%\wcl_%wcl_res%\wcl_%wcl_res%_cut_done.txt
 			&end
 	&end
 	
