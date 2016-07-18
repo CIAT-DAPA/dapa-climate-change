@@ -1,10 +1,9 @@
-/* &r cut_GCM.aml K:\ClimateData\WorldClim_data\Global_30s D:\Workspace\Requests_Name\wc_extract D:\Workspace\Nic_Extract_Cru\prec D:\Workspace\Requests_Name\_mask\mask NO
-&args inputfolder outputfolder outcopyfolder mask switch 
+/* &r cut_GCM.aml S:\observed\gridded_products\worldclim\Global_30s D:\jetarapues\Request\Rerquest_amartinez\wc_extract D:\jetarapues\Request\Rerquest_amartinez\mask\wafrica YES
+&args inputfolder outputfolder mask var switch
 &terminal 9999
 /*&sys cls
 &messages &off
 &if [show program] NE GRID &then GRID
-
 
 &if [null %inputfolder%] OR [null %switch%] &then
 	&do
@@ -45,7 +44,9 @@
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		
-		&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
+		&if %var% EQ ALL &then &s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
+		&else &s gridlist [listfile %inputfolder%\%var%* -grid %outputfolder%\listgrids.list]
+		
 		&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
 		
 		&if %OPENSTATUS% NE 0 &then
@@ -79,14 +80,11 @@
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file] /* &ty Output grid exists
 							%outfolder%\%gridname%.asc = gridascii(%outputfolder%\%gridname%)
 							
-							&sys 7za a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
+							&sys 7z a %outfolder%\%vartype%_asc.zip %outfolder%\%gridname%.asc
 							&if [exists %outfolder%\%gridname%.asc -file] &then &s delstat [DELETE %outfolder%\%gridname%.asc -file]
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 							&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname%
 						&end
-					
-					
-
 						
 				&end
 			&end
