@@ -80,13 +80,11 @@
 	&end	
 &end
 
-&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-&ty          	/\/\/\/ CUT WORLDCLIM /\/\/\/\
-&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-
 &if %wcl% EQ YES &then 
 	&do
+		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+		&ty          	/\/\/\/ CUT WORLDCLIM /\/\/\/\
+		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		&if not [exists %outputdir%\wcl_%resol%\_asciis\%var%_asc.zip -FILE] &then
 			&do	
 				&if not [exists %outputdir%\wcl_%resol% -dir] &then &sys md %outputdir%\wcl_%resol%

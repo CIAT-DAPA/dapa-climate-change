@@ -1,23 +1,22 @@
 # ---------------------------------------------------------
 # Author: Jaime Tarapues
-# Purpouse: Copy rasters to another location
+# Purpouse: correr el script donde estan los scripts cut_process.aml, cut_GCM.aml
 # ---------------------------------------------------------
-# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\pan S:\admin_boundaries\grid_files\pan_adm\pan0 rcp26 30s bcc_csm1_1 2020_2049 prec,tmin YES YES
+# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\pan S:\admin_boundaries\grid_files\pan_adm\pan0 rcp26 30s bcc_csm1_1 2020_2049 prec,tmin YES YES jaime.tm8@gmail.com
+# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\GRID D:\jetarapues\Request\Request_ocampo\mask\cod0 rcp26 30s ALL 2020_2049 bio,tmin,tmax NO NO olgaocampolopez@gmail.com
 
-import arcgisscripting, os, sys, string, glob, subprocess
+import arcgisscripting, os, sys, string, glob, subprocess, time
+import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+
 gp = arcgisscripting.create(9.3)
 gp.CheckOutExtension("Spatial")
 
-dirbase = sys.argv[1]
-rcp = sys.argv[2]
-
+# dirs
 dirGCM='T:\\gcm\\cmip5\\downscaled'
-
-# reslist = ["30s"] #, "2_5min", "5min", "10min" #["10min"]#
-# varlist = ["bio","tmin","tmax","tmean","prec","cons"]
-# periodDc = {"2020_2049", "2040_2069", "2060_2089", "2070_2099"}
-# format = 'asc'#"grd"
-# extension = "zip"
+CopyToFTP="Y:\\data\\data_requests"
+FTP="ftp://ftp.ciat.cgiar.org/DAPA/projects/GCMPage/data/data_requests/"
 
 dirbase = sys.argv[1] #T:\gcm\cmip5\downscaled
 dirout = sys.argv[2]
@@ -28,7 +27,8 @@ models = sys.argv[6]
 periods = sys.argv[7]
 variable = sys.argv[8]
 ascii = sys.argv[9]
-wcl = sys.argv[10]
+wcl = sys.argv[10]# cut worldclim: YES|NO
+toaddr = sys.argv[11] # send email: name@email.com|NO
 
 # Clean screen
 os.system('cls')
@@ -71,5 +71,35 @@ for rcp in rcplist:
 						cmd = 'arc "'+'&run cut_process.aml '+ dirbase+' '+ dirout+' '+ mask+' '+rcp+' '+resolution+' '+var+' '+period+' '+model+' '+ascii+' '+wcl+'"'
 						print '... processing: '
 						proc = subprocess.call(cmd,shell=True)
-				
+
+# copy to FTP and Send email
+if toaddr != "NO":				
+	dateCurr=time.strftime("%Y-%d-%m")
+	folderFTP=dateCurr+"_Request_"+os.path.basename(os.path.normpath(dirout))
+	requestFTP=CopyToFTP+"\\"+folderFTP				
+	if not os.path.exists(requestFTP):
+		os.system('mkdir ' + requestFTP)						
+	print '... Coping to FTP: '+dirout+" "+requestFTP
+	os.system("robocopy "+dirout+" "+requestFTP+" /s /z")
+
+	print '... Sending email to: '+toaddr
+	fromaddr = "ccafsclimate@gmail.com"
+	ccaddr=["j.e.tarapues@cgiar.org","C.E.Navarro@CGIAR.ORG"] #
+	# print ', '.join(ccaddr) 
+	msg = MIMEMultipart()
+	msg['From'] = fromaddr
+	msg['To'] = toaddr
+	msg['CC'] = ', '.join(ccaddr) 
+	msg['Subject'] = "CCAFS-Climate. Climate Data request"
+	body = "Your data request is complete and ready to download:\n \
+	"+FTP+folderFTP+"\n\nThis email is automatically created and distributed, so please do not reply to this email.\n\nRegards,\nCCAFS-Climate team."
+	msg.attach(MIMEText(body, 'plain'))
+	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server.starttls()
+	server.login(fromaddr, "downscaled")
+	text = msg.as_string()
+	toaddrs = [toaddr] + ccaddr
+	server.sendmail(fromaddr, toaddrs, text)
+	server.quit()
+
 print "\n \t Process done!!"
