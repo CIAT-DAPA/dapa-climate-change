@@ -2139,13 +2139,18 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
 }
 
 ## Main function
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py){
   
   ## Load libraries
   library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) 
   
   dircdo <- "cdo"
-  dateDownl= paste0("bc_",lon,"_",lat)
+  if(!is.na(id)){
+    dateDownl= paste0("BC_id=",id,"_xy=",lon,"_",lat)
+  }else{
+    dateDownl= paste0("BC_xy=",lon,"_",lat)
+  }
+  
   dirout <- paste0(dirWork,'/',dateDownl) 
   dataset <- tolower(dataset)
   
@@ -2272,57 +2277,80 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 
 # serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #  si se corre local no es necesario modificar esta variable
 # downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform" # si se corre local no es necesario modificar esta variable
-# dirWork=  "D:/jetarapues/Request/Request_jramirez" #"/home/jtarapues/request/request_oriana" #  "/home/temp" # directorio de salida
-# dirgcm <-  "T:/gcm/cmip5/raw/daily" # "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # 
-# dirobs <-  "U:/cropdata" # "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #
-# dataset <- "station"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princeton, princenton-afr
-# methBCList <- c('3','4','5') #c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
-# varlist <- c("pr","tasmax","tasmin","rsds")
+# dirWork=  "/home/temp" #"C:/Temp/bc/Request_jramirez" # "C:/Temp" # directorio de salida "/home/jtarapues/request/request_oriana" #  
+# dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/cmip5/raw/daily" #  
+# dirobs <- "/mnt/data_cluster_5/cropdata/" # "U:/cropdata" #"S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #   
+# dataset <- "agmerra"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princenton, princenton-afr
+# methBCList <-c("5")#c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
+# varlist <- c("pr","tasmin")#c("pr","tasmax","tasmin","rsds") # 
 # Obyi <- 1980#1985
 # Obyf <- 2010#1987
-# fuyi <- 2040
-# fuyf <- 2069
+# fuyi <- 2030#2072#2020
+# fuyf <- 2060#2100#2049
 # rcpList <- c("rcp85") # rcp26, rcp45, rcp60, rcp85 "rcp26", "rcp45", "rcp60",  # aun no esta funcionando bien para varios rcps
-# xyList <-   c("-49.28,-16.47") #c("-51.82,-16.97") #
-# gcmlist <-  c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
+# xyList <- #c("-85.717,14.817") #c("-49.28,-16.47") # c("-73.84,4.91") #c("-76.38558333,3.533333333") #
+#   fileXY <-  "C:/Temp/bc/Request_andy/CSVs.txt"
+# gcmlist <-  c("bcc_csm1_1","bcc_csm1_1_m","bnu_esm","cccma_canesm2","cesm1_bgc","cesm1_cam5","cmcc_cms","csiro_access1_0","csiro_mk3_6_0","ec_earth","gfdl_cm3","gfdl_esm2g","gfdl_esm2m","inm_cm4","ipsl_cm5a_lr","ipsl_cm5a_mr","ipsl_cm5b_lr","lasg_fgoals_g2","miroc_esm","miroc_esm_chem","miroc_miroc5","mohc_hadgem2_cc","mohc_hadgem2_es","mpi_esm_lr","mpi_esm_mr","mri_cgcm3","ncar_ccsm4","ncc_noresm1_m")#c("bcc_csm1_1_m","cesm1_cam5","csiro_mk3_6_0","mohc_hadgem2_es","mohc_hadgem2_cc","gfdl_esm2g")#c("mohc_hadgem2_es","mohc_hadgem2_cc")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
 # statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
-# fileStat<-  "D:/jetarapues/Request/Request_jramirez/stat_-49.28_-16.47.txt" # "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" #
+# fileStat<-  "C:/Temp/bc_-73.84_4.91/file_1465990447.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
 # sepFile<-"tab"# puntocoma,space,Comma
 # leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
 # typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
 # 
 # ## For run on windows:
-# ver_python<-"C:\\Python27\\ArcGIS10.1\\python.exe"
-# dirScript_py<-"D:\\jetarapues\\_scripts\\bc_extract_gcm.py"
+# ver_python<-"C:\\Python26\\python.exe"
+# dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
 # #=======================================
-# 
-# 
 # 
 # checkALL=gcmlist[which(gcmlist=="ALL")]
 # if(length(checkALL)==1){
 #   gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
 # }
+# if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
 # if(dataset=="station"){
-#   if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
 #   df = read.table(fileStat, header = TRUE,sep=sepFile)
 #   dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
 #   varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
 #   Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
 #   Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
-#   for(xy in xyList){
-#     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-#     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-#     cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
-#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
+#   if (file.exists(fileXY)) {
+#     xyList = read.table(fileXY, header = TRUE,sep=sepFile)
+#     for(i in 1:nrow(xyList)){
+#       id=xyList[i,'id']
+#       lon=as.numeric(xyList[i,'lon'])
+#       lat=as.numeric(xyList[i,'lat'])
+#       cat(paste0(" -> Processing coordinate: ",lon,lat,"\n"))  
+#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
+#     }    
+#   }else{
+#     for(xy in xyList){
+#       id=NA 
+#       lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
+#       lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
+#       cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
+#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
+#     }    
 #   }
-#   
 # }else{
-#   for(xy in xyList){
-#     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-#     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-#     cat(paste0(" -> Processing coordinate: ",xy,"\n"))
-#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat='',sepFile='',leap,typeData,ver_python,dirScript_py)
+#   if (file.exists(fileXY)) {
+#     xyList = read.table(fileXY, header = TRUE,sep=sepFile)
+#     for(i in 1:nrow(xyList)){
+#       id=xyList[i,'id']
+#       lon=as.numeric(xyList[i,'lon'])
+#       lat=as.numeric(xyList[i,'lat'])
+#       cat(paste0(" -> Processing coordinate: ",lon,lat,"\n"))  
+#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
+#     }    
+#   }else{
+#     for(xy in xyList){
+#       id=NA 
+#       lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
+#       lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
+#       cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
+#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
+#     }    
 #   }  
 # }
+
 
 
