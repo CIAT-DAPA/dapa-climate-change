@@ -2288,8 +2288,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # fuyi <- 2030#2072#2020
 # fuyf <- 2060#2100#2049
 # rcpList <- c("rcp85") # rcp26, rcp45, rcp60, rcp85 "rcp26", "rcp45", "rcp60",  # aun no esta funcionando bien para varios rcps
-# xyList <- #c("-85.717,14.817") #c("-49.28,-16.47") # c("-73.84,4.91") #c("-76.38558333,3.533333333") #
-#   fileXY <-  "C:/Temp/bc/Request_andy/CSVs.txt"
+# xyList <- #c("-85.717,14.817") #c("-49.28,-16.47") # c("-73.84,4.91") #c("-76.38558333,3.533333333") # para correr pocos sitios
+# fileXY <-  "/home/temp/Request_andy/CSVs.txt" # para correr varios sitios, este debe contener las columnas id,lon,lat
 # gcmlist <-  c("bcc_csm1_1","bcc_csm1_1_m","bnu_esm","cccma_canesm2","cesm1_bgc","cesm1_cam5","cmcc_cms","csiro_access1_0","csiro_mk3_6_0","ec_earth","gfdl_cm3","gfdl_esm2g","gfdl_esm2m","inm_cm4","ipsl_cm5a_lr","ipsl_cm5a_mr","ipsl_cm5b_lr","lasg_fgoals_g2","miroc_esm","miroc_esm_chem","miroc_miroc5","mohc_hadgem2_cc","mohc_hadgem2_es","mpi_esm_lr","mpi_esm_mr","mri_cgcm3","ncar_ccsm4","ncc_noresm1_m")#c("bcc_csm1_1_m","cesm1_cam5","csiro_mk3_6_0","mohc_hadgem2_es","mohc_hadgem2_cc","gfdl_esm2g")#c("mohc_hadgem2_es","mohc_hadgem2_cc")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
 # statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
 # fileStat<-  "C:/Temp/bc_-73.84_4.91/file_1465990447.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
