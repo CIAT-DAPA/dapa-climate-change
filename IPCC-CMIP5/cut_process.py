@@ -2,7 +2,7 @@
 # Author: Jaime Tarapues
 # Purpouse: correr el script donde estan los scripts cut_process.aml, cut_GCM.aml
 # ---------------------------------------------------------
-# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\pan S:\admin_boundaries\grid_files\pan_adm\pan0 rcp26 30s bcc_csm1_1 2020_2049 prec,tmin YES YES jaime.tm8@gmail.com
+# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_bclement S:\admin_boundaries\grid_files\ind_adm\ind0 rcp85 30s ALL 2040_2069 bio,cons_mths YES YES clement2@gmail.com
 # python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\GRID D:\jetarapues\Request\Request_ocampo\mask\cod0 rcp26 30s ALL 2020_2049 bio,tmin,tmax NO NO olgaocampolopez@gmail.com
 
 import arcgisscripting, os, sys, string, glob, subprocess, time
@@ -80,7 +80,7 @@ if toaddr != "NO":
 	if not os.path.exists(requestFTP):
 		os.system('mkdir ' + requestFTP)						
 	print '... Coping to FTP: '+dirout+" "+requestFTP
-	os.system("robocopy "+dirout+" "+requestFTP+" /s /z")
+	os.system("robocopy "+dirout+" "+requestFTP+" /s /z /xf *.aml /xf *.py")
 
 	print '... Sending email to: '+toaddr
 	fromaddr = "ccafsclimate@gmail.com"
