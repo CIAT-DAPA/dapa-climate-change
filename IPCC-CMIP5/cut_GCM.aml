@@ -1,5 +1,5 @@
-/* &r cut_GCM.aml S:\observed\gridded_products\worldclim\Global_30s D:\jetarapues\Request\Rerquest_amartinez\wc_extract D:\jetarapues\Request\Rerquest_amartinez\mask\wafrica YES
-&args inputfolder outputfolder mask var switch
+/* &r cut_GCM.aml S:\observed\gridded_products\worldclim\Global_30s D:\jetarapues\Request\Rerquest_amartinez\wc_extract D:\jetarapues\Request\Rerquest_amartinez\mask\wafrica YES NO
+&args inputfolder outputfolder mask var switch tif
 &terminal 9999
 /*&sys cls
 &messages &off
@@ -85,6 +85,21 @@
 							&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
 							&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname%
 						&end
+					&if [locase %tif%] EQ yes &then
+						&do
+							&s outfolder %outputfolder%\_tif
+							&if not [exists %outfolder% -dir] &then &sys md %outfolder%
+							
+							/*&if [exists %outfolder%\%gridname%.prj -file] &then &s delstat [DELETE %outfolder%\%gridname%.prj -file]
+							&if [exists %outfolder%\%gridname%.tif -file] &then &s delstat [DELETE %outfolder%\%gridname%.tif -file] /* &ty Output grid exists
+							/*%outfolder%\%gridname%.tif = gridascii(%outputfolder%\%gridname%)
+							&sys gdal_translate -co COMPRESS=DEFLATE -co PREDICTOR=2 %outputfolder%\%gridname% %outfolder%\%gridname%.tif
+							
+							&sys 7z a %outfolder%\%vartype%_tif.zip %outfolder%\%gridname%.tif
+							&if [exists %outfolder%\%gridname%.tif -file] &then &s delstat [DELETE %outfolder%\%gridname%.tif -file]
+							&if [exists %outfolder%\%gridname%.tif.aux.xml -file] &then &s delstat [DELETE %outfolder%\%gridname%.tif.aux.xml -file]
+							&if [exists %outputfolder%\%gridname% -grid] &then kill %outputfolder%\%gridname%
+						&end						
 						
 				&end
 			&end

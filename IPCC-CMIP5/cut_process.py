@@ -2,8 +2,7 @@
 # Author: Jaime Tarapues
 # Purpouse: correr el script donde estan los scripts cut_process.aml, cut_GCM.aml
 # ---------------------------------------------------------
-# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_bclement S:\admin_boundaries\grid_files\ind_adm\ind0 rcp85 30s ALL 2040_2069 bio,cons_mths YES YES clement2@gmail.com
-# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\GRID D:\jetarapues\Request\Request_ocampo\mask\cod0 rcp26 30s ALL 2020_2049 bio,tmin,tmax NO NO olgaocampolopez@gmail.com
+# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\pan S:\admin_boundaries\grid_files\pan_adm\pan0 rcp26 30s bcc_csm1_1 2020_2049 tmin NO NO name@email.com YES
 
 import arcgisscripting, os, sys, string, glob, subprocess, time
 import smtplib
@@ -29,6 +28,7 @@ variable = sys.argv[8]
 ascii = sys.argv[9]
 wcl = sys.argv[10]# cut worldclim: YES|NO
 toaddr = sys.argv[11] # send email: name@email.com|NO
+tif = sys.argv[12] # convert to tiff
 
 # Clean screen
 os.system('cls')
@@ -54,7 +54,13 @@ if variable == "ALL":
 else:
 	variablelist = variable.split(",")
 	
-
+if tif == "yes":
+	filenameF="_tif.zip"
+elif ascii=="yes":
+	filenameF="_asc.zip"
+else:
+	filenameF=".zip"
+	
 gp.AddMessage( "Periods: " + str(periodlist) )	
 gp.AddMessage( "Variables: " + str(variablelist))		
 
@@ -67,8 +73,8 @@ for rcp in rcplist:
 	for model in modellist:
 		for period in periodlist:
 				for var in variablelist:
-					if not os.path.exists(dirout+"\\"+rcp+"_extracts"+"\\global_" + str(resolution)+"\\"+model+"\\r1i1p1\\"+period+"\\_asciis\\"+var+"_asc.zip"):
-						cmd = 'arc "'+'&run cut_process.aml '+ dirbase+' '+ dirout+' '+ mask+' '+rcp+' '+resolution+' '+var+' '+period+' '+model+' '+ascii+' '+wcl+'"'
+					if not os.path.exists(dirout+"\\"+rcp+"_extracts"+"\\global_" + str(resolution)+"\\"+model+"\\r1i1p1\\"+period+"\\_asciis\\"+var+filenameF):
+						cmd = 'arc "'+'&run cut_process.aml '+ dirbase+' '+ dirout+' '+ mask+' '+rcp+' '+resolution+' '+var+' '+period+' '+model+' '+ascii+' '+wcl+' '+tif+'"'
 						print '... processing: '
 						proc = subprocess.call(cmd,shell=True)
 
