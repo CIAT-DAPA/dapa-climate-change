@@ -1,5 +1,5 @@
 ######################################################################################################################
-#### Author : Carlos Navarro, Jaime Tarapues, Julian Rami???rez
+#### Author : Carlos Navarro, Jaime Tarapues, Julian Ramirez
 #### Date   : May 2016
 #### updated : May 2016
 #### Contact: c.e.navarro@cgiar.org, j.e.tarapues@cgiar.org, j.r.villegas@cgiar.org
@@ -104,7 +104,7 @@ obs_extraction <- function(dataset="wfd", varmod="tmean",yi=2007, yf=2013, lon=-
       if(Sys.info()['sysname']=="Linux"){
         system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lon, "_lat=", lat, " ", ncvar, " > ", dirtemp, "/", odat))
       }else{
-        system(paste(ver_python," ",dirScript_py," ",ncvar,' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' NO cdo',sep=''),intern=TRUE)  
+        system(paste(ver_python," ",dirScript_py," ",ncvar,' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' NO ',dircdo,sep=''),intern=TRUE)  
       }
       ## Read and organize daily TS
       datobs <- read.table(odat,header=F,sep="")
@@ -137,7 +137,7 @@ obs_extraction <- function(dataset="wfd", varmod="tmean",yi=2007, yf=2013, lon=-
 }
 
 ## Extract GCM Time Series Function
-gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2010, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4, dirgcm="T:/gcm/cmip5/raw/daily", dirout="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75",ver_python,dirScript_py){
+gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2010, gcm=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4,dirgcm="T:/gcm/cmip5/raw/daily", dirout="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75",dircdo="cdo",ver_python,dirScript_py){
   
   ## Load libraries
   #library(raster); library(ncdf); library(rgdal);
@@ -150,7 +150,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
   #yf <- substr(ts, 6, 9)
   
   # Loop through GCMs
-  for (gcm in gcmlist){
+  #for (gcm in gcmlist){
     
     ## Create and set working directory
     dirtemp <- paste0(dirout, "/gcm/", basename(gcm))
@@ -230,12 +230,12 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
           ### CDO command line to extract daily TS
           if(Sys.info()['sysname']=="Linux"){
             if (varmod=="hur"){
-              system(paste0("cdo -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar[1], " > ", dirtemp, "/", odat))
+              system(paste0(dircdo," -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar[1], " > ", dirtemp, "/", odat))
             }else {
-              system(paste0("cdo -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
+              system(paste0(dircdo," -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
             }
           }else{
-            system(paste(ver_python," ",dirScript_py," ",ncvar[1],' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' YES cdo',sep=''),intern=TRUE)  
+            system(paste(ver_python," ",dirScript_py," ",ncvar[1],' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' YES ',dircdo,sep=''),intern=TRUE)  
           }
           
           ## Read and organize daily TS
@@ -267,7 +267,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
       }else{cat(paste0("\n Error con los periodos seleccionados del historico: ",yearsH))}
     }else{cat(paste0("\n No existe archivo: ",rcp, "/", gcm, "/r1i1p1/",var, "_day* or historical"))}
     
-  }
+  #}
   
 } 
 
@@ -1900,7 +1900,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   listBC=list.dirs(dirbase,recursive=F,full.names=F)
   
   dirsel=intersect(dirsBC,listBC) 
-  
+  #rcpLists=c("historical",rcpList)
   #set size file tif ouput graphic  
   if(length(dirsel)>2){
     w=1000
@@ -2031,7 +2031,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
     if(length(gcmlist)>1){
       merge$ensemble <- rowMeans(merge[,gcmlist],na.rm=T)
       gcmlist_mod=c(gcmlist,"ensemble")
-    }
+    }else{gcmlist_mod=gcmlist}
     
     months <- month(as.Date(merge$date))
     years <- year(as.Date(merge$date)) 
@@ -2043,6 +2043,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
     }
     
     databc_agg <- aggregate(sumgcm[,gcmlist_mod],by=list("method"=sumgcm$method,month=sumgcm$month),FUN=function(x) {mean(x,na.rm=T)})
+    names(databc_agg) <- c("method","month",gcmlist_mod)
     databc <- databc_agg[,c("month",gcmlist_mod)] 
     methods <-databc_agg[,c("method","month")] 
     databc_ag <- melt(databc, id.vars="month")
@@ -2139,24 +2140,72 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
 }
 
 ## Main function
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order){
   
   ## Load libraries
   library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) 
+
+  #dircdo <- "cdo"
+  #dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
+  #ver_python<-"C:\\Python26\\python.exe"
+  #fileStat<-  "http://172.22.52.48/bias_tmp/file_1470239739.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
+  #sepFile<-"tab"# puntocoma,space,Comma  
   
-  dircdo <- "cdo"
-  if(!is.na(id)){
-    dateDownl= paste0("BC_id=",id,"_xy=",lon,"_",lat)
+  #leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
+  #typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
+  
+  if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
+  
+  if (file.exists(xyfile)) {
+    xyList = read.table(xyfile, header = TRUE,sep=sepFile)
+    lenxy=nrow(xyList)
   }else{
-    dateDownl= paste0("BC_xy=",lon,"_",lat)
+    lenxy=length(xyList)
   }
-  
-  dirout <- paste0(dirWork,'/',dateDownl) 
-  dataset <- tolower(dataset)
-  
-  dirHist <- paste0(dirgcm, "/historical")
-  rcp_t=rcpList[1]
-  #for(rcp_t in rcpList){
+  for(i in 1:lenxy){
+    if (file.exists(xyfile)) {
+      idc=xyList[i,'id']
+      lonc=as.numeric(xyList[i,'lon'])
+      latc=as.numeric(xyList[i,'lat'])
+    }else{
+      idc=NA 
+      lonc=as.numeric(sapply(strsplit(xyList[i], '[,]'), "[[", 1))
+      latc=as.numeric(sapply(strsplit(xyList[i], '[,]'), "[[", 2))
+    }      
+    id=idc
+    lon=lonc
+    lat=latc
+    cat(paste(" -> Processing coordinate: ",lon,lat,"\n"))  
+    
+    if(!is.na(id)){
+      dateDownl= paste0("BC_id=",id,"_xy=",lon,"_",lat)
+    }else if(!is.na(order) & remote=="YES"){
+      dateDownl= paste0("bc_order-",order,"_",gsub("\\.",'-',gsub(':','_',gsub(" ", "_", as.character(Sys.time()))))) # 
+    }else{
+      dateDownl= paste0("BC_xy=",lon,"_",lat)
+    }
+    
+    
+    dirout <- paste0(dirWork,'/',dateDownl) 
+    dataset <- tolower(dataset)
+    
+    if(dataset=="station"){
+      if(remote=="YES"){filepath=url(fileStat)}else{filepath=fileStat}
+      df = read.table(filepath, header = TRUE,sep=sepFile)
+      dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
+      varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
+      Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
+      Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
+    }
+    
+    checkALL=gcmlist[which(gcmlist=="ALL")]
+    if(length(checkALL)==1){
+      gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
+    }  
+    
+    dirHist <- paste0(dirgcm, "/historical")
+    rcp_t=rcpList[1]
+    #for(rcp_t in rcpList){
     dirrcp <- paste0(dirgcm, "/", rcp_t)
     a=list.dirs(dirHist,recursive=F,full.names=F)
     b=list.dirs(dirrcp,recursive=F,full.names=F)
@@ -2192,7 +2241,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         if(dataset=="station"){
           dirtemp <- paste0(dirout, "/obs/station")
           if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
-          df = read.table(fileStat, header = TRUE,sep=sepFile)
+          df = read.table(filepath, header = TRUE,sep=sepFile)
           dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
           station=data.frame(cbind(dateSta,df[,which(colnames(df)==varmod)]))   
           names(station)=c("date","value")
@@ -2213,13 +2262,38 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         } 
         cat()
         if(length(check)>0){
-          gcm_extraction(var,varmod, "historical", Obyi,Obyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
           
-          merge_extraction(varmod, "historical",Obyi,Obyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
+          #export variables
+          sfExport("var")
+          sfExport("varmod")
+          sfExport("Obyi")
+          sfExport("Obyf")
+          sfExport("lon") 
+          sfExport("lat") 
+          sfExport("dirgcm") 
+          sfExport("dirout") 
+          sfExport("dircdo") 
+          sfExport("ver_python") 
+          sfExport("dirScript_py")             
           
+          for(rcp in c("historical",rcpList)){
+            if(rcp=="historical"){yi=Obyi;yf=Obyf}else{yi=fuyi;yf=fuyf}
+            sfExport("rcp")
+            for (i in 1:length(gcmlistSel)){
+              gcm <- gcmlistSel[i]
+              sfExport("gcm") 
+              controlIntpol <- function(i) { #define a new function
+                cat(" .> ", paste("\t Cluster: ", i, sep=""), "\tdone!\n")
+                gcm_extraction(var,varmod, rcp, yi,yf, gcm, lon, lat, dirgcm, dirout,dircdo,ver_python,dirScript_py)
+              }
+              system.time(sfSapply(gcmlistSel, controlIntpol))
+            }
+            merge_extraction(varmod,rcp,yi,yf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
+          }
+          sfStop() 
           for(rcp in rcpList){
-            gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
-            merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
+            #gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
+            #merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
             
             odat <- paste0(dirout,"/raw_data/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
             hdat <- paste0(dirout,"/raw_data/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
@@ -2243,33 +2317,35 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
               for(stat in statList){
                 if(stat=='2' || stat=='3'){
                   bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout)
-                  bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout)  
+                  bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout)
+                  bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
+                  bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
                 }
               }  
             }
           }
           
-          if(stat=='2' || stat=='3'){
-            bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
-            bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
-          }
+#           if(stat=='2' || stat=='3'){
+#             bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
+#             bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
+#           }
         }else{cat(paste0("no exite obs ",varmod,'\n'))}
       }else{cat(paste0("no exite gcm ",varmod,'\n'))}
     }
-  #} 
-  
-#     if(length(list.files(dirout,recursive=T))!=0){
-#       if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
-#       if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
-#       if (file.exists(paste0(dirWork,'/readme.txt'))) {file.copy(paste0(dirWork,'/readme.txt'),dirout)}
-#       system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
-#       system(paste0('rm -r ',dirout),intern=TRUE)
-#       
-#       return(paste0(file.path(downData,dateDownl),'.zip'))
-#     }
+    #} 
+  } 
+ 
+  #     if(length(list.files(dirout,recursive=T))!=0){
+  #       if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
+  #       if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
+  #       if (file.exists(paste0(dirWork,'/readme.txt'))) {file.copy(paste0(dirWork,'/readme.txt'),dirout)}
+  #       system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
+  #       system(paste0('rm -r ',dirout),intern=TRUE)
+  #       
+  #       return(paste0(file.path(downData,dateDownl),'.zip'))
+  #     }
   
 }
-
 
 ############################################# Wrapper ##############################################
 
@@ -2289,68 +2365,23 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # fuyf <- 2060#2100#2049
 # rcpList <- c("rcp85") # rcp26, rcp45, rcp60, rcp85 "rcp26", "rcp45", "rcp60",  # aun no esta funcionando bien para varios rcps
 # xyList <- #c("-85.717,14.817") #c("-49.28,-16.47") # c("-73.84,4.91") #c("-76.38558333,3.533333333") # para correr pocos sitios
-# fileXY <-  "/home/temp/Request_andy/CSVs.txt" # para correr varios sitios, este debe contener las columnas id,lon,lat
+# xyfile <-  "/home/temp/Request_andy/CSVs.txt" # para correr varios sitios, este debe contener las columnas id,lon,lat
 # gcmlist <-  c("bcc_csm1_1","bcc_csm1_1_m","bnu_esm","cccma_canesm2","cesm1_bgc","cesm1_cam5","cmcc_cms","csiro_access1_0","csiro_mk3_6_0","ec_earth","gfdl_cm3","gfdl_esm2g","gfdl_esm2m","inm_cm4","ipsl_cm5a_lr","ipsl_cm5a_mr","ipsl_cm5b_lr","lasg_fgoals_g2","miroc_esm","miroc_esm_chem","miroc_miroc5","mohc_hadgem2_cc","mohc_hadgem2_es","mpi_esm_lr","mpi_esm_mr","mri_cgcm3","ncar_ccsm4","ncc_noresm1_m")#c("bcc_csm1_1_m","cesm1_cam5","csiro_mk3_6_0","mohc_hadgem2_es","mohc_hadgem2_cc","gfdl_esm2g")#c("mohc_hadgem2_es","mohc_hadgem2_cc")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
 # statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
 # fileStat<-  "C:/Temp/bc_-73.84_4.91/file_1465990447.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
 # sepFile<-"tab"# puntocoma,space,Comma
 # leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
 # typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
-# 
+# remote <- "NO"  # YES | NO (local) -> importante para definir la ruta en fileStat, si es YES debe ser http://file.txt, NO es path relativo
+# dircdo <- "cdo" # modificar si no encuentra el path de cdo
+# order <- NA # no modificar si remote=NO
 # ## For run on windows:
 # ver_python<-"C:\\Python26\\python.exe"
 # dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
 # #=======================================
 # 
-# checkALL=gcmlist[which(gcmlist=="ALL")]
-# if(length(checkALL)==1){
-#   gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
-# }
-# if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
-# if(dataset=="station"){
-#   df = read.table(fileStat, header = TRUE,sep=sepFile)
-#   dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
-#   varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
-#   Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
-#   Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
-#   if (file.exists(fileXY)) {
-#     xyList = read.table(fileXY, header = TRUE,sep=sepFile)
-#     for(i in 1:nrow(xyList)){
-#       id=xyList[i,'id']
-#       lon=as.numeric(xyList[i,'lon'])
-#       lat=as.numeric(xyList[i,'lat'])
-#       cat(paste0(" -> Processing coordinate: ",lon,lat,"\n"))  
-#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
-#     }    
-#   }else{
-#     for(xy in xyList){
-#       id=NA 
-#       lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-#       lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-#       cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
-#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
-#     }    
-#   }
-# }else{
-#   if (file.exists(fileXY)) {
-#     xyList = read.table(fileXY, header = TRUE,sep=sepFile)
-#     for(i in 1:nrow(xyList)){
-#       id=xyList[i,'id']
-#       lon=as.numeric(xyList[i,'lon'])
-#       lat=as.numeric(xyList[i,'lat'])
-#       cat(paste0(" -> Processing coordinate: ",lon,lat,"\n"))  
-#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
-#     }    
-#   }else{
-#     for(xy in xyList){
-#       id=NA 
-#       lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-#       lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-#       cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
-#       bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,id,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
-#     }    
-#   }  
-# }
-
-
-
+library(snowfall);
+sfInit(parallel=T,cpus=2) #initiate cluster
+stop("error")          
+sfExport("gcm_extraction")
+bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order)

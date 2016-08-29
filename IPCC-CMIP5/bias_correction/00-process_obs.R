@@ -21,16 +21,17 @@
 library(sp); library(raster); library(rgdal); library(maptools); library(ncdf)
 
 
-dirbase="U:/cropdata/"
-dataset <- "agmerra"
+dirbase="/mnt/data_cluster_5/cropdata/"
+dataset <- "agcfsr"
 
 oDir <- paste0(dirbase,dataset,"/daily/nc-files")
-wd <-  paste0(dirbase,dataset,oDir,"/_primary_files")
+wd <-  paste0(oDir,"/_primary_files")
 
 ncList <- list.files(wd,full.names = FALSE)
-varraw=sapply(strsplit(ncList, '[_]'), "[[", 3)
-varraw=sapply(strsplit(varraw, '[.]'), "[[", 1)
-varraw=unique(varraw)
+# varraw=sapply(strsplit(ncList, '[_]'), "[[", 3)
+# varraw=sapply(strsplit(varraw, '[.]'), "[[", 1)
+# varraw=unique(varraw)
+varraw=c("tmax")
 
 year=sapply(strsplit(ncList, '[_]'), "[[", 2)
 yearMin=min(as.numeric(year))
@@ -88,10 +89,11 @@ for (var in varraw){
   }  
   
   ncListVar <- list.files(wd, pattern=paste0(var,".*"),full.names = FALSE)
+  ncListVar <- ncListVar[gsub(".nc4","",sapply(strsplit(basename(ncListVar), '[_]'), "[[", 3))==varmod]
   
   setwd(wd)
   
-  system(paste("cdo -s -f nc mergetime ", paste(ncListVar[1:2], collapse=" "), " ", oDir, "/", var,"_daily_ts_",dataset,"_",yearMin,"_",yearMax,"-temp.nc", sep=""))
+  system(paste("cdo -s -f nc mergetime ", paste(ncListVar, collapse=" "), " ", oDir, "/", var,"_daily_ts_",dataset,"_",yearMin,"_",yearMax,"-temp.nc", sep=""))
   system(paste("nccopy -d9 ", oDir, "/", var,"_daily_ts_",dataset,"_",yearMin,"_",yearMax,"-temp.nc", " ", oDir, "/", var,"_daily_ts_",dataset,"_",yearMin,"_",yearMax,".nc", sep=""))
   unlink(paste(oDir, "/", var,"_daily_ts_",dataset,"_",yearMin,"_",yearMax,"-temp.nc", sep=""))
   
