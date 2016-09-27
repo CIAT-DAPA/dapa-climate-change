@@ -5,7 +5,7 @@
 # input is one file per year
 # some statistics are calculated relative to reference period, all of which must exist.
 # For this code, the ref period conincides with the historical period
-
+# python daily_extreme_stats_cdo_main.py ACCESS1-0
 from sys import exit, argv
 from os import path, mkdir
 
@@ -32,7 +32,7 @@ StYrsFut = 2006
 EnYrsFut = 2099
 
 # root dir needs to match list of runs below - they need to be located there
-RootDir = '/mnt/BCSD'
+RootDir = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
 
 # model name
 model = str(argv[1])
@@ -40,67 +40,67 @@ model = str(argv[1])
 # land-sea mask
 lsm = "./global_0.25deg_LSM.nc"
 
-if not path.isdir('/mnt/out_stats/' + model):
-    mkdir('/mnt/out_stats/' + model)
+if not path.isdir('/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/' + model):
+    mkdir('/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/' + model)
 
 # within each directory, subdirectories for each variable: pr, tasmax, tasmin
 # copy_files really just creates soft links to files for existing variables
 # working directory is hardcoded in two py modules.
 # Also, tavg ('tas') is needed for many stats, calculate up front
-for scens in ('historical', 'rcp45', 'rcp85'):
+for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
     if scens == 'historical':
-        ind_hist = RootDir + "/" + model + "/historical/day/r1i1p1"
+        ind_hist = RootDir#RootDir + "/" + model + "/historical/day/r1i1p1"
 
-        # soflink tasmin historical
-        fn_hist_tn = ind_hist + "/tasmin/tasmin_day_" + model + "_historical_r1i1p1_"
+        #### soflink tasmin historical
+        fn_hist_tn = ind_hist + "/tasmin_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_hist_tn, StComHis, EnComHis, model)
 
-        # soflink tasmax historical
-        fn_hist_tx = ind_hist + "/tasmax/tasmax_day_" + model + "_historical_r1i1p1_"
+        ## soflink tasmax historical
+        fn_hist_tx = ind_hist + "/tasmax_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_hist_tx, StComHis, EnComHis, model)
 
-        # soflink pr historical
-        fn_hist_pr = ind_hist + "/pr/pr_day_" + model + "_historical_r1i1p1_"
+        #### soflink pr historical
+        fn_hist_pr = ind_hist + "/pr_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_hist_pr, StComHis, EnComHis, model)
 
-        # calculate tmean historical
+        #### calculate tmean historical
         t_stats.calc_tavg(fn_hist_tn, fn_hist_tx, StComHis, EnComHis, model)
 
-        # soflink tmean historical
-        fn_hist_tas = RootDir + "/" + model + "/junk/tas_day_" + model + "_historical_r1i1p1_"
+        ## soflink tmean historical
+        fn_hist_tas = RootDir + "/" + model + "/junk/tas_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_hist_tas, StComHis, EnComHis, model)
 
-        # calculate pr in mm historical
+        ### calculate pr in mm historical
         p_stats.calc_ppmm(fn_hist_pr, StComHis, EnComHis, model)
-        # soflink prmm historical
-        fn_hist_prmm = RootDir + "/" + model + "/junk/prmm_day_" + model + "_historical_r1i1p1_"
+        ### soflink prmm historical
+        fn_hist_prmm = RootDir + "/" + model + "/junk/prmm_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_hist_prmm, StComHis, EnComHis, model)
     else:
-        ind_rcp = RootDir + "/" + model + "/" + scens + "/day/r1i1p1"
+        ind_rcp = RootDir#RootDir + "/" + model + "/" + scens + "/day/r1i1p1"
 
         # soflink tasmin rcp
-        fn_rcp_tn = ind_rcp + "/tasmin/tasmin_day_" + model + "_" + scens + "_r1i1p1_"
+        fn_rcp_tn = ind_rcp + "/tasmin_day_BCSD_" + scens + "_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_rcp_tn, StYrsFut, EnYrsFut, model)
 
         # soflink tasmax rcp
-        fn_rcp_tx = ind_rcp + "/tasmax/tasmax_day_" + model + "_" + scens + "_r1i1p1_"
+        fn_rcp_tx = ind_rcp + "/tasmax_day_BCSD_" + scens + "_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_rcp_tx, StYrsFut, EnYrsFut, model)
 
         # soflink pr rcp
-        fn_rcp_pr = ind_rcp + "/pr/pr_day_" + model + "_" + scens + "_r1i1p1_"
+        fn_rcp_pr = ind_rcp + "/pr_day_BCSD_"+ scens + "_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_rcp_pr, StYrsFut, EnYrsFut, model)
 
         # calculate tmean rcp
         t_stats.calc_tavg(fn_rcp_tn, fn_rcp_tx, StYrsFut, EnYrsFut, model)
 
         # soflink tmean rcp
-        fn_rcp_tas = RootDir + "/" + model + "/junk/tas_day_" + model + "_" + scens + "_r1i1p1_"
+        fn_rcp_tas = RootDir + "/" + model + "/junk/tas_day_BCSD_" + scens + "_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_rcp_tas, StYrsFut, EnYrsFut, model)
 
         # calculate pr in mm rcp
         p_stats.calc_ppmm(fn_rcp_pr, StYrsFut, EnYrsFut, model)
         # soflink prmm rcp
-        fn_rcp_prmm = RootDir + "/" + model + "/junk/prmm_day_" + model + "_" + scens + "_r1i1p1_"
+        fn_rcp_prmm = RootDir + "/" + model + "/junk/prmm_day_BCSD_" + scens + "_r1i1p1_"+ model + "_"
         t_stats.copy_files(fn_rcp_prmm, StYrsFut, EnYrsFut, model)
 
     # Monthly mean maximum temperatures historical
