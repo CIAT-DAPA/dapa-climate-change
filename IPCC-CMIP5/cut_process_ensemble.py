@@ -3,7 +3,8 @@
 # Purpouse: correr el script donde estan los scripts cut_process.aml, cut_GCM.aml
 # ---------------------------------------------------------
 # python D:\jetarapues\Request\Request_darango\Latinoamerica\cut_process_ensemble.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_darango\Latinoamerica S:\admin_boundaries\grid_files\pan_adm\pan0 rcp26 30s 2020_2049 prec NO YES NO
-# python D:\jetarapues\Request\Request_darango\Latinoamerica\cut_process_ensemble.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_darango\Latinoamerica D:\jetarapues\Request\Request_darango\Latinoamerica\mask\latino ALL 30s 2040_2069 prec,tmax,tmin,tmean NO YES d.arango@cgiar.org
+# python D:\jetarapues\Request\Request_cenavarro\cut_process_ensemble.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_cenavarro D:\jetarapues\Request\Request_cenavarro\mask\cali ALL 30s ALL ALL NO YES C.E.Navarro@CGIAR.ORG YES
+# python D:\jetarapues\Request\Request_cenavarro\cut_process_ensemble.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_cenavarro D:\jetarapues\Request\Request_cenavarro\mask\cali ALL 30s ALL ALL NO YES NO YES
 
 import arcgisscripting, os, sys, string, glob, subprocess, time
 import smtplib
@@ -28,6 +29,7 @@ variable = sys.argv[7]
 ascii = sys.argv[8]
 wcl = sys.argv[9]# cut worldclim: YES|NO
 toaddr = sys.argv[10] # send email: name@email.com|NO
+tif = sys.argv[11] # convert to tiff
 
 # Clean screen
 os.system('cls')
@@ -53,7 +55,13 @@ if variable == "ALL":
 else:
 	variablelist = variable.split(",")
 	
-
+if tif == "yes":
+	filenameF="_tif.zip"
+elif ascii=="yes":
+	filenameF="_asc.zip"
+else:
+	filenameF=".zip"
+	
 gp.AddMessage( "Periods: " + str(periodlist) )	
 gp.AddMessage( "Variables: " + str(variablelist))		
 
@@ -61,7 +69,8 @@ for rcp in rcplist:
 	for period in periodlist:
 			for var in variablelist:
 				if not os.path.exists(dirout+"\\"+rcp+"_extracts_ens"+"\\global_" + str(resolution)+"\\"+period+"_"+var+"_cut_done.txt"):
-					cmd = 'arc "'+'&run cut_process_ensemble.aml '+ dirbase+' '+ dirout+' '+ mask+' '+rcp+' '+resolution+' '+var+' '+period+' '+ascii+' '+wcl+'"'
+					cmd = 'arc "'+'&run cut_process_ensemble.aml '+ dirbase+' '+ dirout+' '+ mask+' '+rcp+' '+resolution+' '+var+' '+period+' '+ascii+' '+wcl+' '+tif+'"'
+					print cmd
 					print '... processing: '
 					proc = subprocess.call(cmd,shell=True)
 

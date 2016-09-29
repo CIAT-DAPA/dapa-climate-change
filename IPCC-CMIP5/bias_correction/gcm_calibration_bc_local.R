@@ -204,19 +204,34 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
       }
       
       if(yi <= yearF && checkHist==TRUE){
-        
-        if(yearI >= yi){
-          yei = yearI
+        if(rcp=="historical"){
+          if(yearHI >= yi){
+            yei = yearHI
+          }
+          if (yearHI <= yi){
+            yei = yearHI
+          }  
+          if (yearHF <= yf){
+            yef = yearHF
+          }  
+          if (yearHF >= yf){
+            yef =yf
+          }          
+        }else{
+          if(yearI >= yi){
+            yei = yearI
+          }
+          if (yearI <= yi){
+            yei = yi
+          }  
+          if (yearF <= yf){
+            yef = yearF
+          }  
+          if (yearF >= yf){
+            yef =yf
+          }          
         }
-        if (yearI <= yi){
-          yei = yi
-        }  
-        if (yearF <= yf){
-          yef = yearF
-        }  
-        if (yearF >= yf){
-          yef =yf
-        }
+
         yi<-yei
         yf<-yef
         
@@ -2194,8 +2209,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
       df = read.table(filepath, header = TRUE,sep=sepFile)
       dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
       varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
-      Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
-      Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
+      Obyi <-as.numeric(format(as.Date(min(dateSta[!is.na(dateSta)])),'%Y'))
+      Obyf <-as.numeric(format(as.Date(max(dateSta[!is.na(dateSta)])),'%Y'))
     }
     
     checkALL=gcmlist[which(gcmlist=="ALL")]
@@ -2241,8 +2256,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         if(dataset=="station"){
           dirtemp <- paste0(dirout, "/obs/station")
           if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
-          df = read.table(filepath, header = TRUE,sep=sepFile)
-          dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
+          #df = read.table(filepath, header = TRUE,sep=sepFile)
+          #dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
           station=data.frame(cbind(dateSta,df[,which(colnames(df)==varmod)]))   
           names(station)=c("date","value")
           if(all(is.na(station$value))!=TRUE){
@@ -2266,8 +2281,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
           #export variables
           sfExport("var")
           sfExport("varmod")
-          sfExport("Obyi")
-          sfExport("Obyf")
+          # sfExport("Obyi")
+          # sfExport("Obyf")
           sfExport("lon") 
           sfExport("lat") 
           sfExport("dirgcm") 
@@ -2278,6 +2293,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
           
           for(rcp in c("historical",rcpList)){
             if(rcp=="historical"){yi=Obyi;yf=Obyf}else{yi=fuyi;yf=fuyf}
+            sfExport("yi")
+            sfExport("yf")
             sfExport("rcp")
             for (i in 1:length(gcmlistSel)){
               gcm <- gcmlistSel[i]
