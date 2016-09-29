@@ -1,5 +1,5 @@
 ######################################################################################################################
-#### Author : Carlos Navarro, Jaime Tarapues, Julian Rami???rez
+#### Author : Carlos Navarro, Jaime Tarapues, Julian Ramirez
 #### Date   : May 2016
 #### updated : May 2016
 #### Contact: c.e.navarro@cgiar.org, j.e.tarapues@cgiar.org, j.r.villegas@cgiar.org
@@ -104,7 +104,7 @@ obs_extraction <- function(dataset="wfd", varmod="tmean",yi=2007, yf=2013, lon=-
       if(Sys.info()['sysname']=="Linux"){
         system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lon, "_lat=", lat, " ", ncvar, " > ", dirtemp, "/", odat))
       }else{
-        system(paste(ver_python," ",dirScript_py," ",ncvar,' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' NO cdo',sep=''),intern=TRUE)  
+        system(paste(ver_python," ",dirScript_py," ",ncvar,' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' NO ',dircdo,sep=''),intern=TRUE)  
       }
       ## Read and organize daily TS
       datobs <- read.table(odat,header=F,sep="")
@@ -137,7 +137,7 @@ obs_extraction <- function(dataset="wfd", varmod="tmean",yi=2007, yf=2013, lon=-
 }
 
 ## Extract GCM Time Series Function
-gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2010, gcmlist=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4, dirgcm="T:/gcm/cmip5/raw/daily", dirout="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75",ver_python,dirScript_py){
+gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2010, gcm=c("bcc_csm1_1", "bcc_csm1_1_m", "bnu_esm", "cccma_cancm4", "cccma_canesm2"),lon=-73.5, lat=3.4,dirgcm="T:/gcm/cmip5/raw/daily", dirout="D:/jetarapues/Request/Request_cnavarro/bc/bc_38.35_-4.75",dircdo="cdo",ver_python,dirScript_py){
   
   ## Load libraries
   #library(raster); library(ncdf); library(rgdal);
@@ -150,7 +150,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
   #yf <- substr(ts, 6, 9)
   
   # Loop through GCMs
-  for (gcm in gcmlist){
+  #for (gcm in gcmlist){
     
     ## Create and set working directory
     dirtemp <- paste0(dirout, "/gcm/", basename(gcm))
@@ -230,12 +230,12 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
           ### CDO command line to extract daily TS
           if(Sys.info()['sysname']=="Linux"){
             if (varmod=="hur"){
-              system(paste0("cdo -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar[1], " > ", dirtemp, "/", odat))
+              system(paste0(dircdo," -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar[1], " > ", dirtemp, "/", odat))
             }else {
-              system(paste0("cdo -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
+              system(paste0(dircdo," -s -outputtab,date,value -selyear,",yei,"/",yef," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
             }
           }else{
-            system(paste(ver_python," ",dirScript_py," ",ncvar[1],' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' YES cdo',sep=''),intern=TRUE)  
+            system(paste(ver_python," ",dirScript_py," ",ncvar[1],' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' YES ',dircdo,sep=''),intern=TRUE)  
           }
           
           ## Read and organize daily TS
@@ -267,7 +267,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
       }else{cat(paste0("\n Error con los periodos seleccionados del historico: ",yearsH))}
     }else{cat(paste0("\n No existe archivo: ",rcp, "/", gcm, "/r1i1p1/",var, "_day* or historical"))}
     
-  }
+  #}
   
 } 
 
@@ -1209,9 +1209,9 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   if(varmod == "prec"){
     ylabel <- "Precipitation (mm)"; flabel <- "Rainfall Frequency (days per month)";limit = c(0,250);
   }else if(varmod == "tmin"){
-    ylabel <- "Min. Temperature (ºC)"; limit = c(-10, 25);
+    ylabel <- "Min. Temperature (deg C)"; limit = c(-10, 25);
   }else if(varmod == "tmax"){
-    ylabel <- "Max. Temperature (ºC)"; flabel <- "Hot days Frequency (days per month)"; limit = c(0, 40);
+    ylabel <- "Max. Temperature (deg C)"; flabel <- "Hot days Frequency (days per month)"; limit = c(0, 40);
   }else if(varmod == "srad"){
     ylabel <- "Shortwave Sol. Radiation (MJ/m2 day)"; limit = c(0, 400);
   }else if(varmod == "hur"){
@@ -1219,7 +1219,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   }else if(varmod == "swind"){
     ylabel <- "Wind Speed (m/s)"; limit = c(0, 400);
   }else if(varmod == "tmean"){
-    ylabel <- "Mean Temperature (ºC)"; limit = c(0, 100);
+    ylabel <- "Mean Temperature (deg C)"; limit = c(0, 100);
   }
   
   # Personalized colors 
@@ -1494,9 +1494,9 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
   if (varmod == "prec" || varmod == "tmax"){
 
     ## Define output metrics file
-    ofreq <- paste0(dirout_freq, "/freq_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
-    
-    if (!file.exists(ofreq)) {
+    #ofreq <- paste0(dirout_freq, "/freq_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
+    outTif=paste0(dirout_freq, "/freq_", rcp,"_",gcmlist[ngcm],"_",varmod,"_lon_",lon,"_lat_",lat,".tif")
+    if (!file.exists(outTif)) {
       
       ## Get months, years and methods from merged file
       months <- month(as.Date(merge$date))
@@ -1553,7 +1553,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         }
         
         #Write plot data
-        freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
+        #freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
         
       } else {
         
@@ -1589,7 +1589,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         }
         
         #Write output metrics file
-        freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
+        #freq <- write.table(freq, ofreq, sep=" ", row.names=F, quote=F)
         
       }
       
@@ -1698,10 +1698,10 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
       xlabel <- "Precipitation (mm/month)"; flabel <- "Rainfall Frequency (days/month)";#ylimit =c(0, 0.005);xlimit=c(0, 2000); 
       ylabel <- "Density"
     }else if(varmod == "tmin"){
-      xlabel <- "Min. Temperature (ºC)"; #xlimit = c(-10, 25);ylimit = c(0, 0.2);
+      xlabel <- "Min. Temperature (deg C)"; #xlimit = c(-10, 25);ylimit = c(0, 0.2);
       ylabel <- "Density"
     }else if(varmod == "tmax"){
-      xlabel <- "Max. Temperature (ºC)"; flabel <- "Hot days Frequency (days/month)";# ylimit = c(0, 0.2);xlimit=c(0, 50);
+      xlabel <- "Max. Temperature (deg C)"; flabel <- "Hot days Frequency (days/month)";# ylimit = c(0, 0.2);xlimit=c(0, 50);
       ylabel <- "Density"
     }else if(varmod == "srad"){
       xlabel <- "Shortwave Sol. Radiation (MJ/m2 month)"; #ylimit = c(0, 0.2);xlimit = c(0, 400);
@@ -1713,7 +1713,7 @@ bc_densityStats <- function(varmod="srad", rcpList="historical",yi=1980, yf=1985
       xlabel <- "Wind Speed (m/s)"; #ylimit = c(0, 0.2);xlimit = c(0, 400);
       ylabel <- "Density"
     }else if(varmod == "tmean"){
-      xlabel <- "Mean Temperature (ºC)"; #xlimit = c(0, 100);ylimit = c(0, 0.2);
+      xlabel <- "Mean Temperature (deg C)"; #xlimit = c(0, 100);ylimit = c(0, 0.2);
       ylabel <- "Density"
     }
     
@@ -1900,7 +1900,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   listBC=list.dirs(dirbase,recursive=F,full.names=F)
   
   dirsel=intersect(dirsBC,listBC) 
-  
+  #rcpLists=c("historical",rcpList)
   #set size file tif ouput graphic  
   if(length(dirsel)>2){
     w=1000
@@ -1930,9 +1930,9 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   if(varmod == "prec"){
     ylabel <- "Precipitation Change (%)"
   }else if(varmod == "tmin"){
-    ylabel <- "Min. Temperature Change (ºC)"
+    ylabel <- "Min. Temperature Change (deg C)"
   }else if(varmod == "tmax"){
-    ylabel <- "Max. Temperature Change (ºC)"
+    ylabel <- "Max. Temperature Change (deg C)"
   }else if(varmod == "srad"){
     ylabel <- "Shortwave Sol. Radiation Change (%)"
   }else if(varmod == "hur"){
@@ -1940,7 +1940,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   }else if(varmod == "swind"){
     ylabel <- "Wind Speed (m/s)"
   }else if(varmod == "tmean"){
-    ylabel <- "Temperature (ºC)"
+    ylabel <- "Temperature (deg C)"
   }
   
   diroutGrap<-paste(dirbase,"/stats/projected_change",sep="")
@@ -2031,7 +2031,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
     if(length(gcmlist)>1){
       merge$ensemble <- rowMeans(merge[,gcmlist],na.rm=T)
       gcmlist_mod=c(gcmlist,"ensemble")
-    }
+    }else{gcmlist_mod=gcmlist}
     
     months <- month(as.Date(merge$date))
     years <- year(as.Date(merge$date)) 
@@ -2043,6 +2043,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
     }
     
     databc_agg <- aggregate(sumgcm[,gcmlist_mod],by=list("method"=sumgcm$method,month=sumgcm$month),FUN=function(x) {mean(x,na.rm=T)})
+    names(databc_agg) <- c("method","month",gcmlist_mod)
     databc <- databc_agg[,c("month",gcmlist_mod)] 
     methods <-databc_agg[,c("method","month")] 
     databc_ag <- melt(databc, id.vars="month")
@@ -2138,481 +2139,73 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
   }
 }
 
-##indicadores * no se esta usando
-bc_statsInd <- function(varmod="prec", rcp="historical",yi=1998, yf=2013, lon=-73.5, lat=3.4, dirbase="C:/Temp/bc/bc_31.45_-0.65",stat){
-  
-  ## Load libraries
-  library(lubridate); library(ggplot2); library(reshape)
-  
-  dirsBC=c("bias_correction_no_variability","bias_correction_variability","change_factor_no_variability","change_factor_variability","quantile_mapping","raw_data")
-  listBC=list.dirs(dirbase,recursive=F,full.names=F)
-  
-  dirsel=intersect(dirsBC,listBC)  
-  
-  ## Set working directory
-  setwd(dirbase)
-  
-  ## Set and create output directory
-  dirout <- paste0(dirbase, "/indicadores")
-  if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}
-  
-  ## Define end and start year to plot
-  #yi <- substr(ts, 1, 4)
-  #yf <- substr(ts, 6, 9)
-  
-  
-  listbcAll_p=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_prec_*"))
-  listbcAll_tmx=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_tmax_*"))
-  listbcAll_tmn=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_tmin_*"))
-  listbcAll_s=list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0(rcp,"_srad_*"))
-  
-  
-  #   listbcAll=c(listbcAll,list.files(path = dirsel, full.names=TRUE,recursive = TRUE,pattern=paste0("historical_",varmod, "_*")))
-  
-  ## Define methods to plot
-  if (rcp == "historical"){
-    methods <- c("sh_","bc_", "qm_", "raw_")
-    listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
-    methods_ln <-unique(dirname(listbc))  #c("BC Var", "BC", "QM", "RAW") # 
-  } else {
-    methods <- c("sh_","bc_","del_","cf_","qm_","raw_")
-    listbc=grep(paste(methods,collapse="|"),listbcAll, value = TRUE)
-    methods_ln <- unique(dirname(listbc))  # c("CF Var", "CF", "BC Var", "BC", "QM", "RAW") #
-  }  
-  
-  ## Load all bias corrected data
-  odat_p <- lapply(listbcAll_p, function(x){read.table(x,header=T,sep=" ")})
-  odat_tmx <- lapply(listbcAll_tmx, function(x){read.table(x,header=T,sep=" ")})
-  odat_tmn <- lapply(listbcAll_tmn, function(x){read.table(x,header=T,sep=" ")})
-  odat_s <- lapply(listbcAll_s, function(x){read.table(x,header=T,sep=" ")})
-  
-  # Get GCMs names and length
-  ngcm <- length(odat_p[[1]]) - 2
-  gcmlist <- names(odat_p[[1]])[3:length(odat_p[[1]])]
-  
-  # Merge all data in a single table
-  #   merge <- c()
-  #   for(j in 1:length(odat)) { merge <- rbind(cbind("method"=rep(methods_ln[j],nrow( odat[[j]] )), (odat[[j]])), merge) }
-  #   rownames(merge) <- NULL
-  
-  ################################ SEASONS
-  seasons <- c()
-  seasons <- cbind(c("djf", "mam", "jja", "son"), c(12, 3, 6, 9), c(2, 5, 8, 11))
-  colnames(seasons) <- c("season", "staMth", "endMth")  
-  
-  seasonALL_p=c()
-  for(j in 1:length(odat_p)) { 
-    for (k in 1:nrow(seasons)){
-      if(k!=1){
-        seasonStk <- subset(odat_p[[j]], as.numeric(format(as.Date(odat_p[[j]]$date), "%m")) %in% seasons[k,2]:seasons[k,3])
-      }else{
-        seasonStk <- subset(odat_p[[j]], as.numeric(format(as.Date(odat_p[[j]]$date), "%m")) %in% c(12,1,2))
-      }
-      seasonALL_p=rbind(cbind("method_p"=rep(methods_ln[j],nrow(seasonStk)),"rcp"=rep(rcp,nrow(seasonStk)),"season"=rep(seasons[k,1],nrow(seasonStk)),seasonStk),seasonALL_p)  
-    }  
-  }
-  seasonALL_tmx=c()
-  for(j in 1:length(odat_tmx)) { 
-    for (k in 1:nrow(seasons)){
-      if(k!=1){
-        seasonStk <- subset(odat_tmx[[j]], as.numeric(format(as.Date(odat_tmx[[j]]$date), "%m")) %in% seasons[k,2]:seasons[k,3])
-      }else{
-        seasonStk <- subset(odat_tmx[[j]], as.numeric(format(as.Date(odat_tmx[[j]]$date), "%m")) %in% c(12,1,2))
-      }
-      seasonALL_tmx=rbind(cbind("method_tmx"=rep(methods_ln[j],nrow(seasonStk)),"rcp"=rep(rcp,nrow(seasonStk)),"season"=rep(seasons[k,1],nrow(seasonStk)),seasonStk),seasonALL_tmx)  
-    }  
-  }  
-  seasonALL_tmn=c()
-  for(j in 1:length(odat_tmn)) { 
-    for (k in 1:nrow(seasons)){
-      if(k!=1){
-        seasonStk <- subset(odat_tmn[[j]], as.numeric(format(as.Date(odat_tmn[[j]]$date), "%m")) %in% seasons[k,2]:seasons[k,3])
-      }else{
-        seasonStk <- subset(odat_tmn[[j]], as.numeric(format(as.Date(odat_tmn[[j]]$date), "%m")) %in% c(12,1,2))
-      }
-      seasonALL_tmn=rbind(cbind("method_tmn"=rep(methods_ln[j],nrow(seasonStk)),"rcp"=rep(rcp,nrow(seasonStk)),"season"=rep(seasons[k,1],nrow(seasonStk)),seasonStk),seasonALL_tmn)  
-    }  
-  }
-  seasonALL_s=c()
-  for(j in 1:length(odat_s)) { 
-    for (k in 1:nrow(seasons)){
-      if(k!=1){
-        seasonStk <- subset(odat_s[[j]], as.numeric(format(as.Date(odat_s[[j]]$date), "%m")) %in% seasons[k,2]:seasons[k,3])
-      }else{
-        seasonStk <- subset(odat_s[[j]], as.numeric(format(as.Date(odat_s[[j]]$date), "%m")) %in% c(12,1,2))
-      }
-      seasonALL_s=rbind(cbind("method_s"=rep(methods_ln[j],nrow(seasonStk)),"rcp"=rep(rcp,nrow(seasonStk)),"season"=rep(seasons[k,1],nrow(seasonStk)),seasonStk),seasonALL_s)  
-    }  
-  }  
-  
-  
-  # Y-axis labels by variable
-  if(varmod == "prec"){
-    ylabel <- "Precipitation (mm/day)"; flabel <- "Rainfall Frequency (days/month)";limit = c(0,250);
-  }else if(varmod == "tmin"){
-    ylabel <- "Min. Temperature (C)"; limit = c(-10, 25);
-  }else if(varmod == "tmax"){
-    ylabel <- "Max. Temperature (C)"; flabel <- "Hot days Frequency (days/month)"; limit = c(0, 40);
-  }else if(varmod == "srad"){
-    ylabel <- "Shortwave Sol. Radiation ((MJ/m2 day)"; limit = c(0, 400);
-  }else if(varmod == "hur"){
-    ylabel <- "Relative Humidity (%)"; limit = c(0, 100);
-  }else if(varmod == "swind"){
-    ylabel <- "Wind speed (m/s)"; limit = c(0, 400);
-  }else if(varmod == "tmean"){
-    ylabel <- "Mean Temperature (C)"; limit = c(0, 100);
-  }
-  flabel_py <- "Rainfall Frequency (days/season)";limit = c(0,250);
-  flabel_tx <- "ndays Max. Temperaure >35 (C)"; flabel <- "Hot days Frequency (days/season)"; limit = c(0, 40);
-  flabel_tn <- "ndays Min. Temperature >22 (C)"; flabel <- "Hot days Frequency (days/season)"; limit = c(0, 40);
-  flabel_p <- "Precipitation total (mm/season)"
-  flabel_s <- "S. Radiation total (MJ/m2 season)"
-  flabel_tmx <- "Mean Max.Temperature (C)"
-  flabel_tmn <- "Mean Min.Temperature (C)"
-  
-  # Personalized colors 
-  gray='gray50';blue="#122F6B";blue2="#1F78B4";blue3="#A6CEE3";green="#33A02C";green2="#B2DF8A";red="#E31A1C";red2="#FB9A99";orange="#FF7F00";orange2="#FDBF6F"
-  
-  # Long name months list
-  f_names <- list("son"="SON", "jja"="JJA", "mam"="MAM", "djf"="DJF")
-  f_labeller <- function(variable, value){return(f_names[value])}
-  
-  ######################
-  
-  ##### Rainfall frequency and hot days frequency comparison
-  
-  ## Define output metrics file
-  ofreq <- paste0(dirout, "/freq_", rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".txt")
-  
-  if (!file.exists(ofreq)) {
-    
-    ## Get months, years and methods from merged file
-    months <- month(as.Date(seasonALL$date))
-    years_p <- year(as.Date(seasonALL_p$date))
-    years_tmx <- year(as.Date(seasonALL_tmx$date))
-    years_tmn <- year(as.Date(seasonALL_tmn$date))
-    years_s <- year(as.Date(seasonALL_s$date))
-    methods <- year(as.Date(seasonALL$date))
-    
-    ## Calculate frequencies of rainy and hot days
-    merge_mod_p <- seasonALL_p[,5:length(seasonALL_p)]
-    merge_mod_p[merge_mod_p < 1] <- 0 ; merge_mod_p[merge_mod_p > 1] <- 1  #ind-1
-    merge_mod_p <- cbind(seasonALL_p[1:3], merge_mod_p)
-    freq_py <- aggregate(merge_mod_p[4:length(merge_mod_p)], by=list("method_py"=merge_mod_p$method, "year"=years_p, "season"=merge_mod_p$season), FUN="sum", na.rm=T) 
-    
-    merge_mod_tmx <- seasonALL_tmx[,5:length(seasonALL_tmx)]
-    merge_mod_tmx[merge_mod_tmx < 35] <- 0 ; merge_mod_tmx[merge_mod_tmx > 35] <- 1 #ind-2
-    merge_mod_tmx <- cbind(seasonALL_tmx[1:3], merge_mod_tmx)
-    freq_tx <- aggregate(merge_mod_tmx[4:length(merge_mod_tmx)], by=list("method_tmx"=merge_mod_tmx$method, "year"=years_tmx, "season"=merge_mod_tmx$season), FUN="sum", na.rm=T) 
-    
-    merge_mod_tmn <- seasonALL_tmn[,5:length(seasonALL_tmn)]
-    merge_mod_tmn[merge_mod_tmn < 22] <- 0 ; merge_mod_tmn[merge_mod_tmn > 22] <- 1 #ind-3
-    merge_mod_tmn <- cbind(seasonALL_tmn[1:3], merge_mod_tmn)
-    freq_tn <- aggregate(merge_mod_tmn[4:length(merge_mod_tmn)], by=list("method_tmn"=merge_mod_tmn$method, "year"=years_tmn, "season"=merge_mod_tmn$season), FUN="sum", na.rm=T) 
-    
-    #ind-4
-    freq_p <- aggregate(seasonALL_p[5:length(seasonALL_p)], by=list("method_p"=seasonALL_p$method, "year"=years_p, "season"=seasonALL_p$season), FUN="sum", na.rm=T) #ind-4,5
-    #ind-5
-    freq_s <- aggregate(seasonALL_s[5:length(seasonALL_s)], by=list("method_s"=seasonALL_s$method, "year"=years_s, "season"=seasonALL_s$season), FUN="sum", na.rm=T) #ind-4,5
-    #ind-6
-    freq_tmx <- aggregate(seasonALL_tmx[6:length(seasonALL_tmx)], by=list("method_tmx"=seasonALL_tmx$method, "year"=years_tmx, "season"=seasonALL_tmx$season), FUN="mean", na.rm=T)
-    ##ind-7
-    freq_tmn <- aggregate(seasonALL_tmn[6:length(seasonALL_tmn)], by=list("method_tmn"=seasonALL_tmn$method, "year"=years_tmn, "season"=seasonALL_tmn$season), FUN="mean", na.rm=T)
-    
-    
-    ## Set apart observations
-    obs <- freq_py[which(freq_py$method == "quantile_mapping"), ]$obs
-    freq_py$obs <- NULL
-    freq_tx$obs <- NULL
-    freq_tn$obs <- NULL
-    freq_p$obs <- NULL
-    freq_s$obs <- NULL
-    freq_tmx$obs <- NULL
-    freq_tmn$obs <- NULL
-    
-    if (rcp == "historical"){ # Historical plot includes observations
-      
-      
-      # Join observations at the end of std GCM values
-      obs <- matrix(1, length(obs)[1], ngcm) * obs
-      colnames(obs) <- gcmlist
-      freq_p <- rbind(freq_p, cbind("method_p"=rep("OBS", dim(obs)[1]),freq_p[which(freq_p$method == "quantile_mapping"),][2:3], obs))
-      freq_py <- rbind(freq_py, cbind("method_py"=rep("OBS", dim(obs)[1]),freq_py[which(freq_py$method == "quantile_mapping"),][2:3], obs))
-      freq_tmx <- rbind(freq_tmx, cbind("method_tmx"=rep("OBS", dim(obs)[1]),freq_tmx[which(freq_tmx$method == "quantile_mapping"),][2:3], obs))
-      freq_tmn <- rbind(freq_tmn, cbind("method_tmn"=rep("OBS", dim(obs)[1]),freq_tmn[which(freq_tmn$method == "quantile_mapping"),][2:3], obs))
-      freq_tx <- rbind(freq_tx, cbind("method_tmx"=rep("OBS", dim(obs)[1]),freq_tx[which(freq_tx$method == "quantile_mapping"),][2:3], obs))
-      freq_tn <- rbind(freq_tn, cbind("method_tmn"=rep("OBS", dim(obs)[1]),freq_tn[which(freq_tn$method == "quantile_mapping"),][2:3], obs))
-      freq_s <- rbind(freq_s, cbind("method_s"=rep("OBS", dim(obs)[1]),freq_s[which(freq_s$method == "quantile_mapping"),][2:3], obs))
-      
-      rownames(freq_py) <- NULL
-      
-      ## Loop through GCMs
-      for (i in 1:ngcm){
-        
-        if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
-        assign("freq_py", freq_py,  envir = .GlobalEnv)
-        assign("freq_tx", freq_tx,  envir = .GlobalEnv)
-        assign("freq_tn", freq_tn,  envir = .GlobalEnv)
-        assign("freq_p", freq_p,  envir = .GlobalEnv)
-        assign("freq_s", freq_s,  envir = .GlobalEnv)
-        assign("freq_tmx", freq_tmx,  envir = .GlobalEnv)
-        assign("freq_tmn", freq_tmn,  envir = .GlobalEnv)
-        
-        freq_mod_p <- freq_p
-        colnames(freq_mod_p)[i+3] <- "model_p"
-        assign("freq_mod_p", freq_p,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_py <- freq_py
-        colnames(freq_mod_py)[i+3] <- "model_py"
-        assign("freq_mod_py", freq_py,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_tmx <- freq_tmx
-        colnames(freq_mod_tmx)[i+3] <- "model_tmx"
-        assign("freq_mod_tmx", freq_tmx,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_tmn <- freq_tmn
-        colnames(freq_mod_tmn)[i+3] <- "model_tmn"
-        assign("freq_mod_tmn", freq_tmn,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)          
-        
-        freq_mod_tx <- freq_tx
-        colnames(freq_mod_tx)[i+3] <- "model_tx"
-        assign("freq_mod_tx", freq_tx,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_tn <- freq_tn
-        colnames(freq_mod_tn)[i+3] <- "model_tn"
-        assign("freq_mod_tn", freq_tn,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)           
-        
-        freq_mod_s <- freq_s
-        colnames(freq_mod_s)[i+3] <- "model_s"
-        assign("freq_mod_s", freq_s,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)          
-        
-        fillColor=c(red, blue2, orange, red2, blue2, blue3, "white")
-        
-        tiff(paste0(dirout, "/boxplot_", rcp,"_",gcmlist[i],"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=1800, pointsize=8, compression='lzw',res=100)
-        vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-        grid.newpage()
-        pushViewport(viewport(layout = grid.layout(8, 1)))
-        
-        f_p <- ggplot(data=freq_mod_p, aes(x=method_p, y=model_p, fill=method_p)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_p) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none") 
-        f_py <- ggplot(data=freq_mod_py, aes(x=method_py, y=model_py, fill=method_py)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_py) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none")           
-        f_tmx <- ggplot(data=freq_mod_tmx, aes(x=method_tmx, y=model_tmx, fill=method_tmx)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tmx) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none") 
-        f_tmn <- ggplot(data=freq_mod_tmn, aes(x=method_tmn, y=model_tmn, fill=method_tmn)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tmn) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller)+ #
-          theme(legend.position="none") 
-        f_tx <- ggplot(data=freq_mod_tx, aes(x=method_tmx, y=model_tx, fill=method_tmx)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tx) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none") 
-        f_tn <- ggplot(data=freq_mod_tn, aes(x=method_tmn, y=model_tn, fill=method_tmn)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tn) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none")           
-        f_s <- ggplot(data=freq_mod_s, aes(x=method_s, y=model_s, fill=method_s)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_s) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller)+
-          theme(legend.position="none")           
-        
-        par(mai=c(0,0,0,0))
-        plot.new()
-        legend("bottom",ncol=3,legend=c("RAW","BC Quantile Mapping","OBS"),fill=c("red","blue2","orange"), title="Legend",inset=0.1)          
-        
-        print(f_p, vp = vplayout(1, 1))
-        print(f_py, vp = vplayout(2, 1))
-        print(f_tmx, vp = vplayout(3, 1))
-        print(f_tmn, vp = vplayout(4, 1))
-        print(f_tx, vp = vplayout(5, 1))
-        print(f_tn, vp = vplayout(6, 1))          
-        print(f_s, vp = vplayout(7, 1))
-        
-        
-        dev.off()
-        
-        
-        
-      }
-      
-      
-    } else {
-      
-      assign("freq_py", freq_py,  envir = .GlobalEnv)
-      assign("freq_tx", freq_tx,  envir = .GlobalEnv)
-      assign("freq_tn", freq_tn,  envir = .GlobalEnv)
-      assign("freq_p", freq_p,  envir = .GlobalEnv)
-      assign("freq_s", freq_s,  envir = .GlobalEnv)
-      assign("freq_tmx", freq_tmx,  envir = .GlobalEnv)
-      assign("freq_tmn", freq_tmn,  envir = .GlobalEnv)
-      
-      for (i in 1:ngcm){
-        
-        if (varmod == "prec"){cat(paste0("\nRainfall freq boxplot : ", rcp, " ", gcmlist[i]))} else {cat(paste0("\nHot days freq boxplot : ", rcp, " ", gcmlist[i]))}
-        
-        freq_mod_p <- freq_p
-        colnames(freq_mod_p)[i+3] <- "model_p"
-        assign("freq_mod_p", freq_p,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_py <- freq_py
-        colnames(freq_mod_py)[i+3] <- "model_py"
-        assign("freq_mod_py", freq_py,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_tmx <- freq_tmx
-        colnames(freq_mod_tmx)[i+3] <- "model_tmx"
-        assign("freq_mod_tmx", freq_tmx,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_tmn <- freq_tmn
-        colnames(freq_mod_tmn)[i+3] <- "model_tmn"
-        assign("freq_mod_tmn", freq_tmn,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)          
-        
-        freq_mod_tx <- freq_tx
-        colnames(freq_mod_tx)[i+3] <- "model_tx"
-        assign("freq_mod_tx", freq_tx,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)
-        
-        freq_mod_tn <- freq_tn
-        colnames(freq_mod_tn)[i+3] <- "model_tn"
-        assign("freq_mod_tn", freq_tn,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)           
-        
-        freq_mod_s <- freq_s
-        colnames(freq_mod_s)[i+3] <- "model_s"
-        assign("freq_mod_s", freq_s,  envir = .GlobalEnv)
-        assign("i", i,  envir = .GlobalEnv)          
-        
-        fillColor=c(red, blue2, red, red2, blue2, blue3, "white")
-        
-        tiff(paste0(dirout, "/boxplot_", rcp,"_",gcmlist[i],"_lon_",lon,"_lat_",lat,".tif"), width=1000, height=1800, pointsize=8, compression='lzw',res=100)
-        vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-        grid.newpage()
-        pushViewport(viewport(layout = grid.layout(8, 1)))
-        
-        f_p <- ggplot(data=freq_mod_p, aes(x=method_p, y=model_p, fill=method_p)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_p) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none") 
-        f_py <- ggplot(data=freq_mod_py, aes(x=method_py, y=model_py, fill=method_py)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_py) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none")           
-        f_tmx <- ggplot(data=freq_mod_tmx, aes(x=method_tmx, y=model_tmx, fill=method_tmx)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tmx) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none") 
-        f_tmn <- ggplot(data=freq_mod_tmn, aes(x=method_tmn, y=model_tmn, fill=method_tmn)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tmn) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller)+ #
-          theme(legend.position="none") 
-        f_tx <- ggplot(data=freq_mod_tx, aes(x=method_tmx, y=model_tx, fill=method_tmx)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tx) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none") 
-        f_tn <- ggplot(data=freq_mod_tn, aes(x=method_tmn, y=model_tn, fill=method_tmn)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_tn) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller) +#
-          theme(legend.position="none")           
-        f_s <- ggplot(data=freq_mod_s, aes(x=method_s, y=model_s, fill=method_s)) + # GCMs (historical)
-          theme(panel.background = element_rect(fill = 'gray92'), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.y = element_text(size = rel(0.8))) +
-          scale_fill_manual(values=fillColor) +
-          geom_boxplot(outlier.size = NA,outline=FALSE) +
-          labs(x="Seasons", y=flabel_s) +
-          facet_grid(~season, scales="free_y", drop=T, labeller=f_labeller)+
-          theme(legend.position="none")           
-        
-        par(mai=c(0,0,0,0))
-        plot.new()
-        legend("bottom",ncol=2,legend=c("RAW","BC Quantile Mapping"),fill=c("red","blue2"), title="Legend",inset=0.1)          
-        
-        print(f_p, vp = vplayout(1, 1))
-        print(f_py, vp = vplayout(2, 1))
-        print(f_tmx, vp = vplayout(3, 1))
-        print(f_tmn, vp = vplayout(4, 1))
-        print(f_tx, vp = vplayout(5, 1))
-        print(f_tn, vp = vplayout(6, 1))          
-        print(f_s, vp = vplayout(7, 1))
-        
-        
-        dev.off()
-        
-      }
-      
-    }
-    
-  }
-  
-}
-
 ## Main function
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order){
   
   ## Load libraries
   library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) 
+
+  #dircdo <- "cdo"
+  #dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
+  #ver_python<-"C:\\Python26\\python.exe"
+  #fileStat<-  "http://172.22.52.48/bias_tmp/file_1470239739.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
+  #sepFile<-"tab"# puntocoma,space,Comma  
   
-  dircdo <- "cdo"
-  dateDownl= paste0("bc_",lon,"_",lat)
-  dirout <- paste0(dirWork,'/',dateDownl) 
-  dataset <- tolower(dataset)
+  #leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
+  #typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
   
-  dirHist <- paste0(dirgcm, "/historical")
-  rcp_t=rcpList[1]
-  #for(rcp_t in rcpList){
+  if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
+  
+  if (file.exists(xyfile)) {
+    xyList = read.table(xyfile, header = TRUE,sep=sepFile)
+    lenxy=nrow(xyList)
+  }else{
+    lenxy=length(xyList)
+  }
+  for(i in 1:lenxy){
+    if (file.exists(xyfile)) {
+      idc=xyList[i,'id']
+      lonc=as.numeric(xyList[i,'lon'])
+      latc=as.numeric(xyList[i,'lat'])
+    }else{
+      idc=NA 
+      lonc=as.numeric(sapply(strsplit(xyList[i], '[,]'), "[[", 1))
+      latc=as.numeric(sapply(strsplit(xyList[i], '[,]'), "[[", 2))
+    }      
+    id=idc
+    lon=lonc
+    lat=latc
+    cat(paste(" -> Processing coordinate: ",lon,lat,"\n"))  
+    
+    if(!is.na(id)){
+      dateDownl= paste0("BC_id=",id,"_xy=",lon,"_",lat)
+    }else if(!is.na(order) & remote=="YES"){
+      dateDownl= paste0("bc_order-",order,"_",gsub("\\.",'-',gsub(':','_',gsub(" ", "_", as.character(Sys.time()))))) # 
+    }else{
+      dateDownl= paste0("BC_xy=",lon,"_",lat)
+    }
+    
+    
+    dirout <- paste0(dirWork,'/',dateDownl) 
+    dataset <- tolower(dataset)
+    
+    if(dataset=="station"){
+      if(remote=="YES"){filepath=url(fileStat)}else{filepath=fileStat}
+      df = read.table(filepath, header = TRUE,sep=sepFile)
+      dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
+      varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
+      Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
+      Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
+    }
+    
+    checkALL=gcmlist[which(gcmlist=="ALL")]
+    if(length(checkALL)==1){
+      gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
+    }  
+    
+    dirHist <- paste0(dirgcm, "/historical")
+    rcp_t=rcpList[1]
+    #for(rcp_t in rcpList){
     dirrcp <- paste0(dirgcm, "/", rcp_t)
     a=list.dirs(dirHist,recursive=F,full.names=F)
     b=list.dirs(dirrcp,recursive=F,full.names=F)
@@ -2648,7 +2241,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         if(dataset=="station"){
           dirtemp <- paste0(dirout, "/obs/station")
           if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
-          df = read.table(fileStat, header = TRUE,sep=sepFile)
+          df = read.table(filepath, header = TRUE,sep=sepFile)
           dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
           station=data.frame(cbind(dateSta,df[,which(colnames(df)==varmod)]))   
           names(station)=c("date","value")
@@ -2669,13 +2262,38 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         } 
         cat()
         if(length(check)>0){
-          gcm_extraction(var,varmod, "historical", Obyi,Obyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
           
-          merge_extraction(varmod, "historical",Obyi,Obyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
+          #export variables
+          sfExport("var")
+          sfExport("varmod")
+          sfExport("Obyi")
+          sfExport("Obyf")
+          sfExport("lon") 
+          sfExport("lat") 
+          sfExport("dirgcm") 
+          sfExport("dirout") 
+          sfExport("dircdo") 
+          sfExport("ver_python") 
+          sfExport("dirScript_py")             
           
+          for(rcp in c("historical",rcpList)){
+            if(rcp=="historical"){yi=Obyi;yf=Obyf}else{yi=fuyi;yf=fuyf}
+            sfExport("rcp")
+            for (i in 1:length(gcmlistSel)){
+              gcm <- gcmlistSel[i]
+              sfExport("gcm") 
+              controlIntpol <- function(i) { #define a new function
+                cat(" .> ", paste("\t Cluster: ", i, sep=""), "\tdone!\n")
+                gcm_extraction(var,varmod, rcp, yi,yf, gcm, lon, lat, dirgcm, dirout,dircdo,ver_python,dirScript_py)
+              }
+              system.time(sfSapply(gcmlistSel, controlIntpol))
+            }
+            merge_extraction(varmod,rcp,yi,yf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
+          }
+          sfStop() 
           for(rcp in rcpList){
-            gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
-            merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
+            #gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
+            #merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
             
             odat <- paste0(dirout,"/raw_data/raw_ts_",rcp,"_",varmod,"_lon_",lon,"_lat_",lat,".tab")
             hdat <- paste0(dirout,"/raw_data/raw_ts_historical_",varmod,"_lon_",lon,"_lat_",lat,".tab")
@@ -2699,33 +2317,35 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
               for(stat in statList){
                 if(stat=='2' || stat=='3'){
                   bc_stats(varmod, "historical",Obyi,Obyf, lon, lat, dirout)
-                  bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout)  
+                  bc_stats(varmod, rcp, fuyi,fuyf, lon, lat, dirout)
+                  bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
+                  bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
                 }
               }  
             }
           }
           
-          if(stat=='2' || stat=='3'){
-            bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
-            bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
-          }
+#           if(stat=='2' || stat=='3'){
+#             bc_densityStats(varmod,rcpList,Obyi,Obyf, lon, lat, dirout)
+#             bc_changes(varmod,rcpList,gcmlist,lon, lat, dirout)
+#           }
         }else{cat(paste0("no exite obs ",varmod,'\n'))}
       }else{cat(paste0("no exite gcm ",varmod,'\n'))}
     }
-  #} 
-  
-#     if(length(list.files(dirout,recursive=T))!=0){
-#       if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
-#       if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
-#       if (file.exists(paste0(dirWork,'/README.txt'))) {file.copy(paste0(dirWork,'/README.txt'),dirout)}
-#       system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
-#       system(paste0('rm -r ',dirout),intern=TRUE)
-#       
-#       return(paste0(file.path(downData,dateDownl),'.zip'))
-#     }
+    #} 
+  } 
+ 
+  #     if(length(list.files(dirout,recursive=T))!=0){
+  #       if (file.exists(paste0(dirout,'/gcm'))) {system(paste0('rm -r ',dirout,'/gcm'),intern=TRUE)}
+  #       if (file.exists(paste0(dirout,'/obs'))) {system(paste0('rm -r ',dirout,'/obs'),intern=TRUE)}
+  #       if (file.exists(paste0(dirWork,'/readme.txt'))) {file.copy(paste0(dirWork,'/readme.txt'),dirout)}
+  #       system(paste('7za a -mx1 -mmt=2 ', paste(file.path(serverData, dateDownl),'.zip',sep=''),' ',dirout),intern=TRUE)
+  #       system(paste0('rm -r ',dirout),intern=TRUE)
+  #       
+  #       return(paste0(file.path(downData,dateDownl),'.zip'))
+  #     }
   
 }
-
 
 ############################################# Wrapper ##############################################
 
@@ -2733,57 +2353,35 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 
 # serverData= "/mnt/data_cluster_4/portals/ccafs_climate/download_data/files/data/bc_platform" # "S:/portals/ccafs_climate/download_data/files/data/bc_platform" #  si se corre local no es necesario modificar esta variable
 # downData="http://gisweb.ciat.cgiar.org/ccafs_climate/files/data/bc_platform" # si se corre local no es necesario modificar esta variable
-# dirWork=  "D:/jetarapues/Request/Request_jramirez" #"/home/jtarapues/request/request_oriana" #  "/home/temp" # directorio de salida
-# dirgcm <-  "T:/gcm/cmip5/raw/daily" # "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # 
-# dirobs <-  "U:/cropdata" # "/mnt/data_cluster_5/cropdata/" # "S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #
-# dataset <- "station"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princeton, princenton-afr
-# methBCList <- c('3','4','5') #c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
-# varlist <- c("pr","tasmax","tasmin","rsds")
+# dirWork=  "/home/temp" #"C:/Temp/bc/Request_jramirez" # "C:/Temp" # directorio de salida "/home/jtarapues/request/request_oriana" #  
+# dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/cmip5/raw/daily" #  
+# dirobs <- "/mnt/data_cluster_5/cropdata/" # "U:/cropdata" #"S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #   
+# dataset <- "agmerra"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princenton, princenton-afr
+# methBCList <-c("5")#c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
+# varlist <- c("pr","tasmin")#c("pr","tasmax","tasmin","rsds") # 
 # Obyi <- 1980#1985
 # Obyf <- 2010#1987
-# fuyi <- 2040
-# fuyf <- 2069
+# fuyi <- 2030#2072#2020
+# fuyf <- 2060#2100#2049
 # rcpList <- c("rcp85") # rcp26, rcp45, rcp60, rcp85 "rcp26", "rcp45", "rcp60",  # aun no esta funcionando bien para varios rcps
-# xyList <-   c("-49.28,-16.47") #c("-51.82,-16.97") #
-# gcmlist <-  c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
+# xyList <- #c("-85.717,14.817") #c("-49.28,-16.47") # c("-73.84,4.91") #c("-76.38558333,3.533333333") # para correr pocos sitios
+# xyfile <-  "/home/temp/Request_andy/CSVs.txt" # para correr varios sitios, este debe contener las columnas id,lon,lat
+# gcmlist <-  c("bcc_csm1_1","bcc_csm1_1_m","bnu_esm","cccma_canesm2","cesm1_bgc","cesm1_cam5","cmcc_cms","csiro_access1_0","csiro_mk3_6_0","ec_earth","gfdl_cm3","gfdl_esm2g","gfdl_esm2m","inm_cm4","ipsl_cm5a_lr","ipsl_cm5a_mr","ipsl_cm5b_lr","lasg_fgoals_g2","miroc_esm","miroc_esm_chem","miroc_miroc5","mohc_hadgem2_cc","mohc_hadgem2_es","mpi_esm_lr","mpi_esm_mr","mri_cgcm3","ncar_ccsm4","ncc_noresm1_m")#c("bcc_csm1_1_m","cesm1_cam5","csiro_mk3_6_0","mohc_hadgem2_es","mohc_hadgem2_cc","gfdl_esm2g")#c("mohc_hadgem2_es","mohc_hadgem2_cc")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
 # statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
-# fileStat<-  "D:/jetarapues/Request/Request_jramirez/stat_-49.28_-16.47.txt" # "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" #
+# fileStat<-  "C:/Temp/bc_-73.84_4.91/file_1465990447.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
 # sepFile<-"tab"# puntocoma,space,Comma
 # leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
 # typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
-# 
+# remote <- "NO"  # YES | NO (local) -> importante para definir la ruta en fileStat, si es YES debe ser http://file.txt, NO es path relativo
+# dircdo <- "cdo" # modificar si no encuentra el path de cdo
+# order <- NA # no modificar si remote=NO
 # ## For run on windows:
-# ver_python<-"C:\\Python27\\ArcGIS10.1\\python.exe"
-# dirScript_py<-"D:\\jetarapues\\_scripts\\bc_extract_gcm.py"
+# ver_python<-"C:\\Python26\\python.exe"
+# dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
 # #=======================================
 # 
-# 
-# 
-# checkALL=gcmlist[which(gcmlist=="ALL")]
-# if(length(checkALL)==1){
-#   gcmlist <-  list.dirs(paste0(dirgcm,"/", rcpList), recursive = FALSE, full.names = FALSE) 
-# }
-# if(dataset=="station"){
-#   if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
-#   df = read.table(fileStat, header = TRUE,sep=sepFile)
-#   dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
-#   varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
-#   Obyi <-as.numeric(format(as.Date(min(dateSta)),'%Y'))
-#   Obyf <-as.numeric(format(as.Date(max(dateSta)),'%Y'))
-#   for(xy in xyList){
-#     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-#     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-#     cat(paste0(" -> Processing coordinate: ",xy,"\n"))  
-#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py)
-#   }
-#   
-# }else{
-#   for(xy in xyList){
-#     lon=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 1))
-#     lat=as.numeric(sapply(strsplit(xy, '[,]'), "[[", 2))
-#     cat(paste0(" -> Processing coordinate: ",xy,"\n"))
-#     bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,lon,lat,gcmlist,statList,fileStat='',sepFile='',leap,typeData,ver_python,dirScript_py)
-#   }  
-# }
-
-
+library(snowfall);
+sfInit(parallel=T,cpus=2) #initiate cluster
+stop("error")          
+sfExport("gcm_extraction")
+bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order)
