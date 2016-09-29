@@ -287,7 +287,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
 } 
 
 ## Merge OBS and GCM in a Single Matrix
-merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcmlist=c("bnu_esm"), lon=9.883333, lat=-83.633333, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42",sepFile="\t",leap,typeData){
+merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcmlist=c("mohc_hadgem2_es"), lon=9.883333, lat=-83.633333, dataset="station", dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42",sepFile="\t",leap,typeData){
   
   # Set working directory
   setwd(dirbase)
@@ -321,7 +321,15 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
       gcmlist<-gcmlist[pos]
       
       gcmdat <- lapply(paste0(dirbase, "/gcm/",gcmlist,'/',ogcm), function(x){read.table(x,header=T,sep=" ")})
-      
+      if(rcp=="historical"){
+        yearList=c()
+        for(j in 1:length(gcmdat)) {
+          yearList=c(year(gcmdat[[j]][nrow(gcmdat[[j]]),1]),yearList)
+        }
+        if(max(yearList)<yf){
+          yf=max(yearList)          
+        }
+      }
       ## Create a sequence of dates at daily timestep for TS 
       dates <- format(seq(as.Date(paste0(yi,"/1/1")), as.Date(paste0(yf,"/12/31")), "days") ,"%Y-%m-%d")
       dates <- cbind.data.frame("date"=dates, NA)
@@ -371,7 +379,7 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
         if(rcp=="historical"){
           gcmmat=na.omit(gcmmat) 
         }        
-      }
+      }        
       
       ## Write merged output file (include OBS and GCM)
       gcmmat2 <- write.table(gcmmat, odat, sep=" ",row.names=F, quote=F)
@@ -535,7 +543,7 @@ sh_calcs <- function(varmod="tmax", rcp="historical", lon=-73.5, lat=3.4, dirbas
 }
 
 ## Bias Correction Calculation including variability (BC)
-bc_calcs <- function(varmod="prec", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="C:/Temp/bc/bc_2015-12-14_05_46_42"){
+bc_calcs <- function(varmod="prec", rcp="rcp6", lon=-73.5, lat=3.4, dirbase="C:/Temp/bc/BC_xy_-97.1_36.12"){
   
   ## Load libraries
   #library(lubridate)
@@ -2193,11 +2201,11 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
     cat(paste(" -> Processing coordinate: ",lon,lat,"\n"))  
     
     if(!is.na(id)){
-      dateDownl= paste0("BC_id=",id,"_xy=",lon,"_",lat)
+      dateDownl= paste0("BC_id_",id,"_xy=",lon,"_",lat)
     }else if(!is.na(order) & remote=="YES"){
       dateDownl= paste0("bc_order-",order,"_",gsub("\\.",'-',gsub(':','_',gsub(" ", "_", as.character(Sys.time()))))) # 
     }else{
-      dateDownl= paste0("BC_xy=",lon,"_",lat)
+      dateDownl= paste0("BC_xy_",lon,"_",lat)
     }
     
     
