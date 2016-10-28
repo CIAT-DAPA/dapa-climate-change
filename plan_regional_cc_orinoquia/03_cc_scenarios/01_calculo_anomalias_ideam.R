@@ -3,8 +3,8 @@
 ## Author: Carlos Navarro c.e.navarro@cgiar.org
 ##########################################################################################
 
-bDir <- "T:/gcm/cmip5/3era_comunicacion_ideam/point_based"
-oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias_ideam/by_stations"
+bDir <- "//dapadfs/data_cluster_2/gcm/cmip5/3era_comunicacion_ideam/point_based"
+oDir <- "//dapadfs/workspace_cluster_6/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias_ideam/by_stations"
 
 readIdeamProjections <- function(bDir="T:/gcm/cmip5/3era_comunicacion_ideam/point_based", oDir="X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias_ideam/by_stations"){
   
@@ -65,13 +65,13 @@ readIdeamProjections <- function(bDir="T:/gcm/cmip5/3era_comunicacion_ideam/poin
 }
 
 
-bDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias/ideam"
-st_loc <- "S:/observed/weather_station/col-ideam/stations_location.txt"
+bDir <- "//dapadfs/workspace_cluster_6/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias/ideam"
+st_loc <- "//dapadfs/data_cluster_4/observed/weather_station/col-ideam/stations_location.txt"
 ## Interpolated region
-rg <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/average/prec_1.asc"
+rg <- "//dapadfs/workspace_cluster_6/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/average/prec_1.asc"
 # rcp <- "rcp26"
 ## Region with deparments
-msk <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/mask.tif"
+msk <- "//dapadfs/workspace_cluster_6/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/mask.tif"
 
 spatialIDW <- function(bDir="X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/anomalias_ideam", st_loc="S:/observed/weather_station/col-ideam/stations_location.txt", rg="X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/monthly-interpolations/_region/alt-prj-lla.asc", rcp="rcp26", mask="X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/mask.tif"){
   

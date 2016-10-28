@@ -1,0 +1,21 @@
+
+Thank you for purchasing ANUSPLIN4.3. 
+
+Program:
+     The programs are 32-bit Windows "Console mode" executables, and don't
+     create any windows of their own. They are designed to be run from a 
+     console prompt, or with input redirected from a command file. 
+
+Documentation:
+     The documentation supplied with anusplin is now in the form of a PDF 
+     which can be viewed with Acrobat Reader.
+
+Using the example datasets:
+     The package is supplied with test results from running the software on
+     the development platforms, however it is possible to re-run the tests
+     if you are curious. See the Annotated Examples section in the User guide. 
+
+Bug reports:
+     Please send bug reports and other feedback to 
+     anusplin-support@cres.anu.edu.au 
+

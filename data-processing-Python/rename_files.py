@@ -2,26 +2,17 @@
 
 import os, sys, glob, string, shutil, errno
 
-# python D:\jaime\PYTHON\rename.py S:\portals\ccafs_climate\download_data\files\data\precis\precis_andes
+# python rename_files.py S:\observed\gridded_products\worldclim\Global_30s_v2
  
 dirbase = sys.argv[1]
 
-# os.chdir(dirbase)
-# lista = glob.glob("*.a")
-# for w in lista:
-	# print "renombrando: ", w
-	# base = os.path.splitext(w)[0]
-	# os.rename(w, base + ".asc")
+os.chdir(dirbase)
+lista = glob.glob("*.tif")
+for w in lista:
 
+	print "renombrando: ", w
+	var = os.path.basename(w).split("_")[2]
+	mth = os.path.basename(w).split("_")[3][:-4]
 	
-for root, dirs, files in os.walk(dirbase):
-	for name in files:
-		if name.endswith((".zip", ".zip")):	
-			# if len(name)==11:
-			print name
-			# os.rename(root + "\\"+ name, root + "\\"+ name[:-4]+ "0.txt")
+	os.rename(w, var + "_" + str(int(mth)) + ".tif")
 
-			os.rename(root + "\\"+ name, root + "\\"+ name.replace("no_tile","andes_precis"))
-			# str.replace
-			
-print "\tDONE!!"			
