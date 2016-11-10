@@ -1,0 +1,11 @@
+$BATCH(MAIZE)
+!
+! Directory    : maize
+! Command Line : DSCSM045.EXE MZCER045 B DSSBatch.v45
+! Crop         : Maize           
+! Experiment   : AFRB5001.MZX
+! ExpNo        : 1
+! Debug        : DSCSM045.EXE MZCER045 " B DSSBatch.v45"
+!
+@FILEX                                                                                        TRTNO     RP     SQ     OP     CO
+AFRB5001.MZX                                                                                      1      1      0      1      0

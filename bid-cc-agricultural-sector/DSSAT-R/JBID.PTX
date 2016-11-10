@@ -1,0 +1,47 @@
+*EXP.DETAILS: BID17101RZ POTATO LAC
+
+*GENERAL
+@PEOPLE
+Diego Obando Jeison Mesa
+@ADDRESS
+CIAT        
+@SITE
+CALI        
+*TREATMENTS                        -------------FACTOR LEVELS------------
+@N R O C TNAME.................... CU FL SA IC MP MI MF MR MC MT ME MH SM
+ 1 1 1 0 MAJESTIC                   1  1  0  1  1  0  1  0  0  0  0  0  0
+ 2 1 1 0 SEBAGO                     1  1  0  1  1  0  1  0  0  0  0  0  0
+ 3 1 1 0 RUSSET BURBANK             1  1  0  1  1  0  1  0  0  0  0  0  0
+ 4 1 1 0 KATHADIN                   1  1  0  1  1  0  1  0  0  0  0  0  0
+ 5 1 1 0 ATLANTIC                   1  1  0  1  1  0  1  0  0  0  0  0  0
+ 6 1 1 0 MARIS PIPER                1  1  0  1  1  0  1  0  0  0  0  0  0
+ 7 1 1 0 KING EDWARD                1  1  0  1  1  0  1  0  0  0  0  0  0
+ 8 1 1 0 DESIREE                    1  1  0  1  1  0  1  0  0  0  0  0  0
+ 9 1 1 0 LT-1                       1  1  0  1  1  0  1  0  0  0  0  0  0
+10 1 1 0 C14-343                    1  1  0  1  1  0  1  0  0  0  0  0  0
+11 1 1 0 NORCHIP                    1  1  0  1  1  0  1  0  0  0  0  0  0
+12 1 1 0 SHEPODY                    1  1  0  1  1  0  1  0  0  0  0  0  0
+13 1 1 0 RED LASODA                 1  1  0  1  1  0  1  0  0  0  0  0  0
+
+*CULTIVARS
+@C CR INGENO CNAME
+ 1 PT IB0001 PTNA        
+ 2 PT IB0002 PTNA        
+ 3 PT IB0003 PTNA        
+ 4 PT IB0004 PTNA        
+ 5 PT IB0005 PTNA        
+ 6 PT IB0006 PTNA        
+ 7 PT IB0007 PTNA        
+ 8 PT IB0008 PTNA        
+ 9 PT IB0009 PTNA        
+10 PT IB0010 PTNA        
+11 PT IB0011 PTNA        
+12 PT IB0012 PTNA        
+13 PT UF0001 PTNA        
+
+*FIELDS
+@L ID_FIELD WSTA....  FLSA  FLOB  FLDT  FLDD  FLDS  FLST SLTX  SLDP  ID_SOIL    FLNAME
+ 1 BID1     JBID       -99   -99 DR000   -99   -99   -99 -99    -99  BID0000001 FIELD01     
+@L ..........XCRD ...........YCRD .....ELEV .............AREA .SLEN .FLWR .SLAS FLHST FHDUR
+ 1         -99.000         -99.000       -99               -99   -99   -99   -99   -99   -99
+

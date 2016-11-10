@@ -1,0 +1,89 @@
+$CULTIVARS:WHCER045  
+
+! LAST EDIT: 17/05/10
+
+! Coefficients used in the Cropsim-Ceres model differ from those used
+! in DSSAT Version 3.5 AND 4.0. They can be calculated (approximately) from 
+! V3.5 coefficients as follows:
+
+! P1V   = P1V(v3.5)*10 
+! P1D   = P1D(V3.5)*20
+! P5    = P5(V3.5)*20 + 430
+! G1    = G1(V3.5)*5 + 5
+! G2    = (G2(V3.5)*0.35+0.65) * P5/20
+! G3    = G3(V3.5)*0.7 
+! PHINT = PHINT(V3.5)
+
+! Converted coefficients,and those listed below,should always be
+! tested by using them with real experiments and comparing model 
+! outputs with measured values. 
+
+*CULTIVARS:WHCER045
+@VAR#  VAR-NAME........  EXP#   ECO#   P1V   P1D    P5    G1    G2    G3 PHINT 
+!                                        1     2     3     4     5     6     7
+999991 MINIMA               . 999991     0     0   100    10    10   0.5    30
+999992 MAXIMA               . 999992    60   200   999    50    80   8.0   150
+                                                                                
+DFAULT DEFAULT              . DFAULT     5    75   450    30    35   1.0    60 
+                                                                              
+IB1500 MANITOU           1,14 CAWH01     0    60   335    25    26   1.5    86 
+IB0488 NEWTON               . USWH01    50    60   480    25    26   1.5    95 
+IB1015 MARIS FUNDIN         . UKWH01    60    67   515    14    44   4.0   100 
+IB0034 AVALON            1,30 UKWH01    10    62   515    17    45   1.7   100    
+                                                                              
+IB1501 AC_BARRIE            . CAWH01    27    60   533    20    40   2.0    73 
+ID0001 INDIA EXP         1,01 ID0001     0    87 570.0    17    44   1.7    99     
+
+TJK001 NAMRUZ               . UKWH01     8    60   470    11    48   1.7    20
+
+! Cultivars for Mega Environments added from file WHCER045-1.CUL from JK, 10 March, 2012 ex the Harvest Choice consortium. MF 
+                       
+IB0010 Seri82BA             . IB0001    20    94   564    22    39  1.03   120
+IB0011 PBW343BA             . IB0001    20    94   564    22    40  1.01   120
+IB0012 KubsaBA              . IB0001    20    94   564    22    40  1.01   120
+IB0013 TajanBA              . IB0001    20    94   564    24    37  1.01   120
+IB0014 AlondraBA            . IB0001    20    94   564    22    40  1.01   120
+IB0015 BacanoraBA           . IB0001    20    94   564    24    37  1.00   120
+IB0016 DonErnestoBA         . IB0001    20    94   564    22    40  1.01   120
+IB0017 HI617BA              . IB0001    20    94   564    22    40  1.01   120
+IB0018 KanchanBA            . IB0001    20    94   564    22    40  1.01   120
+IB0019 DebieraBA            . IB0001    20    94   564    22    40  1.01   120
+IB0020 SaratovBA            . IB0001    30    94   564    22    40  1.01   120
+IB0021 PehlivanBA           . IB0001    40    94   564    22    40  1.00   120
+IB0022 HalconsnaBA          . IB0001    20    94   564    22    40  1.00   120
+IB0023 KatyaBA              . IB0001    40    94   564    22    40  1.00   120
+IB0024 ChinaBBA             . IB0001    60    94   564    30    40  1.00   120
+IB0025 BezostayaBA          . IB0001    60    94   564    30    40  1.00   120
+IB0026 BrigadierBA          . IB0001    60    94   564    30    40  1.00   120
+IB0027 KoreaBA              . IB0001    60    94   564    30    40  1.00   120
+IB0028 Gerek79BA            . IB0001    60    94   564    30    40  1.00   120
+IB0029 KauzBA               . IB0001    20    94   564    26    37  1.01   120
+IB0030 AttilaBA             . IB0001    20    94   564    22    39  1.01   120
+
+! Adjust parameters P1V and G1 to see which causes cvs 24-28 to yield so much higher
+IB1024 ChinaBBA22-60        . IB0001    60    94   564    22    40  1.00   120
+IB1025 ChinaBBA24-60        . IB0001    60    94   564    24    40  1.00   120
+IB1026 ChinaBBA26-60        . IB0001    60    94   564    26    40  1.00   120
+IB1027 ChinaBBA28-60        . IB0001    60    94   564    28    40  1.00   120
+IB1028 ChinaBBA30-60        . IB0001    60    94   564    30    40  1.00   120
+IB2024 ChinaBBA22-20        . IB0001    20    94   564    22    40  1.00   120
+IB2025 ChinaBBA22-30        . IB0001    30    94   564    22    40  1.00   120
+IB2026 ChinaBBA22-40        . IB0001    40    94   564    22    40  1.00   120
+IB2027 ChinaBBA22-50        . IB0001    50    94   564    22    40  1.00   120
+IB2028 ChinaBBA22-60        . IB0001    60    94   564    22    40  1.00   120
+
+!VAR#  VAR-NAME........  EXP#   ECO#   P1V   P1D    P5    G1    G2    G3 PHINT 
+
+! COEFF       DEFINITION
+! ========    ==========
+! VAR#        Identification code or number for the specific cultivar.
+! VAR-NAME    Name of cultivar.
+! EXP#        Number of experiments used to generate parameters
+! ECO#        Ecotype code for this cultivar,points to entry in ECO file
+! P1V         Days,optimum vernalizing temperature,required for vernalization
+! P1D         Photoperiod response (% reduction in rate/10 h drop in pp)
+! P5          Grain filling (excluding lag) phase duration (oC.d)
+! G1          Kernel number per unit canopy weight at anthesis (#/g)
+! G2          Standard kernel size under optimum conditions (mg)
+! G3          Standard,non-stressed mature tiller wt (incl grain) (g dwt)
+! PHINT       Interval between successive leaf tip appearances (oC.d)

@@ -1,0 +1,1134 @@
+#
+# Makefile to compile and run DSSAT CSM, build 4.5.1.23.
+#
+# Note: edit the system configuration section to suit your system.
+#
+# Usage:
+#   compile model:              make
+#   clean intermediate files:   make clean
+#
+#
+# - Independent Settings -
+#
+# Fortran Compiler
+#
+#from GLAM-R2
+#FCOMPILER=ifort  -g -warn errors -warn noalignments -check bounds -check format -check output_conversion -traceback
+
+#from Jawoo:
+#FCOMPILER=ifort -save -fpp
+
+#from Thorp et al. (2012) 
+#FCOMPILER=ifort -fpe0 -O2
+
+#from Jim in GLAM
+FCOMPILER=ifort -O2 
+
+#other configs from Steve Pickering in GLAM
+#FCOMPILER=ifort -traceback
+#FCOMPILER=ifort -O3 -traceback
+#FCOMPILER=ifort  -g -warn errors -warn noalignments -check bounds -check format -check output_conversion -traceback
+#FCOMPILER=ifort -g -warn -check -traceback #Max warnings
+#
+# Rules
+#
+
+all: csm45
+
+#test: test-gnut-cal test-gnut-run test-gnut-hyp test-wspr test-wwin test-maiz
+
+# main programs
+OBJS1 = ModuleDefs.o OPHEAD.o CRSIMDEF.o SoilMixing.o IPSOIL.o OPSUM.o SC_CNG_mods.o \
+        SLigCeres.o SoilNBalSum.o SoilPBalSum.o 
+OBJS2 = ASMDM.o AUTHAR.o AUTPLT.o CANOPY.o CENTURY.o CHEMICAL.o CO2VAL.o CE_RATIO_C.o \
+        CROPGRO.o CSCER040.o CSCERES_Interface.o CSCRP045.o \
+        CSP_CANOPY.o CSP_CASUPRO.o CSP_DEMAND.o CSCRP_Interface.o CSDIS045.o \
+        CSP_INCOMP.o CSP_INCOMP_OUT.o CSP_GROW_CANE.o CSP_GROW.o CSP_HRes.o \
+        CSP_INPHENOL.o CSP_IPDMND_OUT.o CSP_IPPHENOL.o CSP_IPPLNT.o CSP_MOBIL.o \
+        CSP_NUPTAK.o CSP_OPGROW.o CSP_OPHARV.o CSP_PHENOL.o CSP_PHOTO.o CSP_RESPIR.o \
+        CSP_ROOTS.o CSP_SENES.o CSP_VEGGR.o CSREA045.o CSUTS045.o DATES.o DECRAT_C.o \
+        DEMAND.o EFLOW_C.o EQUIL2.o ERROR.o ESR_SoilEvap.o ETPHOT.o ETPHR.o FCHEM.o \
+        Fert_Place.o Flood_Chem.o FLOODI.o Flood_Irrig.o FREEZE.o FreshWt.o GROW.o \
+        HMET.o HResCeres.o HRes_CGRO.o IMMOBLIMIT_C.o INCOMP.o INCORPOR_C.o INFIL.o \
+        Info.o input_sub.o INSOIL.o INSTGE.o INTRO.o INVAR.o IPCHEM.o IPECO.o IPENV.o \
+        ipexp.o IPHedley_C.o IPHedley_inorg.o IPIBS.o IPMAN.o IPPARM.o IPPEST.o \
+        Ipphenol.o IPPLNT.o IPPROG.o IPSIM.o IPSLIN.o IPSOIL_Inp.o IPTILL.o IPVAR.o \
+        IPWTH_alt.o IRRIG.o LAND.o LINDM.o LITDEC_C.o LMATCH.o MgmtOps.o ML_CERES.o \
+        ML_GROSUB.o ML_NFACT.o ml_NUPTAK.o ML_opharv.o ML_PHASEI.o ML_PHENOL.o \
+        ML_rootgr.o ML_TILLSUB.o MOBIL.o MULCHEVAP.o MULCHLAYER.o MULCHWAT.o MZ_CERES.o \
+        MZ_GROSUB.o MZ_IX_GROSUB.o MZ_IX_KNUMBER.o MZ_IX_LEAFAREA.o MZ_IX_NUPTAK.o \
+        MZ_IX_PHENOL.o MZ_IX_PHOTSYNT.o MZ_IX_PLANTG.o MZ_IX_RADABS.o MZ_IX_RESPIR.o \
+        MZ_KUPTAK.o MZ_NFACTO.o MZ_NUPTAK.o MZ_OPGROW.o MZ_OPHARV.o MZ_OPNIT.o \
+        MZ_PHENOL.o MZ_ROOTS.o NCHECK_C.o NCHECK_inorg.o NCHECK_organic.o NFIX.o NFLUX.o \
+        NUPTAK.o OM_Place.o OPETPHOT.o OpFlood.o OPFLOODN.o OPGeneric.o OPGEN.o Opgrow.o \
+        OPHARV.o OPMULCH.o OPPEST.o OpPlantP.o OpSoilKi.o OPSOILNI.o OpSoilOrg.o \
+        OpSoilPi.o OPSOMLIT_C.o OpStemp.o OPSTRESS.o OPTEMPXY2K.o optempy2k.o OPVIEW.o \
+        OPWBAL.o OPWEATH.o OXLAYER.o Paddy_Mgmt.o PARTIT_C.o PATH.o P_CASUPRO.o \
+        P_CERES.o P_CGRO.o PESTCP.o PEST.o PET.o PHENOL.o PHOTO.o P_IPPLNT.o plant.o \
+        PlantNBal.o PODDET.o PODS.o p_plant.o PPlantSubs.o PT_GROSUB.o PT_NFACTO.o \
+        PT_NUPTAK.o PT_OPGROW.o PT_OPHARV.o PT_PHASEI.o PT_PHENOL.o PT_ROOTGR.o \
+        PT_SUBSTOR.o PT_THTIME.o P_Uptake.o READS.o RESPIR.o RI_Calcshk.o RICE.o \
+        RI_GNURSE.o RI_Grosub.o RI_Ipcrop.o RI_KUPTAK.o RI_Nfacto.o RI_Nuptak.o \
+        RI_Opgrow.o RI_Opharv.o RI_Phenol.o RI_Rootgr.o RI_Tillsub.o RI_Transpl_g.o \
+        RI_Transpl_p.o RNOFF.o ROOTDM.o ROOTS.o RootSoilVol.o ROOTWU.o RPLACE_C.o \
+        RStages.o RunList.o SAL_Stemp.o SATFLO.o SC_CanesimCanopy.o SC_Canop3.o \
+        SC_CNGRO.o SC_COEFFS.o SC_OPHARV.o SC_OUTPUT.o SC_PARTIT.o SC_PHENOL.o \
+        SC_PHOTOS.o SC_Poplt3.o SC_ROOTG.o SDCOMP.o SECLI.o SECROP.o SEEDDM.o SEFERT.o \
+        SEFLD.o SEFREQ.o SEHARV.o SEINIT.o SEIRR.o SENESADD_C.o SENES.o SENS.o SEPEST.o \
+        SEPLT.o SERES.o SESIM.o SESOIL.o SETIME.o SEVAR.o SEWTH.o SG_CERES.o SG_GROSUB.o \
+        SG_NFACT.o sg_NUPTAK.o SG_OPHARV.o SG_PHASEI.o SG_PHENOL.o SG_ROOTGR.o \
+        SoilCBal_C.o SoilCNPinit_C.o SOILDYN.o SOILEV.o SOIL.o SoilKi.o SoilK_init.o \
+        SoilNiBal.o SOILNI.o SoilNi_init.o SoilNoBal_C.o SoilNoBal.o SoilNoPoBal.o \
+        SoilOrg.o SoilOrg_init.o soilpibal.o SoilPi.o SoilPi_init.o SoilPoBal_C.o \
+        SoilPoBal.o SOLAR.o SOMDEC_C.o SOMFIX_C.o SOMINIT_c.o SOMLITPRINT_C.o SPAM.o \
+        SPSUBS.o STEMP.o SW_FreshWt.o SW_GROSUB.o TextureClass.o TILEDRAIN.o Tillage.o \
+        TillEvent.o TRANS.o TR_Calcshk.o TR_Grosub.o TR_Ipcrop.o TR_Nfacto.o TR_Nuptak.o \
+        TR_OPGROW.o TR_Opharv.o TR_Phenol.o TR_Rootgr.o TR_SUBSTOR.o TR_Tillsub.o \
+        TR_Transpl_g.o TR_Transpl_p.o TSOMLIT_C.o UTILS.o VEGDM.o VEGGR.o Warning.o \
+        WATBAL.o WBAL.o WBSUBS.o weathr.o WEATHR_Inp.o WGEN.o WTHMOD.o WTHSET.o
+
+SRCFL1 = ModuleDefs.for OPHEAD.for CRSIMDEF.for SoilMixing.for IPSOIL.for OPSUM.for \
+         SC_CNG_mods.for SLigCeres.for SoilNBalSum.for SoilPBalSum.for 
+SRCFL2 = ASMDM.for AUTHAR.for AUTPLT.for CANOPY.for CENTURY.for CHEMICAL.for CO2VAL.for \
+        CE_RATIO_C.for CROPGRO.for CSCER040.for CSCERES_Interface.for CSCRP045.for \
+        CSP_CANOPY.for CSP_CASUPRO.for CSP_DEMAND.for CSCRP_Interface.for CSDIS045.for \
+        CSP_INCOMP.for CSP_INCOMP_OUT.for CSP_GROW_CANE.for CSP_GROW.for CSP_HRes.for \
+        CSP_INPHENOL.for CSP_IPDMND_OUT.for CSP_IPPHENOL.for CSP_IPPLNT.for \
+        CSP_MOBIL.for CSP_NUPTAK.for CSP_OPGROW.for CSP_OPHARV.for CSP_PHENOL.for \
+        CSP_PHOTO.for CSP_RESPIR.for CSP_ROOTS.for CSP_SENES.for CSP_VEGGR.for \
+        CSREA045.for CSUTS045.for DATES.for DECRAT_C.for DEMAND.for EFLOW_C.for \
+        EQUIL2.for ERROR.for ESR_SoilEvap.for ETPHOT.for ETPHR.for FCHEM.for \
+        Fert_Place.for Flood_Chem.for FLOODI.for Flood_Irrig.for FREEZE.for FreshWt.for \
+        GROW.for HMET.for HResCeres.for HRes_CGRO.for IMMOBLIMIT_C.for INCOMP.for \
+        INCORPOR_C.for INFIL.for Info.for input_sub.for INSOIL.for INSTGE.for INTRO.for \
+        INVAR.for IPCHEM.for IPECO.for IPENV.for ipexp.for IPHedley_C.for \
+        IPHedley_inorg.for IPIBS.for IPMAN.for IPPARM.for IPPEST.for Ipphenol.for \
+        IPPLNT.for IPPROG.for IPSIM.for IPSLIN.for IPSOIL_Inp.for IPTILL.for IPVAR.for \
+        IPWTH_alt.for IRRIG.for LAND.for LINDM.for LITDEC_C.for LMATCH.for MgmtOps.for \
+        ML_CERES.for ML_GROSUB.for ML_NFACT.for ml_NUPTAK.for ML_opharv.for \
+        ML_PHASEI.for ML_PHENOL.for ML_rootgr.for ML_TILLSUB.for MOBIL.for MULCHEVAP.for \
+        MULCHLAYER.for MULCHWAT.for MZ_CERES.for MZ_GROSUB.for MZ_IX_GROSUB.for \
+        MZ_IX_KNUMBER.for MZ_IX_LEAFAREA.for MZ_IX_NUPTAK.for MZ_IX_PHENOL.for \
+        MZ_IX_PHOTSYNT.for MZ_IX_PLANTG.for MZ_IX_RADABS.for MZ_IX_RESPIR.for \
+        MZ_KUPTAK.for MZ_NFACTO.for MZ_NUPTAK.for MZ_OPGROW.for MZ_OPHARV.for \
+        MZ_OPNIT.for MZ_PHENOL.for MZ_ROOTS.for NCHECK_C.for NCHECK_inorg.for \
+        NCHECK_organic.for NFIX.for NFLUX.for NUPTAK.for OM_Place.for OPETPHOT.for \
+        OpFlood.for OPFLOODN.for OPGeneric.for OPGEN.for Opgrow.for OPHARV.for \
+        OPMULCH.for OPPEST.for OpPlantP.for OpSoilKi.for OPSOILNI.for OpSoilOrg.for \
+        OpSoilPi.for OPSOMLIT_C.for OpStemp.for OPSTRESS.for OPTEMPXY2K.for \
+        optempy2k.for OPVIEW.for OPWBAL.for OPWEATH.for OXLAYER.for Paddy_Mgmt.for \
+        PARTIT_C.for PATH.for P_CASUPRO.for P_CERES.for P_CGRO.for PESTCP.for PEST.for \
+        PET.for PHENOL.for PHOTO.for P_IPPLNT.for plant.for PlantNBal.for PODDET.for \
+        PODS.for p_plant.for PPlantSubs.for PT_GROSUB.for PT_NFACTO.for PT_NUPTAK.for \
+        PT_OPGROW.for PT_OPHARV.for PT_PHASEI.for PT_PHENOL.for PT_ROOTGR.for \
+        PT_SUBSTOR.for PT_THTIME.for P_Uptake.for READS.for RESPIR.for RI_Calcshk.for \
+        RICE.for RI_GNURSE.for RI_Grosub.for RI_Ipcrop.for RI_KUPTAK.for RI_Nfacto.for \
+        RI_Nuptak.for RI_Opgrow.for RI_Opharv.for RI_Phenol.for RI_Rootgr.for \
+        RI_Tillsub.for RI_Transpl_g.for RI_Transpl_p.for RNOFF.for ROOTDM.for ROOTS.for \
+        RootSoilVol.for ROOTWU.for RPLACE_C.for RStages.for RunList.for SAL_Stemp.for \
+        SATFLO.for SC_CanesimCanopy.for SC_Canop3.for SC_CNGRO.for SC_COEFFS.for \
+        SC_OPHARV.for SC_OUTPUT.for SC_PARTIT.for SC_PHENOL.for SC_PHOTOS.for \
+        SC_Poplt3.for SC_ROOTG.for SDCOMP.for SECLI.for SECROP.for SEEDDM.for SEFERT.for \
+        SEFLD.for SEFREQ.for SEHARV.for SEINIT.for SEIRR.for SENESADD_C.for SENES.for \
+        SENS.for SEPEST.for SEPLT.for SERES.for SESIM.for SESOIL.for SETIME.for \
+        SEVAR.for SEWTH.for SG_CERES.for SG_GROSUB.for SG_NFACT.for sg_NUPTAK.for \
+        SG_OPHARV.for SG_PHASEI.for SG_PHENOL.for SG_ROOTGR.for SoilCBal_C.for \
+        SoilCNPinit_C.for SOILDYN.for SOILEV.for SOIL.for SoilKi.for SoilK_init.for \
+        SoilNiBal.for SOILNI.for SoilNi_init.for SoilNoBal_C.for SoilNoBal.for \
+        SoilNoPoBal.for SoilOrg.for SoilOrg_init.for soilpibal.for SoilPi.for \
+        SoilPi_init.for SoilPoBal_C.for SoilPoBal.for SOLAR.for SOMDEC_C.for \
+        SOMFIX_C.for SOMINIT_c.for SOMLITPRINT_C.for SPAM.for SPSUBS.for STEMP.for \
+        SW_FreshWt.for SW_GROSUB.for TextureClass.for TILEDRAIN.for Tillage.for \
+        TillEvent.for TRANS.for TR_Calcshk.for TR_Grosub.for TR_Ipcrop.for TR_Nfacto.for \
+        TR_Nuptak.for TR_OPGROW.for TR_Opharv.for TR_Phenol.for TR_Rootgr.for \
+        TR_SUBSTOR.for TR_Tillsub.for TR_Transpl_g.for TR_Transpl_p.for TSOMLIT_C.for \
+        UTILS.for VEGDM.for VEGGR.for Warning.for WATBAL.for WBAL.for WBSUBS.for \
+        weathr.for WEATHR_Inp.for WGEN.for WTHMOD.for WTHSET.for CSM.for
+
+#main program (CSM)
+#csm45: CSM.o $(OBJS1) $(OBJS2)
+#	$(FCOMPILER) -o CSM.o $(OBJS1) $(OBJS2) #-o csm45 
+
+csm45: #CSM.o $(OBJS1) #$(OBJS2)  # .o dependencies ensure required .mod files exist
+	$(FCOMPILER) $(SRCFL1) $(SRCFL2) -o csm45
+#	strip csm45
+
+#csm45: CSM.o $(OBJS1) $(OBJS2)  # .o dependencies ensure required .mod files exist
+#	$(FCOMPILER) -c -o CSM.o CSM.for #$(SRCFLALL)
+
+# object files
+#ModuleDefs.o: ModuleDefs.for
+#	$(FCOMPILER) -c ModuleDefs.for
+#	
+#OPHEAD.o: OPHEAD.for ModuleDefs.o
+#	$(FCOMPILER) -c OPHEAD.for
+#
+#CRSIMDEF.o: CRSIMDEF.for
+#	$(FCOMPILER) -c CRSIMDEF.for
+#
+#SoilMixing.o: SoilMixing.for ModuleDefs.o
+#	$(FCOMPILER) -c SoilMixing.for
+#
+#IPSOIL.o: IPSOIL.for ModuleDefs.o
+#	$(FCOMPILER) -c IPSOIL.for
+#
+#OPSUM.o: OPSUM.for ModuleDefs.o
+#	$(FCOMPILER) -c OPSUM.for
+#
+#SC_CNG_mods.o: SC_CNG_mods.for ModuleDefs.o
+#	$(FCOMPILER) -c SC_CNG_mods.for
+#
+#SLigCeres.o: SLigCeres.for ModuleDefs.o
+#	$(FCOMPILER) -c SLigCeres.for
+#
+#SoilNBalSum.o: SoilNBalSum.for ModuleDefs.o
+#	$(FCOMPILER) -c SoilNBalSum.for
+#
+#SoilPBalSum.o: SoilPBalSum.for ModuleDefs.o
+#	$(FCOMPILER) -c SoilPBalSum.for
+#
+#ASMDM.o: ASMDM.for $(OBJS1)
+#	$(FCOMPILER) -c ASMDM.for
+#
+#AUTHAR.o: AUTHAR.for $(OBJS1)
+#	$(FCOMPILER) -c AUTHAR.for
+#
+#AUTPLT.o: AUTPLT.for $(OBJS1)
+#	$(FCOMPILER) -c AUTPLT.for
+#
+#CANOPY.o: CANOPY.for $(OBJS1)
+#	$(FCOMPILER) -c CANOPY.for
+#
+#CE_RATIO_C.o: CE_RATIO_C.for $(OBJS1)
+#	$(FCOMPILER) -c CE_RATIO_C.for
+#
+#CENTURY.o: CENTURY.for $(OBJS1)
+#	$(FCOMPILER) -c CENTURY.for
+#
+#CHEMICAL.o: CHEMICAL.for $(OBJS1)
+#	$(FCOMPILER) -c CHEMICAL.for
+#
+#CO2VAL.o: CO2VAL.for $(OBJS1)
+#	$(FCOMPILER) -c CO2VAL.for
+#
+#CROPGRO.o: CROPGRO.for $(OBJS1)
+#	$(FCOMPILER) -c CROPGRO.for
+#
+#CSCER040.o: CSCER040.for $(OBJS1)
+#	$(FCOMPILER) -c CSCER040.for
+#
+#CSCERES_Interface.o: CSCERES_Interface.for $(OBJS1)
+#	$(FCOMPILER) -c CSCERES_Interface.for
+#
+#CSCRP045.o: CSCRP045.for $(OBJS1)
+#	$(FCOMPILER) -c CSCRP045.for
+#
+#CSCRP_Interface.o: CSCRP_Interface.for $(OBJS1)
+#	$(FCOMPILER) -c CSCRP_Interface.for
+#
+#CSDIS045.o: CSDIS045.for $(OBJS1)
+#	$(FCOMPILER) -c CSDIS045.for
+#
+#CSP_CANOPY.o: CSP_CANOPY.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_CANOPY.for
+#
+#CSP_CASUPRO.o: CSP_CASUPRO.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_CASUPRO.for
+#
+#CSP_DEMAND.o: CSP_DEMAND.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_DEMAND.for
+#
+#CSP_GROW_CANE.o: CSP_GROW_CANE.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_GROW_CANE.for
+#
+#CSP_GROW.o: CSP_GROW.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_GROW.for
+#
+#CSP_HRes.o: CSP_HRes.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_HRes.for
+#
+#CSP_INCOMP.o: CSP_INCOMP.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_INCOMP.for
+#
+#CSP_INCOMP_OUT.o: CSP_INCOMP_OUT.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_INCOMP_OUT.for
+#
+#CSP_INPHENOL.o: CSP_INPHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_INPHENOL.for
+#
+#CSP_IPDMND_OUT.o: CSP_IPDMND_OUT.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_IPDMND_OUT.for
+#
+#CSP_IPPHENOL.o: CSP_IPPHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_IPPHENOL.for
+#
+#CSP_IPPLNT.o: CSP_IPPLNT.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_IPPLNT.for
+#
+#CSP_MOBIL.o: CSP_MOBIL.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_MOBIL.for
+#
+#CSP_NUPTAK.o: CSP_NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_NUPTAK.for
+#
+#CSP_OPGROW.o: CSP_OPGROW.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_OPGROW.for
+#
+#CSP_OPHARV.o: CSP_OPHARV.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_OPHARV.for
+#
+#CSP_PHENOL.o: CSP_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_PHENOL.for
+#
+#CSP_PHOTO.o: CSP_PHOTO.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_PHOTO.for
+#
+#CSP_RESPIR.o: CSP_RESPIR.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_RESPIR.for
+#
+#CSP_ROOTS.o: CSP_ROOTS.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_ROOTS.for
+#
+#CSP_SENES.o: CSP_SENES.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_SENES.for
+#
+#CSP_VEGGR.o: CSP_VEGGR.for $(OBJS1)
+#	$(FCOMPILER) -c CSP_VEGGR.for
+#
+#CSREA045.o: CSREA045.for $(OBJS1)
+#	$(FCOMPILER) -c CSREA045.for
+#
+#CSUTS045.o: CSUTS045.for $(OBJS1)
+#	$(FCOMPILER) -c CSUTS045.for
+#
+#DATES.o: DATES.for $(OBJS1)
+#	$(FCOMPILER) -c DATES.for
+#
+#DECRAT_C.o: DECRAT_C.for $(OBJS1)
+#	$(FCOMPILER) -c DECRAT_C.for
+#
+#DEMAND.o: DEMAND.for $(OBJS1)
+#	$(FCOMPILER) -c DEMAND.for
+#
+#EFLOW_C.o: EFLOW_C.for $(OBJS1)
+#	$(FCOMPILER) -c EFLOW_C.for
+#
+#EQUIL2.o: EQUIL2.for $(OBJS1)
+#	$(FCOMPILER) -c EQUIL2.for
+#
+#ERROR.o: ERROR.for $(OBJS1)
+#	$(FCOMPILER) -c ERROR.for
+#
+#ESR_SoilEvap.o: ESR_SoilEvap.for $(OBJS1)
+#	$(FCOMPILER) -c ESR_SoilEvap.for
+#
+#ETPHOT.o: ETPHOT.for $(OBJS1)
+#	$(FCOMPILER) -c ETPHOT.for
+#
+#ETPHR.o: ETPHR.for $(OBJS1)
+#	$(FCOMPILER) -c ETPHR.for
+#
+#FCHEM.o: FCHEM.for $(OBJS1)
+#	$(FCOMPILER) -c FCHEM.for
+#
+#Fert_Place.o: Fert_Place.for $(OBJS1)
+#	$(FCOMPILER) -c Fert_Place.for
+#
+#Flood_Chem.o: Flood_Chem.for $(OBJS1)
+#	$(FCOMPILER) -c Flood_Chem.for
+#
+#FLOODI.o: FLOODI.for $(OBJS1)
+#	$(FCOMPILER) -c FLOODI.for
+#
+#Flood_Irrig.o: Flood_Irrig.for $(OBJS1)
+#	$(FCOMPILER) -c Flood_Irrig.for
+#
+#FREEZE.o: FREEZE.for $(OBJS1)
+#	$(FCOMPILER) -c FREEZE.for
+#
+#FreshWt.o: FreshWt.for $(OBJS1)
+#	$(FCOMPILER) -c FreshWt.for
+#
+#GROW.o: GROW.for $(OBJS1)
+#	$(FCOMPILER) -c GROW.for
+#
+#HMET.o: HMET.for $(OBJS1)
+#	$(FCOMPILER) -c HMET.for
+#
+#HResCeres.o: HResCeres.for $(OBJS1)
+#	$(FCOMPILER) -c HResCeres.for
+#
+#HRes_CGRO.o: HRes_CGRO.for $(OBJS1)
+#	$(FCOMPILER) -c HRes_CGRO.for
+#
+#IMMOBLIMIT_C.o: IMMOBLIMIT_C.for $(OBJS1)
+#	$(FCOMPILER) -c IMMOBLIMIT_C.for
+#
+#INCOMP.o: INCOMP.for $(OBJS1)
+#	$(FCOMPILER) -c INCOMP.for
+#
+#INCORPOR_C.o: INCORPOR_C.for $(OBJS1)
+#	$(FCOMPILER) -c INCORPOR_C.for
+#
+#INFIL.o: INFIL.for $(OBJS1)
+#	$(FCOMPILER) -c INFIL.for
+#
+#Info.o: Info.for $(OBJS1)
+#	$(FCOMPILER) -c Info.for
+#
+#input_sub.o: input_sub.for $(OBJS1)
+#	$(FCOMPILER) -c input_sub.for
+#
+#INSOIL.o: INSOIL.for $(OBJS1)
+#	$(FCOMPILER) -c INSOIL.for
+#
+#INSTGE.o: INSTGE.for $(OBJS1)
+#	$(FCOMPILER) -c INSTGE.for
+#
+#INTRO.o: INTRO.for $(OBJS1)
+#	$(FCOMPILER) -c INTRO.for
+#
+#INVAR.o: INVAR.for $(OBJS1)
+#	$(FCOMPILER) -c INVAR.for
+#
+#IPCHEM.o: IPCHEM.for $(OBJS1)
+#	$(FCOMPILER) -c IPCHEM.for
+#
+#IPECO.o: IPECO.for $(OBJS1)
+#	$(FCOMPILER) -c IPECO.for
+#
+#IPENV.o: IPENV.for $(OBJS1)
+#	$(FCOMPILER) -c IPENV.for
+#
+#ipexp.o: ipexp.for $(OBJS1)
+#	$(FCOMPILER) -c ipexp.for
+#
+#IPHedley_C.o: IPHedley_C.for $(OBJS1)
+#	$(FCOMPILER) -c IPHedley_C.for
+#
+#IPHedley_inorg.o: IPHedley_inorg.for $(OBJS1)
+#	$(FCOMPILER) -c IPHedley_inorg.for
+#
+#IPIBS.o: IPIBS.for $(OBJS1)
+#	$(FCOMPILER) -c IPIBS.for
+#
+#IPMAN.o: IPMAN.for $(OBJS1)
+#	$(FCOMPILER) -c IPMAN.for
+#
+#IPPARM.o: IPPARM.for $(OBJS1)
+#	$(FCOMPILER) -c IPPARM.for
+#
+#IPPEST.o: IPPEST.for $(OBJS1)
+#	$(FCOMPILER) -c IPPEST.for
+#
+#Ipphenol.o: Ipphenol.for $(OBJS1)
+#	$(FCOMPILER) -c Ipphenol.for
+#
+#IPPLNT.o: IPPLNT.for $(OBJS1)
+#	$(FCOMPILER) -c IPPLNT.for
+#
+#IPPROG.o: IPPROG.for $(OBJS1)
+#	$(FCOMPILER) -c IPPROG.for
+#
+#IPSIM.o: IPSIM.for $(OBJS1)
+#	$(FCOMPILER) -c IPSIM.for
+#
+#IPSLIN.o: IPSLIN.for $(OBJS1)
+#	$(FCOMPILER) -c IPSLIN.for
+#
+#IPSOIL_Inp.o: IPSOIL_Inp.for $(OBJS1)
+#	$(FCOMPILER) -c IPSOIL_Inp.for
+#
+#IPTILL.o: IPTILL.for $(OBJS1)
+#	$(FCOMPILER) -c IPTILL.for
+#
+#IPVAR.o: IPVAR.for $(OBJS1)
+#	$(FCOMPILER) -c IPVAR.for
+#
+#IPWTH_alt.o: IPWTH_alt.for $(OBJS1)
+#	$(FCOMPILER) -c IPWTH_alt.for
+#
+#IRRIG.o: IRRIG.for $(OBJS1)
+#	$(FCOMPILER) -c IRRIG.for
+#
+#LAND.o: LAND.for $(OBJS1)
+#	$(FCOMPILER) -c LAND.for
+#
+#LINDM.o: LINDM.for $(OBJS1)
+#	$(FCOMPILER) -c LINDM.for
+#
+#LITDEC_C.o: LITDEC_C.for $(OBJS1)
+#	$(FCOMPILER) -c LITDEC_C.for
+#
+#LMATCH.o: LMATCH.for $(OBJS1)
+#	$(FCOMPILER) -c LMATCH.for
+#
+#MgmtOps.o: MgmtOps.for $(OBJS1)
+#	$(FCOMPILER) -c MgmtOps.for
+#
+#ML_CERES.o: ML_CERES.for $(OBJS1)
+#	$(FCOMPILER) -c ML_CERES.for
+#
+#ML_GROSUB.o: ML_GROSUB.for $(OBJS1)
+#	$(FCOMPILER) -c ML_GROSUB.for
+#
+#ML_NFACT.o: ML_NFACT.for $(OBJS1)
+#	$(FCOMPILER) -c ML_NFACT.for
+#
+#ml_NUPTAK.o: ml_NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c ml_NUPTAK.for
+#
+#ML_opharv.o: ML_opharv.for $(OBJS1)
+#	$(FCOMPILER) -c ML_opharv.for
+#
+#ML_PHASEI.o: ML_PHASEI.for $(OBJS1)
+#	$(FCOMPILER) -c ML_PHASEI.for
+#
+#ML_PHENOL.o: ML_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c ML_PHENOL.for
+#
+#ML_rootgr.o: ML_rootgr.for $(OBJS1)
+#	$(FCOMPILER) -c ML_rootgr.for
+#
+#ML_TILLSUB.o: ML_TILLSUB.for $(OBJS1)
+#	$(FCOMPILER) -c ML_TILLSUB.for
+#
+#MOBIL.o: MOBIL.for $(OBJS1)
+#	$(FCOMPILER) -c MOBIL.for
+#
+#MULCHEVAP.o: MULCHEVAP.for $(OBJS1)
+#	$(FCOMPILER) -c MULCHEVAP.for
+#
+#MULCHLAYER.o: MULCHLAYER.for $(OBJS1)
+#	$(FCOMPILER) -c MULCHLAYER.for
+#
+#MULCHWAT.o: MULCHWAT.for $(OBJS1)
+#	$(FCOMPILER) -c MULCHWAT.for
+#
+#MZ_CERES.o: MZ_CERES.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_CERES.for
+#
+#MZ_GROSUB.o: MZ_GROSUB.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_GROSUB.for
+#
+#MZ_IX_GROSUB.o: MZ_IX_GROSUB.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_GROSUB.for
+#
+#MZ_IX_KNUMBER.o: MZ_IX_KNUMBER.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_KNUMBER.for
+#
+#MZ_IX_LEAFAREA.o: MZ_IX_LEAFAREA.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_LEAFAREA.for
+#
+#MZ_IX_NUPTAK.o: MZ_IX_NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_NUPTAK.for
+#
+#MZ_IX_PHENOL.o: MZ_IX_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_PHENOL.for
+#
+#MZ_IX_PHOTSYNT.o: MZ_IX_PHOTSYNT.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_PHOTSYNT.for
+#
+#MZ_IX_PLANTG.o: MZ_IX_PLANTG.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_PLANTG.for
+#
+#MZ_IX_RADABS.o: MZ_IX_RADABS.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_RADABS.for
+#
+#MZ_IX_RESPIR.o: MZ_IX_RESPIR.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_IX_RESPIR.for
+#
+#MZ_KUPTAK.o: MZ_KUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_KUPTAK.for
+#
+#MZ_NFACTO.o: MZ_NFACTO.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_NFACTO.for
+#
+#MZ_NUPTAK.o: MZ_NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_NUPTAK.for
+#
+#MZ_OPGROW.o: MZ_OPGROW.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_OPGROW.for
+#
+#MZ_OPHARV.o: MZ_OPHARV.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_OPHARV.for
+#
+#MZ_OPNIT.o: MZ_OPNIT.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_OPNIT.for
+#
+#MZ_PHENOL.o: MZ_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_PHENOL.for
+#
+#MZ_ROOTS.o: MZ_ROOTS.for $(OBJS1)
+#	$(FCOMPILER) -c MZ_ROOTS.for
+#
+#NCHECK_C.o: NCHECK_C.for $(OBJS1)
+#	$(FCOMPILER) -c NCHECK_C.for
+#
+#NCHECK_inorg.o: NCHECK_inorg.for $(OBJS1)
+#	$(FCOMPILER) -c NCHECK_inorg.for
+#
+#NCHECK_organic.o: NCHECK_organic.for $(OBJS1)
+#	$(FCOMPILER) -c NCHECK_organic.for
+#
+#NFIX.o: NFIX.for $(OBJS1)
+#	$(FCOMPILER) -c NFIX.for
+#
+#NFLUX.o: NFLUX.for $(OBJS1)
+#	$(FCOMPILER) -c NFLUX.for
+#
+#NUPTAK.o: NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c NUPTAK.for
+#
+#OM_Place.o: OM_Place.for $(OBJS1)
+#	$(FCOMPILER) -c OM_Place.for
+#
+#OPETPHOT.o: OPETPHOT.for $(OBJS1)
+#	$(FCOMPILER) -c OPETPHOT.for
+#
+#OpFlood.o: OpFlood.for $(OBJS1)
+#	$(FCOMPILER) -c OpFlood.for
+#
+#OPFLOODN.o: OPFLOODN.for $(OBJS1)
+#	$(FCOMPILER) -c OPFLOODN.for
+#
+#OPGeneric.o: OPGeneric.for $(OBJS1)
+#	$(FCOMPILER) -c OPGeneric.for
+#
+#OPGEN.o: OPGEN.for $(OBJS1)
+#	$(FCOMPILER) -c OPGEN.for
+#
+#Opgrow.o: Opgrow.for $(OBJS1)
+#	$(FCOMPILER) -c Opgrow.for
+#
+#OPHARV.o: OPHARV.for $(OBJS1)
+#	$(FCOMPILER) -c OPHARV.for
+#
+#OPMULCH.o: OPMULCH.for $(OBJS1)
+#	$(FCOMPILER) -c OPMULCH.for
+#
+#OPPEST.o: OPPEST.for $(OBJS1)
+#	$(FCOMPILER) -c OPPEST.for
+#
+#OpPlantP.o: OpPlantP.for $(OBJS1)
+#	$(FCOMPILER) -c OpPlantP.for
+#
+#OpSoilKi.o: OpSoilKi.for $(OBJS1)
+#	$(FCOMPILER) -c OpSoilKi.for
+#
+#OPSOILNI.o: OPSOILNI.for $(OBJS1)
+#	$(FCOMPILER) -c OPSOILNI.for
+#
+#OpSoilOrg.o: OpSoilOrg.for $(OBJS1)
+#	$(FCOMPILER) -c OpSoilOrg.for
+#
+#OpSoilPi.o: OpSoilPi.for $(OBJS1)
+#	$(FCOMPILER) -c OpSoilPi.for
+#
+#OPSOMLIT_C.o: OPSOMLIT_C.for $(OBJS1)
+#	$(FCOMPILER) -c OPSOMLIT_C.for
+#
+#OpStemp.o: OpStemp.for $(OBJS1)
+#	$(FCOMPILER) -c OpStemp.for
+#
+#OPSTRESS.o: OPSTRESS.for $(OBJS1)
+#	$(FCOMPILER) -c OPSTRESS.for
+#
+#OPTEMPXY2K.o: OPTEMPXY2K.for $(OBJS1)
+#	$(FCOMPILER) -c OPTEMPXY2K.for
+#
+#optempy2k.o: optempy2k.for $(OBJS1)
+#	$(FCOMPILER) -c optempy2k.for
+#
+#OPVIEW.o: OPVIEW.for $(OBJS1)
+#	$(FCOMPILER) -c OPVIEW.for
+#
+#OPWBAL.o: OPWBAL.for $(OBJS1)
+#	$(FCOMPILER) -c OPWBAL.for
+#
+#OPWEATH.o: OPWEATH.for $(OBJS1)
+#	$(FCOMPILER) -c OPWEATH.for
+#
+#OXLAYER.o: OXLAYER.for $(OBJS1)
+#	$(FCOMPILER) -c OXLAYER.for
+#
+#Paddy_Mgmt.o: Paddy_Mgmt.for $(OBJS1)
+#	$(FCOMPILER) -c Paddy_Mgmt.for
+#
+#PARTIT_C.o: PARTIT_C.for $(OBJS1)
+#	$(FCOMPILER) -c PARTIT_C.for
+#
+#PATH.o: PATH.for $(OBJS1)
+#	$(FCOMPILER) -c PATH.for
+#
+#P_CASUPRO.o: P_CASUPRO.for $(OBJS1)
+#	$(FCOMPILER) -c P_CASUPRO.for
+#
+#P_CERES.o: P_CERES.for $(OBJS1)
+#	$(FCOMPILER) -c P_CERES.for
+#
+#P_CGRO.o: P_CGRO.for $(OBJS1)
+#	$(FCOMPILER) -c P_CGRO.for
+#
+#PESTCP.o: PESTCP.for $(OBJS1)
+#	$(FCOMPILER) -c PESTCP.for
+#
+#PEST.o: PEST.for $(OBJS1)
+#	$(FCOMPILER) -c PEST.for
+#
+#PET.o: PET.for $(OBJS1)
+#	$(FCOMPILER) -c PET.for
+#
+#PHENOL.o: PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c PHENOL.for
+#
+#PHOTO.o: PHOTO.for $(OBJS1)
+#	$(FCOMPILER) -c PHOTO.for
+#
+#P_IPPLNT.o: P_IPPLNT.for $(OBJS1)
+#	$(FCOMPILER) -c P_IPPLNT.for
+#
+#plant.o: plant.for $(OBJS1)
+#	$(FCOMPILER) -c plant.for
+#
+#PlantNBal.o: PlantNBal.for $(OBJS1)
+#	$(FCOMPILER) -c PlantNBal.for
+#
+#PODDET.o: PODDET.for $(OBJS1)
+#	$(FCOMPILER) -c PODDET.for
+#
+#PODS.o: PODS.for $(OBJS1)
+#	$(FCOMPILER) -c PODS.for
+#
+#p_plant.o: p_plant.for $(OBJS1)
+#	$(FCOMPILER) -c p_plant.for
+#
+#PPlantSubs.o: PPlantSubs.for $(OBJS1)
+#	$(FCOMPILER) -c PPlantSubs.for
+#
+#PT_GROSUB.o: PT_GROSUB.for $(OBJS1)
+#	$(FCOMPILER) -c PT_GROSUB.for
+#
+#PT_NFACTO.o: PT_NFACTO.for $(OBJS1)
+#	$(FCOMPILER) -c PT_NFACTO.for
+#
+#PT_NUPTAK.o: PT_NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c PT_NUPTAK.for
+#
+#PT_OPGROW.o: PT_OPGROW.for $(OBJS1)
+#	$(FCOMPILER) -c PT_OPGROW.for
+#
+#PT_OPHARV.o: PT_OPHARV.for $(OBJS1)
+#	$(FCOMPILER) -c PT_OPHARV.for
+#
+#PT_PHASEI.o: PT_PHASEI.for $(OBJS1)
+#	$(FCOMPILER) -c PT_PHASEI.for
+#
+#PT_PHENOL.o: PT_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c PT_PHENOL.for
+#
+#PT_ROOTGR.o: PT_ROOTGR.for $(OBJS1)
+#	$(FCOMPILER) -c PT_ROOTGR.for
+#
+#PT_SUBSTOR.o: PT_SUBSTOR.for $(OBJS1)
+#	$(FCOMPILER) -c PT_SUBSTOR.for
+#
+#PT_THTIME.o: PT_THTIME.for $(OBJS1)
+#	$(FCOMPILER) -c PT_THTIME.for
+#
+#P_Uptake.o: P_Uptake.for $(OBJS1)
+#	$(FCOMPILER) -c P_Uptake.for
+#
+#READS.o: READS.for $(OBJS1)
+#	$(FCOMPILER) -c READS.for
+#
+#RESPIR.o: RESPIR.for $(OBJS1)
+#	$(FCOMPILER) -c RESPIR.for
+#
+#RI_Calcshk.o: RI_Calcshk.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Calcshk.for
+#
+#RICE.o: RICE.for $(OBJS1)
+#	$(FCOMPILER) -c RICE.for
+#
+#RI_GNURSE.o: RI_GNURSE.for $(OBJS1)
+#	$(FCOMPILER) -c RI_GNURSE.for
+#
+#RI_Grosub.o: RI_Grosub.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Grosub.for
+#
+#RI_Ipcrop.o: RI_Ipcrop.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Ipcrop.for
+#
+#RI_KUPTAK.o: RI_KUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c RI_KUPTAK.for
+#
+#RI_Nfacto.o: RI_Nfacto.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Nfacto.for
+#
+#RI_Nuptak.o: RI_Nuptak.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Nuptak.for
+#
+#RI_Opgrow.o: RI_Opgrow.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Opgrow.for
+#
+#RI_Opharv.o: RI_Opharv.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Opharv.for
+#
+#RI_Phenol.o: RI_Phenol.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Phenol.for
+#
+#RI_Rootgr.o: RI_Rootgr.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Rootgr.for
+#
+#RI_Tillsub.o: RI_Tillsub.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Tillsub.for
+#
+#RI_Transpl_g.o: RI_Transpl_g.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Transpl_g.for
+#
+#RI_Transpl_p.o: RI_Transpl_p.for $(OBJS1)
+#	$(FCOMPILER) -c RI_Transpl_p.for
+#
+#RNOFF.o: RNOFF.for $(OBJS1)
+#	$(FCOMPILER) -c RNOFF.for
+#
+#ROOTDM.o: ROOTDM.for $(OBJS1)
+#	$(FCOMPILER) -c ROOTDM.for
+#
+#ROOTS.o: ROOTS.for $(OBJS1)
+#	$(FCOMPILER) -c ROOTS.for
+#
+#RootSoilVol.o: RootSoilVol.for $(OBJS1)
+#	$(FCOMPILER) -c RootSoilVol.for
+#
+#ROOTWU.o: ROOTWU.for $(OBJS1)
+#	$(FCOMPILER) -c ROOTWU.for
+#
+#RPLACE_C.o: RPLACE_C.for $(OBJS1)
+#	$(FCOMPILER) -c RPLACE_C.for
+#
+#RStages.o: RStages.for $(OBJS1)
+#	$(FCOMPILER) -c RStages.for
+#
+#RunList.o: RunList.for $(OBJS1)
+#	$(FCOMPILER) -c RunList.for
+#
+#SAL_Stemp.o: SAL_Stemp.for $(OBJS1)
+#	$(FCOMPILER) -c SAL_Stemp.for
+#
+#SATFLO.o: SATFLO.for $(OBJS1)
+#	$(FCOMPILER) -c SATFLO.for
+#
+#SC_CanesimCanopy.o: SC_CanesimCanopy.for $(OBJS1)
+#	$(FCOMPILER) -c SC_CanesimCanopy.for
+#
+#SC_Canop3.o: SC_Canop3.for $(OBJS1)
+#	$(FCOMPILER) -c SC_Canop3.for
+#
+#SC_CNGRO.o: SC_CNGRO.for $(OBJS1)
+#	$(FCOMPILER) -c SC_CNGRO.for
+#
+#SC_COEFFS.o: SC_COEFFS.for $(OBJS1)
+#	$(FCOMPILER) -c SC_COEFFS.for
+#
+#SC_OPHARV.o: SC_OPHARV.for $(OBJS1)
+#	$(FCOMPILER) -c SC_OPHARV.for
+#
+#SC_OUTPUT.o: SC_OUTPUT.for $(OBJS1)
+#	$(FCOMPILER) -c SC_OUTPUT.for
+#
+#SC_PARTIT.o: SC_PARTIT.for $(OBJS1)
+#	$(FCOMPILER) -c SC_PARTIT.for
+#
+#SC_PHENOL.o: SC_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c SC_PHENOL.for
+#
+#SC_PHOTOS.o: SC_PHOTOS.for $(OBJS1)
+#	$(FCOMPILER) -c SC_PHOTOS.for
+#
+#SC_Poplt3.o: SC_Poplt3.for $(OBJS1)
+#	$(FCOMPILER) -c SC_Poplt3.for
+#
+#SC_ROOTG.o: SC_ROOTG.for $(OBJS1)
+#	$(FCOMPILER) -c SC_ROOTG.for
+#
+#SDCOMP.o: SDCOMP.for $(OBJS1)
+#	$(FCOMPILER) -c SDCOMP.for
+#
+#SECLI.o: SECLI.for $(OBJS1)
+#	$(FCOMPILER) -c SECLI.for
+#
+#SECROP.o: SECROP.for $(OBJS1)
+#	$(FCOMPILER) -c SECROP.for
+#
+#SEEDDM.o: SEEDDM.for $(OBJS1)
+#	$(FCOMPILER) -c SEEDDM.for
+#
+#SEFERT.o: SEFERT.for $(OBJS1)
+#	$(FCOMPILER) -c SEFERT.for
+#
+#SEFLD.o: SEFLD.for $(OBJS1)
+#	$(FCOMPILER) -c SEFLD.for
+#
+#SEFREQ.o: SEFREQ.for $(OBJS1)
+#	$(FCOMPILER) -c SEFREQ.for
+#
+#SEHARV.o: SEHARV.for $(OBJS1)
+#	$(FCOMPILER) -c SEHARV.for
+#
+#SEINIT.o: SEINIT.for $(OBJS1)
+#	$(FCOMPILER) -c SEINIT.for
+#
+#SEIRR.o: SEIRR.for $(OBJS1)
+#	$(FCOMPILER) -c SEIRR.for
+#
+#SENESADD_C.o: SENESADD_C.for $(OBJS1)
+#	$(FCOMPILER) -c SENESADD_C.for
+#
+#SENES.o: SENES.for $(OBJS1)
+#	$(FCOMPILER) -c SENES.for
+#
+#SENS.o: SENS.for $(OBJS1)
+#	$(FCOMPILER) -c SENS.for
+#
+#SEPEST.o: SEPEST.for $(OBJS1)
+#	$(FCOMPILER) -c SEPEST.for
+#
+#SEPLT.o: SEPLT.for $(OBJS1)
+#	$(FCOMPILER) -c SEPLT.for
+#
+#SERES.o: SERES.for $(OBJS1)
+#	$(FCOMPILER) -c SERES.for
+#
+#SESIM.o: SESIM.for $(OBJS1)
+#	$(FCOMPILER) -c SESIM.for
+#
+#SESOIL.o: SESOIL.for $(OBJS1)
+#	$(FCOMPILER) -c SESOIL.for
+#
+#SETIME.o: SETIME.for $(OBJS1)
+#	$(FCOMPILER) -c SETIME.for
+#
+#SEVAR.o: SEVAR.for $(OBJS1)
+#	$(FCOMPILER) -c SEVAR.for
+#
+#SEWTH.o: SEWTH.for $(OBJS1)
+#	$(FCOMPILER) -c SEWTH.for
+#
+#SG_CERES.o: SG_CERES.for $(OBJS1)
+#	$(FCOMPILER) -c SG_CERES.for
+#
+#SG_GROSUB.o: SG_GROSUB.for $(OBJS1)
+#	$(FCOMPILER) -c SG_GROSUB.for
+#
+#SG_NFACT.o: SG_NFACT.for $(OBJS1)
+#	$(FCOMPILER) -c SG_NFACT.for
+#
+#sg_NUPTAK.o: sg_NUPTAK.for $(OBJS1)
+#	$(FCOMPILER) -c sg_NUPTAK.for
+#
+#SG_OPHARV.o: SG_OPHARV.for $(OBJS1)
+#	$(FCOMPILER) -c SG_OPHARV.for
+#
+#SG_PHASEI.o: SG_PHASEI.for $(OBJS1)
+#	$(FCOMPILER) -c SG_PHASEI.for
+#
+#SG_PHENOL.o: SG_PHENOL.for $(OBJS1)
+#	$(FCOMPILER) -c SG_PHENOL.for
+#
+#SG_ROOTGR.o: SG_ROOTGR.for $(OBJS1)
+#	$(FCOMPILER) -c SG_ROOTGR.for
+#
+#SoilCBal_C.o: SoilCBal_C.for $(OBJS1)
+#	$(FCOMPILER) -c SoilCBal_C.for
+#
+#SoilCNPinit_C.o: SoilCNPinit_C.for $(OBJS1)
+#	$(FCOMPILER) -c SoilCNPinit_C.for
+#
+#SOILDYN.o: SOILDYN.for $(OBJS1)
+#	$(FCOMPILER) -c SOILDYN.for
+#
+#SOILEV.o: SOILEV.for $(OBJS1)
+#	$(FCOMPILER) -c SOILEV.for
+#
+#SOIL.o: SOIL.for $(OBJS1)
+#	$(FCOMPILER) -c SOIL.for
+#
+#SoilKi.o: SoilKi.for $(OBJS1)
+#	$(FCOMPILER) -c SoilKi.for
+#
+#SoilK_init.o: SoilK_init.for $(OBJS1)
+#	$(FCOMPILER) -c SoilK_init.for
+#
+#SoilNiBal.o: SoilNiBal.for $(OBJS1)
+#	$(FCOMPILER) -c SoilNiBal.for
+#
+#SOILNI.o: SOILNI.for $(OBJS1)
+#	$(FCOMPILER) -c SOILNI.for
+#
+#SoilNi_init.o: SoilNi_init.for $(OBJS1)
+#	$(FCOMPILER) -c SoilNi_init.for
+#
+#SoilNoBal_C.o: SoilNoBal_C.for $(OBJS1)
+#	$(FCOMPILER) -c SoilNoBal_C.for
+#
+#SoilNoBal.o: SoilNoBal.for $(OBJS1)
+#	$(FCOMPILER) -c SoilNoBal.for
+#
+#SoilNoPoBal.o: SoilNoPoBal.for $(OBJS1)
+#	$(FCOMPILER) -c SoilNoPoBal.for
+#
+#SoilOrg.o: SoilOrg.for $(OBJS1)
+#	$(FCOMPILER) -c SoilOrg.for
+#
+#SoilOrg_init.o: SoilOrg_init.for $(OBJS1)
+#	$(FCOMPILER) -c SoilOrg_init.for
+#
+#soilpibal.o: soilpibal.for $(OBJS1)
+#	$(FCOMPILER) -c soilpibal.for
+#
+#SoilPi.o: SoilPi.for $(OBJS1)
+#	$(FCOMPILER) -c SoilPi.for
+#
+#SoilPi_init.o: SoilPi_init.for $(OBJS1)
+#	$(FCOMPILER) -c SoilPi_init.for
+#
+#SoilPoBal_C.o: SoilPoBal_C.for $(OBJS1)
+#	$(FCOMPILER) -c SoilPoBal_C.for
+#
+#SoilPoBal.o: SoilPoBal.for $(OBJS1)
+#	$(FCOMPILER) -c SoilPoBal.for
+#
+#GENERIC.o: GENERIC.for $(OBJS1)
+#	$(FCOMPILER) -c GENERIC.for
+#
+#SOLAR.o: SOLAR.for $(OBJS1)
+#	$(FCOMPILER) -c SOLAR.for
+#
+#SOMDEC_C.o: SOMDEC_C.for $(OBJS1)
+#	$(FCOMPILER) -c SOMDEC_C.for
+#
+#SOMFIX_C.o: SOMFIX_C.for $(OBJS1)
+#	$(FCOMPILER) -c SOMFIX_C.for
+#
+#SOMINIT_c.o: SOMINIT_c.for $(OBJS1)
+#	$(FCOMPILER) -c SOMINIT_c.for
+#
+#SOMLITPRINT_C.o: SOMLITPRINT_C.for $(OBJS1)
+#	$(FCOMPILER) -c SOMLITPRINT_C.for
+#
+#SPAM.o: SPAM.for $(OBJS1)
+#	$(FCOMPILER) -c SPAM.for
+#
+#SPSUBS.o: SPSUBS.for $(OBJS1)
+#	$(FCOMPILER) -c SPSUBS.for
+#
+#STEMP.o: STEMP.for $(OBJS1)
+#	$(FCOMPILER) -c STEMP.for
+#
+#SW_FreshWt.o: SW_FreshWt.for $(OBJS1)
+#	$(FCOMPILER) -c SW_FreshWt.for
+#
+#SW_GROSUB.o: SW_GROSUB.for $(OBJS1)
+#	$(FCOMPILER) -c SW_GROSUB.for
+#
+#TextureClass.o: TextureClass.for $(OBJS1)
+#	$(FCOMPILER) -c TextureClass.for
+#
+#TILEDRAIN.o: TILEDRAIN.for $(OBJS1)
+#	$(FCOMPILER) -c TILEDRAIN.for
+#
+#Tillage.o: Tillage.for $(OBJS1)
+#	$(FCOMPILER) -c Tillage.for
+#
+#TillEvent.o: TillEvent.for $(OBJS1)
+#	$(FCOMPILER) -c TillEvent.for
+#
+#TRANS.o: TRANS.for $(OBJS1)
+#	$(FCOMPILER) -c TRANS.for
+#
+#TR_Calcshk.o: TR_Calcshk.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Calcshk.for
+#
+#TR_Grosub.o: TR_Grosub.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Grosub.for
+#
+#TR_Ipcrop.o: TR_Ipcrop.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Ipcrop.for
+#
+#TR_Nfacto.o: TR_Nfacto.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Nfacto.for
+#
+#TR_Nuptak.o: TR_Nuptak.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Nuptak.for
+#
+#TR_OPGROW.o: TR_OPGROW.for $(OBJS1)
+#	$(FCOMPILER) -c TR_OPGROW.for
+#
+#TR_Opharv.o: TR_Opharv.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Opharv.for
+#
+#TR_Phenol.o: TR_Phenol.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Phenol.for
+#
+#TR_Rootgr.o: TR_Rootgr.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Rootgr.for
+#
+#TR_SUBSTOR.o: TR_SUBSTOR.for $(OBJS1)
+#	$(FCOMPILER) -c TR_SUBSTOR.for
+#
+#TR_Tillsub.o: TR_Tillsub.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Tillsub.for
+#
+#TR_Transpl_g.o: TR_Transpl_g.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Transpl_g.for
+#
+#TR_Transpl_p.o: TR_Transpl_p.for $(OBJS1)
+#	$(FCOMPILER) -c TR_Transpl_p.for
+#
+#TSOMLIT_C.o: TSOMLIT_C.for $(OBJS1)
+#	$(FCOMPILER) -c TSOMLIT_C.for
+#
+#UTILS.o: UTILS.for $(OBJS1)
+#	$(FCOMPILER) -c UTILS.for
+#
+#VEGDM.o: VEGDM.for $(OBJS1)
+#	$(FCOMPILER) -c VEGDM.for
+#
+#VEGGR.o: VEGGR.for $(OBJS1)
+#	$(FCOMPILER) -c VEGGR.for
+#
+#Warning.o: Warning.for $(OBJS1)
+#	$(FCOMPILER) -c Warning.for
+#
+#WATBAL.o: WATBAL.for $(OBJS1)
+#	$(FCOMPILER) -c WATBAL.for
+#
+#WBAL.o: WBAL.for $(OBJS1)
+#	$(FCOMPILER) -c WBAL.for
+#
+#WBSUBS.o: WBSUBS.for $(OBJS1)
+#	$(FCOMPILER) -c WBSUBS.for
+#
+#weathr.o: weathr.for $(OBJS1)
+#	$(FCOMPILER) -c weathr.for
+#
+#WEATHR_Inp.o: WEATHR_Inp.for $(OBJS1)
+#	$(FCOMPILER) -c WEATHR_Inp.for
+#
+#WGEN.o: WGEN.for $(OBJS1)
+#	$(FCOMPILER) -c WGEN.for
+#
+#WTHMOD.o: WTHMOD.for $(OBJS1)
+#	$(FCOMPILER) -c WTHMOD.for
+#
+#WTHSET.o: WTHSET.for $(OBJS1)
+#	$(FCOMPILER) -c WTHSET.for
+#
+#CSM.o: CSM.for #$(OBJS1) #$(OBJS2)
+#	$(FCOMPILER) -c CSM.for
+
+clean:
+	rm -f *.o *.mod *.so csm45
+
