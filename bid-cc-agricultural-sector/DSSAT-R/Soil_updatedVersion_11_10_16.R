@@ -16,27 +16,27 @@ library(ncdf4)
 library(dplyr)
 
 #source functions
-#source("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/_scripts/mainFunctions.R") ## File Functios Necessary
-source("~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/mainFunctions_updated.R") ## JRV MBP
+source("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/_scripts/mainFunctions.R") ## File Functios Necessary
+#source("~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/mainFunctions_updated.R") ## JRV MBP
 
 #path to working directories in dapadfs
-#path <- "/mnt/workspace_cluster_3/bid-cc-agricultural-sector/"  ## Project Directory
-path <- "/nfs/workspace_cluster_3/bid-cc-agricultural-sector/"  ## JRV MBP
+path <- "/mnt/workspace_cluster_3/bid-cc-agricultural-sector/"  ## Project Directory
+#path <- "/nfs/workspace_cluster_3/bid-cc-agricultural-sector/"  ## JRV MBP
 
 # read id_soil raster file (file with cell IDs)
-#id_soil <- raster(paste0(path, "02-Soil-data/","cell5m.asc"))         ##   Soil Type Identifier
-id_soil <- raster("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/cell5m.asc") ## JRV MBP
+id_soil <- raster(paste0(path, "02-Soil-data/","cell5m.asc"))         ##   Soil Type Identifier
+#id_soil <- raster("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/cell5m.asc") ## JRV MBP
 proj4string(id_soil) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")  ## Add to the Coordinate System
 
 # read soil profile matching table
-#Soil_profile <- read.table(paste0(path, "02-Soil-data/", "data_hc3ksol_5m_global.txt"), header = T)   ## Soil Profile for Cell5m (Para utilizar en el QUERY)
-Soil_profile <- read.table("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/data_hc3ksol_5m_global.txt", header=T) ## JRV MBP
+Soil_profile <- read.table(paste0(path, "02-Soil-data/", "data_hc3ksol_5m_global.txt"), header = T)   ## Soil Profile for Cell5m (Para utilizar en el QUERY)
+#Soil_profile <- read.table("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/data_hc3ksol_5m_global.txt", header=T) ## JRV MBP
 
 # read soil profiles in DSSAT format
-#wise <- readLines(paste0(path, "02-Soil-data/", "WI.SOL"))      ## Soil File Wise
-wise <- readLines("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/WI.SOL") ## JRV MBP
-#Soil_Generic <- readLines(paste0(path, "02-Soil-data/", "HC.SOL"))   ## Soil File Generic
-Soil_Generic <- readLines("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/HC.SOL") ## JRV MBP
+wise <- readLines(paste0(path, "02-Soil-data/", "WI.SOL"))      ## Soil File Wise
+#wise <- readLines("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/WI.SOL") ## JRV MBP
+Soil_Generic <- readLines(paste0(path, "02-Soil-data/", "HC.SOL"))   ## Soil File Generic
+#Soil_Generic <- readLines("~/CIAT-work/BID-impacts/rerun_analysis/soils/Soil-anexo/HC.SOL") ## JRV MBP
 
 # load 30 arc-min reference raster
 r30 <- raster(paste0(path, "02-Soil-data/","prec_1971_01.nc"))
