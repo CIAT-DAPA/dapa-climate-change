@@ -161,10 +161,10 @@ if (!file.exists(paste(an_dir,"/stress_profile_historical.RData",sep=""))) {
 ##################################################################################
 
 #list files in Arquivos_RCL.zip
-setwd(res_dir)
-rcl_flist <- unzip("Arquivos_RCL.zip",list=T)
-rcl_flist <- rcl_flist$Name[grep("\\.csv",rcl_flist$Name)]
-setwd("~")
+setwd(paste(res_dir,"/output_files_final_ok",sep=""))
+#rcl_flist <- unzip("RCL_J0_res_H.7z",list=T)
+#rcl_flist <- rcl_flist$Name[grep("\\.csv",rcl_flist$Name)]
+#setwd("~")
 
 #loop rcp, gcm, method, and co2p
 for (rcp in rcplist) {
@@ -184,18 +184,13 @@ for (rcp in rcplist) {
           cat("...processing rcp=",rcp,"/ gcm=",gcm,"/ bc_method=",bc,"/ co2=",co2p,"\n")
           
           #uncompress only this file
-          fname <- paste("Arquivos_RCL/",co2p,"/RCL_M7_F1_res_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
-          if (fname == "Arquivos_RCL/High/RCL_M7_F1_res_H_method_del_rcp45_gfdl_esm2g.csv") {
-            fname <- "Arquivos_RCL/High/RCL_M7_F1_res_H_method_del_rcp45_esm2g.csv"
-          }
+          fname <- paste("RCL_J0_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
           if (file.exists(paste(res_dir,"/",fname,sep=""))) {system(paste("rm -f ",res_dir,"/",fname,sep=""))}
-          setwd(res_dir)
-          system(paste("7z x Arquivos_RCL.zip ",fname," -r",sep=""))
-          setwd("~")
+          system(paste("7z x RCL_J0_res_",co2i,".7z ",fname," -r",sep=""))
           
           #load file, then delete
-          res_data <- read.csv(paste(res_dir,"/",fname,sep=""),sep=";")
-          if (file.exists(paste(res_dir,"/",fname,sep=""))) {system(paste("rm -f ",res_dir,"/",fname,sep=""))}
+          res_data <- read.csv(fname)
+          if (file.exists(fname)) {system(paste("rm -f ",fname,sep=""))}
           names(res_data)[7] <- "env_cluster"
           
           #select from fut_quant, and merge with res_data
@@ -267,8 +262,6 @@ for (rcp in rcplist) {
     save(stress_df, file=paste(an_dir,"/stress_profile_",rcp,".RData",sep=""))
   }
 }
-#clean up
-system(paste("rm -rf ",res_dir,"/Arquivos_RCL",sep=""))
 
 
 #loop rcp, gcm, method, and co2p
@@ -280,7 +273,7 @@ for (rcp in rcplist) {
   clusname <- unique(paste(stress_df$env_cluster))
   
   #loop co2 values
-  for (co2p in co2list) {
+  #for (co2p in co2list) {
     #co2p <- co2list[1]
     
     #phenology in oryza2000:
@@ -291,11 +284,12 @@ for (rcp in rcplist) {
     #4. grain filling phase, from 50 % flowering to physiological maturity (DVS=2.0)
     for (clus in clusname) {
       #clus <- clusname[1]
-      cat("...processing rcp=",rcp,"/ co2=",co2p,"/ env_cluster=",clus,"\n")
-      clus_data <- stress_df[which(stress_df$co2 == co2p & stress_df$env_cluster == clus),]
+      cat("...processing rcp=",rcp,"/ env_cluster=",clus,"\n")
+      #clus_data <- stress_df[which(stress_df$co2 == co2p & stress_df$env_cluster == clus),]
+      clus_data <- stress_df[which(stress_df$env_cluster == clus),]
       stress_list <- sort(unique(paste(clus_data$stress_profile)))
       
-      pdf(paste(fig_dir,"/fig_6_profile_",clus,"_",co2p,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
+      pdf(paste(fig_dir,"/fig_6_profile_",clus,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
       leg_s1 <- leg_s2 <- leg_s3 <- NULL
       dap1 <- dap2 <- c()
       for (stp in stress_list) {
@@ -357,10 +351,10 @@ for (rcp in rcplist) {
              text.col=c("blue","dark green","red"), title.col="black", box.lwd=NA,bg=NA)
       dev.off()
       setwd(fig_dir)
-      system(paste("convert -verbose -density 300 fig_6_profile_",clus,"_",co2p,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_6_profile_",clus,"_",co2p,"_",rcp,".png",sep=""))
+      system(paste("convert -verbose -density 300 fig_6_profile_",clus,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_6_profile_",clus,"_",rcp,".png",sep=""))
       setwd("~")
     }
-  }
+  #}
 }
 
 

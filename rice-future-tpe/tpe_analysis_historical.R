@@ -226,9 +226,20 @@ if (!file.exists(paste(an_dir,"/soil_texture_locations_clean.csv",sep=""))) {
   row.names(tab_runs) <- NULL
   names(tab_runs) <- c("Station",paste(names(tab_runs)[2:length(names(tab_runs))],"_runs",sep=""))
   
+#   Texture municipio_wst
+#   76718   SaClLo       VILHENA
+#   189286      Lo        CUIABA
+#   273075      Lo  RONDONOPOLIS
+#   344935  SaClLo         JATAI
+#   372901  SaClLo         FAINA
+#   382893    SaCl        VARJAO
+#   493500      Lo       IPAMERI
+#   495080    SaLo       IPAMERI
+#   499735    SaCl      LUZIANIA
+  
   sclass_list <- c("Cl","ClLo","Lo","Sa","SaCl","SaClLo","SaLo")
   for (i in 1:nrow(tab_runs)) {
-    #i <- 24
+    #i <- 16
     wst_name <- paste(tab_spat$Station[i])
     row_spat <- tab_spat[i,]
     row_runs <- tab_runs[i,]
@@ -267,6 +278,7 @@ if (!file.exists(paste(an_dir,"/rs_reference.tif",sep=""))) {
   rs_ref <- raster(paste(an_dir,"/rs_reference.tif",sep=""))
 }
 #plot(rs_ref); plot(fpols,add=T); plot(bra_shp,add=T)
+
 
 #3. create lookup data frame so rasters of any variable can be plotted easily
 if (!file.exists(paste(an_dir,"/df_reference.RData",sep=""))) {

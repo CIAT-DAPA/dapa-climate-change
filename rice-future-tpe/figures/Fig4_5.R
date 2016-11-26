@@ -106,7 +106,7 @@ his_quant$freq[which(his_quant$env_name == "FE" & his_quant$stress_cluster == 0)
 #historical plot of environments
 pdf(paste(fig_dir,"/fig_4_CDF_historical.pdf",sep=""), height=7,width=10,pointsize=17)
 par(mar=c(5,5,1,1),las=1,lwd=1.5)
-plot(as.numeric(his_quant[1,paste("p",0:100,sep="")]),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,8000),
+plot(as.numeric(his_quant[1,paste("p",0:100,sep="")]),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,6000),
      ylim=c(0,1),xlab=expression(Yield~(kg~ha^{-1})),ylab="Cumulative probability")
 lines(as.numeric(his_quant[3,paste("p",0:100,sep="")]),0:100*0.01,ty="l",col="dark green",lwd=2.5,lty=1)
 lines(as.numeric(his_quant[8,paste("p",0:100,sep="")]),0:100*0.01,ty="l",col="red",lwd=2.5,lty=1)
@@ -141,7 +141,7 @@ for (clus in clusname) {
     
     if (stress == "S1") {
       par(mar=c(5,5,1,1),las=1,lwd=1.5)
-      plot(as.numeric(hisq_t[,paste("p",0:100,sep="")]),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,8000),
+      plot(as.numeric(hisq_t[,paste("p",0:100,sep="")]),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,6000),
            ylim=c(0,1),xlab=expression(Yield~(kg~ha^{-1})),ylab="Cumulative probability")
       leg_s1 <- paste("SP1: ",sprintf("%2.1f",tfreq)," %",sep="")
     } else if (stress == "S2") {
@@ -174,7 +174,7 @@ if (!file.exists(paste(an_dir,"/yield_probability_historical_named.RData",sep=""
 ###
 #plot yield CDF of env_cluster fut (separate co2) in single graph
 for (rcp in rcplist) {
-  #rcp <- rcplist[4]
+  #rcp <- rcplist[3]
   
   #load dataset
   load(file=paste(an_dir,"/yield_probability_",rcp,".RData",sep=""))
@@ -186,49 +186,57 @@ for (rcp in rcplist) {
   ### update fut_quant
   #for each gcm, bc_method, co2p, determine which of the env clusters is HFE, FE, LFE
   #sort by median and then assign value
-  for (gcm in gcmlist) {
-    for (bc in bclist) {
-      for (co2p in co2list) {
-        #gcm <- gcmlist[1]; bc <- bclist[1]; co2p <- co2list[1]
-        tfut_df <- fut_quant[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p),]
-        tdf <- tfut_df[which(tfut_df$stress_cluster == 0),c("env_cluster","p50")]
-        eclus <- tdf$env_cluster[order(tdf$p50,decreasing=T)]
-        
-        #update fut_quant data.frame
-        fut_quant$env_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[1])] <- "HFE"
-        fut_quant$env_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[2])] <- "FE"
-        fut_quant$env_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[3])] <- "LFE"
-        
-        #read simulation data
-        co2i <- substr(co2p,1,1)
-        fname <- paste(res_dir,"/Arquivos_J2/",co2p,"/","J2_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
-        run_data <- read.csv(fname, sep=";")
-        
-        #calculate frequency of environments and of stress profiles
-        freq_fut <- as.data.frame(table(run_data[,c("stress_cluster","env_cluster")]))
-        freq_fut$stress_cluster <- as.numeric(paste(freq_fut$stress_cluster))
-        freq_fut$env_cluster <- as.numeric(paste(freq_fut$env_cluster))
-        fr_hfe <- sum(freq_fut$Freq[which(freq_fut$env_cluster == eclus[1])]) / sum(freq_fut$Freq) * 100
-        fr_lfe <- sum(freq_fut$Freq[which(freq_fut$env_cluster == eclus[2])]) / sum(freq_fut$Freq) * 100
-        fr_fe <- sum(freq_fut$Freq[which(freq_fut$env_cluster == eclus[3])]) / sum(freq_fut$Freq) * 100
-        
-        #put frequencies into data.frame
-        fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[1] & fut_quant$stress_cluster == 0)] <- fr_hfe
-        fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[2] & fut_quant$stress_cluster == 0)] <- fr_fe
-        fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[3] & fut_quant$stress_cluster == 0)] <- fr_lfe
-        
-        #per env_cluster, determine order of stress pattern (1 for highest yield, and so on)
-        for (clus  in cluslist) {
-          #clus <- 1
-          strdf <- tfut_df[which(tfut_df$env_cluster == clus & tfut_df$stress_cluster != 0),c("stress_cluster","p50")]
-          sclus <- strdf$stress_cluster[order(strdf$p50,decreasing=T)]
-          for (sc in 1:length(sclus)) {
-            fut_quant$stress_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == clus & fut_quant$stress_cluster == sclus[sc])] <- paste("S",sc,sep="")
-            fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == clus & fut_quant$stress_cluster == sclus[sc])] <- freq_fut$Freq[which(freq_fut$env_cluster == clus & freq_fut$stress_cluster == sclus[sc])] / sum(freq_fut$Freq[which(freq_fut$env_cluster == clus)]) * 100
+  if (!file.exists(paste(an_dir,"/yield_probability_",rcp,"_named.RData",sep=""))) {
+    for (gcm in gcmlist) {
+      for (bc in bclist) {
+        for (co2p in co2list) {
+          #gcm <- gcmlist[1]; bc <- bclist[1]; co2p <- co2list[1]
+          tfut_df <- fut_quant[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p),]
+          tdf <- tfut_df[which(tfut_df$stress_cluster == 0),c("env_cluster","p50")]
+          eclus <- tdf$env_cluster[order(tdf$p50,decreasing=T)]
+          
+          #update fut_quant data.frame
+          fut_quant$env_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[1])] <- "HFE"
+          fut_quant$env_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[2])] <- "FE"
+          fut_quant$env_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[3])] <- "LFE"
+          
+          #read simulation data
+          co2i <- substr(co2p,1,1)
+          setwd(paste(res_dir,"/output_files_final_ok",sep=""))
+          fname <- paste("JCL_J0_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
+          system(paste("7z x JCL_J0_op_",co2i,".7z ",fname," -aos",sep=""))
+          run_data <- read.csv(fname)
+          if (file.exists(fname)) {system(paste("rm -f ",fname,sep=""))}
+          setwd(res_dir)
+          
+          #calculate frequency of environments and of stress profiles
+          freq_fut <- as.data.frame(table(run_data[,c("stress_cluster","env_cluster")]))
+          freq_fut$stress_cluster <- as.numeric(paste(freq_fut$stress_cluster))
+          freq_fut$env_cluster <- as.numeric(paste(freq_fut$env_cluster))
+          fr_hfe <- sum(freq_fut$Freq[which(freq_fut$env_cluster == eclus[1])]) / sum(freq_fut$Freq) * 100
+          fr_lfe <- sum(freq_fut$Freq[which(freq_fut$env_cluster == eclus[2])]) / sum(freq_fut$Freq) * 100
+          fr_fe <- sum(freq_fut$Freq[which(freq_fut$env_cluster == eclus[3])]) / sum(freq_fut$Freq) * 100
+          
+          #put frequencies into data.frame
+          fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[1] & fut_quant$stress_cluster == 0)] <- fr_hfe
+          fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[2] & fut_quant$stress_cluster == 0)] <- fr_fe
+          fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == eclus[3] & fut_quant$stress_cluster == 0)] <- fr_lfe
+          
+          #per env_cluster, determine order of stress pattern (1 for highest yield, and so on)
+          for (clus  in cluslist) {
+            #clus <- 1
+            strdf <- tfut_df[which(tfut_df$env_cluster == clus & tfut_df$stress_cluster != 0),c("stress_cluster","p50")]
+            sclus <- strdf$stress_cluster[order(strdf$p50,decreasing=T)]
+            for (sc in 1:length(sclus)) {
+              fut_quant$stress_name[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == clus & fut_quant$stress_cluster == sclus[sc])] <- paste("S",sc,sep="")
+              fut_quant$freq[which(fut_quant$gcm == gcm & fut_quant$bc_method == bc & fut_quant$co2 == co2p & fut_quant$env_cluster == clus & fut_quant$stress_cluster == sclus[sc])] <- freq_fut$Freq[which(freq_fut$env_cluster == clus & freq_fut$stress_cluster == sclus[sc])] / sum(freq_fut$Freq[which(freq_fut$env_cluster == clus)]) * 100
+            }
           }
         }
       }
     }
+  } else {
+    load(file=paste(an_dir,"/yield_probability_",rcp,"_named.RData",sep=""))
   }
   
   ### save updated probability data.frame
@@ -237,10 +245,12 @@ for (rcp in rcplist) {
   }
   
   ### loop clusters, plot CDF of yield all env_cluster
-  for (co2p in co2list) {
+  #for (co2p in co2list) {
     #co2p <- co2list[1]
-    futq <- fut_quant[which(fut_quant$stress_cluster == 0 & fut_quant$co2 == co2p),]
-    pdf(paste(fig_dir,"/fig_4_CDF_",co2p,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
+    #futq <- fut_quant[which(fut_quant$stress_cluster == 0 & fut_quant$co2 == co2p),]
+    futq <- fut_quant[which(fut_quant$stress_cluster == 0),]
+    #pdf(paste(fig_dir,"/fig_4_CDF_",co2p,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
+    pdf(paste(fig_dir,"/fig_4_CDF_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
     for (clus in clusname) {
       #clus <- clusname[1]
       futq_s <- futq[which(futq$env_name == clus),]
@@ -257,7 +267,7 @@ for (rcp in rcplist) {
       
       if (clus == "HFE") {
         par(mar=c(5,5,1,1),las=1,lwd=1.5)
-        plot(as.numeric(futq_p50),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,8000),
+        plot(as.numeric(futq_p50),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,6000),
              ylim=c(0,1),xlab=expression(Yield~(kg~ha^{-1})),ylab="Cumulative probability")
         polygon(x=c(as.numeric(futq_plw), rev(as.numeric(futq_pup))), y=c(0:100*0.01,rev(0:100*0.01)), border=NA, col=rgb(red=0,green=100,blue=255,alpha=50,maxColorValue=255))
         leg_hfe <- paste("HFE: ",clusf_p50," [",clusf_plw," - ",clusf_pup,"] %",sep="")
@@ -277,19 +287,22 @@ for (rcp in rcplist) {
            legend=c(leg_hfe,leg_fe,leg_lfe),cex=1.1)
     dev.off()
     setwd(fig_dir)
-    system(paste("convert -verbose -density 300 fig_4_CDF_",co2p,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_4_CDF_",co2p,"_",rcp,".png",sep=""))
+    #system(paste("convert -verbose -density 300 fig_4_CDF_",co2p,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_4_CDF_",co2p,"_",rcp,".png",sep=""))
+    system(paste("convert -verbose -density 300 fig_4_CDF_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_4_CDF_",rcp,".png",sep=""))
     setwd("~")
-  }
+  #}
   
   ### loop clusters, plot CDF of yield per stress_cluster in each env_cluster
-  for (co2p in co2list) {
+  #for (co2p in co2list) {
     #co2p <- co2list[1]
-    futq <- fut_quant[which(fut_quant$stress_cluster != 0 & fut_quant$co2 == co2p),]
+    #futq <- fut_quant[which(fut_quant$stress_cluster != 0 & fut_quant$co2 == co2p),]
+    futq <- fut_quant[which(fut_quant$stress_cluster != 0),]
     for (clus in clusname) {
       #clus <- clusname[1]
       futq_s <- futq[which(futq$env_name == clus),]
       stress_list <- sort(unique(futq_s$stress_name))
-      pdf(paste(fig_dir,"/fig_5_CDF_",clus,"_",co2p,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
+      #pdf(paste(fig_dir,"/fig_5_CDF_",clus,"_",co2p,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
+      pdf(paste(fig_dir,"/fig_5_CDF_",clus,"_",rcp,".pdf",sep=""), height=7,width=10,pointsize=17)
       leg_s1 <- leg_s2 <- leg_s3 <- NULL
       for (stress in stress_list) {
         #stress <- stress_list[1]
@@ -307,7 +320,7 @@ for (rcp in rcplist) {
         
         if (stress == "S1") {
           par(mar=c(5,5,1,1),las=1,lwd=1.5)
-          plot(as.numeric(futq_p50),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,8000),
+          plot(as.numeric(futq_p50),0:100*0.01,ty="l",col="blue",lwd=2.5,lty=1,xlim=c(0,6000),
                ylim=c(0,1),xlab=expression(Yield~(kg~ha^{-1})),ylab="Cumulative probability")
           polygon(x=c(as.numeric(futq_plw), rev(as.numeric(futq_pup))), y=c(0:100*0.01,rev(0:100*0.01)), border=NA, col=rgb(red=0,green=100,blue=255,alpha=50,maxColorValue=255))
           leg_s1 <- paste("SP1: ",clusf_p50," [",clusf_plw," - ",clusf_pup,"] %",sep="")
@@ -327,10 +340,11 @@ for (rcp in rcplist) {
              legend=c(leg_s1,leg_s2,leg_s3),cex=1.1)
       dev.off()
       setwd(fig_dir)
-      system(paste("convert -verbose -density 300 fig_5_CDF_",clus,"_",co2p,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_5_CDF_",clus,"_",co2p,"_",rcp,".png",sep=""))
+      #system(paste("convert -verbose -density 300 fig_5_CDF_",clus,"_",co2p,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_5_CDF_",clus,"_",co2p,"_",rcp,".png",sep=""))
+      system(paste("convert -verbose -density 300 fig_5_CDF_",clus,"_",rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_5_CDF_",clus,"_",rcp,".png",sep=""))
       setwd("~")
     }
-  }
+  #}
 }
 
 

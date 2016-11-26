@@ -76,14 +76,17 @@ rm(yield_rs)
 
 #######
 #plotting function
-rs_levplot <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCECE6",col_f="#00441B",rev=F,leg=T,colours=NA) {
+rs_levplot <- function(rsin,zn,zx,nb,brks=NA,scale="YlOrRd",ncol=9,col_i="#CCECE6",col_f="#00441B",rev=F,leg=T,this_colours=NA) {
+  #dummy check of raster
+  rsdum <- raster(rsin); rsdum[] <- rsin[]; rsin <- rsdum; rm(rsdum)
+  
   #display.brewer.all() #for colours
   if (scale %in% row.names(brewer.pal.info)) {
     pal <- rev(brewer.pal(ncol, scale))
-    if (!is.na(colours[1])) {pal <- colours}
+    if (!is.na(this_colours[1])) {pal <- this_colours}
   } else {
     pal <- colorRampPalette(c(col_i,col_f))(ncol)
-    if (!is.na(colours[1])) {pal <- colours}
+    if (!is.na(this_colours[1])) {pal <- this_colours}
   }
   if (rev) {pal <- rev(pal)}
   
@@ -137,7 +140,7 @@ system(paste("convert -verbose -density 300 fig_3_yield_cv_historical.pdf -quali
 setwd("~")
 
 #logicals for processing
-calc_all_ensemble <- F
+calc_all_ensemble <- T
 calc_per_co2 <- T
 
 #compute change in mean yield for each projection
@@ -167,8 +170,9 @@ for (rcp in rcplist) {
   printall_fun <- function(suffix="") {
     #now produce plots for future scenarios
     #mean yield change
-    chg_ym1[which(chg_ym1[] > 2000)] <- 2000
-    tplot <- rs_levplot(chg_ym1,zn=-2000,zx=2000,nb=8,brks=NA,scale="RdYlBu",col_i=NA,col_f=NA,
+    chg_ym1[which(chg_ym1[] > 600)] <- 600
+    chg_ym1[which(chg_ym1[] < -600)] <- -600
+    tplot <- rs_levplot(chg_ym1,zn=-600,zx=600,nb=6,brks=NA,scale="RdYlBu",col_i=NA,col_f=NA,
                         ncol=11,rev=T,leg=T)
     pdf(paste(fig_dir,"/fig_3_future_yield_chg_",suffix,rcp,".pdf",sep=""), height=7,width=10)
     print(tplot)
@@ -187,9 +191,10 @@ for (rcp in rcplist) {
     system(paste("convert -verbose -density 300 fig_3_future_yield_unc_",suffix,rcp,".pdf -quality 100 -sharpen 0x1.0 -alpha off fig_3_future_yield_unc_",suffix,rcp,".png",sep=""))
     setwd("~")
     
-    #mean yield change
-    chg_sd1[which(chg_sd1[] > 1000)] <- 1000
-    tplot <- rs_levplot(chg_sd1,zn=-1000,zx=1000,nb=8,brks=NA,scale="RdYlBu",col_i=NA,col_f=NA,
+    #s.d. yield change
+    chg_sd1[which(chg_sd1[] > 500)] <- 500
+    chg_sd1[which(chg_sd1[] < -500)] <- -500
+    tplot <- rs_levplot(chg_sd1,zn=-500,zx=500,nb=10,brks=NA,scale="RdYlBu",col_i=NA,col_f=NA,
                         ncol=11,rev=T,leg=T)
     pdf(paste(fig_dir,"/fig_3_future_ystd_chg_",suffix,rcp,".pdf",sep=""), height=7,width=10)
     print(tplot)
@@ -209,8 +214,9 @@ for (rcp in rcplist) {
     setwd("~")
     
     #mean c.v. change
-    chg_cv1[which(chg_cv1[] > 40)] <- 40
-    tplot <- rs_levplot(chg_cv1,zn=-40,zx=40,nb=8,brks=NA,scale="RdYlBu",col_i=NA,col_f=NA,
+    chg_cv1[which(chg_cv1[] > 30)] <- 30
+    chg_cv1[which(chg_cv1[] < -30)] <- -30
+    tplot <- rs_levplot(chg_cv1,zn=-30,zx=30,nb=6,brks=NA,scale="RdYlBu",col_i=NA,col_f=NA,
                         ncol=11,rev=T,leg=T)
     pdf(paste(fig_dir,"/fig_3_future_ycv_chg_",suffix,rcp,".pdf",sep=""), height=7,width=10)
     print(tplot)

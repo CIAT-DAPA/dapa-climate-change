@@ -12,8 +12,8 @@ library(ggplot2); library(grid); library(gridExtra)
 src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
 
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
-#wd <- "~/Leeds-work/rice-future-tpe"
+#wd <- "/nfs/a101/earjr/rice-future-tpe"
+wd <- "~/Leeds-work/rice-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
 fig_odir <- paste(wd,"/figures",sep="")
@@ -243,7 +243,7 @@ unc_vals$rcp85.prec.agreement <- paste(round(unc_vals$rcp85.prec.agreement,1))
 #printing all figures
 for (rcp in rcplist) {
   for (vname in varlist) {
-    #vname <- "tmean"; rcp <- "rcp26"
+    #vname <- "prec"; rcp <- "rcp85"
     #details
     cat("...printing variable=",vname,"/ rcp=",rcp,"\n")
     cname <- paste(rcp,".",vname,".change",sep="")

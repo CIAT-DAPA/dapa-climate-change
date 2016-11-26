@@ -89,7 +89,6 @@ co2list <- c("High","Low")
 #1. produce map of mean yield for each GCM
 #unzip j2 files
 setwd(res_dir)
-system("7z x Arquivos_J2.zip -aos")
 
 #loop to get output as rasters
 for (rcp in rcplist) {
@@ -108,9 +107,14 @@ for (rcp in rcplist) {
           co2i <- substr(co2p,1,1)
           cat("...processing rcp=",rcp,"/ gcm=",gcm,"/ bc_method=",bc,"/ co2=",co2p,"\n")
           
+          #uncompress data
+          setwd(paste(res_dir,"/output_files_final_ok",sep=""))
+          fname <- paste("JCL_J0_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
+          system(paste("7z x JCL_J0_op_",co2i,".7z ",fname," -aos",sep=""))
+          
           #read data
-          fname <- paste(res_dir,"/Arquivos_J2/",co2p,"/","J2_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
-          run_data <- read.csv(fname, sep=";")
+          run_data <- read.csv(fname)
+          #run_data <- unique(run_data)
           run_data$station <- as.vector(sapply(run_data$identificador, FUN=function(x) {unlist(strsplit(paste(x),"_",fixed=T))[1]}))
           run_data$soil <- as.vector(sapply(run_data$identificador, FUN=function(x) {unlist(strsplit(paste(x),"_",fixed=T))[2]}))
           run_data$sdate <- as.numeric(sapply(run_data$identificador, FUN=function(x) {unlist(strsplit(paste(x),"_",fixed=T))[3]}))
@@ -165,6 +169,8 @@ for (rcp in rcplist) {
           
           #remove objects
           rm(list=c("yield_rs","rs_ymean","rs_ystd","rs_ycv","mean_run","run_data")); g=gc(); rm(g)
+          if (file.exists(fname)) {system(paste("rm -f ",fname,sep=""))}
+          setwd(res_dir)
         }
       }
     }
@@ -201,9 +207,14 @@ for (rcp in rcplist) {
           co2i <- substr(co2p,1,1)
           cat("...processing rcp=",rcp,"/ gcm=",gcm,"/ bc_method=",bc,"/ co2=",co2p,"\n")
           
+          #uncompress data
+          setwd(paste(res_dir,"/output_files_final_ok",sep=""))
+          fname <- paste("JCL_J0_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
+          system(paste("7z x JCL_J0_op_",co2i,".7z ",fname," -aos",sep=""))
+          
           #read data
-          fname <- paste(res_dir,"/Arquivos_J2/",co2p,"/","J2_op_",co2i,"_method_",bc,"_",rcp,"_",gcm,".csv",sep="")
-          run_data <- read.csv(fname, sep=";")
+          run_data <- read.csv(fname)
+          #run_data <- unique(run_data)
           run_data$station <- as.vector(sapply(run_data$identificador, FUN=function(x) {unlist(strsplit(paste(x),"_",fixed=T))[1]}))
           run_data$soil <- as.vector(sapply(run_data$identificador, FUN=function(x) {unlist(strsplit(paste(x),"_",fixed=T))[2]}))
           run_data$sdate <- as.numeric(sapply(run_data$identificador, FUN=function(x) {unlist(strsplit(paste(x),"_",fixed=T))[3]}))
@@ -239,6 +250,8 @@ for (rcp in rcplist) {
           #lines(as.numeric(quant_df[4,paste("p",0:100,sep="")]), 0:100/100, col="red")
           #lines(as.numeric(quant_df[7,paste("p",0:100,sep="")]), 0:100/100, col="green")
           #abline(h=0.5)
+          if (file.exists(fname)) {system(paste("rm -f ",fname,sep=""))}
+          setwd(res_dir)
         }
       }
     }
@@ -246,7 +259,4 @@ for (rcp in rcplist) {
   }
 }
 
-#remove J2 files
-setwd("~")
-system(paste("rm -rf ",res_dir,"/Arquivos_J2",sep=""))
 
