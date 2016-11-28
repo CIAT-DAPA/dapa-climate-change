@@ -217,6 +217,40 @@ make_soilfile <- function(in_data, data, path){
 
 make_soilfile(in_data, wise[59933:length(wise)], getwd())
 
+make_soilfile2 <- function(in_data, i, data, path){
+  
+  # Header construction
+  y <- data
+  y <- y[5]
+  write(y, file="x.txt")
+  y <- read.table("x.txt", sep="")
+  in_data$properties <- data.frame(SCOM=paste(y[1,1]), SALB=y[1,2], SLU1=y[1,3], SLDR=y[1,4], SLRO=y[1,5], SLNF=y[1,6], SLPF=1, SMHB=y[1,8], SMPX=y[1,9], SMKE=y[1,10])
+  
+  # sink("SOIL.SOL")
+  cat("*SOILS: General DSSAT Soil Input File\n")
+  cat("\n")
+  cat(paste0("*BID000000", i, "  WISE        SCL     140 GENERIC SOIL PROFILE\n"))
+  cat("@SITE        COUNTRY          LAT     LONG SCS Family\n")
+  
+  # General
+  cat(paste(" ", sprintf("%1$-12s%2$-12s%3$8.3f%4$9.3f",
+                         as.character(in_data$general$SITE), as.character(in_data$general$COUNTRY),
+                         in_data$general$LAT, in_data$general$LON)," ",
+            sprintf("%-12s", as.character(in_data$general$SCSFAM)),
+            "\n", sep=""))
+  
+  # Properties
+  cat("@ SCOM  SALB  SLU1  SLDR  SLRO  SLNF  SLPF  SMHB  SMPX  SMKE\n")
+  cat(paste(sprintf("%1$6s%2$6.2f%3$6.1f%4$6.2f%5$6.2f%6$6.2f%7$6.2f%8$6s%9$6s%10$6s",
+                    as.character(in_data$properties$SCOM), in_data$properties$SALB,
+                    in_data$properties$SLU1, in_data$properties$SLDR, in_data$properties$SLRO,
+                    in_data$properties$SLNF, in_data$properties$SLPF, in_data$properties$SMHB,
+                    in_data$properties$SMPX, in_data$properties$SMKE),"\n", sep=""))
+  cat(paste(read_oneSoilFile(data[6:length(data)], path)), sep = "\n")
+  # sink()
+  
+}
+
 ## Test
 ## make_soilfile(in_data, wise[59933:length(wise)], getwd())
 
@@ -265,7 +299,8 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
     
     if(length(condicion) == 0){
       
-      Wise_Position <- Cod_Ref_and_Position_Generic[which(Cod_Ref_and_Position_Generic[, 1] == paste(Ref_for_Soil)), 2]
+      Wise_Position <- 239 # According to HC_GEN0014 soil profile by Myles recommendation
+      # Wise_Position <- Cod_Ref_and_Position_Generic[which(Cod_Ref_and_Position_Generic[, 1] == paste(Ref_for_Soil)), 2]
       return(make_soilfile(in_data, Soil_Generic[Wise_Position:length(wise)], path))
       
     }
@@ -273,12 +308,13 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
   }
   
 }
-Extraer.SoilDSSAT(Codigo_identificadorSoil = values[5], profileMatrix = profileMatrix, path = '/mnt/bid-cc-agricultural-sector/')
+
+Extraer.SoilDSSAT(Codigo_identificadorSoil = values[5], profileMatrix = profileMatrix, path = '/mnt/workspace_cluster_3/bid-cc-agricultural-sector/')
 
 # Extraer.SoilDSSAT(values[972], getwd())
 
 ## Test
 ## The object values matches in the order of the coordinates for climate data for Latin America
 ## Extraer.SoilDSSAT(values[972],getwd())
-
-save.image(file = paste0(path, "14-ObjectsR/Soil.RData")) ## Save the file Soil
+path = '/mnt/workspace_cluster_3/bid-cc-agricultural-sector/'
+save.image(file = paste0(path, "14-ObjectsR/Soil2.RData")) ## Save the file Soil
