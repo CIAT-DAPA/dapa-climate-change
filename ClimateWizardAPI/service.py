@@ -71,6 +71,12 @@ def service():
 	else:
 		wavg = False
 
+	# for convert to celsius
+	if request.query.index=="TXAVG" or request.query.index=="TNAVG" or request.query.index=="TXX" or request.query.index=="TNN":
+		factor=-273.15 
+	else:
+		factor=0
+		
 	fileName = request.query.index+"_BCSD_"+request.query.scenario+"_"+wgcm
 	folderModels = "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats_tiff/"
 	folder = folderModels+wgcm+"/"
@@ -116,9 +122,9 @@ def service():
 					bandtype = gdal.GetDataTypeName(srcband.DataType)
 					intval = struct.unpack(fmttypes[bandtype] , structval)
 					if wavg:
-						avg += float(intval[0])/100
+						avg += (float(intval[0])/100)+factor
 					else:
-						output_item = {'date' : int(band+startDate-1) , 'value' : (float(intval[0])/100)-baselineAvg}
+						output_item = {'date' : int(band+startDate-1) , 'value' : ((float(intval[0])/100)+factor)-baselineAvg}
 						json_output['values'].append(output_item)
 			if avg != 0 and wavg:
 				avg = (avg / (int(wrange[1]) - int(wrange[0]) + 1)) - baselineAvg
@@ -136,7 +142,7 @@ def service():
 				structval = srcband.ReadRaster(int(px), int(py), 1, 1, buf_type=srcband.DataType )
 				bandtype = gdal.GetDataTypeName(srcband.DataType)
 				intval = struct.unpack(fmttypes[bandtype] , structval)
-				output_item = {'date' : int(band+startDate-1) , 'value' : (float(intval[0])/100)-baselineAvg}
+				output_item = {'date' : int(band+startDate-1) , 'value' : ((float(intval[0])/100)+factor)-baselineAvg}
 				json_output['values'].append(output_item)
 			return json_output
 	else :
