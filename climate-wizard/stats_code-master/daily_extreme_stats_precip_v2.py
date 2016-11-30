@@ -68,12 +68,16 @@ def ptot(fname='', styr=0, enyr=0, model=''):
     if not styr > 1899 and enyr < 2101 and (enyr > styr):
         raise 'incorrect args passed to PTOT %s %d %d' % (fname, styr, enyr, model)
     nyrs = enyr - styr + 1
-    fn_nodir = split(fname, "/")[-1]
+    sDic = {1:"PDJF", 2:"PMAM", 3:"PJJA", 4:"PSON"}
+	fn_nodir = split(fname, "/")[-1]
     ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'PTOT')).replace('_r1i1p1', '')
+    ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'PTOT')).replace('_r1i1p1', '')
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr+str(styr) + "-" + str(enyr) + ".nc"
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
+	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	
     if not path.exists(ofallmonr):
         for i in range(nyrs):
             y = styr+i
@@ -121,6 +125,27 @@ def ptot(fname='', styr=0, enyr=0, model=''):
         print txtmv
         system(txtmv)
         return ofall
+		
+		
+		# create seasonaly summary file
+        txtcmd = "cdo -m 1e+20  seassum " + ofallmon + " " + ofallsns
+        print txtcmd
+        system(txtcmd)
+		
+		# select each season
+		for s in sDic:
+			ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+			ofallsnsr_i = OUTROOT + "/" + model + "/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
+			txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
+			print txtcmd
+			
+			#Moving outputs
+			system(txtcmd)
+			txtmv = "mv %s %s" % (ofallsns_i, ofallsnsr_i)
+			print txtmv
+			system(txtmv)
+			return ofall
+		
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
 
@@ -197,13 +222,19 @@ def cdd(fname='', styr=0, enyr=0, model=''):
 def r02(fname='', styr=0, enyr=0, model=''):
     if not styr > 1899 and enyr < 2101 and (enyr>styr):
         raise 'incorrect args passed to R02 %s %d %d' % (fname, styr, enyr, model)
-    nyrs = enyr-styr+1
+    
+	sDic = {1:"TDJF", 2:"TMAM", 3:"TJJA", 4:"TSON"}
+	nyrs = enyr-styr+1
     fn_nodir = split(fname,"/")[-1]
     ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'R02')).replace('_r1i1p1', '')
+    ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	
+	fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'R02')).replace('_r1i1p1', '')
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr+str(styr) + "-" + str(enyr) + ".nc"
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
+	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	
     if not path.exists(ofallmonr):
         for i in range(nyrs):
             y = styr+i
@@ -278,6 +309,26 @@ def r02(fname='', styr=0, enyr=0, model=''):
         print "... " + txtmv
         system(txtmv)
         return ofall
+		
+		# create seasonaly summary file
+        txtcmd = "cdo -m 1e+20  seassum " + ofallmon + " " + ofallsns
+        print txtcmd
+        system(txtcmd)
+		
+		# select each season
+		for s in sDic:
+			ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+			ofallsnsr_i = OUTROOT + "/" + model + "/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
+			txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
+			print txtcmd
+			
+			#Moving outputs
+			system(txtcmd)
+			txtmv = "mv %s %s" % (ofallsns_i, ofallsnsr_i)
+			print txtmv
+			system(txtmv)
+			return ofall
+		
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
 
@@ -353,13 +404,21 @@ def sdii(fname='', styr=0, enyr=0, model=''):
     if not styr > 1899 and enyr < 2101 and (enyr>styr):
         raise 'incorrect args passed to SDII %s %d %d' % (fname, styr, enyr, model)
     nyrs = enyr-styr+1
-    fn_nodir = split(fname,"/")[-1]
+    
+	sDic = {1:"TDJF", 2:"TMAM", 3:"TJJA", 4:"TSON"}
+	sDicnmon = {1:"12,1,2", 2:"3,4,5", 3:"6,7,8", 4:"9,10,11"}
+	
+	fn_nodir = split(fname,"/")[-1]
     ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'SDII')).replace('_r1i1p1', '')
+    ofallsns = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	
+	fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'SDII')).replace('_r1i1p1', '')
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr+str(styr) + "-" + str(enyr) + ".nc"
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    if not path.exists(ofallmonr):
+    ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+		
+	if not path.exists(ofallmonr):
         for i in range(nyrs):
             y = styr+i
             print "\n... computing SDII for year ",y
@@ -370,7 +429,8 @@ def sdii(fname='', styr=0, enyr=0, model=''):
                     break
                 else:
                     raise Exception('infile not found: %s' % fn)
-            for j in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]:
+            
+			for j in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]:
                 fx = " -selmon," + str(j) + " " + fn
                 if i == 0 and j == 1:
                     txt = "cdo -m 1e+20" + fx + " selmon_1.nc"
@@ -386,6 +446,7 @@ def sdii(fname='', styr=0, enyr=0, model=''):
                     txt = "cdo -m 1e+20 eca_sdii selmon_" + str(j) + ".nc eca_sdii_" + str(j) + ".nc"
                     print "... " + txt
                     system(txt)
+					
             if i == 0:
                 txt = "cdo cat eca_sdii_1.nc eca_sdii_2.nc eca_sdii_3.nc eca_sdii_4.nc eca_sdii_5.nc eca_sdii_6.nc " \
                       "eca_sdii_7.nc eca_sdii_8.nc eca_sdii_9.nc eca_sdii_10.nc eca_sdii_11.nc eca_sdii_12.nc junkmon.nc"
@@ -408,7 +469,8 @@ def sdii(fname='', styr=0, enyr=0, model=''):
                 txt = "mv junkmon_tmp.nc junkmon.nc"
                 print "... " + txt
                 system(txt)
-            print "Done with months, now doing annual\n"
+            
+			print "Done with months, now doing annual\n"
             if i == 0:
                 txt = "cdo -m 1e+20 eca_sdii " + fn + " " + ofall
                 system(txt)
@@ -417,7 +479,58 @@ def sdii(fname='', styr=0, enyr=0, model=''):
                 system(txt)
                 txt = "cdo cat junk_year.nc " + ofall
                 system(txt)
-         # modify variable name and other attributes
+				
+				
+			print "Done with annual, now doing seasonal\n"
+			
+			for k in [1, 2, 3, 4]:
+			
+				if i == 0 and k == 1:
+					
+					fx = " -selmon,1,2 " + fn
+					txt = "cdo -m 1e+20" + fx + " selseas_1.nc"
+					print "..." + txt
+					system(txt)
+					txt = "cdo -m 1e+20 eca_sdii selseas_1.nc " + ofallsns
+					print "... " + txt
+					system(txt)
+					
+				else if k = 1:
+
+					fnp = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(y-1) + ".nc"
+					fx = " -selmon,12 " + fnp
+					txt = "cdo -m 1e+20" + fx + " selseas_1a.nc"
+					fx = " -selmon,1,2 " + fn
+					txt = "cdo -m 1e+20" + fx + " selseas_1b.nc"
+					print "..." + txt
+					system(txt)
+					txt = "cdo cat selseas_1a.nc selseas_1b.nc selseas_1.nc "
+					print "... " + txt
+					system(txt)		
+					txt = "cdo -m 1e+20 eca_sdii selseas_1.nc junk_sns.nc"
+					print "... " + txt
+					system(txt)
+					txt = "cdo cat junk_sns.nc " + ofallsns
+					system(txt)
+				
+				else:
+					
+					fx = " -selmon," + sDicnmon[k] + " " + fn
+					txt = "cdo -m 1e+20" + fx + " selseas_" + str(k) + ".nc"
+					print "..." + txt
+					system(txt)
+					txt = "cdo -m 1e+20 eca_sdii selseas_" + str(k) + ".nc junk_sns.nc"
+					print "... " + txt
+					system(txt)
+					txt = "cdo cat junk_sns.nc " + ofallsns
+					system(txt)
+			
+				txt = "rm selseas_*.nc selseas_1a.nc selseas_1b.nc"
+                print "... " + txt
+                system(txt)
+			
+        
+		# modify variable name and other attributes
         txt = "mv junkmon.nc " + ofallmon
         print "\n... " + txt
         system(txt)
@@ -427,9 +540,13 @@ def sdii(fname='', styr=0, enyr=0, model=''):
         system(txtcmd)
         txtcmd = "ncatted -h -a history,global,o,c,'"+txthist + "' " + ofall
         system(txtcmd)
+		txtcmd = "ncatted -h -a history,global,o,c,'"+txthist + "' " + ofallsns
+        system(txtcmd)
         txtcmd = "ncatted -h -a institution,global,c,c,'"+txtinst + "' " + ofallmon
         system(txtcmd)
         txtcmd = "ncatted -h -a institution,global,c,c,'"+txtinst + "' " + ofall
+        system(txtcmd)
+		txtcmd = "ncatted -h -a institution,global,c,c,'"+txtinst + "' " + ofallsns
         system(txtcmd)
         #new variable name created by CDO:
         txtnewvar = "simple_daily_intensitiy_index_per_time_period"
@@ -437,12 +554,18 @@ def sdii(fname='', styr=0, enyr=0, model=''):
         system(txtcmd)
         txtcmd = "ncrename -h -v "+txtnewvar + ",sdii " + ofall
         system(txtcmd)
-        txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
+		txtcmd = "ncrename -h -v "+txtnewvar + ",sdii " + ofallsns
+        system(txtcmd)
+		txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
         print "... " + txtmvmon
         system(txtmvmon)
         txtmv = "mv %s %s" % (ofall, ofallr)
         print "... " + txtmv
         system(txtmv)
+		txtmvsns = "mv %s %s" % (ofallsns, ofallsnsr)
+        print "... " + txtmvsns
+        system(txtmvsns)
+		
         return ofall
     else:
         print "\n... nothing to do, %s exist!\n" % ofall

@@ -8,7 +8,7 @@
 import arcgisscripting, os, sys, string,glob, shutil
 gp = arcgisscripting.create(9.3)
 
-# python Cut_ensemble_gcm_std_changes.py T:\gcm\cmip5\downscaled S:\admin_boundaries\grid_files\npl_adm\npl0 D:\cenavarro\csa_profiles\npl\by_model rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
+# python 04-Cut_ensemble_gcm_std_changes.py T:\gcm\cmip5\downscaled S:\admin_boundaries\grid_files\vnm_adm\npl0 D:\cenavarro\csa_profiles\vnm\by_model rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
 # "npl", "zmb", "moz", "pak", "btn", "bgd", "ben", "gmb", "civ", "phl"
 
 # Arguments

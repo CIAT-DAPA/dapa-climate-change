@@ -1,3 +1,4 @@
+# This version includes other indices for WOCAT/Climate-Wizard rest API development
 #!/usr/local/cdat5.2/bin/python
 
 """Module for computing temperature extreme stats mostly using CDO utilities"""
@@ -106,14 +107,20 @@ def tavg(fname='', styr=0, enyr=0, model=''):
         system('mkdir ' + OUTROOT + "/" + model + "/")
     if not styr > 1899 and enyr < 2101 and (enyr > styr):
         raise 'incorrect args passed to tavg (%s, %d, %d, %s)' % (fname, styr, enyr, model)
-    nyrs = enyr - styr + 1
+    
+	sDic = {1:"TDJF", 2:"TMAM", 3:"TJJA", 4:"TSON"}
+	nyrs = enyr - styr + 1
     fn_nodir = split(fname, "/")[-1]
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
-    fn_nodirr = ((split(fname, "/")[-1]).replace('r1i1p1_', '')).replace('_day', '')
+    ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
+    
+	fn_nodirr = ((split(fname, "/")[-1]).replace('r1i1p1_', '')).replace('_day', '')
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
-    if not path.exists(ofallmonr):
+	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	
+	if not path.exists(ofallmonr):
         for i in range(nyrs):
             y = styr + i
             print "\n computing tavg for %s%s " % (path.basename(fname), y)
@@ -146,17 +153,40 @@ def tavg(fname='', styr=0, enyr=0, model=''):
         txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofallmon
         print txtcmd
         system(txtcmd)
-        # create yearly summary file
+        
+		# create yearly summary file
         txtcmd = "cdo -m 1e+20  yearavg " + ofallmon + " " + ofall
         print txtcmd
         system(txtcmd)
-        txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
+		
+		#Moving outputs
+		txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
         print txtmvmon
         system(txtmvmon)
         txtmv = "mv %s %s" % (ofall, ofallr)
         print txtmv
         system(txtmv)
         return ofall
+		
+		# create seasonaly summary file
+        txtcmd = "cdo -m 1e+20  seasavg " + ofallmon + " " + ofallsns
+        print txtcmd
+        system(txtcmd)
+		
+		# select each season
+		for s in sDic:
+			ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+			ofallsnsr_i = OUTROOT + "/" + model + "/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
+			txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
+			print txtcmd
+			
+			#Moving outputs
+			system(txtcmd)
+			txtmv = "mv %s %s" % (ofallsns_i, ofallsnsr_i)
+			print txtmv
+			system(txtmv)
+			return ofall
+		
     else:
         print "\n... nothing to do, %s exist!\n" % ofallmon
 
@@ -958,8 +988,8 @@ def tavg_seasons(fname='', styr=0, enyr=0, model=''):
 	ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     fn_nodirr = ((split(fname, "/")[-1]).replace('r1i1p1_', '')).replace('_day', '')
 	ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    fn_nodirs = ((split(fname, "/")[-1]).replace('tas_day', 'TSSN')).replace('_r1i1p1', '')
-	ofallr = OUTROOT + "/" + model + "/" + fn_nodirs + str(styr) + "-" + str(enyr) + ".nc"
+    
+
 	
     if not path.exists(ofallmonr):
         for i in range(nyrs):

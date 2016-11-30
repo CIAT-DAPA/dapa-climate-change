@@ -8,7 +8,7 @@
 import arcgisscripting, os, sys, string,glob, shutil
 gp = arcgisscripting.create(9.3)
 
-# python Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files D:\CIAT\climate_change\CSA_Profiles rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
+# python 02-Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files D:\CIAT\climate_change\CSA_Profiles rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
 
 
 # Arguments
@@ -53,14 +53,15 @@ else:
 
 worldclim = "S:\observed\gridded_products\worldclim\Global_"+resol	
 
-
 countrylist = "tza", "npl", "zmb", "moz", "pak", "btn", "bgd", "ben", "gmb", "civ", "phl"
 
 for country in countrylist:
 
+	# country = "vnm"
+
 	admdir_ctr = admdir + "\\" + country + "_adm\\" + country + "0"
 	dirout_ctr = dirout + "\\" + country
-	
+
 	for rcp in rcpList:		
 		for period in periodlist:
 
@@ -167,4 +168,4 @@ for country in countrylist:
 							
 				print '...done',var
 							
-	gp.AddMessage("\n \t ====> DONE!! <====")  
+gp.AddMessage("\n \t ====> DONE!! <====")  

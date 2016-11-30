@@ -10,7 +10,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractSRTM_hill.py <srtm> <shpdir> <dirout>"
-	print "   - ex: python ExtractSRTM_hill.py S:\observed\gridded_products\srtm\Altitude_30s\alt D:\CIAT\_tools\AdminBoundaries\SHP_files D:\CIAT\climate_change\csa_profiles"
+	print "   - ex: python 01-ExtractSRTM_hill.py S:\observed\gridded_products\srtm\Altitude_30s\alt D:\CIAT\_tools\AdminBoundaries\SHP_files D:\CIAT\climate_change\csa_profiles"
 	sys.exit(1)
 
 # Arguments
@@ -38,7 +38,7 @@ for country in countrylist:
 
 	# Extract by mask function
 	gp.ExtractByMask_sa(inraster, shpdir + "\\" + country + "_adm\\" + country + "0.shp", diroutraster + "\\srtm")
-	print "\t", "srtm extracted"
+	print "\t", country, "srtm extracted"
 
 	# Process: Hillshade
 	gp.Hillshade_sa(diroutraster + "\\srtm", diroutraster + "\\hillshade", "325", "50", "NO_SHADOWS", "0.5")
