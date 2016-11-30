@@ -117,7 +117,7 @@ def ptot(fname='', styr=0, enyr=0, model=''):
         txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
         print txtmvmon
         system(txtmvmon)
-        txtmv = "mv %s %s" % (ofall, ofallr)
+        # txtmv = "mv %s %s" % (ofall, ofallr)
         print txtmv
         system(txtmv)
         return ofall
