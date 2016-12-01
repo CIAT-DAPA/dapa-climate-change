@@ -74,10 +74,12 @@ for (index in indices){
       pos<-which(!file.exists(paste0(dirbase,"/",gcms,"/",nclist)))
       nclist<-nclist[pos]
       gcmlist<-gcms[pos]
-      checkExist=c(checkExist,nclist)
+      #checkExist=c(checkExist,nclist)
+      n=length(gcmlist)
+      checkExist=rbind(checkExist,cbind(index=rep(index,n),rcp=rep(scenario,n),gcmlist)) 
   }
 }
-
+write.csv(checkExist, paste0(dirbase, "/faltante.csv"), row.names = F)
 
 
 

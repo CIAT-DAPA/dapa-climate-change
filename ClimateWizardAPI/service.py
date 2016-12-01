@@ -78,13 +78,14 @@ def service():
 		factor=0
 		
 	fileName = request.query.index+"_BCSD_"+request.query.scenario+"_"+wgcm
-	folderModels = "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats_tiff/"
+	# folderModels = "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats_tiff/"
+	folderModels = "/media/camilo/Data/camilo/proyectos/WOCAT/"
 	folder = folderModels+wgcm+"/"
 	allfiles = find(fileName+"*", folder)
 	baselineAvg = 0
 	if request.query.baseline:
 		wbaseline = request.query.baseline.split("-")
-		if (int(wbaseline[1]) - int(wbaseline[0])) < 20 :
+		if (int(wbaseline[1]) - int(wbaseline[0])) < 19 :
 			return {"error":"Baseline range must be equal or greater than 20 years"}
 		elif request.query.scenario == "historical":
 			return {"error":"Scenario must be different to historical"}
@@ -127,7 +128,7 @@ def service():
 						output_item = {'date' : int(band+startDate-1) , 'value' : ((float(intval[0])/100)+factor)-baselineAvg}
 						json_output['values'].append(output_item)
 			if avg != 0 and wavg:
-				avg = (avg / (int(wrange[1]) - int(wrange[0]) + 1)) - baselineAvg
+				avg = (avg / (int(wrange[1]) - int(wrange[0]) + 1)) - baselineAvg +factor
 				output_item = {'date' : 'avg_'+wrange[0]+"-"+wrange[1] , 'value' : str(avg)}
 				json_output['values'].append(output_item)
 			elif avg == 0 and wavg:
@@ -147,3 +148,5 @@ def service():
 			return json_output
 	else :
 		return {"error":"Data not found"}
+
+run(host='0.0.0.0', port=8080, debug=True)
