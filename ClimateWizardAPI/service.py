@@ -127,7 +127,7 @@ def service():
 						output_item = {'date' : int(band+startDate-1) , 'value' : ((float(intval[0])/100)+factor)-baselineAvg}
 						json_output['values'].append(output_item)
 			if avg != 0 and wavg:
-				avg = (avg / (int(wrange[1]) - int(wrange[0]) + 1)) - baselineAvg
+				avg = (avg / (int(wrange[1]) - int(wrange[0]) + 1)) - baselineAvg +factor
 				output_item = {'date' : 'avg_'+wrange[0]+"-"+wrange[1] , 'value' : str(avg)}
 				json_output['values'].append(output_item)
 			elif avg == 0 and wavg:
