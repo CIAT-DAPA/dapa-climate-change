@@ -84,7 +84,7 @@ def service():
 	baselineAvg = 0
 	if request.query.baseline:
 		wbaseline = request.query.baseline.split("-")
-		if (int(wbaseline[1]) - int(wbaseline[0])) < 20 :
+		if (int(wbaseline[1]) - int(wbaseline[0])) < 19 :
 			return {"error":"Baseline range must be equal or greater than 20 years"}
 		elif request.query.scenario == "historical":
 			return {"error":"Scenario must be different to historical"}
