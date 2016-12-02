@@ -69,14 +69,20 @@ def ptot(fname='', styr=0, enyr=0, model=''):
         raise 'incorrect args passed to PTOT %s %d %d' % (fname, styr, enyr, model)
     nyrs = enyr - styr + 1
     sDic = {1:"PDJF", 2:"PMAM", 3:"PJJA", 4:"PSON"}
+	
 	fn_nodir = split(fname, "/")[-1]
-    ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
+	ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofallsns = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofallqua = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".quarter.nc"
+	ofallqwet = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".qwettest.nc"
+	
 	fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'PTOT')).replace('_r1i1p1', '')
+	fnw_nodirr = fn_nodirr.replace('PTOT', 'PWET')
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr+str(styr) + "-" + str(enyr) + ".nc"
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
 	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofallqwetr = OUTROOT + "/" + model + "/" + fnw_nodirr + str(styr) + "-" + str(enyr) + ".qwettest.nc"
 	
     if not path.exists(ofallmonr):
         for i in range(nyrs):
@@ -118,34 +124,67 @@ def ptot(fname='', styr=0, enyr=0, model=''):
         txtcmd = "cdo -m 1e+20 yearsum " + ofallmon + " " + ofall
         print txtcmd
         system(txtcmd)
-        txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
-        print txtmvmon
-        system(txtmvmon)
-        txtmv = "mv %s %s" % (ofall, ofallr)
-        print txtmv
-        system(txtmv)
-        return ofall
-		
-		
+		return ofall
 		# create seasonaly summary file
         txtcmd = "cdo -m 1e+20  seassum " + ofallmon + " " + ofallsns
         print txtcmd
         system(txtcmd)
+		# create files for each season separately
+		for s in sDic:
+			ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+			txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
+			print txtcmd
+		# create files for each month separately
+		for i in range(1, 12 + 1):
+			ofallmon_i = OUTTEMP + "/" + model + "/junk/" + "pr" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
+			txtcmd = "cdo -m 1e+20 selmon," + str(i) + " " + ofallmon + " " + ofallmon_i
+			print txtcmd
+			system(txtcmd)
+		# create quarters files
+		for i in range(1, 10 + 1):
+			ofallqua_i = OUTTEMP + "/" + model + "/junk/" + "prq" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
+			txtcmd = "cdo -m 1e+20 -selmon," + str(i) + "," + str(i+1) + "," + str(i+2) + " -monsum " + ofallmon + " " + ofallqua_i
+			print txtcmd
+			system(txtcmd)
+			if i == 0:
+		        txtmv = "mv "+ ofallqua_i + " " + ofallqua
+                system(txtmv)
+            else:
+				txt = "cdo -b F32 cat " + ofallqua_i + " " + ofallqua
+                print txt
+                system(txt)
 		
-		# select each season
+		# Caculating the wettest quarter
+		txt = "cdo -b timsum " + ofallqua + " " + ofallqwet
+        print txt
+        system(txt)
+		ofallqua
+		
+		# Moving yearly file
+		txtmv = "mv %s %s" % (ofall, ofallr)
+        print txtmv
+        system(txtmv)
+        return ofall
+		# Moving seasonaly files outputs
 		for s in sDic:
 			ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
 			ofallsnsr_i = OUTROOT + "/" + model + "/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
-			txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
-			print txtcmd
-			
-			#Moving outputs
 			system(txtcmd)
 			txtmv = "mv %s %s" % (ofallsns_i, ofallsnsr_i)
 			print txtmv
 			system(txtmv)
-			return ofall
-		
+		# Moving monthly files outputs
+		for i in range(1, 12 + 1):
+			ofallmon_i = OUTTEMP + "/" + model + "/junk/" + "pr" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
+			ofallmonr_i = OUTROOT + "/" + model + "/" + "pr" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
+			txtmvmon = "mv %s %s" % (ofallmon_i, ofallmonr_i)
+			print txtmvmon
+			system(txtmvmon)
+		# Moving wettest quarter file
+		txtmv = "mv %s %s" % (ofallqwet, ofallqwetr)
+        print txtmv
+        system(txtmv)	
+			
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
 
