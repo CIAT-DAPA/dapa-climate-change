@@ -114,11 +114,13 @@ def tavg(fname='', styr=0, enyr=0, model=''):
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
     ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
 	ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
-    
+    ofallqua = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".quarter.nc"
+	
 	fn_nodirr = ((split(fname, "/")[-1]).replace('r1i1p1_', '')).replace('_day', '')
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
 	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofallquar = OUTROOT + "/" + model + "/" + fnw_nodirr + str(styr) + "-" + str(enyr) + ".quarter.nc"
 	
 	if not path.exists(ofallmonr):
         for i in range(nyrs):
@@ -145,6 +147,23 @@ def tavg(fname='', styr=0, enyr=0, model=''):
                 txt = "rm -rf junk_mon.nc " + ofallmon + " && mv junk_mon_cat.nc " + ofallmon
                 print txt
                 system(txt)
+			
+			if fn_nodir.split("_")[0] == "tas":
+
+				# create quarters files
+				for i in range(1, 10 + 1):
+					ofallqua_i = OUTTEMP + "/" + model + "/junk/tasq" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
+					txtcmd = "cdo -m 1e+20 -selmon," + str(i) + "," + str(i+1) + "," + str(i+2) + " -monmean " + ofallmon + " " + ofallqua_i
+					print txtcmd
+					system(txtcmd)
+					if i == 0:
+						txtmv = "mv "+ ofallqua_i + " " + ofallqua
+						system(txtmv)
+					else:
+						txt = "cdo -b F32 cat " + ofallqua_i + " " + ofallqua
+						print txt
+						system(txt)
+
         now = datetime.now()
         txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
         txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofallmon
@@ -186,6 +205,12 @@ def tavg(fname='', styr=0, enyr=0, model=''):
 			print txtmv
 			system(txtmv)
 			return ofall
+		
+		if fn_nodir.split("_")[0] == "tas":
+			# Moving quarter quarter file
+			txtmv = "mv %s %s" % (ofallqua, ofallquar)
+			print txtmv
+			system(txtmv)
 		
     else:
         print "\n... nothing to do, %s exist!\n" % ofallmon

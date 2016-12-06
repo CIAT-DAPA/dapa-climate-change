@@ -75,14 +75,16 @@ def ptot(fname='', styr=0, enyr=0, model=''):
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
 	ofallsns = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
 	ofallqua = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".quarter.nc"
-	ofallqwet = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".qwettest.nc"
+	# ofallqwet = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".qwettest.nc"
 	
 	fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'PTOT')).replace('_r1i1p1', '')
 	fnw_nodirr = fn_nodirr.replace('PTOT', 'PWET')
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr+str(styr) + "-" + str(enyr) + ".nc"
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
 	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
-	ofallqwetr = OUTROOT + "/" + model + "/" + fnw_nodirr + str(styr) + "-" + str(enyr) + ".qwettest.nc"
+	ofallquar = OUTROOT + "/" + model + "/" + fnw_nodirr + str(styr) + "-" + str(enyr) + ".quarter.nc"
+	# ofallqwetr = OUTROOT + "/" + model + "/" + fnw_nodirr + str(styr) + "-" + str(enyr) + ".qwettest.nc"
+	
 	
     if not path.exists(ofallmonr):
         for i in range(nyrs):
@@ -154,12 +156,12 @@ def ptot(fname='', styr=0, enyr=0, model=''):
                 print txt
                 system(txt)
 		
-		# Caculating the wettest quarter
-		txt = "cdo -b timsum " + ofallqua + " " + ofallqwet
-        print txt
-        system(txt)
-		ofallqua
-		
+		# # Caculating the wettest quarter
+		# txt = "cdo -b timsum " + ofallqua + " " + ofallqwet
+        # print txt
+        # system(txt)
+		# ofallqua
+
 		# Moving yearly file
 		txtmv = "mv %s %s" % (ofall, ofallr)
         print txtmv
@@ -180,10 +182,15 @@ def ptot(fname='', styr=0, enyr=0, model=''):
 			txtmvmon = "mv %s %s" % (ofallmon_i, ofallmonr_i)
 			print txtmvmon
 			system(txtmvmon)
-		# Moving wettest quarter file
-		txtmv = "mv %s %s" % (ofallqwet, ofallqwetr)
+		# Moving quarter quarter file
+		txtmv = "mv %s %s" % (ofallqua, ofallquar)
         print txtmv
         system(txtmv)	
+		
+		# # Moving wettest quarter file
+		# txtmv = "mv %s %s" % (ofallqwet, ofallqwetr)
+        # print txtmv
+        # system(txtmv)	
 			
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
@@ -267,12 +274,14 @@ def r02(fname='', styr=0, enyr=0, model=''):
     fn_nodir = split(fname,"/")[-1]
     ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+    ofallsns = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofallqua = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".quarter.nc"
 	
 	fn_nodirr = ((split(fname, "/")[-1]).replace('prmm_day', 'R02')).replace('_r1i1p1', '')
     ofallr = OUTROOT + "/" + model + "/" + fn_nodirr+str(styr) + "-" + str(enyr) + ".nc"
     ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
 	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	ofallquar = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".quarter.nc"
 	
     if not path.exists(ofallmonr):
         for i in range(nyrs):
@@ -323,6 +332,21 @@ def r02(fname='', styr=0, enyr=0, model=''):
                 txt = "mv junkmon_tmp.nc junkmon.nc"
                 print "... " + txt
                 system(txt)
+			
+			# create quarters files
+			for i in range(1, 10 + 1):
+				ofallqua_i = OUTTEMP + "/" + model + "/junk/" + "r02q" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
+				txtcmd = "cdo -m 1e+20 -selmon," + str(i) + "," + str(i+1) + "," + str(i+2) + " -monsum " + ofallmon + " " + ofallqua_i
+				print txtcmd
+				system(txtcmd)
+				if i == 0:
+					txtmv = "mv "+ ofallqua_i + " " + ofallqua
+					system(txtmv)
+				else:
+					txt = "cdo -b F32 cat " + ofallqua_i + " " + ofallqua
+					print txt
+					system(txt)
+			
         # modify variable name and other attributes
         txt = "mv junkmon.nc " + ofallmon
         print "\n... " + txt
@@ -337,7 +361,8 @@ def r02(fname='', styr=0, enyr=0, model=''):
         txtnewvar = "precipitation_days_index_per_time_period"
         txtcmd = "ncrename -h -v " + txtnewvar + ",pd02 " + ofallmon
         system(txtcmd)
-        # create yearly summary file
+        
+		# create yearly summary file
         txtcmd = "cdo -m 1e+20 yearsum " + ofallmon + " " + ofall
         print "... " + txtcmd
         system(txtcmd)
@@ -367,6 +392,11 @@ def r02(fname='', styr=0, enyr=0, model=''):
 			print txtmv
 			system(txtmv)
 			return ofall
+		
+		# Moving quarter quarter file
+		txtmv = "mv %s %s" % (ofallqua, ofallquar)
+        print txtmv
+        system(txtmv)
 		
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
