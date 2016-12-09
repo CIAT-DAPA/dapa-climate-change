@@ -516,7 +516,7 @@ read.overview2calc.appDay <- function(crop) {
       return(values_of_stress)
     }
     
-    if(crop == "BEAN"){
+    if(crop == "BEAN"| crop=="SOY"){
       
       # Read only the row corresponding to first flowering date per year
       application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
@@ -526,29 +526,6 @@ read.overview2calc.appDay <- function(crop) {
       application_date <- data.frame(crop = crop, year=year, day=application_date)
       
       return(application_date)
-      
-    }
-    
-    
-    if(crop == "SOY"){
-      
-      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
-      
-      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
-      value_stress1 <- scan(paste(data), what = "character", skip = stress[year] + 8, nlines = 1, quiet = T) 
-      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T) 
-      ## Se debe evaluar los puntos que se desean extraer
-      ## Stress durante el llenado vital para los rendimientos
-      ## value_stress1[15]
-      ## value_stress1[17]
-      ## Stress que considera al parecer el promedio de todas las etapas
-      ## value_stress_all[14]
-      ## value_stress_all[16]
-      values_of_stress <- data.frame(value_stress1[13], value_stress1[15], value_stress_all[13], value_stress_all[15])
-      
-      colnames(values_of_stress) <- col.names
-      
-      return(values_of_stress)
       
     }
     
