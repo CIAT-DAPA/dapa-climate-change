@@ -7,6 +7,7 @@
                          culname=c("Seri82BA","TajanBA","DonErnestoBA","Gerek79BA","HalconsnaBA","BrigadierBA"))
   cultivar <- 1
   run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+  sys_type <- "riego" #riego, secano
   ##############################################################################
   ##############################################################################
   
@@ -18,8 +19,9 @@
   load(paste0(path_project, "14-ObjectsR/Soil.RData"))
   rm(list=setdiff(ls(), c("Extraer.SoilDSSAT", "values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile"
                           , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position",
-                          "scenario","cul_list","cultivar","run_type")))
+                          "scenario","cul_list","cultivar","run_type","sys_type")))
   load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Wheat_riego.RDat"))
+  assign("crop_mgmt", get(paste("crop_",sys_type,sep="")))
   
   #Cargar funciones
   source(paste0(path_functions, "main_functions.R"))     ## Cargar funciones principales
@@ -30,10 +32,10 @@
   
   #Crear data.frame de aplicaciones de fertilizante
   if (run_type == "diagnostic") {
-    day0 <-  crop_riego$N.app.0
+    day0 <-  crop_mgmt$N.app.0
     day_aplication0 <- rep(0, length(day0))
     
-    day30 <- crop_riego$N.app.30
+    day30 <- crop_mgmt$N.app.30
     day_aplication30 <- rep(30, length(day30))
     
     amount <- data.frame(day0, day30)
@@ -49,17 +51,18 @@
   ##Configuracion Archivo experimental
   data_xfile <- list()
   data_xfile$run_type <- run_type
-  data_xfile$crop <- "WHEAT" 
+  data_xfile$crop <- "WHEAT"
   data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ WHEAT LAC"
   data_xfile$name <- "./JBID.WHX" 
   data_xfile$CR <- "WH"  ## Variable importante 
   data_xfile$INGENO <- rep(paste(cul_list$dsid[which(cul_list$CID == cultivar)]), length(crop_riego[, "variedad.1"]))
   data_xfile$CNAME <- "WHNA"
-  data_xfile$initation <- crop_riego$mirca.start
-  data_xfile$final <- crop_riego$mirca.end
-  data_xfile$system <- "irrigation"  ## Irrigation or rainfed, if is irrigation then automatic irrigation
+  data_xfile$initation <- crop_mgmt$mirca.start
+  data_xfile$final <- crop_mgmt$mirca.end
+  if (sys_type == "riego") {data_xfile$system <- "irrigation"} ## Irrigation or rainfed, if is irrigation then automatic irrigation
+  if (sys_type == "secano") {data_xfile$system <- "rainfed"} ## Irrigation or rainfed, if is irrigation then automatic irrigation
   data_xfile$year <- years[1]
-  data_xfile$nitrogen_aplication <- list(amount = amount, day_app = day_app)
+  data_xfile$nitrogen_aplication <- list(amount = amount, day_app = day_app) #need to take care of
   data_xfile$smodel <- "WHCER045"     ##  Fin Model
   data_xfile$bname <- "DSSBatch.v45"
   data_xfile$PPOP <- 200   ## Plant population at planting
@@ -91,10 +94,10 @@
   climate_data$Tmax <- Tmax     ## [[year]][pixel, ]
   climate_data$Tmin <- Tmin     ## [[year]][pixel, ]
   climate_data$Prec <- Prec       ## [[year]][pixel, ]
-  climate_data$lat <- crop_riego[,"y"]        ## You can include a vector of latitude
-  climate_data$long <- crop_riego[, "x"]         ## You can include a vector of longitude
+  climate_data$lat <- crop_mgmt[,"y"]        ## You can include a vector of latitude
+  climate_data$long <- crop_mgmt[, "x"]         ## You can include a vector of longitude
   climate_data$wfd <- "wfd"       ## Switch between "wfd" and "model"
-  climate_data$id <- crop_riego[, "Coincidencias"]
+  climate_data$id <- crop_mgmt[, "Coincidencias"]
   
   ## Entradas para las corridas de DSSAT
   input_data <- list()
@@ -105,36 +108,41 @@
 	dir_dssat <- "~/csm45_1_23_bin_ifort/"
 	dir_base <- "~/Scratch"
   
-	#run dssat for one pixel
-  run_dssat(input=input_data, pixel=1, dir_dssat, dir_base)
+	#run dssat for one pixel (test)
+  #run_dssat(input=input_data, pixel=1, dir_dssat, dir_base)
   
   ## librerias para el trabajo en paralelo
   library(foreach)
   library(doMC)
   
-    ##  procesadores en su servidor
+  ##procesadores en su servidor
   registerDoMC(8)
-  Run <- foreach(i = 1:dim(crop_riego)[1]) %dopar% {
-    
+  Run <- foreach(i = 1:dim(crop_mgmt)[1]) %dopar% {
     run_dssat(input_data, i, dir_dssat, dir_base)
-    
   }
-
-   tipo <- "Riego_"
-  cultivo <- "Trigo_"
-  ##cultivar <- "KauzBA_"
-  cultivar <- "ChinaBBA_"
-##save(Run, file = paste("/home/jeisonmesa/Proyectos/BID/bid-cc-agricultural-sector/","_", cultivo,tipo,modelos[i],"_IC_.RDat",sep=""))
-save(Run, file = paste("/home/jmesa/", "_", cultivo, tipo, cultivar, modelos[i], "_",  ".RDat",sep=""))
-save(Run, file = paste("/home/jmesa/","_", cultivo, tipo, cultivar, 'WFD', ".RDat", sep = ""))
-
-
   
-
+  #create general output directory
+  if (!file.exists(paste("~/bid_reruns/",run_type,sep=""))) {
+    dir.create(paste("~/bid_reruns/",run_type,sep=""),recursive=T)
+  }
   
-
-
-
+  #save file
+  if (scenario == "historical") {
+    save(Run, file = paste("~/bid_reruns/",run_type,"/", data_xfile$crop,"_",data_xfile$system,"_", 
+                           paste(cul_list$culname[which(cul_list$CID == cultivar)]), '_WFD', 
+                           ".RDat", sep = ""))
+  } else {
+    save(Run, file = paste("~/bid_reruns/",run_type,"/", data_xfile$crop, "_", data_xfile$system, "_", 
+                           paste(cul_list$culname[which(cul_list$CID == cultivar)]), "_", 
+                           modelos[i], "_",  ".RDat",sep=""))
+  }
+  
+  
+  ##############################################################################
+  ##############################################################################
+  # rainfed run
+  
+  
   ############### Parallel DSSAT ############################
   ########### Load functions necessary ###############
   # path_functions <- "/home/jeisonmesa/Proyectos/BID/DSSAT-R/"
