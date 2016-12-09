@@ -430,48 +430,36 @@ read.overview <- function(crop) {
 
 read.NappDay <- function(crop) {
   # SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES
-  
   if(crop == "WHEAT") {
     data <- 'Overview.OUT'
     overview <- readLines(paste(data))
-    stress <- suppressMessages(grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview))
-    stress_by_year <- 1:length(stress)
+    Napp <- suppressMessages(grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview))
+    Napp_by_year <- 1:length(Napp)
   } else{
     data <- 'OVERVIEW.OUT'
     overview <- readLines(paste(data))
-    stress <- grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview)
-    stress_by_year <- 1:length(stress)
+    Napp <- grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview)
+    Napp_by_year <- 1:length(Napp)
     error <- grep("SIMULATION ABORTED", overview)
     
     if(length(error)>0){
-      stress <- c(stress, error)
-      stress <- sort(stress)
-      stress_by_year <- 1:length(stress)
+      Napp <- c(Napp, error)
+      Napp <- sort(Napp)
+      Napp_by_year <- 1:length(Napp)
     }
-    
   }
   
+  #extract N application date
   extract_application_date <- function(crop, year){
-    
-    if(crop == "WHEAT"){
-      
-      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
-      
-      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
-      value_stress1 <- invisible(scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) )
-      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 13, nlines = 1, quiet = T) 
-      ## Se debe evaluar los puntos que se desean extraer
-      ## Stress durante el llenado vital para los rendimientos
-      ## value_stress1[15]
-      ## value_stress1[17]
-      ## Stress que considera al parecer el promedio de todas las etapas
-      ## value_stress_all[14]
-      ## value_stress_all[16]
-      values_of_stress <- data.frame(value_stress1[15], value_stress1[17], value_stress_all[14], value_stress_all[16])
-      colnames(values_of_stress) <- col.names
-      
-      return(values_of_stress)
-      
+    if (crop == "WHEAT") {
+      col.names <- c("YEARDOY","day","stage")
+      #read entire row where the "End Veg" stage is located
+      application_date <- scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) 
+      #create data frame with what i need from that row
+      application_date <- data.frame(as.numeric(application_date[1]), as.numeric(application_date[4]), paste(application_date[6:7],collapse="_"))
+      colnames(application_date) <- col.names
+      #return quantities
+      return(application_date)
     }
     
     ## Ver el archivo overview para identificar cuales son los valores a extraer (revisar la ppt en la carpeta bid)
@@ -491,7 +479,6 @@ read.NappDay <- function(crop) {
         }
         
       }
-      
       
       ## Se debe evaluar los puntos que se desean extraer
       ## Stress durante el llenado vital para los rendimientos
@@ -517,31 +504,30 @@ read.NappDay <- function(crop) {
       
       return(application_date)
     }
-
+    
+    #maize
     if(crop == "MAIZE"){
-      
       # Read only the row corresponding to first flowering date per year
       application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
       # Just capture the day of year when first flowering 
       application_date <- as.numeric(application_date[3])
       # Create a data.frame with crop, year and application day
       application_date <- data.frame(crop = crop, year=year, day=application_date)
-      
       return(application_date)
-      
     }
-    
-    
   }
   
-  y <- lapply(1:length(stress), function(i) suppressMessages(extract_application_date(crop, i)))
+  #get data for all years
+  y <- lapply(1:length(Napp), function(i) suppressMessages(extract_application_date(crop, i)))
   y <- do.call("rbind", y)
   app_day <- round(mean(y$day, na.rm = T))
   
+  #return value
   return(app_day)
-  
 }
-read.overview2calc.appDay(crop = "BEAN") # To test
+#read.NappDay(crop = "BEAN") # To test
+#read.NappDay(crop = "WHEAT") # To test
+
 
 ##############################################################################
 ## Cambiar fechas de Futuro 1969 == 2021
