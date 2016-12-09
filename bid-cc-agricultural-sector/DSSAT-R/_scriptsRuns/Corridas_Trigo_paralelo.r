@@ -9,30 +9,24 @@ scenario <- "historical" #historical, future
 #cultivar list for wheat (based on CIMMYT Mega-environment work)
 cul_list <- data.frame(CID=1:6,dsid=c("IB0010","IB0013","IB0016","IB0028","IB0022","IB0026"),
                        culname=c("Seri82BA","TajanBA","DonErnestoBA","Gerek79BA","HalconsnaBA","BrigadierBA"))
-#cultivar <- 1
+
+#diagnostic run is only performed for irrigated systems, for historical climate
+run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 #cropping system
-sys_type <- "riego" #riego, secano ##do not run
+sys_type <- "riego" #riego, secano
+
 
 #GCMs
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 gcm_i <- 10 #which GCM will be run
 
-#diagnostic run is only performed for irrigated systems
-run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 ##############################################################################
 ##############################################################################
-
-## librerias para el trabajo en paralelo
-library(foreach)
-library(doMC)
-
-##procesadores en su servidor
-registerDoMC(8)
 
 #iterate cultivars
-foreach(cultivar = 1:nrow(cul_list)) %do% {
+for (cultivar in 1:nrow(cul_list)) {
   #Paths para scripts de funciones y workspace
   path_functions <- "~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/DSSAT-R/"
   path_project <- "/mnt/workspace_cluster_3/bid-cc-agricultural-sector/"
@@ -129,10 +123,17 @@ foreach(cultivar = 1:nrow(cul_list)) %do% {
   
   #run dssat for one pixel (test)
   #run_dssat(input=input_data, pixel=1, dir_dssat, dir_base)
+  
+  ## librerias para el trabajo en paralelo
+  library(foreach)
+  library(doMC)
+  
+  ##procesadores en su servidor
+  registerDoMC(8)
+  
   Run <- foreach(i = 1:dim(crop_mgmt)[1]) %dopar% {
     run_dssat(input_data, i, dir_dssat, dir_base)
   }
-  
   
   #create general output directory
   if (!file.exists(paste("~/bid_reruns/",run_type,sep=""))) {
