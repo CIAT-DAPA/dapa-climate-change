@@ -220,6 +220,9 @@ make_soilfile(in_data, wise[59933:length(wise)], getwd())
 make_soilfile2 <- function(in_data, i, data, path){
   
   # Header construction
+
+  # in_data, 1, Soil_Generic[Generic_Position:length(wise)], path
+  
   y <- data
   y <- y[5]
   write(y, file="x.txt")
@@ -266,9 +269,10 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
   profileMatrix <- profileMatrix
   posicion <- which(profileMatrix[,'CELL30M'] == position)
   
+  
   if(length(posicion) == 0){
     
-    Wise_Position <- Cod_Ref_and_Position_Generic[11, 2]
+    Wise_Position <- 239 # According to HC_GEN0014 soil profile by Myles recommendation
     return(make_soilfile(in_data, Soil_Generic[Wise_Position:length(wise)], path))
     
   } else {
@@ -276,14 +280,38 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
     celdas_id_Wise <- profileMatrix[posicion,] ## Cells and percentage of soil File DSSAT 
     condicion <- match(celdas_id_Wise[,'SoilProfile'], Cod_Ref_and_Position[,'Cod_Ref']) ## Identify cells that accomplish the condition
     
-    if(length(condicion) > 0){
+    # Verify if exists some profiles of WISE and Generic
+    pos_value_missing <- which(is.na(condicion))
+    condicion <- as.numeric(na.omit(condicion))
+    condicion_2 <- match(celdas_id_Wise[pos_value_missing, 'SoilProfile'], Cod_Ref_and_Position_Generic[, 'Cod_Ref_Generic'])
+    if(length(condicion) > 0 && length(condicion_2) > 0){
       
-      if(length(condicion) == 1){
+      Wise_Position <- Cod_Ref_and_Position[which(Cod_Ref_and_Position[,'Cod_Ref'] == celdas_id_Wise[,'SoilProfile']),][1,2]
+      Generic_Position <- match(celdas_id_Wise[pos_value_missing, 'SoilProfile'], Cod_Ref_and_Position_Generic[, 'Cod_Ref_Generic'])
+      
+      # Wise soils
+      sink("SOIL.SOL")
+      for(i in 1:length(condicion)){
+        make_soilfile2(in_data, i, wise[Wise_Position:length(wise)], path)
         
-        Wise_Position <- Cod_Ref_and_Position[which(Cod_Ref_and_Position[,'Cod_Ref'] == celdas_id_Wise[,'SoilProfile']),]
-        return(make_soilfile(in_data, wise[Wise_Position[, 2]:length(wise)], path))
-        
-      } else {
+      }
+      
+      # Generic soils
+      for(j in 1:length(condicion_2)){
+        make_soilfile2(in_data, i+j, Soil_Generic[Cod_Ref_and_Position_Generic[Generic_Position,2]:length(wise)], path)              
+      }
+      sink()
+      
+    }
+    
+    if(length(condicion) == 1 && length(condicion_2)==0){
+      
+      Wise_Position <- Cod_Ref_and_Position[which(Cod_Ref_and_Position[,'Cod_Ref'] == celdas_id_Wise[,'SoilProfile']),]
+      return(make_soilfile(in_data, wise[Wise_Position[, 2]:length(wise)], path))
+      
+    } else {
+      
+      if(length(condicion) > 1 && length(condicion_2)==0){
         
         sink("SOIL.SOL")
         for(i in 1:length(condicion)){
@@ -297,17 +325,10 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
       
     }
     
-    if(length(condicion) == 0){
-      
-      Wise_Position <- 239 # According to HC_GEN0014 soil profile by Myles recommendation
-      # Wise_Position <- Cod_Ref_and_Position_Generic[which(Cod_Ref_and_Position_Generic[, 1] == paste(Ref_for_Soil)), 2]
-      return(make_soilfile(in_data, Soil_Generic[Wise_Position:length(wise)], path))
-      
-    }
-    
   }
   
 }
+
 
 Extraer.SoilDSSAT(Codigo_identificadorSoil = values[5], profileMatrix = profileMatrix, path = '/mnt/workspace_cluster_3/bid-cc-agricultural-sector/')
 

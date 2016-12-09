@@ -7,10 +7,17 @@ path_project <- "/mnt/workspace_cluster_3/bid-cc-agricultural-sector/"
 
 # Cargar data frame entradas para DSSAT
 
+# Cargar nuevo objeto de Suelo
 
-load(paste0(path_project, "14-ObjectsR/Soil.RData"))
+# load(paste0(path_project, "14-ObjectsR/Soil.RData"))
+# rm(list=setdiff(ls(), c("Extraer.SoilDSSAT", "values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile"
+#                         , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position")))
+# 
+
+load(paste0(path_project, "14-ObjectsR/Soil2.RData"))
 rm(list=setdiff(ls(), c("Extraer.SoilDSSAT", "values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile"
-                        , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position")))
+                        , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position", "profileMatrix")))
+
 
 
 load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Maize_riego.Rdat"))
@@ -67,10 +74,10 @@ data_xfile$PLDP <- 5
 
 #i <- 1
 
-gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[i],"/Futuro/")
-load(paste0(gcm, "Precipitation.RDat"))
-load(paste0(gcm, "Srad.Rdat"))
-load(paste0(gcm, "Temperatura_2.RDat"))
+# gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[i],"/Futuro/")
+# load(paste0(gcm, "Precipitation.RDat"))
+# load(paste0(gcm, "Srad.Rdat"))
+# load(paste0(gcm, "Temperatura_2.RDat"))
 
 # Climate Data Set for WFD or global model of climate change
 climate_data <- list()
