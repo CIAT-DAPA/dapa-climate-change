@@ -246,6 +246,9 @@ leap_year <- function(year) {
   
 }
 
+##############################################################################
+# Read stress data from OVERVIEW.OUT
+##############################################################################
 
 read.overview <- function(crop) {
   
@@ -421,7 +424,170 @@ read.overview <- function(crop) {
   
 }
 
+##############################################################################
+# Read application day data for fertilizer from OVERVIEW.OUT
+##############################################################################
+
+read.overview2calc.appDay <- function(crop) {
+  
+  # SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES
+  
+  if(crop == "WHEAT") {
+    data <- 'Overview.OUT'
+    overview <- readLines(paste(data))
+    stress <- suppressMessages(grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview))
+    stress_by_year <- 1:length(stress)
+    
+  } else{
+    
+    data <- 'OVERVIEW.OUT'
+    overview <- readLines(paste(data))
+    stress <- grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview)
+    stress_by_year <- 1:length(stress)
+    error <- grep("SIMULATION ABORTED", overview)
+    
+    
+    
+    if(length(error)>0){
+      
+      stress <- c(stress, error)
+      stress <- sort(stress)
+      stress_by_year <- 1:length(stress)
+      
+    }
+    
+    
+    
+  }
+  
+  extract_application_date <- function(crop, year){
+    
+    if(crop == "WHEAT"){
+      
+      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
+      
+      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
+      value_stress1 <- invisible(scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) )
+      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 13, nlines = 1, quiet = T) 
+      ## Se debe evaluar los puntos que se desean extraer
+      ## Stress durante el llenado vital para los rendimientos
+      ## value_stress1[15]
+      ## value_stress1[17]
+      ## Stress que considera al parecer el promedio de todas las etapas
+      ## value_stress_all[14]
+      ## value_stress_all[16]
+      values_of_stress <- data.frame(value_stress1[15], value_stress1[17], value_stress_all[14], value_stress_all[16])
+      colnames(values_of_stress) <- col.names
+      
+      return(values_of_stress)
+      
+    }
+    
+    ## Ver el archivo overview para identificar cuales son los valores a extraer (revisar la ppt en la carpeta bid)
+    if(crop == "RICE"){
+      
+      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
+      
+      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
+      value_stress1 <- scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) 
+      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 13, nlines = 1, quiet = T) 
+      
+      if(length(value_stress1) >0){
+        
+        if(value_stress1[1] != 'Panicl'){
+          value_stress1 <- NA
+          value_stress_all <- NA
+        }
+        
+      }
+      
+      
+      ## Se debe evaluar los puntos que se desean extraer
+      ## Stress durante el llenado vital para los rendimientos
+      ## value_stress1[15]
+      ## value_stress1[17]
+      ## Stress que considera al parecer el promedio de todas las etapas
+      ## value_stress_all[14]
+      ## value_stress_all[16]
+      values_of_stress <- data.frame(value_stress1[14], value_stress1[16], value_stress_all[13], value_stress_all[15])
+      # values_of_stress <- data.frame(apply(values_of_stress, 2, as.numeric)) 
+      colnames(values_of_stress) <- col.names
+      
+      return(values_of_stress)
+    }
+    
+    if(crop == "BEAN"){
+      
+      # Read only the row corresponding to first flowering date per year
+      application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
+      # Just capture the day of year when first flowering 
+      application_date <- as.numeric(application_date[3])
+      # Create a data.frame with crop, year and application day
+      application_date <- data.frame(crop = crop, year=year, day=application_date)
+      
+      return(application_date)
+      
+    }
+    
+    
+    if(crop == "SOY"){
+      
+      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
+      
+      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
+      value_stress1 <- scan(paste(data), what = "character", skip = stress[year] + 8, nlines = 1, quiet = T) 
+      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T) 
+      ## Se debe evaluar los puntos que se desean extraer
+      ## Stress durante el llenado vital para los rendimientos
+      ## value_stress1[15]
+      ## value_stress1[17]
+      ## Stress que considera al parecer el promedio de todas las etapas
+      ## value_stress_all[14]
+      ## value_stress_all[16]
+      values_of_stress <- data.frame(value_stress1[13], value_stress1[15], value_stress_all[13], value_stress_all[15])
+      
+      colnames(values_of_stress) <- col.names
+      
+      return(values_of_stress)
+      
+    }
+    
+    if(crop == "MAIZE"){
+      
+      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
+      
+      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
+      value_stress1 <- scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) 
+      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 13, nlines = 1, quiet = T) 
+      ## Se debe evaluar los puntos que se desean extraer
+      ## Stress durante el llenado vital para los rendimientos
+      ## value_stress1[15]
+      ## value_stress1[17]
+      ## Stress que considera al parecer el promedio de todas las etapas
+      ## value_stress_all[14]
+      ## value_stress_all[16]
+      values_of_stress <- data.frame(value_stress1[14], value_stress1[16], value_stress_all[13], value_stress_all[15])
+      colnames(values_of_stress) <- col.names
+      
+      return(values_of_stress)
+      
+    }
+    
+    
+  }
+  
+  y <- lapply(1:length(stress), function(i) suppressMessages(extract_application_date(crop, i)))
+  y <- do.call("rbind", y)
+  app_day <- round(mean(y$day, na.rm = T))
+  
+  return(app_day)
+  
+}
+read.overview2calc.appDay(crop = "BEAN") # To test
+
+##############################################################################
 ## Cambiar fechas de Futuro 1969 == 2021
+##############################################################################
 
 change_date_to_fut <- function(data){
 
