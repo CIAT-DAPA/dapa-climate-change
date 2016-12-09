@@ -1,5 +1,6 @@
 # This version includes other indices for WOCAT/Climate-Wizard rest API development
 #!/usr/local/cdat5.2/bin/python
+# v2 adds seasonal and quarters calculations for tavg function
 
 """Module for computing temperature extreme stats mostly using CDO utilities"""
 
@@ -17,16 +18,16 @@ setNetcdfDeflateLevelFlag(0)
 # necesario para temperaturas promedio calculadas
 RootDir = '/mnt/BCSD'
 
-OUTROOT = '/mnt/out_stats'
+OUTROOT = '/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats'
 if not path.isdir(OUTROOT):
     mkdir(OUTROOT)
 
-OUTTEMP = '/home/edarague'
+OUTTEMP = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
 if not path.isdir(OUTTEMP):
     mkdir(OUTTEMP)
 
 # added as fgobal institution attribute to output files
-txtinst = "Santa Clara U.,Climate Central,The Nature Conservancy"
+txtinst = "Santa Clara U.,Climate Central,The Nature Conservancy,International Center for Tropical Agriculture"
 
 # input files are on 0->360 longitude convention. To switch to a -180->180 grid:
 # cdo sellonlatbox,-180,180,-90,90 ifile ofile
@@ -63,159 +64,198 @@ def copy_files(fname='', styr=0, enyr=0, model=''):
 
 
 def calc_tavg(fnamen='', fnamex='', styr=0, enyr=0, model=''):
-    if not path.exists(RootDir + "/" + model + "/junk"):
-        system("mkdir -p " + RootDir + "/" + model + "/junk")
-    fnx_nodir = split(fnamex, "/")[-1]
-    fnn_nodir = split(fnamen, "/")[-1]
-    nyrs = enyr - styr + 1
-    for i in range(nyrs):
-        y = styr + i
-        fnx = OUTTEMP + "/" + model + "/junk/" + fnx_nodir + str(y) + ".nc"
-        fnn = OUTTEMP + "/" + model + "/junk/" + fnn_nodir + str(y) + ".nc"
-        fnxe = RootDir + "/" + model + "/junk/" + fnx_nodir + str(y) + ".nc"
-        ft = fnx.replace('tasmax', 'tmp')
-        fn = fnx.replace('tasmax', 'tas')
-        fne = fnxe.replace('tasmax', 'tas')
-        if not (path.exists(fnx) and path.exists(fnn)):
-            if y == enyr:
-                print 'infile not found: ', fnx, fnn, ' ...skipping last year'
-                break
-            else:
-                raise Exception('infile not found: ' + fnx + ' or ' + fnn)
-        # calc mean daily temp if doesn't already exist
-        if not path.exists(fne):
-            print "\n... calculating daily avg temp for %s%s" % (path.basename(fnamen), y)
-            txt1 = "cdo -m 1e+20 -add %s %s %s" % (fnn, fnx, ft)
-            print txt1
-            system(txt1)
-            txt2 = "cdo divc,2.0 %s %s" % (ft, fn)
-            print txt2
-            system(txt2)
-            txt3 = "rm -rf " + ft
-            print txt3
-            system(txt3)
-            txt4 = "ncrename -h -v tasmin,tas " + fn
-            print txt4
-            system(txt4)
-            txt5 = "mv " + fn + " " + fne
-            print txt5
-            system(txt5)
+	if not path.exists(RootDir + "/" + model + "/junk"):
+		system("mkdir -p " + RootDir + "/" + model + "/junk")
+	fnx_nodir = split(fnamex, "/")[-1]
+	fnn_nodir = split(fnamen, "/")[-1]
+	nyrs = enyr - styr + 1
+	for i in range(nyrs):
+		y = styr + i
+		fnx = OUTTEMP + "/" + model + "/junk/" + fnx_nodir + str(y) + ".nc"
+		fnn = OUTTEMP + "/" + model + "/junk/" + fnn_nodir + str(y) + ".nc"
+		fnxe = RootDir + "/" + model + "/junk/" + fnx_nodir + str(y) + ".nc"
+		ft = fnx.replace('tasmax', 'tmp')
+		fn = fnx.replace('tasmax', 'tas')
+		fne = fnxe.replace('tasmax', 'tas')
+		if not (path.exists(fnx) and path.exists(fnn)):
+			if y == enyr:
+				print 'infile not found: ', fnx, fnn, ' ...skipping last year'
+				break
+			else:
+				raise Exception('infile not found: ' + fnx + ' or ' + fnn)
+		# calc mean daily temp if doesn't already exist
+		if not path.exists(fne):
+			print "\n... calculating daily avg temp for %s%s" % (path.basename(fnamen), y)
+			txt1 = "cdo -m 1e+20 -add %s %s %s" % (fnn, fnx, ft)
+			print txt1
+			system(txt1)
+			txt2 = "cdo divc,2.0 %s %s" % (ft, fn)
+			print txt2
+			system(txt2)
+			txt3 = "rm -rf " + ft
+			print txt3
+			system(txt3)
+			txt4 = "ncrename -h -v tasmin,tas " + fn
+			print txt4
+			system(txt4)
+			txt5 = "mv " + fn + " " + fne
+			print txt5
+			system(txt5)
 
 
 def tavg(fname='', styr=0, enyr=0, model=''):
-    if not path.exists(OUTROOT + "/" + model + "/"):
-        system('mkdir ' + OUTROOT + "/" + model + "/")
-    if not styr > 1899 and enyr < 2101 and (enyr > styr):
-        raise 'incorrect args passed to tavg (%s, %d, %d, %s)' % (fname, styr, enyr, model)
-    
+	if not path.exists(OUTROOT + "/" + model + "/"):
+		system('mkdir ' + OUTROOT + "/" + model + "/")
+	if not styr > 1899 and enyr < 2101 and (enyr > styr):
+		raise 'incorrect args passed to tavg (%s, %d, %d, %s)' % (fname, styr, enyr, model)
+
 	sDic = {1:"TDJF", 2:"TMAM", 3:"TJJA", 4:"TSON"}
 	nyrs = enyr - styr + 1
-    fn_nodir = split(fname, "/")[-1]
-    ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    ofallsns = OUTTEMP + "/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
+	fn_nodir = split(fname, "/")[-1]
+	ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
+	ofallsns = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".seasonal.nc"
 	ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
-    ofallqua = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".quarter.nc"
-	
+	ofallqua = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".quarter.nc"
+
 	fn_nodirr = ((split(fname, "/")[-1]).replace('r1i1p1_', '')).replace('_day', '')
-    ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    ofallr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
+	ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
+	ofallr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
 	ofallsnsr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
-	ofallquar = OUTROOT + "/" + model + "/" + fnw_nodirr + str(styr) + "-" + str(enyr) + ".quarter.nc"
-	
+	ofallquar = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".quarter.nc"
+
 	if not path.exists(ofallmonr):
-        for i in range(nyrs):
-            y = styr + i
-            print "\n computing tavg for %s%s " % (path.basename(fname), y)
-            fn = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(y) + ".nc"
-            if not path.exists(fn):
-                if y == enyr:
-                    print 'infile not found: %s ...skipping last year' % fn
-                    break
-                else:
-                    raise Exception('infile not found: %s' % fn)
-            if i == 0:
-                txt = "cdo -m 1e+20 monmean " + fn + " " + ofallmon
-                print txt
-                system(txt)
-            else:
-                txt = "cdo -m 1e+20 monmean " + fn + " junk_mon.nc"
-                print txt
-                system(txt)
-                txt = "cdo -b F32 cat " + ofallmon + " junk_mon.nc junk_mon_cat.nc"
-                print txt
-                system(txt)
-                txt = "rm -rf junk_mon.nc " + ofallmon + " && mv junk_mon_cat.nc " + ofallmon
-                print txt
-                system(txt)
-			
-			if fn_nodir.split("_")[0] == "tas":
-
-				# create quarters files
-				for i in range(1, 10 + 1):
-					ofallqua_i = OUTTEMP + "/" + model + "/junk/tasq" + str(i) + os.path.basename(fn_nodir).split("_",1)[1]
-					txtcmd = "cdo -m 1e+20 -selmon," + str(i) + "," + str(i+1) + "," + str(i+2) + " -monmean " + ofallmon + " " + ofallqua_i
-					print txtcmd
-					system(txtcmd)
-					if i == 0:
-						txtmv = "mv "+ ofallqua_i + " " + ofallqua
-						system(txtmv)
+		
+		if fn_nodir.split("_")[0] <> "tas":
+			for i in range(nyrs):
+				y = styr + i
+				print "\n computing tavg for %s%s " % (path.basename(fname), y)
+				fn = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(y) + ".nc"
+				if not path.exists(fn):
+					if y == enyr:
+						print 'infile not found: %s ...skipping last year' % fn
+						break
 					else:
-						txt = "cdo -b F32 cat " + ofallqua_i + " " + ofallqua
-						print txt
-						system(txt)
+						raise Exception('infile not found: %s' % fn)
+				if i == 0:
+					txt = "cdo -m 1e+20 monmean " + fn + " " + ofallmon
+					print txt
+					system(txt)
+				else:
+					txt = "cdo -m 1e+20 monmean " + fn + " junk_mon.nc"
+					print txt
+					system(txt)
+					txt = "cdo -b F32 cat " + ofallmon + " junk_mon.nc junk_mon_cat.nc"
+					print txt
+					system(txt)
+					txt = "rm -rf junk_mon.nc " + ofallmon + " && mv junk_mon_cat.nc " + ofallmon
+					print txt
+					system(txt)
 
-        now = datetime.now()
-        txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
-        txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofallmon
-        print txtcmd
-        system(txtcmd)
-        txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofallmon
-        print txtcmd
-        system(txtcmd)
-        
-		# create yearly summary file
-        txtcmd = "cdo -m 1e+20  yearavg " + ofallmon + " " + ofall
-        print txtcmd
-        system(txtcmd)
-		
-		#Moving outputs
-		txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
-        print txtmvmon
-        system(txtmvmon)
-        txtmv = "mv %s %s" % (ofall, ofallr)
-        print txtmv
-        system(txtmv)
-        return ofall
-		
-		# create seasonaly summary file
-        txtcmd = "cdo -m 1e+20  seasavg " + ofallmon + " " + ofallsns
-        print txtcmd
-        system(txtcmd)
-		
-		# select each season
-		for s in sDic:
-			ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".seasonal.nc"
-			ofallsnsr_i = OUTROOT + "/" + model + "/" + str(sDic[s]) + "_" + fn_nodirr + str(styr) + "-" + str(enyr) + ".nc"
-			txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
+			now = datetime.now()
+			txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
+			txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofallmon
 			print txtcmd
-			
-			#Moving outputs
 			system(txtcmd)
-			txtmv = "mv %s %s" % (ofallsns_i, ofallsnsr_i)
+			txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofallmon
+			print txtcmd
+			system(txtcmd)
+
+			# create yearly summary file
+			txtcmd = "cdo -m 1e+20  yearavg " + ofallmon + " " + ofall
+			print txtcmd
+			system(txtcmd)
+
+			#Moving outputs
+			txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
+			print txtmvmon
+			system(txtmvmon)
+			txtmv = "mv %s %s" % (ofall, ofallr)
 			print txtmv
 			system(txtmv)
 			return ofall
-		
+			
+		else:
+			# Create monthly file for tas
+			ofallmontxr = OUTROOT + "/" + model + "/tasmax_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".monthly.nc"
+			ofallmontnr = OUTROOT + "/" + model + "/tasmin_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".monthly.nc"
+			txtcmd = "cdo -m 1e+20 monadd " + ofallmontxr + " " + ofallmontnr + " " + OUTTEMP + "/" + model + "/junk/junk_tas.nc"
+			print txtcmd
+			system(txtcmd)
+			txtcmd = "cdo -m 1e+20 divc,2 " + OUTTEMP + "/" + model + "/junk/junk_tas.nc" + " " + ofallmon
+			print txtcmd
+			system(txtcmd)
+			
+			# create yearly summary file
+			txtcmd = "cdo -m 1e+20  yearavg " + ofallmon + " " + ofall
+			print txtcmd
+			system(txtcmd)
+			# Moving outputs
+			txtmv = "mv %s %s" % (ofallmon, ofallmonr)
+			print txtmv
+			system(txtmv)
+			txtmv = "mv %s %s" % (ofall, ofallr)
+			print txtmv
+			system(txtmv)
+	else:
+		print "\n... nothing to do, %s exist!\n" % ofallmon
+
+	if not path.exists(ofallquar):
+
 		if fn_nodir.split("_")[0] == "tas":
+
+			# create quarters files
+			for i in range(1, 10 + 1):
+				ofallqua_i = OUTTEMP + "/" + model + "/junk/" + "tasq" + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+				txtcmd = "cdo -m 1e+20 yearmean -selmon," + str(i) + "," + str(i+1) + "," + str(i+2) + " " + ofallmonr + " " + ofallqua_i
+				print txtcmd
+				system(txtcmd)
+			# merge all quarter files
+			txt = "cdo -b F32 mergetime " + OUTTEMP + "/" + model + "/junk/" + "tasq*.nc" + " " + ofallqua
+			print txt
+			system(txt)
+		
+			# create seasonaly summary file
+			txtcmd = "cdo -m 1e+20  seasmean " + ofallmonr + " " + ofallsns
+			print txtcmd
+			system(txtcmd)
+
+			# select each season
+			for s in sDic:
+				ofallsns_i = OUTTEMP + "/" + model + "/junk/" + str(sDic[s]) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+				ofallsnsr_i = OUTROOT + "/" + model + "/" + str(sDic[s]) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+				txtcmd = "cdo -m 1e+20 selseas," + str(s) + " " + ofallsns + " " + ofallsns_i
+				print txtcmd
+				system(txtcmd)
+				
+				#Moving outputs
+				txtmv = "mv %s %s" % (ofallsns_i, ofallsnsr_i)
+				print txtmv
+				system(txtmv)
+
 			# Moving quarter quarter file
 			txtmv = "mv %s %s" % (ofallqua, ofallquar)
 			print txtmv
 			system(txtmv)
+			txt = "rm -rf " + OUTTEMP + "/" + model + "/junk/" + "r02q*.nc"
+			print txt
+			system(txt)
 		
-    else:
-        print "\n... nothing to do, %s exist!\n" % ofallmon
+	# create files for each month separately
+	for i in range(1, 12 + 1):
+		ofallmon_i = OUTTEMP + "/" + model + "/junk/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+		txtcmd = "cdo -m 1e+20 selmon," + str(i) + " " + ofallmonr + " " + ofallmon_i
+		print txtcmd
+		system(txtcmd)
+		
+	# Moving monthly files outputs
+	for i in range(1, 12 + 1):
+		ofallmon_i = OUTTEMP + "/" + model + "/junk/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+		ofallmonr_i = OUTROOT + "/" + model + "/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+		txtmvmon = "mv %s %s" % (ofallmon_i, ofallmonr_i)
+		print txtmvmon
+		system(txtmvmon)
 
-
+			
 def txx(fname='', styr=0, enyr=0, model=''):
     if not path.exists(OUTROOT + "/" + model + "/"):
         system('mkdir ' + OUTROOT + "/" + model + "/")
@@ -279,7 +319,24 @@ def txx(fname='', styr=0, enyr=0, model=''):
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
 
-
+	if not path.exists(OUTROOT + "/" + model + "/" + fn_nodirr.split("_")[0] + str(12) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"):
+	
+		# create files for each month separately
+		for i in range(1, 12 + 1):
+			ofallmon_i = OUTTEMP + "/" + model + "/junk/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+			txtcmd = "cdo -m 1e+20 selmon," + str(i) + " " + ofallmonr + " " + ofallmon_i
+			print txtcmd
+			system(txtcmd)
+			
+		# Moving monthly files outputs
+		for i in range(1, 12 + 1):
+			ofallmon_i = OUTTEMP + "/" + model + "/junk/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+			ofallmonr_i = OUTROOT + "/" + model + "/" + fn_nodirr.split("_")[0].lower() + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+			txtmvmon = "mv %s %s" % (ofallmon_i, ofallmonr_i)
+			print txtmvmon
+			system(txtmvmon)
+			
+			
 def tnn(fname='', styr=0, enyr=0, model=''):
     if not path.exists(OUTROOT + "/" + model + "/"):
         system('mkdir ' + OUTROOT + "/" + model + "/")
@@ -342,6 +399,23 @@ def tnn(fname='', styr=0, enyr=0, model=''):
         return ofall
     else:
         print "\n... nothing to do, %s exist!\n" % ofall
+	
+	if not path.exists(OUTROOT + "/" + model + "/" + fn_nodirr.split("_")[0] + str(12) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"):
+	
+		# create files for each month separately
+		for i in range(1, 12 + 1):
+			ofallmon_i = OUTTEMP + "/" + model + "/junk/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+			txtcmd = "cdo -m 1e+20 selmon," + str(i) + " " + ofallmonr + " " + ofallmon_i
+			print txtcmd
+			system(txtcmd)
+			
+		# Moving monthly files outputs
+		for i in range(1, 12 + 1):
+			ofallmon_i = OUTTEMP + "/" + model + "/junk/" + fn_nodirr.split("_")[0] + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+			ofallmonr_i = OUTROOT + "/" + model + "/" + fn_nodirr.split("_")[0].lower() + str(i) + "_" + fn_nodirr.split("_",1)[1] + str(styr) + "-" + str(enyr) + ".nc"
+			txtmvmon = "mv %s %s" % (ofallmon_i, ofallmonr_i)
+			print txtmvmon
+			system(txtmvmon)
 
 
 def gd10(fname='', styr=0, enyr=0, model=''):
@@ -747,7 +821,6 @@ def FD(fname='', styr=0, enyr=0):
     system(txtcmd)
     return ofall
 
-
 # cuts off last year to have global complete coverage
 def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0):
     if not styr > 1899 and enyr < 2101 and (enyr > styr):
@@ -803,7 +876,7 @@ def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0):
     system(txtcmd)
     return ofall
 
-
+	
 def TXnorm(fname='', styr=0, enyr=0):
     # to create a file with 365 time steps and a TXnorm value for each cell, cat all files together
     # uses a 5-day running mean
@@ -999,67 +1072,4 @@ def TP(fname='', pctl='', varin='', reffile='', styr=0, enyr=0):
     txtcmd = "cdo -m 1e+20 divdpy -yearsum -muldpm " + ofallmon + " " + ofall
     system(txtcmd)
     return ofall
-
-
-def tavg_seasons(fname='', styr=0, enyr=0, model=''):
-    if not path.exists(OUTROOT + "/" + model + "/"):
-        system('mkdir ' + OUTROOT + "/" + model + "/")
-    if not styr > 1899 and enyr < 2101 and (enyr > styr):
-        raise 'incorrect args passed to tavg (%s, %d, %d, %s)' % (fname, styr, enyr, model)
-    nyrs = enyr - styr + 1
-    fn_nodir = split(fname, "/")[-1]
-    ofallmon = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    
-	ofall = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
-    fn_nodirr = ((split(fname, "/")[-1]).replace('r1i1p1_', '')).replace('_day', '')
-	ofallmonr = OUTROOT + "/" + model + "/" + fn_nodirr + str(styr) + "-" + str(enyr) + ".monthly.nc"
-    
-
-	
-    if not path.exists(ofallmonr):
-        for i in range(nyrs):
-            y = styr + i
-            print "\n computing tavg for %s%s " % (path.basename(fname), y)
-            fn = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(y) + ".nc"
-            if not path.exists(fn):
-                if y == enyr:
-                    print 'infile not found: %s ...skipping last year' % fn
-                    break
-                else:
-                    raise Exception('infile not found: %s' % fn)
-            if i == 0:
-                txt = "cdo -m 1e+20 monmean " + fn + " " + ofallmon
-                print txt
-                system(txt)
-            else:
-                txt = "cdo -m 1e+20 monmean " + fn + " junk_mon.nc"
-                print txt
-                system(txt)
-                txt = "cdo -b F32 cat " + ofallmon + " junk_mon.nc junk_mon_cat.nc"
-                print txt
-                system(txt)
-                txt = "rm -rf junk_mon.nc " + ofallmon + " && mv junk_mon_cat.nc " + ofallmon
-                print txt
-                system(txt)
-        now = datetime.now()
-        txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
-        txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofallmon
-        print txtcmd
-        system(txtcmd)
-        txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofallmon
-        print txtcmd
-        system(txtcmd)
-        # create yearly summary file
-        txtcmd = "cdo -m 1e+20  seasavg " + ofallmon + " " + ofall
-        print txtcmd
-        system(txtcmd)
-        txtmvmon = "mv %s %s" % (ofallmon, ofallmonr)
-        print txtmvmon
-        system(txtmvmon)
-        txtmv = "mv %s %s" % (ofall, ofallr)
-        print txtmv
-        system(txtmv)
-        return ofall
-    else:
-        print "\n... nothing to do, %s exist!\n" % ofallmon
 
