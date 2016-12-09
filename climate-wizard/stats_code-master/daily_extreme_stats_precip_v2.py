@@ -183,7 +183,11 @@ def ptot(fname='', styr=0, enyr=0, model=''):
 		system(txtmv)
 		txt = "rm -rf " + OUTTEMP + "/" + model + "/junk/" + "prq*.nc"
 		print txt
-		system(txt)		
+		system(txt)	
+		# Moving seasonal file
+		txtmv = "mv %s %s" % (ofallsns, ofallsnsr)
+		print txtmv
+		system(txtmv)		
 	else:
 		print "\n... nothing to do, %s exist!\n" % ofallquar
 
@@ -408,6 +412,11 @@ def r02(fname='', styr=0, enyr=0, model=''):
 		txt = "rm -rf " + OUTTEMP + "/" + model + "/junk/" + "r02q*.nc"
 		print txt
 		system(txt)
+		
+		# Moving seasonal file
+		txtmv = "mv %s %s" % (ofallsns, ofallsnsr)
+		print txtmv
+		system(txtmv)	
 		
 
 def r5d(fname='', styr=0, enyr=0, model=''):
@@ -696,10 +705,11 @@ def sdii(fname='', styr=0, enyr=0, model=''):
 			print txtmvmon
 			system(txtmvmon)
 		
+		# Moving seasonal file
 		txtmv = "mv %s %s" % (ofallsns, ofallsnsr)
-		print "... " + txtmv
-		system(txtmv)
-
+		print txtmv
+		system(txtmv)	
+		
 		return ofallsnsr
 	else:
 		print "\n... nothing to do, %s exist!\n" % ofallsnsr

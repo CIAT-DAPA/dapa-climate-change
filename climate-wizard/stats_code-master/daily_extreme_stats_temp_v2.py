@@ -239,6 +239,11 @@ def tavg(fname='', styr=0, enyr=0, model=''):
 			txt = "rm -rf " + OUTTEMP + "/" + model + "/junk/" + "r02q*.nc"
 			print txt
 			system(txt)
+			
+			# Moving seasonal file
+			txtmv = "mv %s %s" % (ofallsns, ofallsnsr)
+			print txtmv
+			system(txtmv)	
 		
 	# create files for each month separately
 	for i in range(1, 12 + 1):

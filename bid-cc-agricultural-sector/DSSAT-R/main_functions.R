@@ -508,9 +508,9 @@ read.NappDay <- function(crop) {
     #maize
     if(crop == "MAIZE"){
       # Read only the row corresponding to first flowering date per year
-      application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
+      application_date <- scan(paste(data), what = "character", skip = stress[year] + 11, nlines = 1, quiet = T)
       # Just capture the day of year when first flowering 
-      application_date <- as.numeric(application_date[3])
+      application_date <- as.numeric(application_date[3]) + 10
       # Create a data.frame with crop, year and application day
       application_date <- data.frame(crop = crop, year=year, day=application_date)
       return(application_date)
@@ -527,7 +527,7 @@ read.NappDay <- function(crop) {
 }
 #read.NappDay(crop = "BEAN") # To test
 #read.NappDay(crop = "WHEAT") # To test
-
+#read.NappDay(crop = "MAIZE") # To test
 
 ##############################################################################
 ## Cambiar fechas de Futuro 1969 == 2021
