@@ -455,7 +455,7 @@ read.NappDay <- function(crop) {
       #read entire row where the "End Veg" stage is located
       application_date <- scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) 
       #create data frame with what i need from that row
-      application_date <- data.frame(as.numeric(application_date[1]), as.numeric(application_date[4]), paste(application_date[6:7],collapse="_"))
+      application_date <- data.frame(as.numeric(application_date[1]), as.numeric(application_date[4])+10, paste(application_date[6:7],collapse="_"))
       colnames(application_date) <- col.names
       #return quantities
       return(application_date)
