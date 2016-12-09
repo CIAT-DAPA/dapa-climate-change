@@ -82,9 +82,7 @@
 
 
 Xfile <- function(information, pixel, in_conditions, initial) {
-  
-
-
+  #general management information
   PPOP <- information$PPOP
   PPOE <- information$PPOE
   PLME <- paste(information$PLME)
@@ -93,71 +91,53 @@ Xfile <- function(information, pixel, in_conditions, initial) {
   PLDP <- information$PLDP 
   SYMBI <- information$SYMBI
   
+  #override defaults if run_type is diagnostic
+  if (information$run_type == "diagnostic") {NITRO <- "N"} else {NITRO <- "Y"}
+  if (information$run_type == "diagnostic") {WATER <- "N"} else {WATER <- "Y"}
+  
+  #start of planting window
   information$initation <- information$initation[pixel]
-  #information$final <- crop_riego$mirca.end[pixel]
+  
+  #nitrogen application
   information$nitrogen_aplication <- list(amount = amount[pixel, ], day_app = day_app[pixel, ])
-
-#   if(information$initation > information$final){
-#     information$final <- 365
-#   }
-  
-  
-  #midpoint_window <- round(mean(c(information$initation, information$final))) ## Midpoint planting window
   
   if( information$system == "irrigation" ){
-    
-
-    
-    
     # Initial Conditions
     if(information$crop == "RICE"){
       ## 5 Octubre 2015 Cambio en las Condiciones Iniciales para SNH4 y SNO3
       SNH4 <- c(4, 4, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
       SNO3 <- c(0.7, 0.7, 0.5, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1)
-      
     } else{
       SNH4 <- c(3, 3, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
       SNO3 <- c(3, 3, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
-      
     }
-
     
-#     pdate <- convert_date(pmax(midpoint_window, 0), information$year)        ## Planting date
     IC <- 1
     pdate <- convert_date(information$initation, information$year, TRUE)        ## Planting date
-#     sdate <- convert_date(pmax(information$initation - 60, 0), information$year)   ## Simulation Start
-  #  sdate <- convert_date(information$initation - 30, information$year)   ## Simulation Start
     sdate <- convert_date(information$initation, information$year, TRUE) 
     A <- "PL"      ## label name
     first <- -99  ## Start planting window
     last <- -99   ## End planting window
     IRR <- "A"    ## Automatic irrigation
     plant <- "R"    ## On reported date
-    
   }
   
-#SNH4 <- c(10, 10, 0, 0, 0, 0, 0, 0, 0)
-#SNO3 <- c(5, 2, 0, 0, 0, 0, 0, 0, 0)
-
+  #SNH4 <- c(10, 10, 0, 0, 0, 0, 0, 0, 0)
+  #SNO3 <- c(5, 2, 0, 0, 0, 0, 0, 0, 0)
+  
   if( information$system == "rainfed" ) {
-    
-    
-#      SNH4 <- c(1.1, 1.1, 0.7, 0.7, 0.5, 0.3, 0.1, 0.1, 0.1)
-#      SNO3 <- c(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
-    
-#     SNH4 <- c(10, 10, 0, 0, 0, 0, 0, 0, 0)
-#     SNO3 <- c(5, 2, 0, 0, 0, 0, 0, 0, 0)
-    
+    #SNH4 <- c(1.1, 1.1, 0.7, 0.7, 0.5, 0.3, 0.1, 0.1, 0.1)
+    #SNO3 <- c(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
+    #SNH4 <- c(10, 10, 0, 0, 0, 0, 0, 0, 0)
+    #SNO3 <- c(5, 2, 0, 0, 0, 0, 0, 0, 0)
     
     # Initial Conditions 13 July in the morning (2015)
-    
-#     SNH4 <- c(4, 4, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
-#     SNO3 <- c(0.7, 0.7, 0.5, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1)
+    #SNH4 <- c(4, 4, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
+    #SNO3 <- c(0.7, 0.7, 0.5, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1)
     
     # Initial Conditions 13 July in the afternoun (2015)
-    
-        SNH4 <- c(3, 3, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
-        SNO3 <- c(3, 3, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
+    SNH4 <- c(3, 3, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
+    SNO3 <- c(3, 3, 2, 1, 0.1, 0.1, 0.1, 0.1, 0.1)
     
     IC <- 1
     first <- convert_date(information$initation - 5, information$year, TRUE)  ## First Window
@@ -167,55 +147,45 @@ Xfile <- function(information, pixel, in_conditions, initial) {
     A <- "PL"         ## Label Name
     IRR <- "N"        ## No irrigation (rainfed)
     plant <-"A"        ## Automatic planting seed given window
+    
     ### Reconvertir first para que corra con dia de simulacion un año antes
     #first <- convert_date(information$initation , information$year)
     last <- convert_date(information$initation + 65, information$year, FALSE)
     
     ## Es lo que se esta modificando para Trigo Secano tenia !=different
     if(data_xfile$crop == 'WHEAT'){
-      
       IC <- 1
-	  sdate <- convert_date(information$initation - 125, information$year, TRUE) 
+	    sdate <- convert_date(information$initation - 125, information$year, TRUE) 
       first <- convert_date(information$initation - 5, information$year, TRUE)   ## First Window
       last <- convert_date(information$initation + 65, information$year, FALSE)  ## Last Window
       #sdate <- convert_date(first, information$year)    ## Simulation Start
-	  # if(information$initation <= 90){
-	  # sdate <- convert_date(1, information$year)
-	  
-	  # }else{
-	  # sdate <- convert_date(information$initation - 90, information$year)  
-	  # }
+	     # if(information$initation <= 90){
+	     # sdate <- convert_date(1, information$year)
+	     # }else{
+	     # sdate <- convert_date(information$initation - 90, information$year)  
+	    # }
       #sdate <- convert_date(information$initation - 90, information$year)  
       pdate <- -99      ## Planting date (you will take the planting window data mirca 2000)
       A <- "PL"         ## Label Name
       IRR <- "N"        ## No irrigation (rainfed)
       plant <-"A"        ## Automatic planting seed given window
-	  
-	  
     }
-    
   }
-  
   
   ## Defining the Experiment
   in_data <- list()
   
-  
   ## General data of the Experiment
-  
   in_data$general <- list(PEOPLE = "Diego Obando Jeison Mesa", ADDRESS = "CIAT", SITE = "CALI")
-  
   
   ## Definition simulate treatment
   in_data$treatments <- data.frame(N = 1, R = 1, O = 1, C = 0, TNAME = "BID001", CU = 1, FL = 1, SA = 0, IC = IC, MP = 1,
                                    MI = 0, MF = 1, MR = 0, MC = 0, MT = 0, ME = 0, MH = 0, SM = 1)
   
   ## Definition simulate cultivar
-  
   in_data$cultivars <- data.frame(C = 1, CR = information$CR, INGENO = information$INGENO[pixel], CNAME = information$CNAME)
   
   ## Field
-  
   in_data$fields <- data.frame(L = 1, ID_FIELD = "BID1", WSTA = "JBID", FLSA=-99, FLOB = -99, FLDT = "DR000",
                                FLDD = -99, FLDS = -99, FLST = -99, SLTX = -99, SLDP = -99, ID_SOIL="BID0000001",
                                FLNAME = "FIELD01", XCRD = -99, YCRD = -99, ELEV = -99, AREA = -99, SLEN=-99,
@@ -231,7 +201,6 @@ Xfile <- function(information, pixel, in_conditions, initial) {
   #in_data$ini_cond_profile <- data.frame(C=rep(1,5),ICBL=rep(-99,5),SH2O=rep(-99,5),SNH4=rep(-99,5),
   #                                       SNO3=rep(-99,5))
   
-  
   ## Planting Details
   in_data$planting <- data.frame( P = 1, PDATE = pdate, EDATE = -99, PPOP, PPOE, PLME, 
                                   PLDS, PLRS = -99, PLRD, PLDP,
@@ -240,7 +209,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
   ## Simulation Control 
   in_data$sim_ctrl <- data.frame(N = 1, GENERAL = "GE", NYERS = 28, NREPS = 1, START = "S", SDATE = sdate, 
                                  RSEED=2150, SNAME = "simctr1", SMODEL = paste(information$smodel), 
-                                 OPTIONS = "OP", WATER = "Y", NITRO = "Y", SYMBI,
+                                 OPTIONS = "OP", WATER = WATER, NITRO = NITRO, SYMBI = SYMBI,
                                  PHOSP = "N", POTAS = "N", DISES = "N", CHEM = "N", TILL = "N", 
                                  CO2 = "M", METHODS = "ME", WTHER = "M", INCON = "M", LIGHT = "E", 
                                  EVAPO = "R", INFIL = "S", PHOTO = "C", HYDRO = "R",
@@ -262,7 +231,6 @@ Xfile <- function(information, pixel, in_conditions, initial) {
   
   
   # Make Xfile
-  
   ## test
   ## out_file <- "./JBID.RIX"
   # overwrite <- F
@@ -380,11 +348,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
           #cat(paste(sprintf("%2d %5d %5.0f %5.2f %5.2f", 1, in_conditions[i, 1], in_conditions[i, 2], SNH4[i], SNO3[i])), "\n", file = pf)
           cat(paste(sprintf("%2d %5d %5d %5.2f %5.2f", 1, in_conditions[i, 1], in_conditions[i, 2], in_conditions[i, 3], in_conditions[i, 3])), "\n", file = pf)
         }
-        
-      
       }      
-      
-      
     }
     
     cat("\n", file = pf)
@@ -407,20 +371,14 @@ Xfile <- function(information, pixel, in_conditions, initial) {
     cat("@F FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD FERNAME                       \n", file = pf)
     for(i in 1:dim(information$nitrogen_aplication$amount)[2]){
       if(!is.na(information$nitrogen_aplication$amount[, i])) {
-        
-        
         if(i == 1){
-          
           cat(sprintf("%2s %5s %4s %5s %5i %5.1f %5i %5i %5i %5i %5i %1i", 1, information$nitrogen_aplication$day_app[, i], "FE005", "AP002", 
                       4, information$nitrogen_aplication$amount[, i], 0, -99, -99, -99, -99, -99), "\n", file = pf)
-          
         } else{
           cat(sprintf("%2s %5s %4s %5s %5i %5.1f %5i %5i %5i %5i %5i %1i", 1, information$nitrogen_aplication$day_app[, i], "FE005", "AP002", 
                       0, information$nitrogen_aplication$amount[, i], 0, -99, -99, -99, -99, -99), "\n", file = pf)
         }
-        
       }
-      
     }
     cat("\n", file = pf)
     
