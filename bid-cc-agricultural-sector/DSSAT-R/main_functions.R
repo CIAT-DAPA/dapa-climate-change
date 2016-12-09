@@ -428,7 +428,7 @@ read.overview <- function(crop) {
 # Read application day data for fertilizer from OVERVIEW.OUT
 ##############################################################################
 
-read.overview2calc.appDay <- function(crop) {
+read.NappDay <- function(crop) {
   
   # SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES
   

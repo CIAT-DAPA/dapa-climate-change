@@ -208,6 +208,7 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
   imp.dat <- read.fwf(textConnection(text_summary), width = seps, skip = 4)
   colnames(imp.dat) <- headers
   
+  #Extraer stress data de Overview.OUT
   if(!file.exists('Overview.OUT') && !file.exists('OVERVIEW.OUT')){
     change_stress <- matrix(NA, nrow = dim(imp.dat)[1], ncol = 4)
     colnames(change_stress) <-  c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
@@ -241,18 +242,21 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
     }
   }
   
+  #merge both data.frames
   result <- data.frame(imp.dat, change_stress)
   
-  
+  #convert to numeric
   if(input$climate$wfd  == "model"){
   	result[, 'SDAT'] <- as.numeric(paste0(change_date_to_fut(result[, 'SDAT']), substr(result[, 'SDAT'], 5, 7)))
   	result[, 'PDAT'] <- as.numeric(paste0(change_date_to_fut(result[, 'PDAT']), substr(result[, 'PDAT'], 5, 7)))
   	result[, 'ADAT'] <- as.numeric(paste0(change_date_to_fut(result[, 'ADAT']), substr(result[, 'ADAT'], 5, 7)))
   	result[, 'MDAT'] <- as.numeric(paste0(change_date_to_fut(result[, 'MDAT']), substr(result[, 'MDAT'], 5, 7)))
 	}
-
+  
+  #result returned
   return(result)
   
+  #go out of current directory (run directory)
   setwd(paste(dir_base))
   
   if(getwd() == dir_base){
