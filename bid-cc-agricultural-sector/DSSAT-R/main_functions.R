@@ -446,8 +446,6 @@ read.NappDay <- function(crop) {
     stress_by_year <- 1:length(stress)
     error <- grep("SIMULATION ABORTED", overview)
     
-    
-    
     if(length(error)>0){
       
       stress <- c(stress, error)
@@ -455,8 +453,6 @@ read.NappDay <- function(crop) {
       stress_by_year <- 1:length(stress)
       
     }
-    
-    
     
   }
   
@@ -531,22 +527,14 @@ read.NappDay <- function(crop) {
     
     if(crop == "MAIZE"){
       
-      col.names <- c("Stress_water1", "Stress_nitrogen1", "Stress_water_all", "Stress_nitrogen_all")
+      # Read only the row corresponding to first flowering date per year
+      application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
+      # Just capture the day of year when first flowering 
+      application_date <- as.numeric(application_date[3])
+      # Create a data.frame with crop, year and application day
+      application_date <- data.frame(crop = crop, year=year, day=application_date)
       
-      ## Se debe tener en cuenta que se debe leer para todo el tamaño del objeto Stress
-      value_stress1 <- scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) 
-      value_stress_all <- scan(paste(data), what = "character", skip = stress[year] + 13, nlines = 1, quiet = T) 
-      ## Se debe evaluar los puntos que se desean extraer
-      ## Stress durante el llenado vital para los rendimientos
-      ## value_stress1[15]
-      ## value_stress1[17]
-      ## Stress que considera al parecer el promedio de todas las etapas
-      ## value_stress_all[14]
-      ## value_stress_all[16]
-      values_of_stress <- data.frame(value_stress1[14], value_stress1[16], value_stress_all[13], value_stress_all[15])
-      colnames(values_of_stress) <- col.names
-      
-      return(values_of_stress)
+      return(application_date)
       
     }
     
