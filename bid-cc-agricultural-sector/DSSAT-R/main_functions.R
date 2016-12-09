@@ -391,7 +391,6 @@ read.NappDay <- function(crop) {
     Napp <- grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview)
     Napp_by_year <- 1:length(Napp)
     error <- grep("SIMULATION ABORTED", overview)
-    
     if(length(error)>0){
       Napp <- c(Napp, error)
       Napp <- sort(Napp)
@@ -403,10 +402,11 @@ read.NappDay <- function(crop) {
   extract_application_date <- function(crop, year){
     if (crop == "WHEAT") {
       #read entire row where the "End Veg" stage is located
-      application_date <- scan(paste(data), what = "character", skip = stress[year] + 9, nlines = 1, quiet = T) 
+      application_date <- scan(paste(data), what = "character", skip = Napp[year] + 9, nlines = 1, quiet = T) 
+      #compute application date
+      application_date <- as.numeric(application_date[4])+10
       #create data frame with what i need from that row
-      application_date <- data.frame(as.numeric(application_date[1]), as.numeric(application_date[4])+10, paste(application_date[6:7],collapse="_"))
-      colnames(application_date) <- col.names
+      application_date <- data.frame(Napp.crop = crop, Napp.year=year, Napp.day=application_date)
       #return quantities
       return(application_date)
     }
@@ -414,35 +414,32 @@ read.NappDay <- function(crop) {
     ## Ver el archivo overview para identificar cuales son los valores a extraer (revisar la ppt en la carpeta bid)
     if(crop == "RICE"){
       # Read only the row corresponding to first flowering date per year
-      application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
+      application_date <- scan(paste(data), what = "character", skip = Napp[year] + 12, nlines = 1, quiet = T)
       # Just capture the day of year when first flowering 
       application_date <- as.numeric(application_date[3])+10
       # Create a data.frame with crop, year and application day
-      application_date <- data.frame(crop = crop, year=year, day=application_date)
-      
+      application_date <- data.frame(Napp.crop = crop, Napp.year=year, Napp.day=application_date)
       return(application_date)
-      
     }
     
     if(crop == "BEAN" | crop == "SOY"){
       # Read only the row corresponding to first flowering date per year
-      application_date <- scan(paste(data), what = "character", skip = stress[year] + 12, nlines = 1, quiet = T)
+      application_date <- scan(paste(data), what = "character", skip = Napp[year] + 12, nlines = 1, quiet = T)
       # Just capture the day of year when first flowering 
       application_date <- as.numeric(application_date[3])
       # Create a data.frame with crop, year and application day
-      application_date <- data.frame(crop = crop, year=year, day=application_date)
-      
+      application_date <- data.frame(Napp.crop = crop, Napp.year=year, Napp.day=application_date)
       return(application_date)
     }
     
     #maize
     if(crop == "MAIZE"){
       # Read only the row corresponding to first flowering date per year
-      application_date <- scan(paste(data), what = "character", skip = stress[year] + 11, nlines = 1, quiet = T)
+      application_date <- scan(paste(data), what = "character", skip = Napp[year] + 11, nlines = 1, quiet = T)
       # Just capture the day of year when first flowering 
       application_date <- as.numeric(application_date[3]) + 10
       # Create a data.frame with crop, year and application day
-      application_date <- data.frame(crop = crop, year=year, day=application_date)
+      application_date <- data.frame(Napp.crop = crop, Napp.year=year, Napp.day=application_date)
       return(application_date)
     }
   }
@@ -450,10 +447,9 @@ read.NappDay <- function(crop) {
   #get data for all years
   y <- lapply(1:length(Napp), function(i) suppressMessages(extract_application_date(crop, i)))
   y <- do.call("rbind", y)
-  app_day <- round(mean(y$day, na.rm = T))
   
-  #return value
-  return(app_day)
+  #return matrix
+  return(y)
 }
 #read.NappDay(crop = "BEAN") # To test
 #read.NappDay(crop = "WHEAT") # To test
@@ -464,14 +460,11 @@ read.NappDay <- function(crop) {
 ##############################################################################
 
 change_date_to_fut <- function(data){
-
-date_to_mod <- data.frame(pas = 1968:1997, fut = 2020:2049)
-change <- as.numeric(substr(data, 1, 4))
-post_to_change <- match(change, date_to_mod[, 'pas'])
-change[] <- date_to_mod[post_to_change, 'fut']
-
-return(change)
-
+  date_to_mod <- data.frame(pas = 1968:1997, fut = 2020:2049)
+  change <- as.numeric(substr(data, 1, 4))
+  post_to_change <- match(change, date_to_mod[, 'pas'])
+  change[] <- date_to_mod[post_to_change, 'fut']
+  return(change)
 }
 
 ##Run[, 'SDAT'] <- as.numeric(paste0(change_date_to_fut(Run[, 'SDAT']), substr(Run[, 'SDAT'], 5, 7)))

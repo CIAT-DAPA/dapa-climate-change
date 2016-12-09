@@ -95,7 +95,6 @@
 run_dssat <- function(input, pixel, dir_dssat, dir_base) {
   print(pixel)
   run_id <- paste0(input$xfile$crop,"_",input$xfile$system,"_",pixel) #round(runif(1,10,2000000)) #run_id is pixel
-  
   dir_run <- paste0(dir_base, "/", run_id)
   
   #create directory for dssat run
@@ -201,9 +200,7 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
   pat <- "SDAT|PDAT|ADAT|MDAT|CWAM|HWAH|HWUM|H#AM|HIAM|IRCM|EPCM|NICM|YPTM|YPEM|YPNAM|YPNUM|NDCH|TMAXA|TMINA|SRADA|CO2A|PRCP|ETCP"
   imp.head <- scan("Summary.OUT", what = "character", skip = 3, nlines = 1, quiet = T)
   headers <- imp.head[grep(pat, imp.head, perl = TRUE)]
-  
   seps <- c(-92, 8, 8, -8, 8, 8, -14, 8, -8, 8, -14, 8, 6, -8, 6, -12, 6, -12, 6, -30, 6, -179, 9, 9, -27, 9, 9, 6, 6, 6, 6, -6, 7, 7, 7)
-
   text_summary <- readLines('Summary.OUT', skipNul = T)
   imp.dat <- read.fwf(textConnection(text_summary), width = seps, skip = 4)
   colnames(imp.dat) <- headers
@@ -217,19 +214,14 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
 
     ## Hacer coincidir stress con el archivo summary de DSSAT
     if(dim(change_stress)[1] != dim(imp.dat)[1]){
-      
       change_mod <- matrix(NA, nrow = dim(imp.dat)[1], ncol = dim(change_stress)[2])
       change_scratch <- matrix(NA, nrow = dim(imp.dat)[1], ncol = dim(change_stress)[2])
-      
       for(i in 1:dim(change_stress)[1]){
         print(i)
         change_mod[i, ] <- as.matrix(change_stress[i, ])
       }
-      
       j<-1
-      
       for(i in 1:dim(imp.dat)[1]){
-        
         if(imp.dat[i, 'HWAH'] != -99){
           change_scratch [i, ] <- change_mod[j, ]
           j<- j + 1
@@ -242,10 +234,44 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
     }
   }
   
-  #merge both data.frames
-  result <- data.frame(imp.dat, change_stress)
+  #if run_type is diagnostic then also extract the app.date
+  if (input$xfile$run_type == "diagnostic") {
+    if(!file.exists('Overview.OUT') && !file.exists('OVERVIEW.OUT')){
+      Napp_date <- matrix(NA, nrow = dim(imp.dat)[1], ncol = 3)
+      colnames(Napp_date) <-  c("crop", "year", "dap")
+    } else {
+      Napp_date <- read.NappDay(paste(input$xfile$crop))
+      
+      ## Hacer coincidir stress con el archivo Summary.OUT de DSSAT
+      if(dim(Napp_date)[1] != dim(imp.dat)[1]){
+        Napp_mod <- matrix(NA, nrow = dim(imp.dat)[1], ncol = dim(Napp_date)[2])
+        Napp_scratch <- matrix(NA, nrow = dim(imp.dat)[1], ncol = dim(Napp_date)[2])
+        for(i in 1:dim(Napp_date)[1]){
+          print(i)
+          Napp_mod[i, ] <- as.matrix(Napp_date[i, ])
+        }
+        j<-1
+        for(i in 1:dim(imp.dat)[1]){
+          if(imp.dat[i, 'HWAH'] != -99){
+            Napp_scratch [i, ] <- Napp_mod[j, ]
+            j<- j + 1
+          } else {
+            Napp_scratch[i, ] <- rep(NA, dim(Napp_mod)[2])
+          }
+        }
+        colnames(Napp_scratch) <- colnames(Napp_date)
+        Napp_date <- Napp_scratch
+      }
+    }
+    
+    #merge the three data.frames
+    result <- data.frame(imp.dat, change_stress, Napp_date)
+    result$Napp.crop <- result$Napp.year <- NULL
+  } else {
+    result <- data.frame(imp.dat, change_stress)
+  }
   
-  #convert to numeric
+  #convert to numeric (only for GCM)
   if(input$climate$wfd  == "model"){
   	result[, 'SDAT'] <- as.numeric(paste0(change_date_to_fut(result[, 'SDAT']), substr(result[, 'SDAT'], 5, 7)))
   	result[, 'PDAT'] <- as.numeric(paste0(change_date_to_fut(result[, 'PDAT']), substr(result[, 'PDAT'], 5, 7)))

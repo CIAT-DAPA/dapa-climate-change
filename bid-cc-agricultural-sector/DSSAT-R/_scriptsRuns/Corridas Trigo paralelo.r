@@ -1,11 +1,14 @@
-  ############### Parallel DSSAT ############################
-  ########### Load functions necessary ###############
-  
+  ######################## Parallel DSSAT for wheat ############################
+  ##############################################################################
+  ##############################################################################
   #Some general config
   scenario <- "historical" #historical, future
   cul_list <- data.frame(CID=1:6,dsid=c("IB0010","IB0013","IB0016","IB0028","IB0022","IB0026"),
                          culname=c("Seri82BA","TajanBA","DonErnestoBA","Gerek79BA","HalconsnaBA","BrigadierBA"))
   cultivar <- 1
+  run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+  ##############################################################################
+  ##############################################################################
   
   #Paths para scripts de funciones y workspace
   path_functions <- "~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/DSSAT-R/"
@@ -14,7 +17,8 @@
   #Cargar data frame entradas para DSSAT
   load(paste0(path_project, "14-ObjectsR/Soil.RData"))
   rm(list=setdiff(ls(), c("Extraer.SoilDSSAT", "values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile"
-                          , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position")))
+                          , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position",
+                          "scenario","cul_list","cultivar","run_type")))
   load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Wheat_riego.RDat"))
   
   #Cargar funciones
@@ -25,14 +29,18 @@
   source(paste0(path_functions, "DSSAT_run.R"))
   
   #Crear data.frame de aplicaciones de fertilizante
-  day0 <-  crop_riego$N.app.0
-  day_aplication0 <- rep(0, length(day0))
-  
-  day30 <- crop_riego$N.app.30
-  day_aplication30 <- rep(30, length(day30))
-  
-  amount <- data.frame(day0, day30)
-  day_app <- data.frame(day_aplication0, day_aplication30)
+  if (run_type == "diagnostic") {
+    day0 <-  crop_riego$N.app.0
+    day_aplication0 <- rep(0, length(day0))
+    
+    day30 <- crop_riego$N.app.30
+    day_aplication30 <- rep(30, length(day30))
+    
+    amount <- data.frame(day0, day30)
+    day_app <- data.frame(day_aplication0, day_aplication30)
+  } else {
+    #here write update of mgmt matrix when first (diagnostic) run is available
+  }
   
   ##Definir rango de anos, linea base: 71:99; futuro: 69:97
   if (scenario == "historical") {years <- 71:99}
@@ -40,6 +48,7 @@
   
   ##Configuracion Archivo experimental
   data_xfile <- list()
+  data_xfile$run_type <- run_type
   data_xfile$crop <- "WHEAT" 
   data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ WHEAT LAC"
   data_xfile$name <- "./JBID.WHX" 
