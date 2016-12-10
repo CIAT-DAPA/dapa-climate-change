@@ -90,6 +90,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
   PLRD <- information$PLRD  
   PLDP <- information$PLDP 
   SYMBI <- information$SYMBI
+  PLRS <- information$PLRS
   
   #override defaults if run_type is diagnostic
   if (information$run_type == "diagnostic") {NITRO <- "N"} else {NITRO <- "Y"}
@@ -203,7 +204,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
   
   ## Planting Details
   in_data$planting <- data.frame( P = 1, PDATE = pdate, EDATE = -99, PPOP, PPOE, PLME, 
-                                  PLDS, PLRS = -99, PLRD, PLDP,
+                                  PLDS, PLRS = PLRS, PLRD, PLDP,
                                   PLWT = -99, PAGE = -99, PENV = -99, PLPH = -99, SPRL = -99)
   
   ## Simulation Control 

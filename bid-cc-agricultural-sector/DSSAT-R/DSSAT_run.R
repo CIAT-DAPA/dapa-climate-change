@@ -131,6 +131,7 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
   
   ## Make Soil
   Extraer.SoilDSSAT(values[input$climate$id[pixel]],getwd())
+  rewrite_soilfile("SOIL.SOL", "SOIL.SOL")
   
   ## Make Xfile 
   if(input$xfile$system == "rainfed") {

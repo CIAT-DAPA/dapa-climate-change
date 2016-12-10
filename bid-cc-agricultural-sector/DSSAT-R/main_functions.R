@@ -469,4 +469,83 @@ change_date_to_fut <- function(data){
 
 ##Run[, 'SDAT'] <- as.numeric(paste0(change_date_to_fut(Run[, 'SDAT']), substr(Run[, 'SDAT'], 5, 7)))
 
+##############################################################################
+## Correct -99.0 data from soil file so that model actually runs / JRV, JMD, HAA, EVA, CIAT Dec. 2016
+##############################################################################
+rewrite_soilfile <- function(infile, outfile) {
+  #infile <- paste("~/CIAT-work/BID-impacts/rerun_analysis/SOIL.SOL")
+  #oufile <- paste("~/CIAT-work/BID-impacts/rerun_analysis/SOIL2.SOL")
+  
+  soilprof_df <- data.frame()
+  soilprof_ls <- list()
+  ifil <- file(infile, open="r")
+  all_lines <- readLines(ifil,n=-1)
+  close(ifil); rm(ifil)
+  jcount <- 1
+  
+  all_lines_new <- all_lines
+  
+  #find which rows should be targeted
+  wrows <- grep("SLB  SLPX",all_lines)
+  
+  for (i in 1:length(all_lines)) {
+    #i <- 3
+    #read lines, in case of empty line read.table() will return error object
+    tline <- all_lines[i]
+    tline <- try(read.table(textConnection(tline)),silent=T)
+    if (class(tline) != "try-error") {
+      if (length(grep("\\*BID",tline$V1)) > 0) {
+        cat("found a profile, reading all the stuff line=",i,"\n")
+        #now read all the profile details
+        sprofdata <- data.frame()
+        for (j in (i+6):(wrows[jcount]-1)) {
+          #j <- i+6
+          trow <- all_lines[j]
+          trow <- read.fwf(textConnection(trow),widths=rep(6,17)) #read.table(textConnection(trow))
+          sprofdata <- rbind(sprofdata,trow)
+        }
+        names(sprofdata) <- c("SLB","SLMH","SLLL","SDUL","SSAT","SRGF","SSKS","SBDM","SLOC",
+                              "SLCL","SLSI","SLCF","SLNI","SLHW","SLHB","SCEC","SADC")
+        
+        sprofdata$SLLL[which(sprofdata$SLLL < 0)] <- NA; sprofdata$SLLL[which(is.na(sprofdata$SLLL))] <- min(sprofdata$SLLL,na.rm=T)
+        sprofdata$SDUL[which(sprofdata$SDUL < 0)] <- NA; sprofdata$SDUL[which(is.na(sprofdata$SDUL))] <- min(sprofdata$SDUL,na.rm=T)
+        sprofdata$SSAT[which(sprofdata$SSAT < 0)] <- NA; sprofdata$SSAT[which(is.na(sprofdata$SSAT))] <- min(sprofdata$SSAT,na.rm=T)
+        sprofdata$SBDM[which(sprofdata$SBDM < 0)] <- NA; sprofdata$SBDM[which(is.na(sprofdata$SBDM))] <- min(sprofdata$SBDM,na.rm=T)
+        
+        irow <- 1
+        for (j in (i+6):(wrows[jcount]-1)) {
+          cat("i=",i,"and j=",j,"\n")
+          #j <- i+6
+          #SLB  SLMH  SLLL  SDUL  SSAT  SRGF  SSKS  SBDM  SLOC  SLCL  SLSI  SLCF  SLNI  SLHW  SLHB  SCEC  SADC
+          xstr <- paste(sprintf("%6d",as.integer(sprofdata$SLB[irow])),sprintf("%-6s",sprofdata$SLMH[irow]),
+                        " ", sprintf("%5.3f",sprofdata$SLLL[irow])," ",sprintf("%5.3f",sprofdata$SDUL[irow]),
+                        " ", sprintf("%5.3f",sprofdata$SSAT[irow]),paste0(" ",substr(sprintf("%5.2f",sprofdata$SRGF[irow]),1,5)),
+                        paste0(" ",substr(sprintf("%5.2f",sprofdata$SSKS[irow]),1,5)),paste0(" ",substr(sprintf("%5.2f",sprofdata$SBDM[irow]),1,5)),
+                        paste0(" ",substr(sprintf("%5.2f",sprofdata$SLOC[irow]),1,5)),paste0(" ",substr(sprintf("%5.2f",sprofdata$SLCL[irow]),1,5)),
+                        paste0(" ",substr(sprintf("%5.2f",sprofdata$SLSI[irow]),1,5)),paste0(" ",substr(sprintf("%5.2f",sprofdata$SLCF[irow]),1,5)),
+                        paste0(" ",substr(sprintf("%5.2f",sprofdata$SLNI[irow]),1,5)),paste0(" ",substr(sprintf("%5.2f",sprofdata$SLHW[irow]),1,5)),
+                        paste0(" ",substr(sprintf("%5.2f",sprofdata$SLHB[irow]),1,5)),paste0(" ",substr(sprintf("%5.2f",sprofdata$SCEC[irow]),1,5)),
+                        paste0(" ",substr(sprintf("%5.2f",sprofdata$SADC[irow]),1,5)),sep="")
+          all_lines_new[j] <- xstr
+          irow <- irow+1
+        }
+        
+        xx <- -99
+        xx <- paste(" ",substr(sprintf("%6.2f",xx),1,5),sep="")
+        
+        soilprof_ls[[1]] <- sprofdata
+        jcount <- jcount+1
+      }
+    }
+  }
+  
+  
+  ofil <- file(oufile, open="w")
+  writeLines(all_lines_new,con=ofil,sep="\n")
+  close(ofil)
+  
+  #ifil <- file(infile, open="w")
+  #writeLines(all_lines,con=ifil,sep="\n")
+  #close(ifil)
+}
 
