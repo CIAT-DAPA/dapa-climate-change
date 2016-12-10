@@ -472,7 +472,7 @@ change_date_to_fut <- function(data){
 ##############################################################################
 ## Correct -99.0 data from soil file so that model actually runs / JRV, JMD, HAA, EVA, CIAT Dec. 2016
 ##############################################################################
-rewrite_soilfile <- function(infile, outfile) {
+rewrite_soilfile <- function(infile, oufile) {
   #infile <- paste("~/CIAT-work/BID-impacts/rerun_analysis/SOIL.SOL")
   #oufile <- paste("~/CIAT-work/BID-impacts/rerun_analysis/SOIL2.SOL")
   
@@ -495,7 +495,7 @@ rewrite_soilfile <- function(infile, outfile) {
     tline <- try(read.table(textConnection(tline)),silent=T)
     if (class(tline) != "try-error") {
       if (length(grep("\\*BID",tline$V1)) > 0) {
-        cat("found a profile, reading all the stuff line=",i,"\n")
+        #cat("found a profile, reading all the stuff line=",i,"\n")
         #now read all the profile details
         sprofdata <- data.frame()
         for (j in (i+6):(wrows[jcount]-1)) {
@@ -514,7 +514,7 @@ rewrite_soilfile <- function(infile, outfile) {
         
         irow <- 1
         for (j in (i+6):(wrows[jcount]-1)) {
-          cat("i=",i,"and j=",j,"\n")
+          #cat("i=",i,"and j=",j,"\n")
           #j <- i+6
           #SLB  SLMH  SLLL  SDUL  SSAT  SRGF  SSKS  SBDM  SLOC  SLCL  SLSI  SLCF  SLNI  SLHW  SLHB  SCEC  SADC
           xstr <- paste(sprintf("%6d",as.integer(sprofdata$SLB[irow])),sprintf("%-6s",sprofdata$SLMH[irow]),

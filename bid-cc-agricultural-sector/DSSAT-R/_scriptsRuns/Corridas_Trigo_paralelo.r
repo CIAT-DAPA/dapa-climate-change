@@ -122,7 +122,7 @@ for (cultivar in 1:nrow(cul_list)) {
   dir_base <- "~/Scratch"
   
   #run dssat for one pixel (test)
-  #run_dssat(input=input_data, pixel=1, dir_dssat, dir_base)
+  #run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
   
   ## librerias para el trabajo en paralelo
   library(foreach)
