@@ -47,25 +47,26 @@ source(paste0(path_functions, "make_xfile.R"))         ## Cargar funcion para es
 source(paste0(path_functions, "make_wth.R")) 
 source(paste0(path_functions, "dssat_batch.R"))
 source(paste0(path_functions, "DSSAT_run.R"))
-##
-#Crear data.frame de aplicaciones de fertilizante
-if (run_type == "diagnostic") {
-  day0 <-  crop_mgmt$N.app.0
-  day_aplication0 <- rep(0, length(day0))
-  
-  day30 <- crop_mgmt$N.app.30
-  day_aplication30 <- rep(30, length(day30))
-  
-  amount <- data.frame(day0, day30)
-  day_app <- data.frame(day_aplication0, day_aplication30)
-} else {
-  #here write update of mgmt matrix when first (diagnostic) run is available
-}
+
 
 ##Definir rango de anos, linea base: 71:99; futuro: 69:97
 if (scenario == "historical") {years <- 71:99}
 if (scenario == "future") {years <- 69:97}
-  
+
+#Crear data.frame de aplicaciones de fertilizante
+day0 <-  crop_mgmt$N.app.0
+day_aplication0 <- rep(0, length(day0))
+
+if (run_type == "diagnostic") {
+  day30 <- rep(0, length(crop_mgmt$N.app.0))
+} else {
+  day30 <- crop_mgmt$N.app.30
+}
+day_aplication30 <- rep(30, length(day30))
+
+amount <- data.frame(day0, day30)
+day_app <- data.frame(day_aplication0, day_aplication30)
+
   ## configuracion Archivo experimental secano  
   data_xfile <- list()
   data_xfile$run_type <- run_type
@@ -115,8 +116,8 @@ if (scenario == "future") {years <- 69:97}
   climate_data$long <- crop_mgmt[, "x"]         ## You can include a vector of longitude
   climate_data$wfd <- "wfd"       ## Switch between "wfd" and "model"
   climate_data$id <- crop_mgmt[, "Coincidencias"]
-
-  
+  ##
+ 
   ## Entradas para las corridas de DSSAT
   input_data <- list()
   input_data$xfile <- data_xfile
@@ -153,4 +154,4 @@ if (scenario == "future") {years <- 69:97}
   #clean up
   setwd("~")
   system("rm -rf ~/Scratch")
-}
+}}
