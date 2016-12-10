@@ -149,9 +149,10 @@ day_app <- data.frame(day_aplication0, day_aplication30)
                            modelos[gcm_i], "_",  ".RDat",sep=""))
     
 
-  }}
+  }
 ###esta parte aun no porque cierra R
   #clean up
   setwd("~")
   system("rm -rf ~/Scratch")
-}}
+} 
+ 
