@@ -151,7 +151,7 @@ day_app <- data.frame(day_aplication0, day_aplication30)
 
   }
   #clean up
-  setwd("~")
-  system("rm -rf ~/Scratch")
+  #setwd("~")
+  #system("rm -rf ~/Scratch")
 } 
  
