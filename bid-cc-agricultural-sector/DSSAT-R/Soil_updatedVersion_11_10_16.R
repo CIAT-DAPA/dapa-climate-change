@@ -286,19 +286,20 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
     condicion_2 <- match(celdas_id_Wise[pos_value_missing, 'SoilProfile'], Cod_Ref_and_Position_Generic[, 'Cod_Ref_Generic'])
     if(length(condicion) > 0 && length(condicion_2) > 0){
       
-      Wise_Position <- Cod_Ref_and_Position[which(Cod_Ref_and_Position[,'Cod_Ref'] == celdas_id_Wise[,'SoilProfile']),][1,2]
-      Generic_Position <- match(celdas_id_Wise[pos_value_missing, 'SoilProfile'], Cod_Ref_and_Position_Generic[, 'Cod_Ref_Generic'])
+      Wise_Position <- Cod_Ref_and_Position[condicion, 2]
+      Generic_Position <- Cod_Ref_and_Position_Generic[condicion_2, 2]
       
       # Wise soils
       sink("SOIL.SOL")
       for(i in 1:length(condicion)){
-        make_soilfile2(in_data, i, wise[Wise_Position:length(wise)], path)
-        
+        make_soilfile2(in_data, i, wise[Wise_Position[i]:length(wise)], path)
+        cat("\n")
       }
       
       # Generic soils
       for(j in 1:length(condicion_2)){
-        make_soilfile2(in_data, i+j, Soil_Generic[Cod_Ref_and_Position_Generic[Generic_Position,2]:length(wise)], path)              
+        make_soilfile2(in_data, i+j, Soil_Generic[Generic_Position[j]:length(wise)], path)
+        cat("\n")
       }
       sink()
       
@@ -315,8 +316,9 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
         
         sink("SOIL.SOL")
         for(i in 1:length(condicion)){
-          Wise_Position <- Cod_Ref_and_Position[which(Cod_Ref_and_Position[,'Cod_Ref'] == celdas_id_Wise[i,'SoilProfile']),]
-          make_soilfile2(in_data, i, wise[Wise_Position[,2]:length(wise)], path)
+          Wise_Position <- Cod_Ref_and_Position[condicion, 2] # Cod_Ref_and_Position[which(Cod_Ref_and_Position[,'Cod_Ref'] == celdas_id_Wise[i,'SoilProfile']),]
+          make_soilfile2(in_data, i, wise[Wise_Position[i]:length(wise)], path)
+          cat("\n")
         }
         sink()
         return('Done\n')
@@ -329,8 +331,9 @@ Extraer.SoilDSSAT <- function(Codigo_identificadorSoil, profileMatrix, path) {
   
 }
 
-
 Extraer.SoilDSSAT(Codigo_identificadorSoil = values[5], profileMatrix = profileMatrix, path = '/mnt/workspace_cluster_3/bid-cc-agricultural-sector/')
+Extraer.SoilDSSAT(Codigo_identificadorSoil = 191, profileMatrix = profileMatrix, path = '/mnt/workspace_cluster_3/bid-cc-agricultural-sector/')
+Extraer.SoilDSSAT(Codigo_identificadorSoil = 5636, profileMatrix = profileMatrix, path = '/mnt/workspace_cluster_3/bid-cc-agricultural-sector/')
 
 # Extraer.SoilDSSAT(values[972], getwd())
 
