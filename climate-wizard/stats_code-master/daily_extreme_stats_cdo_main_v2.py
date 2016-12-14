@@ -17,7 +17,7 @@ import daily_extreme_stats_temp_v2 as t_stats
 import daily_extreme_stats_precip_v2 as p_stats
 
 # var_stat = ['txavg', 'tnavg', 'txx', 'tnn', 'gd10', 'hd18', 'cd18', 'ptot', 'cdd', 'r02', 'r5d', 'sdii', 'hwdi', 'gsl']
-var_stat = ['txavg', 'tnavg', 'tas', 'txx', 'tnn', 'ptot', 'r02']
+var_stat = ['txavg', 'tnavg', 'tas', 'txx', 'tnn', 'ptot', 'r02','sdii', 'hwdi', 'gsl']
 #var_stat = ['sdii', 'hwdi', 'gsl']
 
 # define reference historical period
@@ -33,8 +33,8 @@ StYrsFut = 2006
 EnYrsFut = 2099
 
 # root dir needs to match list of runs below - they need to be located there
-RootDir = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
-
+RootDir = '/mnt/workspace_cluster_12/ClimateWizard/AR5_Global_Daily_25k/'
+infile='/mnt/data_climatewizard/AR5_Global_Daily_25k'
 # model name
 model = str(argv[1])
 
@@ -50,7 +50,7 @@ if not path.isdir('/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/' + mo
 # Also, tavg ('tas') is needed for many stats, calculate up front
 for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
     if scens == 'historical':
-		ind_hist = RootDir#RootDir + "/" + model + "/historical/day/r1i1p1"
+		ind_hist = infile#RootDir#RootDir + "/" + model + "/historical/day/r1i1p1"
 
 		#### soflink tasmin historical
 		fn_hist_tn = ind_hist + "/tasmin_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
@@ -78,7 +78,7 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
 		fn_hist_prmm = RootDir + "/" + model + "/junk/prmm_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
 		# t_stats.copy_files(fn_hist_prmm, StComHis, EnComHis, model)
     else:
-        ind_rcp = RootDir#RootDir + "/" + model + "/" + scens + "/day/r1i1p1"
+        ind_rcp = infile#RootDir#RootDir + "/" + model + "/" + scens + "/day/r1i1p1"
 
         # soflink tasmin rcp
         fn_rcp_tn = ind_rcp + "/tasmin_day_BCSD_" + scens + "_r1i1p1_"+ model + "_"

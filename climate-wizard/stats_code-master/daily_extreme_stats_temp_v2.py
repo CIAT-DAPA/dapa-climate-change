@@ -22,7 +22,8 @@ OUTROOT = '/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats'
 if not path.isdir(OUTROOT):
     mkdir(OUTROOT)
 
-OUTTEMP = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
+OUTTEMP = '/mnt/workspace_cluster_12/ClimateWizard/AR5_Global_Daily_25k'#'/mnt/data_climatewizard/AR5_Global_Daily_25k'
+OUTTEMP2 = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
 if not path.isdir(OUTTEMP):
     mkdir(OUTTEMP)
 
@@ -129,7 +130,9 @@ def tavg(fname='', styr=0, enyr=0, model=''):
 			for i in range(nyrs):
 				y = styr + i
 				print "\n computing tavg for %s%s " % (path.basename(fname), y)
-				fn = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(y) + ".nc"
+				# fn = OUTTEMP + "/" + model + "/junk/" + fn_nodir + str(y) + ".nc"
+				fn = OUTTEMP2 + "/"  + fn_nodir+ str(y) + ".nc"
+				print "testt: "+ fn + "\n"
 				if not path.exists(fn):
 					if y == enyr:
 						print 'infile not found: %s ...skipping last year' % fn

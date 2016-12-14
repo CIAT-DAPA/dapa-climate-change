@@ -22,7 +22,7 @@ OUTROOT = '/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats'
 if not path.isdir(OUTROOT):
     mkdir(OUTROOT)
 
-OUTTEMP = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
+OUTTEMP = '/mnt/workspace_cluster_12/ClimateWizard/AR5_Global_Daily_25k'#'/mnt/data_climatewizard/AR5_Global_Daily_25k'
 if not path.isdir(OUTTEMP):
     mkdir(OUTTEMP)
 
