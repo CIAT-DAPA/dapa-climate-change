@@ -21,6 +21,9 @@ modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 gcm_i <- 10 #which GCM will be run
 
+#if we want to clean up raw DSSAT files
+cleanup_all <- F
+
 ##############################################################################
 ##############################################################################
 
@@ -36,7 +39,8 @@ for (cultivar in 1:nrow(cul_list)) {
   load(paste0(path_project, "14-ObjectsR/Soil2.RData"))
   rm(list=setdiff(ls(), c("values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile","xy_Ref",
                           "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
-                          "Cod_Ref_and_Position", "profileMatrix","scenario","cul_list","cultivar","run_type","sys_type")))
+                          "Cod_Ref_and_Position", "profileMatrix","scenario","cul_list","cultivar","run_type","sys_type",
+                          "modelos","gcm_i","cleanup_all")))
   load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Wheat_",sys_type,".RDat"))
   assign("crop_mgmt", get(paste("crop_",sys_type,sep="")))
   
@@ -144,16 +148,22 @@ for (cultivar in 1:nrow(cul_list)) {
   
   #save file
   if (scenario == "historical") {
-    save(Run, file = paste("~/bid_reruns/",run_type,"/", data_xfile$crop,"_",data_xfile$system,"_", 
-                           paste(cul_list$culname[which(cul_list$CID == cultivar)]), '_WFD', 
-                           ".RDat", sep = ""))
+    store_name <- paste0(data_xfile$crop,"_",data_xfile$system,"_", 
+                         paste(cul_list$culname[which(cul_list$CID == cultivar)]), '_WFD')
   } else {
-    save(Run, file = paste("~/bid_reruns/",run_type,"/", data_xfile$crop, "_", data_xfile$system, "_", 
-                           paste(cul_list$culname[which(cul_list$CID == cultivar)]), "_", 
-                           modelos[gcm_i], "_",  ".RDat",sep=""))
+    store_name <- paste0(data_xfile$crop, "_", data_xfile$system, "_", 
+                         paste(cul_list$culname[which(cul_list$CID == cultivar)]), "_",
+                         modelos[gcm_i])
   }
+  save(Run, file = paste("~/bid_reruns/",run_type, "/", store_name, ".RDat",sep=""))
   
-  #clean up
-  setwd("~")
-  system("rm -rf ~/Scratch")
+  #clean up, else create a folder and store results in there
+  if (cleanup_all) {
+    setwd("~")
+    system("rm -rf ~/Scratch")
+  } else {
+    setwd("~")
+    system(paste0("mkdir ~/Scratch/",run_type,"_",store_name))
+    system(paste0("mv -f ~/Scratch/",data_xfile$crop,"_",data_xfile$system,"_* ~/Scratch/",run_type,"_",store_name,"/."))
+  }
 }
