@@ -130,7 +130,7 @@ run_dssat <- function(input, pixel, dir_dssat, dir_base) {
   CSMbatch(input$xfile$crop, input$xfile$name, input$xfile$bname) 
   
   ## Make Soil
-  Extraer.SoilDSSAT(input, getwd())
+  Extraer.SoilDSSAT(pixel, getwd())
   rewrite_soilfile("SOIL.SOL", "SOIL.SOL")
   
   ## Make Xfile 

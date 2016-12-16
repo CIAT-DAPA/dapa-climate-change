@@ -1,7 +1,7 @@
 #JRV extraer soil data from 30m grid
 #Dec 2016
 
-Extraer.SoilDSSAT <- function(input,path) {
+Extraer.SoilDSSAT <- function(pixel,path) {
   #position <- Codigo_identificadorSoil + 1   ## Where it coincides with the raster ID
   #posicion <- which(Soil_profile[, 1] == position)
   cell_id <- xy_Ref$CELL30M[which(round(xy_Ref$x,5) == round(input$climate$long[pixel],5) & round(xy_Ref$y,5) == round(input$climate$lat[pixel],5))]
