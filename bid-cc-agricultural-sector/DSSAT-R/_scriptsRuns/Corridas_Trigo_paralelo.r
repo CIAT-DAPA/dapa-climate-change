@@ -16,8 +16,7 @@ run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (fin
 #cropping system
 sys_type <- "riego" #riego, secano
 
-
-#GCMs
+#GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 gcm_i <- 10 #which GCM will be run
@@ -27,15 +26,17 @@ gcm_i <- 10 #which GCM will be run
 
 #iterate cultivars
 for (cultivar in 1:nrow(cul_list)) {
+  #cultivar <- 1
   #Paths para scripts de funciones y workspace
   path_functions <- "~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/DSSAT-R/"
   path_project <- "/mnt/workspace_cluster_3/bid-cc-agricultural-sector/"
   
   #Cargar data frame entradas para DSSAT
-  load(paste0(path_project, "14-ObjectsR/Soil.RData"))
-  rm(list=setdiff(ls(), c("Extraer.SoilDSSAT", "values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile"
-                          , "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", "Cod_Ref_and_Position",
-                          "scenario","cul_list","cultivar","run_type","sys_type")))
+  #load(paste0(path_project, "14-ObjectsR/Soil.RData"))
+  load(paste0(path_project, "14-ObjectsR/Soil2.RData"))
+  rm(list=setdiff(ls(), c("values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile","xy_Ref",
+                          "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
+                          "Cod_Ref_and_Position", "profileMatrix","scenario","cul_list","cultivar","run_type","sys_type")))
   load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Wheat_",sys_type,".RDat"))
   assign("crop_mgmt", get(paste("crop_",sys_type,sep="")))
   
@@ -45,6 +46,7 @@ for (cultivar in 1:nrow(cul_list)) {
   source(paste0(path_functions, "make_wth.R")) 
   source(paste0(path_functions, "dssat_batch.R"))
   source(paste0(path_functions, "DSSAT_run.R"))
+  source(paste0(path_functions, "Extraer.SoilDSSAT.R"))  ## New extraer soil dssat function
   
   #Crear data.frame de aplicaciones de fertilizante
   if (run_type == "diagnostic") {
