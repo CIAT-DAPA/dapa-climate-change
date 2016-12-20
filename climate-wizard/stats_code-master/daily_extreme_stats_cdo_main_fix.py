@@ -34,7 +34,10 @@ StYrsFut = 2006
 
 
 # root dir needs to match list of runs below - they need to be located there
-RootDir = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
+# RootDir = '/mnt/data_climatewizard/AR5_Global_Daily_25k'
+RootDir = '/mnt/workspace_cluster_12/ClimateWizard/AR5_Global_Daily_25k/'
+infile='/mnt/data_climatewizard/AR5_Global_Daily_25k'
+
 
 # model name
 # model = str(argv[1])
@@ -63,7 +66,7 @@ for n in file.readlines():
 			EnYrsFut = 2095
 		
 		if scens == 'historical':
-			ind_hist = RootDir#RootDir + "/" + model + "/historical/day/r1i1p1"
+			ind_hist = infile#RootDir#RootDir + "/" + model + "/historical/day/r1i1p1"
 
 			#### soflink tasmin historical
 			fn_hist_tn = ind_hist + "/tasmin_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
@@ -90,7 +93,7 @@ for n in file.readlines():
 			fn_hist_prmm = RootDir + "/" + model + "/junk/prmm_day_BCSD" +"_historical_r1i1p1_"+ model + "_"
 			t_stats.copy_files(fn_hist_prmm, StComHis, EnComHis, model)
 		else:
-			ind_rcp = RootDir#RootDir + "/" + model + "/" + scens + "/day/r1i1p1"
+			ind_rcp = infile#RootDir RootDir#RootDir + "/" + model + "/" + scens + "/day/r1i1p1"
 
 			# soflink tasmin rcp
 			fn_rcp_tn = ind_rcp + "/tasmin_day_BCSD_" + scens + "_r1i1p1_"+ model + "_"
