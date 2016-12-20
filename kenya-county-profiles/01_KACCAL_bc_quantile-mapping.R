@@ -296,16 +296,29 @@ periodList <- c('2021_2045', '2041_2065')
 rcpList    <- paste("rcp", c(45, 60, 85), sep="") # 26
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 varList    <- c('tmax', 'tmin', 'prec', 'dswrf')
+
+countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
+                                   rep('Cluster 2', 8)),
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin Gishu',
+                                  'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado',
+                                  'Baringo', 'Laikipia', 'Tharaka', 'Lamu',
+                                  'Marsabit', 'Isiolo', 'Wajir', 'Mandera')) # Define counties to analyze by cluster
+countyList$Cluster <- as.character(countyList$Cluster)
+countyList$County <- as.character(countyList$County)
+countyList <- countyList[1,]
+
 # countyList
-lapply(1:length(periodList), function(l){
-  cat('Processing period:',periodList[[l]] , '\n')
-  lapply(1:length(rcpList), function(k){
-    cat('Processing RCP:', rcpList[[k]], '\n')
-    lapply(1:length(gcmList), function(j){
-      cat('Processing GCM:', gcmList[[j]], '\n')
-      lapply(1:length(varList), function(i){
-        cat('Processing variable:', varList[[i]], '\n')
-        BC_Qmap(county="Garissa", rcp=rcpList[[k]], gcm=gcmList[[j]], var=varList[[i]], period=periodList[[l]])
+lapply(1:nrow(countyList), function(z){
+  lapply(1:length(periodList), function(l){
+    cat('Processing period:',periodList[[l]] , '\n')
+    lapply(1:length(rcpList), function(k){
+      cat('Processing RCP:', rcpList[[k]], '\n')
+      lapply(1:length(gcmList), function(j){
+        cat('Processing GCM:', gcmList[[j]], '\n')
+        lapply(1:length(varList), function(i){
+          cat('Processing variable:', varList[[i]], '\n')
+          BC_Qmap(county=countyList$County[[z]], rcp=rcpList[[k]], gcm=gcmList[[j]], var=varList[[i]], period=periodList[[l]])
+        })
       })
     })
   })
