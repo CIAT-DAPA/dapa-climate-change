@@ -20,7 +20,7 @@ sys_type <- "riego" #riego, secano
 #GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
-gcm_i <- 10 #which GCM will be run
+gcm_i <- 1 #which GCM will be run 10
 
 #if we want to clean up raw DSSAT files
 cleanup_all <- F
@@ -146,7 +146,7 @@ for (cultivar in 1:nrow(cul_list)) {
   
   ## Carpetas necesarias donde se encuentra DSSAT compilado y un directorio para las corridas
   dir_dssat <- "~/csm45_1_23_bin_ifort/"
-  dir_base <- "~/Scratch"
+  dir_base <- "~/ScratchFinal"
   
   #run dssat for one pixel (test)
   #run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
@@ -181,10 +181,10 @@ for (cultivar in 1:nrow(cul_list)) {
   #clean up, else create a folder and store results in there
   if (cleanup_all) {
     setwd("~")
-    system("rm -rf ~/Scratch")
+    system("rm -rf ~/ScratchFinal")
   } else {
     setwd("~")
-    system(paste0("mkdir ~/Scratch/",run_type,"_",store_name))
-    system(paste0("mv -f ~/Scratch/",data_xfile$crop,"_",data_xfile$system,"_* ~/Scratch/",run_type,"_",store_name,"/."))
+    system(paste0("mkdir ~/ScratchFinal/",run_type,"_",store_name))
+    system(paste0("mv -f ~/ScratchFinal/",data_xfile$crop,"_",data_xfile$system,"_* ~/ScratchFinal/",run_type,"_",store_name,"/."))
   }
 }
