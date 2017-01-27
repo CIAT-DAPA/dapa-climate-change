@@ -10,7 +10,7 @@ library(raster); library(ncdf4); library(maptools)
 data(wrld_simpl)
 
 #name of crop to analyse
-cropname <- "Maize"
+cropname <- "Rice"
 
 #define seasons
 #note that for wheat, GCCMI have merged planting dates, hence we use the average yield.
@@ -24,8 +24,8 @@ if (tolower(cropname) %in% c("maize","rice")) {
   seas <- c("_")
 }
 
-#nfsDir <- "/nfs/a101/earjr"
-nfsDir <- "~/Leeds-work"
+nfsDir <- "/nfs/a101/earjr"
+#nfsDir <- "~/Leeds-work"
 wd <- paste(nfsDir,"/ToE-global-crops-seasons",sep="")
 yiDir <- paste(wd,"/yield_responses/yield_data/yield_data",seas,tolower(cropname),sep="")
 metDir <- paste(wd,"/yield_responses/meteorology",sep="")
@@ -39,8 +39,13 @@ source("~/Repositories/dapa-climate-change/toe-global-crops/leap_year.R")
 source("~/Repositories/dapa-climate-change/toe-global-crops/gdd_calc.R")
 
 #load planting and harvesting dates
-pdate_rs <- raster(paste(wd,"/data/growing_season_prod_countries_",cropname,".nc",sep=""),varname="planting_day")
-hdate_rs <- raster(paste(wd,"/data/growing_season_prod_countries_",cropname,".nc",sep=""),varname="harvest_day")
+if (tolower(cropname) == "soybean") {
+  pdate_rs <- raster(paste(wd,"/data/growing_season_prod_countries_Soybeans.nc",sep=""),varname="planting_day")
+  hdate_rs <- raster(paste(wd,"/data/growing_season_prod_countries_Soybeans.nc",sep=""),varname="harvest_day")
+} else {
+  pdate_rs <- raster(paste(wd,"/data/growing_season_prod_countries_",cropname,".nc",sep=""),varname="planting_day")
+  hdate_rs <- raster(paste(wd,"/data/growing_season_prod_countries_",cropname,".nc",sep=""),varname="harvest_day")
+}
 
 #load yield data to get mask
 yield_stk <- stack(paste(yiDir,"/gdhy_2013JAN29_",tolower(cropname),seas,"ModelYld500_",1986:2005,".tif",sep=""))
@@ -51,7 +56,11 @@ msk_rs[which(!is.na(msk_rs[]))] <- 1
 
 #keep constructing mask using Maisa's output (these are the pixels we're interested in)
 #fix what Maisa sent
-toe_rs <- stack(paste(toeDir,"/pp_change_atTOE_RCP",c(26,45,60,85),"_",cropname,".nc",sep=""),varname="pr_change")
+if (tolower(cropname) == "soybean") {
+  toe_rs <- stack(paste(toeDir,"/pp_change_atTOE_RCP",c(26,45,60,85),"_Soy.nc",sep=""),varname="pr_change")
+} else {
+  toe_rs <- stack(paste(toeDir,"/pp_change_atTOE_RCP",c(26,45,60,85),"_",cropname,".nc",sep=""),varname="pr_change")
+}
 toe_rs1 <- t(toe_rs)
 toe_rs1 <- flip(toe_rs1, direction="y")
 toe_rs1 <- flip(toe_rs1, direction="x")
@@ -93,12 +102,12 @@ row.names(all_data) <- 1:nrow(all_data)
 
 #create meteorology array. Start from year before to account for those years where
 #planted in year before and harvested this year
-if (!file.exists(paste(metDir,"/meteorology.RData",sep=""))) {
+if (!file.exists(paste(metDir,"/meteorology_",tolower(cropname),".RData",sep=""))) {
   met_array <- array(data=NA,dim=c(nrow(in_data),3,length(1985:2005),366),
                      dimnames=list(CELL=1:nrow(in_data),VARNAME=c("prec","tmin","tmax"),YEAR=1985:2005,DAY=1:366))
   
   #fill in array
-  for (year in 1985:1986) {
+  for (year in 1985:2005) {
     #year <- 1985
     #load monthly meteorology for this year
     prec_year <- tmin_year <- tmax_year <- c()
@@ -133,9 +142,9 @@ if (!file.exists(paste(metDir,"/meteorology.RData",sep=""))) {
     met_array[,"tmin",paste(year),1:ndays] <- as.numeric(extract(tmin_year, in_data[, c("x","y")]))
     met_array[,"tmax",paste(year),1:ndays] <- as.numeric(extract(tmax_year, in_data[, c("x","y")]))
   }
-  save(met_array, file=paste(metDir,"/meteorology.RData",sep=""))
+  save(met_array, file=paste(metDir,"/meteorology_",tolower(cropname),".RData",sep=""))
 } else {
-  load(file=paste(metDir,"/meteorology.RData",sep=""))
+  load(file=paste(metDir,"/meteorology_",tolower(cropname),".RData",sep=""))
 }
 
 
@@ -175,15 +184,15 @@ season_vars <- function(p_i, year) {
   } else if (pdate_i >= hdate_i) {
     #previous year
     if (is.leapyear(year-1)) {ndays1 <- 366} else {ndays1 <- 365}
-    met_data1 <- data.frame(doy=1:ndays1, prec=met_array[paste(p_i),"prec",paste(year-1),paste(1:ndays)], 
-                            tmin=met_array[paste(p_i),"tmin",paste(year-1),paste(1:ndays)],
-                            tmax=met_array[paste(p_i),"tmax",paste(year-1),paste(1:ndays)])
+    met_data1 <- data.frame(doy=1:ndays1, prec=met_array[paste(p_i),"prec",paste(year-1),paste(1:ndays1)], 
+                            tmin=met_array[paste(p_i),"tmin",paste(year-1),paste(1:ndays1)],
+                            tmax=met_array[paste(p_i),"tmax",paste(year-1),paste(1:ndays1)])
     
     #this year
     if (is.leapyear(year)) {ndays2 <- 366} else {ndays2 <- 365}
-    met_data2 <- data.frame(doy=1:ndays2, prec=met_array[paste(p_i),"prec",paste(year),paste(1:ndays)], 
-                            tmin=met_array[paste(p_i),"tmin",paste(year),paste(1:ndays)],
-                            tmax=met_array[paste(p_i),"tmax",paste(year),paste(1:ndays)])
+    met_data2 <- data.frame(doy=1:ndays2, prec=met_array[paste(p_i),"prec",paste(year),paste(1:ndays2)], 
+                            tmin=met_array[paste(p_i),"tmin",paste(year),paste(1:ndays2)],
+                            tmax=met_array[paste(p_i),"tmax",paste(year),paste(1:ndays2)])
     
     
     #merge both matrices
@@ -209,14 +218,35 @@ season_vars <- function(p_i, year) {
 #season_vars(1, 1986); season_vars(969, 1986); season_vars(463, 1986); season_vars(550, 1986)
 
 #compute for all years
-out_data <- data.frame()
-for (year in 1986:2005) {
-  #year <- 1986
-  yld_year <- all_data[which(all_data$year == year),]
-  seas_out <- as.data.frame(t(sapply(1:nrow(in_data), season_vars, year)))
-  names(seas_out) <- c("prec","tmean","gdd")
-  yld_year <- cbind(yld_year, seas_out)
-  out_data <- rbind(out_data, yld_year)
+if (!file.exists(paste(outDir,"/analysis_data_",tolower(cropname),".RData",sep=""))) {
+  out_data <- data.frame()
+  for (year in 1986:2005) {
+    #year <- 1986
+    cat("processing year=",year,"\n")
+    yld_year <- all_data[which(all_data$year == year),]
+    seas_out <- as.data.frame(t(sapply(1:nrow(in_data), season_vars, year)))
+    names(seas_out) <- c("prec","tmean","gdd")
+    yld_year <- cbind(yld_year, seas_out)
+    out_data <- rbind(out_data, yld_year)
+  }
+  
+  #calculate logyield
+  out_data$logyield <- log(out_data$yield_ton_ha)
+  
+  #decade and 5-year technology periods
+  out_data$dec <- NA; out_data$period <- NA
+  out_data$dec[which(out_data$year <= 1990)] <- 1980
+  out_data$dec[which(out_data$year > 1990 & out_data$year <= 2000)] <- 1990
+  out_data$dec[which(out_data$year > 2000)] <- 2000
+  out_data$period[which(out_data$year <= 1985)] <- 1980
+  out_data$period[which(out_data$year > 1985 & out_data$year <= 1990)] <- 1985
+  out_data$period[which(out_data$year > 1990 & out_data$year <= 1995)] <- 1990
+  out_data$period[which(out_data$year > 1995 & out_data$year <= 2000)] <- 1995
+  out_data$period[which(out_data$year > 2000 & out_data$year <= 2005)] <- 2000
+  
+  #save output file
+  save(out_data, file=paste(outDir,"/analysis_data_",tolower(cropname),".RData",sep=""))
+} else {
+  load(file=paste(outDir,"/analysis_data_",tolower(cropname),".RData",sep=""))
 }
 
-save(out_data)
