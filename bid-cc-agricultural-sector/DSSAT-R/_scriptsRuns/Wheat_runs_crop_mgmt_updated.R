@@ -3,40 +3,40 @@
 ######################## Parallel DSSAT for wheat ############################
 ##############################################################################
 ##############################################################################
-#Some general config
-scenario <- "historical" #historical, future
+# Some general config
+scenario <- "historical" # historical, future
 
-#cultivar list for wheat (based on CIMMYT Mega-environment work)
-cul_list <- data.frame(CID=1:6,dsid=c("IB0010","IB0013","IB0016","IB0028","IB0022","IB0026"),
-                       culname=c("Seri82BA","TajanBA","DonErnestoBA","Gerek79BA","HalconsnaBA","BrigadierBA"))
+# Cultivar list for wheat (based on CIMMYT Mega-environment work)
+cul_list <- data.frame(CID = 1:6, dsid = c("IB0010", "IB0013", "IB0016", "IB0028", "IB0022", "IB0026"),
+                       culname = c("Seri82BA", "TajanBA", "DonErnestoBA", "Gerek79BA", "HalconsnaBA", "BrigadierBA"))
 
-#diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+# Diagnostic run is only performed for irrigated systems, for historical climate
+run_type <- "final" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 # run_type <- "final"
 
-#cropping system
+# Cropping system
 sys_type <- "riego" #riego, secano
 
-#GCMs, only if scenario == "future"
+# GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 gcm_i <- 1 #which GCM will be run 10
 
-#if we want to clean up raw DSSAT files
+# If we want to clean up raw DSSAT files
 cleanup_all <- F
 
 ##############################################################################
 ##############################################################################
-cultivar <- 1; rm(cultivar)
-#iterate cultivars
+# cultivar <- 1
+# Iterate cultivars
 for (cultivar in 1:nrow(cul_list)) {
-  #cultivar <- 1
-  #Paths para scripts de funciones y workspace
+
+  # Paths para scripts de funciones y workspace
   path_functions <- "~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/DSSAT-R/"
   path_project <- "/mnt/workspace_cluster_3/bid-cc-agricultural-sector/"
   
-  #Cargar data frame entradas para DSSAT
-  #load(paste0(path_project, "14-ObjectsR/Soil.RData"))
+  # Cargar data frame entradas para DSSAT
+  # load(paste0(path_project, "14-ObjectsR/Soil.RData"))
   load(paste0(path_project, "14-ObjectsR/Soil2.RData"))
   rm(list=setdiff(ls(), c("values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile","xy_Ref",
                           "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
@@ -44,6 +44,16 @@ for (cultivar in 1:nrow(cul_list)) {
                           "modelos","gcm_i","cleanup_all")))
   load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Wheat_",sys_type,".RDat"))
   assign("crop_mgmt", get(paste("crop_",sys_type,sep="")))
+  
+  # Updating planting dates using GGCMI data
+  library(ncdf4)
+  library(raster)
+  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  ggcmi <- ggcmi[[1]]
+  ggcmi[which(ggcmi[] == -99)] <- NA
+  
+  planting_dates <- raster::extract(x = ggcmi, y = crop_mgmt[, c('x', 'y')])
+  crop_mgmt$mirca.start <- round(planting_dates, 0)
   
   #Cargar funciones
   source(paste0(path_functions, "main_functions.R"))     ## Cargar funciones principales
@@ -146,7 +156,8 @@ for (cultivar in 1:nrow(cul_list)) {
   
   ## Carpetas necesarias donde se encuentra DSSAT compilado y un directorio para las corridas
   dir_dssat <- "~/csm45_1_23_bin_ifort/"
-  dir_base <- "~/ScratchFinal"
+  if(run_type == "diagnostic"){dir_base <- "~/Scratch"}
+  if(run_type == "final"){dir_base <- "~/ScratchFinal"}
   
   #run dssat for one pixel (test)
   #run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
@@ -181,10 +192,17 @@ for (cultivar in 1:nrow(cul_list)) {
   #clean up, else create a folder and store results in there
   if (cleanup_all) {
     setwd("~")
-    system("rm -rf ~/ScratchFinal")
+    if(run_type == "diagnostic"){system("rm -rf ~/Scratch")}
+    if(run_type == "final"){system("rm -rf ~/ScratchFinal")}
   } else {
     setwd("~")
-    system(paste0("mkdir ~/ScratchFinal/",run_type,"_",store_name))
-    system(paste0("mv -f ~/ScratchFinal/",data_xfile$crop,"_",data_xfile$system,"_* ~/ScratchFinal/",run_type,"_",store_name,"/."))
+    if(run_type == "diagnostic"){
+      system(paste0("mkdir ~/Scratch/",run_type,"_",store_name))
+      system(paste0("mv -f ~/Scratch/",data_xfile$crop,"_",data_xfile$system,"_* ~/Scratch/",run_type,"_",store_name,"/."))
+    }
+    if(run_type == "final"){
+      system(paste0("mkdir ~/ScratchFinal/",run_type,"_",store_name))
+      system(paste0("mv -f ~/ScratchFinal/",data_xfile$crop,"_",data_xfile$system,"_* ~/ScratchFinal/",run_type,"_",store_name,"/."))
+    }
   }
 }
