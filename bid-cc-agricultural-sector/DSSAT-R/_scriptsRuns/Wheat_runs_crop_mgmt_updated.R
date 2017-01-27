@@ -15,7 +15,7 @@ run_type <- "final" #diagnostic (to extract fertiliser dates) or final (final ru
 # run_type <- "final"
 
 # Cropping system
-sys_type <- "riego" #riego, secano
+sys_type <- "secano" #riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
@@ -27,7 +27,7 @@ cleanup_all <- F
 
 ##############################################################################
 ##############################################################################
-# cultivar <- 1
+# cultivar <- 5
 # Iterate cultivars
 for (cultivar in 1:nrow(cul_list)) {
 
@@ -82,6 +82,7 @@ for (cultivar in 1:nrow(cul_list)) {
     day_aplication30 <- unlist(lapply(1:dim(crop_mgmt)[1], function(p){
       
       if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_irrigation_', cul_list$culname[cultivar], '_WFD/WHEAT_irrigation_', p, sep = ''))}
+      if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_rainfed_', cul_list$culname[cultivar], '_WFD/WHEAT_rainfed_', p, sep = ''))}
       NappDay <- read.NappDay(crop="WHEAT")
       day30 <- round(mean(NappDay$Napp.day, na.rm = T), 0)
       return(day30)
