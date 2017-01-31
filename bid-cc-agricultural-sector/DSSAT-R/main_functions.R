@@ -55,19 +55,17 @@ initial_conditions_mod <- function(data, system) {
     imp.head <- scan(paste(data), what = "character", skip = profiles[1] - 1, nlines = 1, quiet = T)  # Encabezado (titulo para las columnas)
     seps <- c(6, -6, 6, -30, 6)    ## Separadores para las variables
     Initial_conditions <- read.fwf("SOIL.SOL", width = seps, header = F, skip = profiles[1], n = profiles[2] - profiles[1] - 1)
+    
     ## Aqui se multiplica por 2
-	Initial_conditions$V3 <- Initial_conditions$V3 * 2
-	
+    Initial_conditions$V3 <- Initial_conditions$V3 # * 2
+    
     pat <- "SLB|SLLL|SLOC"
     headers <- imp.head[grep(pat, imp.head, perl = TRUE)]
-	
+    
     ## Borrar easta linea cuando no se corra Papa Secano y Trigo Secano
-   ## Initial_conditions <- data.frame(Initial_conditions[, 1], rep(-99, dim(Initial_conditions)[1]), Initial_conditions[, 3])
+    ## Initial_conditions <- data.frame(Initial_conditions[, 1], rep(-99, dim(Initial_conditions)[1]), Initial_conditions[, 3])
     colnames(Initial_conditions) <- headers
     
-	
-	
-
     return(Initial_conditions)
     
   }
@@ -88,9 +86,7 @@ initial_conditions_mod <- function(data, system) {
     
     return(Initial_conditions)
     
-    
   }
-  
   
 }
 
@@ -106,15 +102,15 @@ initial_conditions_wheat <- function(data, system) {
     
     pat <- "SLB|SLLL|SDUL|SLOC"
     headers <- imp.head[grep(pat, imp.head, perl = TRUE)]
-	
+    
     ## Borrar easta linea cuando no se corra Papa Secano y Trigo Secano
-   ## Initial_conditions <- data.frame(Initial_conditions[, 1], rep(-99, dim(Initial_conditions)[1]), Initial_conditions[, 3])
+    ## Initial_conditions <- data.frame(Initial_conditions[, 1], rep(-99, dim(Initial_conditions)[1]), Initial_conditions[, 3])
     colnames(Initial_conditions) <- headers
-	
-	prom_LWR_UPR <- apply(Initial_conditions[, c('SLLL', 'SDUL')],  1, mean)
-	
-    Initial_conditions <- data.frame(Initial_conditions[, -(2:4)], prom_LWR_UPR, Initial_conditions[, 4])
-	colnames(Initial_conditions) <- c('SLB', 'SDUL', 'SLOC')
+    
+    # prom_LWR_UPR <- apply(Initial_conditions[, c('SLLL', 'SDUL')],  1, mean)
+    
+    Initial_conditions <- Initial_conditions[, c(1, 3, 4)] # data.frame(Initial_conditions[, -(2:4)], prom_LWR_UPR, Initial_conditions[, 4])
+    colnames(Initial_conditions) <- c('SLB', 'SDUL', 'SLOC')
     
     return(Initial_conditions)
     
@@ -136,9 +132,7 @@ initial_conditions_wheat <- function(data, system) {
     
     return(Initial_conditions)
     
-    
   }
-  
   
 }
 

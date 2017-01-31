@@ -5,7 +5,7 @@ library('raster')
 library('ncdf4')
 crops = c('Maize','Potatoes','Rice','Soybeans','Wheat','Bean')
 crops_spam = c('maize','potato','rice','soybean','wheat','bean')
-k=1
+k <- 6
 
 #Load SPAM2005 rasters
 eval(parse(text=paste("riego.phys.area = raster('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/07-SPAM_data/SPAM2005/physical.area/spam2005v2r0_physical-area_",crops_spam[k],"_irrigated.nc')",sep='')))
@@ -32,8 +32,8 @@ secano.pts.LAM = secano.pts.p5[ind_LAM_secano,]
 #calculate % irrigated by pixel
 crop_RS = data.frame(x=riego.pts.LAM[,1],y=riego.pts.LAM[,2],riego.area=riego.pts.LAM[,3],secano.area=secano.pts.LAM[,3])
 crop_RS$total.area = crop_RS$riego.area + crop_RS$secano.area  #calculate total area
-crop_RS$riego.pct = crop_RS$riego.area/crop_RS$total.area*100
-crop_RS$secano.pct = crop_RS$secano.area/crop_RS$total.area*100
+crop_RS$riego.pct = (crop_RS$riego.area/crop_RS$total.area) * 100
+crop_RS$secano.pct = (crop_RS$secano.area/crop_RS$total.area) * 100
 
 #filtrar filas sin ninguna area
 ind.bad = which(is.na(crop_RS$x)|crop_RS$total.area==0)
@@ -47,6 +47,7 @@ if (length(ind.bad)>0)  {crop_RS = crop_RS[-ind.bad,]}
 
 #Look at correlations b/w irrigated area & N.app
 eval(parse(text=paste("load('/mnt/workspace_cluster_3/bid-cc-agricultural-sector/08-Cells_toRun/",crops[k],".loc.cal.Rdat')",sep='')))
+if(k == 6){Bean.loc.cal <- Bean.loc}
 eval(parse(text=paste("ind_N = match(paste(round(crop_RS$x,2),round(crop_RS$y,2)),paste(round(",crops[k],".loc.cal$Longitude,2),round(",crops[k],".loc.cal$Latitude,2)))",sep='')))
 eval(parse(text=paste("crop_RS$N.app = ",crops[k],".loc.cal[ind_N,'N.app']",sep='')))  #add N app to riego/ secano matrix
 cor(crop_RS$riego.pct,crop_RS$N.app,use='pairwise.complete.obs')  #with % riego, should be +

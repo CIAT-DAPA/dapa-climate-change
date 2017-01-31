@@ -115,7 +115,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
     
     IC <- 1
     pdate <- convert_date(information$initation, information$year, TRUE)        ## Planting date
-    sdate <- convert_date(information$initation, information$year, TRUE) 
+    sdate <- convert_date(information$initation - 100, information$year, TRUE) 
     A <- "PL"      ## label name
     first <- -99  ## Start planting window
     last <- -99   ## End planting window
@@ -143,7 +143,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
     IC <- 1
     first <- convert_date(information$initation - 5, information$year, TRUE)  ## First Window
     #last <- information$initation + 60  ## Last Window
-    sdate <- convert_date(information$initation - 35, information$year, TRUE)    ## Simulation Start
+    sdate <- convert_date(information$initation - 100, information$year, TRUE)    ## Simulation Start
     pdate <- -99      ## Planting date (you will take the planting window data mirca 2000)
     A <- "PL"         ## Label Name
     IRR <- "N"        ## No irrigation (rainfed)
@@ -156,7 +156,7 @@ Xfile <- function(information, pixel, in_conditions, initial) {
     ## Es lo que se esta modificando para Trigo Secano tenia !=different
     if(data_xfile$crop == 'WHEAT'){
       IC <- 1
-	    sdate <- convert_date(information$initation - 125, information$year, TRUE) 
+	    sdate <- convert_date(information$initation - 100, information$year, TRUE) 
       first <- convert_date(information$initation - 5, information$year, TRUE)   ## First Window
       last <- convert_date(information$initation + 65, information$year, FALSE)  ## Last Window
       #sdate <- convert_date(first, information$year)    ## Simulation Start
