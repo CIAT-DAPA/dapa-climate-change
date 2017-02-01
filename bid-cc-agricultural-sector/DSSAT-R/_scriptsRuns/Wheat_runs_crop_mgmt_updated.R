@@ -11,11 +11,11 @@ cul_list <- data.frame(CID = 1:6, dsid = c("IB0010", "IB0013", "IB0016", "IB0028
                        culname = c("Seri82BA", "TajanBA", "DonErnestoBA", "Gerek79BA", "HalconsnaBA", "BrigadierBA"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "final" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "diagnostic" #diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 # run_type <- "final"
 
 # Cropping system
-sys_type <- "secano" #riego, secano
+sys_type <- "riego" #riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
