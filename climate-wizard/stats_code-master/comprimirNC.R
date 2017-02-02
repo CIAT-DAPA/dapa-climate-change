@@ -18,22 +18,37 @@ for(nc in ncListVar){
 
 #gcmlist<-c('ACCESS1-0', 'bcc-csm1-1', 'BNU-ESM', 'CanESM2', 'CCSM4', 'CESM1-BGC', 'CNRM-CM5', 'CSIRO-Mk3-6-0')
 gcmlist<-c('IPSL-CM5A-MR', 'MIROC-ESM-CHEM','IPSL-CM5A-LR', 'MIROC-ESM')
-gcmlist <-  list.dirs(paste0("/mnt/data_climatewizard/AR5_Global_Daily_25k/"), recursive = FALSE, full.names = FALSE) 
 
-gcmi=9
-gcmf=9
-gcmlist <-  list.dirs(paste0("/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/"), recursive = FALSE, full.names = FALSE) 
+dirgcm="Z:/data/AR5_Global_Daily_25k/out_stats/"
+gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
+gcmi=11
+gcmf=22
+gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
 for(gcm in gcmlist[gcmi:gcmf]){
-  dirbase=paste0("/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/",gcm)
+  dirbase=paste0(dirgcm,gcm)
   ncListVar <- list.files(dirbase,pattern=paste0(".nc"),recursive = T,full.names = TRUE)
   for(nc in ncListVar){
-    if(!file.exists(paste0(dirname(nc), "/", sapply(strsplit(basename(nc), '[.]'), "[[", 1),".nc4"))){
-      system(paste("nccopy -d9 -k4 ", nc, " ", dirname(nc), "/", sapply(strsplit(basename(nc), '[.]'), "[[", 1),".nc4", sep=""))
-      if(file.exists(paste0(dirname(nc), "/", sapply(strsplit(basename(nc), '[.]'), "[[", 1),".nc4"))){
-        unlink(nc) 
-        cat(basename(nc),"...done!\n")
-      }else{cat(" -> Error de compresion\n")}
-    }else{cat(basename(nc),"...Exist!\n")}
+    if(file_ext(nc)=="nc"){
+      if(length(strsplit(basename(nc), '[.]')[[1]])>2){
+        if(!file.exists(paste0(gsub(file_ext(nc),"",nc),"nc4"))){
+          cat(basename(nc))
+          system(paste("nccopy -d9 -k4 ", nc, " ", paste0(gsub(file_ext(nc),"",nc),"nc4"), sep=""))
+          if(file.exists(paste0(gsub(file_ext(nc),"",nc),"nc4"))){
+            unlink(nc) 
+            cat("...done!\n")
+          }else{cat(" -> Error de compresion\n")}
+        }else{cat(basename(nc),"...Exist!\n");unlink(nc)}       
+      }else{
+        if(!file.exists(paste0(dirname(nc), "/", sapply(strsplit(basename(nc), '[.]'), "[[", 1),".nc4"))){
+          cat(basename(nc))
+          system(paste("nccopy -d9 -k4 ", nc, " ", dirname(nc), "/", sapply(strsplit(basename(nc), '[.]'), "[[", 1),".nc4", sep=""))
+          if(file.exists(paste0(dirname(nc), "/", sapply(strsplit(basename(nc), '[.]'), "[[", 1),".nc4"))){
+            unlink(nc) 
+            cat("...done!\n")
+          }else{cat(" -> Error de compresion\n")}
+        }else{cat(basename(nc),"...Exist!\n");unlink(nc)}      
+      }
+    }
   }
 }
 ################  para chekear archivos
@@ -85,7 +100,7 @@ write.csv(checkExist, paste0(dirbase, "/faltante.csv"), row.names = F)
 
 ################  Convert to geotiff  # server: climate
 
-library(sp); library(raster); library(rgdal); library(maptools); library(ncdf4);
+library(sp); library(raster); library(rgdal); library(maptools); library(ncdf4);library(tools);
 dirbase="/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats" # "E:/data/AR5_Global_Daily_25k/out_stats" #  
 outdir="/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats_tiff" # "E:/data/AR5_Global_Daily_25k/out_stats_tiff" # 
 mask="/mnt/data_cluster_4/admin_boundaries/masks_world/mask15m" # "S:/admin_boundaries/masks_world/mask15m" # 
@@ -161,3 +176,52 @@ for (index in indices){
 }
 
 
+################  comprobar ndatos
+dirbase="Z:/data/AR5_Global_Daily_25k/out_stats/"
+gcmlist <-  list.dirs(dirbase, recursive = FALSE, full.names = FALSE) 
+checkndate=rbind()
+for(gcm in gcmlist){
+  dirbase=paste0(dirbase,gcm)
+  ncListVar <- list.files(dirbase,pattern=paste0(".nc"),recursive = T,full.names = TRUE)
+  for(nc in ncListVar){
+    rcp=strsplit(basename(nc), '[_]')[[1]][3]
+    period=strsplit(basename(nc), '[_]')[[1]][5]
+    ndate=as.numeric(system(paste0("cdo ndate ", nc),intern = T)[2])    
+    if(length(strsplit(basename(nc), '[.]')[[1]])>2){
+      if(file_ext(nc)=="nc4"){
+        timestep=strsplit(basename(nc), '[.]')[[1]][2]
+        cat(basename(nc),"\n")
+        chedate="error"
+        if(rcp=="historical"){
+          if(timestep=="monthly" && ndate==672){chedate="ok"}else{unlink(nc)}
+          if(timestep=="quarter" && ndate==560){chedate="ok"}else{unlink(nc)}
+          if(timestep=="seasonal" && ndate==224){chedate="ok"}else{unlink(nc)}
+        }else{
+          if(timestep=="monthly" && ndate>=1076){chedate="ok"}else{unlink(nc)}
+          # if(timestep=="quarter" && ndate==560){chedate="ok"}
+          # if(timestep=="seasonal" && ndate==224){chedate="ok"}          
+        }
+        checkndate=rbind(checkndate,cbind(name=basename(nc),"nc4",ndate,chedate))
+      }else{cat(basename(nc),"...nc!\n")}       
+    }else{
+      if(file_ext(nc)=="nc4"){
+        chedate="error"
+        if(rcp=="historical"){
+          if(ndate>=56&&ndate<=57){chedate="ok"}else{unlink(nc)}
+        }else{
+          if(ndate>=90&&ndate<=100){chedate="ok"}else{unlink(nc)}
+        }    
+        checkndate=rbind(checkndate,cbind(name=basename(nc),"nc4",ndate,chedate))
+      }
+      # else{
+        # chedate="error"
+        # if(rcp=="historical"){
+        #   if(ndate==56&&ndate<=57){chedate="ok"}
+        # }else{
+        #   if(ndate>=90&&ndate<=100){chedate="ok"}
+        # }    
+        # checkndate=rbind(checkndate,cbind(name=basename(nc),"nc",ndate,chedate))        
+        # cat(basename(nc),"...nc!\n")}        
+    }
+  }
+}

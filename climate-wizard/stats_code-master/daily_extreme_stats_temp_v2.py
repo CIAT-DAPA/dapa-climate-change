@@ -753,33 +753,33 @@ def TX90(fname='', styr=0, enyr=0):
 	txtcmd = "ncrename -h -v tasmax,tx90 " + ofall
 	system(txtcmd)
 	return ofall
-def TXnorm(fname='', styr=0, enyr=0):
+# def TXnorm(fname='', styr=0, enyr=0):
     # to create a file with 365 time steps and a TXnorm value for each cell, cat all files together
     # uses a 5-day running mean
-    if not styr > 1899 and enyr < 2101 and (enyr > styr):
-        raise 'incorrect args passed to TXnorm %s %d %d' % (fname, styr, enyr)
-    nyrs = enyr - styr + 1
-    fn_nodir = split(fname, "/")[-1]
-    ofall = OUTROOT + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
-    ofall = ofall.replace('tasmax', 'TXnorm')
-    ofbig = OUTTEMP + "/" + fn_nodir + "all." + str(styr) + "-" + str(enyr) + ".nc"
-    txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP + "/" + fn_nodir + str(styr) + ".nc " + ofbig
-    if not path.exists(ofbig):
-        system(txtcmd)
-        print "created combined file ", ofbig
-    else:
-        print "combined file already exists: ", ofbig
-    txtcmd = "cdo -m 1e+20 ydrunmean,5 " + ofbig + " " + ofall
-    system(txtcmd)
-    now = datetime.now()
-    txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
-    txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofall
-    system(txtcmd)
-    txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofall
-    system(txtcmd)
-    txtcmd = "ncrename -h -v tasmax,TXnorm " + ofall
-    system(txtcmd)
-    return ofall
+    # if not styr > 1899 and enyr < 2101 and (enyr > styr):
+        # raise 'incorrect args passed to TXnorm %s %d %d' % (fname, styr, enyr)
+    # nyrs = enyr - styr + 1
+    # fn_nodir = split(fname, "/")[-1]
+    # ofall = OUTROOT + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
+    # ofall = ofall.replace('tasmax', 'TXnorm')
+    # ofbig = OUTTEMP + "/" + fn_nodir + "all." + str(styr) + "-" + str(enyr) + ".nc"
+    # txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP2 + "/" + fn_nodir + str(styr) + ".nc " + ofbig
+    # if not path.exists(ofbig):
+        # system(txtcmd)
+        # print "created combined file ", ofbig
+    # else:
+        # print "combined file already exists: ", ofbig
+    # txtcmd = "cdo -m 1e+20 ydrunmean,5 " + ofbig + " " + ofall
+    # system(txtcmd)
+    # now = datetime.now()
+    # txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
+    # txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofall
+    # system(txtcmd)
+    # txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofall
+    # system(txtcmd)
+    # txtcmd = "ncrename -h -v tasmax,TXnorm " + ofall
+    # system(txtcmd)
+    # return ofall
 
 def FD(fname='', styr=0, enyr=0):
 	if not styr > 1899 and enyr < 2101 and (enyr > styr):
@@ -883,17 +883,17 @@ def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0):
 	system(txtcmd)
 	return ofall
 
-def TXnorm(fname='', styr=0, enyr=0):
+def TXnorm(fname='', styr=0, enyr=0,model=''):
     # to create a file with 365 time steps and a TXnorm value for each cell, cat all files together
     # uses a 5-day running mean
     if not styr > 1899 and enyr < 2101 and (enyr > styr):
         raise 'incorrect args passed to TXnorm %s %d %d' % (fname, styr, enyr)
     nyrs = enyr - styr + 1
     fn_nodir = split(fname, "/")[-1]
-    ofall = OUTROOT + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
+    ofall = OUTROOT+"/" + model + "/" + fn_nodir + str(styr) + "-" + str(enyr) + ".nc"
     ofall = ofall.replace('tasmax', 'TXnorm')
-    ofbig = OUTTEMP + "/" + fn_nodir + "all." + str(styr) + "-" + str(enyr) + ".nc"
-    txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP + "/" + fn_nodir + str(styr) + ".nc " + ofbig
+    ofbig = OUTTEMP  + "/" + fn_nodir + "all." + str(styr) + "-" + str(enyr) + ".nc"
+    txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP2 + "/" + fn_nodir + str(styr) + ".nc " + ofbig
     if not path.exists(ofbig):
         system(txtcmd)
         print "created combined file ", ofbig
@@ -911,14 +911,14 @@ def TXnorm(fname='', styr=0, enyr=0):
     system(txtcmd)
     return ofall
 
-def HWDI(fnamex='', reffile='', styr=0, enyr=0):
+def HWDI(fnamex='', reffile='', styr=0, enyr=0, model=''):
 	if not styr > 1899 and enyr < 2101 and (enyr > styr):
 		raise 'incorrect args passed to HWDI %s %d %d' % (fname, styr, enyr)
 	nyrs = enyr - styr + 1
 	fnx_nodir = split(fnamex, "/")[-1]
-	ofall = OUTROOT + "/" + fnx_nodir + str(styr) + "-" + str(enyr) + ".nc"
+	ofall = OUTROOT+"/" + model + "/" + fnx_nodir + str(styr) + "-" + str(enyr) + ".nc"
 	ofall = ofall.replace('tasmax', 'HWDI')
-	fnTemp = OUTTEMP
+	fnTemp = OUTTEMP2
 	for i in range(nyrs):
 		y = styr + i
 		fnx = OUTTEMP2 + "/" + fnx_nodir + str(y) + ".nc"

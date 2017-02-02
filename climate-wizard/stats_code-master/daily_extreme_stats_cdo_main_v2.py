@@ -18,8 +18,8 @@ import daily_extreme_stats_precip_v2 as p_stats
 
 # var_stat = ['txavg', 'tnavg', 'txx', 'tnn', 'gd10', 'hd18', 'cd18', 'ptot', 'cdd', 'r02', 'r5d', 'sdii', 'hwdi', 'gsl']
 var_stat = ['txavg', 'tnavg', 'tas', 'txx', 'tnn', 'ptot', 'r02','sdii', 'hwdi', 'gsl']
-# var_stat = ['sdii', 'hwdi', 'gsl']
-var_stat = ['txx']
+#var_stat = ['sdii', 'hwdi', 'gsl']
+#var_stat = ['hwdi']
 
 # define reference historical period
 StRefHis = 1950
@@ -40,7 +40,8 @@ infile='/mnt/data_climatewizard/AR5_Global_Daily_25k'
 model = str(argv[1])
 
 # land-sea mask
-lsm = "./global_0.25deg_LSM.nc"
+# lsm = "./global_0.25deg_LSM.nc"
+lsm = "/home/jtarapues/stats_code-master/global_0.25deg_LSM.nc"
 
 if not path.isdir('/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/' + model):
     mkdir('/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/' + model)
@@ -224,22 +225,24 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
     if 'gsl' in var_stat:
         of = t_stats.GSL(fn_hist_tn, fn_hist_tx, lsm, StComHis, EnComHis)
         print "created outfile %s\n" % of
-        of = t_stats.GSL(fn_rcp_tn, fn_rcp_tx, lsm, StYrsFut, EnYrsFut)
-        print "created outfile %s\n" % of
+        if scens != 'historical':
+            of = t_stats.GSL(fn_rcp_tn, fn_rcp_tx, lsm, StYrsFut, EnYrsFut)
+            print "created outfile %s\n" % of
 
     # Heat wave duration index wrt mean of reference_period
     if 'hwdi' in var_stat:
-        oftxnorm_ref = t_stats.TXnorm(fn_hist_tx, StRefHis, EnRefHis)
+        oftxnorm_ref = t_stats.TXnorm(fn_hist_tx, StRefHis, EnRefHis,model)
         print "created outfile %s\n" % oftxnorm_ref
-        of = t_stats.HWDI(fn_hist_tx, oftxnorm_ref, StComHis, EnComHis)
+        of = t_stats.HWDI(fn_hist_tx, oftxnorm_ref, StComHis, EnComHis,model)
         print "created outfile %s\n" % of
-        of = t_stats.HWDI(fn_rcp_tx, oftxnorm_ref, StYrsFut, EnYrsFut)
-        print "created outfile %s\n" % of
+        if scens != 'historical':		
+            of = t_stats.HWDI(fn_rcp_tx, oftxnorm_ref, StYrsFut, EnYrsFut,model)
+            print "created outfile %s\n" % of
 
 
     ###########################################################################
 
-    # Monthly total precip
+    ## Monthly total precip
     if 'ptot' in var_stat and scens == 'historical':
         of = p_stats.ptot(fn_hist_prmm, StComHis, EnComHis, model)
         print "created outfile %s\n" % of
@@ -247,7 +250,7 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
         of = p_stats.ptot(fn_rcp_prmm, StYrsFut, EnYrsFut, model)
         print "created outfile %s\n" % of
 
-    # Consecutive dry days
+    ### Consecutive dry days
     if 'cdd' in var_stat and scens == 'historical':
         of = p_stats.cdd(fn_hist_prmm, StComHis, EnComHis, model)
         print "created outfile %s\n" % of
@@ -255,7 +258,7 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
         of = p_stats.cdd(fn_rcp_prmm, StYrsFut, EnYrsFut, model)
         print "created outfile %s\n" % of
 
-    # Number of wet days > 0.2 mm/d
+    #### Number of wet days > 0.2 mm/d
     if 'r02' in var_stat and scens == 'historical':
         of = p_stats.r02(fn_hist_prmm, StComHis, EnComHis, model)
         print "created outfile %s\n" % of
@@ -263,7 +266,7 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
         of = p_stats.r02(fn_rcp_prmm, StYrsFut, EnYrsFut, model)
         print "created outfile %s\n" % of
 
-    # Max consec 5 day precip
+    #### Max consec 5 day precip
     if 'r5d' in var_stat and scens == 'historical':
         of = p_stats.r5d(fn_hist_prmm, StComHis, EnComHis, model)
         print "created outfile %s\n" % of
@@ -271,7 +274,7 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
         of = p_stats.r5d(fn_rcp_prmm, StYrsFut, EnYrsFut, model)
         print "created outfile %s\n" % of
 
-    # simple daily precip intensity index
+    ### simple daily precip intensity index
     if 'sdii' in var_stat and scens == 'historical':
         of = p_stats.sdii(fn_hist_prmm, StComHis, EnComHis, model)
         print "created outfile %s\n" % of
@@ -279,8 +282,8 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
         of = p_stats.sdii(fn_rcp_prmm, StYrsFut, EnYrsFut, model)
         print "created outfile %s\n" % of
 
-    # Pct of time precip exceeds ref pd 90th percentile (wet day values)
-    # calculate % of precip due to this too
+    ### Pct of time precip exceeds ref pd 90th percentile (wet day values)
+    ### calculate % of precip due to this too
     if 'r90p' in var_stat:
         ofpr90_ref = p_stats.R90ref(fn_hist_pr, StRefHis, EnRefHis)
         print "created outfile %s\n" % ofpr90_ref

@@ -16,11 +16,11 @@ BC_Qmap <- function(county="Busia", rcp="rcp45", gcm="bcc_csm1_1", var="prec", p
   cat(' *** Performing Quantile-mapping bias correction for', county, 'in the period', period, ', using: RCP', rcp, ', GCM', gcm, 'and variable', var, '***\n')
   
   # Establish directories
-  obsDir     <- "/mnt/workspace_cluster_8/Kenya_KACCAL/data/input_tables"
+  obsDir     <- "/mnt/workspace_cluster_12/Kenya_KACCAL/data/input_tables"
   obsDir     <- paste(obsDir, "/", county, sep="")
-  gcmHistDir <- paste("/mnt/workspace_cluster_8/Kenya_KACCAL/data/gcm_0_05deg_lat/", gcm, "/1971_2000", sep="")
-  gcmFutDir  <- paste("/mnt/workspace_cluster_8/Kenya_KACCAL/data/gcm_0_05deg_lat/", gcm, "/", period, "/", rcp, sep="")
-  outDir     <- "/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat"
+  gcmHistDir <- paste("/mnt/workspace_cluster_12/Kenya_KACCAL/data/gcm_0_05deg_lat/", gcm, "/1971_2000", sep="")
+  gcmFutDir  <- paste("/mnt/workspace_cluster_12/Kenya_KACCAL/data/gcm_0_05deg_lat/", gcm, "/", period, "/", rcp, sep="")
+  outDir     <- "/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat"
   
   if(!dir.exists(outDir)){dir.create(outDir)}
   years_analysis <- paste('y', 1981:2005, sep='')
@@ -40,7 +40,7 @@ BC_Qmap <- function(county="Busia", rcp="rcp45", gcm="bcc_csm1_1", var="prec", p
     
     # Load mask for each county
     cat('Loading county mask for:', county, '\n')
-    countyMask <- raster(paste("/mnt/workspace_cluster_8/Kenya_KACCAL/data/Kenya_counties_rst/", county, "_base.tif", sep=""))
+    countyMask <- raster(paste("/mnt/workspace_cluster_12/Kenya_KACCAL/data/Kenya_counties_rst/", county, "_base.tif", sep=""))
     
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
     # Load historical observed data
@@ -293,19 +293,19 @@ BC_Qmap <- function(county="Busia", rcp="rcp45", gcm="bcc_csm1_1", var="prec", p
 # This process would be done for each county, but for now I ran this process only for four counties with high importance
 
 periodList <- c('2021_2045', '2041_2065')
-rcpList    <- paste("rcp", c(26,45, 60, 85), sep="") # 26
+rcpList    <- paste("rcp", c(45, 60, 85), sep="") # 26 , 45, 60, 85
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 varList    <- c('tmax', 'tmin', 'prec', 'dswrf')
 
 countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
                                    rep('Cluster 2', 8)),
-                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin Gishu',
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
                                   'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado',
                                   'Baringo', 'Laikipia', 'Tharaka', 'Lamu',
                                   'Marsabit', 'Isiolo', 'Wajir', 'Mandera')) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
-countyList <- countyList[1,]
+countyList <- countyList[4,]
 
 # countyList
 lapply(1:nrow(countyList), function(z){
