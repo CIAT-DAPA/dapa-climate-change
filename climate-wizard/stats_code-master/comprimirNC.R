@@ -225,3 +225,12 @@ for(gcm in gcmlist){
     }
   }
 }
+
+####### move files
+dirbase="Z:/data/AR5_Global_Daily_25k/out_stats/"
+nclist <-  list.files(dirbase,pattern=paste0(".nc"),recursive = F,full.names = TRUE)
+for(nc in nclist){
+  model=strsplit(basename(nc), '[_]')[[1]][6] 
+  system(paste0("robocopy ",dirbase," ",dirbase,model," ",basename(nc)," /mov /z"),intern=T)
+}
+
