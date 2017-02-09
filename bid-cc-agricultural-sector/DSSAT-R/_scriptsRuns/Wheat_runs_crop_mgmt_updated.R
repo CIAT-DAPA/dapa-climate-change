@@ -3,6 +3,9 @@
 ######################## Parallel DSSAT for wheat ############################
 ##############################################################################
 ##############################################################################
+
+options(warn = -1); options(scipen = 999)
+
 # Some general config
 scenario <- "historical" # historical, future
 
@@ -11,7 +14,7 @@ cul_list <- data.frame(CID = 1:6, dsid = c("IB0010", "IB0013", "IB0016", "IB0028
                        culname = c("Seri82BA", "TajanBA", "DonErnestoBA", "Gerek79BA", "HalconsnaBA", "BrigadierBA"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
 sys_type <- "secano" # riego, secano
@@ -45,8 +48,8 @@ for (cultivar in 1:nrow(cul_list)) {
   assign("crop_mgmt", get(paste("crop_", sys_type, sep="")))
   
   # Updating planting dates using GGCMI data
-  library(ncdf4)
-  library(raster)
+  suppressMessages(library(ncdf4))
+  suppressMessages(library(raster))
   ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
   ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
@@ -74,25 +77,45 @@ for (cultivar in 1:nrow(cul_list)) {
     day_app <- data.frame(day_aplication0, day_aplication30)
   } else {
     # Here write update of mgmt matrix when first (diagnostic) run is available
-    # Define dates of fertilizer application
-    day0 <-  crop_mgmt$N.app.0d
-    day_aplication0 <- rep(0, length(day0))
-    day_aplication30 <- unlist(lapply(1:dim(crop_mgmt)[1], function(p){
+    # Define dates of fertilizer second application
+    if(!file.exists(paste(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/_wheat_crop_mgmt_", sys_type, ".Rdat", sep = ""))){
       
-      if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_irrigation_', cul_list$culname[cultivar], '_WFD/WHEAT_irrigation_', p, sep = ''))}
-      if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_rainfed_', cul_list$culname[cultivar], '_WFD/WHEAT_rainfed_', p, sep = ''))}
-      NappDay <- read.NappDay(crop = "WHEAT")
-      day30 <- round(mean(NappDay$Napp.day, na.rm = T), 0)
-      return(day30)
+      day0 <-  crop_mgmt$N.app.0d
+      day_aplication0 <- rep(0, length(day0))
+      day_aplication30 <- unlist(lapply(1:dim(crop_mgmt)[1], function(p){
+        
+        if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_irrigation_', cul_list$culname[cultivar], '_WFD/WHEAT_irrigation_', p, sep = ''))}
+        if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_rainfed_', cul_list$culname[cultivar], '_WFD/WHEAT_rainfed_', p, sep = ''))}
+        NappDay <- read.NappDay(crop = "WHEAT")
+        day30 <- round(mean(NappDay$Napp.day, na.rm = T), 0)
+        return(day30)
+        
+      }))
       
-    }))
-    
-    # Define amount of fertilizer to apply
-    day0 <-  crop_mgmt$N.app.0d
-    day30 <- crop_mgmt$N.app.30d
-    
-    amount <- data.frame(day0, day30)
-    day_app <- data.frame(day_aplication0, day_aplication30)
+      crop_mgmt$SecondAppDay <- day_aplication30
+      save(crop_mgmt, file = paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_wheat_crop_mgmt_", sys_type, ".RDat", sep = ""))
+      
+      # Define amount of fertilizer to apply
+      day0 <-  crop_mgmt$N.app.0d
+      day30 <- crop_mgmt$N.app.30d
+      
+      amount <- data.frame(day0, day30)
+      day_app <- data.frame(day_aplication0, day_aplication30)
+      rm(day0, day30, day_aplication0, day_aplication30)
+      
+    } else {
+      
+      load(paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_wheat_crop_mgmt_", sys_type, ".RDat", sep = ""))
+      day0 <-  crop_mgmt$N.app.0d
+      day_aplication0 <- rep(0, length(day0))
+      day0 <-  crop_mgmt$N.app.0d
+      day30 <- crop_mgmt$N.app.30d
+      
+      amount <- data.frame(day0, day30)
+      day_app <- data.frame(day_aplication0, day_aplication30=crop_mgmt$SecondAppDay)
+      rm(day0, day30, day_aplication0)
+      
+    }
     
   }
   
@@ -162,8 +185,8 @@ for (cultivar in 1:nrow(cul_list)) {
   # run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
   
   # Librerias para el trabajo en paralelo
-  library(foreach)
-  library(doMC)
+  suppressMessages(library(foreach))
+  suppressMessages(library(doMC))
   
   # Procesadores en su servidor
   registerDoMC(8)

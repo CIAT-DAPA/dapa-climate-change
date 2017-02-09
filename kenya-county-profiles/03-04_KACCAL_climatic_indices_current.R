@@ -6,15 +6,15 @@
 source('/mnt/workspace_cluster_8/Kenya_KACCAL/scripts/KACCAL_calc_risk_indices_modified.R')
 
 # Load packages
-options(warn=-1)
-library(raster)
-library(ncdf)
-library(ncdf4)
-library(maptools)
-library(ff)
-library(data.table)
-library(miscTools)
-library(compiler)
+options(warn = -1); options(scipen = 999)
+suppressMessages(library(raster))
+suppressMessages(library(ncdf))
+suppressMessages(library(ncdf4))
+suppressMessages(library(maptools))
+suppressMessages(library(ff))
+suppressMessages(library(data.table))
+suppressMessages(library(miscTools))
+suppressMessages(library(compiler))
 
 # Define Kenya counties
 countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
@@ -30,7 +30,7 @@ countyList$County <- as.character(countyList$County)
 
 years_analysis <- paste('y', 1981:2005, sep='')
 inputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/data/input_tables'
-outputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical'
+outputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/results/tmp'
 
 seasonList <- c('first', 'second')
 
@@ -603,6 +603,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
     }
     
     startMat <- lapply(1:length(GSEAS), function(d){ start <- GSEAS[[d]][[1]]; return(start) }); startMat <- as.data.frame(rbind_all(startMat))
+    startMat <- merge()
     lnghtMat <- lapply(1:length(GSEAS), function(d){ lnght <- GSEAS[[d]][[2]]; return(lnght) }); lnghtMat <- as.data.frame(rbind_all(lnghtMat))
     
     # Save all indexes
