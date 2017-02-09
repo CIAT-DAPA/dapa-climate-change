@@ -210,9 +210,14 @@ for (cultivar in 1:nrow(cul_list)) {
                          paste(cul_list$culname[which(cul_list$CID == cultivar)]), "_",
                          modelos[gcm_i])
   }
-  save(Run, file = paste("~/bid_reruns/", run_type, "/", store_name, ".RDat", sep = ""))
   
-  #clean up, else create a folder and store results in there
+  if(!dir.exists(paste(path_project, "19-BID-reanalysis/Wheat/", scenario, "/", run_type, sep = ""))){
+    dir.create(paste(path_project, "19-BID-reanalysis/Wheat/", scenario, "/", run_type, sep = ""), recursive = TRUE)
+  }
+  save(Run, file = paste(path_project, "19-BID-reanalysis/Wheat/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
+  # save(Run, file = paste("~/bid_reruns/", run_type, "/", store_name, ".RDat", sep = ""))
+  
+  # Clean up, else create a folder and store results in there
   if (cleanup_all) {
     setwd("~")
     if(run_type == "diagnostic"){system("rm -rf ~/Scratch")}
