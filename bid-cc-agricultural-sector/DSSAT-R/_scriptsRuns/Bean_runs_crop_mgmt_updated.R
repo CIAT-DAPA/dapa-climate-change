@@ -125,28 +125,28 @@ for (cultivar in 1:nrow(cul_list)) {
   # Configuracion Archivo experimental
   data_xfile <- list()
   data_xfile$run_type <- run_type
-  data_xfile$crop <- "WHEAT"
-  data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ WHEAT LAC"
-  data_xfile$name <- "./JBID.WHX" 
-  data_xfile$CR <- "WH" # Variable importante 
+  data_xfile$crop <- "BEAN"
+  data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ BEAN LAC"
+  data_xfile$name <- "./JBID.BNX"
+  data_xfile$CR <- "BN" # Variable importante 
   data_xfile$INGENO <- rep(paste(cul_list$dsid[which(cul_list$CID == cultivar)]), length(crop_mgmt[, "variedad.1"]))
-  data_xfile$CNAME <- "WHNA"
+  data_xfile$CNAME <- "BZNA"
   data_xfile$initation <- crop_mgmt$mirca.start
   data_xfile$final <- crop_mgmt$mirca.end
   if (sys_type == "riego") {data_xfile$system <- "irrigation"} # Irrigation or rainfed, if is irrigation then automatic irrigation
   if (sys_type == "secano") {data_xfile$system <- "rainfed"}   # Irrigation or rainfed, if is irrigation then automatic irrigation
   data_xfile$year <- years[1]
   data_xfile$nitrogen_aplication <- list(amount = amount, day_app = day_app) # Need to take care of
-  data_xfile$smodel <- "WHCER045" # Fin Model
+  data_xfile$smodel <- "BNGRO045" # Fin Model
   data_xfile$bname <- "DSSBatch.v45"
-  data_xfile$PPOP <- 200  # Plant population at planting
-  data_xfile$PPOE <- 200  # Plant population at emergence
+  data_xfile$PPOP <- 20   # Plant population at planting
+  data_xfile$PPOE <- 20   # Plant population at emergence
   data_xfile$PLME <- "S"  # Planting method: dry seed (S); transplanting (T)
   data_xfile$PLDS <- "R"  # Seed distribution: by row (R)
   data_xfile$PLRD <- 0    # Row direction (degrees from N)
   data_xfile$PLRS <- 18   # Row spacing (cm)
-  data_xfile$PLDP <- 4    # Planting depth (cm)
-  data_xfile$SYMBI <- 'N' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
+  data_xfile$PLDP <- 2    # Planting depth (cm)
+  data_xfile$SYMBI <- 'Y' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
   
   # Load climate data
   if (scenario == "historical") {
@@ -195,10 +195,10 @@ for (cultivar in 1:nrow(cul_list)) {
     run_dssat(input_data, i, dir_dssat, dir_base)
   }
   
-  # Create general output directory
-  if (!file.exists(paste("~/bid_reruns/", run_type, sep = ""))) {
-    dir.create(paste("~/bid_reruns/", run_type, sep=""), recursive = T)
-  }
+  # # Create general output directory
+  # if (!file.exists(paste("~/bid_reruns/", run_type, sep = ""))) {
+  #   dir.create(paste("~/bid_reruns/", run_type, sep=""), recursive = T)
+  # }
   
   # Save file
   if (scenario == "historical") {
@@ -210,10 +210,10 @@ for (cultivar in 1:nrow(cul_list)) {
                          modelos[gcm_i])
   }
   
-  if(!dir.exists(paste(path_project, "19-BID-reanalysis/Wheat/", scenario, "/", run_type, sep = ""))){
-    dir.create(paste(path_project, "19-BID-reanalysis/Wheat/", scenario, "/", run_type, sep = ""), recursive = TRUE)
+  if(!dir.exists(paste(path_project, "19-BID-reanalysis/Bean/", scenario, "/", run_type, sep = ""))){
+    dir.create(paste(path_project, "19-BID-reanalysis/Bean/", scenario, "/", run_type, sep = ""), recursive = TRUE)
   }
-  save(Run, file = paste(path_project, "19-BID-reanalysis/Wheat/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
+  save(Run, file = paste(path_project, "19-BID-reanalysis/Bean/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
   # save(Run, file = paste("~/bid_reruns/", run_type, "/", store_name, ".RDat", sep = ""))
   
   # Clean up, else create a folder and store results in there

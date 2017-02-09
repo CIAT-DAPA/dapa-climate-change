@@ -201,10 +201,10 @@ for (gcm_i in 1:length(modelos)) {
       run_dssat(input_data, i, dir_dssat, dir_base)
     }
     
-    # Create general output directory
-    if (!file.exists(paste("~/bid_reruns/", run_type, sep = ""))) {
-      dir.create(paste("~/bid_reruns/", run_type, sep=""), recursive = T)
-    }
+    # # Create general output directory
+    # if (!file.exists(paste("~/bid_reruns/", run_type, sep = ""))) {
+    #   dir.create(paste("~/bid_reruns/", run_type, sep=""), recursive = T)
+    # }
     
     # Save file
     if (scenario == "historical") {
