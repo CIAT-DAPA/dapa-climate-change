@@ -49,7 +49,7 @@ for (cultivar in 1:nrow(cul_list)) {
   # Updating planting dates using GGCMI data
   suppressMessages(library(ncdf4))
   suppressMessages(library(raster))
-  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Maize_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
   ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
   
