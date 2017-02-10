@@ -10,27 +10,28 @@ options(warn = -1); options(scipen = 999)
 scenario <- "historical" # historical, future
 
 # Cultivar list for bean
-cul_list <- data.frame(CID = 1:2, dsid = c("IB0118", 'IB0010'),
-                       culname = c("ICTAOstua", "Manitou"))
+cul_list <- data.frame(CID = 1:5, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005", "IB0012"),
+                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou"))
 
-# Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "final"
 
 # Cropping system
 sys_type <- "riego" # riego, secano
 
 # GCMs, only if scenario == "future"
-modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
+modelos <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- T
+cleanup_all <- F
 
 ##############################################################################
 ##############################################################################
 
 # Iterate cultivars
 for (cultivar in 1:nrow(cul_list)) {
+  
+  cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
   
   # Paths para scripts de funciones y workspace
   path_functions <- "~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/DSSAT-R/"
@@ -49,12 +50,14 @@ for (cultivar in 1:nrow(cul_list)) {
   # Updating planting dates using GGCMI data
   suppressMessages(library(ncdf4))
   suppressMessages(library(raster))
-  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Pulses_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
   ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
   
   planting_dates <- raster::extract(x = ggcmi, y = crop_mgmt[, c('x', 'y')])
   crop_mgmt$mirca.start <- round(planting_dates, 0)
+  
+  if(sys_type == "secano"){crop_mgmt$N.app.0d <- crop_mgmt$N.app.0d * 2}
   
   # Cargar funciones
   source(paste0(path_functions, "main_functions.R"))    ## Cargar funciones principales
@@ -64,59 +67,11 @@ for (cultivar in 1:nrow(cul_list)) {
   source(paste0(path_functions, "DSSAT_run.R"))
   source(paste0(path_functions, "Extraer.SoilDSSAT.R")) ## New extraer soil dssat function
   
-  # Crear data.frame de aplicaciones de fertilizante
-  if (run_type == "diagnostic") {
-    day0 <-  crop_mgmt$N.app.0d
-    day_aplication0 <- rep(0, length(day0))
-    
-    day30 <- crop_mgmt$N.app.30d
-    day_aplication30 <- rep(30, length(day30))
-    
-    amount <- data.frame(day0, day30)
-    day_app <- data.frame(day_aplication0, day_aplication30)
-  } else {
-    # Here write update of mgmt matrix when first (diagnostic) run is available
-    # Define dates of fertilizer second application
-    if(!file.exists(paste(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/_wheat_crop_mgmt_", sys_type, ".Rdat", sep = ""))){
-      
-      day0 <-  crop_mgmt$N.app.0d
-      day_aplication0 <- rep(0, length(day0))
-      day_aplication30 <- unlist(lapply(1:dim(crop_mgmt)[1], function(p){
-        
-        if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_irrigation_', cul_list$culname[cultivar], '_WFD/WHEAT_irrigation_', p, sep = ''))}
-        if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_WHEAT_rainfed_', cul_list$culname[cultivar], '_WFD/WHEAT_rainfed_', p, sep = ''))}
-        NappDay <- read.NappDay(crop = "WHEAT")
-        day30 <- round(mean(NappDay$Napp.day, na.rm = T), 0)
-        return(day30)
-        
-      }))
-      
-      crop_mgmt$SecondAppDay <- day_aplication30
-      save(crop_mgmt, file = paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_wheat_crop_mgmt_", sys_type, ".RDat", sep = ""))
-      
-      # Define amount of fertilizer to apply
-      day0 <-  crop_mgmt$N.app.0d
-      day30 <- crop_mgmt$N.app.30d
-      
-      amount <- data.frame(day0, day30)
-      day_app <- data.frame(day_aplication0, day_aplication30)
-      rm(day0, day30, day_aplication0, day_aplication30)
-      
-    } else {
-      
-      load(paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_wheat_crop_mgmt_", sys_type, ".RDat", sep = ""))
-      day0 <-  crop_mgmt$N.app.0d
-      day_aplication0 <- rep(0, length(day0))
-      day0 <-  crop_mgmt$N.app.0d
-      day30 <- crop_mgmt$N.app.30d
-      
-      amount <- data.frame(day0, day30)
-      day_app <- data.frame(day_aplication0, day_aplication30=crop_mgmt$SecondAppDay)
-      rm(day0, day30, day_aplication0)
-      
-    }
-    
-  }
+  day0 <-  crop_mgmt$N.app.0d
+  day_aplication0 <- rep(0, length(day0))
+  amount <- data.frame(day0, day30 = 0)
+  day_app <- data.frame(day_aplication0, day_aplication0 = 30)
+  rm(day0, day_aplication0)
   
   # Define years range, linea base: 71:99; futuro: 69:97
   if (scenario == "historical") {years <- 71:99}
@@ -139,12 +94,12 @@ for (cultivar in 1:nrow(cul_list)) {
   data_xfile$nitrogen_aplication <- list(amount = amount, day_app = day_app) # Need to take care of
   data_xfile$smodel <- "BNGRO045" # Fin Model
   data_xfile$bname <- "DSSBatch.v45"
-  data_xfile$PPOP <- 20   # Plant population at planting
-  data_xfile$PPOE <- 20   # Plant population at emergence
+  data_xfile$PPOP <- 30   # Plant population at planting
+  data_xfile$PPOE <- 30   # Plant population at emergence
   data_xfile$PLME <- "S"  # Planting method: dry seed (S); transplanting (T)
   data_xfile$PLDS <- "R"  # Seed distribution: by row (R)
   data_xfile$PLRD <- 0    # Row direction (degrees from N)
-  data_xfile$PLRS <- 18   # Row spacing (cm)
+  data_xfile$PLRS <- 70   # Row spacing (cm)
   data_xfile$PLDP <- 2    # Planting depth (cm)
   data_xfile$SYMBI <- 'Y' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
   

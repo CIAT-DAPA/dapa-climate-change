@@ -10,8 +10,8 @@ options(warn = -1); options(scipen = 999)
 scenario <- "historical" # historical, future
 
 # Cultivar list for maize
-cul_list <- data.frame(CID = 1:3, dsid = c("IB0059", "", "IB0055"), # Waiting for a response of Julian
-                       culname = c("H6", "FM7", "MCCURDY6714"))
+cul_list <- data.frame(CID = 1:3, dsid = c("IB0059", "IB0056", "IB0055"),
+                       culname = c("H6", "FM6", "MCCURDY6714"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
 run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
@@ -24,13 +24,15 @@ modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- T
+cleanup_all <- F
 
 ##############################################################################
 ##############################################################################
 
 # Iterate cultivars
 for (cultivar in 1:nrow(cul_list)) {
+  
+  cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
   
   # Paths para scripts de funciones y workspace
   path_functions <- "~/Repositories/dapa-climate-change/bid-cc-agricultural-sector/DSSAT-R/"
@@ -83,9 +85,9 @@ for (cultivar in 1:nrow(cul_list)) {
       day_aplication0 <- rep(0, length(day0))
       day_aplication40 <- unlist(lapply(1:dim(crop_mgmt)[1], function(p){
         
-        if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_MAIZE_irrigation_', cul_list$culname[cultivar], '_WFD/WHEAT_irrigation_', p, sep = ''))}
-        if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_MAIZE_rainfed_', cul_list$culname[cultivar], '_WFD/WHEAT_rainfed_', p, sep = ''))}
-        NappDay <- read.NappDay(crop = "WHEAT")
+        if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_MAIZE_irrigation_', cul_list$culname[cultivar], '_WFD/MAIZE_irrigation_', p, sep = ''))}
+        if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_MAIZE_rainfed_', cul_list$culname[cultivar], '_WFD/MAIZE_rainfed_', p, sep = ''))}
+        NappDay <- read.NappDay(crop = "MAIZE")
         day40 <- round(mean(NappDay$Napp.day, na.rm = T), 0)
         return(day40)
         
