@@ -9,7 +9,7 @@ options(warn = -1); options(scipen = 999)
 # Some general config
 scenario <- "historical" # historical, future
 
-# Cultivar list for wheat (based on CIMMYT Mega-environment work)
+# Cultivar list for bean
 cul_list <- data.frame(CID = 1:2, dsid = c("IB0118", 'IB0010'),
                        culname = c("ICTAOstua", "Manitou"))
 
