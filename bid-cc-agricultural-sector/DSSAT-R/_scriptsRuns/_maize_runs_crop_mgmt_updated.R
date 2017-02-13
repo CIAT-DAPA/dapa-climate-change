@@ -17,7 +17,7 @@ cul_list <- data.frame(CID = 1:3, dsid = c("IB0059", "IB0056", "IB0055"),
 run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
-sys_type <- "riego" # riego, secano
+sys_type <- "secano" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
@@ -197,10 +197,10 @@ for (cultivar in 1:nrow(cul_list)) {
     run_dssat(input_data, i, dir_dssat, dir_base)
   }
   
-  # Create general output directory
-  if (!file.exists(paste("~/bid_reruns/", run_type, sep = ""))) {
-    dir.create(paste("~/bid_reruns/", run_type, sep=""), recursive = T)
-  }
+  # # Create general output directory
+  # if (!file.exists(paste("~/bid_reruns/", run_type, sep = ""))) {
+  #   dir.create(paste("~/bid_reruns/", run_type, sep=""), recursive = T)
+  # }
   
   # Save file
   if (scenario == "historical") {

@@ -11,7 +11,7 @@ scenario <- "historical" # historical, future
 
 # Cultivar list for bean
 cul_list <- data.frame(CID = 1:5, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005", "IB0012"),
-                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou"))
+                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou")) # Waiting for: Perola
 
 run_type <- "final"
 
