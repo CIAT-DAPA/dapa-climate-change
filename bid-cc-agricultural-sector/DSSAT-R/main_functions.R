@@ -379,7 +379,14 @@ read.NappDay <- function(crop) {
     overview <- readLines(paste(data))
     Napp <- suppressMessages(grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview))
     Napp_by_year <- 1:length(Napp)
-  } else{
+  } 
+  if(crop == "RICE") {
+    data <- 'Summary.OUT'  ##make to match rows
+    overview <- readLines(paste(data))
+    Napp <- suppressMessages(grep("BID001", overview))
+    Napp_by_year <- 1:length(Napp)
+    
+  }else{
     data <- 'OVERVIEW.OUT'
     overview <- readLines(paste(data))
     Napp <- grep("SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES", overview)
