@@ -829,21 +829,23 @@ def FD(fname='', styr=0, enyr=0):
 	return ofall
 
 # cuts off last year to have global complete coverage
-def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0):
+def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0,model=''):
 	if not styr > 1899 and enyr < 2101 and (enyr > styr):
 		raise 'incorrect args passed to FD %s %d %d' % (fname, styr, enyr)
 	nyrs = enyr - styr + 1
 	fnx_nodir = split(fnamex, "/")[-1]
 	fnn_nodir = split(fnamen, "/")[-1]
 	fn_nodir = fnx_nodir.replace('tasmax', 'tas')
-	ofall = OUTROOT + "/" + fnx_nodir + str(styr) + "-" + str(enyr) + ".nc"
+	ofall = OUTROOT+ "/" + model + "/" + fnx_nodir + str(styr) + "-" + str(enyr) + ".nc"
 	ofall = ofall.replace('tasmax', 'GSL')
 	ofbig = OUTTEMP + "/" + fn_nodir + "all." + str(styr) + "-" + str(enyr) + ".nc"
 	for i in range(nyrs):
 		y = styr + i
 		fnx = OUTTEMP2 + "/" + fnx_nodir + str(y) + ".nc"
 		fnn = OUTTEMP2 + "/" + fnn_nodir + str(y) + ".nc"
-		fn = fnx.replace('tasmax', 'tas')
+		ft = fnx.replace('tasmax', 'tmp')
+		fn = OUTTEMP + "/" + model + "/junk/" + fnx_nodir.replace('tasmax', 'tas') + str(y) + ".nc" #fnx.replace('tasmax', 'tas')
+		fn4 = OUTTEMP + "/" + model + "/junk/" + fnx_nodir.replace('tasmax', 'tas') + str(y) + ".nc4" #fnx.replace('tasmax', 'tas')
 		if not (path.exists(fnx) and path.exists(fnn)):
 			if y == enyr:
 				print 'infile not found: ', fnx, fnn, ' ...skipping last year'
@@ -853,31 +855,42 @@ def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0):
 				raise 'infile not found: ', fnx, fnn
 		# calc mean daily temp if doesn't already exist
 		if not path.exists(fn):
-			print "calculating daily avg temp\n"
-			txt = "cdo -m 1e+20 divc,2.0 -add " + fnn + " " + fnx + " " + fn
-			system(txt)
+			# print "calculating daily avg temp\n"
+			# txt = "cdo -m 1e+20 divc,2.0 -add " + fnn + " " + fnx + " " + fn
+			# system(txt)
+			print "\n... calculating daily avg temp for %s%s" % (path.basename(fnamen), y)
+			txt1 = "cdo -m 1e+20 -add %s %s %s" % (fnn, fnx, ft)
+			print txt1
+			system(txt1)
+			txt2 = "cdo divc,2.0 %s %s" % (ft, fn)
+			print txt2
+			system(txt2)
+			txt3 = "rm -rf " + ft
+			print txt3
+			system(txt3)			
 			txtcmd = "ncrename -h -v tasmin,tas " + fn
 			system(txtcmd)
-	# create big file of tavg for all years if it doesn't already exist
-	txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP + "/" + fn_nodir + str(styr) + ".nc " + ofbig
+	###### create big file of tavg for all years if it doesn't already exist
+	#### txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP2 + "/" + fn_nodir + str(styr) + ".nc " + ofbig
+	txtcmd = "ncrcat -n " + str(nyrs) + ",4,1 " + OUTTEMP + "/" + model + "/junk/" + fnx_nodir.replace('tasmax', 'tas') + str(styr) + ".nc " + ofbig
 	if not path.exists(ofbig):
 		system(txtcmd)
 		print "created combined file ", ofbig
 	else:
 		print "combined file already exists: ", ofbig
-	# truncate the last year
+	#### truncate the last year
 	ey = styr + nyrs - 2
 	txt = "cdo -m 1e+20 selyear," + str(styr) + "," + str(
 		ey) + " -eca_gsl -addc,273.15 " + ofbig + " " + fnamemask + " " + ofall
 	system(txt)
-	# modify variable name and other attributes
+	##### modify variable name and other attributes
 	now = datetime.now()
 	txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
 	txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofall
 	system(txtcmd)
 	txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofall
 	system(txtcmd)
-	#new variable name created by CDO:
+	#####new variable name created by CDO:
 	txtnewvar = "thermal_growing_season_length"
 	txtcmd = "ncrename -h -v " + txtnewvar + ",gsl " + ofall
 	system(txtcmd)

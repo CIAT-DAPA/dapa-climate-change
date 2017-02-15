@@ -8,10 +8,13 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
                                    rep('Cluster 2', 4),
                                    rep('Cluster 3', 4),
                                    rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot')) # Define counties to analyze by cluster
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet')                         
+                         ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 
@@ -39,7 +42,7 @@ gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_es
 # First semester: 181-182 days (depending on leap years)
 
 library(data.table)
-countyList <- countyList[5,]
+countyList <- countyList[1:5,]
 
 lapply(1:nrow(countyList), function(i)
 {
@@ -51,12 +54,12 @@ lapply(1:nrow(countyList), function(i)
       
       lapply(1:length(gcmList), function(l){
         
-        precFile <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j],'.RData', sep='')
+        precFile <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j],'.RData', sep='')
         
         if(file.exists(precFile)){
           
-          t1 <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_fs_wet_days.RData', sep='')
-          t2 <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_fs_wet_days.RData', sep='')
+          t1 <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_fs_wet_days.RData', sep='')
+          t2 <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_fs_wet_days.RData', sep='')
           
           if(!file.exists(t1) & !file.exists(t2)){
             
@@ -102,8 +105,8 @@ lapply(1:nrow(countyList), function(i)
             names(chirps_wet_days) <- paste('y', years, sep='')
             names(indexs_wet_days) <- paste('y', years, sep='')
             
-            save(chirps_wet_days, file=paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_fs_wet_days.RData', sep=''))
-            save(indexs_wet_days, file=paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_fs_wet_days.RData', sep=''))
+            save(chirps_wet_days, file=paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_fs_wet_days.RData', sep=''))
+            save(indexs_wet_days, file=paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_fs_wet_days.RData', sep=''))
             
             return(cat('Process has been done for:', countyList$County[[i]], '\n'))
             
@@ -134,10 +137,14 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
                                    rep('Cluster 2', 4),
                                    rep('Cluster 3', 4),
                                    rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot')) # Define counties to analyze by cluster
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet')
+                         
+                         ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 
@@ -165,7 +172,7 @@ gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_es
 # Second semester: 184 days
 
 library(data.table)
-countyList <- countyList[5,]
+countyList <- countyList[1:5,]
 
 lapply(1:nrow(countyList), function(i)
 {
@@ -178,12 +185,12 @@ lapply(1:nrow(countyList), function(i)
       
       lapply(1:length(gcmList), function(l){
         
-        precFile <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j],'.RData', sep='')
+        precFile <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j],'.RData', sep='')
         
         if(file.exists(precFile)){
           
-          t1 <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_ss_wet_days.RData', sep='')
-          t2 <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_ss_wet_days.RData', sep='')
+          t1 <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_ss_wet_days.RData', sep='')
+          t2 <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_ss_wet_days.RData', sep='')
           
           if(!file.exists(t1) & !file.exists(t2)){
             
@@ -230,8 +237,8 @@ lapply(1:nrow(countyList), function(i)
             names(chirps_wet_days) <- paste('y', years, sep='')
             names(indexs_wet_days) <- paste('y', years, sep='')
             
-            save(chirps_wet_days, file=paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_ss_wet_days.RData', sep=''))
-            save(indexs_wet_days, file=paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_ss_wet_days.RData', sep=''))
+            save(chirps_wet_days, file=paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/prec/bc_qmap_prec_', periodList[j], '_ss_wet_days.RData', sep=''))
+            save(indexs_wet_days, file=paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '/indx_ss_wet_days.RData', sep=''))
             
             return(cat('Process has been done for:', countyList$County[[i]], '\n'))
             
@@ -260,10 +267,14 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
                                    rep('Cluster 2', 4),
                                    rep('Cluster 3', 4),
                                    rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot')) # Define counties to analyze by cluster
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet')
+                         
+                         ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 
@@ -272,7 +283,7 @@ rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 
 library(data.table)
-countyList <- countyList[5,]
+countyList <- countyList[1:5,]
 
 lapply(1:nrow(countyList), function(i)
 {
@@ -295,7 +306,7 @@ lapply(1:nrow(countyList), function(i)
         cat('Processing GCM:', gcmList[l], '\n')
         
         # Define county directory
-        countyDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
+        countyDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
         if(length(list.files(path=countyDir, pattern='*_wet_days.RData$'))==2){
           
           cat('100-wettest days was calculated. Continue processing.\n')

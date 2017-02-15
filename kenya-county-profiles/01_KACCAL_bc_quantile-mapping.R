@@ -292,8 +292,8 @@ BC_Qmap <- function(county="Busia", rcp="rcp45", gcm="bcc_csm1_1", var="prec", p
 
 # This process would be done for each county, but for now I ran this process only for four counties with high importance
 
-periodList <- c('2021_2045', '2041_2065')
-rcpList    <- paste("rcp", c(45, 60, 85), sep="") # 26 , 45, 60, 85
+periodList <- c('2041_2065') # '2021_2045', 
+rcpList    <- paste("rcp", c(85), sep="") # 26 , 45, 60, 85
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 varList    <- c('tmax', 'tmin', 'prec', 'dswrf')
 
@@ -305,7 +305,7 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
                                   'Marsabit', 'Isiolo', 'Wajir', 'Mandera')) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
-countyList <- countyList[4,]
+countyList <- countyList[8,]
 
 # countyList
 lapply(1:nrow(countyList), function(z){

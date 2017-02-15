@@ -19,10 +19,10 @@ for(nc in ncListVar){
 #gcmlist<-c('ACCESS1-0', 'bcc-csm1-1', 'BNU-ESM', 'CanESM2', 'CCSM4', 'CESM1-BGC', 'CNRM-CM5', 'CSIRO-Mk3-6-0')
 gcmlist<-c('IPSL-CM5A-MR', 'MIROC-ESM-CHEM','IPSL-CM5A-LR', 'MIROC-ESM')
 
-dirgcm="Z:/data/AR5_Global_Daily_25k/out_stats/"
+dirgcm= "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/" #"Z:/data/AR5_Global_Daily_25k/out_stats/"
 gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
-gcmi=11
-gcmf=22
+gcmi=1
+gcmf=1
 gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
 for(gcm in gcmlist[gcmi:gcmf]){
   dirbase=paste0(dirgcm,gcm)
@@ -78,7 +78,8 @@ write.csv(check_ndate, paste0(dirbase, "/errores_ndates2.csv"), row.names = F)
 checkExist=c()
 scenarios = c("historical","rcp45","rcp85")
 gcms=list.dirs(dirbase, recursive = FALSE, full.names = FALSE) 
-indices = c("CD18", "CDD", "GD10", "HD18", "PTOT", "R02", "R5D", "SDII", "TNN", "TXX") 
+indices = c("CD18", "CDD", "GD10", "HD18", "PTOT", "R02", "R5D", "SDII", "TNN", "TXX","HWDI","R02","SDII","") 
+['txavg', 'tnavg', 'tas', 'txx', 'tnn', 'ptot', 'r02','sdii', 'hwdi', 'gsl']
 for (index in indices){
   for (scenario in scenarios){
     if(scenario=="historical"){
@@ -96,7 +97,45 @@ for (index in indices){
 }
 write.csv(checkExist, paste0(dirbase, "/faltante.csv"), row.names = F)
 
+################## decargar datos corruptos
+require(R.utils)
+require(stringr)
+require("RCurl")
 
+dirbase="Z:/data/AR5_Global_Daily_25k"#"E:/data/AR5_Global_Daily_25k/out_stats/" 
+ncListVar <- list.files(dirbase,pattern = "\\.nc$",recursive = F,full.names = TRUE)
+
+for(nc in ncListVar){
+  sizeNC=file.info(nc)$size/1000000
+  if(sizeNC<100){
+    cat(basename(nc),'\n')
+    unlink(nc) 
+  }
+}
+
+listurl=read.csv(paste0(dirbase,"/nex-gddp-nccs-ftp-files.csv"), stringsAsFactors = F,encoding ="latin1",header = T)
+
+
+t=grepl("tas_day_BCSD_rcp45_r1i1p1_bcc-csm1-1_2074.nc", listurl[,1])
+
+which(t) 
+which(listurl[,1] %in% grep("tas_day_BCSD_rcp45_r1i1p1_bcc-csm1-1_2074.nc",listurl[,1], value = TRUE))
+
+
+output="S:/observed/gridded_products/chirps/daily"
+setwd(output)
+year="2016"
+files=getURL(paste0("http://nasanex.s3.amazonaws.com/NEX-GDDP/BCSD/",year,"/"),verbose=TRUE,ftp.use.epsv=TRUE,dirlistonly = TRUE)
+files=unlist(strsplit(files, "\r\n"))
+for(file in files){
+  url <- paste("ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/global_daily/tifs/p05/",file,sep="")
+  monfile <- basename(file)
+  if(!file.exists(paste0(output,'/',gsub(".gz","",monfile)))){
+    download.file(url, monfile)
+    system(paste0("7z e ",output,"/",monfile," -o",output))
+    unlink(monfile)  
+  }
+}
 
 ################  Convert to geotiff  # server: climate
 
@@ -232,5 +271,44 @@ nclist <-  list.files(dirbase,pattern=paste0(".nc"),recursive = F,full.names = T
 for(nc in nclist){
   model=strsplit(basename(nc), '[_]')[[1]][6] 
   system(paste0("robocopy ",dirbase," ",dirbase,model," ",basename(nc)," /mov /z"),intern=T)
+}
+
+################  para renombrar NC4 a nc
+
+dirgcm= "Z:/data/AR5_Global_Daily_25k/out_stats/" # "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/" # 
+gcmi=1
+gcmf=22
+gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
+for(gcm in gcmlist[gcmi:gcmf]){
+  dirbase=paste0(dirgcm,gcm)
+  ncListVar <- list.files(dirbase,pattern=paste0(".nc"),recursive = T,full.names = TRUE)
+  for(nc in ncListVar){
+    if(file_ext(nc)=="nc4"){
+      ncNew=paste0(gsub(file_ext(nc),"",nc),"nc")
+      file.rename(nc,ncNew)
+      cat(basename(nc),'..done\n')
+    }
+  }
+}
+
+################  datos para EVAN
+dirgcm= "Z:/data/AR5_Global_Daily_25k/out_stats/" # "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/" # 
+gcmi=1
+gcmf=1
+#gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
+ncListVar <- list.files(dirgcm,pattern = "SDII",recursive = T,full.names = TRUE)
+basename(ncListVar[grep(".monthly\historical", ncListVar)])
+
+paste(c("historical",".monthly"),collapse="|")
+
+which(basename(ncListVar) %in% grep("historical",basename(ncListVar), value = TRUE))
+
+
+for(gcm in gcmlist[gcmi:gcmf]){
+  dirbase=paste0(dirgcm,gcm)
+
+  for(nc in ncListVar){
+
+  }
 }
 
