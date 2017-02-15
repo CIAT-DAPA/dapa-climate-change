@@ -10,8 +10,8 @@ options(warn = -1); options(scipen = 999)
 scenario <- "future" # historical, future
 
 # Cultivar list for bean
-cul_list <- data.frame(CID = 1:5, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005", "IB0012"),
-                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou")) # Waiting for: Perola
+cul_list <- data.frame(CID = 1:7, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005", "IB0012", "IB0038", "IB0039"),
+                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou", "Perola", "BRSRadiante"))
 
 run_type <- "final" # Just only final
 

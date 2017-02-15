@@ -6,42 +6,36 @@
 source('/mnt/workspace_cluster_8/Kenya_KACCAL/scripts/KACCAL_calc_risk_indices_modified.R')
 
 # Load packages
-options(warn=-1)
-library(raster)
-library(ncdf)
-library(ncdf4)
-library(maptools)
-library(ff)
-library(data.table)
-library(miscTools)
-library(compiler)
-library(lubridate)
+options(warn = -1); options(scipen = 999)
+suppressMessages(library(raster))
+suppressMessages(library(ncdf))
+suppressMessages(library(ncdf4))
+suppressMessages(library(maptools))
+suppressMessages(library(ff))
+suppressMessages(library(data.table))
+suppressMessages(library(miscTools))
+suppressMessages(library(compiler))
+suppressMessages(library(lubridate))
 
 # Define Kenya counties
-countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
-                                   rep('Cluster 2', 4),
-                                   rep('Cluster 3', 4),
-                                   rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot')) # Define counties to analyze by cluster
+countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
+                                   rep('Cluster 2', 8)),
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin Gishu', 'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado',
+                                  'Baringo', 'Laikipia', 'Tharaka', 'Lamu', 'Marsabit', 'Isiolo', 'Wajir', 'Mandera'))
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
-
-countyList <- countyList[6,]
 
 periodList <- c('2021_2045', '2041_2065')
 rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 
 # years_analysis <- paste('y', 1981:2005, sep='')
-inputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat'
-outputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/future'
+inputDir <- '/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat'
+outputDir <- '/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/future'
 
 seasonList <- c('first', 'second')
 
-calc_climIndices <- function(county='Kilifi', season='first'){
+calc_climIndices <- function(county='Bomet', season='first'){
   
   cat('\n\n\n*** Processing:', gsub(pattern=' ', replacement='_', county, fixed=TRUE), 'county ***\n\n')
   
@@ -64,11 +58,11 @@ calc_climIndices <- function(county='Kilifi', season='first'){
         years_analysis <- as.numeric(unlist(strsplit(x=periodList[j], split='_')))
         years_analysis <- years_analysis[1]:years_analysis[2]
         
-        countyDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', county), sep='')
+        countyDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', county), sep='')
         if(length(list.files(path=countyDir, recursive=TRUE))==14){
           
           cat('Loading raster mask for:', gsub(pattern=' ', replacement='_', county), '\n')
-          countyMask <- raster(paste("/mnt/workspace_cluster_8/Kenya_KACCAL/data/Kenya_counties_rst/", gsub(pattern=' ', replacement='_', county), "_base.tif", sep=""))
+          countyMask <- raster(paste("/mnt/workspace_cluster_12/Kenya_KACCAL/data/Kenya_counties_rst/", gsub(pattern=' ', replacement='_', county), "_base.tif", sep=""))
           
           ### =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= ###
           cat('Loading: Solar radiation for corresponding wet season\n')
@@ -108,7 +102,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           cat('Loading: Soil data\n')
           ### =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= ###
           
-          load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/input_tables/', gsub(pattern=' ', replacement='_', county), '/soil/soil_data.RData', sep=''))
+          load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/input_tables/', gsub(pattern=' ', replacement='_', county), '/soil/soil_data.RData', sep=''))
           soil <- soil_data_county; rm(soil_data_county)
           soil <- soil[,c("cellID","lon.x","lat.x","id_coarse","rdepth","d.25","d.100","d.225","d.450","d.800","d.1500","soilcp")]
           names(soil)[2:3] <- c('lon','lat')
@@ -151,13 +145,13 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           cat('Calculate: Mean temperature for corresponding wet season\n')
           ### =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= ###
           
-          library(foreach)
-          library(doMC)
+          suppressMessages(library(foreach))
+          suppressMessages(library(doMC))
           registerDoMC(20)
           tmean <- foreach(j=1:length(years_analysis)) %dopar% {
             
             #cat(' Processing year:', years_analysis[[j]],'\n')
-            library(lubridate)
+            suppressMessages(library(lubridate))
             tmaxYears <- year(colnames(tmax)[-c(1:3)])
             
             #cat('Select 100-wet days by year\n')
@@ -239,7 +233,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           ND_t35 <- lapply(1:length(years_analysis), function(j){
             
             #cat(' Processing year:', as.numeric(gsub(pattern='y', replacement='', years_analysis[[j]])),'\n')
-            library(lubridate)
+            suppressMessages(library(lubridate))
             tmaxYears <- year(as.Date(colnames(tmax)[-c(1:3)]))
             
             # cat('Select 100-wet days by year\n')
@@ -267,7 +261,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           cat('*** 5. Calculate total precipitation by season through list of years ***\n')
           TOTRAIN <- lapply(1:length(years_analysis), function(j){
             
-            library(lubridate)
+            suppressMessages(library(lubridate))
             precYears <- year(colnames(prec)[-c(1:3)])
             datesID <- grep(pattern=as.numeric(gsub(pattern='y', replacement='', years_analysis[[j]])), x=precYears, fixed=TRUE)
             ncell <- length(prec[,'cellID'])
@@ -290,7 +284,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           CDD <- lapply(1:length(years_analysis), function(j){
             
             # cat(' Processing year:', as.numeric(gsub(pattern='y', replacement='', years_analysis[[j]])),'\n')
-            library(lubridate)
+            suppressMessages(library(lubridate))
             precYears <- year(as.Date(colnames(prec)[-c(1:3)]))
             
             # cat('Select 100-wet days by year\n')
@@ -320,7 +314,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           P5D <- lapply(1:length(years_analysis), function(j){
             
             #cat(' Processing year:', as.numeric(gsub(pattern='y', replacement='', years_analysis[[j]])),'\n')
-            library(lubridate)
+            suppressMessages(library(lubridate))
             precYears <- year(as.Date(colnames(prec)[-c(1:3)]))
             
             #cat('Select 100-wet days by year\n')
@@ -332,7 +326,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
             #cat('Define cells to analyse\n')
             pixelList <- prec[,'cellID']
             
-            library(caTools)
+            suppressMessages(library(caTools))
             p5d <- apply(X=prec[match(pixelList, prec[,'cellID']), datesID+3], MARGIN=1, FUN=function(x){z <- caTools::runmean(x, k=5, endrule='NA'); z <- max(z, na.rm=TRUE); return(z)})
             p5d <- cbind(pixelList, xyFromCell(object=countyMask, cell=pixelList), p5d)
             colnames(p5d) <- c('cellID', 'lon', 'lat', as.character(gsub(pattern='y', replacement='', years_analysis[[j]])))
@@ -351,7 +345,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           P_95 <- lapply(1:length(years_analysis), function(j){
             
             #cat(' Processing year:', as.numeric(gsub(pattern='y', replacement='', years_analysis[[j]])),'\n')
-            library(lubridate)
+            suppressMessages(library(lubridate))
             precYears <- year(as.Date(colnames(prec)[-c(1:3)]))
             
             #cat('Select 100-wet days by year\n')
@@ -417,7 +411,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           
           # Created function
           NDWSProcess <- function(j){ # By pixel
-            library(lubridate)
+            suppressMessages(library(lubridate))
             #cat(' Processing pixel:', pixelList[j],'\n')
             
             daysList <- Reduce(intersect, list(colnames(tmaxAll[,-c(1:3)]), colnames(tminAll[,-c(1:3)]),
@@ -466,7 +460,7 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           #NDWSProcessCMP <- cmpfun(NDWSProcess)
           
           # Running process for all pixel list
-          library(parallel)
+          suppressMessages(library(parallel))
           NDWS <- mclapply(1:ncells, FUN=NDWSProcess, mc.cores=20)
           NDWS <- do.call(rbind, NDWS)
           
@@ -477,8 +471,8 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           cat('*** 11. Estimate length of each growing season\n')
           
           # Created function
-          library(tidyr)
-          library(lubridate)
+          suppressMessages(library(tidyr))
+          suppressMessages(library(lubridate))
           GSEASProcess <- function(p){ # By pixel
             
             daysList <- Reduce(intersect, list(colnames(tmaxAll[,-c(1:3)]), colnames(tminAll[,-c(1:3)]),
@@ -584,13 +578,13 @@ calc_climIndices <- function(county='Kilifi', season='first'){
             }
             
           }
-          library(compiler)
+          suppressMessages(library(compiler))
           GSEASProcessCMP <- cmpfun(GSEASProcess)
           
           # Running process for all pixel list
-          library(dplyr)
-          library(foreach)
-          library(doMC)
+          suppressMessages(library(dplyr))
+          suppressMessages(library(foreach))
+          suppressMessages(library(doMC))
           registerDoMC(20)
           
           GSEAS <- foreach(p=1:ncells) %dopar% {
@@ -598,23 +592,48 @@ calc_climIndices <- function(county='Kilifi', season='first'){
           }
           
           startMat <- lapply(1:length(GSEAS), function(d){ start <- GSEAS[[d]][[1]]; return(start) }); startMat <- as.data.frame(rbind_all(startMat))
+          startMat <- merge(x = precAll[,c("cellID", "lon", "lat")], y = startMat, by = "cellID")
           lnghtMat <- lapply(1:length(GSEAS), function(d){ lnght <- GSEAS[[d]][[2]]; return(lnght) }); lnghtMat <- as.data.frame(rbind_all(lnghtMat))
+          lnghtMat <- merge(x = precAll[,c("cellID", "lon", "lat")], y = lnghtMat, by = "cellID")
           
-          # Save all indexes
-          clim_indexes <- list(TMEAN=TMEAN, GDD_1=GDD_1, GDD_2=GDD_2, ND_t35=ND_t35,
-                               TOTRAIN=TOTRAIN, CDD=CDD, P5D=P5D, P_95=P_95, NDWS=NDWS,
-                               SLGP=startMat, LGP=lnghtMat)
+          fs_startMat <- startMat %>% filter(gSeason == 1); fs_startMat <- fs_startMat[, -4]
+          ss_startMat <- startMat %>% filter(gSeason == 2); ss_startMat <- ss_startMat[, -4]
+          
+          fs_lnghtMat <- lnghtMat %>% filter(gSeason == 1); fs_lnghtMat <- fs_lnghtMat[, -4]
+          ss_lnghtMat <- lnghtMat %>% filter(gSeason == 2); ss_lnghtMat <- ss_lnghtMat[, -4]
+          
+          if(season == "first"){
+            
+            # Save all indexes
+            clim_indexes <- list(TMEAN=TMEAN, GDD_1=GDD_1, GDD_2=GDD_2, ND_t35=ND_t35,
+                                 TOTRAIN=TOTRAIN, CDD=CDD, P5D=P5D, P_95=P_95, NDWS=NDWS,
+                                 SLGP=fs_startMat, LGP=fs_lnghtMat)
+            
+          } else {
+            
+            if(season == "second"){
+              
+              # Save all indexes
+              clim_indexes <- list(TMEAN=TMEAN, GDD_1=GDD_1, GDD_2=GDD_2, ND_t35=ND_t35,
+                                   TOTRAIN=TOTRAIN, CDD=CDD, P5D=P5D, P_95=P_95, NDWS=NDWS,
+                                   SLGP=ss_startMat, LGP=ss_lnghtMat)
+              
+            }
+            
+          }
+          
+          raster::removeTmpFiles(h = 0)
           
           # Save according to season
           if(season == 'first'){
             seasonDir <- paste(outputDir, '/first_season/', gcmList[l], '/', periodList[j], '/', rcpList[k], sep='')
-            if(!dir.exists(seasonDir)){dir.create(seasonDir, recursive=TRUE)}
-            save(clim_indexes, file=paste(seasonDir, '/', gsub(pattern=' ', replacement='_', county, fixed=TRUE), '_first_season.RData', sep=''))
+            if(!dir.exists(seasonDir)){dir.create(seasonDir, recursive = TRUE)}
+            save(clim_indexes, file=paste(seasonDir, '/', gsub(pattern = ' ', replacement = '_', county, fixed = TRUE), '_first_season.RData', sep=''))
           } else {
             if(season == 'second'){
-              seasonDir <- paste(outputDir, '/second_season/', gcmList[l], '/', periodList[j], '/', rcpList[k], sep='')
-              if(!dir.exists(seasonDir)){dir.create(seasonDir, recursive=TRUE)}
-              save(clim_indexes, file=paste(seasonDir, '/', gsub(pattern=' ', replacement='_', county, fixed=TRUE), '_second_season.RData', sep=''))
+              seasonDir <- paste(outputDir, '/second_season/', gcmList[l], '/', periodList[j], '/', rcpList[k], sep = '')
+              if(!dir.exists(seasonDir)){dir.create(seasonDir, recursive = TRUE)}
+              save(clim_indexes, file=paste(seasonDir, '/', gsub(pattern = ' ', replacement = '_', county, fixed = TRUE), '_second_season.RData', sep=''))
             }
           }
           
