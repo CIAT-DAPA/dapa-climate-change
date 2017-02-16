@@ -13,9 +13,9 @@ scenario <- "future" # historical, future
 cul_list <- data.frame(CID = 1 : 3, dsid = c("IB0001", "IB0118", "IB0015"), culname = c("IR8", "IR72", "IR64"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
-sys_type <- "riego" # riego, secano
+sys_type <- "secano" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
