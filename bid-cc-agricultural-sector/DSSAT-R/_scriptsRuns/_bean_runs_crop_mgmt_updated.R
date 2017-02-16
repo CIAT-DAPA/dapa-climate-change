@@ -10,10 +10,10 @@ options(warn = -1); options(scipen = 999)
 scenario <- "historical" # historical, future
 
 # Cultivar list for bean
-cul_list <- data.frame(CID = 1:5, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005", "IB0012"),
-                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou")) # Waiting for: Perola
+cul_list <- data.frame(CID = 1:7, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005", "IB0012", "IB0038", "IB0039"),
+                       culname = c("ICTAOstua", "Carioca", "A193", "BAT881", "Manitou", "Perola", "BRSRadiante"))
 
-run_type <- "final"
+run_type <- "final" # Just only final
 
 # Cropping system
 sys_type <- "riego" # riego, secano
@@ -23,7 +23,7 @@ modelos <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "gfld_esm2g", "inm_cm4", 
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- F
+cleanup_all <- T
 
 ##############################################################################
 ##############################################################################

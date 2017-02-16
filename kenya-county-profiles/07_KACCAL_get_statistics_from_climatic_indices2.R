@@ -20,10 +20,13 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
                                    rep('Cluster 2', 4),
                                    rep('Cluster 3', 4),
                                    rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot'))
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet') 
+                         )
 countyList <- countyList[6,]
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
@@ -39,9 +42,9 @@ gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_es
 wrapClimInd <- lapply(1:nrow(countyList), function(i){
   
   cat('Loading and processing Climatic Indexes for', countyList$County[[i]], 'baseline\n')
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/first_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_first_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/first_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_first_season.RData', sep=''))
   first_season <- clim_indexes; rm(clim_indexes)
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/second_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_second_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/second_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_second_season.RData', sep=''))
   second_season <- clim_indexes; rm(clim_indexes)
   
   first_seasonWrap <- lapply(1:length(first_season), function(m){
@@ -66,7 +69,7 @@ wrapClimInd <- lapply(1:nrow(countyList), function(i){
   
   gg <- ggplot(allWrap, aes(x=Years, y=Average, colour=Season)) + geom_line() + geom_point()
   gg <- gg + facet_wrap(~ Index, scales='free') + theme_bw()
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
   if(!dir.exists(outDir)){
     dir.create(outDir, recursive=TRUE)
   }
@@ -108,9 +111,9 @@ rm(wrapClimInd)
 wrapClimInd_2015 <- lapply(1:nrow(countyList), function(i){
   
   cat('Loading and processing Climatic Indexes for', countyList$County[[i]], 'baseline\n')
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/first_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_first_season_2015.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/first_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_first_season_2015.RData', sep=''))
   first_season <- clim_indexes; rm(clim_indexes)
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/second_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_second_season_2015.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/second_season/', gsub(pattern=' ', replacement='_', countyList$County[[i]]),'_second_season_2015.RData', sep=''))
   second_season <- clim_indexes; rm(clim_indexes)
   
   first_seasonWrap <- lapply(1:length(first_season), function(m){
@@ -135,7 +138,7 @@ wrapClimInd_2015 <- lapply(1:nrow(countyList), function(i){
   
   gg <- ggplot(allWrap, aes(x=Years, y=Average, colour=Season)) + geom_line() + geom_point()
   gg <- gg + facet_wrap(~ Index, scales='free') + theme_bw()
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.pdf', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.pdf', sep=''), plot=gg, width=9, height=8, units='in')
   }
@@ -184,7 +187,7 @@ gg <- gg + theme(axis.text.x = element_text(size=14),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15))
 gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, 600))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
 if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_season_2015.pdf', sep=''))){
   ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
 }
@@ -250,7 +253,7 @@ gg <- gg + theme(axis.text.x = element_text(size=14),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15))
 gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(23, 27))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
 if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_season_2015.pdf', sep=''))){
   ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
 }
@@ -316,7 +319,7 @@ gg <- gg + theme(axis.text.x = element_text(size=14),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15))
 gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, max(allWrap$Average[allWrap$Index=='P_95'])+5))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
 if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_floodsP95_season_2015.pdf', sep=''))){
   ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_floodsP95_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
 }
@@ -337,7 +340,7 @@ gg <- gg + theme(axis.text.x = element_text(size=14),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15))
 gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, max(allWrap$Average[allWrap$Index=='NDWS'])+5))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
 if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_droughtNDWS_season_2015.pdf', sep=''))){
   ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_droughtNDWS_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
 }
@@ -373,7 +376,7 @@ wrapFutClimInd <- lapply(1:nrow(countyList), function(g){
           
           cat('GCM:', gcmList[k], '\n')
           
-          load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/future/', seasonList[h], '_season/', gcmList[k], '/', periodList[i], '/', rcpList[j], '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_', seasonList[h], '_season.RData', sep=''))
+          load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/future/', seasonList[h], '_season/', gcmList[k], '/', periodList[i], '/', rcpList[j], '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_', seasonList[h], '_season.RData', sep=''))
           first_seasonFut <- clim_indexes; rm(clim_indexes)
           
           years_analysis <- unlist(strsplit(periodList[i], split='_'))
@@ -407,7 +410,7 @@ wrapFutClimInd <- lapply(1:nrow(countyList), function(g){
   
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='first' & wrapFutClimInd$Period=='2021_2045',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[g]), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[g]), sep='')
   if(!dir.exists(outDir)){
     dir.create(outDir, recursive=TRUE)
   }
@@ -482,7 +485,7 @@ wrapFutClimInd_median <- lapply(1:nrow(countyList), function(g){
                    axis.title.y = element_text(face="bold",size=15),
                    legend.text = element_text(size=14),
                    legend.title = element_text(face="bold",size=15))
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), sep='')
   if(!dir.exists(outDir)){
     dir.create(outDir, recursive=TRUE)
   }
@@ -553,7 +556,7 @@ trendFutAll <- lapply(1:nrow(countyList), function(i){
   gg <- gg + facet_wrap(~ Index)
   gg <- gg + theme_bw() + geom_hline(yintercept=0.05)
   gg <- gg + ylab('p-value Mann-Kendall test') + scale_y_continuous(limits=c(0, 1))
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2021_2045.pdf', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2021_2045.pdf', sep=''), plot=gg, width=8, height=9, units='in')
   }
@@ -606,7 +609,7 @@ gg <- gg + theme(axis.text.x = element_text(size=10),
                  axis.title.y = element_text(face="bold",size=15),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), sep='')
 if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_allFutureTrend_2021_2065.pdf', sep=''))){
   ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_allFutureTrend_2021_2065.pdf', sep=''), plot=gg, width=10, height=12, units='in')
 }
@@ -627,7 +630,7 @@ lapply(1:length(indList), function(i){
                    legend.text = element_text(size=14),
                    legend.title = element_text(face="bold",size=15),
                    strip.text = element_text(size=15))
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
   if(!dir.exists(outDir)){
     dir.create(outDir, recursive=TRUE)
   }
@@ -653,7 +656,7 @@ gg <- gg + theme(axis.text.x = element_text(size=14),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15),
                  strip.text = element_text(size=15))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
 if(!dir.exists(outDir)){
   dir.create(outDir, recursive=TRUE)
 }
@@ -680,7 +683,7 @@ gg <- gg + theme(axis.text.x = element_text(size=14),
                  legend.text = element_text(size=14),
                  legend.title = element_text(face="bold",size=15),
                  strip.text = element_text(size=15))
-outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
 if(!dir.exists(outDir)){
   dir.create(outDir, recursive=TRUE)
 }
@@ -715,7 +718,7 @@ lapply(1:length(indList), function(i){
                      plot.title = element_text(size=20))
     gg <- gg + scale_x_continuous(breaks=seq(2020, 2065, 5))
     gg <- gg + ggtitle(paste('Index: ', indList[i], ' - RCP: ', rcpList[j] ,sep=''))
-    outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+    outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
     if(!dir.exists(outDir)){
       dir.create(outDir, recursive=TRUE)
     }
@@ -742,7 +745,7 @@ scenarioClustering2 <- function(county){
   seasonList <- c('first', 'second')
   
   # *** Load historical data first season
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
   first_season <- clim_indexes; rm(clim_indexes)
   
   first_seasonWrap <- lapply(1:length(first_season), function(m){
@@ -757,7 +760,7 @@ scenarioClustering2 <- function(county){
   colnames(first_seasonWrap)[3] <- 'Average'
   
   # *** Load historical data second season
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
   second_season <- clim_indexes; rm(clim_indexes)
   
   second_seasonWrap <- lapply(1:length(second_season), function(m){
@@ -810,7 +813,7 @@ scenarioClustering2 <- function(county){
   my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
   corMat <- cor(wrapFutClimInd_absChange, method='spearman')
   diag(corMat) <- NA
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/cluster_analysis/combined/absolute_changes_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/cluster_analysis/combined/absolute_changes_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
   if(!dir.exists(outDir)){dir.create(outDir, recursive=TRUE)}
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))){
     pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), height=8, width=8)
@@ -915,7 +918,7 @@ scenarioClustering3 <- function(county){
   seasonList <- c('first', 'second')
   
   # *** Load historical data first season
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
   first_season <- clim_indexes; rm(clim_indexes)
   
   ###
@@ -959,7 +962,7 @@ scenarioClustering3 <- function(county){
   colnames(first_seasonWrap)[3] <- 'Average'
   
   # *** Load historical data second season
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
   second_season <- clim_indexes; rm(clim_indexes)
   
   ###
@@ -1047,7 +1050,7 @@ scenarioClustering3 <- function(county){
   my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
   corMat <- cor(wrapFutClimInd_absChange, method='spearman')
   diag(corMat) <- NA
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/cluster_analysis/combined/absolute_changes_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/cluster_analysis/combined/absolute_changes_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
   if(!dir.exists(outDir)){dir.create(outDir, recursive=TRUE)}
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))){
     pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), height=8, width=8)
@@ -1164,7 +1167,7 @@ scenarioTrendsClustering <- function(county){
   seasonList <- c('first', 'second')
   
   # *** Load historical data first season
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
   first_season <- clim_indexes; rm(clim_indexes)
   
   first_seasonWrap <- lapply(1:length(first_season), function(m){
@@ -1189,7 +1192,7 @@ scenarioTrendsClustering <- function(county){
   first_seasonWrap <- first_seasonWrap[order(first_seasonWrap$Index),]
   
   # *** Load historical data second season
-  load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
+  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
   second_season <- clim_indexes; rm(clim_indexes)
   
   second_seasonWrap <- lapply(1:length(second_season), function(m){
@@ -1272,7 +1275,7 @@ scenarioTrendsClustering <- function(county){
   my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
   corMat <- cor(wrapFutClimInd_county, method='spearman')
   diag(corMat) <- NA
-  outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/cluster_analysis/combined/trends_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/cluster_analysis/combined/trends_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
   if(!dir.exists(outDir)){dir.create(outDir, recursive=TRUE)}
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))){
     pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), height=8, width=8)

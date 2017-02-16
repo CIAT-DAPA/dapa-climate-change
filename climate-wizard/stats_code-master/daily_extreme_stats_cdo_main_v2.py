@@ -17,9 +17,9 @@ import daily_extreme_stats_temp_v2 as t_stats
 import daily_extreme_stats_precip_v2 as p_stats
 
 # var_stat = ['txavg', 'tnavg', 'txx', 'tnn', 'gd10', 'hd18', 'cd18', 'ptot', 'cdd', 'r02', 'r5d', 'sdii', 'hwdi', 'gsl']
-var_stat = ['txavg', 'tnavg', 'tas', 'txx', 'tnn', 'ptot', 'r02','sdii', 'hwdi', 'gsl']
+# var_stat = ['txavg', 'tnavg', 'tas', 'txx', 'tnn', 'ptot', 'r02','sdii', 'hwdi', 'gsl']
 #var_stat = ['sdii', 'hwdi', 'gsl']
-#var_stat = ['hwdi']
+var_stat = ['gsl']
 
 # define reference historical period
 StRefHis = 1950
@@ -223,10 +223,10 @@ for scens in ['historical', 'rcp45', 'rcp85']: #'historical', 'rcp45', 'rcp85'
 
     # Thermal growing season length
     if 'gsl' in var_stat:
-        of = t_stats.GSL(fn_hist_tn, fn_hist_tx, lsm, StComHis, EnComHis)
+        of = t_stats.GSL(fn_hist_tn, fn_hist_tx, lsm, StComHis, EnComHis,model)
         print "created outfile %s\n" % of
         if scens != 'historical':
-            of = t_stats.GSL(fn_rcp_tn, fn_rcp_tx, lsm, StYrsFut, EnYrsFut)
+            of = t_stats.GSL(fn_rcp_tn, fn_rcp_tx, lsm, StYrsFut, EnYrsFut,model)
             print "created outfile %s\n" % of
 
     # Heat wave duration index wrt mean of reference_period

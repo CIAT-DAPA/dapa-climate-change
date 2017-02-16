@@ -1,4 +1,4 @@
-# Wheat analytics
+# Wheat irrigation analytics
 # Implemented by: H. Achicanoy
 # CIAT, 2017
 
@@ -40,7 +40,7 @@ Run <- lapply(1:length(run_type), function(i){
 Run <- do.call(plyr::rbind.fill, Run)
 Run$Year <- as.numeric(substr(Run$SDAT, start = 1, stop = 4))
 
-write.csv(Run, '/home/jmesa/wheat_results.csv', row.names = F)
+write.csv(Run, '/home/jmesa/wheat_irrigation_results_ggcmi.csv', row.names = F)
 
 # 3. Explore differences produced by changes in second application date of fertilizer (run in Windows)
 
@@ -49,7 +49,9 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-Run <- read.csv('wheat_results.csv')
+wk_dir <- 'D:/ToBackup/Modelling/bid-cc-agricultural-sector/Results/final_analyses/Historical/Irrigation'
+setwd(wk_dir)
+Run <- read.csv('wheat_irrigation_results_ggcmi.csv')
 
 # ------------------------------------------------------------------------------------------------------- #
 # Dots plot
@@ -97,7 +99,7 @@ rm(list=setdiff(ls(), c("values", "Soil_profile", "Cod_Ref_and_Position_Generic"
                         "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
                         "Cod_Ref_and_Position", "profileMatrix","scenario","cul_list","cultivar","run_type","sys_type",
                         "modelos","gcm_i","cleanup_all")))
-load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/Wheat_",sys_type,".RDat"))
+load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/Wheat_",sys_type,".RDat"))
 assign("crop_mgmt", get(paste("crop_",sys_type,sep="")))
 
 rm(list=setdiff(ls(), "crop_mgmt"))
@@ -202,14 +204,55 @@ options(warn = -1); options(scipen = 999)
 library(plyr)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 wk_dir <- "D:/ToBackup/Modelling/bid-cc-agricultural-sector/Results/Historical"
 setwd(wk_dir)
-allResults <- lapply(list.files(getwd()), function(x){
+allResults <- lapply(list.files(getwd(), pattern = ".csv$"), function(x){
   df <- read.csv(x)
-  df$Source <- gsub(pattern = ".csv", replacement = "", x = unlist(strsplit(x = basename(x), split = "_"))[3])
+  df$Source <- gsub(pattern = ".csv", replacement = "", x = unlist(strsplit(x = basename(x), split = "_"))[4])
   return(df)
 }); allResults <- do.call(rbind.fill, allResults)
+
+df <- allResults[,c("Pixel", "Cultivar", "Run_type", "Year", "Source", "HWAH")]
+df <- df %>% spread(Source, HWAH)
+
+# Overall scatterplot
+gg <- df %>% ggplot(aes(x = mirca, y = ggcmi)) + geom_point()
+gg <- gg + theme_bw() + xlab("Mirca yields (kg/ha)") + ylab("GGCMI yields (kg/ha)")
+gg <- gg + geom_abline(intercept = 0, slope = 1, colour = "red") + facet_wrap(~ Run_type)
+ggsave(filename = 'Scatterplot_wheat_mirca_vs_ggcmi.png', plot = gg, width = 10, height = 5, units = 'in')
+
+# Scatterplot for last year
+gg <- df[df$Year == 1998 & df$Cultivar == "Seri82BA",] %>% ggplot(aes(x = mirca, y = ggcmi)) + geom_point(aes(colour = factor(Cultivar)))
+gg <- gg + theme_bw() + xlab("Mirca yields (kg/ha)") + ylab("GGCMI yields (kg/ha)")
+gg <- gg + geom_abline(intercept = 0, slope = 1, colour = "red") + facet_wrap(~ Run_type) + guides(colour = guide_legend(title = "Cultivar"))
+ggsave(filename = 'Scatterplot_wheat_mirca_vs_ggcmi_last_year.png', plot = gg, width = 10, height = 5, units = 'in')
+
+# Explore the cause of the problems
+library(mgcv)
+allResults$Source <- factor(allResults$Source)
+allResults$Cultivar <- factor(allResults$Cultivar)
+allResults$Run_type <- factor(allResults$Run_type)
+gam_obj <- gam(HWAH ~ s(Pixel) + s(Year), family = gaussian(link = identity), data = allResults)
+
+png(filename = 'importance_GAM.png', width = 1000, height = 600, units = 'px', pointsize = 30)
+par(mfrow = c(1, 2))
+plot(gam_obj)
+dev.off()
+
+library(randomForest)
+set.seed(1235)
+rf_obj <- randomForest(HWAH ~ Pixel + Cultivar + Run_type + Source, data=allResults[allResults$Year == 1998,], importance=TRUE, proximity=TRUE)
+plot(rf_obj)
+
+png(filename = 'importance_rf.png', width = 1000, height = 1000, units = 'px', pointsize = 30)
+par(mfrow = c(2, 2))
+partialPlot(rf_obj, allResults[allResults$Year == 1998, c("Pixel", "Cultivar", "Run_type", "Source", "HWAH")], x.var = "Pixel")
+partialPlot(rf_obj, allResults[allResults$Year == 1998, c("Pixel", "Cultivar", "Run_type", "Source", "HWAH")], x.var = "Cultivar")
+partialPlot(rf_obj, allResults[allResults$Year == 1998, c("Pixel", "Cultivar", "Run_type", "Source", "HWAH")], x.var = "Run_type")
+partialPlot(rf_obj, allResults[allResults$Year == 1998, c("Pixel", "Cultivar", "Run_type", "Source", "HWAH")], x.var = "Source")
+dev.off()
 
 # ------------------------------------------------------------------------------------------------------- #
 # Quantile plots

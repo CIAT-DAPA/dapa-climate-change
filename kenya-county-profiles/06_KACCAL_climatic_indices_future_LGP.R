@@ -3,7 +3,7 @@
 # H. Achicanoy
 # CIAT, 2016
 
-source('/mnt/workspace_cluster_8/Kenya_KACCAL/scripts/KACCAL_calc_risk_indices_modified.R')
+source('/mnt/workspace_cluster_12/Kenya_KACCAL/scripts/KACCAL_calc_risk_indices_modified.R')
 
 # Load packages
 options(warn=-1)
@@ -22,10 +22,14 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
                                    rep('Cluster 2', 4),
                                    rep('Cluster 3', 4),
                                    rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot')) # Define counties to analyze by cluster
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet') 
+                         
+                         ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 
@@ -35,8 +39,8 @@ periodList <- c('2021_2045', '2041_2065')
 rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 
-inputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat'
-outputDir <- '/mnt/workspace_cluster_8/Kenya_KACCAL/results/climatic_indices/future/growing_seasons'
+inputDir <- '/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat'
+outputDir <- '/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/future/growing_seasons'
 
 calc_climIndicesLGP <- function(county='Kilifi'){
   
@@ -61,17 +65,17 @@ calc_climIndicesLGP <- function(county='Kilifi'){
         years_analysis <- as.numeric(unlist(strsplit(x=periodList[j], split='_')))
         years_analysis <- years_analysis[1]:years_analysis[2]
         
-        countyDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', county), sep='')
+        countyDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/bc_quantile_0_05deg_lat/', gcmList[l], '/', periodList[j], '/', rcpList[k], '/', gsub(pattern=' ', replacement='_', county), sep='')
         if(length(list.files(path=countyDir, recursive=TRUE))==14){
           
           cat('Loading raster mask for:', gsub(pattern=' ', replacement='_', county), '\n')
-          countyMask <- raster(paste("/mnt/workspace_cluster_8/Kenya_KACCAL/data/Kenya_counties_rst/", gsub(pattern=' ', replacement='_', county), "_base.tif", sep=""))
+          countyMask <- raster(paste("/mnt/workspace_cluster_12/Kenya_KACCAL/data/Kenya_counties_rst/", gsub(pattern=' ', replacement='_', county), "_base.tif", sep=""))
           
           ### =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= ###
           cat('Loading: Soil data\n')
           ### =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= ###
           
-          load(paste('/mnt/workspace_cluster_8/Kenya_KACCAL/data/input_tables/', gsub(pattern=' ', replacement='_', county), '/soil/soil_data.RData', sep=''))
+          load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/data/input_tables/', gsub(pattern=' ', replacement='_', county), '/soil/soil_data.RData', sep=''))
           soil <- soil_data_county; rm(soil_data_county)
           soil <- soil[,c("cellID","lon.x","lat.x","id_coarse","rdepth","d.25","d.100","d.225","d.450","d.800","d.1500","soilcp")]
           names(soil)[2:3] <- c('lon','lat')
