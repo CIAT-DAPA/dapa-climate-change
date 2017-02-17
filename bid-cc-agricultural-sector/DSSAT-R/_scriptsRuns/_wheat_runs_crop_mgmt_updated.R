@@ -14,7 +14,7 @@ cul_list <- data.frame(CID = 1:6, dsid = c("IB0010", "IB0013", "IB0016", "IB0028
                        culname = c("Seri82BA", "TajanBA", "DonErnestoBA", "Gerek79BA", "HalconsnaBA", "BrigadierBA"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
 sys_type <- "secano" # riego, secano
@@ -49,7 +49,11 @@ for (cultivar in 1:nrow(cul_list)) {
   # Updating planting dates using GGCMI data
   suppressMessages(library(ncdf4))
   suppressMessages(library(raster))
-  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  if(sys_type == "riego"){
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  } else {
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Wheat_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  }
   ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
   

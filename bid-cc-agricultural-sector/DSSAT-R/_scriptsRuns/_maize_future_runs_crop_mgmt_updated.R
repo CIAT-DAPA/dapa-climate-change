@@ -30,7 +30,7 @@ cleanup_all <- T
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 1:length(modelos)) {
+for (gcm_i in 4:length(modelos)) {
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
@@ -56,7 +56,12 @@ for (gcm_i in 1:length(modelos)) {
     # Updating planting dates using GGCMI data
     suppressMessages(library(ncdf4))
     suppressMessages(library(raster))
-    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Maize_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+    if(sys_type == "riego"){
+      ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Maize_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+    } else {
+      ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Maize_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+    }
+    
     ggcmi <- ggcmi[[1]]
     ggcmi[which(ggcmi[] == -99)] <- NA
     
