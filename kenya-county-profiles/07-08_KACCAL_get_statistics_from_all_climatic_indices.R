@@ -287,22 +287,28 @@ wrapFutClimInd <- lapply(1:nrow(countyList), function(g){
   # Second season and period 2021-2045
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='second' & wrapFutClimInd$Period=='2021_2045',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2021_2045.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2021_2045.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2021_2045.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_secondSeason_futureTrend_2021_2045.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_secondSeason_futureTrend_2021_2045.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2021_2045.pdf', sep=''))
   }
   
   # First season and period 2041-2065
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='first' & wrapFutClimInd$Period=='2041_2065',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2041_2065.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2041_2065.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2041_2065.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_firstSeason_futureTrend_2041_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_firstSeason_futureTrend_2041_2065.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2041_2065.pdf', sep=''))
   }
   
   # Second season and period 2041-2065
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='second' & wrapFutClimInd$Period=='2041_2065',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2041_2065.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2041_2065.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2041_2065.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_secondSeason_futureTrend_2041_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_secondSeason_futureTrend_2041_2065.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2041_2065.pdf', sep=''))
   }
   
   return(wrapFutClimInd)
@@ -321,12 +327,12 @@ wrapFutClimInd_median <- lapply(1:nrow(countyList), function(g){
     wrapFutClimInd_median <- lapply(1:length(periodList), function(i){
       
       wrapClimInd <- wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season==seasonList[h] & wrapFutClimInd$Period==periodList[i],]
-      wrapClimInd_median <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), median(Average)))
+      wrapClimInd_median <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), median(Average, na.rm = T)))
       colnames(wrapClimInd_median)[4] <- 'Median'
-      quantileFun <- function(x){z <- stats::quantile(x, probs=0.05); return(z)}
+      quantileFun <- function(x){z <- stats::quantile(x, probs=0.05, na.rm = T); return(z)}
       aux <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), quantileFun(Average)))
       wrapClimInd_median$p0_05 <- as.numeric(aux[,ncol(aux)])
-      quantileFun <- function(x){z <- stats::quantile(x, probs=0.95); return(z)}
+      quantileFun <- function(x){z <- stats::quantile(x, probs=0.95, na.rm = T); return(z)}
       aux <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), quantileFun(Average)))
       wrapClimInd_median$p0_95 <- as.numeric(aux[,ncol(aux)])
       
@@ -344,8 +350,8 @@ wrapFutClimInd_median <- lapply(1:nrow(countyList), function(g){
   wrapFutClimInd_median <- do.call(rbind, wrapFutClimInd_median)
   
   # Period: 2021-2045
-  gg <- ggplot(wrapFutClimInd_median[wrapFutClimInd_median$Period=='2021_2045',], aes(x=Years, y=Median, colour=Season))
-  gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line()
+  gg <- ggplot(wrapFutClimInd_median[wrapFutClimInd_median$Period=='2021_2045',], aes(x=Years, y=Median, colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+  gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line() + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y')
   gg <- gg + theme_bw()
   gg <- gg + theme(axis.text.x = element_text(size=10),
@@ -355,16 +361,16 @@ wrapFutClimInd_median <- lapply(1:nrow(countyList), function(g){
                    legend.text = element_text(size=14),
                    legend.title = element_text(face="bold",size=15))
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), sep='')
-  if(!dir.exists(outDir)){
-    dir.create(outDir, recursive=TRUE)
-  }
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2021_2045.pdf', sep=''))){
+  if(!dir.exists(outDir)){ dir.create(outDir, recursive=TRUE) }
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2021_2045.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2021_2045.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), "_mergeFutureTrend_2021_2045.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), "_mergeFutureTrend_2021_2045.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2021_2045.pdf', sep=''))
   }
   
   # Period: 2041-2065
-  gg <- ggplot(wrapFutClimInd_median[wrapFutClimInd_median$Period=='2041_2065',], aes(x=Years, y=Median, colour=Season))
-  gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line()
+  gg <- ggplot(wrapFutClimInd_median[wrapFutClimInd_median$Period=='2041_2065',], aes(x=Years, y=Median, colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+  gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line() + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y')
   gg <- gg + theme_bw()
   gg <- gg + theme(axis.text.x = element_text(size=10),
@@ -373,8 +379,10 @@ wrapFutClimInd_median <- lapply(1:nrow(countyList), function(g){
                    axis.title.y = element_text(face="bold",size=15),
                    legend.text = element_text(size=14),
                    legend.title = element_text(face="bold",size=15))
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2041_2065.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2041_2065.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2041_2065.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), "_mergeFutureTrend_2041_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), "_mergeFutureTrend_2041_2065.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[g]]), '_mergeFutureTrend_2041_2065.pdf', sep=''))
   }
   
   return(wrapFutClimInd_median)
@@ -421,21 +429,25 @@ trendFutAll <- lapply(1:nrow(countyList), function(i){
   })
   trendPeriod <- do.call(rbind, trendPeriod)
   
-  gg <- ggplot(trendPeriod[trendPeriod$Period=='2021_2045',], aes(x=RCP, y=p_value, fill=Season, colour=Season)) + geom_bar(stat='identity', position="dodge")
+  gg <- ggplot(trendPeriod[trendPeriod$Period=='2021_2045',], aes(x=RCP, y=p_value, fill=Season, colour=Season)) + geom_bar(stat='identity', position="dodge") + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3')) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + facet_wrap(~ Index)
   gg <- gg + theme_bw() + geom_hline(yintercept=0.05)
   gg <- gg + ylab('p-value Mann-Kendall test') + scale_y_continuous(limits=c(0, 1))
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2021_2045.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2021_2045.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2021_2045.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_significanceTrend_2021_2045.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_significanceTrend_2021_2045.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2021_2045.pdf', sep=''))
   }
   
-  gg <- ggplot(trendPeriod[trendPeriod$Period=='2041_2065',], aes(x=RCP, y=p_value, fill=Season, colour=Season)) + geom_bar(stat='identity', position="dodge")
+  gg <- ggplot(trendPeriod[trendPeriod$Period=='2041_2065',], aes(x=RCP, y=p_value, fill=Season, colour=Season)) + geom_bar(stat='identity', position="dodge") + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3')) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + facet_wrap(~ Index)
   gg <- gg + theme_bw() + geom_hline(yintercept=0.05)
   gg <- gg + ylab('p-value Mann-Kendall test') + scale_y_continuous(limits=c(0, 1))
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2041_2065.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2041_2065.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2041_2065.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_significanceTrend_2041_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_significanceTrend_2041_2065.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2041_2065.pdf', sep=''))
   }
   
   return(trendPeriod)
@@ -447,135 +459,57 @@ trendFutAll <- do.call(rbind, trendFutAll)
 # Calculate median through GCMs using extreme percentiles to show future trends by 2021-2065
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-# Median for all years through 2021-2065
-wrapFutClimInd_median <- lapply(1:length(seasonList), function(h){
+# Varying per county
+lapply(1:nrow(countyList), function(x){
   
-  wrapClimInd <- wrapFutClimInd[wrapFutClimInd$Season==seasonList[h],]
-  wrapClimInd_median <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), median(Average)))
-  colnames(wrapClimInd_median)[4] <- 'Median'
-  quantileFun <- function(x){z <- stats::quantile(x, probs=0.05); return(z)}
-  aux <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), quantileFun(Average)))
-  wrapClimInd_median$p0_05 <- as.numeric(aux[,ncol(aux)])
-  quantileFun <- function(x){z <- stats::quantile(x, probs=0.95); return(z)}
-  aux <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), quantileFun(Average)))
-  wrapClimInd_median$p0_95 <- as.numeric(aux[,ncol(aux)])
+  wrapFutClimInd <- wrapFutClimInd[wrapFutClimInd$County == countyList[x],]
   
-  proper <- function(x) paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
-  wrapClimInd_median$Season <- proper(seasonList[h])
-  return(wrapClimInd_median)
+  # Median for all years through 2021-2065
+  wrapFutClimInd_median <- lapply(1:length(seasonList), function(h){
+    
+    wrapClimInd <- wrapFutClimInd[wrapFutClimInd$Season==seasonList[h],]
+    wrapClimInd_median <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), median(Average, na.rm = T)))
+    colnames(wrapClimInd_median)[4] <- 'Median'
+    quantileFun <- function(x){z <- stats::quantile(x, probs=0.05, na.rm = T); return(z)}
+    aux <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), quantileFun(Average)))
+    wrapClimInd_median$p0_05 <- as.numeric(aux[,ncol(aux)])
+    quantileFun <- function(x){z <- stats::quantile(x, probs=0.95, na.rm = T); return(z)}
+    aux <- as.data.frame(dplyr::summarise(group_by(wrapClimInd, Index, RCP, Years), quantileFun(Average)))
+    wrapClimInd_median$p0_95 <- as.numeric(aux[,ncol(aux)])
+    
+    proper <- function(x) paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
+    wrapClimInd_median$Season <- proper(seasonList[h])
+    return(wrapClimInd_median)
+    
+  })
+  wrapFutClimInd_median <- do.call(rbind, wrapFutClimInd_median)
   
-})
-wrapFutClimInd_median <- do.call(rbind, wrapFutClimInd_median)
-
-# Facet plot
-gg <- ggplot(wrapFutClimInd_median, aes(x=Years, y=Median, colour=Season))
-gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line()
-gg <- gg + facet_grid(Index ~ RCP, scales='free_y')
-gg <- gg + theme_bw() + ylab('Median of each index with 90% interval of uncertainty')
-gg <- gg + theme(axis.text.x = element_text(size=10),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), sep='')
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_allFutureTrend_2021_2065.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_allFutureTrend_2021_2065.pdf', sep=''), plot=gg, width=10, height=12, units='in')
-}
-
-# Individual plots with all RCPs
-indList    <- unique(as.character(wrapFutClimInd_median$Index))
-lapply(1:length(indList), function(i){
-  db <- wrapFutClimInd_median[wrapFutClimInd_median$Index==indList[i],]
-  rownames(db) <- 1:nrow(db)
-  gg <- ggplot(db, aes(x=Years, y=Median, colour=Season))
-  gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line(size=1.2) + geom_point(size=3)
-  gg <- gg + facet_wrap(~RCP)
+  # Facet plot
+  gg <- ggplot(wrapFutClimInd_median, aes(x=Years, y=Median, colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+  gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line() + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+  gg <- gg + facet_grid(Index ~ RCP, scales='free_y')
   gg <- gg + theme_bw() + ylab('Median of each index with 90% interval of uncertainty')
-  gg <- gg + theme(axis.text.x = element_text(size=14),
+  gg <- gg + theme(axis.text.x = element_text(size=10),
                    axis.text.y = element_text(size=14),
                    axis.title.x = element_text(face="bold",size=15),
                    axis.title.y = element_text(face="bold",size=15),
                    legend.text = element_text(size=14),
-                   legend.title = element_text(face="bold",size=15),
-                   strip.text = element_text(size=15))
-  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
-  if(!dir.exists(outDir)){
-    dir.create(outDir, recursive=TRUE)
+                   legend.title = element_text(face="bold",size=15))
+  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[x]), sep='')
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_allFutureTrend_2021_2065.png', sep=''))){
+    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_allFutureTrend_2021_2065.pdf', sep=''), plot=gg, width=10, height=12, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), "_allFutureTrend_2021_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), "_allFutureTrend_2021_2065.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_allFutureTrend_2021_2065.pdf', sep=''))
   }
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_', indList[i], '_allRCP_2021_2065.pdf', sep=''))){
-    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_', indList[i], '_allRCP_2021_2065.pdf', sep=''), plot=gg, width=12, height=12, units='in')
-  }
-})
-
-#################################################################################
-# Floods
-#################################################################################
-
-db <- wrapFutClimInd_median[wrapFutClimInd_median$Index=='P_95',]
-rownames(db) <- 1:nrow(db)
-gg <- ggplot(db, aes(x=Years, y=Median, colour=Season))
-gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line(size=1.2) + geom_point(size=3) +  scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3')) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
-gg <- gg + facet_wrap(~RCP)
-gg <- gg + theme_bw() + ylab('Floods. 95 percentile of daily precipitation (mm/day)')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15),
-                 strip.text = element_text(size=15))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
-if(!dir.exists(outDir)){
-  dir.create(outDir, recursive=TRUE)
-}
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_P_95_floodsP95_allRCP_2021_2065.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_P_95_floodsP95_allRCP_2021_2065.pdf', sep=''), plot=gg, width=12, height=12, units='in')
-}
-
-system(paste("convert -verbose -density 300 ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_P_95_floodsP95_allRCP_2021_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_P_95_floodsP95_allRCP_2021_2065.png", sep=""), wait=TRUE)
-
-#################################################################################
-# Drought
-#################################################################################
-
-db <- wrapFutClimInd_median[wrapFutClimInd_median$Index=='NDWS',]
-rownames(db) <- 1:nrow(db)
-gg <- ggplot(db, aes(x=Years, y=Median, colour=Season))
-gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line(size=1.2) + geom_point(size=3) +  scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3')) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
-gg <- gg + facet_wrap(~RCP)
-gg <- gg + theme_bw() + ylab('Drought. Number of consecutive days with drought stress (days)')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15),
-                 strip.text = element_text(size=15))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
-if(!dir.exists(outDir)){
-  dir.create(outDir, recursive=TRUE)
-}
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_NDWS_drought_allRCP_2021_2065.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_NDWS_drought_allRCP_2021_2065.pdf', sep=''), plot=gg, width=12, height=12, units='in')
-}
-
-system(paste("convert -verbose -density 300 ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_NDWS_drought_allRCP_2021_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_NDWS_drought_allRCP_2021_2065.png", sep=""), wait=TRUE)
-
-#################################################################################
-
-# Individual plots
-indList <- unique(as.character(wrapFutClimInd_median$Index))
-rcpList <- paste("rcp", c(26, 45, 60, 85), sep="")
-lapply(1:length(indList), function(i){
   
-  lapply(1:length(rcpList), function(j){
-    
-    db <- wrapFutClimInd_median[wrapFutClimInd_median$Index==indList[i] & wrapFutClimInd_median$RCP==rcpList[j],]
+  # Individual plots with all RCPs
+  indList    <- unique(as.character(wrapFutClimInd_median$Index))
+  lapply(1:length(indList), function(i){
+    db <- wrapFutClimInd_median[wrapFutClimInd_median$Index==indList[i],]
     rownames(db) <- 1:nrow(db)
-    gg <- ggplot(db, aes(x=Years, y=Median, colour=Season))
-    gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line(size=1.2) + geom_point(size=3)
-    # gg <- gg + facet_wrap(~RCP)
+    gg <- ggplot(db, aes(x=Years, y=Median, colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+    gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line(size=1.2) + geom_point(size=3) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+    gg <- gg + facet_wrap(~RCP)
     gg <- gg + theme_bw() + ylab('Median of each index with 90% interval of uncertainty')
     gg <- gg + theme(axis.text.x = element_text(size=14),
                      axis.text.y = element_text(size=14),
@@ -583,194 +517,51 @@ lapply(1:length(indList), function(i){
                      axis.title.y = element_text(face="bold",size=15),
                      legend.text = element_text(size=14),
                      legend.title = element_text(face="bold",size=15),
-                     strip.text = element_text(size=15),
-                     plot.title = element_text(size=20))
-    gg <- gg + scale_x_continuous(breaks=seq(2020, 2065, 5))
-    gg <- gg + ggtitle(paste('Index: ', indList[i], ' - RCP: ', rcpList[j] ,sep=''))
+                     strip.text = element_text(size=15))
     outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
-    if(!dir.exists(outDir)){
-      dir.create(outDir, recursive=TRUE)
+    if(!dir.exists(outDir)){ dir.create(outDir, recursive=TRUE) }
+    if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_allRCP_2021_2065.png', sep=''))){
+      ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_allRCP_2021_2065.pdf', sep=''), plot=gg, width=12, height=12, units='in')
+      system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], "_allRCP_2021_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], "_allRCP_2021_2065.png", sep=""), wait=TRUE)
+      file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_allRCP_2021_2065.pdf', sep=''))
     }
-    if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_', indList[i], '_', rcpList[j], '_2021_2065.pdf', sep=''))){
-      ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_', indList[i], '_', rcpList[j], '_2021_2065.pdf', sep=''), plot=gg, width=12, height=10, units='in')
-    }
+  })
+  
+  # Individual plots per each RCP
+  indList <- unique(as.character(wrapFutClimInd_median$Index))
+  rcpList <- paste("rcp", c(26, 45, 60, 85), sep="")
+  lapply(1:length(indList), function(i){
+    
+    lapply(1:length(rcpList), function(j){
+      
+      db <- wrapFutClimInd_median[wrapFutClimInd_median$Index==indList[i] & wrapFutClimInd_median$RCP==rcpList[j],]
+      rownames(db) <- 1:nrow(db)
+      gg <- ggplot(db, aes(x=Years, y=Median, colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+      gg <- gg + geom_ribbon(aes(ymin=p0_05, ymax=p0_95, fill=Season, linetype=NA) ,alpha=.1) + geom_line(size=1.2) + geom_point(size=3) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+      gg <- gg + theme_bw() + ylab('Median of each index with 90% interval of uncertainty')
+      gg <- gg + theme(axis.text.x = element_text(size=14),
+                       axis.text.y = element_text(size=14),
+                       axis.title.x = element_text(face="bold",size=15),
+                       axis.title.y = element_text(face="bold",size=15),
+                       legend.text = element_text(size=14),
+                       legend.title = element_text(face="bold",size=15),
+                       strip.text = element_text(size=15),
+                       plot.title = element_text(size=20))
+      gg <- gg + scale_x_continuous(breaks=seq(2020, 2065, 5))
+      gg <- gg + ggtitle(paste('Index: ', indList[i], ' - RCP: ', rcpList[j] ,sep=''))
+      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+      if(!dir.exists(outDir)){ dir.create(outDir, recursive=TRUE) }
+      if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], '_2021_2065.png', sep=''))){
+        ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], '_2021_2065.pdf', sep=''), plot=gg, width=12, height=10, units='in')
+        system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], "_2021_2065.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], "_2021_2065.png", sep=""), wait=TRUE)
+        file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], '_2021_2065.png', sep=''))
+      }
+      
+    })
     
   })
   
 })
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-# Cluster analysis to identify climate change scenarios by county using absolute changes
-# (Here we use only future absolute changes)
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-
-wrapFutClimInd2 <- wrapFutClimInd
-wrapFutClimInd2 <- as.data.frame(dplyr::summarise(group_by(wrapFutClimInd2, Index, GCM, RCP, County, Season, Years), median(Average)))
-colnames(wrapFutClimInd2)[ncol(wrapFutClimInd2)] <- 'Average'
-
-county <- 'Busia'
-scenarioClustering2 <- function(county){
-  
-  seasonList <- c('first', 'second')
-  
-  # *** Load historical data first season
-  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[1], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[1], '_season.RData', sep=''))
-  first_season <- clim_indexes; rm(clim_indexes)
-  
-  first_seasonWrap <- lapply(1:length(first_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:ncol(first_season[[m]])])),
-                              Index   = names(first_season)[m],
-                              Years   = 1981:2005,
-                              Season  = 'First')
-    return(wrapClimInd)
-  })
-  first_seasonWrap <- do.call(rbind, first_seasonWrap)
-  first_seasonWrap <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap, Index, Season), mean(Average)))
-  colnames(first_seasonWrap)[3] <- 'Average'
-  
-  # *** Load historical data second season
-  load(paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/climatic_indices/historical/', seasonList[2], '_season/', gsub(pattern=' ', replacement='_', county), '_', seasonList[2], '_season.RData', sep=''))
-  second_season <- clim_indexes; rm(clim_indexes)
-  
-  second_seasonWrap <- lapply(1:length(second_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:ncol(second_season[[m]])])),
-                              Index   = names(second_season)[m],
-                              Years   = 1981:2005,
-                              Season  = 'Second')
-    return(wrapClimInd)
-  })
-  second_seasonWrap <- do.call(rbind, second_seasonWrap)
-  second_seasonWrap <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap, Index, Season), mean(Average)))
-  colnames(second_seasonWrap)[3] <- 'Average'
-  
-  all_seasons <- rbind(first_seasonWrap, second_seasonWrap); rm(first_seasonWrap, second_seasonWrap)
-  
-  # *** Load future data
-  wrapFutClimInd_county <- as.data.frame(dplyr::summarise(group_by(wrapFutClimInd2[wrapFutClimInd2$County==county,], Index, GCM, RCP, Season), mean(Average)))
-  colnames(wrapFutClimInd_county)[5] <- 'Average'
-  wrapFutClimInd_county$Average[which(wrapFutClimInd_county$Average==-Inf)] <- 0
-  
-  # *** Calculate absolute change of future based on historical data
-  seasonList <- c('first', 'second')
-  proper <- function(x) paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
-  wrapFutClimInd_absChange <- wrapFutClimInd_county
-  for(i in 1:9){
-    for(j in 1:length(seasonList)){
-      wrapFutClimInd_absChange$Average[which(wrapFutClimInd_absChange$Index==all_seasons$Index[i] & wrapFutClimInd_absChange$Season==seasonList[j])] <- wrapFutClimInd_absChange$Average[which(wrapFutClimInd_absChange$Index==all_seasons$Index[i] & wrapFutClimInd_absChange$Season==seasonList[j])] - all_seasons$Average[which(all_seasons$Index==all_seasons$Index[i] & all_seasons$Season==proper(seasonList[j]))]
-    }
-  }; rm(i, j)
-  
-  wrapFutClimInd_absChange$Season       <- gsub(pattern='first', replacement='S1', x=wrapFutClimInd_absChange$Season)
-  wrapFutClimInd_absChange$Season       <- gsub(pattern='second', replacement='S2', x=wrapFutClimInd_absChange$Season)
-  wrapFutClimInd_absChange$combination  <- paste(wrapFutClimInd_absChange$GCM, '-', wrapFutClimInd_absChange$RCP, '-', wrapFutClimInd_absChange$Season, sep='')
-  
-  wrapFutClimInd_absChange$GCM <- NULL
-  wrapFutClimInd_absChange$RCP <- NULL
-  wrapFutClimInd_absChange$Season <- NULL
-  
-  wrapFutClimInd_absChange <- wrapFutClimInd_absChange %>% spread(key=Index, value=Average)
-  
-  rownames(wrapFutClimInd_absChange) <- wrapFutClimInd_absChange$combination
-  wrapFutClimInd_absChange$combination <- NULL
-  sd0 <- which(apply(X=wrapFutClimInd_absChange, MARGIN=2, FUN=sd)==0)
-  if(length(sd0)>0){
-    wrapFutClimInd_absChange <- wrapFutClimInd_absChange[,-sd0]
-  }
-  
-  ### Exploring correlations between variables
-  library(gplots)
-  my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
-  corMat <- cor(wrapFutClimInd_absChange, method='spearman')
-  diag(corMat) <- NA
-  outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/cluster_analysis/combined/absolute_changes_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
-  if(!dir.exists(outDir)){dir.create(outDir, recursive=TRUE)}
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))){
-    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), height=8, width=8)
-    heatmap.2(corMat, col=my_palette, density.info="none", trace="none", dendrogram="column", key.title='', key.xlab='Spearman correlation', margins=c(9,9))
-    dev.off()
-  }
-  
-  # Doing PCA using absolute changes and doing hierarchical clustering on principal components
-  # because our variables are correlated
-  library(FactoMineR)
-  res_pca  <- FactoMineR::PCA(X=wrapFutClimInd_absChange, graph=FALSE)
-  set.seed(1235)
-  res_hcpc <- FactoMineR::HCPC(res_pca, nb.clust=-1, graph=FALSE) # Define number of SCENARIOS
-  
-  # Description of variables within each cluster
-  # res_hcpc$desc.var
-  
-  library(factoextra)
-  library(corrplot)
-  
-  # Visualize eigenvalues/variances
-  gg <- fviz_eig(res_pca, addlabels=TRUE, hjust = -0.3) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''))){
-    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''), plot=gg, width=7, height=7, units='in')
-  }
-  
-  # Visualize variables with contributions. Use gradient color
-  gg <- fviz_pca_var(res_pca, col.var="contrib")+ scale_color_gradient2(low="white", mid="blue", high="red", midpoint = 96) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''))){
-    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''), plot=gg, width=7.5, height=7, units='in')
-  }
-  
-  # Quality of representation of each variable
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''))){
-    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''), height=7, width=8)
-    par(mfrow=c(1,3))
-    corrplot(res_pca$var$cos2[,1:2], is.corr=FALSE) # Representation quality of each variable
-    corrplot(res_pca$var$contrib[,1:2], is.corr=FALSE) # Contribution of each variable to dimension
-    corrplot(res_pca$var$cor[,1:2], method="ellipse", is.corr=TRUE) # Correlation of each variable to dimension
-    dev.off()
-  }
-  
-  # ENCONTRAR UNA FORMA ADECUADA DE MOSTRAR LOS CLUSTERS EN UN ESPACIO BIVARIADO $$$
-  # Biplot of individuals and variables. Only variables are labelled
-  gg <- fviz_pca_biplot(res_pca,  label="var", habillage=res_hcpc$data.clust$clust, addEllipses=TRUE, ellipse.level=0.95) + theme_bw()
-  # gg <- gg + scale_color_manual(values=c("black", "red", "forestgreen"))
-  # gg <- gg + scale_fill_manual(values=c("black", "red", "forestgreen")) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''))){
-    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''), plot=gg, width=7.5, height=7, units='in')
-  }
-  
-  # Make boxplots for set of variables
-  df_cluster <- res_hcpc$data.clust
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChangeClusters.csv', sep=''))){
-    write.csv(df_cluster, paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChangeClusters.csv', sep=''), row.names=TRUE)
-  }
-  # colnames(df_cluster) <- gsub(pattern='-', replacement='_', colnames(df_cluster))
-  df_cluster$combination <- rownames(df_cluster)
-  df_cluster <- df_cluster %>% gather(Index, Value, TMEAN:NDWS)
-  df_cluster$Index <- as.character(df_cluster$Index)
-  aux <- strsplit(x=df_cluster$combination, split='-')
-  aux <- lapply(1:length(aux), function(i){
-    z <- as.data.frame(t(aux[[i]]))
-    return(z)
-  })
-  aux <- do.call(rbind, aux)
-  df_cluster$GCM <- aux$V1
-  df_cluster$RCP <- aux$V2
-  df_cluster$Season <- aux$V3
-  rm(aux)
-  df_cluster$combination <- NULL
-  df_cluster$Season <- gsub(pattern='S1', replacement='First', df_cluster$Season)
-  df_cluster$Season <- gsub(pattern='S2', replacement='Second', df_cluster$Season)
-  names(df_cluster)[1] <- 'Scenario'
-  df_cluster$Index <- factor(x=df_cluster$Index, levels=c('TMEAN', 'GDD_1', 'GDD_2', 'ND_t35', 'TOTRAIN', 'CDD', 'P5D', 'P_95', 'NDWS'))
-  
-  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_boxplot(aes(colour=Season))
-  gg <- gg + facet_wrap(~ Index, scales='free_y')
-  gg <- gg + theme_bw() + geom_hline(yintercept=0) + ylab('Absolute change respect to baseline')
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline.pdf', sep=''))){
-    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline.pdf', sep=''), plot=gg, width=8, height=9, units='in')
-  }
-  
-  return(cat('Process done.\n'))
-  
-}
-county <- 'Busia'
-scenarioClustering2(county=county)
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Cluster analysis to identify climate change scenarios by county using absolute changes
@@ -792,26 +583,26 @@ scenarioClustering3 <- function(county){
   
   ###
   first_seasonWrap1 <- lapply(1:length(first_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:23])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:23], na.rm = T)),
                               Index   = names(first_season)[m],
                               Years   = 1981:2000,
                               Season  = 'First')
     return(wrapClimInd)
   })
   first_seasonWrap1 <- do.call(rbind, first_seasonWrap1)
-  first_seasonWrap1 <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap1, Index, Season), mean(Average)))
+  first_seasonWrap1 <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap1, Index, Season), mean(Average, na.rm = T)))
   colnames(first_seasonWrap1)[3] <- 'Average'
   
   ###
   first_seasonWrap2 <- lapply(1:length(first_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,(ncol(first_season[[m]])-20+1):ncol(first_season[[m]])])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,(ncol(first_season[[m]])-20+1):ncol(first_season[[m]])], na.rm = T)),
                               Index   = names(first_season)[m],
                               Years   = 1986:2005,
                               Season  = 'First')
     return(wrapClimInd)
   })
   first_seasonWrap2 <- do.call(rbind, first_seasonWrap2)
-  first_seasonWrap2 <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap2, Index, Season), mean(Average)))
+  first_seasonWrap2 <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap2, Index, Season), mean(Average, na.rm = T)))
   colnames(first_seasonWrap2)[3] <- 'Average'
   
   fs_absChanges <- first_seasonWrap2$Average - first_seasonWrap1$Average; rm(first_seasonWrap1, first_seasonWrap2)
@@ -820,14 +611,14 @@ scenarioClustering3 <- function(county){
   
   ###
   first_seasonWrap <- lapply(1:length(first_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:ncol(first_season[[m]])])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:ncol(first_season[[m]])], na.rm = T)),
                               Index   = names(first_season)[m],
                               Years   = 1981:2005,
                               Season  = 'First')
     return(wrapClimInd)
   })
   first_seasonWrap <- do.call(rbind, first_seasonWrap)
-  first_seasonWrap <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap, Index, Season), mean(Average)))
+  first_seasonWrap <- as.data.frame(dplyr::summarise(group_by(first_seasonWrap, Index, Season), mean(Average, na.rm = T)))
   colnames(first_seasonWrap)[3] <- 'Average'
   
   # *** Load historical data second season
@@ -836,26 +627,26 @@ scenarioClustering3 <- function(county){
   
   ###
   second_seasonWrap1 <- lapply(1:length(second_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:23])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:23], na.rm = T)),
                               Index   = names(second_season)[m],
                               Years   = 1981:2000,
                               Season  = 'Second')
     return(wrapClimInd)
   })
   second_seasonWrap1 <- do.call(rbind, second_seasonWrap1)
-  second_seasonWrap1 <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap1, Index, Season), mean(Average)))
+  second_seasonWrap1 <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap1, Index, Season), mean(Average, na.rm = T)))
   colnames(second_seasonWrap1)[3] <- 'Average'
   
   ###
   second_seasonWrap2 <- lapply(1:length(second_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,(ncol(second_season[[m]])-20+1):ncol(second_season[[m]])])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,(ncol(second_season[[m]])-20+1):ncol(second_season[[m]])], na.rm = T)),
                               Index   = names(second_season)[m],
                               Years   = 1986:2005,
                               Season  = 'Second')
     return(wrapClimInd)
   })
   second_seasonWrap2 <- do.call(rbind, second_seasonWrap2)
-  second_seasonWrap2 <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap2, Index, Season), mean(Average)))
+  second_seasonWrap2 <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap2, Index, Season), mean(Average, na.rm = T)))
   colnames(second_seasonWrap2)[3] <- 'Average'
   
   ss_absChanges <- second_seasonWrap2$Average - second_seasonWrap1$Average; rm(second_seasonWrap1, second_seasonWrap2)
@@ -864,20 +655,20 @@ scenarioClustering3 <- function(county){
   
   #
   second_seasonWrap <- lapply(1:length(second_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:ncol(second_season[[m]])])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:ncol(second_season[[m]])], na.rm = T)),
                               Index   = names(second_season)[m],
                               Years   = 1981:2005,
                               Season  = 'Second')
     return(wrapClimInd)
   })
   second_seasonWrap <- do.call(rbind, second_seasonWrap)
-  second_seasonWrap <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap, Index, Season), mean(Average)))
+  second_seasonWrap <- as.data.frame(dplyr::summarise(group_by(second_seasonWrap, Index, Season), mean(Average, na.rm = T)))
   colnames(second_seasonWrap)[3] <- 'Average'
   
   all_seasons <- rbind(first_seasonWrap, second_seasonWrap); rm(first_seasonWrap, second_seasonWrap)
   
   # *** Load future data
-  wrapFutClimInd_county <- as.data.frame(dplyr::summarise(group_by(wrapFutClimInd2[wrapFutClimInd2$County==county,], Index, GCM, RCP, Season), mean(Average)))
+  wrapFutClimInd_county <- as.data.frame(dplyr::summarise(group_by(wrapFutClimInd2[wrapFutClimInd2$County==county,], Index, GCM, RCP, Season), mean(Average, na.rm = T)))
   colnames(wrapFutClimInd_county)[5] <- 'Average'
   wrapFutClimInd_county$Average[which(wrapFutClimInd_county$Average==-Inf)] <- 0
   
@@ -920,43 +711,51 @@ scenarioClustering3 <- function(county){
   corMat <- cor(wrapFutClimInd_absChange, method='spearman')
   diag(corMat) <- NA
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/cluster_analysis/combined/absolute_changes_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
-  if(!dir.exists(outDir)){dir.create(outDir, recursive=TRUE)}
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))){
-    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), height=8, width=8)
+  if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.png', sep=''))){
+    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), units = 'in', height=8, width=8)
     heatmap.2(corMat, col=my_palette, density.info="none", trace="none", dendrogram="column", key.title='', key.xlab='Spearman correlation', margins=c(9,9))
     dev.off()
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_correlationMatrix.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_correlationMatrix.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))
   }
   
   # Doing PCA using absolute changes and doing hierarchical clustering on principal components
   # because our variables are correlated
-  library(FactoMineR)
+  suppressMessages(library(FactoMineR))
   res_pca  <- FactoMineR::PCA(X=wrapFutClimInd_absChange, graph=FALSE)
   set.seed(1235)
-  res_hcpc <- FactoMineR::HCPC(res_pca, nb.clust=-1, graph=FALSE) # Define number of SCENARIOS
+  res_hcpc <- FactoMineR::HCPC(res_pca, nb.clust=-1, graph=FALSE) # Define number of SCENARIOS automatically
   
-  library(factoextra)
-  library(corrplot)
+  suppressMessages(library(factoextra))
+  suppressMessages(library(corrplot))
   
   # Visualize eigenvalues/variances
   gg <- fviz_eig(res_pca, addlabels=TRUE, hjust = -0.3) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''), plot=gg, width=7, height=7, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_eigenValuesPCA.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_eigenValuesPCA.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''))
   }
   
   # Visualize variables with contributions. Use gradient color
   gg <- fviz_pca_var(res_pca, col.var="contrib")+ scale_color_gradient2(low="white", mid="blue", high="red", midpoint = 96) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''), plot=gg, width=7.5, height=7, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_varMapContributionsPCA.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_varMapContributionsPCA.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''))
   }
   
   # Quality of representation of each variable
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''))){
-    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''), height=7, width=8)
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.png', sep=''))){
+    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''), units = 'in', height=7, width=8)
     par(mfrow=c(1,3))
     corrplot(res_pca$var$cos2[,1:2], is.corr=FALSE) # Representation quality of each variable
     corrplot(res_pca$var$contrib[,1:2], is.corr=FALSE) # Contribution of each variable to dimension
     corrplot(res_pca$var$cor[,1:2], method="ellipse", is.corr=TRUE) # Correlation of each variable to dimension
     dev.off()
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_rQuality.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_rQuality.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''))
   }
   
   # ENCONTRAR UNA FORMA ADECUADA DE MOSTRAR LOS CLUSTERS EN UN ESPACIO BIVARIADO $$$
@@ -964,8 +763,10 @@ scenarioClustering3 <- function(county){
   gg <- fviz_pca_biplot(res_pca,  label="var", habillage=res_hcpc$data.clust$clust, addEllipses=TRUE, ellipse.level=0.95) + theme_bw()
   # gg <- gg + scale_color_manual(values=c("black", "red", "forestgreen"))
   # gg <- gg + scale_fill_manual(values=c("black", "red", "forestgreen")) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''), plot=gg, width=7.5, height=7, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_biplotClusterPCA.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_biplotClusterPCA.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''))
   }
   
   # Make boxplots for set of variables
@@ -993,33 +794,66 @@ scenarioClustering3 <- function(county){
   rm(aux)
   df_cluster$combination <- NULL
   names(df_cluster)[1] <- 'Scenario'
-  df_cluster$Index <- factor(x=df_cluster$Index, levels=c('TMEAN', 'GDD_1', 'GDD_2', 'ND_t35', 'TOTRAIN', 'CDD', 'P5D', 'P_95', 'NDWS'))
+  df_cluster$Index <- factor(x=df_cluster$Index, levels=c('TMEAN', 'GDD_1', 'GDD_2', 'ND_t35', 'TOTRAIN', 'CDD', 'P5D', 'P_95', 'NDWS', 'SLGP', 'LGP'))
   
-  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_boxplot(aes(colour=Season))
+  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_boxplot(aes(colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + geom_point(data=df_cluster[grep(pattern='Historical', x=df_cluster$RCP),], aes(x=Scenario, y=Value, colour=Season), size=4)
   gg <- gg + facet_wrap(~ Index, scales='free_y')
   gg <- gg + theme_bw() + geom_hline(yintercept=0) + ylab('Absolute change respect to baseline')
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_absChange_baseline.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_absChange_baseline.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline.pdf', sep=''))
   }
   
-  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_jitter(aes(colour=Season))
+  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_jitter(aes(colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + geom_point(data=df_cluster[grep(pattern='Historical', x=df_cluster$RCP),], aes(x=Scenario, y=Value, colour=Season), size=4)
   gg <- gg + facet_wrap(~ Index, scales='free_y')
   gg <- gg + theme_bw() + geom_hline(yintercept=0) + ylab('Absolute change respect to baseline')
-  gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
-  gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='gold')
-  gg <- gg + annotate('rect', xmin=2.5, xmax=3.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='forestgreen')
-  # gg <- gg + geom_point(df_cluster)
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline2.pdf', sep=''))){
+  if(length(unique(df_cluster$Scenario))==1){
+    gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
+  }
+  if(length(unique(df_cluster$Scenario))==2){
+    gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
+    gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='coral1')
+  }
+  if(length(unique(df_cluster$Scenario))==3){
+    gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
+    gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='coral1')
+    gg <- gg + annotate('rect', xmin=2.5, xmax=3.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='forestgreen')
+  }
+  if(length(unique(df_cluster$Scenario))==4){
+    gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
+    gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='coral1')
+    gg <- gg + annotate('rect', xmin=2.5, xmax=3.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='forestgreen')
+    gg <- gg + annotate('rect', xmin=3.5, xmax=4.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='mediumpurple1')
+  }
+  if(length(unique(df_cluster$Scenario))==5){
+    gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
+    gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='coral1')
+    gg <- gg + annotate('rect', xmin=2.5, xmax=3.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='forestgreen')
+    gg <- gg + annotate('rect', xmin=3.5, xmax=4.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='mediumpurple1')
+    gg <- gg + annotate('rect', xmin=4.5, xmax=5.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='rosybrown1')
+  }
+  if(length(unique(df_cluster$Scenario))==6){
+    gg <- gg + annotate('rect', xmin=0.5, xmax=1.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='blue')
+    gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='coral1')
+    gg <- gg + annotate('rect', xmin=2.5, xmax=3.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='forestgreen')
+    gg <- gg + annotate('rect', xmin=3.5, xmax=4.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='mediumpurple1')
+    gg <- gg + annotate('rect', xmin=4.5, xmax=5.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='rosybrown1')
+    gg <- gg + annotate('rect', xmin=5.5, xmax=6.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='lightgreen')
+  }
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline2.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline2.pdf', sep=''), plot=gg, width=9, height=10, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_absChange_baseline2.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_absChange_baseline2.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_absChange_baseline2.pdf', sep=''))
   }
   
   return(cat('Process done.\n'))
   
 }
 county <- 'Taita Taveta'
-scenarioClustering3(county=county)
+scenarioClustering3(county = county)
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Cluster analysis to identify climate change scenarios by county using trends
@@ -1040,7 +874,7 @@ scenarioTrendsClustering <- function(county){
   first_season <- clim_indexes; rm(clim_indexes)
   
   first_seasonWrap <- lapply(1:length(first_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:ncol(first_season[[m]])])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:ncol(first_season[[m]])], na.rm = T)),
                               Index   = names(first_season)[m],
                               Years   = 1981:2005,
                               Season  = 'First')
@@ -1065,7 +899,7 @@ scenarioTrendsClustering <- function(county){
   second_season <- clim_indexes; rm(clim_indexes)
   
   second_seasonWrap <- lapply(1:length(second_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:ncol(second_season[[m]])])),
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:ncol(second_season[[m]])], na.rm = T)),
                               Index   = names(second_season)[m],
                               Years   = 1981:2005,
                               Season  = 'Second')
@@ -1140,51 +974,59 @@ scenarioTrendsClustering <- function(county){
   }
   
   ### Exploring correlations between variables
-  library(gplots)
+  suppressMessages(library(gplots))
   my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
   corMat <- cor(wrapFutClimInd_county, method='spearman')
   diag(corMat) <- NA
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/cluster_analysis/combined/trends_allYears/', gsub(pattern=' ', replacement='_', county), sep='')
   if(!dir.exists(outDir)){dir.create(outDir, recursive=TRUE)}
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))){
-    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), height=8, width=8)
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.png', sep=''))){
+    pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''), units = 'in', height=8, width=8)
     heatmap.2(corMat, col=my_palette, density.info="none", trace="none", dendrogram="column", key.title='', key.xlab='Spearman correlation', margins=c(9,9))
     dev.off()
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_correlationMatrix.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_correlationMatrix.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_correlationMatrix.pdf', sep=''))
   }
   
   # Doing PCA using estimated slopes and doing hierarchical clustering on principal components
   # because our variables are correlated
-  library(FactoMineR)
+  suppressMessages(library(FactoMineR))
   res_pca  <- FactoMineR::PCA(wrapFutClimInd_county, graph=FALSE)
   set.seed(1235)
-  res_hcpc <- FactoMineR::HCPC(res_pca, nb.clust=-1, graph=FALSE) # Define number of SCENARIOS
+  res_hcpc <- FactoMineR::HCPC(res_pca, nb.clust=-1, graph=FALSE) # Define number of SCENARIOS automatically
   
   # Description of variables within each cluster
   # res_hcpc$desc.var
   
-  library(factoextra)
-  library(corrplot)
+  suppressMessages(library(factoextra))
+  suppressMessages(library(corrplot))
   
   # Visualize eigenvalues/variances
   gg <- fviz_eig(res_pca, addlabels=TRUE, hjust = -0.3) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''), plot=gg, width=7, height=7, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_eigenValuesPCA.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_eigenValuesPCA.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_eigenValuesPCA.pdf', sep=''))
   }
   
   # Visualize variables with contributions. Use gradient color
   gg <- fviz_pca_var(res_pca, col.var="contrib")+ scale_color_gradient2(low="white", mid="blue", high="red", midpoint = 96) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''), plot=gg, width=7.5, height=7, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_varMapContributionsPCA.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_varMapContributionsPCA.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_varMapContributionsPCA.pdf', sep=''))
   }
   
   # Quality of representation of each variable
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.png', sep=''))){
     pdf(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''), height=7, width=8)
     par(mfrow=c(1,3))
     corrplot(res_pca$var$cos2[,1:2], is.corr=FALSE) # Representation quality of each variable
     corrplot(res_pca$var$contrib[,1:2], is.corr=FALSE) # Contribution of each variable to dimension
     corrplot(res_pca$var$cor[,1:2], method="ellipse", is.corr=TRUE) # Correlation of each variable to dimension
     dev.off()
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_rQuality.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_rQuality.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_rQuality.pdf', sep=''))
   }
   
   # ENCONTRAR UNA FORMA ADECUADA DE MOSTRAR LOS CLUSTERS EN UN ESPACIO BIVARIADO $$$
@@ -1192,8 +1034,10 @@ scenarioTrendsClustering <- function(county){
   gg <- fviz_pca_biplot(res_pca,  label="var", habillage=res_hcpc$data.clust$clust, addEllipses=TRUE, ellipse.level=0.95) + theme_bw()
   # gg <- gg + scale_color_manual(values=c("black", "red", "forestgreen"))
   # gg <- gg + scale_fill_manual(values=c("black", "red", "forestgreen")) + theme_bw()
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''), plot=gg, width=7.5, height=7, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_biplotClusterPCA.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_biplotClusterPCA.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_biplotClusterPCA.pdf', sep=''))
   }
   
   # Make boxplots for set of variables
@@ -1221,17 +1065,19 @@ scenarioTrendsClustering <- function(county){
   df_cluster$RCP <- aux$V2
   rm(aux)
   names(df_cluster)[1] <- 'Scenario'
-  df_cluster$Index <- factor(x=df_cluster$Index, levels=c('TMEAN', 'GDD_1', 'GDD_2', 'ND_t35', 'TOTRAIN', 'CDD', 'P5D', 'P_95', 'NDWS'))
+  df_cluster$Index <- factor(x=df_cluster$Index, levels=c('TMEAN', 'GDD_1', 'GDD_2', 'ND_t35', 'TOTRAIN', 'CDD', 'P5D', 'P_95', 'NDWS', 'SLGP', 'LGP'))
   
-  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_boxplot(aes(colour=Season))
+  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_boxplot(aes(colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + geom_point(data=df_cluster[grep(pattern='Historical', x=df_cluster$RCP),], aes(x=Scenario, y=Value, colour=Season), size=4)
   gg <- gg + facet_wrap(~ Index, scales='free_y')
   gg <- gg + theme_bw() + geom_hline(yintercept=0) + ylab('Change by 20 years')
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_trendsScenario.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_trendsScenario.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario.pdf', sep=''))
   }
   
-  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_jitter(aes(colour=Season))
+  gg <- ggplot(df_cluster, aes(x=Scenario, y=Value)) + geom_jitter(aes(colour=Season)) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + geom_point(data=df_cluster[grep(pattern='Historical', x=df_cluster$RCP),], aes(x=Scenario, y=Value, colour=Season), size=4)
   gg <- gg + facet_wrap(~ Index, scales='free_y')
   gg <- gg + theme_bw() + geom_hline(yintercept=0) + ylab('Change by 20 years')
@@ -1239,12 +1085,14 @@ scenarioTrendsClustering <- function(county){
   gg <- gg + annotate('rect', xmin=1.5, xmax=2.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='gold')
   gg <- gg + annotate('rect', xmin=2.5, xmax=3.5, ymin=-Inf, ymax=Inf, alpha=0.1, fill='forestgreen')
   # gg <- gg + geom_point(df_cluster)
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario2.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario2.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario2.pdf', sep=''), plot=gg, width=9, height=10, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_trendsScenario2.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', county), "_trendsScenario2.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', county), '_trendsScenario2.pdf', sep=''))
   }
   
   return(cat('Process done.\n'))
   
 }
 county <- 'Taita Taveta'
-scenarioTrendsClustering(county=county)
+scenarioTrendsClustering(county = county)
