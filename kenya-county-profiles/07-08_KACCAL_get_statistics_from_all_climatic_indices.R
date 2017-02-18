@@ -60,12 +60,14 @@ wrapClimInd_2015 <- lapply(1:nrow(countyList), function(i){
   allWrap <- rbind(first_seasonWrap, second_seasonWrap)
   rm(first_seasonWrap, second_seasonWrap)
   
-  gg <- ggplot(allWrap, aes(x=Years, y=Average, colour=Season)) + geom_line() + geom_point()
+  gg <- ggplot(allWrap, aes(x=Years, y=Average, colour=Season)) + geom_line() + geom_point() + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + facet_wrap(~ Index, scales='free') + theme_bw()
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), sep='')
   if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.pdf', sep=''))){
-    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.pdf', sep=''), plot=gg, width=9, height=8, units='in')
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.png', sep=''))){
+    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.pdf', sep=''), plot=gg, width=10, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_historicalTrend_2015.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_historicalTrend_2015.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_historicalTrend_2015.pdf', sep=''))
   }
   
   indList <- unique(as.character(allWrap$Index))
@@ -85,198 +87,130 @@ wrapClimInd_2015 <- lapply(1:nrow(countyList), function(i){
   trendAll <- do.call(rbind, trendAll)
   trendAll$p_value <- round(trendAll$p_value, 3)
   
-  gg <- ggplot(trendAll, aes(x=Season, y=p_value, fill=Season, colour=Season)) + geom_bar(stat="identity")
+  gg <- ggplot(trendAll, aes(x=Season, y=p_value, fill=Season, colour=Season)) + geom_bar(stat="identity") + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3')) + scale_fill_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
   gg <- gg + facet_wrap(~ Index, scales='free') + theme_bw()
   gg <- gg + geom_hline(yintercept=0.05)
   gg <- gg + ylab('p-value Mann-Kendall test') + scale_y_continuous(limits=c(0, 1))
   if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2015.pdf', sep=''))){
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2015.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2015.pdf', sep=''), plot=gg, width=9, height=8, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_significanceTrend_2015.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), "_significanceTrend_2015.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[[i]]), '_significanceTrend_2015.pdf', sep=''))
   }
   
   return(allWrap)
   
 })
-allWrap <- wrapClimInd_2015[[1]]
+names(wrapClimInd_2015) <- as.character(countyList$County)
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Historical lines plots by county until 2015 (individual way)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-# Total precipitation
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-
-# For both seasons
-gg <- ggplot(allWrap[allWrap$Index=='TOTRAIN',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab('Total precipitation (mm)') + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, 600))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_season_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# For first season
-gg <- ggplot(allWrap[allWrap$Index=='TOTRAIN' & allWrap$Season=='First',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab('Total precipitation (mm)') + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + theme(legend.position="none")
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, 600))
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_firstSeason_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_firstSeason_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# For second season
-gg <- ggplot(allWrap[allWrap$Index=='TOTRAIN' & allWrap$Season=='Second',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab('Total precipitation (mm)') + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + theme(legend.position="none")
-gg <- gg + scale_colour_manual(values=c('Second'='turquoise3'))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, 600))
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_secondSeason_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_secondSeason_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# For annual precipitation
-completeTOTRAIN <- as.data.frame(dplyr::summarise(group_by(allWrap[allWrap$Index=='TOTRAIN',], Index, Years), sum(Average)))
-colnames(completeTOTRAIN)[3] <- 'Average'
-gg <- ggplot(completeTOTRAIN, aes(x=Years, y=Average)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab('Total precipitation (mm)') + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, 1000))
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_complete_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TOTRAIN_complete_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-# Mean temperature
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-
-# For both seasons
-gg <- ggplot(allWrap[allWrap$Index=='TMEAN',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab(expression("Average temperature ("*~degree*C*")")) + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(23, 27))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_season_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# For first season
-gg <- ggplot(allWrap[allWrap$Index=='TMEAN' & allWrap$Season=='First',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab(expression("Average temperature ("*~degree*C*")")) + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + theme(legend.position="none")
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(23, 27))
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_firstSeason_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_firstSeason_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# For second season
-gg <- ggplot(allWrap[allWrap$Index=='TMEAN' & allWrap$Season=='Second',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab(expression("Average temperature ("*~degree*C*")")) + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + theme(legend.position="none")
-gg <- gg + scale_colour_manual(values=c('Second'='turquoise3'))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(23, 27))
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_secondSeason_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_secondSeason_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# For annual temperature
-completeTMEAN <- as.data.frame(dplyr::summarise(group_by(allWrap[allWrap$Index=='TMEAN',], Index, Years), mean(Average)))
-colnames(completeTMEAN)[3] <- 'Average'
-gg <- ggplot(completeTMEAN, aes(x=Years, y=Average)) + geom_line(size=1.2) + geom_point(size=3)
-gg <- gg + theme_bw() + ylab(expression("Average temperature ("*~degree*C*")")) + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(23, 27))
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_complete_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_TMEAN_complete_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-# Floods
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-
-# For both seasons
-gg <- ggplot(allWrap[allWrap$Index=='P_95',], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
-gg <- gg + theme_bw() + ylab('Floods. 95 percentile of daily precipitation (mm/day)') + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, max(allWrap$Average[allWrap$Index=='P_95'])+5))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_floodsP95_season_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_floodsP95_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-system(paste("convert -verbose -density 300 ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_floodsP95_season_2015.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_floodsP95_season_2015.png", sep=""), wait=TRUE)
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-# Drought
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
-
-# For both seasons
-gg <- ggplot(allWrap[allWrap$Index=='NDWS',], aes(x=Years, y=Average, colour=Season)) + geom_area(fill=Season) + geom_point(size=3) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
-gg <- gg + theme_bw() + ylab('Drought. Number of consecutive days with drought stress (days)') + xlab('Years')
-gg <- gg + theme(axis.text.x = element_text(size=14),
-                 axis.text.y = element_text(size=14),
-                 axis.title.x = element_text(face="bold",size=15),
-                 axis.title.y = element_text(face="bold",size=15),
-                 legend.text = element_text(size=14),
-                 legend.title = element_text(face="bold",size=15))
-gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, max(allWrap$Average[allWrap$Index=='NDWS'])+5))
-outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[[1]]), sep='')
-if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_droughtNDWS_season_2015.pdf', sep=''))){
-  ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[1]), '_droughtNDWS_season_2015.pdf', sep=''), plot=gg, width=10, height=7, units='in')
-}
-
-system(paste("convert -verbose -density 300 ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_droughtNDWS_season_2015.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, "/", gsub(pattern=' ', replacement='_', countyList$County[1]), "_droughtNDWS_season_2015.png", sep=""), wait=TRUE)
+# Varying per county
+lapply(1:nrow(countyList), function(i){
+  
+  allWrap <- wrapClimInd_2015[[countyList$County[i]]]
+  indexList <- unique(as.character(allWrap$Index))
+  
+  # Varying per index for both two seasons
+  lapply(1:length(indexList), function(j){
+    
+    gg <- ggplot(allWrap[allWrap$Index == indexList[j],], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+    gg <- gg + theme_bw() + xlab('Years')
+    if(indexList[j] == "TMEAN"){gg <- gg + ylab(expression("Average temperature ("*~degree*C*")"))}
+    if(indexList[j] == "GDD_1"){gg <- gg + ylab(expression("Growing degree days with TB = 10 ("*~degree*C*"/day)"))}
+    if(indexList[j] == "GDD_2"){gg <- gg + ylab(expression("Growing degree days with TO = 25 ("*~degree*C*"/day)"))}
+    if(indexList[j] == "ND_t35"){gg <- gg + ylab(expression("Total number of days with Tmax >= 35"*~degree*C*" (days)"))}
+    if(indexList[j] == "TOTRAIN"){gg <- gg + ylab("Total precipitation (mm)")}
+    if(indexList[j] == "CDD"){gg <- gg + ylab("Maximum number of consecutive dry days (days)")}
+    if(indexList[j] == "P5D"){gg <- gg + ylab("Maximum 5-day running average precipitation (mm/day)")}
+    if(indexList[j] == "P_95"){gg <- gg + ylab("Floods. 95th percentile of daily precipitation (mm/day)")}
+    if(indexList[j] == "NDWS"){gg <- gg + ylab("Drought. Number of consecutive days with drought stress (days)")}
+    if(indexList[j] == "SLGP"){gg <- gg + ylab("Starting day of growing season (days)")}
+    if(indexList[j] == "LGP"){gg <- gg + ylab("Length of growing season (days)")}
+    gg <- gg + theme(axis.text.x = element_text(size=14),
+                     axis.text.y = element_text(size=14),
+                     axis.title.x = element_text(face="bold",size=15),
+                     axis.title.y = element_text(face="bold",size=15),
+                     legend.text = element_text(size=14),
+                     legend.title = element_text(face="bold",size=15))
+    gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[j]])-1, max(allWrap$Average[allWrap$Index == indexList[j]])+1))
+    
+    outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
+    if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
+    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_historical_', indexList[j], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
+    
+  })
+  
+  # Varying per index for each season
+  lapply(1:length(indexList), function(k){
+    
+    seasonList <- unique(as.character(allWrap$Season))
+    lapply(1:length(seasonList), function(l){
+      
+      gg <- ggplot(allWrap[allWrap$Index == indexList[k] & allWrap$Season == seasonList[l],], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
+      gg <- gg + theme_bw() + xlab('Years')
+      if(indexList[j] == "TMEAN"){gg <- gg + ylab(expression("Average temperature ("*~degree*C*")"))}
+      if(indexList[j] == "GDD_1"){gg <- gg + ylab(expression("Growing degree days with TB = 10 ("*~degree*C*"/day)"))}
+      if(indexList[j] == "GDD_2"){gg <- gg + ylab(expression("Growing degree days with TO = 25 ("*~degree*C*"/day)"))}
+      if(indexList[j] == "ND_t35"){gg <- gg + ylab(expression("Total number of days with Tmax >= 35"*~degree*C*" (days)"))}
+      if(indexList[j] == "TOTRAIN"){gg <- gg + ylab("Total precipitation (mm)")}
+      if(indexList[j] == "CDD"){gg <- gg + ylab("Maximum number of consecutive dry days (days)")}
+      if(indexList[j] == "P5D"){gg <- gg + ylab("Maximum 5-day running average precipitation (mm/day)")}
+      if(indexList[j] == "P_95"){gg <- gg + ylab("Floods. 95th percentile of daily precipitation (mm/day)")}
+      if(indexList[j] == "NDWS"){gg <- gg + ylab("Drought. Number of consecutive days with drought stress (days)")}
+      if(indexList[j] == "SLGP"){gg <- gg + ylab("Starting day of growing season (days)")}
+      if(indexList[j] == "LGP"){gg <- gg + ylab("Length of growing season (days)")}
+      gg <- gg + theme(axis.text.x = element_text(size=14),
+                       axis.text.y = element_text(size=14),
+                       axis.title.x = element_text(face="bold",size=15),
+                       axis.title.y = element_text(face="bold",size=15),
+                       legend.text = element_text(size=14),
+                       legend.title = element_text(face="bold",size=15))
+      gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[k]])-1, max(allWrap$Average[allWrap$Index == indexList[k]])+1))
+      
+      outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
+      if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
+      ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_historical_', indexList[k], '_', seasonList[l], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
+      
+    })
+    
+  })
+  
+  # For annual precipitation
+  completeTOTRAIN <- as.data.frame(dplyr::summarise(group_by(allWrap[allWrap$Index == 'TOTRAIN',], Index, Years), sum(Average)))
+  colnames(completeTOTRAIN)[3] <- 'Average'
+  gg <- ggplot(completeTOTRAIN, aes(x=Years, y=Average)) + geom_line(size=1.2) + geom_point(size=3)
+  gg <- gg + theme_bw() + ylab('Total precipitation (mm)') + xlab('Years')
+  gg <- gg + theme(axis.text.x = element_text(size=14),
+                   axis.text.y = element_text(size=14),
+                   axis.title.x = element_text(face="bold",size=15),
+                   axis.title.y = element_text(face="bold",size=15),
+                   legend.text = element_text(size=14),
+                   legend.title = element_text(face="bold",size=15))
+  gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, max(completeTOTRAIN$Average)+100))
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_TOTRAIN_complete_2015.eps', sep=''))){
+    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_TOTRAIN_complete_2015.eps', sep=''), plot=gg, width=10, height=7, units='in')
+  }
+  
+  # For annual temperature
+  completeTMEAN <- as.data.frame(dplyr::summarise(group_by(allWrap[allWrap$Index=='TMEAN',], Index, Years), mean(Average)))
+  colnames(completeTMEAN)[3] <- 'Average'
+  gg <- ggplot(completeTMEAN, aes(x=Years, y=Average)) + geom_line(size=1.2) + geom_point(size=3)
+  gg <- gg + theme_bw() + ylab(expression("Average temperature ("*~degree*C*")")) + xlab('Years')
+  gg <- gg + theme(axis.text.x = element_text(size=14),
+                   axis.text.y = element_text(size=14),
+                   axis.title.x = element_text(face="bold",size=15),
+                   axis.title.y = element_text(face="bold",size=15),
+                   legend.text = element_text(size=14),
+                   legend.title = element_text(face="bold",size=15))
+  gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(min(completeTMEAN$Average)-1, max(completeTMEAN$Average)+1))
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_TMEAN_complete_2015.eps', sep=''))){
+    ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_TMEAN_complete_2015.eps', sep=''), plot=gg, width=10, height=7, units='in')
+  }
+  
+})
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Future trends by county
@@ -339,28 +273,32 @@ wrapFutClimInd <- lapply(1:nrow(countyList), function(g){
   })
   wrapFutClimInd <- do.call(rbind, wrapFutClimInd)
   
+  # First season and period 2021-2045
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='first' & wrapFutClimInd$Period=='2021_2045',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[g]), sep='')
-  if(!dir.exists(outDir)){
-    dir.create(outDir, recursive=TRUE)
-  }
-  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2021_2045.pdf', sep=''))){
+  if(!dir.exists(outDir)){ dir.create(outDir, recursive=TRUE) }
+  if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2021_2045.png', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2021_2045.pdf', sep=''), plot=gg, width=8, height=9, units='in')
+    system(paste("convert -verbose -density 300 ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_firstSeason_futureTrend_2021_2045.pdf -quality 100 -sharpen 0x1.0 -alpha off ", outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), "_firstSeason_futureTrend_2021_2045.png", sep=""), wait=TRUE)
+    file.remove(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2021_2045.pdf', sep=''))
   }
   
+  # Second season and period 2021-2045
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='second' & wrapFutClimInd$Period=='2021_2045',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2021_2045.pdf', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2021_2045.pdf', sep=''), plot=gg, width=8, height=9, units='in')
   }
   
+  # First season and period 2041-2065
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='first' & wrapFutClimInd$Period=='2041_2065',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2041_2065.pdf', sep=''))){
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_firstSeason_futureTrend_2041_2065.pdf', sep=''), plot=gg, width=8, height=9, units='in')
   }
   
+  # Second season and period 2041-2065
   gg <- ggplot(wrapFutClimInd[wrapFutClimInd$County==countyList$County[g] & wrapFutClimInd$Season=='second' & wrapFutClimInd$Period=='2041_2065',], aes(x=Years, y=Average, colour=GCM)) + geom_line()
   gg <- gg + facet_grid(Index ~ RCP, scales='free_y') + theme_bw()
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[g]), '_secondSeason_futureTrend_2041_2065.pdf', sep=''))){
