@@ -3,7 +3,7 @@
 # H. Achicanoy
 # CIAT, 2016
 
-source('/mnt/workspace_cluster_12/Kenya_KACCAL/scripts/KACCAL_calc_risk_indices_modified.R')
+source('/mnt/workspace_cluster_8/Kenya_KACCAL/scripts/KACCAL_calc_risk_indices_modified.R')
 
 # Load packages
 options(warn = -1); options(scipen = 999)
@@ -657,7 +657,7 @@ calc_climIndices <- function(county='Bomet', season='first'){
 }
 # calc_climIndices_v <- Vectorize(calc_climIndices, vectorize.args='county')
 
-countyList <- countyList[7:8,] #5:7 1:4
+countyList <- countyList[6,]
 
 library(parallel)
 mclapply(1:length(seasonList), function(j){

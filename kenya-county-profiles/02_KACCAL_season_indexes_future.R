@@ -4,20 +4,16 @@
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 # Define Kenya counties
-countyList <- data.frame(Cluster=c(#rep('Cluster 1', 3),
-                                   #rep('Cluster 2', 4),
-                                   #rep('Cluster 3', 4),
-                                   #rep('Cluster 4', 4)),
-                                  rep('Cluster 1', 8),
-                                  rep('Cluster 2', 8)),  
+countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
+                                   rep('Cluster 2', 4),
+                                   rep('Cluster 3', 4),
+                                   rep('Cluster 4', 4)),
                          # County=c('Kilifi', 'Tana River', 'Garissa',
                          #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
                          #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
                          #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
                          County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
-                                  'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado', 'Isiolo','Marsabit',  
-                                  'Baringo', 'Laikipia', 'Tharaka', 'Lamu',
-                                  'Wajir', 'Mandera') # Define counties to analyze by cluster                     
+                                  'Keiyo-Marakwet')                         
                          ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
@@ -46,7 +42,7 @@ gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_es
 # First semester: 181-182 days (depending on leap years)
 
 library(data.table)
-countyList <- countyList[8,]
+countyList <- countyList[1:5,]
 
 lapply(1:nrow(countyList), function(i)
 {
@@ -122,13 +118,9 @@ lapply(1:nrow(countyList), function(i)
           cat('Process failed: Precipitation file is not ready yet.\n')
         }
         
-        return(print(data.frame(period=j,rcp=k, gcm=l)))
-        
       })
       
-      
     })
-
     
   })
   
@@ -141,21 +133,18 @@ lapply(1:nrow(countyList), function(i)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 # Define Kenya counties
-countyList <- data.frame(Cluster=c(#rep('Cluster 1', 3),
-  #rep('Cluster 2', 4),
-  #rep('Cluster 3', 4),
-  #rep('Cluster 4', 4)),
-  rep('Cluster 1', 8),
-  rep('Cluster 2', 8)),  
-  # County=c('Kilifi', 'Tana River', 'Garissa',
-  #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-  #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-  #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
-  County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
-           'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado', 'Isiolo','Marsabit',  
-           'Baringo', 'Laikipia', 'Tharaka', 'Lamu',
-           'Wajir', 'Mandera') # Define counties to analyze by cluster                     
-) # Define counties to analyze by cluster
+countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
+                                   rep('Cluster 2', 4),
+                                   rep('Cluster 3', 4),
+                                   rep('Cluster 4', 4)),
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet')
+                         
+                         ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 
@@ -183,7 +172,7 @@ gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_es
 # Second semester: 184 days
 
 library(data.table)
-countyList <- countyList[8,]
+countyList <- countyList[1:5,]
 
 lapply(1:nrow(countyList), function(i)
 {
@@ -274,21 +263,18 @@ lapply(1:nrow(countyList), function(i)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 # Define Kenya counties
-countyList <- data.frame(Cluster=c(#rep('Cluster 1', 3),
-  #rep('Cluster 2', 4),
-  #rep('Cluster 3', 4),
-  #rep('Cluster 4', 4)),
-  rep('Cluster 1', 8),
-  rep('Cluster 2', 8)),  
-  # County=c('Kilifi', 'Tana River', 'Garissa',
-  #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-  #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-  #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
-  County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
-           'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado', 'Isiolo','Marsabit',  
-           'Baringo', 'Laikipia', 'Tharaka', 'Lamu',
-           'Wajir', 'Mandera') # Define counties to analyze by cluster                     
-) # Define counties to analyze by cluster
+countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
+                                   rep('Cluster 2', 4),
+                                   rep('Cluster 3', 4),
+                                   rep('Cluster 4', 4)),
+                         # County=c('Kilifi', 'Tana River', 'Garissa',
+                         #          'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+                         #          'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+                         #          'Homa Bay', 'Siaya', 'Busia', 'West Pokot')
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
+                                  'Keiyo-Marakwet')
+                         
+                         ) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 
@@ -297,7 +283,7 @@ rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
 
 library(data.table)
-countyList <- countyList[8,]
+countyList <- countyList[1:5,]
 
 lapply(1:nrow(countyList), function(i)
 {

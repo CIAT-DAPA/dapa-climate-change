@@ -878,28 +878,24 @@ def GSL(fnamen='', fnamex='', fnamemask='', styr=0, enyr=0,model=''):
 		print "created combined file ", ofbig
 	else:
 		print "combined file already exists: ", ofbig
-		
-	if not path.exists(ofall):
-		#### truncate the last year
-		ey = styr + nyrs - 2
-		txt = "cdo -m 1e+20 selyear," + str(styr) + "," + str(
-			ey) + " -eca_gsl -addc,273.15 " + ofbig + " " + fnamemask + " " + ofall
-		system(txt)
-		##### modify variable name and other attributes
-		now = datetime.now()
-		txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
-		txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofall
-		system(txtcmd)
-		txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofall
-		system(txtcmd)
-		#####new variable name created by CDO:
-		txtnewvar = "thermal_growing_season_length"
-		txtcmd = "ncrename -h -v " + txtnewvar + ",gsl " + ofall
-		system(txtcmd)
-		return ofall
-	else:
-		return ofall
-		
+	#### truncate the last year
+	ey = styr + nyrs - 2
+	txt = "cdo -m 1e+20 selyear," + str(styr) + "," + str(
+		ey) + " -eca_gsl -addc,273.15 " + ofbig + " " + fnamemask + " " + ofall
+	system(txt)
+	##### modify variable name and other attributes
+	now = datetime.now()
+	txthist = "Created on " + now.strftime("%Y-%m-%d %H:%M")
+	txtcmd = "ncatted -h -a history,global,o,c,'" + txthist + "' " + ofall
+	system(txtcmd)
+	txtcmd = "ncatted -h -a institution,global,c,c,'" + txtinst + "' " + ofall
+	system(txtcmd)
+	#####new variable name created by CDO:
+	txtnewvar = "thermal_growing_season_length"
+	txtcmd = "ncrename -h -v " + txtnewvar + ",gsl " + ofall
+	system(txtcmd)
+	return ofall
+
 def TXnorm(fname='', styr=0, enyr=0,model=''):
     # to create a file with 365 time steps and a TXnorm value for each cell, cat all files together
     # uses a 5-day running mean

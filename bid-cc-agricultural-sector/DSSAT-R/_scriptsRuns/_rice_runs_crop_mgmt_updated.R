@@ -13,7 +13,7 @@ scenario <- "historical" # historical, future
 
 cul_list <- data.frame(CID = 1 : 3, dsid = c("IB0001", "IB0118", "IB0015"), culname = c("IR8", "IR72", "IR64"))
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
 sys_type <- "secano" # riego, secano
@@ -48,7 +48,12 @@ for (cultivar in 1:nrow(cul_list)) {
   # Updating planting dates using GGCMI data
   suppressMessages(library(ncdf4))
   suppressMessages(library(raster))
-  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Rice_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  if(sys_type == "riego"){
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Rice_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  } else {
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Rice_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  }
+
   ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
   
@@ -126,17 +131,17 @@ for (cultivar in 1:nrow(cul_list)) {
   data_xfile$run_type <- run_type
   data_xfile$crop <- "RICE"
   data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ RICE LAC"
-  data_xfile$name <- "./JBID.WHX" 
-  data_xfile$CR <- "WH" # Variable importante 
+  data_xfile$name <- "./JBID.RIX" 
+  data_xfile$CR <- "RI" # Variable importante 
   data_xfile$INGENO <- rep(paste(cul_list$dsid[which(cul_list$CID == cultivar)]), length(crop_mgmt[, "variedad.1"]))
-  data_xfile$CNAME <- "WHNA"
+  data_xfile$CNAME <- "IRNA"
   data_xfile$initation <- crop_mgmt$mirca.start
   data_xfile$final <- crop_mgmt$mirca.end
   if (sys_type == "riego") {data_xfile$system <- "irrigation"} # Irrigation or rainfed, if is irrigation then automatic irrigation
   if (sys_type == "secano") {data_xfile$system <- "rainfed"}   # Irrigation or rainfed, if is irrigation then automatic irrigation
   data_xfile$year <- years[1]
   data_xfile$nitrogen_aplication <- list(amount = amount, day_app = day_app) # Need to take care of
-  data_xfile$smodel <- "WHCER045" # Fin Model
+  data_xfile$smodel <- "RICER045"  # Fin Model
   data_xfile$bname <- "DSSBatch.v45"
   data_xfile$PPOP <- 100  # Plant population at planting
   data_xfile$PPOE <- 100  # Plant population at emergence
@@ -144,7 +149,7 @@ for (cultivar in 1:nrow(cul_list)) {
   data_xfile$PLDS <- "R"  # Seed distribution: by row (R)
   data_xfile$PLRD <- 0    # Row direction (degrees from N)
   data_xfile$PLRS <- 18   # Row spacing (cm)
-  data_xfile$PLDP <- 2    # Planting depth (cm)
+  data_xfile$PLDP <-  2 # Planting depth (cm)
   data_xfile$SYMBI <- 'N' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
   
   # Load climate data
@@ -209,10 +214,10 @@ for (cultivar in 1:nrow(cul_list)) {
                          modelos[gcm_i])
   }
   
-  if(!dir.exists(paste(path_project, "19-BID-reanalysis/rice/", scenario, "/", run_type, sep = ""))){
-    dir.create(paste(path_project, "19-BID-reanalysis/rice/", scenario, "/", run_type, sep = ""), recursive = TRUE)
+  if(!dir.exists(paste(path_project, "19-BID-reanalysis/Rice/", scenario, "/", run_type, sep = ""))){
+    dir.create(paste(path_project, "19-BID-reanalysis/Rice/", scenario, "/", run_type, sep = ""), recursive = TRUE)
   }
-  save(Run, file = paste(path_project, "19-BID-reanalysis/rice/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
+  save(Run, file = paste(path_project, "19-BID-reanalysis/Rice/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
   # save(Run, file = paste("~/bid_reruns/", run_type, "/", store_name, ".RDat", sep = ""))
   
   # Clean up, else create a folder and store results in there
