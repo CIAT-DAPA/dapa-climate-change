@@ -292,20 +292,20 @@ BC_Qmap <- function(county="Busia", rcp="rcp45", gcm="bcc_csm1_1", var="prec", p
 
 # This process would be done for each county, but for now I ran this process only for four counties with high importance
 
-periodList <- c('2041_2065') # '2021_2045', 
-rcpList    <- paste("rcp", c(85), sep="") # 26 , 45, 60, 85
+periodList <- c('2021_2045', '2041_2065') # '2021_2045', '2041_2065'
+rcpList    <- paste("rcp", c(26 , 45, 60, 85), sep="") # 26 , 45, 60, 85
 gcmList    <- c("bcc_csm1_1","bcc_csm1_1_m","csiro_mk3_6_0","gfdl_cm3", "gfdl_esm2g","gfdl_esm2m","ipsl_cm5a_mr","miroc_esm", "miroc_esm_chem","miroc_miroc5","ncc_noresm1_m") # "mohc_hadgem2_es"
-varList    <- c('tmax', 'tmin', 'prec', 'dswrf')
+varList    <- c('dswrf') #'tmax', 'tmin', 'prec', 
 
 countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
                                    rep('Cluster 2', 8)),
                          County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin_Gishu',
-                                  'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado',
-                                  'Baringo', 'Laikipia', 'Tharaka', 'Lamu',
-                                  'Marsabit', 'Isiolo', 'Wajir', 'Mandera')) # Define counties to analyze by cluster
+                                  'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado', 'Isiolo','Marsabit',  
+                                  'Baringo', 'Laikipia', 'Tharaka', 'Lq()amu',
+                                  'Wajir', 'Mandera')) # Define counties to analyze by cluster
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
-countyList <- countyList[8,]
+countyList <- countyList[1:8,]
 
 # countyList
 lapply(1:nrow(countyList), function(z){
@@ -313,7 +313,7 @@ lapply(1:nrow(countyList), function(z){
     cat('Processing period:',periodList[[l]] , '\n')
     lapply(1:length(rcpList), function(k){
       cat('Processing RCP:', rcpList[[k]], '\n')
-      lapply(1:length(gcmList), function(j){
+      lapply(10, function(j){ #length(gcmList)
         cat('Processing GCM:', gcmList[[j]], '\n')
         lapply(1:length(varList), function(i){
           cat('Processing variable:', varList[[i]], '\n')

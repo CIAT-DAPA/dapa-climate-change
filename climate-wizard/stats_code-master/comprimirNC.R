@@ -293,22 +293,27 @@ for(gcm in gcmlist[gcmi:gcmf]){
 
 ################  datos para EVAN
 dirgcm= "Z:/data/AR5_Global_Daily_25k/out_stats/" # "/mnt/data_climatewizard/AR5_Global_Daily_25k/out_stats/" # 
-gcmi=1
-gcmf=1
+
 #gcmlist <-  list.dirs(dirgcm, recursive = FALSE, full.names = FALSE) 
 ncListVar <- list.files(dirgcm,pattern = "SDII",recursive = T,full.names = TRUE)
-basename(ncListVar[grep(".monthly\historical", ncListVar)])
 
-paste(c("historical",".monthly"),collapse="|")
+scenarios = c("historical","rcp45","rcp85")
 
-which(basename(ncListVar) %in% grep("historical",basename(ncListVar), value = TRUE))
+index="SDII"
 
-
-for(gcm in gcmlist[gcmi:gcmf]){
-  dirbase=paste0(dirgcm,gcm)
-
-  for(nc in ncListVar){
-
+for (scenario in scenarios){
+  if(scenario=="historical"){
+    period="1950-2005"
+  }else{period="2006-2099"}
+  outNcAvg=paste0(dirgcm,"/ensemble/",index,"_BCSD_",scenario,"_ensemble_",period,"_monthly.nc4")
+  if(!file.exists(outNcAvg)){
+    cat('\nProcessing: ',index,scenario,period,'\n')
+    x=ncListVar[grep(scenario, ncListVar)]
+    stacknc=paste(x[grep(".monthly", x)],collapse = " ")
+    if(length(stacknc)>1){
+      system(paste("cdo -f nc4 -ensavg ",stacknc,outNcAvg)) 
+    }
   }
-}
+}  
+
 
