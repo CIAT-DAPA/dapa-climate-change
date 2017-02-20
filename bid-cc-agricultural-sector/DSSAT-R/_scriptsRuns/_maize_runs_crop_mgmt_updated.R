@@ -14,7 +14,7 @@ cul_list <- data.frame(CID = 1:3, dsid = c("IB0059", "IB0056", "IB0055"),
                        culname = c("H6", "FM6", "MCCURDY6714"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
 sys_type <- "secano" # riego, secano

@@ -29,7 +29,7 @@ cleanup_all <- T
 ##############################################################################
 
 # Iterate cultivars
-for (cultivar in 1:nrow(cul_list)) {
+for (cultivar in 2:nrow(cul_list)) {
   
   cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
   
@@ -50,7 +50,11 @@ for (cultivar in 1:nrow(cul_list)) {
   # Updating planting dates using GGCMI data
   suppressMessages(library(ncdf4))
   suppressMessages(library(raster))
-  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Pulses_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  if(sys_type == "riego"){
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Pulses_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  } else {
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Pulses_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  }
   ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
   
@@ -70,7 +74,7 @@ for (cultivar in 1:nrow(cul_list)) {
   day0 <-  crop_mgmt$N.app.0d
   day_aplication0 <- rep(0, length(day0))
   amount <- data.frame(day0, day30 = 0)
-  day_app <- data.frame(day_aplication0, day_aplication0 = 30)
+  day_app <- data.frame(day_aplication0, day_aplication30 = 30)
   rm(day0, day_aplication0)
   
   # Define years range, linea base: 71:99; futuro: 69:97
