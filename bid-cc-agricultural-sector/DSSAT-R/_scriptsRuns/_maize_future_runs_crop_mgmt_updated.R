@@ -189,8 +189,8 @@ for (gcm_i in 1:length(modelos)) {
     
     # Carpetas necesarias donde se encuentra DSSAT compilado y un directorio para las corridas
     dir_dssat <- "~/csm45_1_23_bin_ifort/"
-    if(run_type == "diagnostic"){dir_base <- "~/ScratchFut"}
-    if(run_type == "final"){dir_base <- "~/ScratchFinalFut"}
+    if(run_type == "diagnostic"){dir_base <- "~/ScratchFutMaize"}
+    if(run_type == "final"){dir_base <- "~/ScratchFinalFutMaize"}
     
     # run dssat for one pixel (test)
     # run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
@@ -231,17 +231,17 @@ for (gcm_i in 1:length(modelos)) {
     # Clean up, else create a folder and store results in there
     if (cleanup_all) {
       setwd("~")
-      if(run_type == "diagnostic"){system("rm -rf ~/ScratchFut")}
-      if(run_type == "final"){system("rm -rf ~/ScratchFinalFut")}
+      if(run_type == "diagnostic"){system("rm -rf ~/ScratchFutMaize")}
+      if(run_type == "final"){system("rm -rf ~/ScratchFinalFutMaize")}
     } else {
       setwd("~")
       if(run_type == "diagnostic"){
-        system(paste0("mkdir ~/ScratchFut/", run_type, "_", store_name))
-        system(paste0("mv -f ~/ScratchFut/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFut/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ~/ScratchFutMaize/", run_type, "_", store_name))
+        system(paste0("mv -f ~/ScratchFutMaize/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFutMaize/", run_type, "_", store_name, "/."))
       }
       if(run_type == "final"){
-        system(paste0("mkdir ~/ScratchFinalFut/", run_type, "_", store_name))
-        system(paste0("mv -f ~/ScratchFinalFut/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinalFut/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ~/ScratchFinalFutMaize/", run_type, "_", store_name))
+        system(paste0("mv -f ~/ScratchFinalFutMaize/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinalFutMaize/", run_type, "_", store_name, "/."))
       }
     }
   }
