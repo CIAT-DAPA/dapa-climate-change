@@ -2,7 +2,7 @@
 # H. Achicanoy
 # CIAT, 2016
 
-options(warn = -1); options(scipen = 999)
+options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
 suppressMessages(if(!require(data.table)){install.packages('data.table'); library(data.table)} else {library(data.table)})
 suppressMessages(if(!require(raster)){install.packages('raster'); library(raster)} else {library(raster)})
 suppressMessages(if(!require(rgdal)){install.packages('rgdal'); library(rgdal)} else {library(rgdal)})
@@ -23,6 +23,7 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
                                   'Baringo', 'Laikipia', 'Tharaka', 'Lamu', 'Marsabit', 'Isiolo', 'Wajir', 'Mandera'))
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
+countyList <- countyList[1:8,]; rownames(countyList) <- 1:nrow(countyList) # Machakos
 
 periodList <- c('2021_2045', '2041_2065')
 rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")
@@ -137,7 +138,7 @@ lapply(1:nrow(countyList), function(i){
                      legend.title = element_text(face="bold",size=15))
     gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[j]])-1, max(allWrap$Average[allWrap$Index == indexList[j]])+1))
     
-    outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
+    outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
     if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
     ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_historical_', indexList[j], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
     
@@ -151,17 +152,17 @@ lapply(1:nrow(countyList), function(i){
       
       gg <- ggplot(allWrap[allWrap$Index == indexList[k] & allWrap$Season == seasonList[l],], aes(x=Years, y=Average, colour=Season)) + geom_line(size=1.2) + geom_point(size=3) + scale_color_manual(values=c('First'='darkgoldenrod3', 'Second'='turquoise3'))
       gg <- gg + theme_bw() + xlab('Years')
-      if(indexList[j] == "TMEAN"){gg <- gg + ylab(expression("Average temperature ("*~degree*C*")"))}
-      if(indexList[j] == "GDD_1"){gg <- gg + ylab(expression("Growing degree days with TB = 10 ("*~degree*C*"/day)"))}
-      if(indexList[j] == "GDD_2"){gg <- gg + ylab(expression("Growing degree days with TO = 25 ("*~degree*C*"/day)"))}
-      if(indexList[j] == "ND_t35"){gg <- gg + ylab(expression("Total number of days with Tmax >= 35"*~degree*C*" (days)"))}
-      if(indexList[j] == "TOTRAIN"){gg <- gg + ylab("Total precipitation (mm)")}
-      if(indexList[j] == "CDD"){gg <- gg + ylab("Maximum number of consecutive dry days (days)")}
-      if(indexList[j] == "P5D"){gg <- gg + ylab("Maximum 5-day running average precipitation (mm/day)")}
-      if(indexList[j] == "P_95"){gg <- gg + ylab("Floods. 95th percentile of daily precipitation (mm/day)")}
-      if(indexList[j] == "NDWS"){gg <- gg + ylab("Drought. Number of consecutive days with drought stress (days)")}
-      if(indexList[j] == "SLGP"){gg <- gg + ylab("Starting day of growing season (days)")}
-      if(indexList[j] == "LGP"){gg <- gg + ylab("Length of growing season (days)")}
+      if(indexList[k] == "TMEAN"){gg <- gg + ylab(expression("Average temperature ("*~degree*C*")"))}
+      if(indexList[k] == "GDD_1"){gg <- gg + ylab(expression("Growing degree days with TB = 10 ("*~degree*C*"/day)"))}
+      if(indexList[k] == "GDD_2"){gg <- gg + ylab(expression("Growing degree days with TO = 25 ("*~degree*C*"/day)"))}
+      if(indexList[k] == "ND_t35"){gg <- gg + ylab(expression("Total number of days with Tmax >= 35"*~degree*C*" (days)"))}
+      if(indexList[k] == "TOTRAIN"){gg <- gg + ylab("Total precipitation (mm)")}
+      if(indexList[k] == "CDD"){gg <- gg + ylab("Maximum number of consecutive dry days (days)")}
+      if(indexList[k] == "P5D"){gg <- gg + ylab("Maximum 5-day running average precipitation (mm/day)")}
+      if(indexList[k] == "P_95"){gg <- gg + ylab("Floods. 95th percentile of daily precipitation (mm/day)")}
+      if(indexList[k] == "NDWS"){gg <- gg + ylab("Drought. Number of consecutive days with drought stress (days)")}
+      if(indexList[k] == "SLGP"){gg <- gg + ylab("Starting day of growing season (days)")}
+      if(indexList[k] == "LGP"){gg <- gg + ylab("Length of growing season (days)")}
       gg <- gg + theme(axis.text.x = element_text(size=14),
                        axis.text.y = element_text(size=14),
                        axis.title.x = element_text(face="bold",size=15),
@@ -170,7 +171,7 @@ lapply(1:nrow(countyList), function(i){
                        legend.title = element_text(face="bold",size=15))
       gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[k]])-1, max(allWrap$Average[allWrap$Index == indexList[k]])+1))
       
-      outDir <- paste('/mnt/workspace_cluster_8/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
+      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
       if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
       ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_historical_', indexList[k], '_', seasonList[l], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
       
