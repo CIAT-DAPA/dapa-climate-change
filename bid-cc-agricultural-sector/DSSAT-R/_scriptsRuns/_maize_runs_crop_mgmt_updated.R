@@ -4,7 +4,7 @@
 ##############################################################################
 ##############################################################################
 
-options(warn = -1); options(scipen = 999)
+options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
 
 # Some general config
 scenario <- "historical" # historical, future
@@ -61,6 +61,7 @@ for (cultivar in 1:nrow(cul_list)) {
   
   planting_dates <- raster::extract(x = ggcmi, y = crop_mgmt[, c('x', 'y')])
   crop_mgmt$mirca.start <- round(planting_dates, 0)
+  removeTmpFiles(h = 0)
   
   # Cargar funciones
   source(paste0(path_functions, "main_functions.R"))    ## Cargar funciones principales
@@ -239,3 +240,5 @@ for (cultivar in 1:nrow(cul_list)) {
     }
   }
 }
+
+g <- gc(); rm(list = ls())

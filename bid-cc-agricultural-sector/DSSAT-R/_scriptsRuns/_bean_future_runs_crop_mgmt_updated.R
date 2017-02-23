@@ -4,7 +4,7 @@
 ##############################################################################
 ##############################################################################
 
-options(warn = -1); options(scipen = 999)
+options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
 
 # Some general config
 scenario <- "future" # historical, future
@@ -65,6 +65,7 @@ for (gcm_i in 4:length(modelos)) {
     
     planting_dates <- raster::extract(x = ggcmi, y = crop_mgmt[, c('x', 'y')])
     crop_mgmt$mirca.start <- round(planting_dates, 0)
+    removeTmpFiles(h = 0)
     
     if(sys_type == "secano"){crop_mgmt$N.app.0d <- crop_mgmt$N.app.0d * 2}
     
@@ -199,3 +200,5 @@ for (gcm_i in 4:length(modelos)) {
   }
   
 }
+
+g <- gc(); rm(list = ls())
