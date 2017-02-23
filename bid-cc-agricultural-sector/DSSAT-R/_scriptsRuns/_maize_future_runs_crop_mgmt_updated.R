@@ -35,7 +35,7 @@ for (gcm_i in 1:length(modelos)) {
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
   # Iterate cultivars
-  for (cultivar in 1:nrow(cul_list)) {
+  for (cultivar in 2:nrow(cul_list)) {
     
     cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
     
