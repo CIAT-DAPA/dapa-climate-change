@@ -29,12 +29,12 @@ cleanup_all <- T
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 4:length(modelos)) {
+for (gcm_i in 6:length(modelos)) {
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
   # Iterate cultivars
-  for (cultivar in 4:nrow(cul_list)) {
+  for (cultivar in 1:nrow(cul_list)) {
     
     cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
     
