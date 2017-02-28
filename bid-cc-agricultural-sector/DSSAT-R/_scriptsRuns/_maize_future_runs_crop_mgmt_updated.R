@@ -4,7 +4,7 @@
 ##############################################################################
 ##############################################################################
 
-options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
+options(warn = -1); options(scipen = 999); g <- gc(reset = T); rm(list = ls())
 
 # Some general config
 scenario <- "future" # historical, future
@@ -30,12 +30,12 @@ cleanup_all <- T
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 1:length(modelos)) {
+for (gcm_i in 7:length(modelos)) {
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
   # Iterate cultivars
-  for (cultivar in 2:nrow(cul_list)) {
+  for (cultivar in 1:nrow(cul_list)) {
     
     cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
     
@@ -249,4 +249,4 @@ for (gcm_i in 1:length(modelos)) {
   
 }
 
-g <- gc(); rm(list = ls())
+g <- gc(reset = T); rm(list = ls())

@@ -4,7 +4,7 @@
 ##############################################################################
 ##############################################################################
 
-options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
+options(warn = -1); options(scipen = 999); g <- gc(reset = T); rm(list = ls())
 
 # Some general config
 scenario <- "future" # historical, future
@@ -34,7 +34,7 @@ for (gcm_i in 4:length(modelos)) {
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
   # Iterate cultivars
-  for (cultivar in 1:nrow(cul_list)) {
+  for (cultivar in 4:nrow(cul_list)) {
     
     cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
     
@@ -201,4 +201,4 @@ for (gcm_i in 4:length(modelos)) {
   
 }
 
-g <- gc(); rm(list = ls())
+g <- gc(reset = T); rm(list = ls())
