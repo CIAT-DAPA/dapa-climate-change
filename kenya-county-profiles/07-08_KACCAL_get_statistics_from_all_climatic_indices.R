@@ -475,7 +475,7 @@ trendFutAll <- do.call(rbind, trendFutAll)
 # Varying per county
 lapply(1:nrow(countyList), function(x){
   
-  wrapFutClimInd <- wrapFutClimInd[wrapFutClimInd$County == countyList[x],]
+  wrapFutClimInd <- wrapFutClimInd[wrapFutClimInd$County == countyList$County[x],]
   
   # Median for all years through 2021-2065
   wrapFutClimInd_median <- lapply(1:length(seasonList), function(h){
