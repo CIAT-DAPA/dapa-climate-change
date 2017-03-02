@@ -349,6 +349,12 @@ scenarioTrendsClustering <- function(county){
           grep2 <- Vectorize(grep, vectorize.args='pattern')
           years <- c(min(timeSer$Years, na.rm=TRUE), max(timeSer$Years, na.rm=TRUE))
           timeSer <- ts(timeSer$Average[grep2(pattern=years[1]:years[2], timeSer$Years, fixed=TRUE)], start=years[1], end=years[2], frequency=1)
+          if(length(which(is.na(timeSer))) >= 1){
+            na_id <- which(is.na(timeSer))
+            for(i in 1:length(na_id)){
+              timeSer[na_id[i]] <- mean(timeSer[c(na_id[i]-1, na_id[i]+1)], na.rm = T)
+            }; rm(i)
+          }
           slope <- sens.slope(timeSer); slope <- slope$b.sen
           df <- data.frame(Index=indList[n], GCM=gcmList[o], RCP=rcpList[p], Season=seasonList[r], slope=slope)
           return(df)
