@@ -16,7 +16,7 @@ cul_list <- data.frame(CID = 1:7, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005
 run_type <- "final" # Just only final
 
 # Cropping system
-sys_type <- "riego" # riego, secano
+sys_type <- "secano" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
@@ -34,7 +34,7 @@ for (gcm_i in 1:length(modelos)) {
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
   # Iterate cultivars
-  for (cultivar in 1:nrow(cul_list)) {
+  for (cultivar in 6:nrow(cul_list)) {
     
     cat(paste("Processing cultivar: ", cul_list$culname[cultivar], "\n", sep = ""))
     
