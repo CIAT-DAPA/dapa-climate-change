@@ -1,6 +1,6 @@
 ##############################################################################
 ##############################################################################
-######################## Parallel DSSAT for rice ############################
+######################## Parallel DSSAT for soybean###########################
 ##############################################################################
 ##############################################################################
 
@@ -9,8 +9,8 @@ options(warn = -1); options(scipen = 999)
 # Some general config
 scenario <- "future" # historical, future
 
-# Cultivar list for rice (based on CIMMYT Mega-environment work)
-cul_list <- data.frame(CID = 1 : 3, dsid = c("IB0001", "IB0118", "IB0015"), culname = c("IR8", "IR72", "IR64"))
+# Cultivar list for soybean (based on CIMMYT Mega-environment work)
+cul_list <- data.frame(CID = 1:2, dsid = c("IB0055", "IB0045"), culname = c("Hutcheson", "DONMARIO"))
 
 # Diagnostic run is only performed for irrigated systems, for historical climate
 run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
@@ -48,23 +48,23 @@ for (gcm_i in 1:length(modelos)) {
                             "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
                             "Cod_Ref_and_Position", "profileMatrix", "scenario", "cul_list", "cultivar", "run_type", "sys_type",
                             "modelos", "gcm_i", "cleanup_all")))
-    load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/rice_", sys_type, ".RDat"))
+    load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/Soybeans_", sys_type, ".RDat"))
     assign("crop_mgmt", get(paste("crop_", sys_type, sep="")))
     
     # Updating planting dates using GGCMI data
     suppressMessages(library(ncdf4))
     suppressMessages(library(raster))
     if(sys_type == "riego"){
-      ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Rice_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+      ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Soybeans_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
     } else {
-      ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Rice_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+      ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Soybeans_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
     }
     ggcmi <- ggcmi[[1]]
     ggcmi[which(ggcmi[] == -99)] <- NA
     
     planting_dates <- raster::extract(x = ggcmi, y = crop_mgmt[, c('x', 'y')])
     crop_mgmt$mirca.start <- round(planting_dates, 0)
-    
+    if(is.null(crop_mgmt$N.app.30d)==T){crop_mgmt$N.app.30d<-rep(0,nrow(crop_mgmt)) }
     # Cargar funciones
     source(paste0(path_functions, "main_functions.R"))    ## Cargar funciones principales
     source(paste0(path_functions, "make_xfile.R"))        ## Cargar funcion para escribir Xfile DSSAT
@@ -86,22 +86,22 @@ for (gcm_i in 1:length(modelos)) {
     } else {
       # Here write update of mgmt matrix when first (diagnostic) run is available
       # Define dates of fertilizer second application
-      if(!file.exists(paste(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/_rice_crop_mgmt_", sys_type, ".Rdat", sep = ""))){
+      if(!file.exists(paste(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/_Soybeans_crop_mgmt_", sys_type, ".Rdat", sep = ""))){
         
         day0 <-  crop_mgmt$N.app.0d
         day_aplication0 <- rep(0, length(day0))
         day_aplication30 <- unlist(lapply(1:dim(crop_mgmt)[1], function(p){
           
-          if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_RICE_irrigation_', cul_list$culname[cultivar], '_WFD/RICE_irrigation_', p, sep = ''))}
-          if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_RICE_rainfed_', cul_list$culname[cultivar], '_WFD/RICE_rainfed_', p, sep = ''))}
-          NappDay <- read.NappDay(crop = "RICE")
+          if(sys_type == 'riego'){setwd(paste('/home/jmesa/Scratch/diagnostic_SOY_irrigation_', cul_list$culname[cultivar], '_WFD/SOY_irrigation_', p, sep = ''))}
+          if(sys_type == 'secano'){setwd(paste('/home/jmesa/Scratch/diagnostic_SOY_rainfed_', cul_list$culname[cultivar], '_WFD/SOY_rainfed_', p, sep = ''))}
+          NappDay <- read.NappDay(crop = "SOY")
           day30 <- round(mean(NappDay$Napp.day, na.rm = T), 0)
           return(day30)
           
         }))
         
         crop_mgmt$SecondAppDay <- day_aplication30
-        save(crop_mgmt, file = paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_rice_crop_mgmt_", sys_type, ".RDat", sep = ""))
+        save(crop_mgmt, file = paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_Soybeans_crop_mgmt_", sys_type, ".RDat", sep = ""))
         
         # Define amount of fertilizer to apply
         day0 <-  crop_mgmt$N.app.0d
@@ -112,7 +112,7 @@ for (gcm_i in 1:length(modelos)) {
         
       } else {
         
-        load(paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_rice_crop_mgmt_", sys_type, ".RDat", sep = ""))
+        load(paste(path_project, "08-Cells_toRun/matrices_cultivo/version2017/_Soybeans_crop_mgmt_", sys_type, ".RDat", sep = ""))
         day0 <-  crop_mgmt$N.app.0d
         day_aplication0 <- rep(0, length(day0))
         day0 <-  crop_mgmt$N.app.0d
@@ -133,28 +133,28 @@ for (gcm_i in 1:length(modelos)) {
     # Configuracion Archivo experimental
     data_xfile <- list()
     data_xfile$run_type <- run_type
-    data_xfile$crop <- "RICE"
-    data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ RICE LAC"
-    data_xfile$name <- "./JBID.RIX" 
-    data_xfile$CR <- "RI" # Variable importante 
+    data_xfile$crop <- "SOY"
+    data_xfile$exp_details <- "*EXP.DETAILS: BID17101RZ SOY LAC"
+    data_xfile$name <- "./JBID.SBX"  
+    data_xfile$CR <- "SB"  # Variable importante 
     data_xfile$INGENO <- rep(paste(cul_list$dsid[which(cul_list$CID == cultivar)]), length(crop_mgmt[, "variedad.1"]))
-    data_xfile$CNAME <- "IRNA"
+    data_xfile$CNAME <- "SZNA" 
     data_xfile$initation <- crop_mgmt$mirca.start
     data_xfile$final <- crop_mgmt$mirca.end
     if (sys_type == "riego") {data_xfile$system <- "irrigation"} # Irrigation or rainfed, if is irrigation then automatic irrigation
     if (sys_type == "secano") {data_xfile$system <- "rainfed"}   # Irrigation or rainfed, if is irrigation then automatic irrigation
     data_xfile$year <- years[1]
     data_xfile$nitrogen_aplication <- list(amount = amount, day_app = day_app) # Need to take care of
-    data_xfile$smodel <- "RICER045"  # Fin Model
+    data_xfile$smodel <- "SBGRO045"   # Fin Model
     data_xfile$bname <- "DSSBatch.v45"
-    data_xfile$PPOP <- 100  # Plant population at planting
-    data_xfile$PPOE <- 100  # Plant population at emergence
+    data_xfile$PPOP <- 20  # Plant population at planting
+    data_xfile$PPOE <- 20  # Plant population at emergence
     data_xfile$PLME <- "S"  # Planting method: dry seed (S); transplanting (T)
     data_xfile$PLDS <- "R"  # Seed distribution: by row (R)
     data_xfile$PLRD <- 0    # Row direction (degrees from N)
-    data_xfile$PLRS <- 18   # Row spacing (cm)
-    data_xfile$PLDP <-  2 # Planting depth (cm)
-    data_xfile$SYMBI <- 'N' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
+    data_xfile$PLRS <- 75   # Row spacing (cm)
+    data_xfile$PLDP <-  3 # Planting depth (cm)
+    data_xfile$SYMBI <- 'Y' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
     
     # Load climate data
     if (scenario == "historical") {
@@ -218,10 +218,10 @@ for (gcm_i in 1:length(modelos)) {
                            modelos[gcm_i])
     }
     
-    if(!dir.exists(paste(path_project, "19-BID-reanalysis/Rice/", scenario, "/", run_type, sep = ""))){
-      dir.create(paste(path_project, "19-BID-reanalysis/Rice/", scenario, "/", run_type, sep = ""), recursive = TRUE)
+    if(!dir.exists(paste(path_project, "19-BID-reanalysis/Soybean/", scenario, "/", run_type, sep = ""))){
+      dir.create(paste(path_project, "19-BID-reanalysis/Soybean/", scenario, "/", run_type, sep = ""), recursive = TRUE)
     }
-    save(Run, file = paste(path_project, "19-BID-reanalysis/Rice/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
+    save(Run, file = paste(path_project, "19-BID-reanalysis/Soybean/", scenario, "/", run_type, "/", store_name, ".RDat", sep = ""))
     # save(Run, file = paste("~/bid_reruns/", run_type, "/", store_name, ".RDat", sep = ""))
     
     # Clean up, else create a folder and store results in there

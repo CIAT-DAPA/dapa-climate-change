@@ -11,12 +11,12 @@ scenario <- "historical" # historical, future
 
 # Cultivar list for soybean (based on CIMMYT Mega-environment work)
 
-cul_list <- data.frame(CID = 1:2, dsid = c("IB0055", "IB0045"), culname = c("Hutcheson", "DON MARIO"))
+cul_list <- data.frame(CID = 1:2, dsid = c("IB0055", "IB0045"), culname = c("Hutcheson", "DONMARIO"))
 # Diagnostic run is only performed for irrigated systems, for historical climate
-run_type <- "diagnostic" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
+run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
-sys_type <- "riego" # riego, secano
+sys_type <- "secano" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
@@ -48,8 +48,13 @@ for (cultivar in 1:nrow(cul_list)) {
   # Updating planting dates using GGCMI data
   suppressMessages(library(ncdf4))
   suppressMessages(library(raster))
-  ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Soybeans_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
-    ggcmi <- ggcmi[[1]]
+  if(sys_type == "riego"){
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Soybeans_ir_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  } else {
+    ggcmi <- brick(paste(path_project, "/20-GGCMI-data/Soybeans_rf_growing_season_dates_v1.25.nc4", sep = ""), varname="planting day")
+  }
+  
+  ggcmi <- ggcmi[[1]]
   ggcmi[which(ggcmi[] == -99)] <- NA
   
   planting_dates <- raster::extract(x = ggcmi, y = crop_mgmt[, c('x', 'y')])
@@ -182,7 +187,7 @@ for (cultivar in 1:nrow(cul_list)) {
   if(run_type == "final"){dir_base <- "~/ScratchFinal"}
   
   # run dssat for one pixel (test)
-  # run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
+  # run_dssat(input=input_data, pixel=756, dir_dssat, dir_base)
   
   # Librerias para el trabajo en paralelo
   suppressMessages(library(foreach))

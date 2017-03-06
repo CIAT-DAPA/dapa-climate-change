@@ -194,7 +194,7 @@ for (cultivar in 1:nrow(cul_list)) {
   # Procesadores en su servidor
   registerDoMC(8)
   
-  # Run DSSAT in parallel
+  # Run DSSAT in parallel  run_dssat(input_data, 583, dir_dssat, dir_base)
   Run <- foreach(i = 1:dim(crop_mgmt)[1]) %dopar% {
     run_dssat(input_data, i, dir_dssat, dir_base)
   }
