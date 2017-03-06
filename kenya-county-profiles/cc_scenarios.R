@@ -290,7 +290,9 @@ scenarioTrendsClustering <- function(county){
   first_season <- clim_indexes; rm(clim_indexes)
   
   first_seasonWrap <- lapply(1:length(first_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(first_season[[m]][,4:which(names(first_season[[m]]) == "2005")], na.rm = T)),
+    cnames <- names(first_season[[m]])[4:ncol(first_season[[m]])]
+    df <- first_season[[m]][, c("cellID", "lon", "lat", as.character(sort(as.numeric(cnames))))]
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(df[,4:which(names(df) == "2005")], na.rm = T)),
                               Index   = names(first_season)[m],
                               Years   = 1981:2005,
                               Season  = 'First')
@@ -315,7 +317,9 @@ scenarioTrendsClustering <- function(county){
   second_season <- clim_indexes; rm(clim_indexes)
   
   second_seasonWrap <- lapply(1:length(second_season), function(m){
-    wrapClimInd <- data.frame(Average = as.numeric(colMeans(second_season[[m]][,4:which(names(first_season[[m]]) == "2005")], na.rm = T)),
+    cnames <- names(second_season[[m]])[4:ncol(second_season[[m]])]
+    df <- second_season[[m]][, c("cellID", "lon", "lat", as.character(sort(as.numeric(cnames))))]
+    wrapClimInd <- data.frame(Average = as.numeric(colMeans(df[,4:which(names(df) == "2005")], na.rm = T)),
                               Index   = names(second_season)[m],
                               Years   = 1981:2005,
                               Season  = 'Second')
