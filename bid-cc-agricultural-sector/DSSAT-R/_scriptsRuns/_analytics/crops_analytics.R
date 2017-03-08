@@ -3,15 +3,13 @@
 # CIAT, 2017
 
 options(warn = -1); options(scipen = 999)
+g <- gc(reset = T); rm(list = ls())
 
 suppressMessages(if(!require(plyr)){install.packages('plyr'); library(plyr)} else {library(plyr)})
 suppressMessages(if(!require(ggplot2)){install.packages('ggplot2'); library(ggplot2)} else {library(ggplot2)})
 suppressMessages(if(!require(dplyr)){install.packages('dplyr'); library(dplyr)} else {library(dplyr)})
 
-# ------------------------------------------------------------------------------------------------------- #
-# Comparing yield results
-# ------------------------------------------------------------------------------------------------------- #
-
+# Establish crops, time, run type, and system
 cropList <- c("Bean", "Maize", "Rice", "Soybean", "Wheat")
 timeList <- c("historical", "future")
 run_type <- c("diagnostic", "final")
@@ -104,7 +102,7 @@ for(crop in cropList){
             gg <- gg + guides(group = FALSE)
             ggsave(filename = paste(gr_dir, "/", crop, "_trends.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
           }
-          
+          rm(gg)
         } else {
           if(time == "future"){
             
@@ -145,7 +143,7 @@ for(crop in cropList){
               gg <- gg + guides(group = FALSE)
               ggsave(filename = paste(gr_dir, "/", crop, "_trends.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
             }
-            
+            rm(gg)
           }
         }
         
@@ -158,3 +156,4 @@ for(crop in cropList){
   }
   
 }
+g <- gc(reset = T); rm(list = ls())
