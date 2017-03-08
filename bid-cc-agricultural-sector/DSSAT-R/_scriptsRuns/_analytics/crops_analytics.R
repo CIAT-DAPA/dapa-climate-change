@@ -26,6 +26,8 @@ for(crop in cropList){
     
     for(run in run_type){
       
+      cat(paste("Processing: ", crop, " in ", time, " scenario for ", run, " run\n", sep = ""))
+      
       # Load all information per crop, time and run type
       info_dir <- paste(wk_dir, "/", crop, "/", time, "/", run, sep = "")
       if(dir.exists(info_dir)){
@@ -59,7 +61,7 @@ for(crop in cropList){
         }
         
         # Graphics directory
-        gr_dir <- paste(wk_dir, "/_diagnostic_plots/", crop, "/", time, sep = "")
+        gr_dir <- paste(wk_dir, "/_diagnostic_plots/", crop, "/", time, "/", run, sep = "")
         if(!dir.exists(gr_dir)){dir.create(gr_dir, recursive = T)}
         
         # Do graphics to explore values and trends
@@ -146,6 +148,7 @@ for(crop in cropList){
             rm(gg)
           }
         }
+        cat(paste("Process done\n", sep = ""))
         
       } else {
         cat(paste("Combination: ", crop, ", ", time, " and ", run, " does not exist. Continue with next combinations\n", sep = ""))
