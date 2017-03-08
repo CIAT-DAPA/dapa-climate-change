@@ -19,6 +19,7 @@ systList <- c("rainfed", "irrigation")
 
 wk_dir <- "//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/19-BID-reanalysis"
 
+# Bean historical final
 # crop <- cropList[1]; time <- timeList[1]; run <- run_type[2]
 
 for(crop in cropList){
