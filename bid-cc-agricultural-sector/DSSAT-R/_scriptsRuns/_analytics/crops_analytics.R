@@ -53,7 +53,7 @@ for(crop in cropList){
           info_crop <- lapply(1:length(info_crop), function(i){
             load(info_crop[[i]])
             Run <- lapply(1:length(Run), function(k){df <- data.frame(Run[[k]]); df$Pixel <- k; return(df)})
-            Run <- do.call(rbind, Run)
+            Run <- do.call(plyr::rbind.fill, Run)
             Run$System <- cult_info[[i]]$System
             Run$Cultivar <- cult_info[[i]]$Cultivar
             Run$GCM <- cult_info[[i]]$GCM
