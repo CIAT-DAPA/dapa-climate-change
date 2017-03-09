@@ -15,7 +15,16 @@ timeList <- c("historical", "future")
 run_type <- c("diagnostic", "final")
 systList <- c("rainfed", "irrigation")
 
-wk_dir <- "//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/19-BID-reanalysis"
+wk_dir <- "workspace_cluster_3/bid-cc-agricultural-sector/19-BID-reanalysis"
+
+OSys <- Sys.info(); OSys <- OSys[names(OSys)=="sysname"]
+if(OSys == "Linux"){
+  wk_dir <- paste("/mnt/", wk_dir, sep = "")
+} else {
+  if(OSys == "Windows"){
+    wk_dir <- paste("//dapadfs/", wk_dir, sep = "")
+  }
+}
 
 # Bean historical final
 # crop <- cropList[1]; time <- timeList[1]; run <- run_type[2]
@@ -71,7 +80,15 @@ for(crop in cropList){
           if(!file.exists(paste(gr_dir, "/", crop, "_dots.png", sep = ""))){
             gg <- info_crop %>% ggplot(aes(x = as.numeric(Pixel), y = as.numeric(HWAH), group = as.factor(Year), colour = System)) + geom_point(alpha = I(1/sqrt(1000)))
             gg <- gg + facet_wrap(~ Cultivar) + theme_bw() + xlab('Pixel') + ylab('Yield (kg/ha)')
-            ggsave(filename = paste(gr_dir, "/", crop, "_dots.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+            if(OSys == "Linux"){
+              ggsave(filename = paste(gr_dir, "/", crop, "_dots.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+              system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_dots.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_dots.png", sep=""), wait=TRUE)
+              file.remove(paste(gr_dir, "/", crop, "_dots.pdf", sep = ""))
+            } else {
+              if(OSys == "Windows"){
+                ggsave(filename = paste(gr_dir, "/", crop, "_dots.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+              }
+            }
           }
           
           # Quantile plot
@@ -91,7 +108,15 @@ for(crop in cropList){
             gg <- gg + geom_linerange(position = position_dodge(width = c(0.6, 0.4)), size = 1, alpha = 0.3)
             gg <- gg + geom_point(aes(color = System, shape = System), position = position_dodge(width = c(0.6, 0.4)), size = 3, alpha = 0.3)
             gg <- gg + facet_wrap(~ Cultivar) + theme_bw() + xlab('Pixel') + ylab('Yield (kg/ha)')
-            ggsave(filename = paste(gr_dir, "/", crop, "_quantile.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+            if(OSys == "Linux"){
+              ggsave(filename = paste(gr_dir, "/", crop, "_quantile.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+              system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_quantile.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_quantile.png", sep=""), wait=TRUE)
+              file.remove(paste(gr_dir, "/", crop, "_quantile.pdf", sep = ""))
+            } else {
+              if(OSys == "Windows"){
+                ggsave(filename = paste(gr_dir, "/", crop, "_quantile.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+              }
+            }
             rm(aux, quantileFun)
           }
           
@@ -102,7 +127,15 @@ for(crop in cropList){
             gg <- gg + geom_line(aes(group = interaction(Pixel, GCM, System)), alpha = I(1/sqrt(1000)))
             gg <- gg + facet_wrap(~ Cultivar) + theme_bw() + xlab('Year') + ylab('Yield (kg/ha)')
             gg <- gg + guides(group = FALSE)
-            ggsave(filename = paste(gr_dir, "/", crop, "_trends.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+            if(OSys == "Linux"){
+              ggsave(filename = paste(gr_dir, "/", crop, "_trends.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+              system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_trends.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_trends.png", sep=""), wait=TRUE)
+              file.remove(paste(gr_dir, "/", crop, "_trends.pdf", sep = ""))
+            } else {
+              if(OSys == "Windows"){
+                ggsave(filename = paste(gr_dir, "/", crop, "_trends.png", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+              }
+            }
           }
           rm(gg)
         } else {
@@ -112,7 +145,15 @@ for(crop in cropList){
             if(!file.exists(paste(gr_dir, "/", crop, "_dots.png", sep = ""))){
               gg <- info_crop %>% ggplot(aes(x = as.numeric(Pixel), y = as.numeric(HWAH), group = as.factor(Year), colour = System)) + geom_point(alpha = I(1/sqrt(1000)))
               gg <- gg + facet_grid(GCM ~ Cultivar) + theme_bw() + xlab('Pixel') + ylab('Yield (kg/ha)')
-              ggsave(filename = paste(gr_dir, "/", crop, "_dots.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+              if(OSys == "Linux"){
+                ggsave(filename = paste(gr_dir, "/", crop, "_dots.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+                system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_dots.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_dots.png", sep=""), wait=TRUE)
+                file.remove(paste(gr_dir, "/", crop, "_dots.pdf", sep = ""))
+              } else {
+                if(OSys == "Windows"){
+                  ggsave(filename = paste(gr_dir, "/", crop, "_dots.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+                }
+              }
             }
             
             # Quantile plot
@@ -132,7 +173,15 @@ for(crop in cropList){
               gg <- gg + geom_linerange(position = position_dodge(width = c(0.6, 0.4)), size = 1, alpha = 0.3)
               gg <- gg + geom_point(aes(color = System, shape = System), position = position_dodge(width = c(0.6, 0.4)), size = 3, alpha = 0.3)
               gg <- gg + facet_grid(GCM ~ Cultivar) + theme_bw() + xlab('Pixel') + ylab('Yield (kg/ha)')
-              ggsave(filename = paste(gr_dir, "/", crop, "_quantile.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+              if(OSys == "Linux"){
+                ggsave(filename = paste(gr_dir, "/", crop, "_quantile.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+                system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_quantile.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_quantile.png", sep=""), wait=TRUE)
+                file.remove(paste(gr_dir, "/", crop, "_quantile.pdf", sep = ""))
+              } else {
+                if(OSys == "Windows"){
+                  ggsave(filename = paste(gr_dir, "/", crop, "_quantile.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+                }
+              }
               rm(aux, quantileFun)
             }
             
@@ -143,7 +192,15 @@ for(crop in cropList){
               gg <- gg + geom_line(aes(group = interaction(Pixel, GCM, System)), alpha = I(1/sqrt(1000)))
               gg <- gg + facet_grid(GCM ~ Cultivar) + theme_bw() + xlab('Year') + ylab('Yield (kg/ha)')
               gg <- gg + guides(group = FALSE)
-              ggsave(filename = paste(gr_dir, "/", crop, "_trends.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+              if(OSys == "Linux"){
+                ggsave(filename = paste(gr_dir, "/", crop, "_trends.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+                system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_trends.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_trends.png", sep=""), wait=TRUE)
+                file.remove(paste(gr_dir, "/", crop, "_trends.pdf", sep = ""))
+              } else {
+                if(OSys == "Windows"){
+                  ggsave(filename = paste(gr_dir, "/", crop, "_trends.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+                }
+              }
             }
             rm(gg)
           }
@@ -156,7 +213,7 @@ for(crop in cropList){
       
     }
     
-  }
+  } ##
   
 }
 g <- gc(reset = T); rm(list = ls())
