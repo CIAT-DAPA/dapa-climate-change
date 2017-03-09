@@ -217,3 +217,19 @@ for(crop in cropList){
   
 }
 g <- gc(reset = T); rm(list = ls())
+
+# Just for Wheat
+gg <- info_crop[info_crop$Year != 2048, ] %>% ggplot(aes(x = as.numeric(Year), y = as.numeric(HWAH), colour = System))
+gg <- gg + stat_summary(aes(colour = System), fun.y = median, geom = "line")
+gg <- gg + geom_line(aes(group = interaction(Pixel, GCM, System)), alpha = I(1/sqrt(1000)))
+gg <- gg + facet_grid(GCM ~ Cultivar) + theme_bw() + xlab('Year') + ylab('Yield (kg/ha)')
+gg <- gg + guides(group = FALSE)
+if(OSys == "Linux"){
+  ggsave(filename = paste(gr_dir, "/", crop, "_trends2047.pdf", sep = ""), plot = gg, width = 10, height = 6, units = 'in')
+  system(paste("convert -verbose -density 300 ", gr_dir, '/', crop, "_trends2047.pdf -quality 100 -sharpen 0x1.0 -alpha off ", gr_dir, '/', crop, "_trends2047.png", sep=""), wait=TRUE)
+  file.remove(paste(gr_dir, "/", crop, "_trends2047.pdf", sep = ""))
+} else {
+  if(OSys == "Windows"){
+    ggsave(filename = paste(gr_dir, "/", crop, "_trends2047.png", sep = ""), plot = gg, width = 15, height = 10, units = 'in')
+  }
+}
