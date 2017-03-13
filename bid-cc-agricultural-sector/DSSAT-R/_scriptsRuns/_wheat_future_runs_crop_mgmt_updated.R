@@ -17,14 +17,14 @@ cul_list <- data.frame(CID = 1:6, dsid = c("IB0010", "IB0013", "IB0016", "IB0028
 run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
-sys_type <- "secano" # riego, secano
+sys_type <- "riego" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- T
+cleanup_all <- F
 
 ##############################################################################
 ##############################################################################
@@ -34,8 +34,18 @@ for (gcm_i in 1:length(modelos)) {
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
+  # Load climate data
+  if (scenario == "historical") {
+    load(paste0(path_project, "14-ObjectsR/wfd/", "WDF_all_new.Rdat"))
+  } else {
+    gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[gcm_i], "/Futuro/")
+    load(paste0(gcm, "Precipitation.RDat"))
+    load(paste0(gcm, "Srad.Rdat"))
+    load(paste0(gcm, "Temperatura_2.Rdat"))
+  }
+  
   # Iterate cultivars
-  for (cultivar in 5:nrow(cul_list)) {
+  for (cultivar in 1:nrow(cul_list)) {
     
     cat(paste("Processing of:", cul_list$culname[cultivar], "\n", sep = ""))
     
@@ -158,16 +168,6 @@ for (gcm_i in 1:length(modelos)) {
     data_xfile$PLRS <- 18   # Row spacing (cm)
     data_xfile$PLDP <- 4    # Planting depth (cm)
     data_xfile$SYMBI <- 'N' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
-    
-    # Load climate data
-    if (scenario == "historical") {
-      load(paste0(path_project, "14-ObjectsR/wfd/", "WDF_all_new.Rdat"))
-    } else {
-      gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[gcm_i], "/Futuro/")
-      load(paste0(gcm, "Precipitation.RDat"))
-      load(paste0(gcm, "Srad.Rdat"))
-      load(paste0(gcm, "Temperatura_2.Rdat"))
-    }
     
     # Climate Data Set for WFD or global model of climate change
     climate_data <- list()
