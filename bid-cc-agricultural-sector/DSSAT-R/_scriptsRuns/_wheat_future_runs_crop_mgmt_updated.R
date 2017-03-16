@@ -32,7 +32,7 @@ cleanup_all <- F
 # Iterate GCM's
 for (gcm_i in 1:length(modelos)) {
   
-  cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
+  cat(paste("Processing of: ", modelos[gcm_i], "\n", sep = ""))
   
   # Load climate data
   if (scenario == "historical") {
