@@ -30,7 +30,7 @@ cleanup_all <- F
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 1:length(modelos)) {
+for (gcm_i in 2:length(modelos)) {
   
   cat(paste("Processing of: ", modelos[gcm_i], "\n", sep = ""))
   
@@ -38,7 +38,7 @@ for (gcm_i in 1:length(modelos)) {
   if (scenario == "historical") {
     load(paste0(path_project, "14-ObjectsR/wfd/", "WDF_all_new.Rdat"))
   } else {
-    gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[gcm_i], "/Futuro/")
+    gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[gcm_i], "/Futuro/version2017/")
     load(paste0(gcm, "Precipitation.RDat"))
     load(paste0(gcm, "Srad.Rdat"))
     load(paste0(gcm, "Temperatura_2.Rdat"))
@@ -59,7 +59,7 @@ for (gcm_i in 1:length(modelos)) {
     rm(list=setdiff(ls(), c("values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile", "xy_Ref",
                             "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
                             "Cod_Ref_and_Position", "profileMatrix", "scenario", "cul_list", "cultivar", "run_type", "sys_type",
-                            "modelos", "gcm_i", "cleanup_all")))
+                            "modelos", "gcm_i", "cleanup_all", "Tmax", "Tmin", "Prec", "Srad")))
     load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/Wheat_", sys_type, ".RDat"))
     assign("crop_mgmt", get(paste("crop_", sys_type, sep="")))
     
@@ -188,8 +188,8 @@ for (gcm_i in 1:length(modelos)) {
     
     # Carpetas necesarias donde se encuentra DSSAT compilado y un directorio para las corridas
     dir_dssat <- "~/csm45_1_23_bin_ifort/"
-    if(run_type == "diagnostic"){dir_base <- "~/ScratchFut"} # It was "~/Scratch" originally
-    if(run_type == "final"){dir_base <- "~/ScratchFinalFut"} # It was "~/ScratchFinal" originally
+    if(run_type == "diagnostic"){dir_base <- "~/ScratchFut2"} # It was "~/Scratch" originally
+    if(run_type == "final"){dir_base <- "~/ScratchFinalFut2"} # It was "~/ScratchFinal" originally
     
     # run dssat for one pixel (test)
     # run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
@@ -230,17 +230,17 @@ for (gcm_i in 1:length(modelos)) {
     # Clean up, else create a folder and store results in there
     if (cleanup_all) {
       setwd("~")
-      if(run_type == "diagnostic"){system("rm -rf ~/ScratchFut")}
-      if(run_type == "final"){system("rm -rf ~/ScratchFinalFut")}
+      if(run_type == "diagnostic"){system("rm -rf ~/ScratchFut2")}
+      if(run_type == "final"){system("rm -rf ~/ScratchFinalFut2")}
     } else {
       setwd("~")
       if(run_type == "diagnostic"){
-        system(paste0("mkdir ~/ScratchFut/", run_type, "_", store_name))
-        system(paste0("mv -f ~/ScratchFut/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFut/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ~/ScratchFut2/", run_type, "_", store_name))
+        system(paste0("mv -f ~/ScratchFut2/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFut2/", run_type, "_", store_name, "/."))
       }
       if(run_type == "final"){
-        system(paste0("mkdir ~/ScratchFinalFut/", run_type, "_", store_name))
-        system(paste0("mv -f ~/ScratchFinalFut/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinalFut/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ~/ScratchFinalFut2/", run_type, "_", store_name))
+        system(paste0("mv -f ~/ScratchFinalFut2/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinalFut2/", run_type, "_", store_name, "/."))
       }
     }
   }
