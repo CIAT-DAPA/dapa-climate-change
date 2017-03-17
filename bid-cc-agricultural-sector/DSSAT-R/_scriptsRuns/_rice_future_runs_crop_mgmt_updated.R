@@ -4,7 +4,7 @@
 ##############################################################################
 ##############################################################################
 
-options(warn = -1); options(scipen = 999)
+options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
 
 # Some general config
 scenario <- "future" # historical, future
@@ -32,6 +32,16 @@ for (gcm_i in 1:length(modelos)) {
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
+  # Load climate data
+  if (scenario == "historical") {
+    load(paste0(path_project, "14-ObjectsR/wfd/", "WDF_all_new.Rdat"))
+  } else {
+    gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[gcm_i], "/Futuro/version2017/")
+    load(paste0(gcm, "Precipitation.RDat"))
+    load(paste0(gcm, "Srad.Rdat"))
+    load(paste0(gcm, "Temperatura_2.Rdat"))
+  }
+  
   # Iterate cultivars
   for (cultivar in 1:nrow(cul_list)) {
     
@@ -47,7 +57,7 @@ for (gcm_i in 1:length(modelos)) {
     rm(list=setdiff(ls(), c("values", "Soil_profile", "Cod_Ref_and_Position_Generic", "make_soilfile", "xy_Ref",
                             "Soil_Generic", "wise", "in_data", "read_oneSoilFile", "path_functions", "path_project", 
                             "Cod_Ref_and_Position", "profileMatrix", "scenario", "cul_list", "cultivar", "run_type", "sys_type",
-                            "modelos", "gcm_i", "cleanup_all")))
+                            "modelos", "gcm_i", "cleanup_all", "Tmax", "Tmin", "Prec", "Srad")))
     load(paste0(path_project, "/08-Cells_toRun/matrices_cultivo/version2017/rice_", sys_type, ".RDat"))
     assign("crop_mgmt", get(paste("crop_", sys_type, sep="")))
     
@@ -156,16 +166,6 @@ for (gcm_i in 1:length(modelos)) {
     data_xfile$PLDP <-  2 # Planting depth (cm)
     data_xfile$SYMBI <- 'N' # Symbiosis (Y =  Yes, N = Not), "Y" only for bean and soy
     
-    # Load climate data
-    if (scenario == "historical") {
-      load(paste0(path_project, "14-ObjectsR/wfd/", "WDF_all_new.Rdat"))
-    } else {
-      gcm <- paste0("/mnt/workspace_cluster_3/bid-cc-agricultural-sector/14-ObjectsR/14-ObjectsR/", modelos[gcm_i], "/Futuro/")
-      load(paste0(gcm, "Precipitation.RDat"))
-      load(paste0(gcm, "Srad.Rdat"))
-      load(paste0(gcm, "Temperatura_2.Rdat"))
-    }
-    
     # Climate Data Set for WFD or global model of climate change
     climate_data <- list()
     climate_data$year <- years # 71:99 # Years where they will simulate yields change between 71:99 or 69:97
@@ -243,3 +243,5 @@ for (gcm_i in 1:length(modelos)) {
   }
   
 }
+
+g <- gc(); rm(list = ls())
