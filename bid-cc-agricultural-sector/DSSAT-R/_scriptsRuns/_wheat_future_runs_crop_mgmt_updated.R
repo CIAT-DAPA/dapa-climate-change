@@ -30,7 +30,7 @@ cleanup_all <- F
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 2:length(modelos)) {
+for (gcm_i in 3:length(modelos)) {
   
   cat(paste("Processing of: ", modelos[gcm_i], "\n", sep = ""))
   
@@ -244,6 +244,8 @@ for (gcm_i in 2:length(modelos)) {
       }
     }
   }
+  
+  rm(Tmax, Tmin, Prec, Srad); gc(reset = T)
   
 }
 
