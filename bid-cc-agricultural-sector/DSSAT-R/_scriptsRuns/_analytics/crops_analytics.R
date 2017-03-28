@@ -26,8 +26,8 @@ if(OSys == "Linux"){
   }
 }
 
-# Bean historical final
-# crop <- cropList[1]; time <- timeList[1]; run <- run_type[2]
+# Wheat future final
+# crop <- cropList[5]; time <- timeList[2]; run <- run_type[2]
 
 for(crop in cropList){
   
@@ -52,6 +52,7 @@ for(crop in cropList){
           cult_info <- lapply(1:length(cult_info), function(i){ df <- data.frame(t(cult_info[[i]])); names(df) <- c("System", "Cultivar", "GCM"); return(df) })
           info_crop <- lapply(1:length(info_crop), function(i){
             load(info_crop[[i]])
+            cat(paste("Loaded ", i, "\n", sep = ""))
             Run <- lapply(1:length(Run), function(k){df <- data.frame(Run[[k]]); df$Pixel <- k; return(df)})
             Run <- do.call(plyr::rbind.fill, Run)
             Run$System <- cult_info[[i]]$System

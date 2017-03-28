@@ -24,6 +24,7 @@ countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
 countyList <- countyList[1:8,]; rownames(countyList) <- 1:nrow(countyList) # Machakos
+countyList <- countyList[1,]
 
 periodList <- c('2021_2045', '2041_2065')
 rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")
