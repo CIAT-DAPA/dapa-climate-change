@@ -1,0 +1,24 @@
+install_version("reshape", version = "0.8.5", repos = "http://cran.us.r-project.org")
+
+packageurl <- "http://cran.r-project.org/src/contrib/Archive/miscTools/miscTools_0.6-20.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+
+packageurl <- "http://cran.r-project.org/src/contrib/Archive/ff/ff_2.2-12.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+
+packageurl <- https://cran.r-project.org/src/contrib/Archive/reshape/reshape_0.8.5.tar.gz
+install.packages(packageurl, repos=NULL, type="source")
+
+
+packageurl <- "https://cran.r-project.org/src/contrib/Archive/plyr/plyr_1.8.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+
+
+packageurl <- "http://cran.r-project.org/src/contrib/Archive/iterators/iterators_1.0.7.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+packageurl <- "http://cran.r-project.org/src/contrib/Archive/foreach/foreach_1.4.2.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+
+
+packageurl <- "http://cran.r-project.org/src/contrib/Archive/doMC/doMC_1.3.3.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
