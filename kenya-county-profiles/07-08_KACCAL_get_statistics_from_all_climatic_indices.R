@@ -131,13 +131,14 @@ lapply(1:nrow(countyList), function(i){
     if(indexList[j] == "NDWS"){gg <- gg + ylab("Drought. Number of consecutive days with drought stress (days)")}
     if(indexList[j] == "SLGP"){gg <- gg + ylab("Starting day of growing season (days)")}
     if(indexList[j] == "LGP"){gg <- gg + ylab("Length of growing season (days)")}
-    gg <- gg + theme(axis.text.x = element_text(size=14),
-                     axis.text.y = element_text(size=14),
+    gg <- gg + theme(axis.text.x  = element_text(size=14),
+                     axis.text.y  = element_text(size=14),
                      axis.title.x = element_text(face="bold",size=15),
                      axis.title.y = element_text(face="bold",size=15),
-                     legend.text = element_text(size=14),
+                     legend.text  = element_text(size=14),
                      legend.title = element_text(face="bold",size=15))
-    gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[j]])-1, max(allWrap$Average[allWrap$Index == indexList[j]])+1))
+    gg <- gg + stat_smooth(method = "lm", se = FALSE)
+    gg <- gg + scale_x_continuous(breaks = seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[j]])-1, max(allWrap$Average[allWrap$Index == indexList[j]])+1))
     
     outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
     if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
@@ -170,6 +171,7 @@ lapply(1:nrow(countyList), function(i){
                        axis.title.y = element_text(face="bold",size=15),
                        legend.text = element_text(size=14),
                        legend.title = element_text(face="bold",size=15))
+      gg <- gg + stat_smooth(method = "lm", se = FALSE, color = "black")
       gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(min(allWrap$Average[allWrap$Index == indexList[k]])-1, max(allWrap$Average[allWrap$Index == indexList[k]])+1))
       
       outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
@@ -191,6 +193,7 @@ lapply(1:nrow(countyList), function(i){
                    axis.title.y = element_text(face="bold",size=15),
                    legend.text = element_text(size=14),
                    legend.title = element_text(face="bold",size=15))
+  gg <- gg + stat_smooth(method = "lm", se = FALSE, color = "black")
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
   gg <- gg + scale_x_continuous(breaks=seq(1980, 2015, 5)) + scale_y_continuous(limits=c(0, max(completeTOTRAIN$Average)+100))
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_TOTRAIN_complete_2015.eps', sep=''))){
@@ -208,6 +211,7 @@ lapply(1:nrow(countyList), function(i){
                    axis.title.y = element_text(face="bold",size=15),
                    legend.text = element_text(size=14),
                    legend.title = element_text(face="bold",size=15))
+  gg <- gg + stat_smooth(method = "lm", se = FALSE, color = "black")
   gg <- gg + scale_x_continuous(breaks=seq(1980, 2005, 5)) + scale_y_continuous(limits=c(min(completeTMEAN$Average)-1, max(completeTMEAN$Average)+1))
   outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/historical_trends/', gsub(pattern=' ', replacement='_', countyList$County[i]), '/individualPlots', sep='')
   if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[i]), '_TMEAN_complete_2015.eps', sep=''))){
@@ -599,5 +603,5 @@ wrapFutClimInd2 <- wrapFutClimInd
 wrapFutClimInd2 <- as.data.frame(dplyr::summarise(group_by(wrapFutClimInd2, Index, GCM, RCP, County, Season, Years), median(Average)))
 colnames(wrapFutClimInd2)[ncol(wrapFutClimInd2)] <- 'Average'
 
-county <- 'Kajiado'
+county <- 'Bomet'
 lapply(countyList$County, function(county){scenarioTrendsClustering(county = county)})

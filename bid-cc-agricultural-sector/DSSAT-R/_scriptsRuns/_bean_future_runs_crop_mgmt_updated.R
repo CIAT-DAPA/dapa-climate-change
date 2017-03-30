@@ -29,7 +29,7 @@ cleanup_all <- F
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 8) { # 1:length(modelos)
+for (gcm_i in 9) { # 1:length(modelos)
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
@@ -142,8 +142,8 @@ for (gcm_i in 8) { # 1:length(modelos)
     
     # Carpetas necesarias donde se encuentra DSSAT compilado y un directorio para las corridas
     dir_dssat <- "~/csm45_1_23_bin_ifort/"
-    if(run_type == "diagnostic"){dir_base <- "~/Scratch"}
-    if(run_type == "final"){dir_base <- "~/ScratchFinal"}
+    if(run_type == "diagnostic"){dir_base <- paste(path_project, "21-Scratch-files/Scratch", sep = "")}
+    if(run_type == "final"){dir_base <- paste(path_project, "21-Scratch-files/ScratchFinal", sep = "")}
     
     # run dssat for one pixel (test)
     # run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
@@ -183,18 +183,18 @@ for (gcm_i in 8) { # 1:length(modelos)
     
     # Clean up, else create a folder and store results in there
     if (cleanup_all) {
-      setwd("~")
-      if(run_type == "diagnostic"){system("rm -rf ~/Scratch")}
-      if(run_type == "final"){system("rm -rf ~/ScratchFinal")}
+      # setwd("~") # paste(path_project, "21-Scratch-files/ScratchFinal", sep = "")
+      if(run_type == "diagnostic"){system(paste("rm -rf ", path_project, "21-Scratch-files/Scratch", sep = ""))}
+      if(run_type == "final"){system(paste("rm -rf ", path_project, "21-Scratch-files/ScratchFinal", sep = ""))}
     } else {
-      setwd("~")
+      # setwd("~")
       if(run_type == "diagnostic"){
-        system(paste0("mkdir ~/Scratch/", run_type, "_", store_name))
-        system(paste0("mv -f ~/Scratch/", data_xfile$crop, "_", data_xfile$system, "_* ~/Scratch/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ", path_project, "21-Scratch-files/Scratch/", run_type, "_", store_name))
+        system(paste0("mv -f ", path_project, "21-Scratch-files/Scratch/", data_xfile$crop, "_", data_xfile$system, "_* ", path_project, "21-Scratch-files/Scratch/", run_type, "_", store_name, "/."))
       }
       if(run_type == "final"){
-        system(paste0("mkdir ~/ScratchFinal/", run_type, "_", store_name))
-        system(paste0("mv -f ~/ScratchFinal/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinal/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ", path_project, "21-Scratch-files/ScratchFinal/", run_type, "_", store_name))
+        system(paste0("mv -f ", path_project, "21-Scratch-files/ScratchFinal/", data_xfile$crop, "_", data_xfile$system, "_* ", path_project, "21-Scratch-files/ScratchFinal/", run_type, "_", store_name, "/."))
       }
     }
   }
