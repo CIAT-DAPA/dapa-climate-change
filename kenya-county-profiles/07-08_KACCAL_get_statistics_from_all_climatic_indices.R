@@ -603,5 +603,5 @@ wrapFutClimInd2 <- wrapFutClimInd
 wrapFutClimInd2 <- as.data.frame(dplyr::summarise(group_by(wrapFutClimInd2, Index, GCM, RCP, County, Season, Years), median(Average)))
 colnames(wrapFutClimInd2)[ncol(wrapFutClimInd2)] <- 'Average'
 
-county <- 'Bomet'
+county <- 'Baringo'
 lapply(countyList$County, function(county){scenarioTrendsClustering(county = county)})
