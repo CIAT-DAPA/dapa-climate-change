@@ -28,7 +28,7 @@ cleanup_all <- T
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 1) { # 1:length(modelos)
+for (gcm_i in 4) { # 1:length(modelos)
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   

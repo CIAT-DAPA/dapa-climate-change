@@ -536,7 +536,7 @@ lapply(1:nrow(countyList), function(x){
                      legend.text = element_text(size=14),
                      legend.title = element_text(face="bold",size=15),
                      strip.text = element_text(size=15))
-    outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+    outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[x]), '/individual_plots', sep='')
     if(!dir.exists(outDir)){ dir.create(outDir, recursive=TRUE) }
     if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_allRCP_2021_2065.png', sep=''))){
       ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_allRCP_2021_2065.pdf', sep=''), plot=gg, width=12, height=12, units='in')
@@ -567,7 +567,7 @@ lapply(1:nrow(countyList), function(x){
                        plot.title = element_text(size=20))
       gg <- gg + scale_x_continuous(breaks=seq(2020, 2065, 5))
       gg <- gg + ggtitle(paste('Index: ', indList[i], ' - RCP: ', rcpList[j] ,sep=''))
-      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[1]), '/individual_plots', sep='')
+      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[x]), '/individual_plots', sep='')
       if(!dir.exists(outDir)){ dir.create(outDir, recursive=TRUE) }
       if(!file.exists(paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], '_2021_2065.png', sep=''))){
         ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[x]), '_', indList[i], '_', rcpList[j], '_2021_2065.pdf', sep=''), plot=gg, width=12, height=10, units='in')
@@ -580,6 +580,84 @@ lapply(1:nrow(countyList), function(x){
   })
   
 })
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# Integrating historical and future trends to explore changes
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+
+barCharts <- function(histData = wrapClimInd_2015, futData = wrapFutClimInd_median){
+  
+  if(class(histData) == "list"){
+    nms <- names(histData)
+    histData <- lapply(1:length(histData), function(i){
+      z <- histData[[i]]
+      z$County <- nms[i]
+      return(z)
+    })
+    histData <- do.call(rbind, histData)
+  }
+  
+  # Calculate mean and sd for historical data
+  allWrap2 <- as.data.frame(dplyr::summarise(group_by(histData, County, Index, Season), mean(Average)))
+  allWrap2$std <- as.data.frame(dplyr::summarise(group_by(histData, County, Index, Season), sd(Average)))[,ncol(as.data.frame(dplyr::summarise(group_by(histData, County, Index, Season), sd(Average))))]
+  names(allWrap2) <- c('County', 'Index', 'Season', 'Mean', 'Std')
+  
+  # Calculate mean and sd for future data
+  wrapFutClimInd_median2 <- as.data.frame(dplyr::summarise(group_by(futData, County, Index, RCP, Season), mean(Median)))
+  wrapFutClimInd_median2$std <- as.data.frame(dplyr::summarise(group_by(futData, County, Index, RCP, Season), sd(Median)))[,ncol(as.data.frame(dplyr::summarise(group_by(futData, County, Index, RCP, Season), mean(Median))))]
+  names(wrapFutClimInd_median2) <- c('County', 'Index', 'RCP', 'Season', 'Mean', 'Std')
+  
+  county <- allWrap2; rm(allWrap2)
+  county$RCP <- 'Historical'
+  county <- rbind(county, wrapFutClimInd_median2); rm(wrapFutClimInd_median2)
+  
+  indexList <- unique(as.character(county$Index))
+  cntyList <- unique(as.character(county$County))
+  
+  lapply(1:length(indexList), function(j){
+    
+    lapply(1:length(cntyList), function(k){
+      
+      county2 <- county[county$County == cntyList[k] & county$Index == indexList[j] & (county$RCP == "Historical" | county$RCP == "rcp26" | county$RCP == "rcp85"),]; rownames(county2) <- 1:nrow(county2)
+      limits <- aes(ymax = Mean + Std, ymin = Mean - Std)
+      
+      gg <- ggplot(county2, aes(fill = Season, y = Mean, x = RCP)) + geom_bar(stat = "identity", position = "dodge")
+      gg <- gg + scale_fill_manual(values = c('darkgoldenrod3', 'turquoise3'),
+                                   breaks = c("First", "Second"),
+                                   labels = c("January-June", "July-December"))
+      dodge <- position_dodge(width = 0.9)
+      gg <- gg + geom_errorbar(limits, position = dodge, width = 0.25, data = county2)
+      gg <- gg + xlab('')
+      if(indexList[j] == "TMEAN"){gg <- gg + ylab(expression("Average temperature ("*~degree*C*")"))}
+      if(indexList[j] == "GDD_1"){gg <- gg + ylab(expression("Growing degree days with TB = 10 ("*~degree*C*"/day)"))}
+      if(indexList[j] == "GDD_2"){gg <- gg + ylab(expression("Growing degree days with TO = 25 ("*~degree*C*"/day)"))}
+      if(indexList[j] == "ND_t35"){gg <- gg + ylab(expression("Total number of days with Tmax >= 35"*~degree*C*" (days)"))}
+      if(indexList[j] == "TOTRAIN"){gg <- gg + ylab("Total precipitation (mm)")}
+      if(indexList[j] == "CDD"){gg <- gg + ylab("Maximum number of consecutive dry days (days)")}
+      if(indexList[j] == "P5D"){gg <- gg + ylab("Maximum 5-day running average precipitation (mm/day)")}
+      if(indexList[j] == "P_95"){gg <- gg + ylab("Floods. 95th percentile of daily precipitation (mm/day)")}
+      if(indexList[j] == "NDWS"){gg <- gg + ylab("Drought. Number of consecutive days with drought stress (days)")}
+      if(indexList[j] == "SLGP"){gg <- gg + ylab("Starting day of growing season (days)")}
+      if(indexList[j] == "LGP"){gg <- gg + ylab("Length of growing season (days)")}
+      gg <- gg + theme_bw()
+      gg <- gg + theme(axis.text.x  = element_text(size=14),
+                       axis.text.y  = element_text(size=14),
+                       axis.title.x = element_text(face="bold",size=15),
+                       axis.title.y = element_text(face="bold",size=15),
+                       legend.text  = element_text(size=14),
+                       legend.title = element_text(face="bold",size=15))
+      gg <- gg + scale_x_discrete(breaks=c("Historical","rcp26","rcp85"),
+                                  labels=c("Historical\n(1981-2015)", "RCP2.6\n(2021-2065)", "RCP8.5\n(2021-2065)"))
+      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[k]), sep='')
+      if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
+      ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[k]), '_barChart_historical_future_changes_', indexList[j], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
+      
+    })
+    
+  })
+  
+}
+barCharts(histData = wrapClimInd_2015, futData = wrapFutClimInd_median)
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Cluster analysis to identify climate change scenarios by county using absolute changes
