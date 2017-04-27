@@ -1,14 +1,17 @@
 # ---------------------------------------------------------------------------------
 # Author: Jaime Tarapues
 # Date: April 27th, 2017
-# Version: 1.0
+# Version: 1.0 (Test version)
 # Purpose: extract values of CHIRPS V2 (5 KM), CRU V4 (50 km), WorldClim V2 (1 km)
 # ----------------------------------------------------------------------------------
 
 library(jsonlite)
 
+# selección de años yi=año inciio yf=año final
 yi=2010
 yf=2010
+
+# listado de coordenadas en columnas id,lon,lat
 listcoor=data.frame(id=c(1,2),lon=c(-75.021,-76),lat=c(4,4.5))
 
 # Para usarlo por fuera de ciat usar:
