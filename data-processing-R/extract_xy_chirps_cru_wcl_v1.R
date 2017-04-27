@@ -1,3 +1,5 @@
+library(jsonlite)
+
 yi=2010
 yf=2010
 listcoor=data.frame(id=c(1,2),lon=c(-75.021,-76),lat=c(4,4.5))
