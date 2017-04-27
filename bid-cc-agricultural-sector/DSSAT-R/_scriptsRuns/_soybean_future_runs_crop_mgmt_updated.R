@@ -4,7 +4,7 @@
 ##############################################################################
 ##############################################################################
 
-options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
+options(warn = -1); options(scipen = 999); g <- gc(reset = T); rm(list = ls())
 
 # Some general config
 scenario <- "future" # historical, future
@@ -22,13 +22,13 @@ modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- F
+cleanup_all <- T
 
 ##############################################################################
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 1:length(modelos)) {
+for (gcm_i in 9) { # 1:length(modelos)
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
@@ -242,6 +242,8 @@ for (gcm_i in 1:length(modelos)) {
     }
   }
   
+  rm(Tmax, Tmin, Prec, Srad); gc(reset = T)
+  
 }
 
-g <- gc(); rm(list = ls())
+g <- gc(reset = T); rm(list = ls())

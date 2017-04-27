@@ -10,7 +10,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractByMask.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ex: python ExtractByMask.py D:\CIAT\Projects\PNUMA\03-Projections\Avg_Anom_A2\2020_2049\no_cut D:\CIAT\Projects\PNUMA\03-Projections\Avg_Anom_A2\2020_2049 D:\CIAT\Projects\PNUMA\00-Administrative_boundaries\andesPeEcCo\andesPeruEcuadorCOL.shp ALL"
+	print "   - ex: python ExtractByMask.py S:\observed\gridded_products\worldclim\Global_30s_v2 D:\CIAT\Workspace\palvarez\wcl_v2 D:\CIAT\_tools\AdminBoundaries\Colombia\_by_departaments\CA_adm\CA0.shp ALL"
 	sys.exit(1)
 
 # Arguments
@@ -35,9 +35,9 @@ gp.workspace = dirbase
 # Get a list of grids in the workspace 
 print "\t ..listing grids into " + dirbase
 if wildcard == "ALL":
-	rasters = sorted(gp.ListRasters("*", "GRID"))
+	rasters = sorted(gp.ListRasters("*", "TIF"))
 else:	
-	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
+	rasters = sorted(gp.ListRasters(wildcard + "*", "TIF"))
 
 # Lopping around the grids
 for raster in rasters:

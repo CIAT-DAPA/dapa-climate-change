@@ -6,31 +6,35 @@
 #  Load packages and previous information ----
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-options(warn=-1); options(scipen=999)
-if(!require(data.table)){install.packages('data.table'); library(data.table)} else {library(data.table)}
-if(!require(raster)){install.packages('raster'); library(raster)} else {library(raster)}
-if(!require(rgdal)){install.packages('rgdal'); library(rgdal)} else {library(rgdal)}
-if(!require(rasterVis)){install.packages('rasterVis'); library(rasterVis)} else {library(rasterVis)}
-if(!require(ggplot2)){install.packages('ggplot2'); library(ggplot2)} else {library(ggplot2)}
-if(!require(trend)){install.packages('trend'); library(trend)} else {library(trend)}
-if(!require(ggthemes)){install.packages('ggthemes'); library(ggthemes)} else {library(ggthemes)}
-if(!require(dplyr)){install.packages('dplyr'); library(dplyr)} else {library(dplyr)}
-if(!require(tidyr)){install.packages('tidyr'); library(tidyr)} else {library(tidyr)}
-if(!require(FactoMineR)){install.packages('FactoMineR'); library(FactoMineR)} else {library(FactoMineR)}
-if(!require(factoextra)){install.packages('factoextra'); library(factoextra)} else {library(factoextra)}
-if(!require(lubridate)){install.packages('lubridate'); library(lubridate)} else {library(lubridate)}
+options(warn = -1); options(scipen = 999); g <- gc(); rm(list = ls())
+suppressMessages(if(!require(data.table)){install.packages('data.table'); library(data.table)} else {library(data.table)})
+suppressMessages(if(!require(raster)){install.packages('raster'); library(raster)} else {library(raster)})
+suppressMessages(if(!require(rgdal)){install.packages('rgdal'); library(rgdal)} else {library(rgdal)})
+suppressMessages(if(!require(rasterVis)){install.packages('rasterVis'); library(rasterVis)} else {library(rasterVis)})
+suppressMessages(if(!require(ggplot2)){install.packages('ggplot2'); library(ggplot2)} else {library(ggplot2)})
+suppressMessages(if(!require(trend)){install.packages('trend'); library(trend)} else {library(trend)})
+suppressMessages(if(!require(ggthemes)){install.packages('ggthemes'); library(ggthemes)} else {library(ggthemes)})
+suppressMessages(if(!require(dplyr)){install.packages('dplyr'); library(dplyr)} else {library(dplyr)})
+suppressMessages(if(!require(tidyr)){install.packages('tidyr'); library(tidyr)} else {library(tidyr)})
+suppressMessages(if(!require(FactoMineR)){install.packages('FactoMineR'); library(FactoMineR)} else {library(FactoMineR)})
+suppressMessages(if(!require(factoextra)){install.packages('factoextra'); library(factoextra)} else {library(factoextra)})
+suppressMessages(if(!require(lubridate)){install.packages('lubridate'); library(lubridate)} else {library(lubridate)})
 
-countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
-                                   rep('Cluster 2', 4),
-                                   rep('Cluster 3', 4),
-                                   rep('Cluster 4', 4)),
-                         County=c('Kilifi', 'Tana River', 'Garissa',
-                                  'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
-                                  'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
-                                  'Homa Bay', 'Siaya', 'Busia', 'West Pokot'))
-countyList <- countyList[13,]
+countyList <- data.frame(Cluster=c(rep('Cluster 1', 8),
+                                   rep('Cluster 2', 8)),
+                         County=c('Bomet', 'Kericho', 'Kakamega', 'Uasin Gishu', 'Keiyo-Marakwet', 'Machakos', 'Kisumu', 'Kajiado',
+                                  'Baringo', 'Laikipia', 'Tharaka', 'Lamu', 'Marsabit', 'Isiolo', 'Wajir', 'Mandera'))
 countyList$Cluster <- as.character(countyList$Cluster)
 countyList$County <- as.character(countyList$County)
+
+# countyList <- data.frame(Cluster=c(rep('Cluster 1', 3),
+#                                    rep('Cluster 2', 4),
+#                                    rep('Cluster 3', 4),
+#                                    rep('Cluster 4', 4)),
+#                          County=c('Kilifi', 'Tana River', 'Garissa',
+#                                   'Kwale', 'Makueni', 'Taita Taveta', 'Embu',
+#                                   'Meru', 'Nyeri', 'Nyandarua', 'Nakuru',
+#                                   'Homa Bay', 'Siaya', 'Busia', 'West Pokot'))
 
 periodList <- c('2021_2045', '2041_2065')
 rcpList    <- paste("rcp", c(26, 45, 60, 85), sep="")

@@ -16,20 +16,20 @@ cul_list <- data.frame(CID = 1:7, dsid = c("IB0006", 'IB0010', "IB0033", "IB0005
 run_type <- "final" # Just only final
 
 # Cropping system
-sys_type <- "riego" # riego, secano
+sys_type <- "secano" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm", "cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- F
+cleanup_all <- T
 
 ##############################################################################
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 4) { # 1:length(modelos)
+for (gcm_i in 1) { # 1:length(modelos)
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
@@ -142,8 +142,8 @@ for (gcm_i in 4) { # 1:length(modelos)
     
     # Carpetas necesarias donde se encuentra DSSAT compilado y un directorio para las corridas
     dir_dssat <- "~/csm45_1_23_bin_ifort/"
-    if(run_type == "diagnostic"){dir_base <- "~/Scratch"}
-    if(run_type == "final"){dir_base <- "~/ScratchFinal"}
+    if(run_type == "diagnostic"){dir_base <- "~/Scratch"} # paste(path_project, "21-Scratch-files/Scratch", sep = "")
+    if(run_type == "final"){dir_base <- "~/ScratchFinal"} # paste(path_project, "21-Scratch-files/ScratchFinal", sep = "")
     
     # run dssat for one pixel (test)
     # run_dssat(input=input_data, pixel=250, dir_dssat, dir_base)
@@ -183,18 +183,18 @@ for (gcm_i in 4) { # 1:length(modelos)
     
     # Clean up, else create a folder and store results in there
     if (cleanup_all) {
-      setwd("~")
-      if(run_type == "diagnostic"){system("rm -rf ~/Scratch")}
-      if(run_type == "final"){system("rm -rf ~/ScratchFinal")}
+      # setwd("~") # paste(path_project, "21-Scratch-files/ScratchFinal", sep = "")
+      if(run_type == "diagnostic"){system("rm -rf ~/Scratch")} # system(paste("rm -rf ", path_project, "21-Scratch-files/Scratch", sep = ""))
+      if(run_type == "final"){system("rm -rf ~/ScratchFinal")} # system(paste("rm -rf ", path_project, "21-Scratch-files/ScratchFinal", sep = ""))
     } else {
-      setwd("~")
+      # setwd("~")
       if(run_type == "diagnostic"){
-        system(paste0("mkdir ~/Scratch/", run_type, "_", store_name))
-        system(paste0("mv -f ~/Scratch/", data_xfile$crop, "_", data_xfile$system, "_* ~/Scratch/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ~/Scratch/", run_type, "_", store_name)) # paste0("mkdir ", path_project, "21-Scratch-files/Scratch/", run_type, "_", store_name)
+        system(paste0("mv -f ~/Scratch/", data_xfile$crop, "_", data_xfile$system, "_* ~/Scratch/", run_type, "_", store_name, "/.")) # paste0("mv -f ", path_project, "21-Scratch-files/Scratch/", data_xfile$crop, "_", data_xfile$system, "_* ", path_project, "21-Scratch-files/Scratch/", run_type, "_", store_name, "/.")
       }
       if(run_type == "final"){
-        system(paste0("mkdir ~/ScratchFinal/", run_type, "_", store_name))
-        system(paste0("mv -f ~/ScratchFinal/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinal/", run_type, "_", store_name, "/."))
+        system(paste0("mkdir ~/ScratchFinal/", run_type, "_", store_name)) # paste0("mkdir ", path_project, "21-Scratch-files/ScratchFinal/", run_type, "_", store_name)
+        system(paste0("mv -f ~/ScratchFinal/", data_xfile$crop, "_", data_xfile$system, "_* ~/ScratchFinal/", run_type, "_", store_name, "/.")) # paste0("mv -f ", path_project, "21-Scratch-files/ScratchFinal/", data_xfile$crop, "_", data_xfile$system, "_* ", path_project, "21-Scratch-files/ScratchFinal/", run_type, "_", store_name, "/.")
       }
     }
   }
@@ -204,3 +204,5 @@ for (gcm_i in 4) { # 1:length(modelos)
 }
 
 g <- gc(reset = T); rm(list = ls())
+system("mv /home/jmesa/ScratchFinal/* /mnt/workspace_cluster_3/bid-cc-agricultural-sector/21-Scratch-files/ScratchFinal")
+system("rm -rf ~/ScratchFinal")
