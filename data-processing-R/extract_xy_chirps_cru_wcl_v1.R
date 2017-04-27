@@ -7,7 +7,7 @@
 
 library(jsonlite)
 
-# selección de años yi=año inciio yf=año final
+# selección de años yi=año inicio yf=año final
 yi=2010
 yf=2010
 
