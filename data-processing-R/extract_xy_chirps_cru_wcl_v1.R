@@ -59,7 +59,7 @@ datalist[[4]]
 # woldclim v2 tmin 1km
 datalist[[5]]
 
-# woldclim v2 tmin 1km
+# woldclim v2 tmax 1km
 datalist[[6]]
 
 # dias lluviosos por mes chirps v2
@@ -74,8 +74,8 @@ datalist[[9]]
 # cru v4 prec 50km
 datalist[[10]]
 
-# cru v4  tmax 50km
+# cru v4  tmin 50km
 datalist[[11]]
 
-# cru v4  tmin 50km
+# cru v4  tmax 50km
 datalist[[12]]
