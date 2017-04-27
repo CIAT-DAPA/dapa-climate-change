@@ -1,3 +1,10 @@
+# ---------------------------------------------------------------------------------
+# Author: Jaime Tarapues
+# Date: April 27th, 2017
+# Version: 1.0
+# Purpose: extract values of CHIRPS V2 (5 KM), CRU V4 (50 km), WorldClim V2 (1 km)
+# ----------------------------------------------------------------------------------
+
 library(jsonlite)
 
 yi=2010
