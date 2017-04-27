@@ -12,7 +12,7 @@ yf=2010
 listcoor=data.frame(id=c(1,2),lon=c(-75.021,-76),lat=c(4,4.5))
 
 # Para usarlo por fuera de ciat usar:
-#"http://181.118.144.158/stations/php/data-graphics-chirps.php?"
+#service="http://181.118.144.158/stations/php/data-graphics-chirps.php?"
 service="http://172.22.52.8/stations/php/data-graphics-chirps.php?"
 dateday <- format(seq(as.Date(paste0(yi,'/',"1/1")), as.Date(paste0(yf,'/',"12/31")), "days") ,"%Y-%m-%d")
 datemon <- format(seq(as.Date(paste0(yi,'/',"1/1")), as.Date(paste0(yf,'/',"12/31")), "months") ,"%Y-%m")
