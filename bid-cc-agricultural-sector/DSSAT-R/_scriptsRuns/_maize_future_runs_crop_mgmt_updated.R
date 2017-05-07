@@ -17,20 +17,20 @@ cul_list <- data.frame(CID = 1:3, dsid = c("IB0059", "IB0056", "IB0055"),
 run_type <- "final" # diagnostic (to extract fertiliser dates) or final (final run once mgmt has been specified)
 
 # Cropping system
-sys_type <- "secano" # riego, secano
+sys_type <- "riego" # riego, secano
 
 # GCMs, only if scenario == "future"
 modelos <- c("bcc_csm1_1", "bnu_esm","cccma_canesm2", "gfld_esm2g", "inm_cm4", "ipsl_cm5a_lr",
              "miroc_miroc5", "mpi_esm_mr", "ncc_noresm1_m")
 
 # If we want to clean up raw DSSAT files
-cleanup_all <- F
+cleanup_all <- T
 
 ##############################################################################
 ##############################################################################
 
 # Iterate GCM's
-for (gcm_i in 6:length(modelos)) {
+for (gcm_i in 1) { # 1:length(modelos)
   
   cat(paste("Processing of:", modelos[gcm_i], "\n", sep = ""))
   
@@ -246,6 +246,8 @@ for (gcm_i in 6:length(modelos)) {
       }
     }
   }
+  
+  rm(Tmax, Tmin, Prec, Srad); gc(reset = T)
   
 }
 
