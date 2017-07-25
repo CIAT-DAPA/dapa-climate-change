@@ -648,9 +648,9 @@ barCharts <- function(histData = wrapClimInd_2015, futData = wrapFutClimInd_medi
                        legend.title = element_text(face="bold",size=15))
       gg <- gg + scale_x_discrete(breaks=c("Historical","rcp26","rcp85"),
                                   labels=c("Historical\n(1981-2015)", "RCP2.6\n(2021-2065)", "RCP8.5\n(2021-2065)"))
-      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', countyList$County[k]), sep='')
+      outDir <- paste('/mnt/workspace_cluster_12/Kenya_KACCAL/results/graphics/future_trends/', gsub(pattern=' ', replacement='_', cntyList[k]), sep='')
       if(!dir.exists(outDir)){dir.create(outDir, recursive = T)}
-      ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', countyList$County[k]), '_barChart_historical_future_changes_', indexList[j], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
+      ggsave(filename=paste(outDir, '/', gsub(pattern=' ', replacement='_', cntyList[k]), '_barChart_historical_future_changes_', indexList[j], '.eps', sep=''), plot=gg, width=10, height=7, units='in')
       
     })
     
