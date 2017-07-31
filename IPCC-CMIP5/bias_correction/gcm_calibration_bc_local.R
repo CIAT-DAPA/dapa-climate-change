@@ -1137,7 +1137,7 @@ qm_calcs <- function(varmod="tmax", rcp="rcp85", lon=-73.5, lat=3.4, dirbase="D:
 }
 
 ## Comparison methods (plots)
-bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.28, lat=-16.47, dirbase="C:/Temp/bc/Request_jramirez/bc_-49.28_-16.47"){
+bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.28, lat=-16.47, dirbase="C:/Temp/bc/BC_xy_-62.0068_5.5066"){
   
   ## Load libraries
   library(lubridate); library(ggplot2); library(reshape)
@@ -1286,7 +1286,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=obs_agg) + 
           #geom_line(aes_string(x="date", y=names(obs_agg)[3],linetype = "leg"),colour='gray50',size=0.2, shape=1) +   # Observations
-          geom_line(aes_string(x="date", y=names(obs_agg)[i+3], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
+          geom_line(aes_string(x="date", y=names(obs_agg)[i+3], colour="method"), size=0.2) +   # GCMs (historical) , shape=1
           facet_wrap(~ method, ncol=1) +
           scale_color_manual(breaks=c(as.character(hecolor[,1]),"Obs"), values=c(hex_color,'gray50'))+
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14),
@@ -1296,7 +1296,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         cat(paste0("\nTime series daily plot  ", rcp, " ", varmod, " ", gcm))
         tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=merge_mod) +  
-          geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), shape=1, size=0.2)+   # GCMs (future)
+          geom_line(aes_string(x="date", y=names(merge_mod)[i+3], colour="method"), size=0.2)+   # GCMs (future) , shape=1
           facet_wrap(~ method, ncol=1) + 
           scale_color_manual(values=hex_color) +
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14),
@@ -1359,7 +1359,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=obs_agg) + 
           #geom_line(aes_string(x="date", y="obs",linetype = "method"),colour='gray50',size=0.2, shape=1,data=obs_sel) +   # Observations
-          geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2) +   # GCMs (historical)
+          geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), size=0.2) +   # GCMs (historical) , shape=1
           facet_wrap(~ method, ncol=1) +
           scale_color_manual(breaks=c(as.character(hecolor[,1]),"Obs"), values=c(hex_color,'gray50'))+
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14),
@@ -1369,7 +1369,7 @@ bc_stats <- function(varmod="prec", rcp="historical",yi=1980, yf=2010, lon=-49.2
         cat(paste0("\nTime series monthly plot  ", rcp, " ", varmod, " ", gcm))
         tiff(ots, width=w, height=h_timeseries, pointsize=8, compression='lzw',res=100)
         p <- ggplot(data=obs_agg) +  
-          geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), shape=1, size=0.2)+   # GCMs (future)
+          geom_line(aes_string(x="date", y=names(obs_agg)[i+4], colour="method"), size=0.2)+   # GCMs (future) , shape=1
           facet_wrap(~ method, ncol=1) + 
           scale_color_manual(values=hex_color) +
           theme(legend.position="bottom",panel.background = element_rect(fill = 'gray92'), legend.title=element_blank(),strip.text.x=element_text(size=14),
@@ -2159,7 +2159,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
 bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order){
   
   ## Load libraries
-  library(raster); library(ncdf); library(rgdal); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) 
+  library(raster); library(ncdf4); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) #library(rgdal); 
 
   #dircdo <- "cdo"
   #dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
@@ -2170,7 +2170,9 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
   #leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
   #typeData<-1 #1=Remueve los NA si todos los modelos los tienen en comun, 2=remueve todos los datos con NA, 3=conserva los datos con leeps NA # opci?n 2 pone problema en qmap dejarlo en valor 1
   
-  if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="Comma"){sepFile=","}
+  if(sepFile=="space"){sepFile=" "} else if(sepFile=="tab"){sepFile="\t"}else if(sepFile=="puntocoma"){sepFile=";"}else if(sepFile=="comma"){sepFile=","}
+  
+  options(bitmapType='cairo') # Sirve en LINUX para que guarde las imagenes
   
   if (file.exists(xyfile)) {
     xyList = read.table(xyfile, header = TRUE,sep=sepFile)
@@ -2206,7 +2208,11 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
     dataset <- tolower(dataset)
     
     if(dataset=="station"){
-      if(remote=="YES"){filepath=url(fileStat)}else{filepath=fileStat}
+      # if(remote=="YES"){filepath=url(fileStat)}else{filepath=fileStat}
+      dirtemp <- paste0(dirout, "/obs/station")
+      if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}	
+      filepath=paste0(dirtemp,'/tempfile.txt')
+      download.file(fileStat,destfile=filepath,method="curl")
       df = read.table(filepath, header = TRUE,sep=sepFile)
       dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)]), "%Y%m%d"),"%Y-%m-%d")
       varlist=colnames(df)[!colnames(df) %in% colnames(df)[1]]
@@ -2250,20 +2256,22 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
           yearF<- strftime(as.Date(as.character(endYear), "%Y%m%d"),"%Y")
           if(fuyf <= yearF){
             gcmlistSel=c(gcmlistSel,gcm)
-          }             
+          }
+#           else if(fuyf == 2100 && yearF==2099){
+#             gcmlistSel=c(gcmlistSel,gcm)
+#           }             
         }  
       }
       if(length(gcmlistSel)>0){
         if(dataset=="station"){
-          dirtemp <- paste0(dirout, "/obs/station")
-          if (!file.exists(dirtemp)) {dir.create(dirtemp, recursive=T)}
           #df = read.table(filepath, header = TRUE,sep=sepFile)
           #dateSta=strftime(as.Date(as.character(df$date[!is.na(df$date)] ), "%Y%m%d"),"%Y-%m-%d")
           station=data.frame(cbind(dateSta,df[,which(colnames(df)==varmod)]))   
           names(station)=c("date","value")
           if(all(is.na(station$value))!=TRUE){
             if (!file.exists(paste0(dirtemp,"/obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab"))){
-              write.table(station,paste0(dirtemp,"/obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab"), sep="\t",row.names=F,quote = FALSE)   
+              write.table(station,paste0(dirtemp,"/obs_ts_",varmod,"_lon_",lon,"_lat_",lat,".tab"), sep="\t",row.names=F,quote = FALSE)  
+              unlink(filepath)		  
               check=c(check,'ok')
             }else{check=c(check,'ok')}
           }
@@ -2280,35 +2288,33 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         if(length(check)>0){
           
           #export variables
-          sfExport("var")
-          sfExport("varmod")
-          # sfExport("Obyi")
-          # sfExport("Obyf")
-          sfExport("lon") 
-          sfExport("lat") 
-          sfExport("dirgcm") 
-          sfExport("dirout") 
-          sfExport("dircdo") 
-          sfExport("ver_python") 
-          sfExport("dirScript_py")             
+#           sfExport("var")
+#           sfExport("varmod")
+#           sfExport("lon") 
+#           sfExport("lat") 
+#           sfExport("dirgcm") 
+#           sfExport("dirout") 
+#           sfExport("dircdo") 
+#           sfExport("ver_python") 
+#           sfExport("dirScript_py")             
           
           for(rcp in c("historical",rcpList)){
             if(rcp=="historical"){yi=Obyi;yf=Obyf}else{yi=fuyi;yf=fuyf}
-            sfExport("yi")
-            sfExport("yf")
-            sfExport("rcp")
+            #sfExport("yi")
+            #sfExport("yf")
+            #sfExport("rcp")
             for (i in 1:length(gcmlistSel)){
               gcm <- gcmlistSel[i]
-              sfExport("gcm") 
-              controlIntpol <- function(i) { #define a new function
+              #sfExport("gcm") 
+              #controlIntpol <- function(i) { #define a new function
                 cat(" .> ", paste("\t Cluster: ", i, sep=""), "\tdone!\n")
                 gcm_extraction(var,varmod, rcp, yi,yf, gcm, lon, lat, dirgcm, dirout,dircdo,ver_python,dirScript_py)
-              }
-              system.time(sfSapply(gcmlistSel, controlIntpol))
+              #}
+              #system.time(sfSapply(gcmlistSel, controlIntpol))
             }
             merge_extraction(varmod,rcp,yi,yf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
           }
-          sfStop() 
+          #sfStop() 
           for(rcp in rcpList){
             #gcm_extraction(var,varmod, rcp, fuyi,fuyf, gcmlistSel, lon, lat, dirgcm, dirout,ver_python,dirScript_py)
             #merge_extraction(varmod, rcp,fuyi,fuyf, gcmlistSel, lon, lat, dataset, dirout,sepFile,leap,typeData)
@@ -2385,7 +2391,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # xyList <- #c("-85.717,14.817") #c("-49.28,-16.47") # c("-73.84,4.91") #c("-76.38558333,3.533333333") # para correr pocos sitios
 # xyfile <-  "/home/temp/Request_andy/CSVs.txt" # para correr varios sitios, este debe contener las columnas id,lon,lat
 # gcmlist <-  c("bcc_csm1_1","bcc_csm1_1_m","bnu_esm","cccma_canesm2","cesm1_bgc","cesm1_cam5","cmcc_cms","csiro_access1_0","csiro_mk3_6_0","ec_earth","gfdl_cm3","gfdl_esm2g","gfdl_esm2m","inm_cm4","ipsl_cm5a_lr","ipsl_cm5a_mr","ipsl_cm5b_lr","lasg_fgoals_g2","miroc_esm","miroc_esm_chem","miroc_miroc5","mohc_hadgem2_cc","mohc_hadgem2_es","mpi_esm_lr","mpi_esm_mr","mri_cgcm3","ncar_ccsm4","ncc_noresm1_m")#c("bcc_csm1_1_m","cesm1_cam5","csiro_mk3_6_0","mohc_hadgem2_es","mohc_hadgem2_cc","gfdl_esm2g")#c("mohc_hadgem2_es","mohc_hadgem2_cc")#c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr", "ipsl_cm5a_mr", "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m")
-# statList<-c('1','2','3') # c('1') # 1=files bc, 2=tables, 3=graphics   
+# statList<-c('1','2') # c('1') # 1=files bc, 2=tables and graphics   
 # fileStat<-  "C:/Temp/bc_-73.84_4.91/file_1465990447.txt"#"/home/temp/file_1465990447.txt" #"/home/temp/bc_-49.28_-16.47/obs/stat_-49.28_-16.47.txt"#  "C:/Temp/bc/bc_-76.38558333_3.533333333/apto_alfonso_bonilla.txt" # "/home/jtarapues/apto_alfonso_bonilla.txt"#  "D:/jetarapues/Request/Request_jramirez/stat_-51.82_-16.97.txt" # "C:/Temp/bc/Request_jramirez/stat_-49.28_-16.47.txt" #
 # sepFile<-"tab"# puntocoma,space,Comma
 # leap<-1 # 1=rellena los leap year con el promedio del dia antes y despues (e.g. DSSAT, Oryza2000), 2=quita los dias leap year (e.g. para GLAM), 3=conserva los datos con leap NA
@@ -2398,8 +2404,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
 # #=======================================
 # 
-library(snowfall);
-sfInit(parallel=T,cpus=2) #initiate cluster
-stop("error")          
-sfExport("gcm_extraction")
+# library(snowfall);
+# sfInit(parallel=T,cpus=2) #initiate cluster
+# stop("error")          
+# sfExport("gcm_extraction")
 bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order)
