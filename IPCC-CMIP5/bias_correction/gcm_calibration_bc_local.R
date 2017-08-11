@@ -2380,7 +2380,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # dirWork=  "/home/temp" #"C:/Temp/bc/Request_jramirez" # "C:/Temp" # directorio de salida "/home/jtarapues/request/request_oriana" #  
 # dirgcm <- "/mnt/data_cluster_2/gcm/cmip5/raw/daily" # "T:/gcm/cmip5/raw/daily" #  
 # dirobs <- "/mnt/data_cluster_5/cropdata/" # "U:/cropdata" #"S:/observed/gridded_products/ncep-cru-srb-gsod-merge-for-east-west-africa" #   
-# dataset <- "agmerra"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princenton, princenton-afr
+# dataset <- "agmerra"  #"station" wfd, wfdei, agmerra, grasp, agcfsr, princeton, princenton-afr
 # methBCList <-c("5")#c('1','2','3','4','5')  # 1=SH,2=BC,3=DEL,4=CF,5=QM c('5')#
 # varlist <- c("pr","tasmin")#c("pr","tasmax","tasmin","rsds") # 
 # Obyi <- 1980#1985
