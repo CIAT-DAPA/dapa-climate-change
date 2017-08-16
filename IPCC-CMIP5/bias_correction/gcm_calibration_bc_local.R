@@ -2156,10 +2156,10 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
 }
 
 ## Main function
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order,wth){
   
   ## Load libraries
-  library(raster); library(ncdf4); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) #library(rgdal); 
+  library(raster); library(ncdf); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) #library(rgdal); 
 
   #dircdo <- "cdo"
   #dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
@@ -2233,7 +2233,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
     b=list.dirs(dirrcp,recursive=F,full.names=F)
     gcmlistIn=intersect(a,b)
     gcmlist=intersect(gcmlistIn,gcmlist)
-    
+
     for (var in varlist){
       if  (var == "prec") {var <- "pr"} else if (var == "srad") {var <- "rsds"} else if (var == "tmax") {var <- "tasmax"} else if (var == "tmin") {var <- "tasmin"} else if (var == "tmean") {var <- "tas"} else if (var == "swind") {var <- "sfcWind"} 
       cat()
@@ -2356,7 +2356,67 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
         }else{cat(paste0("no exite obs ",varmod,'\n'))}
       }else{cat(paste0("no exite gcm ",varmod,'\n'))}
     }
-    #} 
+    #}
+    
+
+    if(wth=="yes" && length(intersect(varlist,c("pr","tasmax","tasmin","rsds")))==4){
+      dirsBC=cbind(c("bias_correction_no_variability","bias_correction_variability","change_factor_no_variability","change_factor_variability","quantile_mapping"),c("sh","bc","del","cf","qm"))
+      listBC=list.dirs(dirout,recursive=F,full.names=F)
+      dirsBC=dirsBC[which(dirsBC[,1]==listBC),]
+      
+      date_for_dssat <- function(year, day_year) {
+        if(nchar(day_year) == 1){
+          data <- paste0(year, '00', day_year)
+        }
+        if(nchar(day_year) == 2){
+          data <- paste0(year, '0', day_year)
+        }
+        if(nchar(day_year) == 3){
+          data <- paste0(year, day_year)
+        }
+        return(data)
+      }
+      
+      for(rcp in c("historical",rcpList)){
+        for(bc in 1:nrow(dirsBC)){
+          listbcAll=list.files(path = paste0(dirout,'/',dirsBC[,1]), full.names=T,recursive = TRUE,pattern=paste0(dirsBC[bc,2],"_ts_",rcp,"_", "_*"))#
+          ## Load all bias corrected data
+          odat <- lapply(listbcAll, function(x){read.table(x,header=T,sep=" ")})
+          listbc=basename(listbcAll)
+          # Get GCMs names and length
+          ngcm <- length(odat[[1]]) - 2
+          gcmlist <- names(odat[[1]])[3:length(odat[[1]])]     
+          
+          for(j in 1:length(gcmlist)) { 
+            outwth=paste0(dirout,'/',dirsBC[bc,1],'/wth')
+            if (!file.exists(outwth)) {dir.create(outwth, recursive=T)} 
+            julian_day = yday(ymd(odat[[1]]$date))
+            
+            Srad <- odat[[2]][,gcmlist[j]]
+            Tmax <- odat[[3]][,gcmlist[j]]
+            Tmin <- odat[[4]][,gcmlist[j]]
+            Prec <- odat[[1]][,gcmlist[j]]
+            date <- date_for_dssat(substr(year(odat[[1]]$date), 3, 4), julian_day)
+            
+            sink(paste0(outwth,"/",dirsBC[bc,2],'-',rcp,'-',gcmlist[j], '.WTH'), append = F)
+            ## Agregar las siguientes Lineas
+            
+            ##cat(paste("*WEATHER DATA :"),paste(coordenadas[1,1]),paste(coordenadas[1,2]))
+            cat(paste("*WEATHER DATA :"), paste("CCAFS-Climate"))
+            cat("\n")
+            cat("\n")
+            cat(c("@ INSI      LAT     LONG  ELEV   TAV   AMP REFHT WNDHT"))
+            cat("\n")
+            cat(sprintf("%6s %8.3f %8.3f %5.0f %5.1f %5.1f %5.2f %5.2f", "USCI", lat, lon, -99,-99, -99.0, 0, 0))
+            cat("\n")
+            cat(c('@DATE  SRAD  TMAX  TMIN  RAIN'))
+            cat("\n")
+            cat(cbind(sprintf("%5s %5.1f %5.1f %5.1f %5.1f", date, Srad, Tmax, Tmin, Prec)), sep = "\n")
+            sink()              
+          }          
+        }
+      }
+    }# wtw
   } 
  
   #     if(length(list.files(dirout,recursive=T))!=0){
@@ -2402,10 +2462,11 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # ## For run on windows:
 # ver_python<-"C:\\Python26\\python.exe"
 # dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
+# wth <- yes/no  convert files to wth format DSSAT
 # #=======================================
-# 
+#
 # library(snowfall);
 # sfInit(parallel=T,cpus=2) #initiate cluster
 # stop("error")          
 # sfExport("gcm_extraction")
-bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order)
+bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order,wth)
