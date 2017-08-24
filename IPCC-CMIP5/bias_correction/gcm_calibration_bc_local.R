@@ -2264,6 +2264,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
     }
     
     dirout <- paste0(dirWork,'/',dateDownl) 
+    if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}  
     dataset <- tolower(dataset)
     txtFile = paste(dirout,"/","Wrapper.txt",sep="")
     if(!file.exists(txtFile)){
