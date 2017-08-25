@@ -244,18 +244,26 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
           cat("\nExtracting GCM data : ", " ", basename(gcm), " ", rcp,  " ", varmod, " \n")
           
           ### CDO command line to extract daily TS
-          if(Sys.info()['sysname']=="Linux"){
-            if (varmod=="hur"){
-              system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar[1], " > ", dirtemp, "/", odat))
-            }else {
-              system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar[1], " > ", dirtemp, "/", odat))
+          cdofunction=function(ver_python,dirScript_py,dircdo,ncvar,dirtemp,odat,yi,yf,lonmod,lat,var,ncvar,dirtemp){
+            if(Sys.info()['sysname']=="Linux"){
+              if (varmod=="hur"){
+                system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar, " > ", dirtemp, "/", odat))
+              }else {
+                system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " ",  ncvar, " > ", dirtemp, "/", odat))
+              }
+            }else{
+              system(paste(ver_python," ",dirScript_py," ",ncvar,' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lonmod,' ',lat,' YES ',dircdo,sep=''),intern=TRUE)  
             }
-          }else{
-            system(paste(ver_python," ",dirScript_py," ",ncvar[1],' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lon,' ',lat,' YES ',dircdo,sep=''),intern=TRUE)  
           }
-          
+          cdofunction(ver_python,dirScript_py,dircdo,ncvar[1],dirtemp,odat,yi,yf,lonmod,lat,var,ncvar,dirtemp)
           ## Read and organize daily TS
           datgcm <- read.table(odat, header=F, sep="")
+          if(class(datgcm[,2])=="factor"){
+            unlink(datgcm)
+            cdofunction(ver_python,dirScript_py,dircdo,ncvar[1],dirtemp,odat,yi,yf,lonmod,lat,var,ncvar,dirtemp)
+            datgcm <- read.table(odat, header=F, sep="")
+          }
+          
           names(datgcm) <- c("date","value")
           #           datgcm <- datgcm[which(datgcm$year %in% yi:yf),]
           #           datgcm$year <- NULL
@@ -320,6 +328,7 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
       
       lista<-lista[pos]
       gcmlist<-gcmlist[pos]
+      checkvalue <- lapply(paste0(dirbase, "/gcm/",gcmlist,'/',ogcm), function(x){y=read.table(x,header=T,sep=" ");if(class(y$value)=="factor"){unlink(x)}})
       gcmdat <- lapply(paste0(dirbase, "/gcm/",gcmlist,'/',ogcm), function(x){read.table(x,header=T,sep=" ")})
       
       ## Create a sequence of dates at daily timestep for TS 
@@ -377,7 +386,7 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
       # ensemble
       if(length(gcmlist)>1){
         mod=gcmmat[,3:length(gcmmat)]
-        Value=rowMeans(mod, na.rm = TRUE)
+        Value=rowMeans(as.numeric(mod), na.rm = TRUE)
         gcmmat$ensemble=Value
       }
       
