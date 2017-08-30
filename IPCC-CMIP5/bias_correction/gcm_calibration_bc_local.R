@@ -244,7 +244,7 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
           cat("\nExtracting GCM data : ", " ", basename(gcm), " ", rcp,  " ", varmod, " \n")
           
           ### CDO command line to extract daily TS
-          cdofunction=function(ver_python,dirScript_py,dircdo,ncvar,dirtemp,odat,yi,yf,lonmod,lat,var,ncvar,dirtemp){
+          cdofunction=function(ver_python,dirScript_py,dircdo,ncvar,dirtemp,odat,yi,yf,lonmod,lat,var){
             if(Sys.info()['sysname']=="Linux"){
               if (varmod=="hur"){
                 system(paste0(dircdo," -s -outputtab,date,value -selyear,",yi,"/",yf," -remapnn,lon=", lonmod, "_lat=", lat, " -selname,", var, " -sellevel,85000 ",  ncvar, " > ", dirtemp, "/", odat))
@@ -255,12 +255,12 @@ gcm_extraction <- function(var="pr",varmod="prec",rcp="historical",yi=1980, yf=2
               system(paste(ver_python," ",dirScript_py," ",ncvar,' ',dirtemp, "/", odat,' ',yi,' ',yf,' ',lonmod,' ',lat,' YES ',dircdo,sep=''),intern=TRUE)  
             }
           }
-          cdofunction(ver_python,dirScript_py,dircdo,ncvar[1],dirtemp,odat,yi,yf,lonmod,lat,var,ncvar,dirtemp)
+          cdofunction(ver_python,dirScript_py,dircdo,ncvar[1],dirtemp,odat,yi,yf,lonmod,lat,var)
           ## Read and organize daily TS
           datgcm <- read.table(odat, header=F, sep="")
           if(class(datgcm[,2])=="factor"){
             unlink(datgcm)
-            cdofunction(ver_python,dirScript_py,dircdo,ncvar[1],dirtemp,odat,yi,yf,lonmod,lat,var,ncvar,dirtemp)
+            cdofunction(ver_python,dirScript_py,dircdo,ncvar[1],dirtemp,odat,yi,yf,lonmod,lat,var)
             datgcm <- read.table(odat, header=F, sep="")
           }
           
@@ -386,7 +386,7 @@ merge_extraction <- function(varmod="swind", rcp="rcp45", yi=1980, yf=1990, gcml
       # ensemble
       if(length(gcmlist)>1){
         mod=gcmmat[,3:length(gcmmat)]
-        Value=rowMeans(as.numeric(mod), na.rm = TRUE)
+        Value=rowMeans(mod, na.rm = TRUE)
         gcmmat$ensemble=Value
       }
       
@@ -2582,8 +2582,8 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # dircdo <- "cdo" # modificar si no encuentra el path de cdo
 # order <- NA # no modificar si remote=NO
 # ## For run on windows:
-# ver_python<-"C:\\Python26\\python.exe"
-# dirScript_py<-"C:\\Temp\\bc\\Request_jramirez\\bc_extract_gcm.py"
+# ver_python<-"C:/Python26/python.exe"
+# dirScript_py<-"C:/Temp/bc/Request_jramirez/bc_extract_gcm.py"
 # #=======================================
 #
 # library(snowfall);
