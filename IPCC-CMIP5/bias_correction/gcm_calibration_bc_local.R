@@ -2454,9 +2454,13 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
             ## Load all bias corrected data
             odat <- lapply(listbcAll, function(x){read.table(x,header=T,sep=" ")})
             listbc=basename(listbcAll)
+            varlist=sapply(strsplit(listbc, '[_]'), "[[", 4)
+            names(odat)=varlist
             # Get GCMs names and length
-            ngcm <- length(odat[[1]]) - 2
-            gcmlist <- names(odat[[1]])[3:length(odat[[1]])] 
+            colmod=Reduce(intersect, list(names(odat$prec),names(odat$srad),names(odat$tmin),names(odat$tmax)))
+            ngcm <- length(colmod) - 2
+            gcmlist <- colmod[3:length(colmod)] 
+            
             outwth=paste0(dirout,'/',dirsBC[bc,1],'/wth')
             for(j in 1:length(gcmlist)) {
               if(rcp=="historical"){yi=Obyi;yf=Obyf}else{yi=fuyi;yf=fuyf}
@@ -2465,11 +2469,11 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
                 cat(" => ", paste("\t Convert wth ",rcp,gcmlist[j],dirsBC[bc,2]))
                 if (!file.exists(outwth)) {dir.create(outwth, recursive=T)} 
                 julian_day = yday(ymd(odat[[1]]$date))
-                Srad <- odat[[2]][,gcmlist[j]]
-                Tmax <- odat[[3]][,gcmlist[j]]
-                Tmin <- odat[[4]][,gcmlist[j]]
-                Prec <- odat[[1]][,gcmlist[j]]
-                date <- paste0(substr(year(odat[[1]]$date), 3, 4), formatC(julian_day, width = 3,flag = 0))
+                Srad <- odat$srad[,gcmlist[j]]
+                Tmax <- odat$tmax[,gcmlist[j]]
+                Tmin <- odat$tmin[,gcmlist[j]]
+                Prec <- odat$prec[,gcmlist[j]]
+                date <- paste0(substr(year(odat$prec$date), 3, 4), formatC(julian_day, width = 3,flag = 0))
     
                 sink(wth_file, append = F)
                 ## Agregar las siguientes Lineas
@@ -2500,14 +2504,18 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
          wth_file=paste0(outwth,"/",dataset,"_obs_",Obyi,"-",Obyf,'.WTH')
          if (!file.exists(wth_file)) {
            odat <- lapply(listbcAll, function(x){read.table(x,header=T,sep=" ")})
+           listbc=basename(listbcAll)
+           varlist=sapply(strsplit(listbc, '[_]'), "[[", 4)
+           names(odat)=varlist
+           
            cat(" => ", paste("\t Convert wth obs",dataset,dirsBC[bc,2]))
            if (!file.exists(outwth)) {dir.create(outwth, recursive=T)} 
-           julian_day = yday(ymd(odat[[1]]$date))
+           julian_day = yday(ymd(odat$prec$date))
            
-           Srad <- odat[[2]][,2]
-           Tmax <- odat[[3]][,2]
-           Tmin <- odat[[4]][,2]
-           Prec <- odat[[1]][,2]
+           Srad <- odat$srad[,2]
+           Tmax <- odat$tmax[,2]
+           Tmin <- odat$tmin[,2]
+           Prec <- odat$prec[,2]
            date <- paste0(substr(year(odat[[1]]$date), 3, 4), formatC(julian_day, width = 3,flag = 0))
            
            sink(wth_file, append = F)
