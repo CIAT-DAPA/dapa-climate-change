@@ -91,18 +91,18 @@ sep_d=function(...){
 }
 
 load_tmin=function(){
-  tmin=read.csv_n(gfile("Seleccione un archivo"),header=T)
+  tmin=read.table(gfile("Seleccione el archivo de temperatura mínima"),sep = svalue(sep),header=T)
   assign("tmin",tmin,.GlobalEnv)
 }
 
 load_tmax=function(){
-  tmax=read.csv_n(gfile("Seleccione un archivo"),header=T)
+  tmax=read..table(gfile("Seleccione el archivo de temperatura máxima"),sep = svalue(sep),header=T)
   assign("tmax",tmax,.GlobalEnv)
 }
 
 load_precip=function(){
-  precip=read.csv_n(gfile("Seleccione un archivo"),header=T)
-  assign("precip",precip,.GlobalEnv)
+  prec=read.table(gfile("Seleccione el archivo de precitación"),sep = svalue(sep),header=T)
+  assign("prec",prec,.GlobalEnv)
 }
 
 #Función para sacar barra de progreso
@@ -226,7 +226,7 @@ graf_plot=function(){
 
     tmax1=ts(tmax,start=min(tmax$year),frequency=365)
     tmin1=ts(tmin,start=min(tmin$year),frequency=365)
-    precip1=ts(precip,start=min(precip$year),frequency=365)
+    prec1=ts(prec,start=min(prec$year),frequency=365)
 
     station=names( tmax[-3:-1])
     m=matrix(c(1,1,2,3,3,4,5,5,6),3,3,byrow=T)
@@ -246,8 +246,8 @@ graf_plot=function(){
       hist(tmax1[,i+3],main="",xlab="Temp. Máxima")
       plot(tmin1[,i+3],type="l",xlab="Años",ylab="Temp. Mínima",ylim=c(min(tmin[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="black")
       hist(tmin1[,i+3],main="",xlab="Temp. Mínima")
-      plot(precip1[,i+3],type="l",xlab="Años",ylab="Precipitación")
-      hist(precip1[,i+3],main="",xlab="Precipitación")
+      plot(prec1[,i+3],type="l",xlab="Años",ylab="Precipitación")
+      hist(prec1[,i+3],main="",xlab="Precipitación")
       dev.off()
 
     }
@@ -257,7 +257,7 @@ graf_plot=function(){
 
     tmax1=ts(aggregate(tmax[-3:-1],list(Mes=tmax$month,Año=tmax$year),mean2),frequency=12,start=min(tmax$year))
     tmin1=ts(aggregate(tmin[-3:-1],list(Mes=tmin$month,Año=tmin$year),mean2),start=min(tmin$year),frequency=12)
-    precip1=ts(aggregate(precip[-3:-1],list(Mes=precip$month,Año=precip$year),sum2),start=min(precip$year),frequency=12)
+    prec1=ts(aggregate(prec[-3:-1],list(Mes=prec$month,Año=prec$year),sum2),start=min(prec$year),frequency=12)
 
 
     station=names(tmax[-3:-1])
@@ -278,8 +278,8 @@ graf_plot=function(){
       hist(tmax1[,i+2],main="",xlab="Temp. Máxima")
       plot(tmin1[,i+2],type="l",xlab="Años",ylab="Temp. Mínima",ylim=c(min(tmin[,i+3],na.rm=T),max(tmin[,i+3],na.rm=T)),col="black")
       hist(tmin1[,i+2],main="",xlab="Temp. Mínima")
-      plot(precip1[,i+2],type="l",xlab="Años",ylab="Precipitación")
-      hist(precip1[,i+2],main="",xlab="Precipitación")
+      plot(prec1[,i+2],type="l",xlab="Años",ylab="Precipitación")
+      hist(prec1[,i+2],main="",xlab="Precipitación")
       dev.off()
 
 
@@ -295,7 +295,7 @@ graf_box=function(){
   if(svalue(tipo)=="Mensual"){
     tmax=aggregate(tmax[-3:-1],list(month=tmax$month,year=tmax$year),mean2)
     tmin=aggregate(tmin[-3:-1],list(month=tmin$month,year=tmin$year),mean2)
-    precip=aggregate(precip[-3:-1],list(month=precip$month,year=precip$year),sum2)
+    prec=aggregate(prec[-3:-1],list(month=prec$month,year=prec$year),sum2)
 
     station=names( tmax[-2:-1])
     month1=recode(tmax$month,"1='Ene';2='Feb';3='Mar';4='Abr';5='May';6='Jun';7='Jul';8='Ago';9='Sep';10='Oct';11='Nov';12='Dec'",as.factor.result=TRUE)
@@ -317,11 +317,11 @@ graf_box=function(){
 
       mes=qplot(month1,tmax[,i+2], geom = "boxplot",group = month1, ylab=paste("Temp. Máxima",sep="_"),xlab="Mes", outlier.size =0.7)
       mes1=qplot(month1,tmin[,i+2], geom = "boxplot",group = month1, ylab=paste("Temp. Mínima",sep="_"),xlab="Mes", outlier.size =0.7)
-      mes2=qplot(month1,precip[,i+2], geom = "boxplot",group = month1, ylab=paste("Precip",sep="_"),xlab="Mes", outlier.size =0.7)
+      mes2=qplot(month1,prec[,i+2], geom = "boxplot",group = month1, ylab=paste("Precip",sep="_"),xlab="Mes", outlier.size =0.7)
 
       year=qplot(tmax$year ,tmax[,i+2], geom = "boxplot",  group =  tmax$year,ylab=paste("Temp. Máxima",sep="_"),xlab="",outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
       year1=qplot(tmin$year ,tmin[,i+2], geom = "boxplot", group =  tmin$year,ylab=paste("Temp. Mínima",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
-      year2=qplot(precip$year ,precip[,i+2], geom = "boxplot", group =  precip$year,ylab=paste("Precip",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+      year2=qplot(prec$year ,prec[,i+2], geom = "boxplot", group =  prec$year,ylab=paste("Precip",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
 
       grid.newpage()
 
@@ -342,7 +342,7 @@ graf_box=function(){
     }
     x=melt(tmax[-2:-1])
     y=melt(tmin[-2:-1])
-    z=melt(precip[-2:-1])
+    z=melt(prec[-2:-1])
 
     gral=qplot(x$variable,x$value,geom="boxplot",group=x$variable,ylab="Temp. Máxima",xlab="",outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
     gral1=qplot(y$variable,y$value,geom="boxplot",group=y$variable,ylab="Temp. Mínima",xlab="",outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
@@ -366,7 +366,7 @@ graf_box=function(){
   if(svalue(tipo)=="Diaria"){
     tmax=tmax
     tmin=tmin
-    precip=precip
+    prec=prec
 
     station=names( tmax[-3:-1])
     month1=recode(tmax$month,"1='Ene';2='Feb';3='Mar';4='Abr';5='May';6='Jun';7='Jul';8='Ago';9='Sep';10='Oct';11='Nov';12='Dec'",as.factor.result=TRUE)
@@ -388,11 +388,11 @@ graf_box=function(){
 
       mes=qplot(month1,tmax[,i+3], geom = "boxplot",group = month1, ylab=paste("Temp. Máxima",sep="_"),xlab="",outlier.size =0.7)
       mes1=qplot(month1,tmin[,i+3], geom = "boxplot",group = month1, ylab=paste("Temp. Mínima",sep="_"),xlab="", outlier.size =0.7)
-      mes2=qplot(month1,precip[,i+3], geom = "boxplot",group = month1, ylab=paste("Precipitación",sep="_"),xlab="", outlier.size =0.7)
+      mes2=qplot(month1,prec[,i+3], geom = "boxplot",group = month1, ylab=paste("Precipitación",sep="_"),xlab="", outlier.size =0.7)
 
       year=qplot(tmax$year ,tmax[,i+3], geom = "boxplot",  group =  tmax$year,ylab=paste("Temp. Máxima",sep="_"),xlab="",outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
       year1=qplot(tmin$year ,tmin[,i+3], geom = "boxplot", group =  tmin$year,ylab=paste("Temp. Mínima",sep="_"),xlab="",outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
-      year2=qplot(precip$year ,precip[,i+3], geom = "boxplot", group =  precip$year,ylab=paste("Precipitación",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+      year2=qplot(prec$year ,prec[,i+3], geom = "boxplot", group =  prec$year,ylab=paste("Precipitación",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
 
       grid.newpage()
 
@@ -413,7 +413,7 @@ graf_box=function(){
     }
     x=melt(tmax[-3:-1])
     y=melt(tmin[-3:-1])
-    z=melt(precip[-3:-1])
+    z=melt(prec[-3:-1])
 
     gral=qplot(x$variable,x$value,geom="boxplot",group=x$variable,ylab="Temp. Máxima",xlab="", outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
     gral1=qplot(y$variable,y$value,geom="boxplot",group=y$variable,ylab="Temp. Mínima",xlab="", outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
@@ -459,7 +459,7 @@ graf_disp=function(){
 
     datostmax=aggregate(tmax[-3:-1],list(month=tmax$month,year=tmax$year),mean2)
     datostmin=aggregate(tmin[-3:-1],list(month=tmin$month,year=tmin$year),mean2)
-    datosprecip=aggregate(precip[-3:-1],list(month=precip$month,year=precip$year),sum2)
+    datosprec=aggregate(prec[-3:-1],list(month=prec$month,year=prec$year),sum2)
 
 
     jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos dispersión/tmax.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
@@ -477,11 +477,11 @@ graf_disp=function(){
     tryCatch(pairs(datostmin,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
     dev.off()
 
-    jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos dispersión/precip.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+    jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos dispersión/prec.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-    # jpeg(paste("Analisis grafico/Gráficos dispersión/precip.jpeg",sep=""),width = 600, height = 600)
-    datosprecip=data.frame(na.omit(datosprecip[-2:-1]))
-    tryCatch( pairs(datosprecip,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
+    # jpeg(paste("Analisis grafico/Gráficos dispersión/prec.jpeg",sep=""),width = 600, height = 600)
+    datosprec=data.frame(na.omit(datosprec[-2:-1]))
+    tryCatch( pairs(datosprec,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
     dev.off()
   }
 
@@ -507,11 +507,11 @@ graf_disp=function(){
   tryCatch(pairs(datostmin,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
   dev.off()
 
-  jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos dispersión/precip.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+  jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos dispersión/prec.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-  # jpeg(paste("Analisis grafico/Gráficos dispersión/precip.jpeg",sep=""),width = 600, height = 600)
-  datosprecip=data.frame(na.omit(precip[-3:-1]))
-  tryCatch( pairs(datosprecip,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
+  # jpeg(paste("Analisis grafico/Gráficos dispersión/prec.jpeg",sep=""),width = 600, height = 600)
+  datosprec=data.frame(na.omit(prec[-3:-1]))
+  tryCatch( pairs(datosprec,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
   dev.off()
   }
 }
@@ -1132,8 +1132,8 @@ quality_control<-function(object){
     
   }
   
-  if(svalue(variable)=="precip"){
-    dir.create("Control de calidad/precip",showWarnings=F)
+  if(svalue(variable)=="prec"){
+    dir.create("Control de calidad/prec",showWarnings=F)
     
     
     porcentajes=matrix(0,ncol(object)-3,6)
@@ -1212,7 +1212,7 @@ quality_control<-function(object){
       
       
       if(nrow(out_atip_data)!=0){
-        write.csv_n(out_atip_data,paste("Control de calidad/precip/","atipicos_",station[i],".csv",sep=""),row.names=F)
+        write.csv_n(out_atip_data,paste("Control de calidad/prec/","atipicos_",station[i],".csv",sep=""),row.names=F)
       }
       ##QC datos consecutivos 
       xc <-data.frame(hasta=cumsum(rle(object[,i+3])$lengths),cant_iguales=rle(object[,i+3])$lengths,valor=rle(object[,i+3])$values)
@@ -1240,7 +1240,7 @@ quality_control<-function(object){
                             round(na/dim(tmax)[1]*100,2))
       
       #######Graficos control de calidad###########
-      tiff(paste("Control de calidad/precip/","precip_qc_",station[i],".tiff",sep=""),compression = 'lzw',height = 5,width = 16,units="in", res=150)
+      tiff(paste("Control de calidad/prec/","prec_qc_",station[i],".tiff",sep=""),compression = 'lzw',height = 5,width = 16,units="in", res=150)
       par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
       plot(tmax[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Precipitación (mm)",main=station[i])
       points(out_cons,tmax[out_cons,i+3],col="black",bg="red",cex=0.7,pch=21)
@@ -1255,7 +1255,7 @@ quality_control<-function(object){
       dev.off()
     }
     
-    write.csv_n(object,"Control de calidad/precip_qc.csv",row.names=F)
+    write.csv_n(object,"Control de calidad/prec_qc.csv",row.names=F)
     dimnames(porcentajes)<-c(list(station),list(c("% Datos fuera del rango","% Datos atípicos","% Datos consecutivos","% Total datos NA")))
     
   }
@@ -1278,7 +1278,7 @@ quality_control<-function(object){
 
 datos_falt=function(){
 
-  #Corrección spline para preciptación
+  #Corrección spline para prectación
   ComprehensivePrecipitationGenerator<-function (station = c("T0001", "T0010", "T0099"), prec_all,
                                                  mean_climate_prec = NULL, year_max = 1990, year_min = 1961,
                                                  leap = TRUE, nmonth = 12, cpf = NULL, verbose = TRUE, p = 1,
@@ -1442,7 +1442,7 @@ datos_falt=function(){
 
 #   cbind(ifelse(any(apply(tmax[-3:-1],2,descriptna)/dim(tmax)[1]>0.3),"presenta", "NO presenta"),
 #   ifelse(any(apply(tmin[-3:-1],2,descriptna)/dim(tmax)[1]>0.3),"presenta", "NO presenta"),
-#   ifelse(any(precipna=apply(precip[-3:-1],2,descriptna)/dim(tmax)[1]>0.3),"presenta", "NO presenta"))
+#   ifelse(any(precipna=apply(prec[-3:-1],2,descriptna)/dim(tmax)[1]>0.3),"presenta", "NO presenta"))
 #
 #
 #   paste("La variable",, "porcentajes de datos faltantes (%NA) superiores a lo permitido")
@@ -1463,11 +1463,11 @@ datos_falt=function(){
 
   tmax<- read.csv_n("Datos_faltantes/tmax_na.csv", header = TRUE)
   tmin<- read.csv_n("Datos_faltantes/tmin_na.csv", header = TRUE)
-  precip <- read.csv_n("Datos_faltantes/precip_na.csv", header = TRUE)
+  prec <- read.csv_n("Datos_faltantes/prec_na.csv", header = TRUE)
 
   tmax=subset(tmax,tmax$year>=year_min & tmax$year<=year_max)
   tmin=subset(tmin,tmin$year>=year_min & tmin$year<=year_max)
-  precip=subset(precip,precip$year>=year_min & precip$year<=year_max)
+  prec=subset(prec,prec$year>=year_min & prec$year<=year_max)
 
 
   station <- names(tmax) [-3:-1]
@@ -1502,7 +1502,7 @@ datos_falt=function(){
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n")
 
   generation00_prec <- ComprehensivePrecipitationGenerator(station=station,
-                                                           prec_all=precip,
+                                                           prec_all=prec,
                                                            year_min=year_min,
                                                            year_max=year_max,
                                                            exogen=exogen,
@@ -1544,7 +1544,7 @@ datos_falt=function(){
 
   data_genTmin <- data.frame(tmin[,1:3],data_genTmin)
   data_genTmax <- data.frame(tmax[,1:3],data_genTmax)
-  data_genPrec <- data.frame(precip[,1:3],data_genPrec)
+  data_genPrec <- data.frame(prec[,1:3],data_genPrec)
 
 
   ifelse(file.exists("tmax_faltantes")=="FALSE",dir.create("Datos_faltantes/tmax_faltantes",showWarnings=F),"Ya existe carpeta")
@@ -1579,8 +1579,8 @@ datos_falt=function(){
     jpeg(paste("Datos_faltantes/precip_faltantes/prec_",station[i],".jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
 
     #jpeg(paste("Datos_faltantes/precip_faltantes/prec_",station[i],".jpeg",sep=""),width = 1150, height = 500)
-    plot(1:dim(precip)[1],data_genPrec[,i+3],type="l",col="blue",lwd=1.2,main=paste("prec_",station[i],sep=""),xlab="Años",ylab="Precipitación",  xaxt="n")
-    lines(1:dim(precip)[1],precip[,i+3],col="red",lwd=1.2)
+    plot(1:dim(prec)[1],data_genPrec[,i+3],type="l",col="blue",lwd=1.2,main=paste("prec_",station[i],sep=""),xlab="Años",ylab="Precipitación",  xaxt="n")
+    lines(1:dim(prec)[1],prec[,i+3],col="red",lwd=1.2)
     axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,dim(tmax)[1],by=1080),las=2)
     legend("topright",c("Generada","Original"),lwd=c(1.5,1.5),col=c("blue","red"))
     dev.off()
@@ -1594,14 +1594,14 @@ datos_falt=function(){
     tmin[tmin.na,i+3]<-data_genTmin[tmin.na,i+3]
 
 
-    precip.na=which(is.na(precip[,i+3]))
-    precip[precip.na,i+3]<-data_genPrec[precip.na,i+3]
+    prec.na=which(is.na(prec[,i+3]))
+    prec[prec.na,i+3]<-data_genPrec[prec.na,i+3]
 
   }
 
   write.csv_n(tmax,"Datos_faltantes/data_genTmax.csv",row.names =F)
   write.csv_n(tmin,"Datos_faltantes/data_genTmin.csv",row.names =F)
-  write.csv_n(precip,"Datos_faltantes/data_genPrec.csv",row.names =F)
+  write.csv_n(prec,"Datos_faltantes/data_genPrec.csv",row.names =F)
 
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n")
   cat("\n Proceso finalizado!! \n")
@@ -1668,7 +1668,7 @@ graf_norm=function(){
     }
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
 
     dir.create("Homogeneidad/precip_norm",showWarnings=F)
 
@@ -1707,7 +1707,7 @@ shap=function(x){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
   }
 
@@ -1747,9 +1747,9 @@ KS_test=function(object){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    Con_datos_falt=apply(as.data.frame(data[,4:ncol(precip)]),2,KS)
+    Con_datos_falt=apply(as.data.frame(data[,4:ncol(prec)]),2,KS)
   }
 
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {data1=cultivoh(x)
@@ -1786,9 +1786,9 @@ JB2=function(x){
     #Con_datos_falt=apply(tmin[,4:ncol(tmin)],2,JB)
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    #Con_datos_falt=apply(precip[,4:ncol(precip)],2,JB)
+    #Con_datos_falt=apply(prec[,4:ncol(prec)],2,JB)
   }
 
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {x=cultivoh(x)
@@ -1837,7 +1837,7 @@ Rsp_Test<- function(x){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
 
   }
@@ -1880,9 +1880,9 @@ Ken_T <- function(object){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    Con_datos_falt=apply(as.data.frame(data[,4:ncol(precip)]),2,Kend_Test)
+    Con_datos_falt=apply(as.data.frame(data[,4:ncol(prec)]),2,Kend_Test)
   }
 
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {data1=cultivoh(x)
@@ -1933,9 +1933,9 @@ F_test.indic <- function(object){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    Con_datos_falt=apply(as.data.frame(data[,4:ncol(precip)]),2,par.f)
+    Con_datos_falt=apply(as.data.frame(data[,4:ncol(prec)]),2,par.f)
 
   }
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {data1=cultivoh(x)
@@ -1984,9 +1984,9 @@ testSK <- function(object){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    Con_datos_falt=apply(as.data.frame(data[,4:ncol(precip)]),2,par.sk)
+    Con_datos_falt=apply(as.data.frame(data[,4:ncol(prec)]),2,par.sk)
 
   }
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {data1=cultivoh(x)
@@ -2034,9 +2034,9 @@ T_Test <- function(object){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    Con_datos_falt=apply(as.data.frame(data[,4:ncol(precip)]),2,PruebaT)
+    Con_datos_falt=apply(as.data.frame(data[,4:ncol(prec)]),2,PruebaT)
 
   }
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {data1=cultivoh(x)
@@ -2082,9 +2082,9 @@ Umann_Test <- function(object){
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     x <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
-    Con_datos_falt=apply(as.data.frame(data[,4:ncol(precip)]),2,Umann)
+    Con_datos_falt=apply(as.data.frame(data[,4:ncol(prec)]),2,Umann)
 
   }
   if(svalue(mesh)!="" && svalue(mesh1)!="" && svalue(añoh)!="" && svalue(añoh1)!="") {data1=cultivoh(x)
@@ -2390,7 +2390,7 @@ cuantil=function(est){
  # est=which(names(tmax)==svalue(nom_est_c))
   if(svalue(nom_est_c)=="tmax"){ datac<- read.csv_n("Datos_faltantes/data_genTmax.csv", header = TRUE)}
   if(svalue(nom_est_c)=="tmin"){ datac<- read.csv_n("Datos_faltantes/data_genTmin.csv", header = TRUE)}
-  if(svalue(nom_est_c)=="precip"){ datac<- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)}
+  if(svalue(nom_est_c)=="prec"){ datac<- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)}
 
 
   if(svalue(mesi)!="" && svalue(mesi1)!="" && svalue(añoi)!="" && svalue(añoi1)!="") {
@@ -2628,8 +2628,8 @@ graficos_enso_anomalias=function(){
     promedios_tmax=aggregate(data_m_e1[which(names(data_m_e1)=="tmax")],list(Mes=data_m_e1$month),mean2)
     promedios_tmin=aggregate(data_m_e1[which(names(data_m_e1)=="tmin")],list(Mes=data_m_e1$month),mean2)
 
-    promedios_precip=aggregate(data_m_e1[which(names(data_m_e1)=="precip")],list(Mes=data_m_e1$month),mean2)
-    desv_precip=aggregate(data_m_e1[which(names(data_m_e1)=="precip")],list(Mes=data_m_e1$month),sd2)
+    promedios_precip=aggregate(data_m_e1[which(names(data_m_e1)=="prec")],list(Mes=data_m_e1$month),mean2)
+    desv_precip=aggregate(data_m_e1[which(names(data_m_e1)=="prec")],list(Mes=data_m_e1$month),sd2)
 
 
 
@@ -2642,7 +2642,7 @@ graficos_enso_anomalias=function(){
 
     an1=data_m_e1[which(names(data_m_e1)=="tmin")]-promedios_tmin[,2]
 
-    an2=(data_m_e1[which(names(data_m_e1)=="precip")]-promedios_precip[,2])/as.numeric(unlist(rep(desv_precip[,2],max(data_m_e1$year)-min(data_m_e1$year)+1)))
+    an2=(data_m_e1[which(names(data_m_e1)=="prec")]-promedios_precip[,2])/as.numeric(unlist(rep(desv_precip[,2],max(data_m_e1$year)-min(data_m_e1$year)+1)))
 
 
 
@@ -2668,7 +2668,7 @@ graficos_enso_anomalias=function(){
 
     g32=ggplot(data_m_e1, aes(x=1:length(year), y=ONI )) +  geom_bar(stat = "identity",   aes(fill = ENSO))+scale_x_continuous(breaks=seq(1,nrow(data_m_e1),by=24), labels=seq(min(data_m_e1$year),max(data_m_e1$year),2))+xlab("")+
       theme(legend.title =element_text(color="white") ,legend.position="right")+ #scale_fill_discrete(breaks = c("Niño","Normal","Niña"))
-      scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+geom_line(aes(1:length(year),an2[,1],colour="Anomalías obsv. precip"),data=an2,size=0.5)+ylab("ONI")+
+      scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+geom_line(aes(1:length(year),an2[,1],colour="Anomalías obsv. prec"),data=an2,size=0.5)+ylab("ONI")+
       scale_color_manual(values=c("black"))
 
     jpeg(paste("ENSO/Graficos_anomalias/anomalias.jpeg",sep=""), width = 9, height = 7,units = 'in',res=200)
@@ -2758,7 +2758,7 @@ graficos_enso_anomalias=function(){
 
           g32=ggplot(tx2, aes(x=1:length(year), y=ONI )) +  geom_bar(stat = "identity",   aes(fill = ENSO))+scale_x_continuous(breaks=seq(1,nrow(tx2),by=24), labels=seq(min(tx$year),max(tx$year),2))+xlab("")+
             theme(legend.title =element_text(color="white") ,legend.position="right")+ #scale_fill_discrete(breaks = c("Niño","Normal","Niña"))
-            scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+geom_line(aes(1:length(year),an2[,j],colour="Anomalías obsv. precip"),data=an2,size=0.5)+ylab("ONI")+
+            scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+geom_line(aes(1:length(year),an2[,j],colour="Anomalías obsv. prec"),data=an2,size=0.5)+ylab("ONI")+
             scale_color_manual(values=c("black"))
 
           jpeg(paste("ENSO/Graficos_anomalias/",station[j],".jpeg",sep=""), width = 9, height = 7,units = 'in',res=200)
@@ -2800,7 +2800,7 @@ graficos_enso_plot=function(){
 
     Fechas=c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic") # Crea una tabla con los nombres de los meses
 
-    g2=ggplot(data_m_e2,aes(y=precip,x=month))+stat_smooth(method=loess,fullrange=T,aes(colour=ENSO),size=1,level=0)+xlab("")+ylab("Precipitación")+scale_x_continuous(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylim(0,mean2(data_m_e2$precip)+100)+
+    g2=ggplot(data_m_e2,aes(y=prec,x=month))+stat_smooth(method=loess,fullrange=T,aes(colour=ENSO),size=1,level=0)+xlab("")+ylab("Precipitación")+scale_x_continuous(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylim(0,mean2(data_m_e2$prec)+100)+
       # scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"),name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+
       scale_colour_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ",breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))#+facet_wrap(~ENSO)
 
@@ -2933,7 +2933,7 @@ graficos_enso_boxplot=function(){
 
     Fechas=c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic") # Crea una tabla con los nombres de los meses
 
-    g21a=ggplot(data_m_e2,aes(y=precip,x=factor(month)))+geom_boxplot(aes(fill=factor(ENSO1)),outlier.size=0.8)+scale_x_discrete(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylab("Precipitación")+
+    g21a=ggplot(data_m_e2,aes(y=prec,x=factor(month)))+geom_boxplot(aes(fill=factor(ENSO1)),outlier.size=0.8)+scale_x_discrete(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylab("Precipitación")+
       scale_fill_manual(values=c("firebrick3","chartreuse3","dodgerblue2"), name=" ",breaks=c("1","2","3"),labels=c("Niño","Normal","Niña"))+xlab("")
 
     g21b=ggplot(data_m_e2,aes(y=tmax,x=factor(month)))+geom_boxplot(aes(fill=factor(ENSO1)),outlier.size=0.8)+scale_x_discrete(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylab("Temperatura Máxima")+
@@ -3033,7 +3033,7 @@ inf=function(h,...){ #Crea y genera informe en word
 
   }
 
-  if(svalue(nom_val2)=="precip"){
+  if(svalue(nom_val2)=="prec"){
     object <- read.csv_n("Datos_faltantes/data_genPrec.csv", header = TRUE)
   }
 
@@ -3243,7 +3243,7 @@ pronosticos=function(){
 
     if(svalue(val_p)=="tmax"){data=aggregate(as.numeric(tmax),list(data_d$year,data_d$month),mean2)}
     if(svalue(val_p)=="tmin"){data=aggregate(as.numeric(tmin),list(data_d$year,data_d$month),mean2)}
-    if(svalue(val_p)=="precip"){data=aggregate(as.numeric(precip),list(data_d$year,data_d$month),sum)}
+    if(svalue(val_p)=="prec"){data=aggregate(as.numeric(prec),list(data_d$year,data_d$month),sum)}
     if(svalue(val_p)=="srad"){data=aggregate(as.numeric(srad),list(data_d$year,data_d$month),mean2)}
 
     data_all=aggregate(data_d[,c("tmax","tmin")],list(data_d$year,data_d$month),mean2)
@@ -3311,7 +3311,7 @@ pronosticos=function(){
 
   percentiles=rbind(apply(var_org,2,FUN=quantile,0.3333,na.rm=T),apply(var_org,2,FUN=quantile,0.6666,na.rm=T),apply(var_org,2,FUN=quantile,0.9999,na.rm=T))
 
-  if(svalue(val_p)=="precip"){ nomb_prob=c("Déficit","Normal","Exceso")
+  if(svalue(val_p)=="prec"){ nomb_prob=c("Déficit","Normal","Exceso")
   }else nomb_prob=c("Disminución","Normal","Aumento")
 
   rownames(percentiles)=nomb_prob
@@ -3404,7 +3404,7 @@ pronosticos=function(){
   resumen=function(x) rbind(min2(x),max(x))
   resumen2=apply(todo,2,resumen)
 
-  if(svalue(val_p)=="precip") {medias=apply(todo,2,median)}else{medias=apply(todo,2,mean2)}
+  if(svalue(val_p)=="prec") {medias=apply(todo,2,median)}else{medias=apply(todo,2,mean2)}
 
   dif=t(t(todo)-medias)
 
@@ -3558,12 +3558,12 @@ pronosticos=function(){
     #---------------------------------------------------------------------------------#
     #----------------------------Gráfica para PRECIPITACIÓN---------------------------#
     #---------------------------------------------------------------------------------#
-    if(exists("precip")){
+    if(exists("prec")){
 
       esc_final_mensual_Lluvia=matrix(0,nrow(escenarios_final),ncol(probabilidades))
 
       for(z in 1:nrow(escenarios_final)){
-        prev=aggregate(as.numeric(esc_final_diarios[[z]]$precip),list(Mes=esc_final_diarios[[z]]$month),sum)
+        prev=aggregate(as.numeric(esc_final_diarios[[z]]$prec),list(Mes=esc_final_diarios[[z]]$month),sum)
         ord=order(match(as.numeric(prev$Mes),orden))
         esc_final_mensual_Lluvia[z,]=t(prev)[-1,ord]
 
@@ -3572,7 +3572,7 @@ pronosticos=function(){
       esc_final_mensual_Lluvia=as.data.frame(esc_final_mensual_Lluvia)
       colnames(esc_final_mensual_Lluvia)=names(probabilidades)
 
-      Multianual_Libertad1=aggregate(data_d$precip,list(Mes=data_d$month,Año=data_d$year),sum2) #Se carga la precipitación mensual multianual
+      Multianual_Libertad1=aggregate(data_d$prec,list(Mes=data_d$month,Año=data_d$year),sum2) #Se carga la precipitación mensual multianual
       Multianual_Libertad=aggregate(Multianual_Libertad1[,3],list(Mes=Multianual_Libertad1$Mes),mean2)[match(names(probabilidades),colnames(Años_org)),]#Se carga la precipitación mensual multianual
 
       if(svalue(num_esc)==" "){promedio_escenarios_Lluvia=esc_final_mensual_Lluvia[2,]
@@ -3775,13 +3775,13 @@ pronosticos=function(){
     #---------------------------------------------------------------------------------#
     #---------------------------Gráficos Precipitación--------------------------------#
     #---------------------------------------------------------------------------------#
-    if(exists("precip")){
+    if(exists("prec")){
 
 
       esc_final_mensual_Lluvia=matrix(0,nrow(escenarios_final),ncol(probabilidades))
 
       for(z in 1:nrow(escenarios_final)){
-        esc_final_mensual_Lluvia[z,]=rbind(esc_final_mensual[[z]]$precip)
+        esc_final_mensual_Lluvia[z,]=rbind(esc_final_mensual[[z]]$prec)
       }
 
       colnames(esc_final_mensual_Lluvia)=names(probabilidades)
@@ -3789,7 +3789,7 @@ pronosticos=function(){
       if(svalue(num_esc)==" "){promedio_escenarios_Lluvia=esc_final_mensual_Lluvia[2,]
       }else{promedio_escenarios_Lluvia=apply(esc_final_mensual_Lluvia,2,mean2)}
 
-      Multianual_Libertad=aggregate(data_m$precip,list(Mes=data_m$month),mean2)[match(names(probabilidades),colnames(Años_org)),]#Se carga la precipitación mensual multianual
+      Multianual_Libertad=aggregate(data_m$prec,list(Mes=data_m$month),mean2)[match(names(probabilidades),colnames(Años_org)),]#Se carga la precipitación mensual multianual
 
       tiff("Pronosticos/precip_pronos.tiff", width = 10, height = 5,units = 'in',res=200)
       a=barplot(as.numeric(Multianual_Libertad[,2]),names.arg=names(probabilidades),col="Slate Gray 2",ylab="Precipitacion (mm)",,cex.lab=1,main="Pronóstico precipitación",cex.main=0.8,ylim=c(0,max(Multianual_Libertad[,2])+200))
@@ -3951,7 +3951,7 @@ opc=function(){
     dir.create("Datos_faltantes",showWarnings=F)
     write.csv_n(tmax,"Datos_faltantes/data_genTmax.csv",row.names =F)
     write.csv_n(tmin,"Datos_faltantes/data_genTmin.csv",row.names =F)
-    write.csv_n(precip,"Datos_faltantes/data_genPrec.csv",row.names =F)
+    write.csv_n(prec,"Datos_faltantes/data_genPrec.csv",row.names =F)
 
   }
 }
@@ -3978,7 +3978,7 @@ lytg2[3,4]=(añod1=gedit("",cont=lytg2,expand=F,width =10,initial.msg="AAAA"))
 lytg2[4,1]=glabel("",container=lytg2)
 
 lytg2[5,1]=glabel("-Variable a analizar  ",container=lytg2)
-lytg2[5,2]=(nom_val1=gdroplist(c("tmax","tmin","precip"),selected = 0,cont=lytg2,expand=T,handler=function(h,...){attach(eval(parse(text=svalue(h$obj))),warn.conflicts =F)}))
+lytg2[5,2]=(nom_val1=gdroplist(c("tmax","tmin","prec"),selected = 0,cont=lytg2,expand=T,handler=function(h,...){attach(eval(parse(text=svalue(h$obj))),warn.conflicts =F)}))
 lytg2[5,3]=gbutton("Descriptivas",container=lytg2,handler=function(h,...){print(descript2(eval(parse(text=svalue(nom_val1)))))})
 
 lyt1[2,1:6]=glabel("")
@@ -4041,7 +4041,7 @@ lytg=glayout(homogeneous =F,cont=gg,spacing=1,expand=T)
 lytg[1,1]=glabel("",cont=lytg)
 
 lytg[2,1]=glabel("Variable a validar",container=lytg)
-lytg[2,2]=(variable<-gdroplist(c("tmax","tmin","precip"),selected=0,cont=lytg,expand=T))
+lytg[2,2]=(variable<-gdroplist(c("tmax","tmin","prec"),selected=0,cont=lytg,expand=T))
 
 lytg[3,1]=glabel("No. de desviaciones estándar: ",container=lytg)
 lytg[3,2]=(criterio=gedit("3",container=lytg,width = 5,initial.msg="Desv.Est."))
@@ -4117,7 +4117,7 @@ lyt55[3,3]=(añoh1=gedit("",cont=lyt55,expand=F,width =10,initial.msg="AAAA"))
 
 lyt55[4,1]=glabel("")
 lyt55[5,1]=glabel("-Variable a analizar",container=lyt55)
-lyt55[5,2]=(nom_val2=gdroplist(c("tmax","tmin", "precip"),selected=0,cont=lyt55,expand=T))
+lyt55[5,2]=(nom_val2=gdroplist(c("tmax","tmin", "prec"),selected=0,cont=lyt55,expand=T))
 
 lyt55[6,1]=glabel("-Nivel de significancia",container=lyt55)
 lyt55[6,2]=(obj <- gspinbutton(from=0, to = 0.3, by =0.01, value=0.05,
@@ -4213,7 +4213,7 @@ lyt.22[12,4]=(valor322=gedit("",container=lyt.22,width = 15,initial.msg="Dias co
 
 lyt.22[13,1]=gcheckbox("Cuantiles",container=lyt.22,handler = function(h,...){print(cuantil())})
 lyt.22[13,2]=(nom_val_c=gdroplist(c("","Terciles","Cuartiles","Deciles","Percentiles"),selected=1,cont=lyt.22,expand=F))
-lyt.22[13,3]=(nom_est_c=gdroplist(c("","tmax","tmin","precip"),selected=1,cont=lyt.22,expand=F))
+lyt.22[13,3]=(nom_est_c=gdroplist(c("","tmax","tmin","prec"),selected=1,cont=lyt.22,expand=F))
 
 #lyt.22[14,1]=gcheckbox("Índice Estandarizado de Precipitación",container=lyt.22,handler = function(h,...){print(spi())})
 
@@ -4293,7 +4293,7 @@ lty.33[4,3]=gbutton("Mensuales",cont=lty.33,handler=function(h,...) cargar_mensu
 lty.33[5,1]=glabel(" ",cont=lty.33)
 
 lty.33[6,1]=glabel("-Seleccione la variable:",cont=lty.33)
-lty.33[6,2]=(val_p=gdroplist(c("tmax","tmin","precip","srad"),cont=lty.33))
+lty.33[6,2]=(val_p=gdroplist(c("tmax","tmin","prec","srad"),cont=lty.33))
 #lty.33[3,3]=gdroplist(c("Hasta",Fechas),cont=lty.33)
 lty.33[7,1]=glabel("-Cargar tabla probabilidades:",cont=lty.33)
 lty.33[7,2]=gbutton("Probabilidades",cont=lty.33,handler=function(h,...) cargar_prob())
@@ -4329,7 +4329,7 @@ lyt.7[1,1]=glabel(" ",container=lyt.7)
 
 lyt.7[2,1]=glabel("-Seleccione la variable a relacionar",container=lyt.7)
 
-lyt.7[2,2]=(val_p=gdroplist(c("tmax","tmin","precip"),cont=lyt.7))
+lyt.7[2,2]=(val_p=gdroplist(c("tmax","tmin","prec"),cont=lyt.7))
 lyt.7[3,1]=glabel(" ",container=lyt.7)
 lyt.7[3,2]=gbutton("Generar mapas",cont=lyt.7,handler=function(h,...) pronosticos())
 
