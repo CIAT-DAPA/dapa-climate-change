@@ -1,0 +1,55 @@
+# ---------------------------------------------------------
+# Author: Carlos Navarro
+# Purpouse: Extract by mask grids in a workspace
+# ---------------------------------------------------------
+
+import arcgisscripting, os, sys, glob
+gp = arcgisscripting.create(9.3)
+
+if len(sys.argv) < 5:
+	os.system('cls')
+	print "\n Too few args"
+	print " Syntaxis python ExtractByMask.py <dirbase> <dirout> <mask> <wildcard>"
+	sys.exit(1)
+	print "   - ex: python ExtractByMask.py S:\observed\gridded_products\worldclim\Global_30s_v2 D:\cenavarro\Request\nadietzhda S:\admin_boundaries\grid_files\mex_adm\mex0 ALL"
+
+# Arguments
+dirbase =sys.argv[1]
+dirout =sys.argv[2]
+mask =sys.argv[3]
+wildcard = sys.argv[4]
+
+# Check out Spatial Analyst extension license
+gp.CheckOutExtension("Spatial")
+
+# Clear screen
+os.system('cls')
+
+print "\n~~~~~~~~~~~~~~~~~~~~~~~~~"
+print "     EXTRACT BY MASK      "
+print "~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+
+# Set Workspace
+gp.workspace = dirbase
+
+# Get a list of grids in the workspace 
+print "\t ..listing grids into " + dirbase
+if wildcard == "ALL":
+	rasters = sorted(glob.glob(dirbase + "\\*.tif"))
+else:	
+	rasters = sorted(gp.ListRasters(wildcard + "", "TIFF"))
+
+print rasters
+
+# Lopping around the grids
+for raster in rasters:
+	
+	if not os.path.exists(dirout + "\\" + os.path.basename(raster)):
+	
+		# Extract by mask function
+		gp.ExtractByMask_sa(raster, mask, dirout + "\\" + os.path.basename(raster))
+		# os.system("gdal_translate -of GTiff " + dirout + "\\" + os.path.basename(raster)[:-4] + " " + dirout + "\\" + os.path.basename(raster) + ".tif")
+		
+	print "\t", os.path.basename(raster), "extracted"
+
+print "\n\t Process done!!"

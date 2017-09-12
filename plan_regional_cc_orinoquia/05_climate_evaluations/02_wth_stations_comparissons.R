@@ -1,14 +1,16 @@
-##################
-## Plot dispersion
-##################
+#####################################
+## Plot dispersion (llanos & tropico)
+#####################################
 
 require(raster)
 
 iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/stations-averages"
 aDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/average"
 oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/01-skill_interpolation"
-wDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/baseline_wcl"
-xt <- extent(raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/_region/mask"))
+wDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/llanos/tropico/baseline_wcl"
+xt <- extent(raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/_region/alt-prj-lla.asc"))
+rg <- "lla"
+ext <- "asc"
 
 mths = c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
 varList <- c("rain", "tmax", "tmin")
@@ -16,30 +18,31 @@ varList <- c("rain", "tmax", "tmin")
 for(var in varList){
   
   # Observados
-  st <- read.csv(paste0(iDir, "/", var, "_lla.csv"))
+  st <- read.csv(paste0(iDir, "/", var, "_", rg, ".csv"))
   st.reg <- st[which(st$LONG >= xt@xmin & st$LONG <= xt@xmax & st$LAT >= xt@ymin & st$LAT <= xt@ymax),]
+  st.reg <- st.reg[which(st.reg$SOURCE=="ideam"),]
   coor <- st.reg[,6:7]
   
   #Ajustados
   if (var == "rain"){
-    stk <- stack(paste0(aDir, "/prec_",1:12,".asc"))  
+    stk <- stack(paste0(aDir, "/prec_",1:12,".", ext))  
   } else {
-    stk <- stack(paste0(aDir, "/", var, "_",1:12,".asc"))
+    stk <- stack(paste0(aDir, "/", var, "_",1:12,".", ext))
   }
   data.adj <- extract(stk, coor)
   
-  # WorldClim 
-  if (var == "rain"){
-    stk.wcl <- stack(paste0(wDir, "/prec_",1:12,".tif"))  
-  } else {
-    stk.wcl <- stack(paste0(wDir, "/", var, "_",1:12,".tif"))
-  }
-  data.wcl <- extract(stk.wcl, coor)
+#   # WorldClim 
+#   if (var == "rain"){
+#     stk.wcl <- stack(paste0(wDir, "/prec_",1:12,".tif"))  
+#   } else {
+#     stk.wcl <- stack(paste0(wDir, "/", var, "_",1:12,".tif"))
+#   }
+#   data.wcl <- extract(stk.wcl, coor)
 
-  tiff(paste(oDir, "/station_comparisson_llanos", var, ".tiff",sep=""),width = 900, height = 1200, pointsize = 20, compression="lzw")
+  tiff(paste(oDir, "/station_comparisson_", rg, "_", var, ".tiff",sep=""),width = 1600, height = 600, pointsize = 20, compression="lzw")
   
   # c(bottom, left, top, right)
-  par(mfrow=c(4,3), mar=c(3, 2, 2, 2), oma=c(3, 3, 0, 0))
+  par(mfrow=c(2,6), mar=c(1, 1, 2, 1), oma=c(4, 4, 0, 0))
   
   if (var == "rain"){
     limits = c(0, 800)
@@ -64,15 +67,32 @@ for(var in varList){
     obs <- st.reg[,mth+8]  
     adj <- data.adj[,mth]
     
+    if (rg == "ame" && var != "prec"){
+      obs <- obs/10
+      adj <- adj/10
+    }
+    
     m1 <- lm(adj ~ obs)
     r <- summary(m1)$r.squared
     
-    plot(obs, adj, col=color, xlab="", ylab="", xlim=limits, ylim=limits, cex=1, main=mths[mth])
+    if (mth == 1){
+      plot(obs, adj, col=color, xlab="", ylab="", xlim=limits, ylim=limits, cex=0.8, main=mths[mth], xaxt = "n")  
+    } else if (mth == 7){
+      plot(obs, adj, col=color, xlab="", ylab="", xlim=limits, ylim=limits, cex=0.8, main=mths[mth])
+    } else if (mth > 7){
+      plot(obs, adj, col=color, xlab="", ylab="", xlim=limits, ylim=limits, cex=0.8, main=mths[mth], yaxt = "n")
+    } else {
+      plot(obs, adj, col=color, xlab="", ylab="", xlim=limits, ylim=limits, cex=0.8, main=mths[mth], yaxt = "n", xaxt = "n")  
+    }
+    # plot(obs, adj, col=color, xlab="", ylab="", xlim=limits, ylim=limits, cex=1, main=mths[mth], x)
+    
+    
+    
     grid()
     abline(0,1,lty=1)
     abline(m1,lty=2, col="red")
-    legend("topleft",paste(expression(R2),round(r,4),sep="="), bty = "n")
-    mtext(c(xlabel, ylabel), c(SOUTH<-1, WEST<-2), line=1, col="black", outer=TRUE)
+    legend("topleft",paste(expression(R2),round(r,4),sep="="), bty = "n", cex = 1.4)
+    mtext(c(xlabel, ylabel), c(SOUTH<-1, WEST<-2), line=2, col="black", outer=TRUE)
     
   }
   
@@ -172,6 +192,69 @@ for(i in 229:229){
 }
 
 
+
+
+
+##################
+## PDF Bioclim
+##################
+
+require(raster)
+
+iDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/tropico/average"
+wDir <- "S:/observed/gridded_products/worldclim/Global_30s"
+oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/01-skill_interpolation"
+
+bio_adj <- stack(paste0(iDir, "/bio_", 1:19, ".tif"))
+bio_wcl <- stack(paste0(wDir, "/bio_", 1:19))
+bio_wcl <- crop(bio_wcl,extent(bio_adj[[1]]))
+
+
+escala = c("(°C)","(°C)","(°C/°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(mm)","(mm)","(mm)","","(mm)","(mm)","(mm)","(mm)")
+
+tiff(paste(oDir, "/interpolated_tropico_bioclim_v2.tif",sep=""), width = 1200, height = 1800, pointsize = 10, compression="lzw", res=150)
+
+nf <- layout(mat = matrix(c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,21,21),6,4, byrow=TRUE),  height = c(0.95,0.95))
+par(mar=c(4,2,2,2), oma=c(4, 4, 0, 0))
+
+par(xpd=F)
+
+for(i in 1:19){
+  a=density(bio_wcl[[i]],plot=FALSE)
+  
+  min=min(a$x)
+  max=max(a$x)
+  
+  miny=min(a$y)
+  maxy=max(a$y)
+  
+  b=density(bio_adj[[i]],plot=FALSE)
+  
+  bmin=min(b$x)
+  bmax=max(b$x)
+  
+  bminy=min(b$y)
+  bmaxy=max(b$y)
+  
+  
+  density(bio_wcl[[i]],lwd=2,yaxt="n",cex.lab=1.2,cex.axis=1,xaxt="n",col="red",ylim=c(miny,max(maxy,bmaxy)),plot=T,xlim=c(min,max),xlab=paste("Bio", i, escala[i],sep=" "), ylab="") 
+  #title("FDP Variables bioclimaticas")
+  par(new=T)  
+  density(bio_adj[[i]],col="blue",ylab="",lwd=2,main="",xlab="",cex.lab=1.2,cex.axis=1,ylim=c(miny,max(maxy,bmaxy)),xlim=c(min,max))
+  grid()
+  
+}
+
+plot(1,axes=FALSE, xlab="", ylab="",type = "n")
+#plot(1,axes=FALSE, xlab="", ylab="",type = "n")
+
+# windows()
+plot(1, type = "n", axes=FALSE, xlab="", ylab="")
+legend(x = "top",inset = 0,cex=2,legend= c("Interpolados", "WorldClim"),col=c("red","blue"),lwd=2,lty=c(1,1),ncol=1,horiz=TRUE)
+
+mtext("FDP", WEST<-2, line=1, col="black", outer=TRUE, cex=1.4)
+
+dev.off()
 
 
 
@@ -598,174 +681,4 @@ for(i in 1:length(prec.obs$OLD_ID)){
   #title("Comparación clima observado vs. estimado")
   dev.off()
 }
-
-##################################################diagramas de dispersion
-require(raster)
-mth = c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
-
-if (var == "prec"){
-  limits = c(0, 800)
-  color = "blue"
-  xlabel = "Observados (mm/mes)"
-  ylabel = "Estimados (mm/mes)"
-} else if (var == "tmax") {
-  limits = c(0, 35)
-  color = "red"
-  xlabel = "Observados (°C)"
-  ylabel = "Estimados (°C)"
-} else if (var == "tmin") {
-  limits = c(0, 35)
-  color = "orange"
-  xlabel = "Observados (°C)"
-  ylabel = "Estimados (°C)"
-}
-
-
-tiff(paste("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/skill_interpolacion_tropico/interpolation_skill_disp_tropico.tif",sep=""),width = 900, height = 1200, pointsize = 20, compression="lzw")
-par(mfrow=c(4,3), mar=c(3, 2, 2, 2), oma=c(3, 3, 0, 0))
-
-for(i in 1:12){
-  
-  p<-raster(paste0("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline_tropico/interpolation_america/monthly-interpolations/promedios_interpolation/prec_",i,".asc"))
-  datos1<-read.csv("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/evalue_rain_obs1.csv")
-  
-  coor1=datos1[,6:7]
-  values1<-extract(p,coor1)
-  
-  write.csv(values1,"D:/datos1.csv",row.name=T)
-  data1<-read.csv("D:/datos1.csv")
-  
-  obs1<-unlist(datos1[i+8])
-  
-  m1<-lm((data1$x)~obs1)
-  r<-summary(m1)$r.squared
-  
-  plot(obs1,data1$x,col="blue",xlab="",ylab="",main=mth[i],xlim=limits, ylim=limits,cex=1.5)
-  grid()
-  abline(0,1,lty=1)
-  legend("topleft",paste(expression(R^2),round(r,4),sep="="), bty = "n")
-  
-  
-}
-mtext(c(xlabel, ylabel), c(SOUTH<-1, WEST<-2), line=1, col="black", outer=TRUE)
-dev.off()
-#######################
-
-tiff(paste("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/skill_interpolation_dispersion_chart_tropicotmax.tif",sep=""),width = 900, height = 1200, pointsize = 20, compression="lzw")
-par(mfrow=c(4,3), mar=c(3, 2, 2, 2), oma=c(3, 3, 0, 0))
-
-for(i in 1:12){
-  
-  tma<-raster(paste0("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline_tropico/interpolation_america/monthly-interpolations/promedios_interpolation/tmax_",i,".asc"))
-  datos2<-read.csv("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/evalue_tmax_obs1.csv")
-  datos1<-read.csv("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/evalue_rain_obs1.csv")
-  
-  coor1=datos1[,6:7]
-  values2<-extract(tma,coor1)
-  write.csv(values2,"D:/datos2.csv",row.name=T)
-  data2<-read.csv("D:/datos2.csv")
-  
-  obs2<-unlist(datos2[i+8])
-  
-  m2<-lm((data2$x)~obs2)
-  r<-summary(m2)$r.squared
-  
-  plot(obs2,data2$x,col="red",xlab="",ylab="",main=mth[i],xlim=limits, ylim=limits,cex=1.5)
-  grid()
-  abline(0,1,lty=1)
-  legend("topleft",paste(expression(R^2),round(r,4),sep="="), bty = "n")
-}
-mtext(c(xlabel, ylabel), c(SOUTH<-1, WEST<-2), line=1, col="black", outer=TRUE)
-dev.off()
-#########################
-tiff(paste("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/skill_interpolacion_tropico/skill_interpolation_dispersion_chart_tropicotmin.tif",sep=""),width = 900, height = 1200, pointsize = 20, compression="lzw")
-par(mfrow=c(4,3), mar=c(3, 2, 2, 2), oma=c(3, 3, 0, 0))
-
-for(i in 1:12){
-  tmi<-raster(paste0("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline_tropico/interpolation_america/monthly-interpolations/promedios_interpolation/tmin_",i,".asc"))
-  datos3<-read.csv("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/evalue_tmin_obs1.csv")
-  datos1<-read.csv("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/evalue_rain_obs1.csv")
-  
-  
-  coor1=datos1[,6:7]
-  values3<-extract(tmi,coor1)
-  write.csv(values3,"D:/datos3.csv",row.name=T)
-  data3<-read.csv("D:/datos3.csv")
-  
-  
-  obs3<-unlist(datos3[i+8])
-  
-  m3<-lm((data3$x)~obs3)
-  r<-summary(m3)$r.squared
-  
-  plot(obs3,data3$x,col="orange",xlab="",ylab="",main=mth[i],xlim=limits, ylim=limits,cex=1.5)
-  grid()
-  abline(0,1,lty=1)
-  legend("topleft",paste(expression(R^2),round(r,4),sep="="), bty = "n")
-}
-mtext(c(xlabel, ylabel), c(SOUTH<-1, WEST<-2), line=1, col="black", outer=TRUE)
-dev.off()
-  
-
-##########################################################################################################
-##############comprarar bioclimaticas de worldclim con bioclimaticas ajustadas mediante las estaciones
-#########################################################################################################
-
-
-require(raster)
-bio_ajus<-stack(lapply(paste0("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline_tropico/interpolation_america/monthly-interpolations/promedios_interpolation/bio_",1:19),raster))                
-bio_wclim<-stack(lapply(paste0("S:/observed/gridded_products/worldclim/Global_30s/bio_",1:19),raster))
-
-e<-raster("C:/Users/jardila/Desktop/interpolacion precipitacion/CHIRPS/chirps-v2.0.1981.01.01.tif")
-extent(e)
-
-bio_ajus_col<-crop(bio_ajus,extent(e))
-bio_wclim_col<-crop(bio_wclim,extent(e))
-
-escala=c("(°C)","(°C)","(°C/°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(°C)","(mm)","(mm)","(mm)","","(mm)","(mm)","(mm)","(mm)")
-
-png(paste("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/evaluaciones/FDP/bioclimaticas/_plot_density_bioclim.png",sep=""),width = 1200, height = 1600)
-
-nf <- layout(mat = matrix(c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,21,21),6,4, byrow=TRUE),  height = c(0.95,0.95))
-par(mar=c(5,5,2,2))
-
-
-par(xpd=F)
-
-for(i in 1:19){  
-  a=density(bio_wclim_col[[i]],plot=FALSE)
-  
-  min=min(a$x)
-  max=max(a$x)
-  
-  miny=min(a$y)
-  maxy=max(a$y)
-  
-  b=density(bio_ajus_col[[i]],plot=FALSE)
-  
-  bmin=min(b$x)
-  bmax=max(b$x)
-  
-  bminy=min(b$y)
-  bmaxy=max(b$y)
-  
-    
-  density(bio_wclim_col[[i]],lty=2,lwd=2,yaxt="n",cex.lab=1.6,cex.axis=1.6,xaxt="n",col="blue",ylim=c(miny,max(maxy,bmaxy)),plot=T,xlim=c(min,max),main=paste("bio_", i),xlab=paste("bio_", i, escala[i],sep=" "),ylab="FDP") 
-  #title("FDP Variables bioclimaticas")
-  par(new=T)  
-  density(bio_ajus_col[[i]],col="blue",ylab="",lwd=2,main="",xlab="",cex.lab=1.6,cex.axis=1.6,ylim=c(miny,max(maxy,bmaxy)),xlim=c(min,max))
-  grid()
-  
-}
-
-plot(1,axes=FALSE, xlab="", ylab="",type = "n")
-#plot(1,axes=FALSE, xlab="", ylab="",type = "n")
-
-# windows()
-plot(1, type = "n", axes=FALSE, xlab="", ylab="")
-legend(x = "top",inset = 0,cex=2,legend= c("WorldClim Ajustado","WorldClim Original"),col=c("blue","blue"),lwd=2,lty=c(1,2),ncol=1,horiz=TRUE)
-
-dev.off()
-
-
 

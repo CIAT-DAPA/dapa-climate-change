@@ -1,0 +1,349 @@
+SPLINA  VERSION 4.36  17/07/06
+COPYRIGHT AUSTRALIAN NATIONAL UNIVERSITY
+
+TITLE OF FITTED SURFACES (60 CHARS):
+-----------------------------------
+Radiation
+
+SURFACE VALUE UNITS CODE AND MISSING DATA VALUE:
+-----------------------------------------------
+  0 - UNDEFINED
+  1 - METRES
+  2 - FEET
+  3 - KILOMETRES
+  4 - MILES
+  5 - DEGREES
+  6 - RADIANS
+  7 - MILLIMETRES
+  8 - MEGAJOULES
+    8
+
+INDEPENDENT VARIABLES
+---------------------
+NUMBER OF INDEPENDENT SPLINE VARIABLES (0 TO 10):
+    2
+
+NUMBER OF INDEPENDENT COVARIATES (0 TO  8):
+    0
+
+NUMBER OF SURFACE SPLINE VARIABLES (0 TO  8):
+    0
+
+NUMBER OF SURFACE COVARIATES (0 TO  8):
+    0
+
+TRANSFORMATION CODES            REFERENCE UNIT CODES
+--------------------            --------------------
+  0 - NO TRANSFORMATION           0 - UNDEFINED
+  1 - X/A                         1 - METRES
+  2 - X*A                         2 - FEET
+  3 - A*LOG(X + B)                3 - KILOMETRES
+  4 - (X/B)**A                    4 - MILES
+  5 - A*EXP(X/B)                  5 - DEGREES
+  6 - A*TANH(X/B)                 6 - RADIANS
+  7 - ANISOTROPY ANGLE            7 - MILLIMETRES
+  8 - ANISOTROPY FACTOR           8 - MEGAJOULES
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  1:
+   110.000       155.000        0         5
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  2:
+  -45.0000      -10.0000        0         5
+
+SURFACE DIRECTIVES
+------------------
+DEPENDENT VARIABLE TRANSFORMATION:
+  0 - NO TRANSFORMATION
+  1 - NATURAL LOGARITHM
+  2 - SQUARE ROOT
+  5 - OCCURRENCE
+    0
+
+ORDER OF SPLINE (AT LEAST 2):
+    2
+
+NUMBER OF SURFACES (AT LEAST 1):
+   12
+
+NUMBER OF RELATIVE VARIANCES (0, 1 OR  12):
+    0
+
+OPTIMIZATION DIRECTIVE (NORMALLY 1):
+  0 - COMMON SMOOTHING PARAMETER FOR ALL SURFACES
+  1 - COMMON SMOOTHING DIRECTIVE FOR ALL SURFACES
+  2 - DIFFERENT SMOOTHING DIRECTIVE FOR EACH SURFACE
+    1
+
+SMOOTHING DIRECTIVE (NORMALLY 1):
+  0 - FIXED SMOOTHING PARAMETER FOR EACH SURFACE
+  1 - MINIMIZE GCV FOR EACH SURFACE
+  2 - MINIMIZE TRUE MEAN SQUARE ERROR FOR EACH SURFACE
+  3 - FIXED SIGNAL FOR EACH SURFACE
+  4 - MINIMIZE GML FOR EACH SURFACE
+    1
+
+DATA FILE NAME:
+--------------
+rainrad.dat
+
+MAXIMUM NUMBER OF DATA POINTS (AT LEAST  3):
+     100
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+   16
+
+DATA FORMAT (SITE LABEL,  2 INDEP VARS, 12 SURFACES,  0 REL VARIANCES):
+(a16,2f10.3//12f8.0)
+
+OUTPUT LARGE RESIDUAL FILE NAME (BLANK IF NOT REQUIRED):
+rad.res
+
+OUTPUT OPTIMIZATION PARAMETERS FILE NAME (BLANK IF NOT REQUIRED):
+rad.opt
+
+OUTPUT SURFACE COEFFICIENTS FILE NAME (BLANK IF NOT REQUIRED):
+rad.sur
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+rad.lis
+
+OUTPUT ERROR COVARIANCE FILE NAME (BLANK IF NOT REQUIRED):
+rad.cov
+
+VALIDATION DATA FILE NAME (BLANK IF NOT REQUIRED):
+-------------------------------------------------
+rainrad.val
+
+MAXIMUM NUMBER OF VALIDATION DATA POINTS:
+     100
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+   16
+
+DATA FORMAT (LABEL,  2 INDEP VARS, 12 SURFACES):
+(a16,2f10.3//12f8.0)
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+rad.out
+
+DATA SUMMARY
+------------
+NUMBER OF DATA POINTS READ     =     98
+NUMBER OF POINTS WITHIN LIMITS =     98
+
+ SURF  MEAN RELATIVE VARIANCE  ROOT MEAN REL VAR
+    1                1.00               1.00    
+
+SURFACE STATISTICS
+------------------
+SURF       RHO    NPTS     ERROR    SIGNAL    SURF     MEAN     STD DEV
+   1 0.180E-01      98      23.7      74.3       1   24.976       2.549    
+   2 0.361E-01      98      31.1      66.9       2   22.449       2.430    
+   3 0.670E-02      98      15.4      82.6       3   18.992       2.764    
+   4 0.704E+00      98      65.5      32.5       4   15.231       3.730    
+   5 0.744E+00      98      66.1      31.9       5   11.646       3.869    
+   6 0.121E+01      98      70.8      27.2       6   10.161       3.940    
+   7 0.480E+00      98      61.4      36.6       7   11.033       4.218    
+   8 0.991E+00      98      68.9      29.1       8   13.622       4.086    
+   9 0.637E-02      98      15.1      82.9       9   17.398       3.783    
+  10 0.511E+00      98      62.1      35.9      10   21.228       3.157    
+  11 0.407E+00      98      59.6      38.4      11   24.071       2.593    
+  12 0.752E-02      98      16.3      81.7      12   25.319       2.572    
+ AVG 0.427E+00      98      46.3      51.7           18.010       3.373    
+
+SURF       GCV       MSR       VAR     SURF   RTGCV     RTMSR     RTVAR
+   1     0.861     0.506E-01 0.209        1   0.928     0.225     0.457    
+   2     0.982     0.988E-01 0.311        2   0.991     0.314     0.558    
+   3     0.891     0.221E-01 0.140        3   0.944     0.149     0.375    
+   4     0.922     0.412     0.616        4   0.960     0.642     0.785    
+   5     0.570     0.259     0.384        5   0.755     0.509     0.620    
+   6     0.543     0.283     0.392        6   0.737     0.532     0.626    
+   7     0.579     0.227     0.363        7   0.761     0.477     0.602    
+   8     0.555     0.274     0.390        8   0.745     0.524     0.625    
+   9     0.528     0.125E-01 0.812E-01    9   0.727     0.112     0.285    
+  10      1.05     0.421     0.665       10    1.02     0.649     0.815    
+  11      1.39     0.514     0.846       11    1.18     0.717     0.920    
+  12     0.889     0.245E-01 0.147       12   0.943     0.156     0.384    
+ AVG     0.813     0.217     0.379            0.902     0.465     0.615    
+
+SURF       GML       MSE       VAR     SURF   RTGML     RTMSE     RTVAR
+   1      1.94     0.158     0.139        1    1.39     0.398     0.372    
+   2      2.14     0.213     0.251        2    1.46     0.461     0.501    
+   3      2.50     0.118     0.814E-01    3    1.58     0.344     0.285    
+   4      1.18     0.205     0.594        4    1.09     0.452     0.771    
+   5     0.730     0.125     0.373        5   0.855     0.354     0.611    
+   6     0.669     0.109     0.392        6   0.818     0.330     0.626    
+   7     0.778     0.135     0.344        7   0.882     0.368     0.587    
+   8     0.694     0.116     0.385        8   0.833     0.340     0.621    
+   9      1.42     0.687E-01 0.443E-01    9    1.19     0.262     0.210    
+  10      1.36     0.243     0.617       10    1.17     0.493     0.785    
+  11      1.88     0.332     0.783       11    1.37     0.576     0.885    
+  12      2.46     0.123     0.882E-01   12    1.57     0.351     0.297    
+ AVG      1.48     0.162     0.341             1.22     0.403     0.584    
+
+VALIDATION DATA SUMMARY
+-----------------------
+NUMBER OF DATA POINTS READ     =     48
+NUMBER OF POINTS WITHIN LIMITS =     47
+
+VALIDATION STATISTICS
+---------------------
+SURF  NPTS        ME        MAE        RMS        MAX      SITE
+   1    47     0.371       1.08       1.44       3.55      ORANGE
+   2    47     0.118      0.897       1.16       2.88      MEEKATHARRA
+   3    47     0.238      0.849       1.10       3.04      BROOME
+   4    47     0.201      0.566      0.714       2.06      MEEKATHARRA
+   5    47    -0.189      0.447      0.560      -1.26      ISLAND BEND
+   6    47    -0.152      0.403      0.511      -1.47      COBAR
+   7    47    -0.126      0.424      0.563      -1.78      COBAR
+   8    47    -0.517E-01  0.555      0.736      -2.37      MURESK
+   9    47     0.505E-02  0.740      0.915       2.27      MT ST LEONARD
+  10    47     0.147      0.908       1.20       3.21      TOD RIVER
+  11    47     0.274       1.05       1.30       3.26      MEEKATHARRA
+  12    47     0.264       1.20       1.59       4.41      MT ST LEONARD
+ AVG    47     0.917E-01  0.759       1.04       4.41      MT ST LEONARD
+
+RANKED ROOT MEAN SQUARE RESIDUALS
+---------------------------------
+     1     24  INNISFAIL           1.23    
+     2     82  MAREEBA             1.09    
+     3     40  PARADA              1.04    
+     4     95  NHILL               1.03    
+     5     77  KAIRI EXP STN      0.862    
+     6     53  THEODORE           0.812    
+     7     54  THE KNOB           0.791    
+     8      5  BRIAN PASTURES     0.728    
+     9     97  TAMWORTH           0.727    
+    10     93  GLADSTONE          0.700    
+    11     14  DARTMOUTH          0.693    
+    12     89  SOUTH PERTH R.S.   0.689    
+    13     56  WAITE              0.665    
+    14     30  LAUNCESTON AERO    0.632    
+    15     12  CRESSY RESEARCH    0.616    
+    16     26  KHANCOBAN          0.608    
+    17      7  CAIRNS             0.563    
+    18     15  DENILIQUIN         0.562    
+    19     90  WONGAN HILLS R.S   0.546    
+    20     17  DWELLINGUP         0.544    
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  1
+     1     40  PARADA            -0.924             22.9     21.9
+     2     77  KAIRI EXP STN      0.613             20.4     21.0
+     3     16  DENMARK            0.587             24.8     25.4
+     4     84  MT. BARKER R.S.   -0.523             27.5     27.0
+     5     30  LAUNCESTON AERO   -0.520             25.4     24.9
+     6      8  CAMPBELL TOWN     -0.505             25.2     24.7
+     7      1  ADELAIDE R.O.     -0.441             27.1     26.7
+     8     38  NAMBOUR            0.431             21.3     21.7
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  2
+     1     40  PARADA            -0.938             19.6     18.7
+     2     77  KAIRI EXP STN      0.935             17.4     18.3
+     3     48  SCOTTSDALE(K)      0.795             20.0     20.8
+     4     71  BILOELA            0.765             19.5     20.3
+     5     54  THE KNOB           0.735             18.0     18.8
+     6     49  STRATHGORDON      -0.591             19.4     18.8
+     7     30  LAUNCESTON AERO   -0.590             22.1     21.5
+     8     97  TAMWORTH          -0.564             23.7     23.1
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  3
+     1     82  MAREEBA           -0.502             17.8     17.3
+     2     49  STRATHGORDON      -0.455             13.3     12.9
+     3     54  THE KNOB           0.430             12.3     12.8
+     4     45  SCAMANDER          0.384             12.6     12.9
+     5     50  SWANSEA           -0.383             15.2     14.8
+     6     77  KAIRI EXP STN      0.367             16.4     16.8
+     7     26  KHANCOBAN         -0.356             20.2     19.8
+     8     14  DARTMOUTH          0.347             16.7     17.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  4
+     1     77  KAIRI EXP STN       2.11             14.9     17.0
+     2     95  NHILL              -1.81             14.7     12.9
+     3     90  WONGAN HILLS R.S   -1.38             17.8     16.4
+     4     53  THEODORE            1.27             17.1     18.3
+     5     24  INNISFAIL           1.27             15.8     17.1
+     6     93  GLADSTONE          -1.20             19.2     18.0
+     7     23  INGLEWOOD          -1.20             18.9     17.7
+     8     17  DWELLINGUP          1.13             12.3     13.5
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  5
+     1     24  INNISFAIL           2.06             12.9     15.0
+     2     95  NHILL              -1.27             10.3      9.0
+     3     82  MAREEBA            -1.26             16.5     15.2
+     4     14  DARTMOUTH           1.22              6.9      8.1
+     5     93  GLADSTONE          -1.11             15.8     14.7
+     6     53  THEODORE           0.918             13.5     14.4
+     7     40  PARADA            -0.906             16.2     15.3
+     8     77  KAIRI EXP STN      0.807             14.4     15.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  6
+     1     24  INNISFAIL           2.16             12.0     14.2
+     2     95  NHILL              -1.49              9.0      7.5
+     3     93  GLADSTONE          -1.35             14.4     13.0
+     4     82  MAREEBA            -1.23             15.6     14.4
+     5     97  TAMWORTH           -1.20             11.0      9.8
+     6     17  DWELLINGUP          1.07              6.9      8.0
+     7     53  THEODORE            1.02             11.9     12.9
+     8     20  GOVE AIRPORT       0.922             15.3     16.3
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  7
+     1     24  INNISFAIL           2.12             13.5     15.6
+     2     82  MAREEBA            -1.67             17.6     15.9
+     3     56  WAITE               1.25              6.4      7.7
+     4     95  NHILL              -1.04              9.2      8.2
+     5     53  THEODORE           0.998             13.0     14.0
+     6     97  TAMWORTH          -0.997             12.2     11.2
+     7     13  DAMPIER            0.894             15.7     16.5
+     8     79  KIMBERLEY         -0.820             22.0     21.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  8
+     1     24  INNISFAIL           1.62             16.4     18.0
+     2     40  PARADA             -1.50             19.8     18.3
+     3     95  NHILL              -1.44             12.3     10.9
+     4     56  WAITE               1.19              9.6     10.8
+     5     53  THEODORE            1.18             15.4     16.6
+     6     72  CHAPMAN R.S.        1.10             13.5     14.6
+     7     79  KIMBERLEY         -0.992             23.7     22.7
+     8     94  KALGOORLIE        -0.862             15.1     14.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  9
+     1     56  WAITE              0.461             14.1     14.5
+     2      1  ADELAIDE R.O.     -0.336             14.8     14.5
+     3      7  CAIRNS             0.245             18.0     18.2
+     4     12  CRESSY RESEARCH   -0.237             13.3     13.1
+     5     77  KAIRI EXP STN     -0.237             19.9     19.7
+     6     33  MAYDENA            0.228             10.1     10.3
+     7     17  DWELLINGUP         0.225             14.7     14.9
+     8      6  BRISBANE R.O.     -0.222             18.9     18.7
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 10
+     1     40  PARADA             -2.29             26.1     23.8
+     2     14  DARTMOUTH           1.54             16.8     18.3
+     3     95  NHILL              -1.45             21.1     19.7
+     4      7  CAIRNS              1.34             22.0     23.4
+     5     15  DENILIQUIN         -1.32             21.8     20.5
+     6      5  BRIAN PASTURES     -1.29             23.8     22.5
+     7     12  CRESSY RESEARCH    -1.24             18.4     17.2
+     8     84  MT. BARKER R.S.     1.21             17.0     18.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 11
+     1     82  MAREEBA             2.70             21.3     24.0
+     2     54  THE KNOB            2.15             15.9     18.0
+     3     89  SOUTH PERTH R.S.    1.77             23.3     25.1
+     4     40  PARADA             -1.54             25.7     24.2
+     5      5  BRIAN PASTURES     -1.49             26.1     24.7
+     6     86  NEWDEGATE R.S.     -1.42             26.8     25.3
+     7     12  CRESSY RESEARCH    -1.32             21.9     20.6
+     8     30  LAUNCESTON AERO    -1.12             21.9     20.8
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 12
+     1     59  WERRIBEE           0.488             23.7     24.2
+     2     30  LAUNCESTON AERO   -0.486             25.0     24.5
+     3     64  LAVERTON          -0.476             24.8     24.4
+     4     48  SCOTTSDALE(K)      0.405             22.9     23.3
+     5     80  KYABRAM           -0.331             28.0     27.6
+     6     16  DENMARK            0.315             24.2     24.5
+     7     51  TATURA             0.298             26.7     27.0
+     8     84  MT. BARKER R.S.   -0.287             26.8     26.5
+
+PROGRAM SPLINA  VERSION 4.36  DATE 18/07/2006  TIME 15.18.59

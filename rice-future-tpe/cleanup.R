@@ -27,6 +27,10 @@ for (wst in loc_list$id) {
   
   wst_odir <- paste(gcm_fdir,"/loc_",wst_name,sep="")
   if (file.exists(paste(wst_odir,"/obs",sep=""))) {system(paste("rm -rf ",wst_odir,"/obs",sep=""))}
+  if (file.exists(paste(wst_odir,"/raw_merge",sep=""))) {system(paste("rm -rf ",wst_odir,"/raw_merge",sep=""))}
+  if (file.exists(paste(wst_odir,"/Change_Factor_no_variability",sep=""))) {system(paste("rm -rf ",wst_odir,"/Change_Factor_no_variability",sep=""))}
+  if (file.exists(paste(wst_odir,"/Change_Factor_variability",sep=""))) {system(paste("rm -rf ",wst_odir,"/Change_Factor_variability",sep=""))}
+  if (file.exists(paste(wst_odir,"/statistics",sep=""))) {system(paste("rm -rf ",wst_odir,"/statistics",sep=""))}
   if (file.exists(paste(wst_odir,"/stats",sep=""))) {system(paste("rm -rf ",wst_odir,"/stats",sep=""))}
   
   tabflist <- list.files(wst_odir,pattern="\\.tab")

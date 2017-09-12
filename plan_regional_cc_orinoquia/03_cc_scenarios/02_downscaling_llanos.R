@@ -9,7 +9,7 @@ require(rgdal)
 
 bDir  <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima"
 mask <- raster("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/mask_v1.tif")
-varList <- c("prec", "tmin", "tmax")
+varList <- c("prec") #, "tmin", "tmax")
 rcpList <- c("rcp26", "rcp45", "rcp85")
 
 for (rcp in rcpList){
@@ -70,21 +70,22 @@ for (rcp in rcpList){
   
   }
   
-  cat("Donwscaling process over ", rcp, "tmean", "\n")
-  
-  ## Calcular temperatura media
-  for (j in 1:12) {
-    oTif <- paste0(oDir, "/tmean_",j, ".tif")
-    
-    del_tx <- stack(paste0(oDir, "/tmax_", j, ".tif"))
-    del_tn <- stack(paste0(oDir, "/tmin_", j, ".tif"))
-    del <- (del_tx + del_tn) / 2
-    
-#     del <- crop(del, extent(mask))
-#     del <- mask(del, mask)
-    writeRaster(del, oTif, format="GTiff", datatype='INT2S')
-    
-  }
+#   cat("Donwscaling process over ", rcp, "tmean", "\n")
+#   
+#   ## Calcular temperatura media
+#   for (j in 1:12) {
+#     oTif <- paste0(oDir, "/tmean_",j, ".tif")
+#     
+#     del_tx <- stack(paste0(oDir, "/tmax_", j, ".tif"))
+#     del_tn <- stack(paste0(oDir, "/tmin_", j, ".tif"))
+#     del <- (del_tx + del_tn) / 2
+#     
+# #     del <- crop(del, extent(mask))
+# #     del <- mask(del, mask)
+#     writeRaster(del, oTif, format="GTiff", datatype='INT2S')
+#     
+#   }
+#   
   
 }
 

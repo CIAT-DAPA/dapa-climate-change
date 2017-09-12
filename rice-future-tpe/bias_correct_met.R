@@ -7,8 +7,12 @@
 #3. Run bias correction, summary stats / plots
 #4. Create oryza2000 files as needed
 
+library(lubridate); library(qmap); library(ggplot2)
+library(tools); library(reshape); require(grid)
+
 #source dir
 src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+bc.dir <- "~/Repositories/dapa-climate-change/IPCC-CMIP5/bias_correction"
 
 #directories
 wd <- "/nfs/a101/earjr/rice-future-tpe"
@@ -19,8 +23,8 @@ obs_dir <- paste(wd,"/obs_meteorology",sep="")
 #if (!file.exists(gcm_odir)) {dir.create(gcm_odir)}
 gcm_fdir <- paste(wd,"/gcm_meteorology",sep="")
 
-#source functions (fron CN / JT)
-source(paste(src.dir,"/gcm_calibration_bc_v2.R",sep=""))
+#source functions (from CN / JT)
+source(paste(bc.dir,"/gcm_calibration_bc_local.R",sep=""))
 
 # #create list of GCMs that have all scenarios
 # gcmlist_his <- data.frame(gcm=list.files(paste(gcm_idir,"/historical",sep="")), present.his=1)
@@ -175,6 +179,9 @@ for (wst in loc_list$id) {
 }
 
 #construct list of final weather stations
+#stations to exclude: wst=BRAZ001, wst=CPTEC0069, wst=INMET00306, wst=INMET00308, 
+#                     wst=INMET00305, wst=INMET00307
+
 loc_list$allyears <- T
 for (wst in loc_list$id) {
   #wst <- paste(loc_list$id[1])
@@ -204,20 +211,28 @@ for (wst in loc_list$id) {
   for (var in varlist) {
     #var <- varlist[1]
     if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
-    merge_extraction(varmod, rcp="historical", ts="1981_2005", gcmlist, lon, lat, dataset="wst", dirbase=wst_odir)
+    merge_extraction(varmod, rcp="historical", yi=1981, yf=2005, gcmlist, lon, lat, dataset="wst", dirbase=wst_odir, leap=1, typeData=1)
   }
   
   #rcps
   for (rcp in rcplist) {
-    #rcp <- rcplist[3]
+    #rcp <- rcplist[1]
     for (vname in varlist) {
       #vname <- varlist[1]
       if  (vname == "pr") {varmod <- "prec"} else if (vname == "rsds") {varmod <- "srad"} else if (vname == "tasmax") {varmod <- "tmax"} else if (vname == "tasmin") {varmod <- "tmin"}
-      merge_extraction(varmod, rcp, ts="2041_2065", gcmlist, lon, lat, dataset="wst", dirbase=wst_odir)
-      del_calcs(varmod, rcp, lon, lat, wst_odir) #only to means
-      cf_calcs(varmod, rcp, lon, lat, wst_odir) #means and variability
-      bc_stats(varmod, rcp, "2041_2065", lon, lat, wst_odir) #plotting / statistics
+      merge_extraction(varmod, rcp, yi=2041, yf=2065, gcmlist, lon, lat, dataset="wst", dirbase=wst_odir, leap=1, typeData=1)
+      del_calcs(varmod, rcp, lon, lat, wst_odir, leap=1) #only to means
+      cf_calcs(varmod, rcp, lon, lat, wst_odir, leap=1) #means and variability
+      bc_stats(varmod, rcp, yi=2041, yf=2065, lon, lat, wst_odir) #plotting / statistics
     }
+  }
+  
+  #historical and projected changes
+  for (var in varlist) {
+    #var <- varlist[1]
+    if  (var == "pr") {varmod <- "prec"} else if (var == "rsds") {varmod <- "srad"} else if (var == "tasmax") {varmod <- "tmax"} else if (var == "tasmin") {varmod <- "tmin"}
+    bc_stats(varmod, rcp="historical", yi=1981, yf=2005, lon, lat, wst_odir) #plotting / statistics
+    bc_changes(varmod, rcpList=rcplist, gcmlist=gcmlist, lon, lat, wst_odir) #plotting / statistics
   }
 }
 

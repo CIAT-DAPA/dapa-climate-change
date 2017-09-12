@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1218/trunk/EcoCrop/src
+END
+createMask.R
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/731/trunk/EcoCrop/src/createMask.R
+END
+futureRuns.tmp.R
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/786/trunk/EcoCrop/src/futureRuns.tmp.R
+END
+yjTest.R
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/639/trunk/EcoCrop/src/yjTest.R
+END
+futureRuns.R
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/779/trunk/EcoCrop/src/futureRuns.R
+END
+areaFalse.R
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/705/trunk/EcoCrop/src/areaFalse.R
+END
+relationships.R
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/731/trunk/EcoCrop/src/relationships.R
+END
+fitAssessDist.R
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/639/trunk/EcoCrop/src/fitAssessDist.R
+END
+uncertainty-v2.R
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/1096/trunk/EcoCrop/src/uncertainty-v2.R
+END
+EcoCrop.R
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/1206/trunk/EcoCrop/src/EcoCrop.R
+END
+accuracy.R
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/705/trunk/EcoCrop/src/accuracy.R
+END
+validation.R
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/1218/trunk/EcoCrop/src/validation.R
+END
+randomSplit.R
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/639/trunk/EcoCrop/src/randomSplit.R
+END
+getUniqueCoord.R
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/759/trunk/EcoCrop/src/getUniqueCoord.R
+END
+impacts.R
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/1200/trunk/EcoCrop/src/impacts.R
+END
+getParameters.R
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/642/trunk/EcoCrop/src/getParameters.R
+END
+extractClimateData.R
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/759/trunk/EcoCrop/src/extractClimateData.R
+END
+suitMerge.R
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/780/trunk/EcoCrop/src/suitMerge.R
+END
+uncertainty.R
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/797/trunk/EcoCrop/src/uncertainty.R
+END
+histPlot.R
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/642/trunk/EcoCrop/src/histPlot.R
+END
+bufferPoints.R
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/681/trunk/EcoCrop/src/bufferPoints.R
+END
+000debug.R
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/731/trunk/EcoCrop/src/000debug.R
+END
+calibrationParameters.R
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/642/trunk/EcoCrop/src/calibrationParameters.R
+END

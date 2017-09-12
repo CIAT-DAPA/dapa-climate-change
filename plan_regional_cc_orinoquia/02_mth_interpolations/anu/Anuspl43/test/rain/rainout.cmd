@@ -1,0 +1,17 @@
+mv rain*.log out
+mv rain*.not out
+mv rain*.rej out
+mv rain*.res out
+mv rain.flg out
+mv rain.out out
+mv rain*.opt out
+mv rain*.sur out
+mv rain*.cov out
+mv rain*.lis out
+mv rain*.gcv out
+mv rain*.img out
+mv rain*.doc out
+mv rain*.grd out
+mv rcov*.img out
+mv rcov*.doc out
+mv rcov*.grd out

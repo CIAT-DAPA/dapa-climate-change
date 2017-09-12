@@ -62,11 +62,12 @@ def md5Checksum(filePath):
 
 def main():
   # check arguments
-  if (len(sys.argv) >= 4 ):
+  if (len(sys.argv) >= 5 ):
 	in_file = sys.argv[1]
 	dirout = sys.argv[2]
 	where_marksim = sys.argv[3]
 	tmp_dir = sys.argv[4]
+	fold = sys.argv[5]
   else:
     sys.exit("not three arguments provided")
   
@@ -88,8 +89,8 @@ def main():
     os.mkdir(tmp_dir + "/" + base + "")
   if not os.path.exists(tmp_dir + "/" + base + "/data"):
     os.mkdir(tmp_dir + "/" + base + "/data")
-  if not os.path.exists(tmp_dir + "/lib"):
-    os.mkdir(tmp_dir + "/lib")
+  if not os.path.exists(tmp_dir + "/lib" + "_" + fold):
+    os.mkdir(tmp_dir + "/lib" + "_" + fold)
   
   
   # cp gcm to local drive
@@ -98,17 +99,17 @@ def main():
   this_gcm = os.listdir(tmp_dir + "/" + base + "/data")
   
   # cp marksim 
-  shutil.copy2(where_marksim, tmp_dir + "/lib")
+  shutil.copy2(where_marksim, tmp_dir + "/lib" + "_" + fold)
   
   # unzip marksim
-  zip = zipfile.ZipFile(tmp_dir + "/lib/marksim.zip")
+  zip = zipfile.ZipFile(tmp_dir + "/lib" + "_" + fold + "/marksim.zip")
   
   for f in zip.namelist():
-    open(tmp_dir + "\\lib\\" + f, 'wb').write(zip.read(f))
+    open(tmp_dir + "\\lib" + "_" + fold + "\\" + f, 'wb').write(zip.read(f))
   zip.close()
   
   # write MASTER_PATH
-  f = open(tmp_dir + "/lib/MASTER_PATH.CTR","w")
+  f = open(tmp_dir + "/lib" + "_" + fold + "/MASTER_PATH.CTR","w")
   f.write(tmp_dir + "\\" + base + "\\run.LST")
   f.close()
   
@@ -145,20 +146,20 @@ def main():
       f = open(f_path + '/' + 'tmp.XBF','w')
       f.write(tmp_dir + "\\" + base + "\\data\\" + f_parent + "\\" + f_name + "\\" + f_name + ".CLX," + f_name + ",1234,99,d")
       f.close()
-      os.system(tmp_dir + "/lib/MarkSim_v1.2.exe")
+      os.system(tmp_dir + "/lib" + "_" + fold + "/MarkSim_v1.2.exe")
       count += 1
       # UNcomment the following line once testing is done!
       # if count == 3: break
   zip.close()
   
   # Zip results
-  target_dir = tmp_dir + "/" + base + "/data"
-  target_zip = dirout + "\\" + base + ".zip "
-  print "zipping results"
-  os.system(tmp_dir + "\\lib\\7za.exe a -tzip " + target_zip +  target_dir)
-  print "Removing temporal files"
-  if os.path.exists(target_zip):
-	os.system("rd /s /q " + target_dir)
+  # target_dir = tmp_dir + "/" + base + "/data"
+  # target_zip = dirout + "\\" + base + ".zip "
+  # print "zipping results"
+  # os.system(tmp_dir + "\\lib" + "_" + fold + "\\7za.exe a -tzip " + target_zip +  target_dir)
+  # print "Removing temporal files"
+  # if os.path.exists(target_zip):
+	# os.system("rd /s /q " + target_dir)
   
   # while True:
     # print "trying to copy"

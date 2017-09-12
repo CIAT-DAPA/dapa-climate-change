@@ -1,0 +1,145 @@
+##load libraries
+##raster package
+library(raster);library(maptools);library(ggplot2);library(rgdal)
+##
+library(modeest);library(gridExtra);library(reshape);library(ncdf4);require(grid)
+require(ncdf4)
+##end load libraries
+
+##DIRECTORIES
+##DATOS
+#working dir
+bdir <- "Z:/Ensayo ecocrop/Cafe/baseline/"
+maps="Z:/Ensayo ecocrop/mapas de colombia/"
+#params
+path.p<-paste("\\\\dapadfs\\workspace_cluster_3\\bid-cc-agricultural-sector\\11-EcoCrop_runs\\model_data\\")  ##path params
+##DATA CLIMA
+met_dir <- paste(bdir,"/01-climate-data",sep="") # Solo para clima presente 
+wfd_dir <- "Z:/Ensayo ecocrop/Cafe/baseline/"  ##todo lo que diga wfd dir lo cambiare por bdir
+
+##output
+data_dir <- paste(bdir,"/model_data",sep="")  ## Donde se encuentran los parametros para correr los cultivos; #ESTA RUTA SE USA PARA SALIDA??
+if(!file.exists(data_dir)){dir.create(data_dir)} else {cat("Folder exists\n")} ## Crea la carpeta data_dir en caso de no existir
+##AUN NO SE QUE RESULTADOS SE GUARDAN AQUI DEL PRESENTE
+runs_dir <- paste(bdir,"model_runs",sep="")  ## Directorio donde se guardaran las salidas
+if(!file.exists(runs_dir)){dir.create(runs_dir)} else {cat("Folder exists\n")}
+
+##WDF DIRECTORIE
+crop_wfd_dir <- paste(runs_dir,"/WFD",sep="")
+if (!file.exists(crop_wfd_dir)) {dir.create(crop_wfd_dir,recursive=T)} else {cat("Folder exists")}
+# crop_wfd_dir <- paste(runs_dir,"/coffea_robusta_test/WFD",sep="")
+
+#### specify future directory
+#crop_fut_dir <- paste(runs_dir,"/Future",sep="")
+#if (!file.exists(crop_fut_dir)) {dir.create(crop_fut_dir,recursive=T)} else {cat("Folder exists")}
+# crop_fut_dir <- paste(runs_dir,"/coffea_arabica_test",sep="")
+##path for graphs
+base_dir<-"Z:/Ensayo ecocrop/Cafe/baseline/model_runs/"   ##output maps
+wd_dir <- paste(base_dir, 'WFD', sep='')
+
+##graph paths
+#graphs_path<-paste('//dapadfs/workspace_cluster_3/bid-cc-agricultural-sector/11-EcoCrop_runs/model_runs/graphs/',sep='')
+graphs_path<-"Z:/Ensayo ecocrop/graficas/"
+#######################END PATH
+###end directories
+
+###load ecocrop
+src_dir <- "Z:/Ensayo ecocrop/modelo fuente/"  ## Codigo del modelo #call ecocrop functions
+source(paste(src_dir,"EcoCrop-model.R",sep=""))
+
+##end load ecocrop
+##LOAD MAPS
+mapcol=readRDS(paste(maps,"COL_adm1.RDS",sep=""))
+orinoquia=mapcol[mapcol@data$NAME_1%in%c("Arauca","Casanare", "Meta", "Vichada"),]
+orinoquia1=fortify(orinoquia)
+##END LOAD MAPS
+##MODEL PARAMS
+params <- read.csv(paste(path.p,"/crop_parameters4.csv",sep=""),header=T) # Coffea arabica
+params1 <- read.csv(paste(path.p,"/crop_parameters5.csv",sep=""),header=T) # Coffea robusta
+params <- rbind(params,params1)
+ncrops <- nrow(params) #number of crops
+cropList <- sort(as.character(params$Crop))  ## Lista de Cultivos a Correr
+params$Rmin=params$Rmin/10
+params$Rmax=params$Rmax/10
+params$Ropmin=params$Ropmin/10
+params$Ropmax=params$Ropmax/10
+##end params
+##convert maps
+params$Gmin=c(125,125)
+params$Gmax=c(125,125)
+convertfiles<-function(temp){
+  files<- list.files("Z:/Ensayo ecocrop/Cafe/baseline/",pattern='.asc')
+  files<-gsub("_std",NA,files)
+  files<-na.omit(files)
+  ##mean temperature files
+  files.mean<-gsub(temp,NA,files);files.mean=files[is.na(files.mean)]
+  mean.grids<- sapply(1:12,function(x) patt <- raster(paste("Z:/Ensayo ecocrop/Cafe/baseline/",temp,"_" ,x, ".asc", sep="")))
+  mean10=lapply(1:12,function(x){calc(mean.grids[[x]],function(j){j/10})})
+  lapply(1:12,function(x){ writeRaster(mean10[[x]],paste("Z:/Ensayo ecocrop/Cafe/baseline/1/",temp,"_",x,sep=""), format="ascii",overwrite=T)})
+  return
+  mean.grids
+  mean10
+  }
+###used when temperature is *10
+#convert.meant<-convertfiles("tmean")
+#convert.mint<-convertfiles("tmin")  
+#convert.maxt<-convertfiles("tmax")
+##end convert maps
+
+
+for(n in 1:length(cropList)){
+  ##create folders
+   crop_name <- paste(params$Crop)[which(params$Crop==cropList[n])] #Name of the last test, lookup for
+   run_dir <- paste(crop_wfd_dir,"/",n, sep="") #Output folder for WFD
+
+   main_crop_dir <- paste0(crop_wfd_dir,"/",cropList[n])
+   if(!file.exists(main_crop_dir)) {dir.create(main_crop_dir)} else {cat("Folder exists\n")}
+
+     fun<-suitCalc(climPath =paste(bdir,"1/",sep=""),
+              # climPath2 = '',
+              #yearly=T,#turn this into FALSE if u dont want the script to do the yearly time series calculation
+              Gmin=params$Gmin[n],
+              Gmax=params$Gmax[n],
+              Tkmp=params$Tkmp[n],
+              Tmin=params$Tmin[n],
+              Topmin=params$Topmin[n],
+              Topmax=params$Topmax[n],
+              Tmax=params$Tmax[n],
+              Rmin=params$Rmin[n],
+              Ropmin=params$Ropmin[n],
+              Ropmax=params$Ropmax[n],
+              Rmax=params$Rmax[n],
+              outfolder = main_crop_dir, 
+              cropname = crop_name,
+              ext=".asc")
+
+}
+
+
+###maps 
+for ( i in 1:length(cropList)){
+ave_map <- paste(wd_dir, '/', cropList[i], '/', cropList[i], '_suit.tif', sep='') ##provisonal se cambia i por 1
+ave_map <- raster(ave_map)
+ave_map_reclass <- reclassify(ave_map, c(0,50,1, 50,65,2, 65,80,3, 80,Inf,4))  ## PReguntar porque hacen esta reclasificacion
+ave_map_reclass[which(ave_map_reclass[]==0)] <- NA
+ave_map_reclass <- mask(x=ave_map, mask=orinoquia)
+ave_reclass <- cbind(as.data.frame(xyFromCell(object=ave_map_reclass, cell=1:ncell(ave_map_reclass))), suit=values(ave_map_reclass))
+ave_reclass$suit1=cut(ave_reclass$suit,breaks=c(0,50,65,80,100),right=T)
+ave_reclass$suit1=as.factor(ave_reclass$suit1)
+ave_reclass=na.omit(ave_reclass)
+table(ave_reclass$suit1)
+# Do the plot
+c10d <- cbind(orinoquia1, orinoquia@data[orinoquia1$id,])
+#graph
+ggplot(c10d,aes(long,lat,group=group))+
+  geom_polygon(aes(fill=group),colour = alpha("white", 1/2), size = 0.2)+
+  scale_fill_brewer(palette="Greys") +guides(fill = "none")+
+  geom_point(data=ave_reclass,aes(x,y,group=suit1,colour=as.character(suit1)),size=3)+
+  #geom_text(data=labelsd,aes(label =labelsd[,1] , x = labelsd[,2], y = labelsd[,3]))+
+  theme(axis.line=element_blank(),
+        axis.text=element_blank(),
+        panel.background=element_blank())+
+        scale_colour_brewer(palette="Spectral") +labs(x="",y="",colour = "Current suitability (%)")+
+  ggsave(paste(wd_dir, '/', cropList[i], '/', cropList[i], '_mapbaseline.jpg', sep=''))
+     
+}

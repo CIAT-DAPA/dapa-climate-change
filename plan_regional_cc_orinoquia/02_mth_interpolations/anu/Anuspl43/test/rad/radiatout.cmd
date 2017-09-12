@@ -1,0 +1,10 @@
+mv *rad*.log out
+mv *rad*.res out
+mv *rad*.opt out
+mv *rad*.sur out
+mv *rad*.lis out
+mv *rad*.cov out
+mv *rad*.out out
+mv *rad*.grd out
+mv *rad*.err out
+mv *rad*.gcv out

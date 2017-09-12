@@ -8,13 +8,17 @@ stop("!")
 library(sp); library(maptools); library(raster); library(rgeos)
 library(ggplot2); library(grid); library(gridExtra)
 
+#source code directory
+src.dir <- "~/Repositories/dapa-climate-change/rice-future-tpe"
+
 #directories
-wd <- "/nfs/a101/earjr/rice-future-tpe"
+#wd <- "/nfs/a101/earjr/rice-future-tpe"
+wd <- "~/Leeds-work/rice-future-tpe"
 obs_dir <- paste(wd,"/obs_meteorology",sep="")
 gcm_dir <- paste(wd,"/gcm_meteorology",sep="")
 fig_odir <- paste(wd,"/figures",sep="")
 
-source(paste(wd,"/scripts/thiessen_polygons.R",sep=""))
+source(paste(src.dir,"/thiessen_polygons.R",sep=""))
 
 #location list
 loc_list <- read.csv(paste(obs_dir,"/all_wst_locs.csv",sep=""))
@@ -87,11 +91,11 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
       
       #load historical data (only once)
       if (vname == "prec") {
-        dat_his <- read.table(paste(wst_odir,"/raw_ts_historical_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+        dat_his <- read.table(paste(wst_odir,"/raw_merge/raw_ts_historical_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
         dat_his <- dat_his[,c("date","obs")]
       } else {
-        dat_his1 <- read.table(paste(wst_odir,"/raw_ts_historical_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
-        dat_his2 <- read.table(paste(wst_odir,"/raw_ts_historical_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+        dat_his1 <- read.table(paste(wst_odir,"/raw_merge/raw_ts_historical_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+        dat_his2 <- read.table(paste(wst_odir,"/raw_merge/raw_ts_historical_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
         dat_his1 <- dat_his1[,c("date","obs")]; dat_his2 <- dat_his2[,c("date","obs")]
         dat_his <- data.frame(date=dat_his1$date,obs=((dat_his1$obs+dat_his2$obs)*.5))
       }
@@ -123,17 +127,19 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
         for (mth in mthlist) {
           #mth <- mthlist[1]
           cat("...processing all GCMs for wst=",wst_name,"/ rcp=",rcp,"/ method=",mth,"/ variable=",vname,"\n")
+          if (mth == "cf") {mthstr <- "Change_Factor_variability"}
+          if (mth == "del") {mthstr <- "Change_Factor_no_variability"}
           for (gcm in gcmlist) {
             #gcm <- gcmlist[1]
             
             #load future data
             if (vname == "prec") {
-              dat_rcp <- read.table(paste(wst_odir,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              dat_rcp <- read.table(paste(wst_odir,"/",mthstr,"/",mth,"_ts_",rcp,"_",vname,"_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
               dat_rcp <- dat_rcp[,c("date",gcm)]
               names(dat_rcp)[2] <- "gcm"
             } else {
-              dat_rcp1 <- read.table(paste(wst_odir,"/",mth,"_ts_",rcp,"_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
-              dat_rcp2 <- read.table(paste(wst_odir,"/",mth,"_ts_",rcp,"_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              dat_rcp1 <- read.table(paste(wst_odir,"/",mthstr,"/",mth,"_ts_",rcp,"_tmin_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
+              dat_rcp2 <- read.table(paste(wst_odir,"/",mthstr,"/",mth,"_ts_",rcp,"_tmax_lon_",lon,"_lat_",lat,".tab",sep=""),header=T)
               dat_rcp1 <- dat_rcp1[,c("date",gcm)]; names(dat_rcp1)[2] <- "gcm"
               dat_rcp2 <- dat_rcp2[,c("date",gcm)]; names(dat_rcp2)[2] <- "gcm"
               dat_rcp <- data.frame(date=dat_rcp1$date,gcm=((dat_rcp1$gcm+dat_rcp2$gcm)*.5))
@@ -163,7 +169,7 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
             
             #change value
             if (vname == "prec") {
-              chgval <- (rcpval - hisval) / max(c(hisval,0.001)) * 100
+              chgval <- (rcpval - hisval) / max(c(hisval,0.01)) * 100
             } else {
               chgval <- rcpval - hisval
             }
@@ -215,7 +221,8 @@ if (!file.exists(paste(fig_odir,"/fig2_data.RData",sep=""))) {
 }
 
 #append these data to thiessen polygons
-fpols <- data_out; names(data_out)[1] <- "id"
+names(data_out)[1] <- "id"
+fpols <- data_out
 fpols <- SpatialPolygonsDataFrame(f_thiepol, fpols, match.ID=T)
 fpols.points <- fortify(fpols, region="id")
 fpols.df <- merge(fpols.points, fpols@data, by="id")
@@ -236,16 +243,16 @@ unc_vals$rcp85.prec.agreement <- paste(round(unc_vals$rcp85.prec.agreement,1))
 #printing all figures
 for (rcp in rcplist) {
   for (vname in varlist) {
-    #vname <- "tmean"; rcp <- "rcp26"
+    #vname <- "prec"; rcp <- "rcp85"
     #details
     cat("...printing variable=",vname,"/ rcp=",rcp,"\n")
     cname <- paste(rcp,".",vname,".change",sep="")
-    lims <- ceiling(c(1.4,get(paste(vname,"_max",sep="")))*10)*0.1
+    lims <- ceiling(c(1,get(paste(vname,"_max",sep="")))*10)*0.1
     
     #plot object
     viz <- ggplot() + geom_polygon(data=fpols.df, aes_string(x="long", y="lat", group="group", fill=cname), colour='grey 80')
     if (vname == "tmean") {
-      brks <- c(ceiling(seq(1.4,get(paste(vname,"_max",sep="")),length.out=10)*10)*0.1)
+      brks <- c(ceiling(seq(1.1,get(paste(vname,"_max",sep="")),length.out=10)*10)*0.1)
       viz <- viz + scale_fill_gradient(low="#ffeda0",high="#e31a1c",na.value="grey50",guide="colourbar",
                                       space="Lab",breaks=brks,limits=lims)
     } else {

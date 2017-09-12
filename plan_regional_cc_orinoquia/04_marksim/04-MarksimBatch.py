@@ -6,7 +6,7 @@ if len(sys.argv) < 7:
 	os.system('cls')
 	print "\n Too few args"
 	print "   - Sintaxis: "
-	print "   - python 04-MarksimBatch.py X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\datos_diarios\_dat_files D:\cenavarro\ms D:\cenavarro\ms\tmp 1 1 rcp26"
+	print "   - python X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\00-scripts\04_marksim\04-MarksimBatch.py X:\ALPACAS\Plan_Regional_de_Cambio_Climatico_Orinoquia\01-datos_clima\datos_diarios\_dat_files D:\cenavarro\ms D:\cenavarro\ms\tmp 1 1 baseline"
 	sys.exit(1)
 
 dirbase = sys.argv[1]

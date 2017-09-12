@@ -14,6 +14,8 @@ accuracy <- function(trainMx=NULL, testMx=NULL, variable="rain") {
     "ERR.JUL","ERR.AUG","ERR.SEP","ERR.OCT","ERR.NOV","ERR.DEC")
     if (variable == "rain") {
       ipts <- read.fortran(fname, format=list(c("I6","A8","F14","2F10"),c("12F8"),c("12F8"),c("12F8"),c("I1")))
+    } else if (variable == "rhum") {
+      ipts <- read.fortran(fname, format=list(c("I6","A11","3F10"),c("12F8"),c("12F8"),c("12F8"),c("I1")))
     } else if (variable == "tean") {
       ipts <- read.fortran(fname, format=list(c("I6","A10","F11","2F10"),c("12F8"),c("12F8"),c("12F8"),c("I1")))
     } else {

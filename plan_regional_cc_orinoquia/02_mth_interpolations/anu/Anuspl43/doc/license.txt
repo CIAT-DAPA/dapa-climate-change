@@ -1,0 +1,14 @@
+ANUSPLIN license terms
+Copyright 2004 The Australian National University.
+
+This software is the copyright of the Australian National University.  
+The software or any portion of it may not in any way be copied, 
+redistributed or reverse engineered. unless otherwise provided 
+for in the Licence Agreement. 
+
+Disclaimer: This software is provided on an "as is" basis without
+warranty of any kind, express or implied, to the extent permitted
+by law, including but not limited to any implied warranties of
+merchantability or fitness for a particular purpose. The Australian
+National Unviersity shall not be liable for any consequential,
+incidental or special damages resulting from the use of the software.

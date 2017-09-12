@@ -1,0 +1,6 @@
+*SOILS: General DSSAT Soil Input File
+
+*GJIN000001  Gujarat     -99     260 Clay
+@SITE        COUNTRY          LAT     LONG SCS FAMILY
+ Gujarat     India          23.000 -72.000 Gujarat soil type
+@ SCOM  SALB  SLU1  SLDR  SLRO  SLNF  SLPF  SMHB  SMPX  SMKE

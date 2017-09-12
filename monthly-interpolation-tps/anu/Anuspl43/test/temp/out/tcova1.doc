@@ -1,0 +1,25 @@
+file title  : tcova1.img
+data type   : real
+file type   : ascii
+columns     :     16
+rows        :     16
+ref. system : latlong
+ref. units  : deg
+unit dist.  :  1.0
+min. X      :    144.50000000000    
+max. X      :    148.50000000000    
+min. Y      :   -44.000000000000    
+max. Y      :   -40.000000000000    
+pos'n error :  0.0
+resolution  :   0.25000000000000    
+min. value  :      0
+max. value  :      1
+value units : deg
+value error : unknown
+flag value  :   -99.00000    
+flag def'n  : no data
+legend cats :  0
+comment     : AVERAGE GRID VALUE     =   0.769584    
+comment     : NUMBER OF GRID VALUES  =         80
+comment     : ERROR COVARIANCE FILE = tmaxa.cov
+lineage     : PROGRAM LAPGRD  VERSION  4.4  DATE 18/07/2006  TIME 15.18.44

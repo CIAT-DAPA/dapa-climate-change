@@ -45,7 +45,7 @@
 		&ty          /\/\/\/\GCM MODELS ASCII2GRID/\/\/\/\
 		&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 		
-		&s gridlist [listfile %inputfolder%\* -grid %outputfolder%\listgrids.list]
+		&s gridlist [listfile %inputfolder%\bio* -grid %outputfolder%\listgrids.list]
 		&s openlist [OPEN %outputfolder%\listgrids.list OPENSTATUS -READ]
 		
 		&if %OPENSTATUS% NE 0 &then

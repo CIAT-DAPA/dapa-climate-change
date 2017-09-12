@@ -1,0 +1,18 @@
+*DSSAT Cropping System Model Ver. 4.5.1.023 -Stub         MAR 03, 2015; 08:34:00
+
+ Unit  Filename
+   21  FILEIO
+   14  BATCH 
+  101  SIMCDE
+   25  DSPRO
+   22  DTACDE
+  102  RUNLST
+   11  FILEW
+  103  OUTO
+   10  FILEC
+  104  OUTS
+  105  SEVAL
+  106  FILECO2
+   13  FILESS
+    8  FILEA
+  107  OUTINFO

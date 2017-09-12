@@ -1,17 +1,17 @@
 #Julian Ramirez
 #CIAT / University of Leeds
 
-# setwd("D:/cenavarro/col-cormacarena/monthly-interpolations/_scripts")
-# anuDir <- "D:/cenavarro/col-cormacarena/monthly-interpolations/anu/Anuspl43/bin"
-# stDir <- "D:/cenavarro/col-cormacarena/monthly-interpolations/stations-averages"
-# rDir <- "D:/cenavarro/col-cormacarena/monthly-interpolations/_region"
-# oDir <- "D:/cenavarro/col-cormacarena/monthly-interpolations/outputs/tmin"
+# setwd("X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/00-scripts/02_mth_interpolations/_llanos_version")
+# anuDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/00-scripts/02_mth_interpolations/anu/Anuspl43/bin"
+# stDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/stations-averages"
+# rDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/_region"
+# oDir <- "D:/cenavarro/col-cormacarena/monthly-interpolations/outputs/rhum"
 # train.per <- 0.70
-# vn <- "tmin"
+# vn <- "rhum"
 # tile <- 1
 # ntiles <- 1
-# suffix <-"ame"
-# nfolds=25
+# suffix <-"lla"
+# nfolds <- 25
 # source("01_fitSplines.R")
 
 require(raster)
@@ -25,7 +25,7 @@ source("writeDatFile.R"); source("createFitFile.R"); source("createValFile.R"); 
 splineFitting <- function(anuDir="C:/Users/jardila/Desktop/monthly-interpolations/anu/Anuspl43/bin", stDir, rDir, oDir, nfolds=25, train.per=0.85, vn="rain", ntiles=1, unix=F, suffix="some") {
   
   #Defining units
-  if (vn == "rain") {u <- "millimetres"} else {u <- "degrees"}
+  if (vn == "rain") {u <- "millimetres"} else if (vn == "rhum") {u <- "undefined"} else {u <- "degrees"}
   
   #stDir is where station data files are
   #rDir is where latitude, longitude and altitude data files are
@@ -51,7 +51,7 @@ splineFitting <- function(anuDir="C:/Users/jardila/Desktop/monthly-interpolation
   cat("Reading stations data \n")
   st <- read.csv(paste(stDir,"/", vn, "_", suffix,".csv",sep=""))
   st.reg <- st[which(st$LONG >= xt@xmin & st$LONG <= xt@xmax & st$LAT >= xt@ymin & st$LAT <= xt@ymax),]
-  st.reg.10y <- st.reg[which(st.reg$NYEARS >= 10),]
+  st.reg.10y <- st.reg[which(st.reg$NYEARS >= 15),]
   
   #Cleansing from any -9999 value
   for (i in 10:21) {
@@ -190,12 +190,12 @@ splineFitting <- function(anuDir="C:/Users/jardila/Desktop/monthly-interpolation
         write.csv(acc$TEST, paste(vn, "_test-values.csv", sep=""), quote=F, row.names=F)
         write.csv(acc$METRICS, paste(vn, "_metrics.csv", sep=""), quote=F, row.names=F)
         
-        #Writing status file
-#         zz <- file(paste(vn, "-status.anu", sep=""), "w")
-#         cat("Process finished on", date(), "\n", file=zz)
-#         close(zz) 
-#         
-# 
+        # Writing status file
+        zz <- file(paste(vn, "-status.anu", sep=""), "w")
+        cat("Process finished on", date(), "\n", file=zz)
+        close(zz) 
+        
+
         #Statistical consistency
         
 #         a <- c()
@@ -216,4 +216,7 @@ splineFitting <- function(anuDir="C:/Users/jardila/Desktop/monthly-interpolation
 
 
 otp <- splineFitting(anuDir, stDir, rDir, oDir, nfolds, train.per, vn, ntiles, unix=F, suffix)
+
+
+
 

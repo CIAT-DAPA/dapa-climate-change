@@ -32,7 +32,7 @@ os.system('cls')
 gp.CheckOutExtension("Spatial")
 
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~"
-print "     ASCII TO GRID       "
+print "     GRID TO ASCII         "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 gp.workspace = dirbase 

@@ -1,0 +1,120 @@
+## Author : Carlos Navarro
+## Date   : January 2016
+
+###############################################################################################
+########################## DAILY DATA FOR CORMACARENA PROJECT #################################
+###############################################################################################
+# source("01_dat_files_generation.R")
+
+bDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/downscaling/llanos"
+mask <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/mask_cov.asc"
+dem <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/baseline/llanos/_region/alt-prj-lla.asc"
+oDir <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/datos_diarios/_dat_files"
+read_diva <- "X:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/00-scripts/04_marksim/Read_DIVA.exe"
+model <- "rcp45"
+# otp <- dat_files_gen(bDir, mask, dem, oDir)
+
+## Generation of the daily .dat files 
+# dat_files_gen <- function(bDir="U:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima", mask="U:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_masks/llanos_adm0.asc", dem="S:/observed/gridded_products/srtm/Altitude_30s/alt", oDir="U:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/datos_diarios/dat_files", read_diva="U:/ALPACAS/Plan_Regional_de_Cambio_Climatico_Orinoquia/01-datos_clima/_scripts/Read_DIVA.exe", model="baseline"){
+
+  require(raster)
+  require(ncdf)
+  require(rgdal)
+  
+  if (model != "baseline"){
+    bDir <- paste0(bDir, "/", model)
+  }
+  
+  oDirMod <- paste0(oDir, "/", model)
+  if (!file.exists(oDirMod)) {dir.create(oDirMod, recursive=T)}
+  
+  if (!file.exists(paste0(oDirMod, "/", model, ".txt"))){
+    
+    mask <- raster(mask)
+    dem <- raster(dem)
+      
+    varList <- c("tmin", "tmax", "prec")
+    
+    coords <- round(rasterToPoints(mask)[,1:2], digits = 3)
+    colnames(coords) <- c("LONGITUD", "LATITUD")
+    
+#     coordsfile <- write.table(coords, paste0(oDir, "/coords_pts.txt"), quote = F, row.names = F, sep="\t")
+    
+    ncell <- dim(coords)[1]
+        
+#     ## IDs raster
+#     coords_id <- cbind(coords, 1:ncell)
+#     colnames(coords_id) <- c("LONGITUD", "LATITUD", "ID")
+#     write.table(coords_id, paste0(oDir, "/coords_id.txt"), quote = F, row.names = F, sep="\t")
+#     mask_id <- rasterize(coords, mask,  coords_id[,3])
+#     writeRaster(mask_id, paste0(oDir, "/coords_id.tif"))
+    
+    alt <- extract(dem, coords)
+    
+    list <- c()
+    values <- c()
+    
+    for (mth in 1:12){
+      
+      for (var in varList){
+
+        rs <- raster(paste0(bDir, "/", var, "_", mth, ".asc"))  
+        rs_pts <- round(extract(rs, coords), digits = 1)
+        
+#         if (var == "prec"){
+#           rs_pts <- round(extract(rs, coords), digits = 1)
+#         } else {
+#           rs_pts <- round(extract(rs, coords), digits = 1)
+#         }
+        
+        # rs_cut <- mask(crop(rs, extent(mask)), mask)
+        # rs_pts <- rasterToPoints(rs_cut)
+        
+        
+        values <- cbind(values, rs_pts)
+        
+        list <- c(list, paste0(var, mth))
+        
+      }
+      
+    }
+    
+    colnames(values) <- list
+    
+    nFold <- ncell %/% 8000 + 1
+    
+    for(j in 1:nFold){
+      
+      #     outdir<-paste0(oDir,"/",model)
+      #     if (!file.exists(outdir)) {dir.create(outdir, recursive=T)}
+      
+      oFold <- paste0(oDirMod, "/fold-", sprintf("%02d",j))
+      if (!file.exists(oFold)) {dir.create(oFold)}
+      
+      if (!file.exists(paste0(oFold, "/7999.dat"))){
+        
+        staCell <- ((j - 1) * 8000) + 1
+        if (j == nFold){endCell <- ncell} else {endCell <- staCell + 7999}
+        
+        cat("\n Creating dat files for Fold ", j, model, staCell, endCell, "\n")
+        
+        data_matrix <- cbind("POINTID"=1:8000, "LATITUD"=coords[staCell:endCell,2], "LONGITUD"=coords[staCell:endCell,1], "RecNo"=1:8000, "PointNo"=1:8000, coords[staCell:endCell,], "alt"=alt[staCell:endCell], values[staCell:endCell,])
+        
+        data_matrix <- write.table(data_matrix, paste0(oFold, "/", model, ".txt"), quote = F, row.names = F, sep="\t")
+        
+        cat("fold ", j)
+        system2(paste0(read_diva))
+        
+      }
+      
+    }
+    
+    all_data <- cbind("POINTID"=1:ncell, "LATITUD"=coords[,2], "LONGITUD"=coords[,1], "RecNo"=1:ncell, "PointNo"=1:ncell, coords, "alt"=alt, values)
+    all_data <- write.table(all_data, paste0(oDir, "/", model, "_all_data.txt"), quote = F, row.names = F, sep="\t")
+  }
+  
+# }
+
+
+
+
