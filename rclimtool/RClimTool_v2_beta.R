@@ -63,9 +63,9 @@ suppressMessages(library(gWidgetsRGtk2)) #Paquete para generar interfaz grafica
 suppressMessages(library(RMAWGEN)) #Este realiza la funcion del llenado de datos
 suppressMessages(library(Kendall)) #Necesario para correr la prueba de Mann-Kendall
 suppressMessages(library(tseries)) #Prueba jarque bera
-suppressMessages(library(grid)) #para crear división de graficos ggplot2
+suppressMessages(library(grid)) #para crear división de gráficos ggplot2
 suppressMessages(library(car)) #para recodificar variables
-suppressMessages(library(reshape)) #para modificar base de datos para graficos ggplot2
+suppressMessages(library(reshape)) #para modificar base de datos para gráficos ggplot2
 suppressMessages(library(DescTools)) #Prueba no paramétrica Siegel Tukey para igualdad de varianzas
 
 options("guiToolkit"="RGtk2") #Selecciona las herramientas para la interfaz grafica
@@ -189,7 +189,7 @@ descript2=function(object){
   d=as.table(d)
   names(dimnames(d)) <- c(" ", paste("Variable",svalue(nom_val1)))
 
-  cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n ")
+  cat("\n\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n ")
   cat(" Análisis descriptivo para la variable ",svalue(nom_val1))
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n")
 
@@ -212,18 +212,21 @@ descriptna2=function(object){
 
 
 #---------------------------------------------------------------------
-####----------Funciones para generar graficos automáticos-----------#####
+####----------Funciones para generar gráficos automáticos-----------#####
 #---------------------------------------------------------------------
 
 ########################################################
-#MODIFICAR GRAFICOS MAS ESTANDARIZADOS (EXPLORAR JAZIKU)
+#MODIFICAR gráficoS MAS ESTANDARIZADOS (EXPLORAR JAZIKU)
 ########################################################
 
 graf_plot=function(){
-  confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis grafico"),"Ubicación archivos")
+  confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis gráfico"),"Ubicación archivos")
 
   if(svalue(tipo)=="Diaria"){
-
+    cat("\n\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    cat(paste0(" Generando gráficos plot diarios"))
+    cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    
     tmax1=ts(tmax,start=min(tmax$year),frequency=365)
     tmin1=ts(tmin,start=min(tmin$year),frequency=365)
     prec1=ts(prec,start=min(prec$year),frequency=365)
@@ -231,15 +234,15 @@ graf_plot=function(){
     station=names( tmax[-3:-1])
     m=matrix(c(1,1,2,3,3,4,5,5,6),3,3,byrow=T)
 
-    dir.create("Analisis grafico",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos diarios",showWarnings=F)
+    dir.create("Analisis gráfico",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos diarios",showWarnings=F)
 
-    dir.create("Analisis grafico/Gráficos diarios/Gráficos plot e histogramas",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos diarios/Gráficos plot e histogramas",showWarnings=F)
 
     for(i in 1:(ncol(tmax)-3)){
 
-      jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos plot e histogramas/plot_",station[i],"_d.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
-      #jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos plot e histogramas/plot_",station[i],"_d.jpeg",sep=""),width = 1000, height = 500)
+      jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos plot e histogramas/plot_",station[i],"_d.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
+      #jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos plot e histogramas/plot_",station[i],"_d.jpeg",sep=""),width = 1000, height = 500)
       layout(m)
       plot(tmax1[,i+3],type="l",xlab="Años",ylab="Temperatura Máxima (°C)",col="black")
       title(main=paste(station[i]),outer = TRUE, line = -1)
@@ -249,12 +252,16 @@ graf_plot=function(){
       plot(prec1[,i+3],type="l",xlab="Años",ylab="Precipitación (mm/día)")
       hist(prec1[,i+3],main="",xlab="Precipitación")
       dev.off()
-
+      
+      cat(paste0("Generando gráfico plot para la estación "),station[i],"\n")
     }
   }
 
   if(svalue(tipo)=="Mensual"){
-
+    cat("\n\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    cat(paste0(" Generando gráficos plot mensuales"))
+    cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    
     tmax1=ts(aggregate(tmax[-3:-1],list(Mes=tmax$month,Año=tmax$year),mean2),frequency=12,start=min(tmax$year))
     tmin1=ts(aggregate(tmin[-3:-1],list(Mes=tmin$month,Año=tmin$year),mean2),start=min(tmin$year),frequency=12)
     prec1=ts(aggregate(prec[-3:-1],list(Mes=prec$month,Año=prec$year),sum2),start=min(prec$year),frequency=12)
@@ -263,15 +270,15 @@ graf_plot=function(){
     station=names(tmax[-3:-1])
     m=matrix(c(1,1,2,3,3,4,5,5,6),3,3,byrow=T)
 
-    dir.create("Analisis grafico",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos Mensuales",showWarnings=F)
+    dir.create("Analisis gráfico",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos Mensuales",showWarnings=F)
 
-    dir.create("Analisis grafico/Gráficos Mensuales/Gráficos plot e histogramas",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos Mensuales/Gráficos plot e histogramas",showWarnings=F)
 
     for(i in 1:(ncol(tmax)-3)){
 
-      jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos plot e histogramas/plot_",station[i],"_m.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
-      #jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos plot e histogramas/plot_",station[i],"_m.jpeg",sep=""),width = 1200, height = 500)
+      jpeg(paste("Analisis gráfico/Gráficos Mensuales/Gráficos plot e histogramas/plot_",station[i],"_m.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
+      #jpeg(paste("Analisis gráfico/Gráficos Mensuales/Gráficos plot e histogramas/plot_",station[i],"_m.jpeg",sep=""),width = 1200, height = 500)
       layout(m)
       plot(tmax1[,i+2],type="l",xlab="Años",ylab="Temperatura Máxima (°C)",ylim=c(min(tmax[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="black")
       title(main=paste(station[i]),outer = TRUE, line = -1)
@@ -282,7 +289,8 @@ graf_plot=function(){
       hist(prec1[,i+2],main="",xlab="Precipitación (mm/mes)")
       dev.off()
 
-
+      cat(paste0("Generando gráfico plot para la estación "),station[i],"\n")
+      
     }
 
   }
@@ -290,9 +298,13 @@ graf_plot=function(){
 }
 
 graf_box=function(){
-  confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis grafico"),"Ubicación archivos")
+  confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis gráfico"),"Ubicación archivos")
 
   if(svalue(tipo)=="Mensual"){
+    cat("\n\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    cat(paste0(" Generando gráficos boxplot mensuales"))
+    cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    
     tmax=aggregate(tmax[-3:-1],list(month=tmax$month,year=tmax$year),mean2)
     tmin=aggregate(tmin[-3:-1],list(month=tmin$month,year=tmin$year),mean2)
     prec=aggregate(prec[-3:-1],list(month=prec$month,year=prec$year),sum2)
@@ -304,16 +316,16 @@ graf_box=function(){
     month1=factor(month1,levels=levels1)
 
     vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-    dir.create("Analisis grafico",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos Mensuales",showWarnings=F)
+    dir.create("Analisis gráfico",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos Mensuales",showWarnings=F)
 
-    dir.create("Analisis grafico/Gráficos Mensuales/Gráficos boxplot",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos Mensuales/Gráficos boxplot",showWarnings=F)
 
     for(i in 1:(ncol(tmax)-2)){
 
-      jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos boxplot/box_",station[i],"_m.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
+      jpeg(paste("Analisis gráfico/Gráficos Mensuales/Gráficos boxplot/box_",station[i],"_m.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
 
-      #jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos boxplot/box_",station[i],"_m.jpeg",sep=""),width = 1200, height = 500)
+      #jpeg(paste("Analisis gráfico/Gráficos mensuales/Gráficos boxplot/box_",station[i],"_m.jpeg",sep=""),width = 1200, height = 500)
 
       mes=qplot(month1,tmax[,i+2], geom = "boxplot",group = month1, ylab=paste("Temperatura Máxima (°C)",sep="_"),xlab="Mes", outlier.size =0.7)
       mes1=qplot(month1,tmin[,i+2], geom = "boxplot",group = month1, ylab=paste("Temperatura Mínima (°C)",sep="_"),xlab="Mes", outlier.size =0.7)
@@ -338,7 +350,8 @@ graf_box=function(){
       print(year2, vp = vplayout(4,1:2))
       print(mes2, vp = vplayout(4,3:4))
       dev.off()
-
+      cat(paste0("Generando gráfico boxplot para la estación "),station[i],"\n")
+      
     }
     x=melt(tmax[-2:-1])
     y=melt(tmin[-2:-1])
@@ -349,9 +362,9 @@ graf_box=function(){
     gral2=qplot(x$variable,z$value,geom="boxplot",group=z$variable,ylab="Precipitación (mm)",xlab="", outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
     vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
-    jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos boxplot/todos_m.jpeg",sep=""), width = 10, height = 4,units = 'in',res=200)
+    jpeg(paste("Analisis gráfico/Gráficos Mensuales/Gráficos boxplot/todos_m.jpeg",sep=""), width = 10, height = 4,units = 'in',res=200)
 
-    #jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos boxplot/todos_m.jpeg",sep=""),width = 600, height = 500)
+    #jpeg(paste("Analisis gráfico/Gráficos mensuales/Gráficos boxplot/todos_m.jpeg",sep=""),width = 600, height = 500)
     grid.newpage()
 
     pushViewport(viewport(layout = grid.layout(2,3, heights = unit(c(0.5, 4, 4,4), "null"))))
@@ -364,6 +377,10 @@ graf_box=function(){
   }
 
   if(svalue(tipo)=="Diaria"){
+    cat("\n\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    cat(paste0(" Generando gráficos boxplot diarios"))
+    cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n ")
+    
     tmax=tmax
     tmin=tmin
     prec=prec
@@ -377,13 +394,13 @@ graf_box=function(){
 
 
     vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-    dir.create("Analisis grafico",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos Diarios",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos Diarios/Gráficos_boxplot",showWarnings=F)
+    dir.create("Analisis gráfico",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos Diarios",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos Diarios/Gráficos_boxplot",showWarnings=F)
 
     for(i in 1:(ncol(tmax)-3)){
 
-      jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos_boxplot/box_",station[i],"_d.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
+      jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos_boxplot/box_",station[i],"_d.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
 
 
       mes=qplot(month1,tmax[,i+3], geom = "boxplot",group = month1, ylab=paste("Temp. Máxima",sep="_"),xlab="",outlier.size =0.7)
@@ -409,7 +426,8 @@ graf_box=function(){
       print(year2, vp = vplayout(4,1:2))
       print(mes2, vp = vplayout(4,3:4))
       dev.off()
-
+      cat(paste0("Generando gráfico boxplot para la estación "),station[i],"\n")
+      
     }
     x=melt(tmax[-3:-1])
     y=melt(tmin[-3:-1])
@@ -420,7 +438,7 @@ graf_box=function(){
     gral2=qplot(x$variable,z$value,geom="boxplot",group=z$variable,ylab="Precipitación",xlab="", outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
     vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
-    jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos_boxplot/todos_d.jpeg",sep=""), width = 10, height = 4,units = 'in',res=200)
+    jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos_boxplot/todos_d.jpeg",sep=""), width = 10, height = 4,units = 'in',res=200)
 
     grid.newpage()
 
@@ -435,7 +453,7 @@ graf_box=function(){
 }
 
 graf_disp=function(){
-  confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis grafico"),"Ubicación archivos")
+  confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis gráfico"),"Ubicación archivos")
 
   panel.cor <- function(x, y, digits=2, prefix="", cex.cor, ...){
     usr <- par("usr"); on.exit(par(usr))
@@ -452,64 +470,64 @@ graf_disp=function(){
 
   if(svalue(tipo)=="Mensual"){
 
-    dir.create("Analisis grafico",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos mensuales",showWarnings=F)
+    dir.create("Analisis gráfico",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos mensuales",showWarnings=F)
 
-    dir.create("Analisis grafico/Gráficos mensuales/Gráficos dispersión",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos mensuales/Gráficos dispersión",showWarnings=F)
 
     datostmax=aggregate(tmax[-3:-1],list(month=tmax$month,year=tmax$year),mean2)
     datostmin=aggregate(tmin[-3:-1],list(month=tmin$month,year=tmin$year),mean2)
     datosprec=aggregate(prec[-3:-1],list(month=prec$month,year=prec$year),sum2)
 
 
-    jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos dispersión/tmax.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+    jpeg(paste("Analisis gráfico/Gráficos mensuales/Gráficos dispersión/tmax.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-    #jpeg(paste("Analisis grafico/Gráficos dispersión/tmax.jpeg",sep=""),width = 600, height = 600)
+    #jpeg(paste("Analisis gráfico/Gráficos dispersión/tmax.jpeg",sep=""),width = 600, height = 600)
     datostmax=data.frame(na.omit(datostmax[-2:-1]))
     tryCatch( pairs(datostmax,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
 
     dev.off()
 
-    jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos dispersión/tmin.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+    jpeg(paste("Analisis gráfico/Gráficos mensuales/Gráficos dispersión/tmin.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-    #jpeg(paste("Analisis grafico/Gráficos dispersión/tmin.jpeg",sep=""),width = 600, height = 600)
+    #jpeg(paste("Analisis gráfico/Gráficos dispersión/tmin.jpeg",sep=""),width = 600, height = 600)
     datostmin=data.frame(na.omit(datostmin[-2:-1]))
     tryCatch(pairs(datostmin,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
     dev.off()
 
-    jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos dispersión/prec.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+    jpeg(paste("Analisis gráfico/Gráficos mensuales/Gráficos dispersión/prec.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-    # jpeg(paste("Analisis grafico/Gráficos dispersión/prec.jpeg",sep=""),width = 600, height = 600)
+    # jpeg(paste("Analisis gráfico/Gráficos dispersión/prec.jpeg",sep=""),width = 600, height = 600)
     datosprec=data.frame(na.omit(datosprec[-2:-1]))
     tryCatch( pairs(datosprec,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
     dev.off()
   }
 
   if(svalue(tipo)=="Diaria"){
-    dir.create("Analisis grafico",showWarnings=F)
-    dir.create("Analisis grafico/Gráficos diarios",showWarnings=F)
+    dir.create("Analisis gráfico",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos diarios",showWarnings=F)
 
-    dir.create("Analisis grafico/Gráficos diarios/Gráficos dispersión",showWarnings=F)
+    dir.create("Analisis gráfico/Gráficos diarios/Gráficos dispersión",showWarnings=F)
 
 
-  jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos dispersión/tmax.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+  jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos dispersión/tmax.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-  #jpeg(paste("Analisis grafico/Gráficos dispersión/tmax.jpeg",sep=""),width = 600, height = 600)
+  #jpeg(paste("Analisis gráfico/Gráficos dispersión/tmax.jpeg",sep=""),width = 600, height = 600)
   datostmax=data.frame(na.omit(tmax[-3:-1]))
   tryCatch( pairs(datostmax,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
 
   dev.off()
 
-  jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos dispersión/tmin.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+  jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos dispersión/tmin.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-  #jpeg(paste("Analisis grafico/Gráficos dispersión/tmin.jpeg",sep=""),width = 600, height = 600)
+  #jpeg(paste("Analisis gráfico/Gráficos dispersión/tmin.jpeg",sep=""),width = 600, height = 600)
   datostmin=data.frame(na.omit(tmin[-3:-1]))
   tryCatch(pairs(datostmin,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
   dev.off()
 
-  jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos dispersión/prec.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
+  jpeg(paste("Analisis gráfico/Gráficos diarios/Gráficos dispersión/prec.jpeg",sep=""), width = 10, height = 10,units = 'in',res=200)
 
-  # jpeg(paste("Analisis grafico/Gráficos dispersión/prec.jpeg",sep=""),width = 600, height = 600)
+  # jpeg(paste("Analisis gráfico/Gráficos dispersión/prec.jpeg",sep=""),width = 600, height = 600)
   datosprec=data.frame(na.omit(prec[-3:-1]))
   tryCatch( pairs(datosprec,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
   dev.off()
@@ -521,8 +539,8 @@ graf_clim = function(){
 }
 
 #---------------------------------------------------------------------
-####-----Funciones para generar graficos PERSONALIZADOS----------#####
-####----------Funciones para generar graficos clásicos-----------#####
+####-----Funciones para generar gráficos PERSONALIZADOS----------#####
+####----------Funciones para generar gráficos clásicos-----------#####
 #---------------------------------------------------------------------
 
 plot2=function(){ #Genera gráfico plot
@@ -558,7 +576,7 @@ plot2=function(){ #Genera gráfico plot
 
       "main"=list(
         type= "gedit",
-        text="'Titulo del grafico'"),
+        text="'Titulo del gráfico'"),
       "xlab"=list(
         type= "gedit",
         text="'Etiqueta eje x'"),
@@ -568,7 +586,7 @@ plot2=function(){ #Genera gráfico plot
   ggenericwidget(plot.default.LIST,cont=gwindow("Gráfico Plot"))
 }
 
-hist2=function(){ #Genera grafico histograma
+hist2=function(){ #Genera gráfico histograma
   object=eval(parse(text=svalue(nom_val1)))
   hist.LIST <- list(
     title = "hist",
@@ -584,7 +602,7 @@ hist2=function(){ #Genera grafico histograma
       ),
       "main"=list(
         type= "gedit",
-        text="'Titulo del grafico'"),
+        text="'Titulo del gráfico'"),
       "xlab"=list(
         type= "gedit",
         text="'Etiqueta eje x'"),
@@ -595,7 +613,7 @@ hist2=function(){ #Genera grafico histograma
   ggenericwidget(hist.LIST,container=gwindow("Gráfico Histograma"))
 }
 
-boxplot2=function(){#Genera grafico boxplot
+boxplot2=function(){#Genera gráfico boxplot
   object=eval(parse(text=svalue(nom_val1)))
   boxplot.LIST <- list(
     title = "boxplot",
@@ -612,7 +630,7 @@ boxplot2=function(){#Genera grafico boxplot
         editable =T),
       "main"=list(
         type= "gedit",
-        text="'Titulo del grafico'"),
+        text="'Titulo del gráfico'"),
       "ylab"=list(
         type= "gedit",
         text="'Etiqueta eje y'")))
@@ -620,7 +638,7 @@ boxplot2=function(){#Genera grafico boxplot
 
 }
 
-qqnorm2=function(){ #Genera grafico qq-norm
+qqnorm2=function(){ #Genera gráfico qq-norm
   object=eval(parse(text=svalue(nom_val1)))
   qqnorm.default.LIST <- list(
     title = "qqnorm.default",
@@ -658,10 +676,10 @@ qqnorm2=function(){ #Genera grafico qq-norm
 }
 
 #---------------------------------------------------------------------
-####---------Funciones para generar graficos con ggplot2---------#####
+####---------Funciones para generar gráficos con ggplot2---------#####
 #---------------------------------------------------------------------
 
-hist_22=function(){ #genera grafico hist con ggplot2
+hist_22=function(){ #genera gráfico hist con ggplot2
   object=eval(parse(text=svalue(nom_val1)))
   qplot.LIST <- list(
     title = "qplot",
@@ -685,7 +703,7 @@ hist_22=function(){ #genera grafico hist con ggplot2
 
       "main"=list(
         type= "gedit",
-        text="'Titulo del grafico'"),
+        text="'Titulo del gráfico'"),
       "xlab"=list(
         type= "gedit",
         text="'Etiqueta eje x'"),
@@ -696,7 +714,7 @@ hist_22=function(){ #genera grafico hist con ggplot2
 
 }
 
-qplot2=function(){ #genera grafico plot con ggplot2
+qplot2=function(){ #genera gráfico plot con ggplot2
   object=eval(parse(text=svalue(nom_val1)))
   qplot.LIST <- list(
     title = "qplot",
@@ -725,7 +743,7 @@ qplot2=function(){ #genera grafico plot con ggplot2
 
       "main"=list(
         type= "gedit",
-        text="'Titulo del grafico'"),
+        text="'Titulo del gráfico'"),
       "xlab"=list(
         type= "gedit",
         text="'Etiqueta eje x'"),
@@ -821,7 +839,7 @@ sum2=function(a,na.rm=any(!is.na(a))){
   return(sum(a,na.rm=any(!is.na(a))))
 }
 
-#Modificar graficos de control poner antes y despues
+#Modificar gráficos de control poner antes y despues
 
 quality_control<-function(object){
 
@@ -959,7 +977,7 @@ quality_control<-function(object){
                             round(na/dim(tmax)[1]*100,2))
 
       
-      #######Graficos control de calidad###########
+      #######gráficos control de calidad###########
       tiff(paste("Control de calidad/tmax/","tmax_qc_",station[i],".tiff",sep=""),compression = 'lzw',height = 5,width = 16,units="in", res=150)
       par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
       plot(tmax[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Temperatura máxima (°C)",main=station[i])
@@ -1107,7 +1125,7 @@ quality_control<-function(object){
                             round(na/dim(tmax)[1]*100,2))
       
       
-      #######Graficos control de calidad###########
+      #######gráficos control de calidad###########
       tiff(paste("Control de calidad/tmin/","tmin_qc_",station[i],".tiff",sep=""),compression = 'lzw',height = 5,width = 16,units="in", res=150)
       par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
       plot(tmin[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Temperatura mínima (°C)",main=station[i])
@@ -1239,7 +1257,7 @@ quality_control<-function(object){
       porcentajes[i,]=cbind(round((dim(out_range_data)[1]/dim(tmax)[1])*100,2),round((dim(out_atip_data)[1]/dim(tmax)[1])*100),round((dim(out_cons_data)[1]/dim(tmax)[1])*100,2),
                             round(na/dim(tmax)[1]*100,2))
       
-      #######Graficos control de calidad###########
+      #######gráficos control de calidad###########
       tiff(paste("Control de calidad/prec/","prec_qc_",station[i],".tiff",sep=""),compression = 'lzw',height = 5,width = 16,units="in", res=150)
       par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
       plot(tmax[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Precipitación (mm)",main=station[i])
@@ -2615,7 +2633,7 @@ enso1=function(){
   return(Condicion_ENSO)
 }
 
-graficos_enso_anomalias=function(){
+gráficos_enso_anomalias=function(){
   vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
   datos=read.table("Enso_ONI.txt",header=T)
@@ -2635,7 +2653,7 @@ graficos_enso_anomalias=function(){
 
     #station=names(object[-3:-1])
     dir.create("ENSO",showWarnings=F)
-    dir.create("ENSO/Graficos_anomalias",showWarnings=F)
+    dir.create("ENSO/gráficos_anomalias",showWarnings=F)
 
 
     an=data_m_e1[which(names(data_m_e1)=="tmax")]-promedios_tmax[,2]
@@ -2671,9 +2689,9 @@ graficos_enso_anomalias=function(){
       scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+geom_line(aes(1:length(year),an2[,1],colour="Anomalías obsv. prec"),data=an2,size=0.5)+ylab("ONI")+
       scale_color_manual(values=c("black"))
 
-    jpeg(paste("ENSO/Graficos_anomalias/anomalias.jpeg",sep=""), width = 9, height = 7,units = 'in',res=200)
+    jpeg(paste("ENSO/gráficos_anomalias/anomalias.jpeg",sep=""), width = 9, height = 7,units = 'in',res=200)
 
-    #jpeg(paste("ENSO/Graficos/",station[j],"_b.jpeg",sep=""),width = 1000, height = 700)
+    #jpeg(paste("ENSO/gráficos/",station[j],"_b.jpeg",sep=""),width = 1000, height = 700)
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(4,1, heights = unit(c(0.5, 4,4,4), "null"))))
     grid.text(paste(""), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
@@ -2684,7 +2702,7 @@ graficos_enso_anomalias=function(){
 
 
 
-    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/Graficos_anomalias"),"Ubicación archivos")
+    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/gráficos_anomalias"),"Ubicación archivos")
 
 
   }else{object<- read.csv_n("Datos_faltantes/data_genTmax.csv", header = TRUE)
@@ -2711,7 +2729,7 @@ graficos_enso_anomalias=function(){
 
         station=names(object[-3:-1])
         dir.create("ENSO",showWarnings=F)
-        dir.create("ENSO/Graficos_anomalias",showWarnings=F)
+        dir.create("ENSO/gráficos_anomalias",showWarnings=F)
 
         an=matrix(0,nrow(tx),ncol(object[-3:-1]))
         an1=matrix(0,nrow(tx),ncol(object[-3:-1]))
@@ -2761,9 +2779,9 @@ graficos_enso_anomalias=function(){
             scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"), name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+geom_line(aes(1:length(year),an2[,j],colour="Anomalías obsv. prec"),data=an2,size=0.5)+ylab("ONI")+
             scale_color_manual(values=c("black"))
 
-          jpeg(paste("ENSO/Graficos_anomalias/",station[j],".jpeg",sep=""), width = 9, height = 7,units = 'in',res=200)
+          jpeg(paste("ENSO/gráficos_anomalias/",station[j],".jpeg",sep=""), width = 9, height = 7,units = 'in',res=200)
 
-          #jpeg(paste("ENSO/Graficos/",station[j],"_b.jpeg",sep=""),width = 1000, height = 700)
+          #jpeg(paste("ENSO/gráficos/",station[j],"_b.jpeg",sep=""),width = 1000, height = 700)
           grid.newpage()
           pushViewport(viewport(layout = grid.layout(4,1, heights = unit(c(0.5, 4,4,4), "null"))))
           grid.text(paste(station[j]), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
@@ -2776,11 +2794,11 @@ graficos_enso_anomalias=function(){
 
         sapply_pb(1:length(station), function(x){plots(x)})
         # assign("plots", plots, envir=.GlobalEnv)
-        confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/Graficos_anomalias"),"Ubicación archivos")
+        confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/gráficos_anomalias"),"Ubicación archivos")
   }
 }
 
-graficos_enso_plot=function(){
+gráficos_enso_plot=function(){
 
   vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
@@ -2792,7 +2810,7 @@ graficos_enso_plot=function(){
 
 
     dir.create("ENSO",showWarnings=F)
-    dir.create("ENSO/Graficos_plot",showWarnings=F)
+    dir.create("ENSO/gráficos_plot",showWarnings=F)
 
 
     assign("data_m_e2", data_m_e2, envir=.GlobalEnv)
@@ -2806,7 +2824,7 @@ graficos_enso_plot=function(){
 
     data_g2=cbind(rep(1:12,3),ggplot_build(g2)$data[[1]][c(1,seq(2,240,7)[-1]),3],"Enso"=c(rep("Niña",12),rep("Niño",12),rep("Normal",12)))
     colnames(data_g2)=c("Mes","Prom_ajust","Enso")
-    write.csv_n(round(data_g2,2),"ENSO/Graficos_plot/enso_plot_precip.csv",row.names=F)
+    write.csv_n(round(data_g2,2),"ENSO/gráficos_plot/enso_plot_precip.csv",row.names=F)
 
     g21=ggplot(data_m_e2,aes(y=tmax,x=month))+stat_smooth(method=loess,fullrange=T,aes(colour=ENSO),size=1,level=0)+xlab("")+ylab("Temperatura Máxima")+scale_x_continuous(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylim(mean2(data_m_e2$tmax)-2,mean2(data_m_e2$tmax)+2)+
       # scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"),name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+
@@ -2814,7 +2832,7 @@ graficos_enso_plot=function(){
 
     data_g21=cbind(rep(1:12,3),ggplot_build(g21)$data[[1]][c(1,seq(2,240,7)[-1]),3],"Enso"=c(rep("Niña",12),rep("Niño",12),rep("Normal",12)))
     colnames(data_g21)=c("Mes","Prom_ajust","Enso")
-    write.csv_n(round(data_g21,2),"ENSO/Graficos_plot/enso_plot_tmax.csv",row.names=F)
+    write.csv_n(round(data_g21,2),"ENSO/gráficos_plot/enso_plot_tmax.csv",row.names=F)
 
     g22=ggplot(data_m_e2,aes(y=tmin,x=month))+stat_smooth(method=loess,fullrange=T,aes(colour=ENSO),size=1,level=0)+xlab("")+ylab("Temperatura Mínima")+scale_x_continuous(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylim(mean2(data_m_e2$tmin)-1,mean2(data_m_e2$tmin)+1)+
       # scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"),name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+
@@ -2822,9 +2840,9 @@ graficos_enso_plot=function(){
 
     data_g22=cbind(rep(1:12,3),ggplot_build(g22)$data[[1]][c(1,seq(2,240,7)[-1]),3],"Enso"=c(rep("Niña",12),rep("Niño",12),rep("Normal",12)))
     colnames(data_g22)=c("Mes","Prom_ajust","Enso")
-    write.csv_n(round(data_g22,2),"ENSO/Graficos_plot/enso_plot_tmin.csv",row.names=F)
+    write.csv_n(round(data_g22,2),"ENSO/gráficos_plot/enso_plot_tmin.csv",row.names=F)
 
-    jpeg(paste("ENSO/Graficos_plot/plot.jpeg",sep=""), width = 5, height = 10,units = 'in',res=200)
+    jpeg(paste("ENSO/gráficos_plot/plot.jpeg",sep=""), width = 5, height = 10,units = 'in',res=200)
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(4,1, heights = unit(c(0.5, 4,4,4), "null"))))
     grid.text(paste(""), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
@@ -2833,7 +2851,7 @@ graficos_enso_plot=function(){
     print(g22, vp = vplayout(4,1))
     dev.off()
 
-    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/Graficos_plot"),"Ubicación archivos")
+    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/gráficos_plot"),"Ubicación archivos")
 
   }else{
 
@@ -2853,7 +2871,7 @@ graficos_enso_plot=function(){
 
     station=names(object[-3:-1])
     dir.create("ENSO",showWarnings=F)
-    dir.create("ENSO/Graficos_plot",showWarnings=F)
+    dir.create("ENSO/gráficos_plot",showWarnings=F)
 
 
     assign("tx", tx, envir=.GlobalEnv)
@@ -2876,7 +2894,7 @@ graficos_enso_plot=function(){
 
       data_g2=cbind(rep(1:12,3),round(ggplot_build(g2)$data[[1]][c(1,seq(2,240,7)[-1]),3],2),"Enso"=c(rep("Niña",12),rep("Niño",12),rep("Normal",12)))
       colnames(data_g2)=c("Mes","Prom_ajust","Enso")
-      write.csv_n(data_g2,paste("ENSO/Graficos_plot/enso_plot_precip_",station[i],".csv"),row.names=F)
+      write.csv_n(data_g2,paste("ENSO/gráficos_plot/enso_plot_precip_",station[i],".csv"),row.names=F)
 
 
       g21=ggplot(tx,aes(y=tx[,i+2],x=Mes))+stat_smooth(method=loess,fullrange=T,aes(colour=ENSO),size=1,level=0)+xlab("")+ylab("Temperatura Máxima")+scale_x_continuous(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylim(mean2(tx[,i+2])-2,mean2(tx[,i+2])+2)+
@@ -2886,7 +2904,7 @@ graficos_enso_plot=function(){
 
       data_g21=cbind(rep(1:12,3),round(ggplot_build(g21)$data[[1]][c(1,seq(2,240,7)[-1]),3],2),"Enso"=c(rep("Niña",12),rep("Niño",12),rep("Normal",12)))
       colnames(data_g21)=c("Mes","Prom_ajust","Enso")
-      write.csv_n(data_g21,paste("ENSO/Graficos_plot/enso_plot_tmax_",station[i],".csv"),row.names=F)
+      write.csv_n(data_g21,paste("ENSO/gráficos_plot/enso_plot_tmax_",station[i],".csv"),row.names=F)
 
       g22=ggplot(tx1,aes(y=tx1[,i+2],x=Mes))+stat_smooth(method=loess,fullrange=T,aes(colour=ENSO),size=1,level=0)+xlab("")+ylab("Temperatura Mínima")+scale_x_continuous(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylim(mean2(tx1[,i+2])-1,mean2(tx1[,i+2])+1)+
         # scale_fill_manual(values=c( "dodgerblue2","firebrick3","chartreuse3"),name=" ", breaks=c("Niño","Normal","Niña"),labels=c("Niño","Normal","Niña"))+
@@ -2894,10 +2912,10 @@ graficos_enso_plot=function(){
 
       data_g22=cbind(rep(1:12,3),round(ggplot_build(g22)$data[[1]][c(1,seq(2,240,7)[-1]),3],2),"Enso"=c(rep("Niña",12),rep("Niño",12),rep("Normal",12)))
       colnames(data_g22)=c("Mes","Prom_ajust","Enso")
-      write.csv_n(data_g22,paste("ENSO/Graficos_plot/enso_plot_tmin_",station[i],".csv"),row.names=F)
+      write.csv_n(data_g22,paste("ENSO/gráficos_plot/enso_plot_tmin_",station[i],".csv"),row.names=F)
 
 
-      jpeg(paste("ENSO/Graficos_plot/",station[i],".jpeg",sep=""), width = 5, height = 10,units = 'in',res=200)
+      jpeg(paste("ENSO/gráficos_plot/",station[i],".jpeg",sep=""), width = 5, height = 10,units = 'in',res=200)
       grid.newpage()
       pushViewport(viewport(layout = grid.layout(4,1, heights = unit(c(0.5, 4,4,4), "null"))))
       grid.text(paste(station[i]), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
@@ -2909,11 +2927,11 @@ graficos_enso_plot=function(){
     }
 
     sapply_pb(1:length(station), function(x){plots1(x)})
-    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/Graficos_plot"),"Ubicación archivos")
+    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/gráficos_plot"),"Ubicación archivos")
   }
 }
 
-graficos_enso_boxplot=function(){
+gráficos_enso_boxplot=function(){
 
   vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
@@ -2925,7 +2943,7 @@ graficos_enso_boxplot=function(){
 
 
     dir.create("ENSO",showWarnings=F)
-    dir.create("ENSO/Graficos_boxplot",showWarnings=F)
+    dir.create("ENSO/gráficos_boxplot",showWarnings=F)
 
 
     assign("data_m_e2", data_m_e2, envir=.GlobalEnv)
@@ -2943,7 +2961,7 @@ graficos_enso_boxplot=function(){
       scale_fill_manual(values=c("firebrick3","chartreuse3","dodgerblue2"), name=" ",breaks=c("1","2","3"),labels=c("Niño","Normal","Niña"))+xlab("")
 
 
-    jpeg(paste("ENSO/Graficos_boxplot/boxplot.jpeg",sep=""), width = 8, height = 9,units = 'in',res=200)
+    jpeg(paste("ENSO/gráficos_boxplot/boxplot.jpeg",sep=""), width = 8, height = 9,units = 'in',res=200)
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(4,1, heights = unit(c(0.5, 4,4,4), "null"))))
     grid.text(paste(""), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
@@ -2952,7 +2970,7 @@ graficos_enso_boxplot=function(){
     print(g21c, vp = vplayout(4,1))
     dev.off()
 
-    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/Graficos_plot"),"Ubicación archivos")
+    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/gráficos_plot"),"Ubicación archivos")
   }else{
 
     object<- read.csv_n("Datos_faltantes/data_genTmax.csv", header = TRUE)
@@ -2971,7 +2989,7 @@ graficos_enso_boxplot=function(){
 
     station=names(object[-3:-1])
     dir.create("ENSO",showWarnings=F)
-    dir.create("ENSO/Graficos_boxplot",showWarnings=F)
+    dir.create("ENSO/gráficos_boxplot",showWarnings=F)
 
 
     assign("tx", tx, envir=.GlobalEnv)
@@ -2999,7 +3017,7 @@ graficos_enso_boxplot=function(){
       g22a=ggplot(tx1,aes(y=tx1[,i+2],x=factor(Mes)))+geom_boxplot(aes(fill=factor(ENSO1)),outlier.size=0.8)+scale_x_discrete(breaks=1:12, labels=Fechas)+theme(axis.text.x=element_text(angle=90, vjust=0.5, size=12))+ylab("Temperatura Mínima")+
         scale_fill_manual(values=c("firebrick3","chartreuse3","dodgerblue2"), name=" ",breaks=c("1","2","3"),labels=c("Niño","Normal","Niña"))+xlab("")
 
-      jpeg(paste("ENSO/Graficos_boxplot/",station[i],".jpeg",sep=""), width = 8, height = 9,units = 'in',res=200)
+      jpeg(paste("ENSO/gráficos_boxplot/",station[i],".jpeg",sep=""), width = 8, height = 9,units = 'in',res=200)
       grid.newpage()
       pushViewport(viewport(layout = grid.layout(4,1, heights = unit(c(0.5, 4,4,4), "null"))))
       grid.text(paste(station[i]), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
@@ -3011,7 +3029,7 @@ graficos_enso_boxplot=function(){
     }
 
     sapply_pb(1:length(station), function(x){plots2(x)})
-    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/Graficos_boxplot"),"Ubicación archivos")
+    confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"ENSO/gráficos_boxplot"),"Ubicación archivos")
   }
 }
 
@@ -3985,7 +4003,7 @@ lyt1[2,1:6]=glabel("")
 
 
 #---------------------------------------------------------------------
-###------------------------Analisis grafico------------------------###
+###------------------------Analisis gráfico------------------------###
 #---------------------------------------------------------------------
 lyt1[3,1]=(g.2=gframe("Gráficos automáticos: ",container=lyt1 ,horizontal=F,expand=T))
 lytg.1=glayout(homogeneous =F,cont=g.2,spacing=1,expand=T)
@@ -4268,9 +4286,9 @@ lyt.33=glayout(homogeneous =T,cont=gg.44,spacing=3,expand=T)
 #lyt.33[1,1]=gbutton("Cargar datos mensuales",container=lyt.33,handler = function(h,...){datos_enso_m()},expand=T)
 #lyt.33[2,1]=glabel("")
 
-lyt.33[3,1]=gbutton("Gráficos plot",container=lyt.33,handler = function(h,...){print(graficos_enso_plot())},expand=T)
-lyt.33[4,1]=gbutton("Gráficos boxplot",container=lyt.33,handler = function(h,...){print(graficos_enso_boxplot())},expand=T)
-lyt.33[5,1]=gbutton("Gráficos anomalías",container=lyt.33,handler = function(h,...){print(graficos_enso_anomalias())},expand=T)
+lyt.33[3,1]=gbutton("Gráficos plot",container=lyt.33,handler = function(h,...){print(gráficos_enso_plot())},expand=T)
+lyt.33[4,1]=gbutton("Gráficos boxplot",container=lyt.33,handler = function(h,...){print(gráficos_enso_boxplot())},expand=T)
+lyt.33[5,1]=gbutton("Gráficos anomalías",container=lyt.33,handler = function(h,...){print(gráficos_enso_anomalias())},expand=T)
 
 
 
