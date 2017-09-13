@@ -91,17 +91,17 @@ sep_d=function(...){
 }
 
 load_tmin=function(){
-  tmin=read.table(gfile("Seleccione el archivo de temperatura mínima"),sep = svalue(sep),header=T)
+  tmin=read.table(gfile("Seleccione el archivo de temperatura mínima"),dec = svalue(sep),header=T)
   assign("tmin",tmin,.GlobalEnv)
 }
 
 load_tmax=function(){
-  tmax=read..table(gfile("Seleccione el archivo de temperatura máxima"),sep = svalue(sep),header=T)
+  tmax=read.table(gfile("Seleccione el archivo de temperatura máxima"),dec = svalue(sep),header=T)
   assign("tmax",tmax,.GlobalEnv)
 }
 
 load_precip=function(){
-  prec=read.table(gfile("Seleccione el archivo de precitación"),sep = svalue(sep),header=T)
+  prec=read.table(gfile("Seleccione el archivo de precitación"),dec = svalue(sep),header=T)
   assign("prec",prec,.GlobalEnv)
 }
 
@@ -241,12 +241,12 @@ graf_plot=function(){
       jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos plot e histogramas/plot_",station[i],"_d.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
       #jpeg(paste("Analisis grafico/Gráficos diarios/Gráficos plot e histogramas/plot_",station[i],"_d.jpeg",sep=""),width = 1000, height = 500)
       layout(m)
-      plot(tmax1[,i+3],type="l",xlab="Años",ylab="Temp. Máxima",ylim=c(min(tmin[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="black")
+      plot(tmax1[,i+3],type="l",xlab="Años",ylab="Temperatura Máxima (°C)",col="black")
       title(main=paste(station[i]),outer = TRUE, line = -1)
-      hist(tmax1[,i+3],main="",xlab="Temp. Máxima")
-      plot(tmin1[,i+3],type="l",xlab="Años",ylab="Temp. Mínima",ylim=c(min(tmin[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="black")
-      hist(tmin1[,i+3],main="",xlab="Temp. Mínima")
-      plot(prec1[,i+3],type="l",xlab="Años",ylab="Precipitación")
+      hist(tmax1[,i+3],main="",xlab="Temperatura Máxima (°C)")
+      plot(tmin1[,i+3],type="l",xlab="Años",ylab="Temperatura Mínima (°C)",col="black")
+      hist(tmin1[,i+3],main="",xlab="Temperatura Mínima")
+      plot(prec1[,i+3],type="l",xlab="Años",ylab="Precipitación (mm/día)")
       hist(prec1[,i+3],main="",xlab="Precipitación")
       dev.off()
 
@@ -273,13 +273,13 @@ graf_plot=function(){
       jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos plot e histogramas/plot_",station[i],"_m.jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
       #jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos plot e histogramas/plot_",station[i],"_m.jpeg",sep=""),width = 1200, height = 500)
       layout(m)
-      plot(tmax1[,i+2],type="l",xlab="Años",ylab="Temp. Máxima",ylim=c(min(tmax[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="black")
+      plot(tmax1[,i+2],type="l",xlab="Años",ylab="Temperatura Máxima (°C)",ylim=c(min(tmax[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="black")
       title(main=paste(station[i]),outer = TRUE, line = -1)
-      hist(tmax1[,i+2],main="",xlab="Temp. Máxima")
-      plot(tmin1[,i+2],type="l",xlab="Años",ylab="Temp. Mínima",ylim=c(min(tmin[,i+3],na.rm=T),max(tmin[,i+3],na.rm=T)),col="black")
-      hist(tmin1[,i+2],main="",xlab="Temp. Mínima")
-      plot(prec1[,i+2],type="l",xlab="Años",ylab="Precipitación")
-      hist(prec1[,i+2],main="",xlab="Precipitación")
+      hist(tmax1[,i+2],main="",xlab="Temperatura Máxima (°C)")
+      plot(tmin1[,i+2],type="l",xlab="Años",ylab="Temperatura Mínima (°C)",ylim=c(min(tmin[,i+3],na.rm=T),max(tmin[,i+3],na.rm=T)),col="black")
+      hist(tmin1[,i+2],main="",xlab="Temperatura Mínima (°C)")
+      plot(prec1[,i+2],type="l",xlab="Años",ylab="Precipitación (mm/mes)")
+      hist(prec1[,i+2],main="",xlab="Precipitación (mm/mes)")
       dev.off()
 
 
@@ -315,13 +315,13 @@ graf_box=function(){
 
       #jpeg(paste("Analisis grafico/Gráficos mensuales/Gráficos boxplot/box_",station[i],"_m.jpeg",sep=""),width = 1200, height = 500)
 
-      mes=qplot(month1,tmax[,i+2], geom = "boxplot",group = month1, ylab=paste("Temp. Máxima",sep="_"),xlab="Mes", outlier.size =0.7)
-      mes1=qplot(month1,tmin[,i+2], geom = "boxplot",group = month1, ylab=paste("Temp. Mínima",sep="_"),xlab="Mes", outlier.size =0.7)
-      mes2=qplot(month1,prec[,i+2], geom = "boxplot",group = month1, ylab=paste("Precip",sep="_"),xlab="Mes", outlier.size =0.7)
+      mes=qplot(month1,tmax[,i+2], geom = "boxplot",group = month1, ylab=paste("Temperatura Máxima (°C)",sep="_"),xlab="Mes", outlier.size =0.7)
+      mes1=qplot(month1,tmin[,i+2], geom = "boxplot",group = month1, ylab=paste("Temperatura Mínima (°C)",sep="_"),xlab="Mes", outlier.size =0.7)
+      mes2=qplot(month1,prec[,i+2], geom = "boxplot",group = month1, ylab=paste("Precipitación (mm)",sep="_"),xlab="Mes", outlier.size =0.7)
 
-      year=qplot(tmax$year ,tmax[,i+2], geom = "boxplot",  group =  tmax$year,ylab=paste("Temp. Máxima",sep="_"),xlab="",outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
-      year1=qplot(tmin$year ,tmin[,i+2], geom = "boxplot", group =  tmin$year,ylab=paste("Temp. Mínima",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
-      year2=qplot(prec$year ,prec[,i+2], geom = "boxplot", group =  prec$year,ylab=paste("Precip",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+      year=qplot(tmax$year ,tmax[,i+2], geom = "boxplot",  group =  tmax$year,ylab=paste("Temperatura Máxima (°C)",sep="_"),xlab="",outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+      year1=qplot(tmin$year ,tmin[,i+2], geom = "boxplot", group =  tmin$year,ylab=paste("Temperatura Mínima (°C)",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+      year2=qplot(prec$year ,prec[,i+2], geom = "boxplot", group =  prec$year,ylab=paste("Precipitación (mm)",sep="_"),xlab="", outlier.size =0.7)+scale_x_continuous(breaks=pretty(min(tmax$year):max(tmax$year),length(unique(tmax$year))))+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
 
       grid.newpage()
 
@@ -344,9 +344,9 @@ graf_box=function(){
     y=melt(tmin[-2:-1])
     z=melt(prec[-2:-1])
 
-    gral=qplot(x$variable,x$value,geom="boxplot",group=x$variable,ylab="Temp. Máxima",xlab="",outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
-    gral1=qplot(y$variable,y$value,geom="boxplot",group=y$variable,ylab="Temp. Mínima",xlab="",outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
-    gral2=qplot(x$variable,z$value,geom="boxplot",group=z$variable,ylab="Precipitación",xlab="", outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+    gral=qplot(x$variable,x$value,geom="boxplot",group=x$variable,ylab="Temperatura Máxima (°C)",xlab="",outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+    gral1=qplot(y$variable,y$value,geom="boxplot",group=y$variable,ylab="Temperatura Mínima (°C)",xlab="",outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+    gral2=qplot(x$variable,z$value,geom="boxplot",group=z$variable,ylab="Precipitación (mm)",xlab="", outlier.size =0.7)+theme(axis.text.x  = element_text(angle=90, vjust=0.5))
     vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
     jpeg(paste("Analisis grafico/Gráficos Mensuales/Gráficos boxplot/todos_m.jpeg",sep=""), width = 10, height = 4,units = 'in',res=200)
