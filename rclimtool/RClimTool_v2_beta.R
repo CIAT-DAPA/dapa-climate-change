@@ -285,8 +285,8 @@ graf_plot=function(){
       hist(tmax1[,i+2],main="",xlab="Temperatura Máxima (°C)")
       plot(tmin1[,i+2],type="l",xlab="Años",ylab="Temperatura Mínima (°C)",ylim=c(min(tmin[,i+3],na.rm=T),max(tmin[,i+3],na.rm=T)),col="black")
       hist(tmin1[,i+2],main="",xlab="Temperatura Mínima (°C)")
-      plot(prec1[,i+2],type="l",xlab="Años",ylab="Precipitación (mm/mes)")
-      hist(prec1[,i+2],main="",xlab="Precipitación (mm/mes)")
+      plot(prec1[,i+2],type="l",xlab="Años",ylab="Precipitación (mm/ mes)")
+      hist(prec1[,i+2],main="",xlab="Precipitación (mm/ mes)")
       dev.off()
 
       cat(paste0("Generando gráfico plot para la estación "),station[i],"\n")
@@ -466,8 +466,8 @@ graf_disp=function(){
   }
 
 
-
-
+if(ncol(tmax)>15)
+  stop("El número de estaciones no es adecuado generar los gráficos de dispersión")
   if(svalue(tipo)=="Mensual"){
 
     dir.create("Analisis gráfico",showWarnings=F)
@@ -532,12 +532,54 @@ graf_disp=function(){
   tryCatch( pairs(datosprec,lower.panel=panel.cor, pch=19,col="black"),error=function(e) NULL )
   dev.off()
   }
-}
-
-graf_clim = function(){
+  
   
 }
 
+graf_clim = function(){
+  station=names( tmax[-3:-1])
+  
+  tmax_clim = aggregate(tmax[,-3:-1],list(tmax$month),mean2)
+  tmin_clim = aggregate(tmin[,-3:-1],list(tmin$month),mean2)
+  prec_cum = aggregate(prec[,-3:-1],list(prec$month,prec$year),sum22)
+  prec_clim = aggregate(prec_cum[,-2:-1],list(prec_cum$Group.1),mean2)
+  
+  
+ 
+  dir.create("Analisis gráfico",showWarnings=F)
+  dir.create("Analisis gráfico/Climatologías",showWarnings=F)
+  
+  jpeg(paste("Analisis gráfico/Climatologías/clim_",station[i],".jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
+   par(mar = c(7,5,2.5,5))
+   with(prec_clim, barplot(prec_clim[,2], col="lightblue", ylab="Precipitación (mm/ mes)", names.arg=c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec")))
+  
+   par(new = T)
+   with(tmin_clim, plot(tmin_clim[,1],tmin_clim[,2], type="l", col="blue",lwd = 2,
+                       axes=F, xlab=NA, ylab=NA, cex=1.2,ylim=c(min(tmin_clim[,2])-0.5,max(tmax_clim[,2])+0.5)))
+   par(new = T)
+   with(tmax_clim, plot(tmax_clim[,1],tmax_clim[,2], type="l", col="red3",lwd = 2,
+                       axes=F, xlab=NA, ylab=NA, cex=1.2,ylim=c(min(tmin_clim[,2])-0.5,max(tmax_clim[,2])+0.5)))
+
+  axis(side = 4)
+  mtext(side = 4, line = 3, 'Temperatura (°C)')
+  box()
+  title(paste(names(tmin_clim[2])))
+ # grid()
+  par(xpd=TRUE)
+  legend(0.2,min(tmin_clim[,2])-3,
+         legend=c("Temperatura máxima", "Temperatura mínima", "Precipitación"),
+         lty=c(1,1,1), lwd=c(2,2,7),col=c("red3", "blue","lightblue"))
+  dev.off()
+}
+
+sum22=function(a,na.rm=T){
+  na.x=sum(is.na(a))/length(a)
+  if(na.x>=0.2){
+    x=NA
+  }else{x=sum2(a)}
+  
+  return(x)
+}
 #---------------------------------------------------------------------
 ####-----Funciones para generar gráficos PERSONALIZADOS----------#####
 ####----------Funciones para generar gráficos clásicos-----------#####
