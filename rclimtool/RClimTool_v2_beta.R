@@ -923,9 +923,9 @@ quality_control<-function(object){
       month = factor(month, levels=month.abb)
       
       #svalue(ric)
-      val.na = boxplot(x~month,range=5,plot=F)
+      val.na = boxplot(x~month,range=svalue(ric),plot=F)
       #svalue(ric)
-      val = boxplot(x~month,range=3,plot=F)
+      val = boxplot(x~month,range=svalue(ric),plot=F)
       
       
         
@@ -948,9 +948,9 @@ quality_control<-function(object){
       out_atip.na = which(x > lim_sup.na | x < lim_inf.na)  
       out_atip = which(x > lim_sup | x < lim_inf)  
       
-      val.na.y = boxplot(x~year,range=5)
+      val.na.y = boxplot(x~year,range=svalue(ric))
       #svalue(ric)
-      val.y = boxplot(x~year,range=3,plot=F)
+      val.y = boxplot(x~year,range=svalue(ric),plot=F)
       year.nam = as.numeric(val.y$names)
      
       lim_inf.y = c()
@@ -973,7 +973,7 @@ quality_control<-function(object){
       out_atip.y = which(x > lim_sup.y | x < lim_inf.y)  
       
       out_atip.na_data = data.frame(c(out_atip.na,out_atip.na.y),object[c(out_atip.na,out_atip.na.y),i+3])
-      object[c(out_atip.na,out_atip.na.y),i+3]<-NA
+      #object[c(out_atip.na,out_atip.na.y),i+3]<-NA
       
       out_atip_data = cbind(object[c(out_atip,out_atip.y),1:3],object[c(out_atip,out_atip.y),i+3])
       colnames(out_atip_data)<-c("day","month","year","value")
@@ -3970,7 +3970,7 @@ pronosticos=function(){
 #####################################################################################
 
 
-win <- gwindow("RClimTool 2.0", visible=T ,width = 600) #Crea ventana inicial
+win <- gwindow("RClimTool 2.0", visible=F ,width = 600) #Crea ventana inicial
 nb = gnotebook(cont=win,expand=T,tab.pos = 2)
 
 
@@ -4103,8 +4103,9 @@ lytg[1,1]=glabel("",cont=lytg)
 lytg[2,1]=glabel("Variable a validar",container=lytg)
 lytg[2,2]=(variable<-gdroplist(c("tmax","tmin","prec"),selected=0,cont=lytg,expand=T))
 
-lytg[3,1]=glabel("No. de desviaciones estándar: ",container=lytg)
-lytg[3,2]=(criterio=gedit("3",container=lytg,width = 5,initial.msg="Desv.Est."))
+lytg[3,1]=glabel("Factor RIC: ",container=lytg)
+lytg[3,2]=(criterio=gedit("5",container=lytg,width = 5,initial.msg=" "))
+
 
 lytg[4,1]=glabel("Rango de la variable:",container=lytg)
 lytg[4,2]=(minim=gedit("",container=lytg,width = 7,initial.msg="Mín."))
@@ -4278,19 +4279,19 @@ lyt.22[13,3]=(nom_est_c=gdroplist(c("","tmax","tmin","prec"),selected=1,cont=lyt
 #lyt.22[14,1]=gcheckbox("Índice Estandarizado de Precipitación",container=lyt.22,handler = function(h,...){print(spi())})
 
 
-lyt2[3,1]=(gg.3.3=gframe("Indicadores Agroclimáticos:",cont=lyt2,horizontal=F))
-lyt.2.2=glayout(homogeneous =F,cont=gg.3.3,spacing=2,expand=F)
-lyt.2.2[1,1]=glabel("")
-lyt.2.2[2,1]=gcheckbox("Grados días del cultivo ",container=lyt.2.2,handler = function(h,...){print(gradosdias(as.numeric(svalue(valor22))))})
-lyt.2.2[2,2]=(temp_base=gedit("",container=lyt.2.2,width = 15,initial.msg="Temp. Base"))
+# lyt2[3,1]=(gg.3.3=gframe("Indicadores Agroclimáticos:",cont=lyt2,horizontal=F))
+# lyt.2.2=glayout(homogeneous =F,cont=gg.3.3,spacing=2,expand=F)
+# lyt.2.2[1,1]=glabel("")
+# lyt.2.2[2,1]=gcheckbox("Grados días del cultivo ",container=lyt.2.2,handler = function(h,...){print(gradosdias(as.numeric(svalue(valor22))))})
+# lyt.2.2[2,2]=(temp_base=gedit("",container=lyt.2.2,width = 15,initial.msg="Temp. Base"))
 
 #---------------------------------------------------------------------
 ###--------------Seccion Cálculo de nuevas variables---------------###
 #---------------------------------------------------------------------
 
-lyt22=glayout(homogeneous =F,cont=nb,spacing=2,label="7. Resumen mensual y otros ",expand=T)
+lyt22=glayout(homogeneous =F,cont=nb,spacing=2,label="7. Agregación mensual y nuevas variables ",expand=T)
 
-lyt22[1,1]=(gg.4=gframe("Cálculo de nuevas variables",cont=lyt22,horizontal=F))
+lyt22[1,1]=(gg.4=gframe("Agregación mensual",cont=lyt22,horizontal=F))
 lyt.3=glayout(homogeneous =T,cont=gg.4,spacing=3,expand=T)
 
 lyt.3[1,1]=glabel("-Seleccione la variable a calcular",container=lyt.3)
@@ -4300,17 +4301,20 @@ lyt.3[4,1]=gcheckbox("Temp. Mínima Mensual",container=lyt.3,handler = function(h
 lyt.3[5,1]=gcheckbox("Temp. Mínima Promedio Mensual",container=lyt.3,handler = function(h,...){print(tempminprom())})
 lyt.3[6,1]=gcheckbox("Temp. Promedio Mensual",container=lyt.3,handler = function(h,...){print(tempmean())})
 lyt.3[7,1]=gcheckbox("Precip. Acumulada Mensual",container=lyt.3,handler = function(h,...){print(precpcum())})
-lyt.3[8,1]=gcheckbox("Oscilación de temperatura diaria",container=lyt.3,handler = function(h,...){print(osc_temp())})
-lyt.3[9,1]=gcheckbox("Oscilación de temperatura mensual",container=lyt.3,handler = function(h,...){print(osc_temp_m())})
 
+lyt22[2,1]=(gg.4.4=gframe("Nuevas variables",cont=lyt22,horizontal=F))
+lyt.3.4=glayout(homogeneous =T,cont=gg.4.4,spacing=3,expand=T)
+
+lyt.3.4[1,1]=gcheckbox("Oscilación de temperatura diaria",container=lyt.3.4,handler = function(h,...){print(osc_temp())})
+lyt.3.4[2,1]=gcheckbox("Oscilación de temperatura mensual",container=lyt.3.4,handler = function(h,...){print(osc_temp_m())})
 
 #---------------------------------------------------------------------
 ###---------------------Seccion Condición ENSO---------------------###
 #---------------------------------------------------------------------
 
-lyt22=glayout(homogeneous =F,cont=nb,spacing=2,label="8. Condición ENSO ",expand=T)
+lyt22=glayout(homogeneous =F,cont=nb,spacing=2,label="8. Fenómeno El Niño/La Niña ",expand=T)
 
-lyt22[1,1]=(gg.4=gframe("Condición ENSO",cont=lyt22,horizontal=F))
+lyt22[1,1]=(gg.4=gframe("Fenómeno El Niño/La Niña",cont=lyt22,horizontal=F))
 lyt.3=glayout(homogeneous =T,cont=gg.4,spacing=3,expand=T)
 
 lyt.3[2,1]=glabel("Desde:",container=lyt.3)
@@ -4322,15 +4326,15 @@ lyt.3[3,2]=(mes1=gdroplist(c("Mes",1:12),selected=1,cont=lyt.1,expand=T))
 lyt.3[3,3]=(año1=gdroplist(c("Año",1950:2014),selected=1,cont=lyt.1,expand=T))
 lyt.3[4,2]=gbutton("Consulta Mensual",container=lyt.3,handler = function(h,...){print(enso())},expand=T)
 
-lyt22[2,1]=(gg.44=gframe("Generar gráficos ENSO",cont=lyt22,horizontal=F))
+lyt22[2,1]=(gg.44=gframe("Generar gráficos",cont=lyt22,horizontal=F))
 lyt.33=glayout(homogeneous =T,cont=gg.44,spacing=3,expand=T)
 
 #lyt.33[1,1]=gbutton("Cargar datos mensuales",container=lyt.33,handler = function(h,...){datos_enso_m()},expand=T)
 #lyt.33[2,1]=glabel("")
 
-lyt.33[3,1]=gbutton("Gráficos plot",container=lyt.33,handler = function(h,...){print(gráficos_enso_plot())},expand=T)
-lyt.33[4,1]=gbutton("Gráficos boxplot",container=lyt.33,handler = function(h,...){print(gráficos_enso_boxplot())},expand=T)
-lyt.33[5,1]=gbutton("Gráficos anomalías",container=lyt.33,handler = function(h,...){print(gráficos_enso_anomalias())},expand=T)
+lyt.33[1,1]=gbutton("Gráficos plot",container=lyt.33,handler = function(h,...){print(gráficos_enso_plot())},expand=T)
+lyt.33[2,1]=gbutton("Gráficos boxplot",container=lyt.33,handler = function(h,...){print(gráficos_enso_boxplot())},expand=T)
+lyt.33[3,1]=gbutton("Gráficos anomalías",container=lyt.33,handler = function(h,...){print(gráficos_enso_anomalias())},expand=T)
 
 
 
@@ -4404,7 +4408,7 @@ g5=ggroup(container=nb,horizontal = F,label="Bienvenid@",cont=nb)
 gimage("logo.png",dirname=dir, size="menu", container=g5,label="Bienvenid@",width=700,heigth=700) #Inserta imagen "ciat.png"en la ventana
 
 mensj=gtext("Bienvenid@ ",cont=g5)
-insert(mensj, "a RClimTool, una aplicación diseñada para el análisis de series climatológicas (Temperatura Mínima, Temperatura Máxima y Precipitación)")
+insert(mensj, "a RClimTool, una aplicación diseñada para el análisis de series meteorológicas diarias (Temperatura Mínima, Temperatura Máxima y Precipitación)")
 
 visible(win) = T
 focus(win)
