@@ -215,9 +215,6 @@ descriptna2=function(object){
 ####----------Funciones para generar gráficos automáticos-----------#####
 #---------------------------------------------------------------------
 
-########################################################
-#MODIFICAR gráficoS MAS ESTANDARIZADOS (EXPLORAR JAZIKU)
-########################################################
 
 graf_plot=function(){
   confirmDialog(paste("Los resultados gráficos se guardarán en",getwd(),"/Analisis gráfico"),"Ubicación archivos")
@@ -883,6 +880,15 @@ sum2=function(a,na.rm=any(!is.na(a))){
 
 #Modificar gráficos de control poner antes y despues
 
+add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
+              mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+
+
 quality_control<-function(object){
 
   val=ifelse(sapply(object[-3:-1],min2)>=as.numeric(svalue(minim)) & sapply(object[-3:-1],max2)<=as.numeric(svalue(maxim)),"está dentro del rango permitido","contiene valores por fuera del rango permitido")
@@ -922,10 +928,10 @@ quality_control<-function(object){
       month = month.abb[as.numeric(object$month)]
       month = factor(month, levels=month.abb)
       
-      #svalue(ric)
-      val.na = boxplot(x~month,range=svalue(ric),plot=F)
-      #svalue(ric)
-      val = boxplot(x~month,range=svalue(ric),plot=F)
+      #svalue(criterio)
+      #val.na = boxplot(x~month,range=svalue(criterio),plot=F)
+      #svalue(criterio)
+      val = boxplot(x~month,range=as.numeric(svalue(criterio)),plot=F)
       
       
         
@@ -934,23 +940,13 @@ quality_control<-function(object){
       for(j in 1:12){
         lim_inf[month==month.abb[j]]=val$stats[1,j]
         lim_sup[month==month.abb[j]]=val$stats[5,j]
-        
+      
       }
       
-      lim_inf.na = c()
-      lim_sup.na = c()
-      for(j in 1:12){
-        lim_inf.na[month==month.abb[j]]=val.na$stats[1,j]
-        lim_sup.na[month==month.abb[j]]=val.na$stats[5,j]
-        
-      }
      
-      out_atip.na = which(x > lim_sup.na | x < lim_inf.na)  
       out_atip = which(x > lim_sup | x < lim_inf)  
       
-      val.na.y = boxplot(x~year,range=svalue(ric))
-      #svalue(ric)
-      val.y = boxplot(x~year,range=svalue(ric),plot=F)
+      val.y = boxplot(x~year,range=as.numeric(svalue(criterio)),plot=F)
       year.nam = as.numeric(val.y$names)
      
       lim_inf.y = c()
@@ -961,18 +957,9 @@ quality_control<-function(object){
         
       }
       
-      lim_inf.na.y = c()
-      lim_sup.na.y = c()
-      for(j in 1:length(year.nam)){
-        lim_inf.na.y[year==year.nam[j]]=val.na.y$stats[1,j]
-        lim_sup.na.y[year==year.nam[j]]=val.na.y$stats[5,j]
-        
-      }
-      
-      out_atip.na.y = which(x > lim_sup.na.y | x < lim_inf.na.y)
       out_atip.y = which(x > lim_sup.y | x < lim_inf.y)  
       
-      out_atip.na_data = data.frame(c(out_atip.na,out_atip.na.y),object[c(out_atip.na,out_atip.na.y),i+3])
+      #out_atip.na_data = data.frame(c(out_atip.na,out_atip.na.y),object[c(out_atip.na,out_atip.na.y),i+3])
       #object[c(out_atip.na,out_atip.na.y),i+3]<-NA
       
       out_atip_data = cbind(object[c(out_atip,out_atip.y),1:3],object[c(out_atip,out_atip.y),i+3])
@@ -1020,19 +1007,51 @@ quality_control<-function(object){
 
       
       #######gráficos control de calidad###########
-      tiff(paste("Control de calidad/tmax/","tmax_qc_",station[i],".tiff",sep=""),compression = 'lzw',height = 5,width = 16,units="in", res=150)
-      par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
-      plot(tmax[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Temperatura máxima (°C)",main=station[i])
+      
+      tiff("box_month.tiff",compression = 'lzw',height = 5,width = 15,units="in", res=200)
+      par(mfrow=c(2,1),
+          oma = c(5,4,0,0) + 0.1,
+          mar = c(0,0,1,1) + 1.5)
+      boxplot(object[,i+3]~month,range=as.numeric(svalue(criterio)),plot=T)
+      
+      plot(1:length(object[,i+3]),object[,i+3],type="l")
+      lines(1:length(object[,i+3]),lim_inf,col="red",lty=2)
+      lines(1:length(object[,i+3]),lim_sup,col="red",lty=2)
+      dev.off()
+      
+      
+    
+      tiff(paste0(outDir,"quality_control/tmax/line_graph/",nomb_tmax[i],"_",variable,"_line_graph_qc.tiff"),compression = 'lzw',height = 7,width = 16,units="in", res=150)
+      
+      par(mfrow = c(2,1),     # 2x2 layout
+          oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
+          mar = c(4, 4, 3, 3), # space for one row of text at ticks and to separate plots
+          xpd = NA) 
+      
+      ylim1 = c(min(tmax[,i+3],na.rm=T) ,max(tmax[,i+3],na.rm=T)+1)
+      ylim2 = c(min(object[,i+3],na.rm=T) ,max(object[,i+3],na.rm=T)+1)
+      
+      plot(tmax[,i+3],type="l",col="grey",xaxt="n",yaxt="n",xlab="",ylab="Temperatura máxima (°C)",main = "Antes del control de calidad",ylim=ylim1,cex.lab=0.8)
+      
+      mtext(paste0(station[i]),side=3,outer=T,adj=0,line=-1.3,cex = 1.2) 
+      points(out_range,tmax[out_range,i+3],col="black",bg="green",cex=0.7,pch=21)
       points(out_cons,tmax[out_cons,i+3],col="black",bg="red",cex=0.7,pch=21)
-      points(out_atip.na,tmax[out_atip.na,i+3],col="black",bg="purple",cex=0.7,pch=21)
-      points(out_atip,tmax[out_atip,i+3],col="black",bg="blue",cex=0.7,pch=24)
+      points(c(out_atip.y,out_atip),tmax[c(out_atip.y,out_atip),i+3],col="black",bg="purple",cex=0.7,pch=21)
       points(out_salt.n,tmax[out_salt.n,i+3],col="black",bg="turquoise1",cex=0.7,pch=24)
       points(out_int,tmax[out_int,i+3],col="black",bg="tan3",cex=0.7,pch=21)
-      points(out_range,tmax[out_range,i+3],col="black",bg="green",cex=0.7,pch=21)
-      axis(1,at=seq(1,nrow(tmax),1095),labels=seq(min(tmax$year),max(tmax$year),3),las=1,col="black")
-   
-      legend("topright", inset=c(-0.17,0),c("Consecutivos","Atípicos eliminados","Atípicos sospechosos","Saltos consecutivos","Tmax<Tmin","Fuera del rango"),
-             pch=c(21,21,24,24,21,21),col="black",pt.bg= c("red","purple","blue","turquoise1","tan3","green"),bty = "n")
+      
+      axis(1,at=seq(1,nrow(tmax),nrow(tmax)/length(unique(object$year))),labels=seq(min(tmax$year),max(tmax$year),1),las=1,col="black",las =2,cex.axis = 0.8)
+      axis(2,at=seq(ylim1[1],ylim1[2],5),labels=seq(ylim1[1],ylim1[2],5),las=1,col="black",las =1,cex.axis = 0.8)
+      
+      
+      plot(object[,i+3],type="l",col="grey",xaxt="n",yaxt="n",xlab="",ylab="Temperatura máxima (°C)",main = "Después del control de calidad",ylim=ylim2,cex.lab=0.8)
+      
+      axis(1,at=seq(1,nrow(tmax),366),labels=seq(min(tmax$year),max(tmax$year),1),las=1,col="black",las =2,cex.axis = 0.8)
+      axis(2,at=seq(ylim2[1],ylim2[2],5),labels=seq(ylim2[1],ylim2[2],5),las=1,col="black",las =1,cex.axis = 0.8)
+      
+      add_legend("bottomleft", legend=c("Datos consecutivos","Datos atípicos","Datos por fuera del rango","Saltos consecutivos","Consistencia interna tmax<tmin"), pch=c(21,21,21,24,21), 
+                 pt.bg= c("red","purple","green","turquoise1","tan3"),bty = "n",cex = 0.9,text.width=c(0.085,0.3,0.235,0.3,0.3),
+                 horiz=TRUE)
       
       dev.off()
        }
@@ -1070,9 +1089,9 @@ quality_control<-function(object){
       month = month.abb[as.numeric(object$month)]
       month = factor(month, levels=month.abb)
       
-      #svalue(ric)
+      #svalue(criterio)
       val.na = boxplot(x~month,range=5,plot=F)
-      #svalue(ric)
+      #svalue(criterio)
       val = boxplot(x~month,range=2,plot=F)
       
       
@@ -1097,7 +1116,7 @@ quality_control<-function(object){
       out_atip = which(x > lim_sup | x < lim_inf)  
       
       val.na.y = boxplot(x~year,range=5)
-      #svalue(ric)
+      #svalue(criterio)
       val.y = boxplot(x~year,range=3,plot=F)
       year.nam = as.numeric(val.y$names)
       
@@ -1216,7 +1235,7 @@ quality_control<-function(object){
       x[x<=0]= NA
       #svalue(ric)
       val.na = boxplot(x~month,range=5,plot=F)
-      #svalue(ric)
+      #svalue(criterio)
       val = boxplot(x~month,range=3,plot=F)
       
       
@@ -1241,7 +1260,7 @@ quality_control<-function(object){
       out_atip = which(x > lim_sup | x < lim_inf)  
       
       val.na.y = boxplot(x~year,range=5)
-      #svalue(ric)
+      #svalue(criterio)
       val.y = boxplot(x~year,range=3,plot=F)
       year.nam = as.numeric(val.y$names)
       
@@ -1307,7 +1326,7 @@ quality_control<-function(object){
       points(out_atip.na,tmax[out_atip.na,i+3],col="black",bg="purple",cex=0.7,pch=21)
       points(out_atip,tmax[out_atip,i+3],col="black",bg="blue",cex=0.7,pch=24)
       points(out_range,tmax[out_range,i+3],col="black",bg="green",cex=0.7,pch=21)
-      axis(1,at=seq(1,nrow(tmax),1095),labels=seq(min(tmax$year),max(tmax$year),3),las=1,col="black")
+      axis(1,at=seq(1,nrow(tmax),nrow(tmax)/length(unique(object$year))*3),labels=seq(min(tmax$year),max(tmax$year),3),las=1,col="black")
       
       legend("topright", inset=c(-0.17,0),c("Consecutivos","Atípicos eliminados","Atípicos sospechosos","Fuera del rango"),
              pch=c(21,21,24,21),col="black",pt.bg= c("red","purple","blue","green"),bty = "n")
@@ -1623,7 +1642,7 @@ datos_falt=function(){
     #jpeg(paste("Datos_faltantes/tmax_faltantes/tmax_",station[i],".jpeg",sep=""),width = 1150, height = 500)
     plot(1:dim(tmax)[1],data_genTmax[,i+3],,main=paste("tmax_",station[i]),type="l",xlab="Años",ylab="Temp. Máxima",ylim=c(min(tmax[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="blue",lwd=1.2,  xaxt="n")
     lines(1:dim(tmax)[1],tmax[,i+3],col="red",lwd=1.2)
-    axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,dim(tmax)[1],by=1080),las=2)
+    axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,nrow(tmax),nrow(tmax)/length(unique(tmax$year))*3),las=2)
     legend("topright",c("Generada","Original"),lwd=c(1.5,1.5),col=c("blue","black"))
     dev.off()
 
@@ -1632,7 +1651,7 @@ datos_falt=function(){
     #jpeg(paste("Datos_faltantes/tmin_faltantes/tmin_",station[i],".jpeg",sep=""),width = 1150, height = 500)
     plot(1:dim(tmin)[1],data_genTmin[,i+3],type="l",col="blue",lwd=1.2,main=paste("tmin_",station[i]),xlab="Años",ylab="Temp. Mínima",ylim=c(min(tmin[,i+3],na.rm=T),max(tmin[,i+3],na.rm=T)),  xaxt="n")
     lines(1:dim(tmin)[1],tmin[,i+3],col="red",lwd=1.2)
-    axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,dim(tmax)[1],by=1080),las=2)
+    axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,nrow(tmax),nrow(tmax)/length(unique(tmax$year))*3),las=2)
     legend("topright",c("Generada","Original"),lwd=c(1.5,1.5),col=c("blue","red"))
     dev.off()
 
@@ -1641,7 +1660,7 @@ datos_falt=function(){
     #jpeg(paste("Datos_faltantes/precip_faltantes/prec_",station[i],".jpeg",sep=""),width = 1150, height = 500)
     plot(1:dim(prec)[1],data_genPrec[,i+3],type="l",col="blue",lwd=1.2,main=paste("prec_",station[i],sep=""),xlab="Años",ylab="Precipitación",  xaxt="n")
     lines(1:dim(prec)[1],prec[,i+3],col="red",lwd=1.2)
-    axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,dim(tmax)[1],by=1080),las=2)
+    axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,nrow(tmax),nrow(tmax)/length(unique(tmax$year))*3),las=2)
     legend("topright",c("Generada","Original"),lwd=c(1.5,1.5),col=c("blue","red"))
     dev.off()
 
@@ -3961,454 +3980,3 @@ pronosticos=function(){
 
 }
 
-
-
-#####################################################################################
-#####################################################################################
-#####--------------------------CUERPO INTERFAZ GRÁFICA------------------------#######
-#####################################################################################
-#####################################################################################
-
-
-win <- gwindow("RClimTool 2.0", visible=F ,width = 600) #Crea ventana inicial
-nb = gnotebook(cont=win,expand=T,tab.pos = 2)
-
-
-#------------------------------------------------------------------
-###----------------Lectura y validacion de datos----------------###
-#------------------------------------------------------------------
-
-lyt=glayout(homogeneous =T,cont=nb,spacing=1,label="1. Lectura de datos",expand=T)
-
-lyt[1,1:3]=(g=gframe("Lectura de datos",container=lyt,horizontal = T))
-lytgb=glayout(homogeneous =F,cont=g,spacing=1,expand=F)
-
-lytgb[1,1]=(h=gbutton("Cambiar directorio",container=lytgb,handler = function(h,...)setwd(gfile(text="Seleccionar directorio",type="selectdir"))))
-lytgb[1,2]=(glabel=("-Separador decimal:"))
-lytgb[1,3]=sep=(gdroplist(c(" ",".",","),handler=function(...) sep_d() ))
-
-lytgb[2,1]=(glabel=(""))
-lytgb[3,1]=(glabel=("Cargar datos:"))
-
-lytgb[5,1]=gbutton("Temp. Máxima",container=lytgb, expand=F,
-                   handler =function(h,...) {load_tmax()})
-
-
-lytgb[6,1]=gbutton("Temp. Mínima",container=lytgb, expand=F,
-                   handler =function(h,...) {load_tmin()})
-
-
-lytgb[7,1]=gbutton("Precipitación",container=lytgb, expand=F,
-                   handler =function(h,...) {load_precip()})
-
-lytgb[8,1]=(glabel=(""))
-
-lytgb[9,1]=glabel("-¿Desea realizar el llenado de datos?")
-lytgb[10,1]=op=(gdroplist(c("Si","No"),handler=function(...) opc() ))
-
-opc=function(){
-  if(svalue(op)=="No"){
-    dir.create("Datos_faltantes",showWarnings=F)
-    write.csv_n(tmax,"Datos_faltantes/data_genTmax.csv",row.names =F)
-    write.csv_n(tmin,"Datos_faltantes/data_genTmin.csv",row.names =F)
-    write.csv_n(prec,"Datos_faltantes/data_genPrec.csv",row.names =F)
-
-  }
-}
-
-#----------------------------------------------------------------
-####--------------------Analisis descriptivo----------------#####
-#----------------------------------------------------------------
-lyt1=glayout(homogeneous =F,cont=nb,spacing=1,label="2. Análisis gráfico y descriptivo",expand=T)
-
-lyt1[1,1:6]=(g1=gframe("Análisis descripivo",container=lyt,expand=T,horizontal=F))
-lytg2=glayout(homogeneous =F,cont=g1,spacing=1,expand=T)
-
-lytg2[1,1]=glabel("-Período de análisis",container=lytg2)
-lytg2[2,1]=glabel("Desde",container=lytg2)
-lytg2[2,2]=(diad=gedit("",cont=lytg2,expand=F,width =7,initial.msg="D"))
-lytg2[2,3]=(mesd=gedit("",cont=lytg2,expand=F,width =7,initial.msg="M"))
-lytg2[2,4]=(añod=gedit("",cont=lytg2,expand=F,width =10,initial.msg="AAAA"))
-
-lytg2[3,1]=glabel("Hasta",container=lytg2)
-lytg2[3,2]=(diad1=gedit("",cont=lytg2,expand=F,width =7,initial.msg="D"))
-lytg2[3,3]=(mesd1=gedit("",cont=lytg2,expand=F,width =7,initial.msg="M"))
-lytg2[3,4]=(añod1=gedit("",cont=lytg2,expand=F,width =10,initial.msg="AAAA"))
-
-lytg2[4,1]=glabel("",container=lytg2)
-
-lytg2[5,1]=glabel("-Variable a analizar  ",container=lytg2)
-lytg2[5,2]=(nom_val1=gdroplist(c("tmax","tmin","prec"),selected = 0,cont=lytg2,expand=T,handler=function(h,...){attach(eval(parse(text=svalue(h$obj))),warn.conflicts =F)}))
-lytg2[5,3]=gbutton("Descriptivas",container=lytg2,handler=function(h,...){print(descript2(eval(parse(text=svalue(nom_val1)))))})
-
-lyt1[2,1:6]=glabel("")
-
-
-#---------------------------------------------------------------------
-###------------------------Analisis gráfico------------------------###
-#---------------------------------------------------------------------
-lyt1[3,1]=(g.2=gframe("Gráficos automáticos: ",container=lyt1 ,horizontal=F,expand=T))
-lytg.1=glayout(homogeneous =F,cont=g.2,spacing=1,expand=T)
-
-lytg.1[1,1]=glabel("Tipo de análisis")
-lytg.1[1,2]=(tipo=gdroplist(c(" ","Diaria","Mensual"),selected=1,cont=lytg.1))
-
-lytg.1[2,1]=glabel("",cont=lytg.1)
-lytg.1[3,1]=gbutton("Gráficos Plot",container=lytg.1,
-                    handler = function(h,...){graf_plot() } )
-
-
-lytg.1[4,1]=gbutton("Gráficos Boxplot",container=lytg.1,
-                    handler = function(h,...){graf_box() } )
-
-
-lytg.1[5,1]=gbutton("Gráficos de dispersión",container=lytg.1,
-                    handler = function(h,...){graf_disp() } )
-
-lyt1[5,1:6]=glabel("")
-
-
-lyt1[6,1]=(g2=gframe("Gráficos Personalizados: ",container=lyt1 ,horizontal=F,expand=T))
-lytg1=glayout(homogeneous =F,cont=g2,spacing=1,expand=T)
-
-lytg1[1,1]=glabel("Clásicos",container=lytg1)
-lytg1[2,1]=gbutton("Gráfico Plot",container=lytg1,
-                   handler = function(h,...){plot2() } )
-
-lytg1[3,1]=gbutton("Histograma",container=lytg1,
-                   handler = function(h,...){hist2()} )
-
-lytg1[4,1]=gbutton("Gráfico Boxplot",container=lytg1,
-                   handler = function(h,...){boxplot2()} )
-
-lytg1[1,2]=glabel("      ",container=lytg1)
-lytg1[1,3]=glabel("P. ggplot2",container=lytg1)
-lytg1[2,3]=gbutton("Gráfico Plot",container=lytg1,
-                   handler = function(h,...){qplot2()} )
-
-lytg1[3,3]=gbutton("Histograma",container=lytg1,
-                   handler = function(h,...){hist_22()} )
-
-#---------------------------------------------------------------
-###----------------Seccion control de calidad----------------###
-#---------------------------------------------------------------
-
-lyt4=glayout(homogeneous =T,cont=nb,spacing=2,label="3. Control de calidad ",expand=T)
-
-lyt4[1,1]=(gg=gframe("Validación",cont=lyt4,horizontal=F))
-lytg=glayout(homogeneous =F,cont=gg,spacing=1,expand=T)
-
-lytg[1,1]=glabel("",cont=lytg)
-
-lytg[2,1]=glabel("Variable a validar",container=lytg)
-lytg[2,2]=(variable<-gdroplist(c("tmax","tmin","prec"),selected=0,cont=lytg,expand=T))
-
-lytg[3,1]=glabel("Factor RIC: ",container=lytg)
-lytg[3,2]=(criterio=gedit("5",container=lytg,width = 5,initial.msg=" "))
-
-
-lytg[4,1]=glabel("Rango de la variable:",container=lytg)
-lytg[4,2]=(minim=gedit("",container=lytg,width = 7,initial.msg="Mín."))
-lytg[4,3]=(maxim=gedit("",container=lytg,width = 10,initial.msg="Máx."))
-
-lytg[5,1]=glabel("Variación temp: ",container=lytg)
-lytg[5,2]=(criterio1=gedit("10",container=lytg,width = 5,initial.msg=" "))
-
-lytg[6,1]=glabel("",cont=lytg)
-lytg[7,2]=gbutton("Validar",container=lytg,handler=function(h,...){print(validar2(eval(parse(text=svalue(variable)))))})
-lytg[7,3]=gbutton("Gráficos",container=lytg,handler=function(h,...){grafcontrol(eval(parse(text=svalue(variable))))})
-
-lyt4[2,1]=(gg.3=gframe("Informe",cont=lyt4,horizontal=F))
-lytgg.3=glayout(homogeneous =F,cont=gg.3,spacing=1,expand=T)
-
-lytgg.3[1,1]=glabel("Nombre del archivo: ",container=lytgg.3)
-lytgg.3[1,2]=(nom_arch1 <-gedit("preinforme",container=lytgg.3,coerce.with=as.character)) #Genera un label editable para el nombre del archivo del informe
-
-lytgg.3[2,2]=gbutton("Generar Informe",cont=lytgg.3,handler=function(h,...)inf2())
-
-#------------------------------------------------------------
-###----------------Seccion datos faltantes----------------###
-#------------------------------------------------------------
-
-lyt3d=glayout(homogeneous =T,cont=nb,spacing=2,label="4. Llenado de datos faltantes",expand=T)
-
-lyt3d[1,1]=(gg.3=gframe("RMAWGEN (Datos diarios)",cont=lyt3d,horizontal=F))
-lyt3=glayout(homogeneous =F,cont=gg.3,spacing=3,expand=T)
-
-lyt3[1,1]=glabel("",cont=lyt3)
-lyt3[2,1]=glabel("Año inicial: ",container=lyt3)
-lyt3[2,2]=(year_min <-gedit("",container=lyt3,width = 10,initial.msg="AAAA")) #Genera un label editable para el nombre del archivo del informe
-
-lyt3[3,1]=glabel("Año final: ",container=lyt3)
-lyt3[3,2]=(year_max <-gedit("",container=lyt3,width = 10,initial.msg="AAAA")) #Genera un label editable para el nombre del archivo del informe
-
-lyt3[6,1]=gbutton("Completar datos",container=lyt3,handler = function(h,...){datos_falt()},expand=T)
-lyt3[8,1:4]=gtext("Nota: Es indispensable tener los datos de temperatura mínima, máxima y precipitación",container=lyt3,coerce.with=as.character)
-
-
-
-lyt3d[2,1]=(gg.3=gframe("CHIRPS (Datos mensuales-Precipitación)",cont=lyt3d,horizontal=F))
-lyt3=glayout(homogeneous =F,cont=gg.3,spacing=3,expand=T)
-
-lyt3[1,1]=glabel("",cont=lyt3)
-lyt3[2,1]=glabel("Año inicial: ",container=lyt3)
-lyt3[2,2]=(year_min <-gedit("",container=lyt3,width = 10,initial.msg="AAAA")) #Genera un label editable para el nombre del archivo del informe
-
-lyt3[3,1]=glabel("Año final: ",container=lyt3)
-lyt3[3,2]=(year_max <-gedit("",container=lyt3,width = 10,initial.msg="AAAA")) #Genera un label editable para el nombre del archivo del informe
-
-lyt3[6,1]=gbutton("Completar datos",container=lyt3,handler = function(h,...){datos_falt()},expand=T)
-lyt3[8,1:4]=gtext("Nota: Esta opción únicamente se aplica para los datos de precipitación mensuales",container=lyt3,coerce.with=as.character)
-
-#-------------------------------------------------------------------
-###----------------Seccion homogeneidad de series----------------###
-#-------------------------------------------------------------------
-lyt5=glayout(homogeneous =F,cont=nb,spacing=2,label="5. Análisis de homogeneidad",expand=T)
-lyt5[1,1]=(gg.1=gframe("Definición de parámetros:",cont=lyt5,horizontal=F))
-
-lyt55=glayout(homogeneous =F,cont=gg.1,spacing=2,expand=T)
-lyt55[1,1]=glabel("-Período de análisis",container=lyt55)
-lyt55[2,1]=glabel("Desde",container=lyt55)
-lyt55[2,2]=(mesh=gedit("",cont=lyt55,expand=F,width =7,initial.msg="M"))
-lyt55[2,3]=(añoh=gedit("",cont=lyt55,expand=F,width =10,initial.msg="AAAA"))
-
-lyt55[3,1]=glabel("Hasta",container=lyt55)
-lyt55[3,2]=(mesh1=gedit("",cont=lyt55,expand=F,width =7,initial.msg="M"))
-lyt55[3,3]=(añoh1=gedit("",cont=lyt55,expand=F,width =10,initial.msg="AAAA"))
-
-lyt55[4,1]=glabel("")
-lyt55[5,1]=glabel("-Variable a analizar",container=lyt55)
-lyt55[5,2]=(nom_val2=gdroplist(c("tmax","tmin", "prec"),selected=0,cont=lyt55,expand=T))
-
-lyt55[6,1]=glabel("-Nivel de significancia",container=lyt55)
-lyt55[6,2]=(obj <- gspinbutton(from=0, to = 0.3, by =0.01, value=0.05,
-                   container=lyt55)) #Idea para seleccionar nivel de confianza
-
-lyt5[2,1]=glabel("")
-lyt5[3,1]=(gg2=gframe("Test para Normalidad:",cont=lyt5,horizontal=F))
-norm_test1=gcheckbox("Shapiro-Wilk",cont=gg2,handler=function(h,...){print(shap(eval(parse(text=svalue(nom_val2)))))})
-norm_test2=gcheckbox("Kolmogorov-Smirnov",cont=gg2,handler=function(h,...){print(KS_test(eval(parse(text=svalue(nom_val2)))))})
-norm_test3=gcheckbox("Jarque-Bera ",cont=gg2,handler=function(h,...){print(JB2(eval(parse(text=svalue(nom_val2)))))})
-
-gbutton("Gráficos QQ-norm",cont=gg2,handler=function(h,...){graf_norm()},width=5)
-
-lyt5[4,1]=glabel("")
-lyt5[5,1]=(gg3=gframe("Test para Tendencia:",cont=lyt5,horizontal=F))
-tend_test=gcheckbox("Rango correlación de Spearman",cont=gg3,handler=function(h,...){print(Rsp_Test(eval(parse(text=svalue(nom_val2)))))})
-tend_test1=gcheckbox("Mann-Kendall",cont=gg3,handler=function(h,...){print(Ken_T(eval(parse(text=svalue(nom_val2)))))})
-
-lyt5[6,1]=glabel("")
-lyt5[7,1]=(gg4=gframe("Test para Estabilidad en Varianza:",cont=lyt5,horizontal=F))
-estv_test=gcheckbox("Test-F",cont=gg4,handler=function(h,...){print(F_test.indic(eval(parse(text=svalue(nom_val2)))))})
-estv_test1=gcheckbox("Test Siegel Tukey",cont=gg4,handler=function(h,...){print(testSK(eval(parse(text=svalue(nom_val2)))))})
-
-lyt5[8,1]=glabel("")
-lyt5[9,1]=(gg5=gframe("Test para Estabilidad en Media:",cont=lyt5,horizontal=F))
-estm_test=gcheckbox("Test-T",cont=gg5,handler=function(h,...){print(T_Test(eval(parse(text=svalue(nom_val2)))))})
-estm_test1=gcheckbox("Test U Mann - Whitney",cont=gg5,handler=function(h,...){print(Umann_Test(eval(parse(text=svalue(nom_val2)))))})
-
-lyt5[1,2]=glabel("   ")
-lyt5[1,3]=(gg.2=gframe("Informe",cont=lyt5,horizontal=F))
-lyt.1=glayout(homogeneous =F,cont=gg.2,spacing=2,expand=T)
-
-lyt.1[1,1]=glabel("Nombre del archivo: ",container=lyt.1)
-lyt.1[1,2]=(nom_arch <-gedit("informe.doc",container=lyt.1,coerce.with=as.character,width = 15)) #Genera un label editable para el nombre del archivo del informe
-
-lyt.1[2,2]=gbutton("Generar Informe",container=lyt.1,handler = function(h,...){inf()},expand=T)
-
-#---------------------------------------------------------------------
-###------------------------Seccion Indicadores---------------------###
-#---------------------------------------------------------------------
-lyt2=glayout(homogeneous =F,cont=nb,spacing=2,label="6. Cálculo de indicadores ",expand=T)
-
-lyt2[1,1]=(gg.3=gframe("Definición de parámetros:",cont=lyt2,horizontal=F))
-lyt.2=glayout(homogeneous =F,cont=gg.3,spacing=2,expand=T)
-lyt.2[1,1]=glabel("")
-
-lyt.2[2,1]=glabel("-Período de análisis",container=lyt55)
-lyt.2[3,1]=glabel("Desde",container=lyt.2)
-lyt.2[3,2]=(diai=gedit("",cont=lyt.2,expand=F,width =7,initial.msg="D"))
-
-lyt.2[3,3]=(mesi=gedit("",cont=lyt.2,expand=F,width =7,initial.msg="M"))
-lyt.2[3,4]=(añoi=gedit("",cont=lyt.2,expand=F,width =10,initial.msg="AAAA"))
-
-lyt.2[4,1]=glabel("Hasta",container=lyt.2)
-lyt.2[4,2]=(diai1=gedit("",cont=lyt.2,expand=F,width =7,initial.msg="D"))
-
-lyt.2[4,3]=(mesi1=gedit("",cont=lyt.2,expand=F,width =7,initial.msg="M"))
-lyt.2[4,4]=(añoi1=gedit("",cont=lyt.2,expand=F,width =10,initial.msg="AAAA"))
-
-lyt.2[5,1]=glabel("",container=lyt.2)
-
-lyt2[2,1]=(gg.33=gframe("Indicadores Climáticos:",cont=lyt2,horizontal=F))
-lyt.22=glayout(homogeneous =F,cont=gg.33,spacing=2,expand=F)
-
-lyt.22[7,1]=gcheckbox("No. días con Temp. mín.",container=lyt.22,handler = function(h,...){print(tempmin_ind(as.numeric(svalue(valor1))))})
-lyt.22[7,2]=(nom_valm=gdroplist(c("mayor a ","menor a ","igual a "),selected=0,cont=lyt.22,expand=F))
-lyt.22[7,3]=(valor1=gedit("",container=lyt.22,width = 10,initial.msg="Valor"))
-
-lyt.22[8,1]=gcheckbox("No. días con Temp. máx.",container=lyt.22,handler = function(h,...){print(tempmax_ind(as.numeric(svalue(valor2))))})
-lyt.22[8,2]=(nom_valm1=gdroplist(c("mayor a ","menor a ","igual a "),selected=0,cont=lyt.22,expand=F))
-lyt.22[8,3]=(valor2=gedit("",container=lyt.22,width = 0.5,initial.msg="Valor"))
-
-lyt.22[9,1]=gcheckbox("No. días con lluvia ",container=lyt.22,handler = function(h,...){print(lluvia(as.numeric(svalue(valor3))))})
-lyt.22[9,2]=(nom_valp=gdroplist(c("mayor a ","menor a ","igual a "),selected=0,cont=lyt.22,expand=F))
-lyt.22[9,3]=(valor3=gedit("",container=lyt.22,width = 0.5,initial.msg="Valor"))
-
-lyt.22[10,1]=gcheckbox("No. períodos con lluvia consec",container=lyt.22,handler = function(h,...){print(lluviaconsc(as.numeric(svalue(valor31)),as.numeric(svalue(valor32))))})
-lyt.22[10,2]=(nom_valc=gdroplist(c("mayor a ","menor a ","igual a "),selected=0,cont=lyt.22,expand=F))
-
-lyt.22[10,3]=(valor31=gedit("",container=lyt.22,width = 0.5,initial.msg="Valor"))
-lyt.22[10,4]=(valor32=gedit("",container=lyt.22,width = 15,initial.msg="Dias consec."))
-
-lyt.22[11,1]=gcheckbox("No. períodos con Temp. máx. consec",container=lyt.22,handler = function(h,...){print(tmaxconsc(as.numeric(svalue(valor311)),as.numeric(svalue(valor321))))})
-lyt.22[11,2]=(nom_valc1=gdroplist(c("mayor a ","menor a ","igual a "),selected=0,cont=lyt.22,expand=F))
-lyt.22[11,3]=(valor311=gedit("",container=lyt.22,width = 0.5,initial.msg="Valor"))
-lyt.22[11,4]=(valor321=gedit("",container=lyt.22,width = 15,initial.msg="Dias consec."))
-
-lyt.22[12,1]=gcheckbox("No. períodos con Temp. mín. consec",container=lyt.22,handler = function(h,...){print(tminconsc(as.numeric(svalue(valor312)),as.numeric(svalue(valor322))))})
-lyt.22[12,2]=(nom_valc2=gdroplist(c("mayor a ","menor a ","igual a "),selected=0,cont=lyt.22,expand=F))
-
-lyt.22[12,3]=(valor312=gedit("",container=lyt.22,width = 0.5,initial.msg="Valor"))
-lyt.22[12,4]=(valor322=gedit("",container=lyt.22,width = 15,initial.msg="Dias consec."))
-
-lyt.22[13,1]=gcheckbox("Cuantiles",container=lyt.22,handler = function(h,...){print(cuantil())})
-lyt.22[13,2]=(nom_val_c=gdroplist(c("","Terciles","Cuartiles","Deciles","Percentiles"),selected=1,cont=lyt.22,expand=F))
-lyt.22[13,3]=(nom_est_c=gdroplist(c("","tmax","tmin","prec"),selected=1,cont=lyt.22,expand=F))
-
-#lyt.22[14,1]=gcheckbox("Índice Estandarizado de Precipitación",container=lyt.22,handler = function(h,...){print(spi())})
-
-
-# lyt2[3,1]=(gg.3.3=gframe("Indicadores Agroclimáticos:",cont=lyt2,horizontal=F))
-# lyt.2.2=glayout(homogeneous =F,cont=gg.3.3,spacing=2,expand=F)
-# lyt.2.2[1,1]=glabel("")
-# lyt.2.2[2,1]=gcheckbox("Grados días del cultivo ",container=lyt.2.2,handler = function(h,...){print(gradosdias(as.numeric(svalue(valor22))))})
-# lyt.2.2[2,2]=(temp_base=gedit("",container=lyt.2.2,width = 15,initial.msg="Temp. Base"))
-
-#---------------------------------------------------------------------
-###--------------Seccion Cálculo de nuevas variables---------------###
-#---------------------------------------------------------------------
-
-lyt22=glayout(homogeneous =F,cont=nb,spacing=2,label="7. Agregación mensual y nuevas variables ",expand=T)
-
-lyt22[1,1]=(gg.4=gframe("Agregación mensual",cont=lyt22,horizontal=F))
-lyt.3=glayout(homogeneous =T,cont=gg.4,spacing=3,expand=T)
-
-lyt.3[1,1]=glabel("-Seleccione la variable a calcular",container=lyt.3)
-lyt.3[2,1]=gcheckbox("Temp. Máxima Mensual",container=lyt.3,handler = function(h,...){print(tempmax())})
-lyt.3[3,1]=gcheckbox("Temp. Máxima Promedio Mensual",container=lyt.3,handler = function(h,...){print(tempmaxprom())})
-lyt.3[4,1]=gcheckbox("Temp. Mínima Mensual",container=lyt.3,handler = function(h,...){print(tempmin())})
-lyt.3[5,1]=gcheckbox("Temp. Mínima Promedio Mensual",container=lyt.3,handler = function(h,...){print(tempminprom())})
-lyt.3[6,1]=gcheckbox("Temp. Promedio Mensual",container=lyt.3,handler = function(h,...){print(tempmean())})
-lyt.3[7,1]=gcheckbox("Precip. Acumulada Mensual",container=lyt.3,handler = function(h,...){print(precpcum())})
-
-lyt22[2,1]=(gg.4.4=gframe("Nuevas variables",cont=lyt22,horizontal=F))
-lyt.3.4=glayout(homogeneous =T,cont=gg.4.4,spacing=3,expand=T)
-
-lyt.3.4[1,1]=gcheckbox("Oscilación de temperatura diaria",container=lyt.3.4,handler = function(h,...){print(osc_temp())})
-lyt.3.4[2,1]=gcheckbox("Oscilación de temperatura mensual",container=lyt.3.4,handler = function(h,...){print(osc_temp_m())})
-
-#---------------------------------------------------------------------
-###---------------------Seccion Condición ENSO---------------------###
-#---------------------------------------------------------------------
-
-lyt22=glayout(homogeneous =F,cont=nb,spacing=2,label="8. Fenómeno El Niño/La Niña ",expand=T)
-
-lyt22[1,1]=(gg.4=gframe("Fenómeno El Niño/La Niña",cont=lyt22,horizontal=F))
-lyt.3=glayout(homogeneous =T,cont=gg.4,spacing=3,expand=T)
-
-lyt.3[2,1]=glabel("Desde:",container=lyt.3)
-lyt.3[2,2]=(mes=gdroplist(c("Mes",1:12),selected=1,cont=lyt.1,expand=T))
-lyt.3[2,3]=(año=gdroplist(c("Año",1950:2014),selected=1,cont=lyt.1,expand=T))
-
-lyt.3[3,1]=glabel("Hasta:",container=lyt.3)
-lyt.3[3,2]=(mes1=gdroplist(c("Mes",1:12),selected=1,cont=lyt.1,expand=T))
-lyt.3[3,3]=(año1=gdroplist(c("Año",1950:2014),selected=1,cont=lyt.1,expand=T))
-lyt.3[4,2]=gbutton("Consulta Mensual",container=lyt.3,handler = function(h,...){print(enso())},expand=T)
-
-lyt22[2,1]=(gg.44=gframe("Generar gráficos",cont=lyt22,horizontal=F))
-lyt.33=glayout(homogeneous =T,cont=gg.44,spacing=3,expand=T)
-
-#lyt.33[1,1]=gbutton("Cargar datos mensuales",container=lyt.33,handler = function(h,...){datos_enso_m()},expand=T)
-#lyt.33[2,1]=glabel("")
-
-lyt.33[1,1]=gbutton("Gráficos plot",container=lyt.33,handler = function(h,...){print(gráficos_enso_plot())},expand=T)
-lyt.33[2,1]=gbutton("Gráficos boxplot",container=lyt.33,handler = function(h,...){print(gráficos_enso_boxplot())},expand=T)
-lyt.33[3,1]=gbutton("Gráficos anomalías",container=lyt.33,handler = function(h,...){print(gráficos_enso_anomalias())},expand=T)
-
-
-
-#---------------------------------------------------------------------------------
-###---------------------Seccion Remuestreo determinísticos---------------------###
-#---------------------------------------------------------------------------------
-
-lyt6=glayout(homogeneous =T,cont=nb,spacing=2,label="9. Pronósticos Determinísticos",expand=T)
-
-lyt6[1,1]=(gg6=gframe("Parámetros de entrada",cont=lyt6,horizontal=F))
-lty.33=glayout(homogeneous =F,cont=gg6,spacing=2,expand=T)
-
-lty.33[1,1]=glabel(" ",cont=lty.33)
-
-
-lty.33[4,1]=glabel("-Cargar datos (opcional):",cont=lty.33)
-lty.33[4,2]=gbutton("Diarios",cont=lty.33,handler=function(h,...) cargar_diarios())
-lty.33[4,3]=gbutton("Mensuales",cont=lty.33,handler=function(h,...) cargar_mensual())
-
-lty.33[5,1]=glabel(" ",cont=lty.33)
-
-lty.33[6,1]=glabel("-Seleccione la variable:",cont=lty.33)
-lty.33[6,2]=(val_p=gdroplist(c("tmax","tmin","prec","srad"),cont=lty.33))
-#lty.33[3,3]=gdroplist(c("Hasta",Fechas),cont=lty.33)
-lty.33[7,1]=glabel("-Cargar tabla probabilidades:",cont=lty.33)
-lty.33[7,2]=gbutton("Probabilidades",cont=lty.33,handler=function(h,...) cargar_prob())
-
-
-lty.33[8,1]=glabel("-No. de escenarios a simular:",cont=lty.33)
-lty.33[8,2]=(num_esc=gedit(" ",cont=lty.33,width=3))
-
-
-lty.33[9,1]=glabel("-Generar pronósticos:",cont=lty.33)
-lty.33[9,2]=gbutton("Pronosticar",cont=lty.33,handler=function(h,...) pronosticos())
-
-
-
-lyt6[2,1]=(gg.6=gframe("Enlaces de interés",cont=lyt6,horizontal=F))
-lty.3.3=glayout(homogeneous =F,cont=gg.6,spacing=2,expand=T)
-lty.3.3[1,1]=glabel("-IDEAM: www.ideam.gov.co/",cont=lty.3.3)
-lty.3.3[2,1]=glabel("-NOAA: www.noaa.gov/",cont=lty.3.3)
-lty.3.3[3,1]=glabel("-ECMWF: www.ecmwf.int/",cont=lty.3.3)
-
-
-#---------------------------------------------------------------------------------
-###---------------------Seccion teleconexiones con ACC-------------------------###
-#---------------------------------------------------------------------------------
-
-
-lyt7=glayout(homogeneous =F,cont=nb,spacing=2,label="10. Análisis de correlaciones ",expand=T)
-
-lyt7[1,1]=(gg.4=gframe("Análisis de correlaciones con TSM",cont=lyt7,horizontal=F))
-lyt.7=glayout(homogeneous =T,cont=gg.4,spacing=3,expand=T)
-
-lyt.7[1,1]=glabel(" ",container=lyt.7)
-
-lyt.7[2,1]=glabel("-Seleccione la variable a relacionar",container=lyt.7)
-
-lyt.7[2,2]=(val_p=gdroplist(c("tmax","tmin","prec"),cont=lyt.7))
-lyt.7[3,1]=glabel(" ",container=lyt.7)
-lyt.7[3,2]=gbutton("Generar mapas",cont=lyt.7,handler=function(h,...) pronosticos())
-
-#---------------------------------------------------------------------
-###---------------------------Bienvenida---------------------------###
-#---------------------------------------------------------------------
-
-g5=ggroup(container=nb,horizontal = F,label="Bienvenid@",cont=nb)
-
-#Para el logo modifique la ruta en "dirname="en la cual se encuentra la imagen
-#gimage("logo", size="menu", container=g5,label="Bienvenid@",width=700,heigth=700) #Inserta imagen "ciat.png"en la ventana
-gimage("logo.png",dirname=dir, size="menu", container=g5,label="Bienvenid@",width=700,heigth=700) #Inserta imagen "ciat.png"en la ventana
-
-mensj=gtext("Bienvenid@ ",cont=g5)
-insert(mensj, "a RClimTool, una aplicación diseñada para el análisis de series meteorológicas diarias (Temperatura Mínima, Temperatura Máxima y Precipitación)")
-
-visible(win) = T
-focus(win)
