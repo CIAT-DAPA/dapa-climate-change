@@ -546,27 +546,29 @@ graf_clim = function(){
   dir.create("Analisis gráfico",showWarnings=F)
   dir.create("Analisis gráfico/Climatologías",showWarnings=F)
   
-  jpeg(paste("Analisis gráfico/Climatologías/clim_",station[i],".jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
-   par(mar = c(7,5,2.5,5))
-   with(prec_clim, barplot(prec_clim[,2], col="lightblue", ylab="Precipitación (mm/ mes)", names.arg=c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec")))
-  
-   par(new = T)
-   with(tmin_clim, plot(tmin_clim[,1],tmin_clim[,2], type="l", col="blue",lwd = 2,
-                       axes=F, xlab=NA, ylab=NA, cex=1.2,ylim=c(min(tmin_clim[,2])-0.5,max(tmax_clim[,2])+0.5)))
-   par(new = T)
-   with(tmax_clim, plot(tmax_clim[,1],tmax_clim[,2], type="l", col="red3",lwd = 2,
-                       axes=F, xlab=NA, ylab=NA, cex=1.2,ylim=c(min(tmin_clim[,2])-0.5,max(tmax_clim[,2])+0.5)))
-
-  axis(side = 4)
-  mtext(side = 4, line = 3, 'Temperatura (°C)')
-  box()
-  title(paste(names(tmin_clim[2])))
- # grid()
-  par(xpd=TRUE)
-  legend(0.2,min(tmin_clim[,2])-3,
-         legend=c("Temperatura máxima", "Temperatura mínima", "Precipitación"),
-         lty=c(1,1,1), lwd=c(2,2,7),col=c("red3", "blue","lightblue"))
-  dev.off()
+  for(i in 1:ncol(tmax_clim)){
+    jpeg(paste("Analisis gráfico/Climatologías/clim_",station[i],".jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
+    par(mar = c(7,5,2.5,5))
+    with(prec_clim, barplot(prec_clim[,i+1], col="lightblue", ylab="Precipitación (mm/ mes)", names.arg=c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec")))
+    
+    par(new = T)
+    with(tmin_clim, plot(tmin_clim[,1],tmin_clim[,i+1], type="l", col="blue",lwd = 2,
+                         axes=F, xlab=NA, ylab=NA, cex=1.2,ylim=c(min(tmin_clim[,i+1])-0.5,max(tmax_clim[,i+1])+0.5)))
+    par(new = T)
+    with(tmax_clim, plot(tmax_clim[,1],tmax_clim[,i+1], type="l", col="red3",lwd = 2,
+                         axes=F, xlab=NA, ylab=NA, cex=1.2,ylim=c(min(tmin_clim[,i+1])-0.5,max(tmax_clim[,i+1])+0.5)))
+    
+    axis(side = 4)
+    mtext(side = 4, line = 3, 'Temperatura (°C)')
+    box()
+    title(paste(names(tmin_clim[2])))
+    # grid()
+    par(xpd=TRUE)
+    legend(0.2,min(tmin_clim[,2])-3,
+           legend=c("Temperatura máxima", "Temperatura mínima", "Precipitación"),
+           lty=c(1,1,1), lwd=c(2,2,7),col=c("red3", "blue","lightblue"))
+    dev.off()
+  }
 }
 
 sum22=function(a,na.rm=T){
@@ -1640,7 +1642,7 @@ datos_falt=function(){
     jpeg(paste("Datos_faltantes/tmax_faltantes/tmax_",station[i],".jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
 
     #jpeg(paste("Datos_faltantes/tmax_faltantes/tmax_",station[i],".jpeg",sep=""),width = 1150, height = 500)
-    plot(1:dim(tmax)[1],data_genTmax[,i+3],,main=paste("tmax_",station[i]),type="l",xlab="Años",ylab="Temp. Máxima",ylim=c(min(tmax[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="blue",lwd=1.2,  xaxt="n")
+    plot(1:dim(tmax)[1],data_genTmax[,i+3],main=paste("tmax_",station[i]),type="l",xlab="Años",ylab="Temp. Máxima",ylim=c(min(tmax[,i+3],na.rm=T),max(tmax[,i+3],na.rm=T)),col="blue",lwd=1.2,  xaxt="n")
     lines(1:dim(tmax)[1],tmax[,i+3],col="red",lwd=1.2)
     axis(side=1,labels=seq(min(tmax$year),max(tmax$year),3),at=seq(1,nrow(tmax),nrow(tmax)/length(unique(tmax$year))*3),las=2)
     legend("topright",c("Generada","Original"),lwd=c(1.5,1.5),col=c("blue","black"))
@@ -1837,7 +1839,7 @@ KS_test=function(object){
 
   Sin_datos_falt=apply(data1[,4:ncol(data1)],2,KS)
   result=as.table(cbind(Con_datos_falt,Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Kolmogorov_Smirnov (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Kolmogorov_Smirnov (p-valor/ Decisión)")
 
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Prueba Kolmogorov Smirnov para ", svalue(nom_val2)))
@@ -1876,7 +1878,7 @@ JB2=function(x){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,JB)
   result=as.table(cbind(Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Jarque_Bera (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Jarque_Bera (p-valor/ Decisión)")
 
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Prueba Jarque Bera para ", svalue(nom_val2)))
@@ -1925,7 +1927,7 @@ Rsp_Test<- function(x){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,Spearman)
   result=as.table(cbind(Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Spearman (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Spearman (p-valor/ Decisión)")
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n          Correlación de Spearman para ", svalue(nom_val2)))
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n")
@@ -1969,7 +1971,7 @@ Ken_T <- function(object){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,Kend_Test)
   result=as.table(cbind(Con_datos_falt,Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Mann_Kendall (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Mann_Kendall (p-valor/ Decisión)")
 
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Test de Mann Kendall para ", svalue(nom_val2)))
@@ -2022,7 +2024,7 @@ F_test.indic <- function(object){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,par.f)
   result=as.table(cbind(Con_datos_falt,Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Test_F (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Test_F (p-valor/ Decisión)")
 
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Test F para ", svalue(nom_val2)))
@@ -2073,7 +2075,7 @@ testSK <- function(object){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,par.sk)
   result=as.table(cbind(Con_datos_falt,Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Test_Siegel_Tukey (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Test_Siegel_Tukey (p-valor/ Decisión)")
 
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Test Siegel Tukey para ", svalue(nom_val2)))
@@ -2123,7 +2125,7 @@ T_Test <- function(object){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,PruebaT)
   result=as.table(cbind(Con_datos_falt,Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Test_t (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Test_t (p-valor/ Decisión)")
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Test t para ", svalue(nom_val2)))
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n")
@@ -2171,7 +2173,7 @@ Umann_Test <- function(object){
 
   Sin_datos_falt=apply(as.data.frame(x[,4:ncol(x)]),2,Umann)
   result=as.table(cbind(Con_datos_falt,Sin_datos_falt))
-  names(dimnames(result)) <- c("Estación", "Test_U_Mann_Whitney (p-valor/ Desición)")
+  names(dimnames(result)) <- c("Estación", "Test_U_Mann_Whitney (p-valor/ Decisión)")
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
   cat(paste("\n             Test U Mann Whitney para ", svalue(nom_val2)))
   cat("\n =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= \n")
