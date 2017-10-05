@@ -2225,7 +2225,7 @@ bc_changes <-function(varmod="srad", rcpList="historical",gcmlist,lon=38.35, lat
 }
 
 ## Main function
-bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order,wth){
+bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order,dir){
   
   ## Load libraries
   library(raster); library(ncdf4); library(lubridate); library(qmap); library(ggplot2);library(tools); library(reshape);require(grid) #library(rgdal); 
@@ -2271,15 +2271,19 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
     }else{
       dateDownl= paste0("BC_xy_",lon,"_",lat)
     }
-    
-    dirout <- paste0(dirWork,'/',dateDownl) 
+    if(dir=="YES"){
+      dirout <- dirWork      
+    }else{
+      dirout <- paste0(dirWork,'/',dateDownl)       
+    }
     if (!file.exists(dirout)) {dir.create(dirout, recursive=T)}  
     dataset <- tolower(dataset)
     txtFile = paste(dirout,"/","Wrapper.txt",sep="")
     if(!file.exists(txtFile)){
       opnFile <- file(txtFile, open="a")
-      cat(paste0("serverData<-'",serverData,"' \n","downData<-'",downData,"' \n","dirWork<-'",dirWork,"' \n","dirgcm <-'",dirgcm ,"' \n","dirobs <-'",dirobs ,"' \n","dataset <-'",dataset ,"' \n","methBCList <-c('",paste(methBCList,collapse="','"),"') \n","varlist <-c('",paste(varlist,collapse="','"),"') \n","Obyi <-",Obyi ," \n","Obyf <-",Obyf ," \n","fuyi <-",fuyi ," \n","fuyf <-",fuyf ," \n","rcpList <-c('",paste(rcpList,collapse="','"),"') \n","xyList <-c('",paste(xyList,collapse="','"),"') \n","xyfile <-",xyfile ," \n","gcmlist <-c('",paste(gcmlist,collapse="','"),"') \n","statList<-c('",paste(statList,collapse="','"),"') \n","fileStat<-",fileStat," \n","sepFile<-'",sepFile,"' \n","leap<-",leap," \n","typeData<-",typeData," \n","remote <-'",remote ,"' \n","dircdo <-'",dircdo ,"' \n","order <-",order ," \n","ver_python<-'",ver_python,"' \n","dirScript_py<-'",dirScript_py,"' \n"), file=opnFile)
-      cat(paste0("bc_processing('",serverData,"','",downData,"','",dirWork,"','",dirgcm ,"','",dirobs ,"','",dataset ,"',","c('",paste(methBCList,collapse="','"),"') ",",c('",paste(varlist,collapse="','"),"'), ",Obyi ,",",Obyf ,",",fuyi ,",",fuyf ,",","c('",paste(rcpList,collapse="','"),"') ,","c('",paste(xyList,collapse="','"),"'),'",xyfile ,"',","c('",paste(gcmlist,collapse="','"),"') ",",c('",paste(statList,collapse="','"),"') ,'",fileStat,"','",sepFile,"',",leap,",",typeData,",'",ver_python,"','",dirScript_py,"','",remote,"','",dircdo,"',",order,")"), file=opnFile)      
+      cat(paste0("serverData<-'",serverData,"' \n","downData<-'",downData,"' \n","dirWork<-'",dirWork,"' \n","dirgcm <-'",dirgcm ,"' \n","dirobs <-'",dirobs ,"' \n","dataset <-'",dataset ,"' \n","methBCList <-c('",paste(methBCList,collapse="','"),"') \n","varlist <-c('",paste(varlist,collapse="','"),"') \n","Obyi <-",Obyi ," \n","Obyf <-",Obyf ," \n","fuyi <-",fuyi ," \n","fuyf <-",fuyf ," \n","rcpList <-c('",paste(rcpList,collapse="','"),"') \n","xyList <-c('",paste(xyList,collapse="','"),"') \n","xyfile <-'",xyfile ,"' \n","gcmlist <-c('",paste(gcmlist,collapse="','"),"') \n","statList<-c('",paste(statList,collapse="','"),"') \n","fileStat<-",fileStat," \n","sepFile<-'",sepFile,"' \n","leap<-",leap," \n","typeData<-",typeData," \n","remote <-'",remote ,"' \n","dircdo <-'",dircdo ,"' \n","order <-",order ," \n","ver_python<-'",ver_python,"' \n","dirScript_py<-'",dirScript_py,"' \n","dir<-'",dir,"' \n"), file=opnFile)
+      cat(paste0("bc_processing('",serverData,"','",downData,"','",dirout,"','",dirgcm ,"','",dirobs ,"','",dataset ,"',","c('",paste(methBCList,collapse="','"),"') ",",c('",paste(varlist,collapse="','"),"'), ",Obyi ,",",Obyf ,",",fuyi ,",",fuyf ,",","c('",paste(rcpList,collapse="','"),"') ,","c('",paste(xyList,collapse="','"),"'),'",xyfile ,"',","c('",paste(gcmlist,collapse="','"),"') ",",c('",paste(statList,collapse="','"),"') ,'",fileStat,"','",sepFile,"',",leap,",",typeData,",'",ver_python,"','",dirScript_py,"','",remote,"','",dircdo,"',",order,",'",dir,"')"), file=opnFile)      
+      cat(paste0("\n","SELECT * from bc_processing('",serverData,"','",downData,"','",dirout,"','",dirgcm ,"','",dirobs ,"','",dataset ,"',","'",paste(methBCList,collapse=","),"' ",",'",paste(varlist,collapse=","),"','",Obyi ,"','",Obyf ,"','",fuyi ,"','",fuyf ,"','",paste(rcpList,collapse=","),"' ,","'",paste(xyList,collapse=","),"','",xyfile ,"',","'",paste(gcmlist,collapse=","),"' ",",'",paste(statList,collapse=","),"' ,'",fileStat,"','",sepFile,"','",order,"','",dircdo,"','",dir,"')"), file=opnFile)      
       close.connection(opnFile) 
     }
     
@@ -2589,6 +2593,7 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # remote <- "NO"  # YES | NO (local) -> importante para definir la ruta en fileStat, si es YES debe ser http://file.txt, NO es path relativo
 # dircdo <- "cdo" # modificar si no encuentra el path de cdo
 # order <- NA # no modificar si remote=NO
+# dir <- "YES" | "NO" # if is YES dirWork is the workspace here are the results
 # ## For run on windows:
 # ver_python<-"C:/Python26/python.exe"
 # dirScript_py<-"C:/Temp/bc/Request_jramirez/bc_extract_gcm.py"
@@ -2598,4 +2603,4 @@ bc_processing<- function(serverData,downData,dirWork,dirgcm,dirobs,dataset,methB
 # sfInit(parallel=T,cpus=2) #initiate cluster
 # stop("error")          
 # sfExport("gcm_extraction")
-bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order)
+bc_processing(serverData,downData,dirWork,dirgcm,dirobs,dataset,methBCList,varlist,Obyi,Obyf,fuyi,fuyf,rcpList,xyList,xyfile,gcmlist,statList,fileStat,sepFile,leap,typeData,ver_python,dirScript_py,remote,dircdo,order,dir)
