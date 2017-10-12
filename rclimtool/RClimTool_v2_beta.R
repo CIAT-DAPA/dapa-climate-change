@@ -16,8 +16,14 @@
     suppressWarnings(suppressPackageStartupMessages(
       library(a.package, character.only=TRUE)))
   }
-  qq <- function(save="no") { q(save=save)}
-  
+  utils::assignInNamespace(
+    "q", 
+    function(save = "no", status = 0, runLast = TRUE) 
+    {
+      .Internal(quit(save, status, runLast))
+    }, 
+    "base"
+  )  
 #Función que contiene todo lo relacionado a la interfaz
 rclimtool<<-function(){
 #----------------------------------------------------------------------------------------#
