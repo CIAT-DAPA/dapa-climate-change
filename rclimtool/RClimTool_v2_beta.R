@@ -16,43 +16,17 @@
     suppressWarnings(suppressPackageStartupMessages(
       library(a.package, character.only=TRUE)))
   }
-  utils::assignInNamespace(
-    "q", 
-    function(save = "no", status = 0, runLast = TRUE) 
-    {
-      .Internal(quit(save, status, runLast))
-    }, 
-    "base"
-  )  
+  # utils::assignInNamespace(
+  #   "q", 
+  #   function(save = "no", status = 0, runLast = TRUE) 
+  #   {
+  #     .Internal(quit(save, status, runLast))
+  #   }, 
+  #   "base"
+  # )  
 #Función que contiene todo lo relacionado a la interfaz
 rclimtool<<-function(){
-#----------------------------------------------------------------------------------------#
-#----------------------------------------------------------------------------------------#
-#                ____   ____ _ _         _____           _
-#               |  _ \ / ___| (_)_ __ __|_   _|__   ___ | |
-#               | |_) | |   | | | '_ ` _ \| |/ _ \ / _ \| |
-#               |  _ <| |___| | | | | | | | | (_) | (_) | |
-#               |_| \_\\____|_|_|_| |_| |_|_|\___/ \___/|_|
 
-#            __     __            _               ____    ___
-#            \ \   / /__ _ __ ___(_) ___  _ __   |___ \  / _ \
-#             \ \ / / _ \ '__/ __| |/ _ \| '_ \    __) || | | |
-#              \ V /  __/ |  \__ \ | (_) | | | |  / __/ | |_| |
-#               \_/ \___|_|  |___/_|\___/|_| |_| |_____(_)___/
-
-
-#                           _          _
-#                          | |        | |
-#                          | |__   ___| |_ __ _
-#                          | '_ \ / _ \ __/ _` |
-#                          | |_) |  __/ || (_| |
-#                          |_.__/ \___|\__\__,_|
-#----------------------------------------------------------------------------------------#
-#----------------------------------------------------------------------------------------#
-
-#sourceDirectory()
-#IMPORTANTE LEER!!!!
-#IMPORTANTE LEER!!!!
 #IMPORTANTE LEER!!!!
 
 #Escriba la ubicación de la carpeta con los archivos de la herramienta
@@ -63,22 +37,22 @@ dir="C:/Users/lllanos/Desktop/RClimTool V2.0"
 ####--------Paquetes necesarios para correr la aplicación---------####
 #---------------------------------------------------------------------
 #if(require(R.utils)==FALSE){install.packages("R.utils")}
-if(require(ggplot2)==FALSE){install.packages("ggplot2")}
-if(require(rtf)==FALSE){ install.packages("rtf")}
-if(require(gWidgets)==FALSE){install.packages("gWidgets")}
-if(require(gWidgetsRGtk2)==FALSE){install.packages("gWidgetsRGtk2") }
-if(require(RMAWGEN)==FALSE){install.packages("RMAWGEN") }
-if(require(Kendall)==FALSE){install.packages("Kendall") }
-if(require(tseries)==FALSE){install.packages("tseries")}
-if(require(grid)==FALSE){install.packages("grid")}
-if(require(car)==FALSE){ install.packages("car") }
-if(require(reshape)==FALSE){ install.packages("reshape")}
-if(require(maptools)==FALSE){install.packages("maptools")}
-if(require(mapdata)==FALSE){install.packages("mapdata")}
-if(require(RColorBrewer)==FALSE){install.packages("RColorBrewer")}
-if(require(classInt)==FALSE){install.packages("classInt")}
-if(require(gpclib)==FALSE){install.packages("gpclib")}
-if(require(DescTools)==FALSE){install.packages("DescTools")}
+if(library2("ggplot2")[1]==FALSE){suppressMessages(install.packages("ggplot2"))}
+if(library2("rtf")[1]==FALSE){suppressMessages(install.packages("rtf"))}
+if(library2("gWidgets")[1]==FALSE){suppressMessages(install.packages("gWidgets"))}
+if(library2("gWidgetsRGtk2")[1]==FALSE){suppressMessages(install.packages("gWidgetsRGtk2")) }
+if(library2("RMAWGEN")[1]==FALSE){suppressMessages(install.packages("RMAWGEN")) }
+if(library2("Kendall")[1]==FALSE){suppressMessages(install.packages("Kendall")) }
+if(library2("tseries")[1]==FALSE){suppressMessages(install.packages("tseries"))}
+if(library2("grid")[1]==FALSE){suppressMessages(install.packages("grid"))}
+if(library2("car")[1]==FALSE){ suppressMessages(install.packages("car")) }
+if(library2("reshape")[1]==FALSE){ suppressMessages(install.packages("reshape"))}
+if(library2("maptools")[1]==FALSE){suppressMessages(install.packages("maptools"))}
+if(library2("mapdata")[1]==FALSE){suppressMessages(install.packages("mapdata"))}
+if(library2("RColorBrewer")[1]==FALSE){suppressMessages(install.packages("RColorBrewer"))}
+if(library2("classInt")[1]==FALSE){suppressMessages(install.packages("classInt"))}
+if(library2("gpclib")[1]==FALSE){suppressMessages(install.packages("gpclib"))}
+if(library2("DescTools")[1]==FALSE){suppressMessages(install.packages("DescTools"))}
 
 
 library2("ggplot2") #Este paquete sirve para realizar gráficos más elaborados
