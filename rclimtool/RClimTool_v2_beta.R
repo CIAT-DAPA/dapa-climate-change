@@ -22,8 +22,8 @@
 
   rclimtool <<- function(){
       
-      #IMPORTANTE LEER!!!!
-      #Escriba la ubicación de la carpeta con los archivos de la herramienta
+      # IMPORTANTE LEER!!!!
+      # Escriba la ubicación de la carpeta con los archivos de la herramienta
       
       dir <- "C:/Users/lllanos/Desktop/RClimTool V2.0"
       
