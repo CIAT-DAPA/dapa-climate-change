@@ -4,7 +4,7 @@
 .First <- function()
 {
   
-  options("repos" = c(CRAN = "https://www.icesi.edu.co/CRAN/"))
+ # options("repos" = c(CRAN = "https://www.icesi.edu.co/CRAN/"))
   options(warn = -1)
   options(scipen = 999)
   options("guiToolkit"="RGtk2") #Selecciona las herramientas para la interfaz grafica
@@ -12,7 +12,7 @@
   options(width = 130)
   options(max.print=100)
   
-  library2 <- function(a.package){
+  library2 <<- function(a.package){
     suppressWarnings(suppressPackageStartupMessages(
       library(a.package, character.only=TRUE)))
   }
@@ -37,24 +37,6 @@ dir="C:/Users/lllanos/Desktop/RClimTool V2.0"
 ####--------Paquetes necesarios para correr la aplicación---------####
 #---------------------------------------------------------------------
 #if(require(R.utils)==FALSE){install.packages("R.utils")}
-if(library2("ggplot2")[1]==FALSE){suppressMessages(install.packages("ggplot2"))}
-if(library2("rtf")[1]==FALSE){suppressMessages(install.packages("rtf"))}
-if(library2("gWidgets")[1]==FALSE){suppressMessages(install.packages("gWidgets"))}
-if(library2("gWidgetsRGtk2")[1]==FALSE){suppressMessages(install.packages("gWidgetsRGtk2")) }
-if(library2("RMAWGEN")[1]==FALSE){suppressMessages(install.packages("RMAWGEN")) }
-if(library2("Kendall")[1]==FALSE){suppressMessages(install.packages("Kendall")) }
-if(library2("tseries")[1]==FALSE){suppressMessages(install.packages("tseries"))}
-if(library2("grid")[1]==FALSE){suppressMessages(install.packages("grid"))}
-if(library2("car")[1]==FALSE){ suppressMessages(install.packages("car")) }
-if(library2("reshape")[1]==FALSE){ suppressMessages(install.packages("reshape"))}
-if(library2("maptools")[1]==FALSE){suppressMessages(install.packages("maptools"))}
-if(library2("mapdata")[1]==FALSE){suppressMessages(install.packages("mapdata"))}
-if(library2("RColorBrewer")[1]==FALSE){suppressMessages(install.packages("RColorBrewer"))}
-if(library2("classInt")[1]==FALSE){suppressMessages(install.packages("classInt"))}
-if(library2("gpclib")[1]==FALSE){suppressMessages(install.packages("gpclib"))}
-if(library2("DescTools")[1]==FALSE){suppressMessages(install.packages("DescTools"))}
-
-
 library2("ggplot2") #Este paquete sirve para realizar gráficos más elaborados
 library2("rtf") #con este paquete se genera el informe automático en Word
 library2("gWidgets") #Paquete para generar interfaz grafica
@@ -4445,4 +4427,4 @@ gui <<- rclimtool()
 cat("\n   Bienvenido a RClimTool...\n\n")
 }
 
-save(.First, file = "RClimTool2.RData")
+save(.First, file = "RClimTool.RData")
