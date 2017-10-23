@@ -540,7 +540,7 @@
         dir.create("Analisis gráfico",showWarnings=F)
         dir.create("Analisis gráfico/Climatologías",showWarnings=F)
         
-        for(i in 1:ncol(tmax_clim)){
+        for(i in 1:(ncol(tmax_clim)-1)){
           jpeg(paste("Analisis gráfico/Climatologías/clim_",station[i],".jpeg",sep=""), width = 10, height = 7,units = 'in',res=200)
           par(mar = c(7,5,2.5,5))
           with(prec_clim, barplot(prec_clim[,i+1], col="lightblue", ylab="Precipitación (mm/ mes)", names.arg=c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec")))
@@ -555,7 +555,7 @@
           axis(side = 4)
           mtext(side = 4, line = 3, 'Temperatura (°C)')
           box()
-          title(paste(names(tmin_clim[2])))
+          title(paste(station[i]))
           # grid()
           par(xpd=TRUE)
           legend(0.2,min(tmin_clim[,2])-3,
@@ -4381,3 +4381,9 @@
 
 # Aquí se guarda ejecutable de la herramienta
 save(.First, file = "RClimTool.RData")
+
+#back end
+#download.file("http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/Y/%284N%29%287N%29RANGEEDGES/X/%2874W%29%2871W%29RANGEEDGES/data.nc","test.nc") 
+# tryCatch({ 
+#   cat(paste0("quality_control para la estación "),name_st_prec[i],"\n")
+# }, error=function(e){cat("ERROR :",name_st_prec[i],conditionMessage(e), "\n")})
