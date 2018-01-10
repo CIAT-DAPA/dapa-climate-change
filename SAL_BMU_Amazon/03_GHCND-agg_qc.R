@@ -116,7 +116,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/GHCN
     
     sum22=function(a,na.rm=T){
       na.x=mean(is.na(a))/length(a)
-      if(na.x>=0.20){
+      if(na.x>=0.60){
         x=NA
       }else{x=mean(a,na.rm=any(!is.na(a)))}
       
@@ -126,7 +126,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/GHCN
   }
   
   # Aggregate 
-  monthly_var = aggregate(data_qc, list(Month=data_qc$month, Year=data_qc$year),sum22)
+  monthly_var = aggregate(data_qc, list(Month=data_qc$Month, Year=data_qc$Year),sum22)
   monthly_var$day <- NULL
   
   # Write monthly quality controled
@@ -297,24 +297,24 @@ wth_sel <- function(var="prec", rg=c(-79.5, -72, -11.9, 3), rgName="amazon", bDi
 #   daily_qc(var, bDir, oDir)
 # }
 
-# # Monthly aggregation
-# varList <- c("prec","tmax", "tmin")
-# for (var in varList){
-#   bDir = "Z:/DATA/WP2/01_Weather_Stations/GHCN"
-#   oDir = "Z:/DATA/WP2/01_Weather_Stations/GHCN"
-#   monthly_agg(var, bDir, oDir)
-# }
-# 
-# # Monthly read
-# bDir <- "S:/observed/weather_station/ghcn/organized-data"
-# oDir <- "Z:/DATA/WP2/01_Weather_Stations/GHCN"
-# rg <- c(-79.5, -72, -11.9, 3)
-# sY=1960
-# fY=2009
-# varList <- c("rain","tmax", "tmin")
-# for (var in varList){
-#   monthly_read(var, bDir, oDir, rg, sY, fY)
-# }
+# Monthly aggregation
+varList <- c("prec","tmax", "tmin")
+for (var in varList){
+  bDir = "Z:/DATA/WP2/01_Weather_Stations/GHCN"
+  oDir = "Z:/DATA/WP2/01_Weather_Stations/GHCN"
+  monthly_agg(var, bDir, oDir)
+}
+
+# Monthly read
+bDir <- "S:/observed/weather_station/ghcn/organized-data"
+oDir <- "Z:/DATA/WP2/01_Weather_Stations/GHCN"
+rg <- c(-80, -66, -16, 5)
+sY=1960
+fY=2009
+varList <- c("rain","tmax", "tmin")
+for (var in varList){
+  monthly_read(var, bDir, oDir, rg, sY, fY)
+}
 
 
 # # Clim calcs

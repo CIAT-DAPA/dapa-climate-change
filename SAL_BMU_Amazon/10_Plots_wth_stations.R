@@ -119,7 +119,7 @@ gap_plot <- function(bDir="Z:/DATA/WP2/01_Weather_Stations", dst="GHCN",var="pre
       grid.arrange(get(listP[[1]]), get(listP[[2]]), get(listP[[3]]),get(listP[[4]]),get(listP[[5]]), ncol=length(listP))
     }
     dev.off()
-      
+    
   } else {
     
     tiff(paste(oDir, "/temporal_coverage_monthly_", var, "_", tolower(dst), "_", rgname, "_", sY, "_", fY, "_na30.tif", sep=""), width=500, height = 4000, pointsize=8, compression='lzw',res=100)
@@ -330,10 +330,13 @@ clim_plot <- function(bDir="Z:/DATA/WP2/01_Weather_Stations/MERGE", rgname, oDir
     # Colors and sizes for plots
     if (var == "prec"){
       color = "blue"
+      varmod = "rain"
     } else if (var == "tmax"){
       color = "red"
+      varmod = var
     } else if (var == "tmin"){
       color = "orange"
+      varmod = var
     }
     
     
@@ -341,11 +344,11 @@ clim_plot <- function(bDir="Z:/DATA/WP2/01_Weather_Stations/MERGE", rgname, oDir
       
       if (period == 1986){
         # Read climatological data files
-        climDt <- read.csv(paste0(bDir, "/", var, "_climatology_", as.character(period), "_", as.character(period+19), ".csv"), header = T)
+        climDt <- read.csv(paste0(bDir, "/climatology/", varmod, "_amz_", as.character(period), "_", as.character(period+19), ".csv"), header = T)
         clim_all <- rbind(clim_all, cbind(climDt[, c("ID", "LONG", "LAT")], "PERIOD"=paste0(as.character(period), "_", as.character(period+19))) )
       } else {
         # Read climatological data files
-        climDt <- read.csv(paste0(bDir, "/", var, "_climatology_", as.character(period), "_", as.character(period+29), ".csv"), header = T)
+        climDt <- read.csv(paste0(bDir, "/climatology/", varmod, "_amz_", as.character(period), "_", as.character(period+29), ".csv"), header = T)
         clim_all <- rbind(clim_all, cbind(climDt[, c("ID", "LONG", "LAT")], "PERIOD"=paste0(as.character(period), "_", as.character(period+29))) )
         
       }
@@ -390,12 +393,12 @@ clim_plot <- function(bDir="Z:/DATA/WP2/01_Weather_Stations/MERGE", rgname, oDir
 # Gap Plot
 bDir="Z:/DATA/WP2/01_Weather_Stations"
 # dst="GSOD"
-rg=c(-79.5, -70, -11, 2)
+rg <- c(-80, -66, -16, 5)
 # rg <- c(-80, -66, -16, 5)
 rgname <- "amazon"
 sY=1971
-fY=2010
-oDir="Z:/DATA/WP2/04_Evaluations/01_weather_stations_comparissons"
+fY=2015
+oDir="Z:/DATA/WP2/04_Evaluations/01_weather_stations_comparissons/temporal_coverage"
 varList <- c("prec", "tmax", "tmin")
 dstList <- c("COL", "ECU", "GHCN", "GSOD", "BRA", "PER")
 # dst <- "ECU"
@@ -420,7 +423,7 @@ mskDir ="Z:/DATA/WP2/00_zones"
 for (var in varList){
   
   # map_na(bDir, dst, var, rg, sY, fY, rgname, oDir, mskDir, "nas")
-  map_na(bDir, dst, var, rg, sY, fY, rgname, oDir, mskDir, "cover")
+  map_na(bDir, dst, var, rg, sY, fY, rgname, oDir, mskDir, "nas")
 }
 
 

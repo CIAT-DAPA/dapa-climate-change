@@ -180,7 +180,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/ECU"
     
     sum22=function(a,na.rm=T){
       na.x=mean(is.na(a))/length(a)
-      if(na.x>=0.20){
+      if(na.x>=0.60){
         x=NA
       }else{x=mean(a,na.rm=any(!is.na(a)))}
       
@@ -190,7 +190,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/ECU"
   }
   
   # Aggregate 
-  monthly_var = aggregate(data_qc, list(Month=data_qc$month, Year=data_qc$year),sum22)
+  monthly_var = aggregate(data_qc, list(Month=data_qc$Month, Year=data_qc$Year),sum22)
   monthly_var$day <- NULL
   
   # Write monthly quality controled
@@ -330,12 +330,12 @@ for (var in varList){
   daily_qc(var, bDir, oDir)
 }
 
-# Monthly aggregation 
+# # Monthly aggregation
 # varList <- c("prec","tmax", "tmin")
 # for (var in varList){
 #   bDir = "Z:/DATA/WP2/01_Weather_Stations/ECU"
 #   oDir = "Z:/DATA/WP2/01_Weather_Stations/ECU"
-#   monthly_agg(var, bDir, oDir)  
+#   monthly_agg(var, bDir, oDir)
 # }
 
 # # Monthly read

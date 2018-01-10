@@ -1,0 +1,285 @@
+SPLINA  VERSION 4.36  17/07/06
+COPYRIGHT AUSTRALIAN NATIONAL UNIVERSITY
+
+TITLE OF FITTED SURFACES (60 CHARS):
+-----------------------------------
+Cubic Spline Fit, Error SD = 0.2
+
+SURFACE VALUE UNITS CODE AND MISSING DATA VALUE:
+-----------------------------------------------
+  0 - UNDEFINED
+  1 - METRES
+  2 - FEET
+  3 - KILOMETRES
+  4 - MILES
+  5 - DEGREES
+  6 - RADIANS
+  7 - MILLIMETRES
+  8 - MEGAJOULES
+    0
+
+INDEPENDENT VARIABLES
+---------------------
+NUMBER OF INDEPENDENT SPLINE VARIABLES (0 TO 10):
+    1
+
+NUMBER OF INDEPENDENT COVARIATES (0 TO  9):
+    0
+
+NUMBER OF SURFACE SPLINE VARIABLES (0 TO  9):
+    0
+
+NUMBER OF SURFACE COVARIATES (0 TO  9):
+    0
+
+TRANSFORMATION CODES            REFERENCE UNIT CODES
+--------------------            --------------------
+  0 - NO TRANSFORMATION           0 - UNDEFINED
+  1 - X/A                         1 - METRES
+  2 - X*A                         2 - FEET
+  3 - A*LOG(X + B)                3 - KILOMETRES
+  4 - (X/B)**A                    4 - MILES
+  5 - A*EXP(X/B)                  5 - DEGREES
+  6 - A*TANH(X/B)                 6 - RADIANS
+  7 - ANISOTROPY ANGLE            7 - MILLIMETRES
+  8 - ANISOTROPY FACTOR           8 - MEGAJOULES
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  1:
+   0.00000       360.000        0         0
+
+SURFACE DIRECTIVES
+------------------
+DEPENDENT VARIABLE TRANSFORMATION:
+  0 - NO TRANSFORMATION
+  1 - NATURAL LOGARITHM
+  2 - SQUARE ROOT
+  5 - OCCURRENCE
+    0
+
+ORDER OF SPLINE (AT LEAST 1):
+    2
+
+NUMBER OF SURFACES (AT LEAST 1):
+    1
+
+NUMBER OF RELATIVE VARIANCES (0 OR 1):
+    0
+
+OPTIMIZATION DIRECTIVE (NORMALLY 1):
+  0 - COMMON SMOOTHING PARAMETER FOR ALL SURFACES
+  1 - COMMON SMOOTHING DIRECTIVE FOR ALL SURFACES
+  2 - DIFFERENT SMOOTHING DIRECTIVE FOR EACH SURFACE
+    1
+
+SMOOTHING DIRECTIVE (NORMALLY 1):
+  0 - FIXED SMOOTHING PARAMETER FOR EACH SURFACE
+  1 - MINIMIZE GCV FOR EACH SURFACE
+  2 - MINIMIZE TRUE MEAN SQUARE ERROR FOR EACH SURFACE
+  3 - FIXED SIGNAL FOR EACH SURFACE
+  4 - MINIMIZE GML FOR EACH SURFACE
+    1
+
+DATA FILE NAME:
+--------------
+sine.dat
+
+MAXIMUM NUMBER OF DATA POINTS (AT LEAST  2):
+     250
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+    0
+
+DATA FORMAT ( 1 INDEP VARS,  1 SURFACES,  0 REL VARIANCES):
+
+
+OUTPUT LARGE RESIDUAL FILE NAME (BLANK IF NOT REQUIRED):
+
+
+OUTPUT OPTIMIZATION PARAMETERS FILE NAME (BLANK IF NOT REQUIRED):
+sine.opt
+
+OUTPUT SURFACE COEFFICIENTS FILE NAME (BLANK IF NOT REQUIRED):
+sine.sur
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+sine.lis
+
+OUTPUT ERROR COVARIANCE FILE NAME (BLANK IF NOT REQUIRED):
+sine.cov
+
+VALIDATION DATA FILE NAME (BLANK IF NOT REQUIRED):
+-------------------------------------------------
+sine.val
+
+MAXIMUM NUMBER OF VALIDATION DATA POINTS:
+     250
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+    0
+
+DATA FORMAT ( 1 INDEP VARS,  1 SURFACES):
+
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+sine.out
+
+DATA SUMMARY
+------------
+NUMBER OF DATA POINTS READ     =    101
+NUMBER OF POINTS WITHIN LIMITS =    101
+
+ SURF  MEAN RELATIVE VARIANCE  ROOT MEAN REL VAR
+    1                1.00               1.00    
+
+SURFACE STATISTICS
+------------------
+SURF       RHO    NPTS     ERROR    SIGNAL    SURF     MEAN     STD DEV
+   1 0.255E+05     101      92.6       8.4       1 -0.34178E-01  0.7165    
+
+SURF       GCV       MSR       VAR     SURF   RTGCV     RTMSR     RTVAR
+   1     0.334E-01 0.281E-01 0.306E-01    1   0.183     0.168     0.175    
+
+SURF       GML       MSE       VAR     SURF   RTGML     RTMSE     RTVAR
+   1     0.399E-01 0.254E-02 0.334E-01    1   0.200     0.504E-01 0.183    
+
+VALIDATION DATA SUMMARY
+-----------------------
+NUMBER OF DATA POINTS READ     =    101
+NUMBER OF POINTS WITHIN LIMITS =    101
+
+VALIDATION STATISTICS
+---------------------
+SURF  NPTS        ME        MAE        RMS        MAX      SITE
+   1   101    -0.342E-01  0.355E-01  0.432E-01 -0.954E-01    38
+
+RANKED ROOT MEAN SQUARE RESIDUALS
+---------------------------------
+     1     61     0.466    
+     2     36     0.435    
+     3     30     0.345    
+     4     80     0.330    
+     5     79     0.312    
+     6     98     0.302    
+     7     55     0.298    
+     8     95     0.294    
+     9     97     0.287    
+    10     42     0.284    
+    11     70     0.276    
+    12     45     0.266    
+    13     46     0.258    
+    14      2     0.254    
+    15     76     0.252    
+    16     49     0.249    
+    17     89     0.241    
+    18     57     0.240    
+    19     68     0.236    
+    20     52     0.235    
+    21     28     0.226    
+    22     63     0.216    
+    23     83     0.203    
+    24      7     0.199    
+    25     10     0.188    
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  1
+     1     61     0.466             -1.1     -0.6
+     2     36     0.435              0.3      0.7
+     3     30    -0.345              1.3      0.9
+     4     80    -0.330             -0.6     -1.0
+     5     79     0.312             -1.3     -1.0
+     6     98     0.302             -0.5     -0.2
+     7     55    -0.298              0.0     -0.3
+     8     95     0.294             -0.7     -0.4
+     9     97    -0.287              0.0     -0.3
+    10     42     0.284              0.2      0.5
+    11     70     0.276             -1.2     -1.0
+    12     45    -0.266              0.6      0.3
+    13     46    -0.258              0.5      0.3
+    14      2     0.254             -0.2      0.0
+    15     76     0.252             -1.3     -1.0
+    16     49     0.249             -0.1      0.1
+    17     89    -0.241             -0.4     -0.7
+    18     57     0.240             -0.6     -0.4
+    19     68     0.236             -1.1     -0.9
+    20     52    -0.235              0.2     -0.1
+    21     28    -0.226              1.2      1.0
+    22     63    -0.216             -0.5     -0.7
+    23     83     0.203             -1.1     -0.9
+    24      7    -0.199              0.5      0.3
+    25     10     0.188              0.3      0.5
+    26     73    -0.184             -0.8     -1.0
+    27     66    -0.182             -0.7     -0.8
+    28     65     0.181             -1.0     -0.8
+    29     47    -0.178              0.4      0.2
+    30      6    -0.174              0.4      0.3
+    31     99    -0.171              0.0     -0.2
+    32     82    -0.171             -0.8     -0.9
+    33     85     0.167             -1.0     -0.8
+    34     51     0.160             -0.2      0.0
+    35     59     0.157             -0.7     -0.5
+    36     41     0.154              0.3      0.5
+    37     40     0.153              0.4      0.5
+    38     74    -0.152             -0.9     -1.0
+    39     14    -0.148              0.8      0.7
+    40     23    -0.146              1.1      0.9
+    41      8    -0.143              0.5      0.4
+    42      5     0.142              0.1      0.2
+    43     44    -0.138              0.5      0.4
+    44     21     0.138              0.8      0.9
+    45     12     0.136              0.4      0.6
+    46     19     0.135              0.7      0.8
+    47     72    -0.132             -0.9     -1.0
+    48     71    -0.122             -0.9     -1.0
+    49     64    -0.118             -0.6     -0.8
+    50     87     0.115             -0.9     -0.8
+    51      4    -0.114              0.3      0.2
+    52      9     0.113              0.3      0.4
+    53     62    -0.113             -0.6     -0.7
+    54     88    -0.113             -0.6     -0.7
+    55     18     0.109              0.7      0.8
+    56     93     0.109             -0.6     -0.5
+    57     27    -0.107              1.1      1.0
+    58     24     0.102              0.9      1.0
+    59     69     0.999E-01         -1.0     -0.9
+    60     11    -0.958E-01          0.6      0.5
+    61     38     0.946E-01          0.5      0.6
+    62     96    -0.934E-01         -0.2     -0.3
+    63     67    -0.901E-01         -0.8     -0.9
+    64     48     0.855E-01          0.1      0.2
+    65     81     0.808E-01         -1.0     -1.0
+    66     25    -0.801E-01          1.1      1.0
+    67     20    -0.791E-01          1.0      0.9
+    68     17    -0.730E-01          0.9      0.8
+    69     43    -0.693E-01          0.5      0.4
+    70      3     0.673E-01          0.0      0.1
+    71     60    -0.667E-01         -0.5     -0.6
+    72     58    -0.658E-01         -0.4     -0.4
+    73     16     0.649E-01          0.7      0.7
+    74     13     0.647E-01          0.5      0.6
+    75     84     0.637E-01         -0.9     -0.9
+    76     77    -0.636E-01         -1.0     -1.0
+    77     92    -0.585E-01         -0.5     -0.5
+    78     54     0.579E-01         -0.3     -0.2
+    79     39    -0.573E-01          0.6      0.6
+    80     56    -0.558E-01         -0.3     -0.3
+    81     86    -0.547E-01         -0.7     -0.8
+    82     78     0.538E-01         -1.1     -1.0
+    83     29    -0.486E-01          1.0      1.0
+    84    100    -0.477E-01         -0.1     -0.1
+    85     91    -0.475E-01         -0.5     -0.6
+    86      1    -0.471E-01          0.0      0.0
+    87     75     0.456E-01         -1.1     -1.0
+    88     53    -0.427E-01         -0.1     -0.1
+    89     32    -0.426E-01          0.9      0.9
+    90     31     0.368E-01          0.9      0.9
+    91     35    -0.310E-01          0.8      0.8
+    92     94    -0.281E-01         -0.4     -0.4
+    93     90    -0.227E-01         -0.6     -0.6
+    94     50    -0.196E-01          0.1      0.0
+    95    101     0.120E-01         -0.1     -0.1
+    96     34    -0.943E-02          0.8      0.8
+    97     26     0.781E-02          1.0      1.0
+    98     37     0.644E-02          0.7      0.7
+    99     15    -0.517E-02          0.7      0.7
+   100     33    -0.333E-02          0.8      0.8
+
+PROGRAM SPLINA  VERSION 4.36  DATE 18/07/2006  TIME 15.18.35

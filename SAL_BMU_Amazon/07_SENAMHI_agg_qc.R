@@ -26,9 +26,9 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
   datosprecip = as.data.frame(matrix(NA,nrow(fechas),length(Datos)))
   
   # Merge daily data
-  for(j in 1:length(Datos)) {  
+  for(j in 1:length(Datos)) {
     
-    final = merge(fechas,Datos[j],by=c("Month", "Year"),all.x=T)
+    final = merge(fechas,Datos[j],by=c("Year", "Month"),all.x=T)
     datosprecip[,j]=final[,3]
   }
   
@@ -118,14 +118,15 @@ wth_sel <- function(var="prec", rg=c(-79.5, -72, -11.9, 3), rgName="amazon", bDi
   
 }
 
-var = "prec"
+
+var = "tmin"
 bDir = "Z:/DATA/WP2/01_Weather_Stations/PER/monthly-raw"
 oDir = "Z:/DATA/WP2/01_Weather_Stations/PER"
 monthly_agg(var, bDir, oDir)
 
 # Clim calcs
-sY=1981
-fY=2010
+sY=1986
+fY=2005
 bDir = "Z:/DATA/WP2/01_Weather_Stations/PER"
 oDir = "Z:/DATA/WP2/01_Weather_Stations/PER"
 # rg=c(-79.5, -72, -11.9, 3)
@@ -138,13 +139,13 @@ for (var in varList){
 
 # 
 # 
-# var="rhum"
-# rgName="amazon"
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
-# sY=1981
-# fY=2010
-# rg <- c(-80, -66, -16, 5)
-# wth_sel(var, rg, rgName, bDir, oDir, sY, fY)
+var="rhum"
+rgName="amazon"
+bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
+oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
+sY=1981
+fY=2010
+rg <- c(-80, -66, -16, 5)
+wth_sel(var, rg, rgName, bDir, oDir, sY, fY)
 # 
 

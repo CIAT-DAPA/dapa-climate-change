@@ -10,7 +10,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractByMask.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ex: python ExtractByMask.py S:\observed\gridded_products\worldclim\Global_30s_v2 D:\CIAT\Workspace\palvarez\wcl_v2 D:\CIAT\_tools\AdminBoundaries\Colombia\_by_departaments\CA_adm\CA0.shp ALL"
+	print "   - ex: python ExtractByMask.py S:\observed\gridded_products\worldclim\Global_30s_v2 C:\Workspace\cgonzalez\wcl_v2 S:\admin_boundaries\shp_files\COL_adm\COL0.shp vapr"
 	sys.exit(1)
 
 # Arguments
@@ -31,6 +31,10 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 # Set Workspace
 gp.workspace = dirbase
+
+# Create output folder
+if not os.path.exists(dirout):
+	os.system('mkdir ' + dirout)
 
 # Get a list of grids in the workspace 
 print "\t ..listing grids into " + dirbase

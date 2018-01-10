@@ -1,0 +1,67 @@
+/* &r cut_process.aml T:\gcm\cmip5\downscaled Z:\DATA\WP2\03_Future_data\downscaled_wcl_2_5min Z:\DATA\WP2\00_zones\rg_poly ALL 2.5min YES 
+
+/* rootdir = Root folder where are storaged GCM CMIP5 data
+/* outputdir = Output folder
+/* mask =  Input mask data defining areas to extract
+/* rcp = escenarios: rcp26 rcp45 rcp60 rcp85. Use ALL to select all the rcps 
+/* resol = The possibilities are 30s 2.5min 5min 10min
+/* switch = Set YES to convert outputs in ESRI-Ascii files
+
+&args rootdir outputdir mask rcp resol switch
+&if [null %rootdir%] &then &return Use the root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&if %rcp% EQ ALL &then &s rcp rcp26 rcp45 rcp60 rcp85
+&else &s rcp %rcp%
+
+&do rcp &list %rcp%
+	&if %resol% EQ 30s &then &s inputdir %rootdir%\%rcp%\Global_30s
+	&else &if %resol% EQ 2.5min &then &s inputdir %rootdir%\%rcp%\global_2_5min
+	&else &if %resol% EQ 5min &then &s inputdir %rootdir%\%rcp%\global_5min
+	&else &s inputdir %rootdir%\%rcp%\global_10min
+
+	&if not [exists %outputdir%\%rcp%_extracts -dir] &then &sys md %outputdir%\%rcp%_extracts
+
+	&if %resol% EQ 30s &then &s outdir %outputdir%\%rcp%_extracts\Global_30s
+	&else &if %resol% EQ 2.5min &then &s outdir %outputdir%\%rcp%_extracts\Global_2_5min
+	&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts\Global_5min
+	&else &s outdir %outputdir%\%rcp%_extracts\Global_10min
+
+	&s modellist bcc_csm1_1 csiro_mk3_6_0 fio_esm gfdl_cm3 giss_e2_h giss_e2_r ipsl_cm5a_lr ipsl_cm5a_mr miroc_esm miroc_esm_chem miroc_miroc5 mohc_hadgem2_cc mri_cgcm3 ncar_ccsm4
+	/* &s modellist [listfile %inputdir%\* -dir]
+	&s nmodels [token %modellist% -count]
+	&do md = 1 &to %nmodels%
+		
+		&s modname [extract %md% %modellist%]
+		&s outmoddir %outdir%\%modname%
+		/* &s outmoddir %outdir%\%modname%\r1i1p1
+		&if not [exists %outmoddir% -dir] &then &sys md %outmoddir%
+		
+		&do ts &list 2040_2069 /* 2020_2049 2040_2069 2060_2089 2070_2099
+			&s outmodtsdir %outmoddir%
+			/* &s outmodtsdir %outmoddir%\%ts% 
+			&s inmodtsdir %inputdir%\%modname%\r1i1p1\%ts%
+			
+			&if not [exists %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt -FILE] &then
+				&do
+					&ty
+					&ty Model %modname% (%rcp%, %ts%, %resol%)
+					&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
+					&r cut_GCM.aml %inmodtsdir% %outmodtsdir% %outmodtsdir% %mask% %switch%
+					&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%modname%\r1i1p1\%ts%_cut_done.txt
+				&end
+			&else 
+				&do
+					&ty 
+					&ty Model %modname% (%ts%, %resol%) processed
+				&end		
+			
+		&end
+	&end	
+&end	
+&ty	
+&ty ======DONE!=======

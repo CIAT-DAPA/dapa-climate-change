@@ -281,7 +281,7 @@ leap <- function(year) {
 }
 
 ####################################################################################
-#Fucntion to convert to monthly data and calculate the 30yr averages for GSOD data
+#Function to convert to monthly data and calculate the 30yr averages for GSOD data
 ####################################################################################
 mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
 
@@ -349,13 +349,18 @@ mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
     
   }
   
-  dataMt_prec <- cbind(dates, dataMt_prec)
-  dataMt_tmax <- cbind(dates, dataMt_tmax)
-  dataMt_tmin <- cbind(dates, dataMt_tmin)
+  names(dataMt_prec) <- usaf_ids
+  names(dataMt_tmax) <- usaf_ids
+  names(dataMt_tmin) <- usaf_ids
   
-  names(dataMt_prec) <- c("Date", usaf_ids) 
-  names(dataMt_tmax) <- c("Date", usaf_ids)
-  names(dataMt_tmin) <- c("Date", usaf_ids)
+  # Add dates
+  year = as.numeric(substr(dates[,1],1,4))
+  month = as.numeric(substr(dates[,1],5,6))
+  day = as.numeric(substr(dates[,1],7,8))
+  
+  dataMt_prec <- cbind("Year"=year, "Month"=month, "Day"=day, dataMt_prec)
+  dataMt_tmax <- cbind("Year"=year, "Month"=month, "Day"=day, dataMt_tmax)
+  dataMt_tmin <- cbind("Year"=year, "Month"=month, "Day"=day, dataMt_tmin)
   
   write.csv(dataMt_prec, paste0(odir, "/prec_daily_all_qc.csv"), row.names=F)
   write.csv(dataMt_tmax, paste0(odir, "/tmax_daily_all_qc.csv"), row.names=F)
@@ -367,11 +372,10 @@ mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
 ### Monthly aggregation QC GSOD ####
 ####################################
 
-monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL", oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"){
+monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/GSOD", oDir = "Z:/DATA/WP2/01_Weather_Stations/GSOD"){
   
   # Read daily QC data
   data_qc <- read.csv(paste0(bDir, "/", var, "_daily_all_qc.csv"), header = T)
-  
   
   # Monthly aggregation based on min percent of NA
   
@@ -391,7 +395,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
     
     sum22=function(a,na.rm=T){
       na.x=mean(is.na(a))/length(a)
-      if(na.x>=0.20){
+      if(na.x>=0.60){
         x=NA
       }else{x=mean(a,na.rm=any(!is.na(a)))}
       
@@ -401,8 +405,11 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
   }
   
   # Aggregate 
-  monthly_var = aggregate(data_qc, list(Month=substr(data_qc$Date, 5, 6),Year=substr(data_qc$Date, 1, 4)),sum22)
-  monthly_var$Date <- NULL
+  monthly_var = aggregate(data_qc, by=list(Month=data_qc$Month,Year=data_qc$Year),sum22)
+  monthly_var[,3] <- NULL
+  monthly_var[,3] <- NULL
+  monthly_var[,3] <- NULL
+  
   
   # Write monthly quality controled
   write.csv(monthly_var, paste0(oDir, "/", var, "_monthly_all.csv"), row.names=F)

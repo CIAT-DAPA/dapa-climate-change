@@ -10,7 +10,7 @@ gp = arcgisscripting.create(9.3)
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python TemperatureCalc.py D:\Workspace\Requests\Jvalencia\Ensemble\2010_2039 D:\Workspace\Requests\Jvalencia\Ensemble\2010_2039 tmean"
+	print "   - ie: python TemperatureCalc.py C:\Workspace\cgonzalez\wcl_v2 C:\Workspace\cgonzalez\wcl_v2 dtr"
 	sys.exit(1)
 
 dirbase = sys.argv[1]
@@ -47,8 +47,8 @@ if variable == "dtr":
 	for month in range (1, 12 + 1, 1):
 
 		print "Calculating month " + str(month)
-		InExpression = gp.workspace + "\\tmax_" + str(month) + " - " + gp.workspace + "\\tmin_" + str(month)
-		gp.SingleOutputMapAlgebra_sa(InExpression,  dirout + "\\dtr_" + str(month))
+		InExpression = gp.workspace + "\\tmax_" + str(month) + ".tif - " + gp.workspace + "\\tmin_" + str(month) + ".tif"
+		gp.SingleOutputMapAlgebra_sa(InExpression,  dirout + "\\dtr_" + str(month) + ".tif")
 
 		
 if variable == "tmax":

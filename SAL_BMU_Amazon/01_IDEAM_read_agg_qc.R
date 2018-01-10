@@ -205,7 +205,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
     
     sum22=function(a,na.rm=T){
       na.x=mean(is.na(a))/length(a)
-      if(na.x>=0.50){
+      if(na.x>=0.60){
         x=NA
       }else{x=mean(a,na.rm=any(!is.na(a)))}
       
@@ -236,7 +236,7 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL",
   ## Climatology aggregation based on NA percent
   avg_var = function(a,na.rm=T){
     na.x = length(which(is.na(a))) / length(a)
-    if(na.x>=0.50){
+    if(na.x>=0.67){
       x = NA
     }else{
       x = mean(a, na.rm = any(!is.na(a))) 
@@ -257,6 +257,7 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL",
   
   # Remove rows with NA
   monthly_avg <- na.omit(cbind(st_names, round(t(monthly_avg), 1)))
+  monthly_avg <- cbind(st_names, round(t(monthly_avg), 1))
   rownames(monthly_avg) <- NULL
   
   # Add month names
@@ -409,26 +410,31 @@ wth_sel <- function(var="prec", rg=c(-79.5, -72, -11.9, 3), rgName="amazon", bDi
 # oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
 # daily_qc(var, bDir, oDir)
 
-# var="rhum"
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
-# monthly_agg(var, bDir, oDir)
-# 
-# var="rhum"
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
-# st_loc="S:/observed/weather_station/col-ideam/stations_names.csv"
-# sY=1981
-# fY=2010
-# clim_calc(var,  bDir, oDir, st_loc, sY, fY)
+varList <- c("prec","tmax", "tmin", "rhum")
+for (var in varList){
+  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
+  oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
+  monthly_agg(var, bDir, oDir)
+}
 
-# var="rhum"
-# rgName="amazon"
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
-# sY=1981
-# fY=2010
-# rg <- c(-80, -66, -16, 5)
-# wth_sel(var, rg, rgName, bDir, oDir, sY, fY)
+# 
+varList <- c("prec","tmax", "tmin")
+bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
+oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
+st_loc="S:/observed/weather_station/col-ideam/stations_names.csv"
+sY=1961
+fY=1990
+for (var in varList){
+clim_calc(var,  bDir, oDir, st_loc, sY, fY)
+}
+
+var="rhum"
+rgName="amazon"
+bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
+oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
+sY=1981
+fY=2010
+rg <- c(-80, -66, -16, 5)
+wth_sel(var, rg, rgName, bDir, oDir, sY, fY)
 
 

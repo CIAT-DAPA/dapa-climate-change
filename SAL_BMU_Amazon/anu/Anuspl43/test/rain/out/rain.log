@@ -1,0 +1,448 @@
+SPLINB  VERSION 4.36  17/03/06
+COPYRIGHT AUSTRALIAN NATIONAL UNIVERSITY
+
+TITLE OF FITTED SURFACES (60 CHARS):
+-----------------------------------
+Rainfall Using Knots & Square Root Transformation
+
+SURFACE VALUE UNITS CODE AND MISSING DATA VALUE:
+-----------------------------------------------
+  0 - UNDEFINED
+  1 - METRES
+  2 - FEET
+  3 - KILOMETRES
+  4 - MILES
+  5 - DEGREES
+  6 - RADIANS
+  7 - MILLIMETRES
+  8 - MEGAJOULES
+    7
+
+INDEPENDENT VARIABLES
+---------------------
+NUMBER OF INDEPENDENT SPLINE VARIABLES (0 TO 10):
+    3
+
+NUMBER OF INDEPENDENT COVARIATES (0 TO  7):
+    0
+
+NUMBER OF SURFACE SPLINE VARIABLES (0 TO  7):
+    0
+
+NUMBER OF SURFACE COVARIATES (0 TO  7):
+    0
+
+TRANSFORMATION CODES            REFERENCE UNIT CODES
+--------------------            --------------------
+  0 - NO TRANSFORMATION           0 - UNDEFINED
+  1 - X/A                         1 - METRES
+  2 - X*A                         2 - FEET
+  3 - A*LOG(X + B)                3 - KILOMETRES
+  4 - (X/B)**A                    4 - MILES
+  5 - A*EXP(X/B)                  5 - DEGREES
+  6 - A*TANH(X/B)                 6 - RADIANS
+  7 - ANISOTROPY ANGLE            7 - MILLIMETRES
+  8 - ANISOTROPY FACTOR           8 - MEGAJOULES
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  1:
+   140.000       150.000        0         5   3.000    
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  2:
+  -45.0000      -39.0000        0         5   2.000    
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  3:
+   0.00000       5000.00        1         1
+ENTER  1 TRANSFORMATION COEFFICIENT(S):
+   1000.00    
+
+SURFACE DIRECTIVES
+------------------
+DEPENDENT VARIABLE TRANSFORMATION:
+  0 - NO TRANSFORMATION
+  1 - NATURAL LOGARITHM
+  2 - SQUARE ROOT
+  5 - OCCURRENCE
+    2
+
+ORDER OF SPLINE (AT LEAST 2):
+    2
+
+NUMBER OF SURFACES (AT LEAST 1):
+   12
+
+NUMBER OF RELATIVE VARIANCES (0, 1 OR  12):
+    0
+
+OPTIMIZATION DIRECTIVE (NORMALLY 1):
+  0 - COMMON SMOOTHING PARAMETER FOR ALL SURFACES
+  1 - COMMON SMOOTHING DIRECTIVE FOR ALL SURFACES
+  2 - DIFFERENT SMOOTHING DIRECTIVE FOR EACH SURFACE
+    1
+
+SMOOTHING DIRECTIVE (NORMALLY 1):
+  0 - FIXED SMOOTHING PARAMETER FOR EACH SURFACE
+  1 - MINIMIZE GCV FOR EACH SURFACE
+  2 - MINIMIZE TRUE MEAN SQUARE ERROR FOR EACH SURFACE
+  3 - FIXED SIGNAL FOR EACH SURFACE
+  4 - MINIMIZE GML FOR EACH SURFACE
+    1
+
+DATA FILE NAME:
+--------------
+rain.dat
+
+MAXIMUM NUMBER OF DATA POINTS (AT LEAST  4):
+     300
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+    6
+
+DATA FORMAT (SITE LABEL,  3 INDEP VARS, 12 SURFACES,  0 REL VARIANCES):
+(a6,2f8.3,f8.1/12f9.2)
+
+KNOT INDEX FILE NAME:
+rainsel.not
+
+MAXIMUM NUMBER OF DATA KNOTS (AT LEAST  1):
+     200
+
+INPUT BAD DATA FLAG FILE NAME (BLANK IF NOT REQUIRED):
+
+
+OUTPUT BAD DATA FLAG FILE NAME (BLANK IF NOT REQUIRED):
+rain.flg
+
+OUTPUT LARGE RESIDUAL FILE NAME (BLANK IF NOT REQUIRED):
+rain.res
+
+OUTPUT OPTIMIZATION PARAMETERS FILE NAME (BLANK IF NOT REQUIRED):
+rain.opt
+
+OUTPUT SURFACE COEFFICIENTS FILE NAME (BLANK IF NOT REQUIRED):
+rain.sur
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+rain.lis
+
+OUTPUT ERROR COVARIANCE FILE NAME (BLANK IF NOT REQUIRED):
+rain.cov
+
+VALIDATION DATA FILE NAME (BLANK IF NOT REQUIRED):
+-------------------------------------------------
+rain.val
+
+MAXIMUM NUMBER OF VALIDATION DATA POINTS:
+     300
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+    6
+
+DATA FORMAT (LABEL,  3 INDEP VARS, 12 SURFACES):
+(a6,2f8.3,f8.1/12f9.2)
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+rain.out
+
+DATA SUMMARY
+------------
+NUMBER OF DATA POINTS READ     =    246
+NUMBER OF POINTS WITHIN LIMITS =    243
+MIN NUMBER OF POINTS WITH DATA =    243
+
+ SURF  MEAN RELATIVE VARIANCE  ROOT MEAN REL VAR
+    1                1.00               1.00    
+
+NUMBER OF KNOTS      =    150
+
+SURFACE STATISTICS
+------------------
+SURF       RHO    NPTS     ERROR    SIGNAL    SURF     MEAN     STD DEV
+   1 0.390E-02     243     135.1     107.9       1   52.981       23.57    
+   2 0.681E-02     243     150.9      92.1       2   47.541       17.08    
+   3 0.540E-02     243     144.1      98.9       3   63.275       23.67    
+   4 0.335E-02     243     131.2     111.8       4   76.666       37.95    
+   5 0.286E-02     243     127.3     115.7       5   91.268       47.28    
+   6 0.391E-02     243     135.2     107.8       6   82.186       45.22    
+   7 0.369E-02     243     133.7     109.3       7   109.04       55.59    
+   8 0.394E-02     243     135.4     107.6       8   103.01       49.90    
+   9 0.323E-02     243     130.2     112.8       9   88.480       49.11    
+  10 0.284E-02     243     127.1     115.9      10   82.176       39.14    
+  11 0.508E-02     243     142.4     100.6      11   73.110       29.90    
+  12 0.331E-02     243     130.9     112.1      12   75.558       29.50    
+ AVG 0.402E-02     243     135.3     107.7           78.774       39.17    
+
+SURF       GCV       MSR       VAR     SURF   RTGCV     RTMSR     RTVAR
+   1     0.131     0.406E-01 0.731E-01    1   0.362     0.202     0.270    
+   2     0.150     0.579E-01 0.932E-01    2   0.387     0.241     0.305    
+   3     0.160     0.561E-01 0.947E-01    3   0.399     0.237     0.308    
+   4     0.188     0.547E-01 0.101        4   0.433     0.234     0.318    
+   5     0.263     0.722E-01 0.138        5   0.513     0.269     0.371    
+   6     0.260     0.806E-01 0.145        6   0.510     0.284     0.381    
+   7     0.312     0.944E-01 0.172        7   0.558     0.307     0.414    
+   8     0.270     0.839E-01 0.151        8   0.520     0.290     0.388    
+   9     0.239     0.687E-01 0.128        9   0.489     0.262     0.358    
+  10     0.200     0.548E-01 0.105       10   0.447     0.234     0.324    
+  11     0.184     0.632E-01 0.108       11   0.429     0.251     0.328    
+  12     0.172     0.498E-01 0.924E-01   12   0.414     0.223     0.304    
+ AVG     0.211     0.647E-01 0.117            0.459     0.254     0.342    
+
+SURF       GML       MSE       VAR     SURF   RTGML     RTMSE     RTVAR
+   1     0.423     0.324E-01 0.921E-01    1   0.650     0.180     0.303    
+   2     0.353     0.353E-01 0.111        2   0.594     0.188     0.333    
+   3     0.433     0.385E-01 0.118        3   0.658     0.196     0.343    
+   4     0.651     0.467E-01 0.127        4   0.807     0.216     0.356    
+   5     0.939     0.656E-01 0.162        5   0.969     0.256     0.403    
+   6     0.807     0.643E-01 0.176        6   0.898     0.254     0.419    
+   7      1.06     0.772E-01 0.221        7    1.03     0.278     0.470    
+   8     0.885     0.667E-01 0.194        8   0.941     0.258     0.440    
+   9     0.856     0.595E-01 0.162        9   0.925     0.244     0.403    
+  10     0.728     0.499E-01 0.125       10   0.853     0.223     0.354    
+  11     0.524     0.447E-01 0.137       11   0.724     0.211     0.369    
+  12     0.577     0.426E-01 0.111       12   0.760     0.207     0.334    
+ AVG     0.686     0.520E-01 0.145            0.828     0.228     0.380    
+
+APPROXIMATE UNTRANSFORMED STATISTICS
+------------------------------------
+SURF       GCV       MSR       VAR     SURF   RTGCV     RTMSR     RTVAR
+   1      27.9      8.61      15.5        1    5.28      2.93      3.94    
+   2      28.6      11.0      17.7        2    5.34      3.32      4.21    
+   3      40.4      14.2      24.0        3    6.36      3.77      4.90    
+   4      57.7      16.8      31.1        4    7.59      4.10      5.58    
+   5      96.2      26.4      50.3        5    9.81      5.13      7.09    
+   6      85.7      26.5      47.6        6    9.26      5.15      6.90    
+   7      136.      41.2      74.8        7    11.7      6.42      8.65    
+   8      112.      34.6      62.1        8    10.6      5.88      7.88    
+   9      84.8      24.3      45.4        9    9.21      4.93      6.74    
+  10      65.9      18.0      34.4       10    8.12      4.24      5.87    
+  11      53.9      18.5      31.6       11    7.34      4.30      5.62    
+  12      51.9      15.1      27.9       12    7.21      3.88      5.29    
+ AVG      70.1      21.3      38.5             8.37      4.61      6.21    
+
+SURF       MSE     RTMSE
+   1      6.88      2.62    
+   2      6.72      2.59    
+   3      9.75      3.12    
+   4      14.3      3.78    
+   5      24.0      4.90    
+   6      21.1      4.60    
+   7      33.7      5.80    
+   8      27.5      5.24    
+   9      21.1      4.59    
+  10      16.4      4.05    
+  11      13.1      3.62    
+  12      12.9      3.59    
+ AVG      17.3      4.16    
+
+VALIDATION DATA SUMMARY
+-----------------------
+NUMBER OF DATA POINTS READ     =     15
+NUMBER OF POINTS WITHIN LIMITS =     15
+
+VALIDATION STATISTICS
+---------------------
+SURF  NPTS        ME        MAE        RMS        MAX      SITE
+   1    15     -1.44       4.33       5.99      -17.6      094027
+   2    15     0.190       4.20       5.17      -11.5      094027
+   3    15    -0.641       5.11       6.58      -14.5      094027
+   4    15     -1.21       5.48       7.92      -23.0      094027
+   5    15     -1.93       7.55       9.82      -24.2      094027
+   6    15     -1.11       7.37       10.2      -27.0      094027
+   7    15     -1.68       8.37       12.9      -39.5      094027
+   8    15     -1.31       7.79       11.2      -32.9      094027
+   9    15     -1.04       7.40       10.8      -33.6      094027
+  10    15     -1.60       6.52       10.0      -31.2      094027
+  11    15     0.147       5.40       8.33      -24.1      094027
+  12    15     -2.59       5.91       8.42      -25.1      094027
+ AVG    15     -1.18       6.29       9.21      -39.5      094027
+
+VALIDATION OF TRANSFORMED VALUES
+--------------------------------
+SURF  NPTS        ME        MAE        RMS        MAX      SITE
+   1    15    -0.836E-01  0.300      0.390      -1.04      094027
+   2    15     0.386E-01  0.316      0.382      0.762      092079
+   3    15    -0.283E-01  0.335      0.427      0.954      092079
+   4    15    -0.525E-01  0.332      0.457      -1.21      094027
+   5    15    -0.785E-01  0.424      0.534      -1.19      094027
+   6    15    -0.251E-01  0.432      0.574      -1.32      094027
+   7    15    -0.603E-01  0.427      0.610      -1.68      094027
+   8    15    -0.471E-01  0.406      0.555      -1.49      094027
+   9    15    -0.236E-01  0.418      0.564      -1.54      094027
+  10    15    -0.540E-01  0.376      0.540      -1.48      094027
+  11    15     0.325E-01  0.329      0.481      -1.22      094027
+  12    15    -0.133      0.345      0.463      -1.25      094027
+ AVG    15    -0.429E-01  0.370      0.503      -1.68      094027
+
+RANKED ROOT MEAN SQUARE RESIDUALS
+---------------------------------
+     1      3  091002   0.754    
+     2    180  094092   0.686    
+     3     75  091185   0.669    
+     4     94  092017   0.668    
+     5   -114  092052   0.651    
+     6   -218  096001   0.606    
+     7    197  095009   0.589    
+     8    132  093035   0.582    
+     9     89  092009   0.539    
+    10    214  095040   0.530    
+    11     30  091060   0.526    
+    12     20  091039   0.509    
+    13     26  091052   0.478    
+    14    221  096010   0.462    
+    15   -113  092051   0.460    
+    16     38  091081   0.460    
+    17    -63  091151   0.460    
+    18    135  094001   0.459    
+    19     70  091168   0.452    
+    20    147  094026   0.422    
+    21   -211  095028   0.420    
+    22   -233  097006   0.417    
+    23     18  091034   0.381    
+    24   -230  096046   0.381    
+    25    155  094040   0.379    
+    26    128  093021   0.375    
+    27    238  097021   0.372    
+    28   -239  097022   0.367    
+    29     46  091095   0.366    
+    30   -220  096004   0.363    
+    31   -153  094034   0.360    
+    32    -82  091223   0.357    
+    33     79  091195   0.355    
+    34    157  094042   0.355    
+    35    -86  092005   0.354    
+    36     33  091070   0.348    
+    37    158  094043   0.347    
+    38    -74  091182   0.347    
+    39    165  094062   0.346    
+    40   -237  097020   0.343    
+    41     39  091082   0.341    
+    42   -235  097011   0.337    
+    43   -241  097036   0.334    
+    44   -242  097045   0.330    
+    45   -215  095041   0.329    
+    46   -244  097053   0.327    
+    47   -216  095055   0.324    
+    48   -191  094139   0.321    
+    49     65  091156   0.306    
+    50     -2  091001   0.303    
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  1
+     1   -114  092052  -0.780             75.8     62.8
+     2     89  092009   0.681             43.0     52.4
+     3   -190  094130  -0.594             56.5     47.9
+     4    180  094092  -0.587             84.6     74.1
+     5     94  092017  -0.534             60.5     52.5
+     6   -216  095055  -0.504             46.8     40.2
+     7    132  093035  -0.470             43.6     37.6
+     8   -233  097006  -0.434            219.0    206.3
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  2
+     1     94  092017  -0.757             65.5     53.8
+     2     75  091185   0.732             27.9     36.1
+     3   -114  092052  -0.724             75.0     63.0
+     4     91  092011  -0.715             51.0     41.3
+     5   -233  097006  -0.584            163.5    149.0
+     6    131  093027  -0.553             42.9     36.0
+     7     54  091118  -0.538             39.1     32.6
+     8     89  092009   0.531             44.6     52.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  3
+     1     46  091095    1.08             36.0     50.1
+     2     70  091168   0.776             59.5     72.1
+     3   -114  092052  -0.714            119.5    104.4
+     4    158  094043  -0.657             67.7     57.3
+     5     94  092017  -0.618             69.1     59.2
+     6   -233  097006  -0.584            225.2    208.0
+     7   -113  092051  -0.525             86.0     76.5
+     8     93  092013   0.519             62.1     70.5
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  4
+     1      3  091002  -0.869             92.2     76.3
+     2   -114  092052  -0.805            127.4    109.9
+     3     94  092017  -0.661             68.0     57.5
+     4    238  097021   0.640            175.6    193.0
+     5     30  091060  -0.620            107.2     94.8
+     6     20  091039   0.574             62.1     71.5
+     7     75  091185   0.528             55.3     63.5
+     8     79  091195   0.505             71.2     80.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  5
+     1    132  093035   -1.05             63.4     47.8
+     2     94  092017  -0.960             84.6     67.8
+     3    197  095009  -0.837             81.4     67.0
+     4    -86  092005   0.685             56.9     67.7
+     5    221  096010   0.676             41.9     51.1
+     6    214  095040   0.670             42.1     51.3
+     7   -114  092052  -0.662            133.6    118.7
+     8      3  091002  -0.659            106.0     92.9
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  6
+     1      3  091002   -1.07            100.7     80.4
+     2   -218  096001  -0.969            171.2    146.8
+     3    132  093035  -0.936             55.2     42.2
+     4     26  091052  -0.871            102.3     85.4
+     5     75  091185   0.845             59.9     73.7
+     6    180  094092  -0.837             98.6     82.7
+     7    214  095040   0.794             32.9     42.6
+     8    197  095009  -0.780             69.7     57.3
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  7
+     1      3  091002   -1.24            144.5    116.3
+     2    180  094092   -1.21            148.5    120.5
+     3     75  091185    1.17             81.3    103.7
+     4     94  092017  -0.858            100.9     84.4
+     5   -218  096001  -0.839            209.4    185.8
+     6    -63  091151  -0.829            214.5    190.9
+     7     70  091168   0.829            157.4    178.9
+     8     38  091081  -0.818            146.3    127.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  8
+     1      3  091002   -1.09            136.7    112.4
+     2    180  094092   -1.06            132.8    109.4
+     3     20  091039    1.02             87.6    107.7
+     4     75  091185   0.913             79.3     96.4
+     5   -218  096001  -0.784            195.2    173.9
+     6    197  095009  -0.749             88.5     75.0
+     7   -230  096046   0.729             80.0     93.5
+     8     38  091081  -0.651            131.7    117.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  9
+     1      3  091002  -0.915            111.7     93.2
+     2    135  094001  -0.851             54.3     42.5
+     3    197  095009  -0.811             89.9     75.2
+     4   -218  096001  -0.774            166.7    147.3
+     5    147  094026   0.763             47.8     59.0
+     6     75  091185   0.703             66.1     78.0
+     7    180  094092  -0.667            111.4     97.8
+     8     38  091081  -0.639             97.3     85.1
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 10
+     1     26  091052  -0.747             94.4     80.4
+     2    197  095009  -0.660             84.9     73.2
+     3      9  091016   0.641             80.3     92.2
+     4   -114  092052  -0.612             95.5     83.9
+     5     75  091185   0.601             58.5     68.1
+     6     30  091060  -0.598            107.7     95.6
+     7     20  091039   0.589             62.3     72.0
+     8    214  095040   0.585             48.9     57.4
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 11
+     1   -114  092052   -1.04            112.2     91.3
+     2     89  092009    1.03             57.9     74.7
+     3   -153  094034   0.717             38.5     47.9
+     4     94  092017  -0.680             83.6     71.6
+     5    180  094092  -0.667            121.4    107.1
+     6    155  094040   0.618             61.5     71.6
+     7   -211  095028   0.564             70.7     80.5
+     8    102  092031  -0.541             64.0     55.6
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 12
+     1     94  092017  -0.801             88.9     74.4
+     2     70  091168   0.779             73.0     86.9
+     3    132  093035  -0.744             65.5     54.0
+     4    -63  091151  -0.612            106.1     93.9
+     5   -114  092052  -0.598            115.9    103.4
+     6     89  092009   0.593             73.6     84.1
+     7    180  094092  -0.567            112.3    100.6
+     8    197  095009  -0.564             72.0     62.8
+
+PROGRAM SPLINB  VERSION 4.36  DATE 18/07/2006  TIME 15.18.53

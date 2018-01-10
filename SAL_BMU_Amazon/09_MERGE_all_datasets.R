@@ -15,7 +15,7 @@ merge_dst_dly <- function(bDir="Z:/DATA/WP2/01_Weather_Stations", var="tmax", rg
   # Set region extent
   rgExt <- extent(rg)
   
-  dstList <- c("COL", "ECU", "GHCN", "GSOD", "PER", "BRA")
+  dstList <- c("COL", "ECU", "GHCN", "GSOD", "BRA")
   
   for (dst in dstList){
     
@@ -45,6 +45,7 @@ merge_dst_dly <- function(bDir="Z:/DATA/WP2/01_Weather_Stations", var="tmax", rg
       source = "GSOD"
     } else if (dst == "BRA") {
       source = "INMET"
+      names(monDt) <- gsub("X", "", names(monDt))
     } else if (dst == "PER") {
       source = "SENAMHI"
     }
@@ -89,7 +90,7 @@ merge_dst_mth <- function(bDir="Z:/DATA/WP2/01_Weather_Stations", var="prec", rg
   
   for (dst in dstList){
     
-    cat(dst, var, sy, "-", fY, "merging\n")
+    cat(dst, var, sY, "-", fY, "merging\n")
     # Read monthly weather file & select years
     monDt <- read.csv(paste0(bDir, "/", dst, "/", var, "_monthly_all.csv"), header = T)
     monDt <- monDt[ which(monDt$Year >= sY & monDt$Year <= fY),]
@@ -164,12 +165,15 @@ merge_dst_mth <- function(bDir="Z:/DATA/WP2/01_Weather_Stations", var="prec", rg
 #############################
 
 fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE", oDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE", dDir = "S:/observed/gridded_products/chirps/monthly/world",sY=1986, fY=2005){
-  
+  {
   library(raster)
   
   # Read monthly and station adn year selection
   st_data <- read.csv(paste0(bDir, "/", var, "_monthly_all_amazon.csv"), header=T)
   st_coord <- read.csv(paste0(bDir, "/", var, "_stations_monthly_amazon.csv"), header=T)
+  
+  # Select period
+  st_data_filter <- st_data[ which(st_data$Year >= sY & st_data$Year <= fY),]
   
   ## Return %NA and remove stations with lesser data
   na_per <- function(a,na.rm=T){
@@ -177,13 +181,10 @@ fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/ME
     x = na.x
     return(x)
   }
-  st_data_na <- apply(st_data,2,na_per)
-  st_data_filter <- st_data[,which(as.vector(st_data_na)<=0.50)]
-  st_data_na_filter <- apply(st_data_filter,2,na_per)
   
-  # Select period
-  st_data_filter_earlier <- st_data_filter[ which(st_data_filter$Year < sY),]
-  st_data_filter <- st_data_filter[ which(st_data_filter$Year >= sY & st_data_filter$Year <= fY),]
+  #   st_data_na <- apply(st_data_filter,2,na_per)
+  #   st_data_na_filter <- st_data_filter[,which(as.vector(st_data_na)<=0.50)]
+  #   st_data_na_test <- apply(st_data_na_filter,2,na_per)
   
   ## Set coordinates only for the coordinates filtered 
   st_names_filter <- as.matrix(gsub("X", "", names(st_data_filter)[3:length(names(st_data_filter))]))
@@ -218,7 +219,7 @@ fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/ME
   years_months <- st_data_filter[,1:2]
   st_data_filter$Year <- NULL
   st_data_filter$Month <- NULL
-
+  
   names(st_dts) <- names(st_data_filter)
   st_dts_na = apply(st_dts,2,na_per)
   
@@ -233,12 +234,18 @@ fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/ME
     legend(...)
   }
   
+  metrics <- c()
+  
   # Filling stations
   for (i in 1:ncol(st_dts)){
     
+    na_val <- na_per(st_data_filter[,i])
+    
     cat("Filling", var, "_", st_names_filter[i], "\n")
     
-    if(st_dts_na[i]==0){
+    if(st_dts_na[i]==0 && na_val < 0.70){
+      
+      p_val <- cor.test(st_data_filter[,i], st_dts[,i], alternative = "greater")$p.value
       
       # Set linear model
       data.model = as.data.frame(cbind("y"=st_data_filter[,i], "x"=st_dts[,i]))
@@ -263,31 +270,31 @@ fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/ME
       
       # Plot comparisson
       tiff(paste0(oDir, "/", var, "_", st_names_filter[i],".tiff"),compression = 'lzw',height = 10,width = 10,units="in", res=200)
-        
-        par(mfrow=c(2,1))
-        
-        if (var == "prec"){
-          plot(dates,st_data_filter[,i],lwd=1.5,type="l",xlab="",ylab="Precipitation (mm)")  
-        } else {
-          plot(dates,st_data_filter[,i],lwd=1.5,type="l",xlab="",ylab="Temperature (C deg)")  
-        }
-        
-        lines(dates,st_dts[,i],col="blue",lty=2,lwd=1)
-        lines(dates,data_model.p,col="red",lty=2)
-        
-        
-        plot(st_data_filter[,i],st_dts[,i],xlab="Observed_stations",ylab="dts")
-        abline(model,col="red")
-        legend('bottomright', legend = eqn, bty = 'n')
-        
-        add_legend("topright",c("Observed","dts","Model"),
-                   horiz=T, bty='n', cex=0.9,lty=c(1,2,2),lwd=c(1.5,1,1),col=c("black","blue","red"))
-        
+      
+      par(mfrow=c(2,1))
+      
+      if (var == "prec"){
+        plot(dates,st_data_filter[,i],lwd=1.5,type="l",xlab="",ylab="Precipitation (mm)")  
+      } else {
+        plot(dates,st_data_filter[,i],lwd=1.5,type="l",xlab="",ylab="Temperature (C deg)")  
+      }
+      
+      lines(dates,st_dts[,i],col="blue",lty=2,lwd=1)
+      lines(dates,data_model.p,col="red",lty=2)
+      
+      
+      plot(st_data_filter[,i],st_dts[,i],xlab="Observed_stations",ylab="dts")
+      abline(model,col="red")
+      legend('bottomright', legend = eqn, bty = 'n')
+      
+      add_legend("topright",c("Observed","dts","Model"),
+                 horiz=T, bty='n', cex=0.9,lty=c(1,2,2),lwd=c(1.5,1,1),col=c("black","blue","red"))
+      
       dev.off()
       
       pos.na = which(is.na(st_data_filter[,i]))
       
-      if(r2>=0.1){
+      if(na_val < 0.5 && p_val <= 0.05 && r2 >= 0.3){
         st_data_filter[pos.na,i] = as.numeric(data_model.p[pos.na])
       }else {
         st_data_filter[pos.na,i] = as.numeric(st_dts[pos.na,i])
@@ -296,12 +303,19 @@ fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/ME
     }
     
     
+    metrics <- rbind(metrics, cbind(st_names_filter[i], na_val, p_val, r2))
+    
+    
   }
+  }
+  colnames(metrics) <- c("St_name", "NA_per", "p_value", "r2")
   
   # Write stations filled
-  write.csv(rbind(st_data_filter_earlier, cbind(years_months, st_data_filter)) ,paste0(bDir, "/", var, "_monthly_all_amazon_filled.csv"),row.names = F)
+  write.csv(cbind(years_months, st_data_filter), paste0(bDir, "/", var, "_monthly_all_amazon_filled.csv"),row.names = F)
+  write.csv(metrics, paste0(bDir, "/", var, "_monthly_all_amazon_filled_metrics.csv"),row.names = F)
   
 }
+
 
 #############################
 ### 04- Climatology Calcs ###
@@ -310,13 +324,13 @@ fill_dst_mth <- function(var="tmin",  bDir = "Z:/DATA/WP2/01_Weather_Stations/ME
 clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE", oDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE", stDir="Z:/DATA/WP2/01_Weather_Stations/MERGE", sY=1981, fY=2010){
   
   # Read monthly file
-  if (var == "prec"){
+#   if (var == "prec"){
     
     monthly_var <- read.csv(paste0(bDir, "/", var, "_monthly_all_amazon_filled.csv"), header=T) 
     
-  } else {
-    monthly_var <- read.csv(paste0(bDir, "/", var, "_monthly_all_amazon.csv"), header=T)  
-  }
+#   } else {
+#     monthly_var <- read.csv(paste0(bDir, "/", var, "_monthly_all_amazon.csv"), header=T)  
+#   }
   
   
   # oDir_per <- paste0(oDir, "/", sY, "_", fY)
@@ -327,7 +341,7 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE
   ## Climatology aggregation based on NA percent
   avg_var = function(a,na.rm=T){
     na.x = length(which(is.na(a))) / length(a)
-    if(na.x>=0.33){
+    if(na.x>=0.6667){
       x = NA
     }else{
       x = mean(a, na.rm = any(!is.na(a))) 
@@ -393,28 +407,45 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE
 ### 05 - Add Pseudo-stations #####
 ##################################
 
-add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world", bDir ="Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology", rDir ="Z:/DATA/WP2/00_zones", dst_name ="chrips", sY =1981, fY =2010, var ="prec"){
+add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world", bDir ="Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology", rDir ="Z:/DATA/WP2/00_zones", oDir="", dst_name ="chrips", sY =1981, fY =2010, var ="prec"){
   
   require(raster)
   require(rgdal)
   require(dismo)
   require(som)
+  library(sp)
+  library(KernSmooth)
   
   # List of months
   mthLs <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
   
+  # Create output dir
+  if (!file.exists(oDir)) {dir.create(oDir, recursive=T)}
+  
   ## Region mask
-  mask <- raster(paste0(rDir, "/mask"))
+  mask <- raster(paste0(rDir, "/5km/alt-prj-amz.asc"))
   depLim <- raster(paste0(rDir, "/rg_poly_amz"))
   refExt <- extent(mask)
-  
+    
   ## Load original station data to 
   if (var == "prec"){
     raw_data <- read.csv(paste0(bDir, "/rain_amz_", sY, "_", fY, ".csv"))  
   } else {
     raw_data <- read.csv(paste0(bDir, "/", var, "_amz_", sY, "_", fY, ".csv"))  
   }
+
+  # Fit with kernell model
+  points <- raw_data
+  coordinates(points) <- ~LONG+LAT
   
+  est <- bkde2D(coordinates(points), 
+                bandwidth=c(2,2), 
+                gridsize=c(nrow(mask),ncol(mask)),
+                range.x=list(c(xmin(refExt),xmax(refExt)),c(ymin(refExt),ymax(refExt))))
+#   est$fhat[est$fhat<0.00001] <- 0 ## ignore very small values
+  
+  # create raster
+  wgRs = raster(list(x=est$x1,y=est$x2,z=est$fhat)) * 10000
   
   ## Read CHRIPS output data, write in a friendly format
   # Cut border and calc 30yr avg
@@ -443,19 +474,20 @@ add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world"
   gap <- rasterize(cbind(raw_data$LONG, raw_data$LAT), rs_agg, 1, fun=mean)
   gap[is.na(gap)] <- 0 
   gap[gap==1] <- NA 
+  gap <- mask(gap, resample(mask, gap))
 
-  ## Calc random points based on kernel-density function (computed in ArcGIS)
-  wgRs <- setMinMax(raster(paste0(rDir, "/rg_weigth_1deg_", var, ".tif")))
+  # wgRs <- setMinMax(raster(paste0(rDir, "/rg_weigth_1deg_", var, ".tif"))) ## Calc random points based on kernel-density function (computed in ArcGIS)
   wgGap <- mask(1-(wgRs/(maxValue(wgRs)- minValue(wgRs))), resample(gap, wgRs))
-  
+  wgGap[wgGap<0.00001] <- 0
+
   # Calculate the density within departaments based on raw_data
   # gapMsk <- mask(setExtent(crop(gap, extent(depLim)), extent(depLim), keepres = F) , depLim)
-  # denPres <- nrow(raw_data)/length(depLim[!is.na(depLim)])
-  # npts <- length(mask[!is.na(mask)]) * denPres
+  denPres <- nrow(raw_data)/length(mask[!is.na(mask)])
+
   if (var == "prec"){
-    npts <- 0.3*(nrow(raw_data))  
+      npts <- 0.2 * length(mask[!is.na(mask)]) * denPres#     
   } else {
-    npts <- 0.5*(nrow(raw_data))  
+      npts <- 0.3 * length(mask[!is.na(mask)]) * denPres#     
   }
   
   pts <- randomPoints(wgGap, n=npts, ext=extent(depLim), prob=T)
@@ -478,88 +510,102 @@ add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world"
   combClimData <- na.omit(rbind(raw_data, climData))
   
   if(var == "prec"){
-    write.csv(combClimData,  paste0(bDir, "/rain_amz_", sY, "_", fY, ".csv"), row.names = F)  
+    write.csv(combClimData,  paste0(oDir, "/rain_amz_", sY, "_", fY, ".csv"), row.names = F)  
   } else {
-    write.csv(combClimData,  paste0(bDir, "/", var, "_amz_", sY, "_", fY, ".csv"), row.names = F)
+    write.csv(combClimData,  paste0(oDir, "/", var, "_amz_", sY, "_", fY, ".csv"), row.names = F)
   }
   
 } 
 
-# ### 01- Merge dataset daily
-# bDir="Z:/DATA/WP2/01_Weather_Stations"
-# # rg=c(-79.5, -72, -11.9, 3)
-# rg <- c(-80, -66, -16, 5) #Study Region region
-# rgname <- "amazon"
-# sY=1971
-# fY=2010
-# oDir="Z:/DATA/WP2/01_Weather_Stations/MERGE"
-# varList <- c("prec", "tmax", "tmin")
-# for (var in varList){
-#   merge_dst_dly(bDir, var, rg, sY, fY, rgname, oDir)
-# }
 
 
-# ## 02- Merge dataset monthly
-# bDir="Z:/DATA/WP2/01_Weather_Stations"
-# # rg=c(-79.5, -70, -11, 2)
-# rg <- c(-80, -66, -16, 5)
-# rgname <- "amazon"
-# oDir="Z:/DATA/WP2/01_Weather_Stations/MERGE"
-# varList <- c("prec", "tmax", "tmin")
-# 
-# sY=1971
-# fY=2010
-# for (var in varList){
-#   merge_dst_mth(bDir, var, rg, sY, fY, rgname, oDir)
-# }
 
-## 03- Fill monthly dataset
-# bDir="Z:/DATA/WP2/01_Weather_Stations/MERGE"
-# # rg=c(-79.5, -70, -11, 2)
-# rg <- c(-80, -66, -16, 5)
-# rgname <- "amazon"
-# var <- "tmax"
-# sY=1981
-# fY=2010
-# oDir="Z:/DATA/WP2/01_Weather_Stations/MERGE/filled"
-# # dDir = "S:/observed/gridded_products/chirps/monthly/world"
-# dDir <- "U:/cropdata/agmerra/monthly"
-# # dst_stk = paste0("S:/observed/gridded_products/cru-ts-v3-21/proces_data/tmn/tmn_", sY:fY, ".nc")
-# 
-# fill_dst_mth(var, bDir, oDir, dDir, sY, fY)
-
-
-# # 04 - Clim calcs
+### 01- Merge dataset daily
+bDir="Z:/DATA/WP2/01_Weather_Stations"
 # rg=c(-79.5, -72, -11.9, 3)
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology"
-# stDir= "Z:/DATA/WP2/01_Weather_Stations/MERGE"
-# varList <- c("prec", "tmax", "tmin")
-# periodLs <- c(1971, 1976, 1986, 1981)
-# 
-# for (sY in periodLs){
-# 
-#   if (sY == 1986){
-#     fY = sY + 19
-#   } else {
-#     fY = sY + 29
-#   }
-# 
-#   for (var in varList){
-#     clim_calc(var, bDir, oDir, stDir, sY, fY)
-#   }
-# }
+rg <- c(-80, -66, -16, 5) #Study Region region
+rgname <- "amazon"
+sY=1971
+fY=2010
+oDir="Z:/DATA/WP2/01_Weather_Stations/MERGE"
+varList <- c("prec", "tmax", "tmin")
+for (var in varList){
+  merge_dst_dly(bDir, var, rg, sY, fY, rgname, oDir)
+}
+
+
+## 02- Merge dataset monthly
+bDir="Z:/DATA/WP2/01_Weather_Stations"
+# rg=c(-79.5, -70, -11, 2)
+rg <- c(-80, -66, -16, 5)
+rgname <- "amazon"
+oDir="Z:/DATA/WP2/01_Weather_Stations/MERGE"
+varList <- c("prec", "tmax", "tmin")
+sY=1971
+fY=2010
+for (var in varList){
+  merge_dst_mth(bDir, var, rg, sY, fY, rgname, oDir)
+}
+
+# 03- Fill monthly dataset
+bDir="Z:/DATA/WP2/01_Weather_Stations/MERGE"
+# rg=c(-79.5, -70, -11, 2)
+rg <- c(-80, -66, -16, 5)
+rgname <- "amazon"
+# var <- "tmin"
+sY=1981
+fY=2010
+oDir="Z:/DATA/WP2/01_Weather_Stations/MERGE/filled"
+# dst_stk = paste0("S:/observed/gridded_products/cru-ts-v3-21/proces_data/tmn/tmn_", sY:fY, ".nc")
+varList <- c("prec", "tmax", "tmin")
+for (var in varList){
+  if (var == "prec"){
+    dDir = "S:/observed/gridded_products/chirps/monthly/world"  
+  } else {
+    dDir <- "U:/cropdata/agmerra/monthly"
+  }
+  fill_dst_mth(var, bDir, oDir, dDir, sY, fY)
+}
+
+# 04 - Clim calcs
+rg=c(-80, -66, -16, 5)
+bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE"
+oDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology"
+stDir= "Z:/DATA/WP2/01_Weather_Stations/MERGE"
+varList <- c("prec", "tmax", "tmin")
+periodLs <- c(1971, 1976, 1986, 1981)
+
+for (sY in periodLs){
+
+  if (sY == 1986){
+    fY = sY + 19
+  } else {
+    fY = sY + 29
+  }
+
+  for (var in varList){
+    clim_calc(var, bDir, oDir, stDir, sY, fY)
+  }
+}
 
 
 # 05 - Add pseudo-stations
-# dDir <- "S:/observed/gridded_products/chirps/monthly/world"
-dDir <- "U:/cropdata/agmerra/monthly"
 bDir <- "Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology"
 rDir <- "Z:/DATA/WP2/00_zones"
-dst_name <- "agmerra"
+oDir <- "Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology/combined"
+
 sY <- 1981
 fY <- 2010
-var <- "tmax"
-add_pseudost(dDir, bDir, rDir, dst_name, sY, fY, var)
-
+varList <- c("prec", "tmax", "tmin")
+for (var in varList){
+  if (var == "prec"){
+    dDir <- "S:/observed/gridded_products/chirps/monthly/world"
+    dst_name <- "CHIRPS"
+  } else {
+    dDir <- "U:/cropdata/agmerra/monthly"
+    dst_name <- "AGMERRA"
+  }
+  
+  add_pseudost(dDir, bDir, rDir, oDir, dst_name, sY, fY, var)
+}
 

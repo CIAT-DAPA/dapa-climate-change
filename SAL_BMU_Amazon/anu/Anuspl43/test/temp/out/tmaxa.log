@@ -1,0 +1,329 @@
+SPLINA  VERSION 4.36  17/07/06
+COPYRIGHT AUSTRALIAN NATIONAL UNIVERSITY
+
+TITLE OF FITTED SURFACES (60 CHARS):
+-----------------------------------
+Maximum Temperature
+
+SURFACE VALUE UNITS CODE AND MISSING DATA VALUE:
+-----------------------------------------------
+  0 - UNDEFINED
+  1 - METRES
+  2 - FEET
+  3 - KILOMETRES
+  4 - MILES
+  5 - DEGREES
+  6 - RADIANS
+  7 - MILLIMETRES
+  8 - MEGAJOULES
+    5
+
+INDEPENDENT VARIABLES
+---------------------
+NUMBER OF INDEPENDENT SPLINE VARIABLES (0 TO 10):
+    2
+
+NUMBER OF INDEPENDENT COVARIATES (0 TO  8):
+    1
+
+NUMBER OF SURFACE SPLINE VARIABLES (0 TO  7):
+    0
+
+NUMBER OF SURFACE COVARIATES (0 TO  7):
+    0
+
+TRANSFORMATION CODES            REFERENCE UNIT CODES
+--------------------            --------------------
+  0 - NO TRANSFORMATION           0 - UNDEFINED
+  1 - X/A                         1 - METRES
+  2 - X*A                         2 - FEET
+  3 - A*LOG(X + B)                3 - KILOMETRES
+  4 - (X/B)**A                    4 - MILES
+  5 - A*EXP(X/B)                  5 - DEGREES
+  6 - A*TANH(X/B)                 6 - RADIANS
+  7 - ANISOTROPY ANGLE            7 - MILLIMETRES
+  8 - ANISOTROPY FACTOR           8 - MEGAJOULES
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  1:
+   140.000       150.000        0         5
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  2:
+  -45.0000      -39.0000        0         5
+
+LOWER & UPPER LIMITS, TRANSF CODE, REF UNIT, MARGIN(S) FOR VARIABLE  3:
+  -50.0000       3000.00        1         1
+ENTER  1 TRANSFORMATION COEFFICIENT(S):
+   1000.00    
+
+SURFACE DIRECTIVES
+------------------
+DEPENDENT VARIABLE TRANSFORMATION:
+  0 - NO TRANSFORMATION
+  1 - NATURAL LOGARITHM
+  2 - SQUARE ROOT
+  5 - OCCURRENCE
+    0
+
+ORDER OF SPLINE (AT LEAST 2):
+    2
+
+NUMBER OF SURFACES (AT LEAST 1):
+   12
+
+NUMBER OF RELATIVE VARIANCES (0, 1 OR  12):
+    0
+
+OPTIMIZATION DIRECTIVE (NORMALLY 1):
+  0 - COMMON SMOOTHING PARAMETER FOR ALL SURFACES
+  1 - COMMON SMOOTHING DIRECTIVE FOR ALL SURFACES
+  2 - DIFFERENT SMOOTHING DIRECTIVE FOR EACH SURFACE
+    1
+
+SMOOTHING DIRECTIVE (NORMALLY 1):
+  0 - FIXED SMOOTHING PARAMETER FOR EACH SURFACE
+  1 - MINIMIZE GCV FOR EACH SURFACE
+  2 - MINIMIZE TRUE MEAN SQUARE ERROR FOR EACH SURFACE
+  3 - FIXED SIGNAL FOR EACH SURFACE
+  4 - MINIMIZE GML FOR EACH SURFACE
+    1
+
+DATA FILE NAME:
+--------------
+tmaxa.dat
+
+MAXIMUM NUMBER OF DATA POINTS (AT LEAST  4):
+     200
+
+NO. OF CHARACTERS IN SITE LABEL (0 TO 20):
+   20
+
+DATA FORMAT (SITE LABEL,  3 INDEP VARS, 12 SURFACES,  0 REL VARIANCES):
+(a20,2f10.3,f8.1/12f7.1)
+
+OUTPUT LARGE RESIDUAL FILE NAME (BLANK IF NOT REQUIRED):
+tmaxa.res
+
+OUTPUT OPTIMIZATION PARAMETERS FILE NAME (BLANK IF NOT REQUIRED):
+tmaxa.opt
+
+OUTPUT SURFACE COEFFICIENTS FILE NAME (BLANK IF NOT REQUIRED):
+tmaxa.sur
+
+OUTPUT DATA LIST FILE NAME (BLANK IF NOT REQUIRED):
+tmaxa.lis
+
+OUTPUT ERROR COVARIANCE FILE NAME (BLANK IF NOT REQUIRED):
+tmaxa.cov
+
+VALIDATION DATA FILE NAME (BLANK IF NOT REQUIRED):
+-------------------------------------------------
+
+
+DATA SUMMARY
+------------
+NUMBER OF DATA POINTS READ     =     72
+NUMBER OF POINTS WITHIN LIMITS =     72
+
+ SURF  MEAN RELATIVE VARIANCE  ROOT MEAN REL VAR
+    1                1.00               1.00    
+
+SURFACE STATISTICS
+------------------
+SURF       RHO    NPTS     ERROR    SIGNAL    SURF     MEAN     STD DEV
+   1 0.364E-02      72      33.4      38.6       1   20.796       2.274    
+   2 0.731E-02      72      40.3      31.7       2   21.251       2.304    
+   3 0.144E-01      72      46.4      25.6       3   19.243       2.227    
+   4 0.487E-01      72      55.1      16.9       4   16.265       2.269    
+   5 0.110E+01      72      65.9       6.1       5   13.486       2.312    
+   6 0.196E-01      72      48.9      23.1       6   11.262       2.319    
+   7 0.977E+00      72      65.7       6.3       7   10.683       2.403    
+   8 0.657E+00      72      64.9       7.1       8   11.574       2.485    
+   9 0.525E-01      72      55.5      16.5       9   13.168       2.380    
+  10 0.119E-01      72      44.7      27.3      10   15.288       2.211    
+  11 0.137E-01      72      46.0      26.0      11   16.969       2.267    
+  12 0.118E-01      72      44.7      27.3      12   18.890       2.257    
+ AVG 0.243E+00      72      51.0      21.0           15.740       2.310    
+
+SURF       GCV       MSR       VAR     SURF   RTGCV     RTMSR     RTVAR
+   1     0.873     0.188     0.406        1   0.935     0.434     0.637    
+   2      1.32     0.414     0.740        2    1.15     0.644     0.860    
+   3     0.770     0.320     0.497        3   0.878     0.566     0.705    
+   4     0.715     0.419     0.547        4   0.846     0.647     0.740    
+   5     0.717     0.601     0.656        5   0.847     0.775     0.810    
+   6     0.547     0.252     0.371        6   0.739     0.502     0.609    
+   7     0.646     0.538     0.589        7   0.804     0.733     0.768    
+   8     0.884     0.719     0.797        8   0.940     0.848     0.893    
+   9     0.912     0.542     0.703        9   0.955     0.736     0.838    
+  10     0.906     0.350     0.563       10   0.952     0.592     0.750    
+  11      1.04     0.425     0.665       11    1.02     0.652     0.816    
+  12      1.03     0.398     0.641       12    1.02     0.631     0.801    
+ AVG     0.864     0.430     0.598            0.929     0.656     0.773    
+
+SURF       GML       MSE       VAR     SURF   RTGML     RTMSE     RTVAR
+   1      1.24     0.217     0.374        1    1.11     0.466     0.612    
+   2      1.67     0.325     0.692        2    1.29     0.571     0.832    
+   3     0.901     0.176     0.478        3   0.949     0.420     0.691    
+   4     0.739     0.129     0.531        4   0.859     0.359     0.729    
+   5     0.680     0.556E-01 0.656        5   0.824     0.236     0.810    
+   6     0.582     0.119     0.338        6   0.763     0.345     0.582    
+   7     0.612     0.515E-01 0.588        7   0.782     0.227     0.767    
+   8     0.840     0.781E-01 0.795        8   0.917     0.280     0.892    
+   9     0.940     0.161     0.685        9   0.970     0.401     0.828    
+  10      1.05     0.213     0.521       10    1.02     0.462     0.722    
+  11      1.23     0.240     0.641       11    1.11     0.490     0.801    
+  12      1.27     0.243     0.632       12    1.13     0.493     0.795    
+ AVG     0.980     0.167     0.578            0.990     0.409     0.760    
+
+SURF   COVARIATES AND STANDARD ERRORS
+   1    -8.92        0.466    
+   2    -8.43        0.577    
+   3    -8.42        0.438    
+   4    -8.19        0.407    
+   5    -7.72        0.372    
+   6    -8.29        0.366    
+   7    -8.19        0.354    
+   8    -8.57        0.417    
+   9    -8.88        0.458    
+  10    -8.74        0.476    
+  11    -8.84        0.510    
+  12    -8.76        0.509    
+
+RANKED ROOT MEAN SQUARE RESIDUALS
+---------------------------------
+     1     51  MOUNT_WELLINGTON        3.69    
+     2     52  GEEVESTON_(FOURFOOT)    1.87    
+     3     28  LAUNCESTON_(TI_TREE     1.20    
+     4     29  GUNNS_PLAINS           0.889    
+     5      5  LOW_HEAD_LIGHTHOUSE    0.869    
+     6     30  ROSSARDEN_(ABERFOYLE   0.824    
+     7     54  BOTHWELL               0.748    
+     8     44  HASTINGS_CHALET        0.691    
+     9     63  CAPE_SORELL_LIGHTHOU   0.676    
+    10     58  BRONTE_PARK            0.637    
+    11     43  CAPE_BRUNY_LIGHTHOUS   0.636    
+    12     46  KINGSTON               0.602    
+    13     35  EDDYSTONE_POINT_LIGH   0.582    
+    14      8  REDPATH                0.575    
+    15     13  LAUNCESTON_AIRPORT     0.564    
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  1
+     1     51  MOUNT_WELLINGTON        2.44       *     12.8     15.2
+     2     28  LAUNCESTON_(TI_TREE    -1.06             24.6     23.5
+     3     52  GEEVESTON_(FOURFOOT)  -0.946             21.7     20.8
+     4     30  ROSSARDEN_(ABERFOYLE  -0.654             21.6     20.9
+     5      5  LOW_HEAD_LIGHTHOUSE    0.632             20.1     20.7
+     6     63  CAPE_SORELL_LIGHTHOU   0.576             18.2     18.8
+     7      8  REDPATH                0.496             19.3     19.8
+     8     46  KINGSTON              -0.492             21.6     21.1
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  2
+     1     51  MOUNT_WELLINGTON        2.66             13.3     16.0
+     2     28  LAUNCESTON_(TI_TREE    -1.45             25.6     24.1
+     3     52  GEEVESTON_(FOURFOOT)   -1.40             22.1     20.7
+     4     53  PALMERS_LOOKOUT        -1.21             20.5     19.3
+     5     63  CAPE_SORELL_LIGHTHOU    1.15             18.5     19.7
+     6     29  GUNNS_PLAINS           -1.11             23.1     22.0
+     7      8  REDPATH                 1.02             19.3     20.3
+     8     27  MARRAWAH_(MARSHALL)   -0.950             21.0     20.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  3
+     1     51  MOUNT_WELLINGTON        3.05       *     11.3     14.4
+     2     52  GEEVESTON_(FOURFOOT)   -1.57             19.9     18.3
+     3     28  LAUNCESTON_(TI_TREE    -1.09             22.6     21.5
+     4      5  LOW_HEAD_LIGHTHOUSE    0.992             19.4     20.4
+     5     30  ROSSARDEN_(ABERFOYLE  -0.915             18.8     17.9
+     6     63  CAPE_SORELL_LIGHTHOU   0.856             17.5     18.4
+     7     43  CAPE_BRUNY_LIGHTHOUS   0.664             17.5     18.2
+     8     13  LAUNCESTON_AIRPORT     0.632             20.9     21.5
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  4
+     1     51  MOUNT_WELLINGTON        3.50       *      8.3     11.8
+     2     52  GEEVESTON_(FOURFOOT)   -2.01             17.1     15.1
+     3     30  ROSSARDEN_(ABERFOYLE   -1.19             15.6     14.4
+     4     46  KINGSTON               -1.10             18.3     17.2
+     5      5  LOW_HEAD_LIGHTHOUSE     1.02             16.9     17.9
+     6     44  HASTINGS_CHALET       -0.914             16.5     15.6
+     7     54  BOTHWELL              -0.900             17.0     16.1
+     8     24  DELORAINE_EAST        -0.847             17.8     17.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  5
+     1     51  MOUNT_WELLINGTON        4.40       *      4.9      9.3
+     2     52  GEEVESTON_(FOURFOOT)   -2.51             14.6     12.1
+     3     28  LAUNCESTON_(TI_TREE    -1.26             15.8     14.5
+     4     54  BOTHWELL               -1.13             13.5     12.4
+     5      5  LOW_HEAD_LIGHTHOUSE     1.03             14.4     15.4
+     6     64  PORT_DAVEY_(LAST RET   0.972             12.9     13.9
+     7     24  DELORAINE_EAST        -0.916             14.5     13.6
+     8     35  EDDYSTONE_POINT_LIGH   0.875             15.3     16.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  6
+     1     51  MOUNT_WELLINGTON        2.62       *      3.4      6.0
+     2     52  GEEVESTON_(FOURFOOT)   -1.70             11.9     10.2
+     3     46  KINGSTON              -0.999             12.8     11.8
+     4     54  BOTHWELL              -0.788             10.9     10.1
+     5     57  NEW_NORFOLK            0.760             10.9     11.7
+     6     58  BRONTE_PARK           -0.647              8.7      8.1
+     7     28  LAUNCESTON_(TI_TREE   -0.641             12.6     12.0
+     8     55  BUSHY_PARK_HOPS_RESE   0.589             11.0     11.6
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  7
+     1     51  MOUNT_WELLINGTON        4.45       *      1.9      6.3
+     2     52  GEEVESTON_(FOURFOOT)   -2.25             11.7      9.5
+     3     54  BOTHWELL               -1.14             10.6      9.5
+     4     31  BICHENO_COMPOSITE      -1.01             13.9     12.9
+     5     58  BRONTE_PARK           -0.991              7.8      6.8
+     6     57  NEW_NORFOLK            0.962             10.9     11.9
+     7     32  ORFORD_POST_OFFICE    -0.926             13.4     12.5
+     8     30  ROSSARDEN_(ABERFOYLE  -0.922              8.9      8.0
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  8
+     1     51  MOUNT_WELLINGTON        5.09       *      2.1      7.2
+     2     52  GEEVESTON_(FOURFOOT)   -2.38             12.8     10.4
+     3     29  GUNNS_PLAINS           -1.70             13.4     11.7
+     4     28  LAUNCESTON_(TI_TREE    -1.53             14.1     12.6
+     5     54  BOTHWELL               -1.15             11.7     10.6
+     6      5  LOW_HEAD_LIGHTHOUSE     1.10             12.3     13.4
+     7     44  HASTINGS_CHALET        -1.06             12.4     11.3
+     8     50  TASMAN_LIGHTHOUSE      0.940             10.2     11.1
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE  9
+     1     51  MOUNT_WELLINGTON        4.69       *      3.9      8.6
+     2     52  GEEVESTON_(FOURFOOT)   -2.18             14.5     12.3
+     3     28  LAUNCESTON_(TI_TREE    -1.14             15.4     14.3
+     4      5  LOW_HEAD_LIGHTHOUSE    0.939             13.3     14.2
+     5     30  ROSSARDEN_(ABERFOYLE  -0.924             11.8     10.9
+     6     58  BRONTE_PARK           -0.859             11.3     10.4
+     7     29  GUNNS_PLAINS          -0.793             14.0     13.2
+     8     35  EDDYSTONE_POINT_LIGH   0.785             14.4     15.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 10
+     1     51  MOUNT_WELLINGTON        3.39       *      7.1     10.5
+     2     52  GEEVESTON_(FOURFOOT)   -1.69             16.7     15.0
+     3     28  LAUNCESTON_(TI_TREE    -1.00             17.8     16.8
+     4     30  ROSSARDEN_(ABERFOYLE  -0.991             15.0     14.0
+     5      5  LOW_HEAD_LIGHTHOUSE    0.803             14.8     15.6
+     6     29  GUNNS_PLAINS          -0.789             16.5     15.7
+     7     43  CAPE_BRUNY_LIGHTHOUS   0.693             14.3     15.0
+     8     45  HOBART_REGIONAL_OFFI  -0.668             16.9     16.2
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 11
+     1     51  MOUNT_WELLINGTON        3.52       *      8.4     11.9
+     2     52  GEEVESTON_(FOURFOOT)   -1.72             18.1     16.4
+     3     28  LAUNCESTON_(TI_TREE    -1.69             20.7     19.0
+     4     29  GUNNS_PLAINS           -1.09             18.7     17.6
+     5     30  ROSSARDEN_(ABERFOYLE  -0.939             16.6     15.7
+     6      5  LOW_HEAD_LIGHTHOUSE    0.856             16.7     17.6
+     7     45  HOBART_REGIONAL_OFFI  -0.835             18.5     17.7
+     8      8  REDPATH                0.790             15.1     15.9
+
+RANKED ROOT MEAN SQUARE RESIDUALS FOR SURFACE 12
+     1     51  MOUNT_WELLINGTON        3.36       *     10.5     13.9
+     2     28  LAUNCESTON_(TI_TREE    -1.59             22.7     21.1
+     3     52  GEEVESTON_(FOURFOOT)   -1.48             19.7     18.2
+     4     29  GUNNS_PLAINS           -1.16             20.8     19.6
+     5     21  LAUNCESTON_7EX          1.15             20.4     21.5
+     6     39  PALMERSTON_(COMPOSIT  -0.801             21.7     20.9
+     7     63  CAPE_SORELL_LIGHTHOU   0.760             16.9     17.7
+     8      8  REDPATH                0.690             17.1     17.8
+
+PROGRAM SPLINA  VERSION 4.36  DATE 18/07/2006  TIME 15.18.40

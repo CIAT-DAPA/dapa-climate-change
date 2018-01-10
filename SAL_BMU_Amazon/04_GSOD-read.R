@@ -63,7 +63,7 @@ write.csv(st_loc, paste0(odir, "/stations_names.csv"), row.names=F)
 
 #do the snowfall stuff here
 library(snowfall)
-sfInit(parallel=T,cpus=2) #initiate cluster
+sfInit(parallel=T,cpus=32) #initiate cluster
 
 #export functions
 sfExport("convertGSOD")

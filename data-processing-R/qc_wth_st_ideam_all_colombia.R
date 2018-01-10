@@ -5,15 +5,16 @@
 ## Modified by : Carlos Navarro c.e.navarro@cgiar.org
 ##########################################################################################
 
-varList <- c("prec","tmax", "tmin", "rhum")
-bDir = "S:/observed/weather_station/col-ideam/daily-raw"
+varList <- c("prec","tmax", "tmin")
+bDir = "D:/OneDrive - CGIAR/CIAT/Climate/ideam_wht_st"
 oDir = "D:/cenavarro/Request/iakemi"
+
 for (var in varList){
   daily_qc(var, bDir, oDir)
 }
 
-bDir = "D:/cenavarro/Request/iakemi"
-oDir = "D:/cenavarro/Request/iakemi"
+bDir = "D:/OneDrive - CGIAR/CIAT/Climate/ideam_wht_st"
+oDir = "D:/OneDrive - CGIAR/CIAT/Climate/ideam_wht_st"
 for (var in varList){
   #   monthly_agg(var, bDir, oDir)
   add_info(var, bDir, oDir)
@@ -234,6 +235,8 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
   
 }
 
+## Add info and municipality averages
+
 add_info <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL", oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"){
   
   ## Add coordinates and location
@@ -251,22 +254,13 @@ add_info <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL", o
   
   join <- merge(st_loc, monthly_var_t, by = "Station", all = FALSE)
   write.csv(join, paste0(oDir, "/", var, "_monthly_all_info.csv"), row.names=F)
-  
-  write.csv(join[which(join$Departament == "Tolima"),], paste0(oDir, "/", var, "_monthly_all_info_tolima.csv"), row.names=F)
-  
-}
 
-depto_averages <- function (){
-  
   ## Averages by departament 
   join$Station <- NULL
   join$Lon <- NULL
   join$Lat <- NULL
   join$Alt <- NULL
   join$Name <- NULL
-  
-  
-  
   
   if (var == "prec"){
     
@@ -302,23 +296,24 @@ depto_averages <- function (){
     
     return(x)
   }
+  
   join_avg_mun <- aggregate(join[,3:length(join)], list(Municipality=join$Municipality, Departament=join$Departament), avg_2)
   
-  ann_avg <- aggregate(t(join_avg_mun[,3:length(join_avg_mun)]), list(Year=year), sum22)
-  year_agg <- ann_avg$Year
-  ann_avg$Year <- NULL
-  ann_avg_t <- data.frame(t(ann_avg))
-  names(ann_avg_t) <- year_agg
-  ann_avg_mun <- cbind("Municipality"=join_avg_mun$Municipality, "Departament"=join_avg_mun$Departament, ann_avg_t)
-  
-  write.csv(ann_avg_mun, paste0(oDir, "/", var, "_annual_by_mun.csv"), row.names=F)
+  # ann_avg <- aggregate(t(join_avg_mun[,3:length(join_avg_mun)]), list(Year=year), sum22)
+  # year_agg <- ann_avg$Year
+  # ann_avg$Year <- NULL
+  # ann_avg_t <- data.frame(t(ann_avg))
+  # names(ann_avg_t) <- year_agg
+  # ann_avg_mun <- cbind("Municipality"=join_avg_mun$Municipality, "Departament"=join_avg_mun$Departament, ann_avg_t)
+  # 
+  # write.csv(ann_avg_mun, paste0(oDir, "/", var, "_annual_by_mun.csv"), row.names=F)
   write.csv(join_avg_mun, paste0(oDir, "/", var, "_monthly_by_mun.csv"), row.names=F)
-  write.csv(join, paste0(oDir, "/", var, "_monthly_by_stations.csv"), row.names=F)
-  
-  write.csv(t(ann_avg_mun), paste0(oDir, "/", var, "_annual_by_mun_t.csv"), row.names=F)
-  
-  ann_avg_mun_sort <- melt(ann_avg_mun, id.vars = c("Departament", "Municipality"), measure.vars = c("1965", "1966", "1967", "1968", "1969", "1970", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"))
-  write.csv(ann_avg_mun_sort, paste0(oDir, "/", var, "_annual_by_mun_sort.csv"), row.names=F)
+  # write.csv(join, paste0(oDir, "/", var, "_monthly_by_stations.csv"), row.names=F)
+  # 
+  # write.csv(t(ann_avg_mun), paste0(oDir, "/", var, "_annual_by_mun_t.csv"), row.names=F)
+  # 
+  # ann_avg_mun_sort <- melt(ann_avg_mun, id.vars = c("Departament", "Municipality"), measure.vars = c("1965", "1966", "1967", "1968", "1969", "1970", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"))
+  # write.csv(ann_avg_mun_sort, paste0(oDir, "/", var, "_annual_by_mun_sort.csv"), row.names=F)
   
 }
 

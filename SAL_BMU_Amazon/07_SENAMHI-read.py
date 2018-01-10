@@ -10,7 +10,7 @@ from csv import writer as csvwriter, reader as cvsreader
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 07_SENAMHI-read.py D:\CIAT\Projects\lat_bmu\01_Weather_Stations\PER\monthly-raw D:\CIAT\Projects\lat_bmu\01_Weather_Stations\PER\monthly-raw"
+	print "   - ie: python 07_SENAMHI-read.py Z:\DATA\WP2\01_Weather_Stations\PER\monthly-raw\_primary_files Z:\DATA\WP2\01_Weather_Stations\PER\monthly-raw"
 	sys.exit(1)
 
 #Set variables 
@@ -56,7 +56,7 @@ for infile in files:
 		## Read weather info txt plain file
 		if line.find("ESTACION: ") > -1:
 			stNumber = line[10:16]
-			print stNumber
+			print "Reading", stNumber
 			
 		if 'var' in locals():
 			
@@ -85,7 +85,7 @@ for infile in files:
 				else: 
 					value = line.split("\t")[month]
 				
-				if value == "---" or value == "S/D":
+				if value == "---" or value == "S/D" or value == "S/":
 					value = "NA"
 				
 				wFile = open(staFile, "a")

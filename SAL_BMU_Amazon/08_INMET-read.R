@@ -13,7 +13,7 @@ daily_qc <- function(var="prec", bDir = "S:/observed/weather_station/col-ideam/d
   if (var == "prec"){ 
     varmod = "Precipitacao"
   } else if (var == "tmax") {
-    armod ="TempMaxima"
+    varmod ="TempMaxima"
   } else if (var == "tmin") { 
     varmod ="TempMinima" 
   } else if (var == "rhum") {
@@ -41,19 +41,20 @@ daily_qc <- function(var="prec", bDir = "S:/observed/weather_station/col-ideam/d
     j <- which(colnames(st) %in% varmod)
     Datos <- na.omit(cbind(format(as.Date(st[,2], format="%d/%m/%Y"), "%Y%m%d"), st[,j]))
     
-    # # Replace ',' by '.'
-    # convert = function(x){
-    #   y=as.numeric(sub(",", ".", x, fixed = TRUE))
-    #   return(y)
-    # }
-    # Datos_n = lapply(Datos,convert)
+    # Replace ',' by '.'
+    convert = function(x){
+      y=as.numeric(sub(",", ".", x, fixed = TRUE))
+      return(y)
+    }
+    Datos_n = lapply(Datos,convert)
     
     if(var == "prec"){
       
       # Quality control functions for precipitation
       
       qc = function(x){
-        pos=which(x[,2]>350 | x[,2]<0)
+        
+        pos=which(as.numeric(x[,2])>350 | as.numeric(x[,2])<0)
         if(length(pos)!=0){
           x[pos,2]=NA}
         return(x)
@@ -63,7 +64,7 @@ daily_qc <- function(var="prec", bDir = "S:/observed/weather_station/col-ideam/d
       
       
       qc = function(x){
-        pos = which(x[,2]>100 | x[,2]<0)
+        pos = which(as.numeric(x[,2])>100 | as.numeric(x[,2])<0)
         if(length(pos) != 0){
           x[pos,2] = NA}
         return(x) 
@@ -74,7 +75,7 @@ daily_qc <- function(var="prec", bDir = "S:/observed/weather_station/col-ideam/d
       # Quality control functions for temperature 
       
       qc = function(x){
-        pos = which(x[,2]>50 | x[,2]<(-20))
+        pos = which(as.numeric(x[,2])>50 | as.numeric(x[,2])<(-20))
         if(length(pos) != 0){
           x[pos,2] = NA}
         return(x) 
@@ -101,55 +102,55 @@ daily_qc <- function(var="prec", bDir = "S:/observed/weather_station/col-ideam/d
   names(varfin)=c("Day","Month","Year",substring(files,5,nchar(files)-(4)))
   
   # Write daily file`(raw data)
-  write.csv(varfin, paste0(oDir, "/", var, "_daily_all.csv"), row.names = F)
+  write.csv(varfin, paste0(oDir, "/", var, "_daily_all_qc.csv"), row.names = F)
   
-  data_na2 = function(x){
-    na=sum(is.na(x)) / length(x)
-    return(na)
-  }
-  
-  data = sapply(varfin, as.numeric)
-  
-  if (var == "prec"){
-    
-    qc=function(x){
-      pos=which(x>350 | x<0)
-      if(length(pos)!=0){
-        x[pos]=NA}
-      return(x)
-    }
-    
-  } else if (var == "rhum") {
-    
-    qc=function(x){
-      pos=which(x>100 | x<0)
-      if(length(pos)!=0){
-        x[pos]=NA}
-      return(x)
-    }
-    
-  } else { 
-    
-    qc=function(x){
-      pos=which(x>50 | x<(-20))
-      if(length(pos)!=0){
-        x[pos]=NA}
-      return(x)
-    }
-    
-  }
-  
-  # Set quality control 
-  data_qc = apply(data[,-3:-1],2,qc)
-  
-  data_qc = cbind(day,month,year,data_qc)
-  names(data_qc)=c("Day","Month","Year",substring(files,1,nchar(files)-(9+nchar(var))))
-  
-  # Write daily quality controled
-  write.csv(data_qc, paste0(oDir, "/", var, "_daily_all_qc.csv"), row.names = F)
-  # write.csv(as.matrix(fechas), paste0(oDir, "/dates_daily.csv"), row.names = F)
-  
-  nas = apply(varfin,2,data_na2)
+  # data_na2 = function(x){
+  #   na=sum(is.na(x)) / length(x)
+  #   return(na)
+  # }
+  # 
+  # data = sapply(varfin, as.numeric)
+  # 
+  # if (var == "prec"){
+  #   
+  #   qc=function(x){
+  #     pos=which(x>350 | x<0)
+  #     if(length(pos)!=0){
+  #       x[pos]=NA}
+  #     return(x)
+  #   }
+  #   
+  # } else if (var == "rhum") {
+  #   
+  #   qc=function(x){
+  #     pos=which(x>100 | x<0)
+  #     if(length(pos)!=0){
+  #       x[pos]=NA}
+  #     return(x)
+  #   }
+  #   
+  # } else { 
+  #   
+  #   qc=function(x){
+  #     pos=which(x>50 | x<(-20))
+  #     if(length(pos)!=0){
+  #       x[pos]=NA}
+  #     return(x)
+  #   }
+  #   
+  # }
+  # 
+  # # Set quality control 
+  # data_qc = apply(data[,-3:-1],2,qc)
+  # 
+  # data_qc = cbind(day,month,year,data_qc)
+  # names(data_qc)=c("Day","Month","Year",substring(files,1,nchar(files)-(9+nchar(var))))
+  # 
+  # # Write daily quality controled
+  # write.csv(data_qc, paste0(oDir, "/", var, "_daily_all_qc.csv"), row.names = F)
+  # # write.csv(as.matrix(fechas), paste0(oDir, "/dates_daily.csv"), row.names = F)
+  # 
+  # nas = apply(varfin,2,data_na2)
   
 }
 
@@ -180,7 +181,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
     
     sum22=function(a,na.rm=T){
       na.x=mean(is.na(a))/length(a)
-      if(na.x>=0.50){
+      if(na.x>=0.60){
         x=NA
       }else{x=mean(a,na.rm=any(!is.na(a)))}
       
@@ -190,7 +191,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
   }
   
   # Aggregate 
-  monthly_var = aggregate(data_qc[,-3:-1], list(Month=data_qc$month, Year=data_qc$year),sum22)
+  monthly_var = aggregate(data_qc[,-3:-1], list(Year=data_qc$Year, Month=data_qc$Month),sum22)
   
   # Write monthly quality controled
   write.csv(monthly_var, paste0(oDir, "/", var, "_monthly_all.csv"), row.names=F)
@@ -211,7 +212,7 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL",
   ## Climatology aggregation based on NA percent
   avg_var = function(a,na.rm=T){
     na.x = length(which(is.na(a))) / length(a)
-    if(na.x>=0.50){
+    if(na.x>=0.30){
       x = NA
     }else{
       x = mean(a, na.rm = any(!is.na(a))) 
@@ -372,24 +373,24 @@ wth_sel <- function(var="prec", rg=c(-79.5, -72, -11.9, 3), rgName="amazon", bDi
 # bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
 # oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
 # daily_qc(var, bDir, oDir)
-# 
-# var="rhum"
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
-# monthly_agg(var, bDir, oDir)
-# 
-# # Clim calcs
-# sY=191
-# fY=2010
-# bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
-# oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
-# # rg=c(-79.5, -72, -11.9, 3)
-# rgName="amazon"
-# st_loc="Z:/DATA/WP2/01_Weather_Stations/BRA/stations.csv"
-# varList <- c("prec", "tmax", "tmin", "rhum")
-# for (var in varList){
-#   clim_calc(var, bDir, oDir, st_loc, sY, fY)
-# }
+
+var="tmin"
+bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
+oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
+monthly_agg(var, bDir, oDir)
+ 
+# Clim calcs
+sY=1981
+fY=2010
+bDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
+oDir = "Z:/DATA/WP2/01_Weather_Stations/BRA"
+# rg=c(-79.5, -72, -11.9, 3)
+rgName="amazon"
+st_loc="Z:/DATA/WP2/01_Weather_Stations/BRA/stations.csv"
+varList <- c("prec", "tmax", "tmin", "rhum")
+for (var in varList){
+  clim_calc(var, bDir, oDir, st_loc, sY, fY)
+}
 
 # 
 # 
