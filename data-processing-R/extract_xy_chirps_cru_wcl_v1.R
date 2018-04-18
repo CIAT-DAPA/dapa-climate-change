@@ -1,22 +1,26 @@
 # ---------------------------------------------------------------------------------
 # Author: Jaime Tarapues
-# Date: April 27th, 2017
-# Version: 1.0 (Test version)
+# Date: April 27th, 2018
+# Version: 1.0
 # Purpose: extract values of CHIRPS V2 (5 KM), CRU V4 (50 km), WorldClim V2 (1 km)
 # ----------------------------------------------------------------------------------
 
-library(jsonlite)
+library(jsonlite,curl) #tambien instalar curl
 
 # selección de años yi=año inicio yf=año final
 yi=2010
 yf=2010
 
+#datasets:
+chirps="true"
+chirp="false"
+wcl="true"
+cru="true"
+
 # listado de coordenadas en columnas id,lon,lat
 listcoor=data.frame(id=c(1,2),lon=c(-75.021,-76),lat=c(4,4.5))
 
-# Para usarlo por fuera de ciat usar:
-#service="http://181.118.144.158/stations/php/data-graphics-chirps.php?"
-service="http://172.22.52.8/stations/php/data-graphics-chirps.php?"
+service="http://maprooms.ciat.cgiar.org/CCAFS-Climate/chirps/data-graphics-chirps.php?"
 dateday <- format(seq(as.Date(paste0(yi,'/',"1/1")), as.Date(paste0(yf,'/',"12/31")), "days") ,"%Y-%m-%d")
 datemon <- format(seq(as.Date(paste0(yi,'/',"1/1")), as.Date(paste0(yf,'/',"12/31")), "months") ,"%Y-%m")
 mon <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
@@ -28,7 +32,7 @@ datalist[[5]]=data.frame();datalist[[6]]=data.frame();datalist[[7]]=data.frame()
 for(i in 1:nrow(listcoor)){
   lon=listcoor$lon[i]
   lat=listcoor$lat[i]
-  value=fromJSON(paste0(service,"lon=",lon,"&lat=",lat,"&yi=",yi,"&yf=",yf,"&mi=1&mf=12"))
+  value=fromJSON(paste0(service,"lon=",lon,"&lat=",lat,"&yi=",yi,"&yf=",yf,"&mi=1&mf=12","&ch_chirps=",chirps,"&ch_chirp=",chirp,"&ch_wcl=",wcl,"&ch_cru=",cru))
   datalist[[1]]=rbind(datalist[[1]],data.frame(id=listcoor$id[i],date=dateday,value=value$prec$data))
   datalist[[2]]=rbind(datalist[[2]],data.frame(id=listcoor$id[i],date=datemon,value=value$monthly$data))
   datalist[[3]]=rbind(datalist[[3]],data.frame(id=listcoor$id[i],date=mon,value=value$clim$data))
