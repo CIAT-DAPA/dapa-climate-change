@@ -15,7 +15,7 @@ yf=2018
 #Select datasets true/false:
 chirps="true" #1980-Actual
 chirp="false"
-wcl="true"
+wcl="true" # Worldclim
 cru="true" #1901-2016
 
 # list of points with coordinates in columns id,lon,lat
