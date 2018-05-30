@@ -4,15 +4,16 @@
 # Date: April 27th, 2018
 # Version: 1.0
 # Purpose: extract values of CHIRPS V2 (5 KM), CRU V4 (50 km), WorldClim V2 (1 km) from coordinates
+# How does it to run: only modify YEARS,DATASETS and list of coordinates that you need to extract (lines 13-25).
 # ----------------------------------------------------------------------------------
 
 library(jsonlite,curl) 
 
-# selection period: yi=start year yf=end year
+# selection YEARS: yi=start year yf=end year
 yi=2017
 yf=2018
 
-#Select datasets true/false:
+#Select DATASETS true/false:
 chirps="true" #1980-Actual
 chirp="false"
 wcl="true" # Worldclim
