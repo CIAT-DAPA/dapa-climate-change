@@ -52,9 +52,9 @@ for(i in 1:nrow(listcoor)){
   }
 }
 
-#########
-# RESULS
-#########
+###########
+# RESULTS
+###########
 
 # Daily chirps v2 resol 5km
 datalist[[1]]
