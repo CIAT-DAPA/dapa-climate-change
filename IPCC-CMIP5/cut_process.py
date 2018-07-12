@@ -2,7 +2,7 @@
 # Author: Jaime Tarapues
 # Purpouse: correr el script donde estan los scripts cut_process.aml, cut_GCM.aml
 # ---------------------------------------------------------
-# python D:\jetarapues\Request\Request_ocampo\cut_process.py T:\gcm\cmip5\downscaled D:\jetarapues\Request\Request_ocampo\pan S:\admin_boundaries\grid_files\pan_adm\pan0 rcp26 30s bcc_csm1_1 2020_2049 tmin NO NO name@email.com YES
+# python cut_process.py T:\gcm\cmip5\downscaled C:\Workspace\request\request_oaiikulola C:\Workspace\request\request_oaiikulola\eaf.shp rcp60 30s ALL 2020_2049 tmin NO NO name@email.com YES
 
 import arcgisscripting, os, sys, string, glob, subprocess, time
 import smtplib
@@ -44,7 +44,7 @@ else:
 	rcplist = rcps.split(",")	
 
 if periods == "ALL":
-	periodlist = '2020_2049','2040_2069','2060_2089','2070_2099'
+	periodlist = '2020_2049','2040_2069' #,'2060_2089','2070_2099'
 else:
 	periodlist = periods.split(",")
 	

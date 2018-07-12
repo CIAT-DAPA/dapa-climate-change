@@ -1,4 +1,4 @@
-/* &r cut_process.aml T:\gcm\cmip5\downscaled Z:\DATA\WP2\03_Future_data\downscaled_wcl_2_5min Z:\DATA\WP2\00_zones\rg_poly ALL 2.5min YES 
+/* &r cut_process.aml T:\gcm\cmip5\downscaled C:\Workspace\request\request_oaiikulola Z:\DATA\WP2\00_zones\rg_poly ALL 30s YES 
 
 /* rootdir = Root folder where are storaged GCM CMIP5 data
 /* outputdir = Output folder
@@ -31,8 +31,8 @@
 	&else &if %resol% EQ 5min &then &s outdir %outputdir%\%rcp%_extracts\Global_5min
 	&else &s outdir %outputdir%\%rcp%_extracts\Global_10min
 
-	&s modellist bcc_csm1_1 csiro_mk3_6_0 fio_esm gfdl_cm3 giss_e2_h giss_e2_r ipsl_cm5a_lr ipsl_cm5a_mr miroc_esm miroc_esm_chem miroc_miroc5 mohc_hadgem2_cc mri_cgcm3 ncar_ccsm4
-	/* &s modellist [listfile %inputdir%\* -dir]
+	/* &s modellist bcc_csm1_1 csiro_mk3_6_0 fio_esm gfdl_cm3 giss_e2_h giss_e2_r ipsl_cm5a_lr ipsl_cm5a_mr miroc_esm miroc_esm_chem miroc_miroc5 mohc_hadgem2_cc mri_cgcm3 ncar_ccsm4
+	&s modellist [listfile %inputdir%\* -dir]
 	&s nmodels [token %modellist% -count]
 	&do md = 1 &to %nmodels%
 		

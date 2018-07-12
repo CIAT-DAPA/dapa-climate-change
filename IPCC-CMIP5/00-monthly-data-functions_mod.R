@@ -28,9 +28,10 @@ require(sp)
 # otp <- GCMAnomalies(rcp, baseDir, ens, basePer)
 # otp <- GCMSummary(baseDir, ens)
 # 
-# basePer <- "1975s"
-# basePer <- "1985s"
-# otp <- GCMEnsembleAnom(baseDir, ens, basePer)
+basePer <- "1995s"
+ens <- "r1i1p1"
+baseDir <- "T:/gcm/cmip5/raw/monthly"
+otp <- GCMEnsembleAnom(baseDir, ens, basePer)
 # 
 # imageDir <- "T:/gcm/cmip5/baseinfo/inventory"
 # baseDir <- "T:/gcm/cmip5/raw/monthly"
@@ -274,12 +275,12 @@ require(rgdal)
 require(sp)
 
 rcp='rcp85'
+# rcp='rcp60'
 baseDir="T:/gcm/cmip5/raw/monthly"
 ens="r1i1p1"
-basePer="1961_1990"
-GCMAnomalies(rcp,baseDir,ens,basePer)
+basePer="1981_2010"
 
-GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", oDir="D:/cormacarena") {
+GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990") {
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
   cat("XXXXXXXXX GCM ANOMALIES CALCULATION XXXXXXXX \n")
@@ -287,11 +288,8 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   cat(" \n")
   
   # List of variables and months
-  #   varList <- c("prec", "tmax", "tmin")
-  var <- "prec" 
+  varList <- c("tmin","tmax")
   monthList <- c(1:12)
-  
-  nameFileOut="/eq0_cur1_hist-historical-"
   
   curDir <- paste(baseDir, "/historical", sep="")
   futDir <- paste(baseDir, "/", rcp, sep="")
@@ -311,10 +309,10 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
     curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
     
     # Average directory
-    curAvgDir <- paste(curEnsDir, "/average/", basePer, sep="")
+    curAvgDir <- paste(curEnsDir, "/average/", basePer, "_", rcp, sep="")
     
     # periodList <- c("2020", "2030", "2040", "2050", "2060", "2070")
-    periodList <- c("2030")
+    periodList <- c("2010", "2020", "2030", "2040")
     
     for (period in periodList) {
       
@@ -343,14 +341,19 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
             
           } else if (basePer == "1981_2005") {
            
-            anomDir <- paste(oDir, "/", gcm, "/", ens, "/anomalies_1985s", sep="")
-            anomPerDir <- paste(oDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s", sep="")
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1985s/", staYear, "_", endYear, sep="")
+            
+          } else if (basePer == "1981_2010") {
+            
+            anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1995s", sep="")
+            anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1995s/", staYear, "_", endYear, sep="")
             
           }
           
-          checkFile <- paste(anomDir, "/anomalies_", staYear, "_", endYear, "_done.txt", sep="")
+          # checkFile <- paste(anomDir, "/anomalies_", staYear, "_", endYear, "_done.txt", sep="")
           
-          if (!file.exists(checkFile)){
+          # if (!file.exists(checkFile)){
             
             if (!file.exists(anomDir)) {dir.create(anomDir)}
             if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
@@ -423,10 +426,10 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
               
               
             }  # checkFile  
-          } # var
+          # } # var
         }
       }  
-      write.table("Done!", checkFile, row.names=F)      
+      # write.table("Done!", checkFile, row.names=F)      
       
     } # period  
     
@@ -440,6 +443,7 @@ GCMAnomalies <- function(rcp='rcp60', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   
 }
 
+GCMAnomalies(rcp,baseDir,ens,basePer)
 
 
 #############################################################################################################################################
@@ -582,20 +586,22 @@ GCMSummary <- function(baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1") {
 #####################################################################
 GCMEnsembleAnom <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1975s") {
   
-  rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+  # rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+  rcpList <- c("rcp85")
   
   # List of variables and months
-  varList <- c("prec", "tmax", "tmin")
+  # varList <- c("prec", "tmax", "tmin")
+  varList <- c("tmin")
   mthList <- c(1:12)
  
   for (rcp in rcpList){
       
-    gcmSum <- data.frame(read.csv(paste(baseDir, "/availability-gcm-", ens,".csv", sep="")))
+    gcmSum <- data.frame(read.csv(paste(baseDir, "/availability-gcm-", ens,".csv", sep=""), header=T))
     gcmSum <- gcmSum[gcmSum$rcp == rcp, ]
     gcmList <- gcmSum$model
     
     futDir <- paste(baseDir, "/", rcp, sep="")
-    periodList <- c("2020", "2040", "2060")
+    periodList <- c("2010", "2020", "2030")
     
     ensDir <- paste(baseDir, "/ensemble_anomalies", "/", basePer, "/", rcp, sep="")
     if (!file.exists(ensDir)) {
@@ -631,7 +637,7 @@ GCMEnsembleAnom <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1
             for (gcm in gcmList){
               
               futAnomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_", basePer, "/", staYear, "_", endYear, sep="")
-              futAnomPath <- paste(futAnomDir, "/", var, "_", mth, ".asc", sep="")
+              futAnomPath <- paste(futAnomDir, "/", var, "_", mth, ".nc", sep="")
   
               fileList <- c(fileList, futAnomPath)
               
@@ -641,22 +647,22 @@ GCMEnsembleAnom <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1
             
             cat(" .> Calculating..  ", paste("\t ", var, "_", mth, sep=""))
             
-            if (!file.exists(paste(ensDirPer, "/", var, "_", mth, ".asc", sep=""))){
+            if (!file.exists(paste(ensDirPer, "/", var, "_", mth, ".nc", sep=""))){
               
               gcmMean <- mean(gcmStack)
-              fun <- function(x) { sd(x) }
-              gcmStd <- calc(gcmStack, fun)
+              # fun <- function(x) { sd(x) }
+              # gcmStd <- calc(gcmStack, fun)
               # gcmRange <- range(gcmStack, na.rm = TRUE)
               
-              gcmMean <- writeRaster(gcmMean, paste(ensDirPer, "/", var, "_", mth, ".asc", sep=""), format='ascii', overwrite=FALSE)
-              gcmStd <- writeRaster(gcmStd, paste(ensDirPer, "/", var, "_", mth, "_sd.asc", sep=""), format='ascii', overwrite=FALSE)
+              gcmMean <- writeRaster(gcmMean, paste(ensDirPer, "/", var, "_", mth, ".nc", sep=""), format='ascii', overwrite=FALSE)
+              # gcmStd <- writeRaster(gcmStd, paste(ensDirPer, "/", var, "_", mth, "_sd.asc", sep=""), format='ascii', overwrite=FALSE)
               # gcmRange <- writeRaster(gcmRange, paste(ensDirPer, "/", var, "_", mth, "_range.asc", sep=""), format='ascii', overwrite=FALSE)
             }
           
-            stat <- cellStats(gcmStack, mean)
-            
-            gcmMatrix <- data.frame(cbind(as.data.frame(gcmMatrix), as.numeric(stat)))
-            varNames <- cbind((varNames), paste(var, "_", mth, sep=""))
+            # stat <- cellStats(gcmStack, mean)
+            # 
+            # gcmMatrix <- data.frame(cbind(as.data.frame(gcmMatrix), as.numeric(stat)))
+            # varNames <- cbind((varNames), paste(var, "_", mth, sep=""))
             
             
             cat(" .. done!\n")
@@ -664,13 +670,13 @@ GCMEnsembleAnom <- function(baseDir="T:/data/gcm/cmip5/raw/monthly", ens="r1i1p1
           }
         }  
         
-        colnames(gcmMatrix) <- varNames
-        gcmMatrix <- cbind(as.data.frame(gcmList), gcmMatrix)
-        colnames(gcmMatrix)[1] <- "model"
+        # colnames(gcmMatrix) <- varNames
+        # gcmMatrix <- cbind(as.data.frame(gcmList), gcmMatrix)
+        # colnames(gcmMatrix)[1] <- "model"
         
-        cat("\n .> Writting stats csv file\n")
+        # cat("\n .> Writting stats csv file\n")
         
-        write.csv(gcmMatrix, csvStats, row.names=F)
+        # write.csv(gcmMatrix, csvStats, row.names=F)
         
         cat("Ensemble over: ", rcp, " ", ens, " ", paste(staYear, "_", endYear, " ", basePer, sep="")," .. done!\n\n")
         
