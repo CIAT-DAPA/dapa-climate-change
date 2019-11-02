@@ -168,3 +168,82 @@ for (vr in vrLs){
   
   
 }
+
+
+
+
+######################################
+######## EcoCrop Uncertainty  ########
+######################################
+
+# Load libraries
+require(raster)
+require(rgdal)
+require(rasterVis)
+require(maptools)
+
+# Set params
+
+bDir <- "D:/OneDrive - CGIAR/CIAT/Articles/mbeltran_crop_exposure/maps"
+uDir <- "D:/OneDrive - CGIAR/CIAT/Projects/lat_sal/05_EcoCrop_runs/uncertainties"
+cDir <- "D:/OneDrive - CGIAR/CIAT/Projects/lat_sal/05_EcoCrop_runs/outputs"
+oDir <- bDir
+zDir <- bDir
+
+
+rcpLs <- c("rcp26", "rcp45", "rcp85")
+rcp <- "rcp85"
+period <- "2040_2069"
+gcm <- "ensemble"
+season <- "ann"
+cropLs <- c("cassava", "maize","plantain")
+cropNameLs <- c("Cassava", "Maize", "Plantain")
+crop_experiment <- c("cassava", "maize_eitzinger_kai", "plantain_reggata_german")
+grdLs <- expand.grid(rcpLs,crop_experiment)
+mask <- readOGR("D:/OneDrive - CGIAR/CIAT/Projects/lat_sal/00_zones/rg_poly_countries.shp", layer= "rg_poly_countries")
+
+fun <- function(x) { sd(x) }
+
+# adm <- readOGR( paste0("C:/_tools/AdminBoundaries/Global/10m/10m-admin-0-countries.shp"), layer = paste0("10m-admin-0-countries") )
+# mask <- readOGR( paste0(zDir, "/Eco-Region del Napo.shp"), layer = paste0("Eco-Region del Napo"))
+# ext <- extent(extent(mask)@xmin - buf, extent(mask)@xmax + buf, extent(mask)@ymin - buf, extent(mask)@ymax + buf)
+# lim <- extent(-80, -71, -11.5, 2.5)
+
+  # Load current suitability 
+rsStk <- stack(c(paste0(uDir, "/sd_", crop_experiment[1], "_", rcp, "_", period, ".tif"), 
+                 calc(stack(paste0(uDir, "/mean_", crop_experiment[1], "_", rcpLs, "_", period, ".tif")), fun), 
+                 paste0(uDir, "/sd_", crop_experiment[2], "_", rcp, "_", period, ".tif"), 
+                 calc(stack(paste0(uDir, "/mean_", crop_experiment[2], "_", rcpLs, "_", period, ".tif")), fun), 
+                 paste0(uDir, "/sd_", crop_experiment[3], "_", rcp, "_", period, ".tif"), 
+                 calc(stack(paste0(uDir, "/mean_", crop_experiment[3], "_", rcpLs, "_", period, ".tif")), fun)
+)
+)
+
+id <- rep(c("GCM", "RCP"), 3)
+
+# Plot settings
+plot <- setZ(rsStk, id)
+names(plot) <- id
+# zvalues <- c(-100, -30, -1, 1, 30, 100)
+zvalues <- seq(0, 35, 5)
+myTheme <- BuRdTheme()
+myTheme <- rasterTheme(region=brewer.pal('Greys', n=7))
+myTheme$axis.line$col = 'gray'
+
+par.settings=list(layout.heights=list(xlab.key.padding=1))
+
+# Plot via levelplot
+tiff(paste(oDir, "/crop_std_",period, "_suit_.tif", sep=""), width=3300, height=1200, pointsize=300, compression='lzw',res=300)
+
+print(levelplot(plot, at = zvalues, layout=c(6, 1),
+                xlab="", 
+                ylab="", 
+                names.attr=id, 
+                # par.strip.text=list(cex=0),
+                par.settings = myTheme, 
+                colorkey = list(space = "bottom")
+)
++ layer(sp.polygons(mask, col= "gray", lwd=1)) 
+)
+grid.text(expression("%"), 0.2, 0, hjust=13, vjust=-3.8, gp=gpar(fontsize=12)) 
+dev.off()

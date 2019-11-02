@@ -10,7 +10,7 @@ if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractSRTM_hill.py <srtm> <shpdir> <dirout>"
-	print "   - ex: python 01-ExtractSRTM_hill.py S:\observed\gridded_products\srtm\Altitude_30s\alt S:\admin_boundaries\shp_files D:\Workspace\csa_profiles"
+	print "   - ex: python 01-ExtractSRTM_hill_subnational.py S:\observed\gridded_products\srtm\Altitude_30s\alt D:\Workspace\Request\obonilla\gtm_alta_verapaz.shp D:\Workspace\Request\obonilla"
 	sys.exit(1)
 
 # Arguments
@@ -28,7 +28,7 @@ print "\n~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "     EXTRACT BY MASK      "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
-countrylist = "idn", "zzz"
+countrylist = "gtm", "zzz"
 
 for country in countrylist:
 
@@ -37,7 +37,7 @@ for country in countrylist:
 		os.system('mkdir ' + diroutraster)		
 
 	# Extract by mask function
-	gp.ExtractByMask_sa(inraster, shpdir + "\\" + country + "_adm\\" + country + "0.shp", diroutraster + "\\srtm")
+	gp.ExtractByMask_sa(inraster, shpdir, diroutraster + "\\srtm")
 	print "\t", "srtm extracted"
 
 	# Process: Hillshade

@@ -1,8 +1,8 @@
 require(raster)
 require(stats)
 
-countryLs <- c("tza", "npl", "zmb", "moz", "pak", "btn", "bgd", "ben", "gmb", "civ", "phl")
-bDir <- "D:/cenavarro/csa_profiles"
+countryLs <- c("sin")
+bDir <- "D:/Workspace/csa_profiles"
 
 mt <- c()
 
@@ -32,7 +32,9 @@ for (country in countryLs){
     mt <- rbind(mt, cbind(country, period, bio_1avg, bio_12avg, bio_1std, bio_12std))
     
   }
+
+  write.csv(mt, paste0(bDir, "/", country, "/country_stats.csv"))
   
 }
 
-write.csv(mt, paste0(bDir, "/country_stats.csv"))
+

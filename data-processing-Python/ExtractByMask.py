@@ -10,7 +10,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ExtractByMask.py <dirbase> <dirout> <mask> <wildcard>"
-	print "   - ex: python ExtractByMask.py S:\observed\gridded_products\worldclim\Global_30s_v2 C:\Workspace\cgonzalez\wcl_v2 S:\admin_boundaries\shp_files\COL_adm\COL0.shp vapr"
+	print "   - ex: python ExtractByMask.py S:\observed\gridded_products\worldclim\Global_30s_v2 D:\Workspace\Request\psiles S:\admin_boundaries\regional-files\SouthAmerica\mask bio"
 	sys.exit(1)
 
 # Arguments

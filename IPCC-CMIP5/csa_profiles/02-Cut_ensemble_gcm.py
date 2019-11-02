@@ -8,7 +8,7 @@
 import arcgisscripting, os, sys, string,glob, shutil
 gp = arcgisscripting.create(9.3)
 
-# python 02-Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files D:\CIAT\climate_change\CSA_Profiles rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
+# python 02-Cut_ensemble_gcm.py T:\gcm\cmip5\downscaled\ensemble S:\admin_boundaries\grid_files D:\Workspace\csa_profiles rcp45 2020_2049,2040_2069,2060_2089 NO 30s bio
 
 
 # Arguments
@@ -49,15 +49,11 @@ if variable == "ALL":
 else:
 	variablelist = variable.split(",")
 
-
-
 worldclim = "S:\observed\gridded_products\worldclim\Global_"+resol	
 
-countrylist = "tza", "npl", "zmb", "moz", "pak", "btn", "bgd", "ben", "gmb", "civ", "phl"
+countrylist = "idn", "zzz"
 
 for country in countrylist:
-
-	# country = "vnm"
 
 	admdir_ctr = admdir + "\\" + country + "_adm\\" + country + "0"
 	dirout_ctr = dirout + "\\" + country
@@ -146,23 +142,23 @@ for country in countrylist:
 						else:
 							print "...ya existe anomalia!", variable			
 						
-						#Convierte a ascii
-						gp.workspace = dirouanoma 	
-						if not os.path.exists(dirouanoma + "\\ascii"):
-							os.system('mkdir ' + dirouanoma + "\\ascii")	
-						OutAscii = dirouanoma + "\\ascii\\" + variable + ".asc"	
-						if not gp.Exists(OutAscii):	
-							gp.RasterToASCII_conversion(outAnomala, OutAscii)
-							gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
+						# #Convierte a ascii
+						# gp.workspace = dirouanoma 	
+						# if not os.path.exists(dirouanoma + "\\ascii"):
+							# os.system('mkdir ' + dirouanoma + "\\ascii")	
+						# OutAscii = dirouanoma + "\\ascii\\" + variable + ".asc"	
+						# if not gp.Exists(OutAscii):	
+							# gp.RasterToASCII_conversion(outAnomala, OutAscii)
+							# gp.AddMessage( "\t"+ " " +  variable+ " " + "converted" )
 							
-						# Comprime en un archivo .ZIP
-						InZip = dirouanoma + "\\ascii\\" + var + "_asc.zip"
-						os.system('7za a ' + InZip + " " + OutAscii)
-						os.remove(OutAscii)				
-						if os.path.exists(OutAscii[:-3]+"prj"):
-							os.remove(OutAscii[:-3]+"prj")
-						if gp.Exists(OutRaster) and switch == "YES":
-							gp.delete_management(OutRaster)
+						# # Comprime en un archivo .ZIP
+						# InZip = dirouanoma + "\\ascii\\" + var + "_asc.zip"
+						# os.system('7za a ' + InZip + " " + OutAscii)
+						# os.remove(OutAscii)				
+						# if os.path.exists(OutAscii[:-3]+"prj"):
+							# os.remove(OutAscii[:-3]+"prj")
+						# if gp.Exists(OutRaster) and switch == "YES":
+							# gp.delete_management(OutRaster)
 
 
 							
