@@ -11,7 +11,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python Resample.py <dirbase> <dirout> <resolution> <method> <wildcard>"
-	print "    - ie: python Resample.py D:\Documents\Desktop\agrihack_climate_data\observed\worldclim\Global_10min D:\Documents\Desktop\agrihack_climate_data\observed\worldclim\Global_10min\_resampled 0.5 NEAREST ALL"
+	print "    - ie: python Resample.py T:\gcm\cmip5\downscaled\rcp85\global_30s\cnrm_cm5\r1i1p1\2020_2049 S:\portals\ccafs_climate\download_data\files\data\ipcc_5ar_ciat_downscaled\rcp8_5\2030s\cnrm_cm5\2_5min\tmean 0.0416666666666667 NEAREST tmean"
 	print " Units Resolution: arcminutes"
 	print " Resample types:"
 	print "\t NEAREST Nearest neighbor assignment This is the default" 
@@ -53,7 +53,7 @@ else:
 	rasters = sorted(gp.ListRasters(wildcard + "*", "GRID"))
 
 gp.toolbox = "SA"
-gp.Extent = "-26 -47 53 38"
+# gp.Extent = "-26 -47 53 38"
 
 # Lopping around the grids
 for raster in rasters:

@@ -9,7 +9,7 @@ if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python ZonalStatistical.py <srtm> <shpdir> <dirout>"
-	print "   - ex: python 03-ZonalStatistical.py D:\Workspace\csa_profiles S:\admin_boundaries\shp_files"
+	print "   - ex: python 03-ZonalStatistical_subnational.py D:\Workspace\csa_profiles D:\Workspace\csa_profiles"
 	sys.exit(1)
 
 # Arguments
@@ -27,11 +27,10 @@ print "     ZONAL STATS           "
 print "~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 # countrylist = "mwi"
-countrylist = "idn", "zzz"
-
+countrylist = "sin", "zzz"
 for country in countrylist:
 
-	admshp = admdir + "\\" + country + "_adm\\" + country + "1.shp"
+	admshp = admdir + "\\" + country + "\\" + country + "_adm\\" + country + "1.shp"
 	dissshp = dirbase + "\\" + country + "\\" + country + "1_diss.shp"
 
 	bio1 = dirbase + "\\" + country + "\\anomalies\\rcp45\\Global_30s\\2040_2069\\bio_1" 
