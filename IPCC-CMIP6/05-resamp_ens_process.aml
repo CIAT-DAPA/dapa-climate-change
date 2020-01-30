@@ -1,0 +1,46 @@
+/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp45 r1i1p1 10 G:\jetarapues\cmip5_process\masks\mask10m
+/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp45 r1i1p1 5 G:\jetarapues\cmip5_process\masks\mask5m
+/* &r 05-resamp_ens_process.aml T:\gcm\cmip5\downscaled\ensemble T:\gcm\cmip5\downscaled\ensemble rcp45 r1i1p1 2.5 G:\jetarapues\cmip5_process\masks\mask2_5m
+
+&args rootdir outfolder rcp ensemble resol mask
+&if [null %rootdir%] &then &return Use scenario and/or root_folder argument
+&terminal 9999
+&sys cls
+
+&amlpath .
+&s bdir [show &amlpath]
+
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+&ty          /\/\/\/\/\/\/DTR CALC GCM/\/\/\/\/\/\
+&ty          /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+&if %resol% EQ 2.5 &then &s outdir %outfolder%\%rcp%\global_2_5min
+&else &if %resol% EQ 5 &then &s outdir %outfolder%\%rcp%\global_5min
+&else &s outdir %outfolder%\%rcp%\global_10min
+
+&do ts &list 2040_2069 2060_2089 2070_2099
+	
+	&s outmodtsdir %outdir%\%ts%
+	&s inmodtsdir %rootdir%\%rcp%\global_30s\%ts%
+	
+	&if not [exists %outdir%\%ts% -dir] &then &sys md %outdir%\%ts%
+	
+	&if not [exists %outdir%\%ts%_resampled.txt -FILE] &then
+		&do
+			&ty
+			&ty (%rcp%, %ts%, %resol%)
+			&if not [exists %outmodtsdir% -dir] &then &sys md %outmodtsdir%
+			&r 05-resample_GCM.aml %inmodtsdir% %outmodtsdir% %resol% NEAREST %mask%
+			&sys dir /d /b /o %outmodtsdir%\* > %outdir%\%ts%_resampled.txt
+		&end
+	&else 
+		&ty (%ts%, %resol%) processed
+		/*&do
+			/*&ty 
+			/*&ty (%ts%, %resol%) processed
+		/*&end
+
+&end
+
+
+	
