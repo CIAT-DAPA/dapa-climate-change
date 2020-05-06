@@ -4,16 +4,16 @@
 #nfs_base <- "/nfs" #"//dapadfs" "/mnt"
 ##nfs_base <- "//dapadfs" 
 
-src.dir <- "Z:/WORK_PACKAGES/WP2/00_scripts"
+src.dir <- "D:/OneDrive - CGIAR/CIAT/Crops/EcoCrop-development/_scripts"
 
-cropParamFile <- "Z:/WORK_PACKAGES/WP2/05_EcoCrop_runs/crop-parameters/crop-parameters.csv"
-cropDir <- "Z:/WORK_PACKAGES/WP2/05_EcoCrop_runs/outputs"
-cDir <- "Z:/WORK_PACKAGES/WP2/02_Gridded_data/baseline_2_5min/average"
+cropParamFile <- "D:/OneDrive - CGIAR/CIAT/Crops/EcoCrop-development/crop_parameters/crop-parameters-maize-bean-icc.csv"
+cropDir <- "D:/OneDrive - CGIAR/CIAT/Crops/EcoCrop-development/outputs"
+cDir <- "D:/OneDrive - CGIAR/CIAT/Climate & Geodata/cmip5_downscaled/gtm_wcl"
 #sowDat="//dapadfs/workspace_cluster_3/vulnerability-analysis/EcoCrop-development/Growing_season/2000_sta_2.asc"
 #harDat="//dapadfs/workspace_cluster_3/vulnerability-analysis/EcoCrop-development/Growing_season/end_date.asc"
 #crop <- ""
 
-source(paste(src.dir,"/src-ecocrop/EcoCrop-model_WCl.R",sep=""))
+source(paste(src.dir,"/src/EcoCrop-model_WCl.R",sep=""))
 
 
 #######################################
@@ -62,7 +62,7 @@ for (n in 15:nTest){
                     #sowDat=sowDat,
                     #harDat=harDat,
                     cropname=paste(testName, sep=""),
-                    ext=".tif",
+                    ext="",
                     cropClimate=F
                     )
     
