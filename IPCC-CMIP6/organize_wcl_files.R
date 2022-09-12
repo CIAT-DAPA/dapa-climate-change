@@ -2,6 +2,8 @@
 ## CIAT 2022
 ## Organize WorldClim files into Alliance DFS system
 
+library(stringr)
+
 bs_dir <- "E:/cmip6_2_5m" 
 ot_dir <- "E:/ipcc_6ar_wcl_downscaled"
 
@@ -21,7 +23,7 @@ for (fl in fl_list){
   per <-  str_replace(str_split(basename(fl), "_")[[1]][6], ".tif", "")  
   
   scn_mod <- str_replace(scn, "_", "")
-  gcm_mod <- tolower(str_replace(gcm, "-", "_"))
+  gcm_mod <- tolower(str_replace_all(gcm, "-", "_"))
   
   ot_dir_fl <- paste0(ot_dir, "/", scn_dc[scn], "/", per_dc[per], "/", gcm_mod, "/", res_dc[res])
   out_fl <- paste0(gcm_mod, "_", scn, "_", per_dc[per], "_", var_dc[var], "_", str_replace(res, "2.", "2_"), "_no_tile_tif.tif")
@@ -31,3 +33,17 @@ for (fl in fl_list){
   file.rename(from = fl,  to = paste0(ot_dir_fl, "/", out_fl))
   
 } 
+
+
+# # Fix
+# 
+# fl_list <- list.files(paste0(ot_dir), full.names = TRUE, recursive = TRUE)
+# for (fl in fl_list){
+#   
+#   newpath <- str_replace_all(dirname(fl), "-", "_") 
+#   if (!file.exists(newpath)) {dir.create(newpath, recursive=T)}
+#   
+#   file.rename(from = fl,  to = str_replace_all(fl, "-", "_"))
+#   cat(paste0(str_replace_all(fl, "-", "_"), "\n"))
+# 
+# }
