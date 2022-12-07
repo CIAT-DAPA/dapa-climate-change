@@ -23,8 +23,8 @@ require(rasterVis)
 require(RColorBrewer)
 require(rgeos)
 require(grid)
-require(RSAGA) 
-require(envirem)
+# require(RSAGA) 
+# require(envirem)
 
 ## Params
 yi <- 1981
@@ -1841,7 +1841,7 @@ for (m in 1:12){
     unit <- "mag"
     
     # Quantiles by month
-    prc_mag <- read.csv(paste0(oIDirHCdd, "/prc_", ctrName, "_", m, "_normal_mag_class", ".csv"))
+    prc_mag <- read.csv(paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_normal_mag_class", ".csv"))
     prc_mag_mtx <- matrix(c(-1, prc_mag[m, 2], 1,
                             prc_mag[m, 2], prc_mag[m, 3], 2,
                             prc_mag[m, 3], prc_mag[m, 4], 3,
@@ -1862,9 +1862,9 @@ for (m in 1:12){
     normal_m_r <- subset(normal_r, normal_r$Month == m)
 
     ## Calculate mean monthly prec by condition
-    prc_elnino <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
-    prc_lanina <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
-    prc_normal <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_elnino_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_lanina_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_normal_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
     
     prc_elnino_r[which(prc_elnino_r[]<0)]=0
     prc_lanina_r[which(prc_lanina_r[]<0)]=0
@@ -1947,17 +1947,18 @@ for (m in 1:12){
 cat(">. FLD calcs done", "\n")
 
 
+
 ##################################################
 ## Check indices                               ###
 ##################################################
 
 # Set params
-varList <- c("cdd", "drd", "p95", "fld", "frd")
+varList <- c("cdd", "drd", "p95", "frd", "fld")
 id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 ## General output directory
-oIDirH <- paste0(oIDir, "/historical")
-oIDirHChk <- paste0(oIDir, "/historical/_check")
+oIDirH <- paste0(oIDir, "/recent-past")
+oIDirHChk <- paste0(oIDir, "/recent-past/_check")
 if (!file.exists(oIDirHChk)) {dir.create(oIDirHChk)}
 
 ## Load Mask (Adm0)
