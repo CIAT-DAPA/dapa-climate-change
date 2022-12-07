@@ -72,7 +72,8 @@ mag_labels <- c("Month", "5%", "35%", "65%", "95%")
 cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content"
 lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912_V2.3_reclass.tif"
 dem_global <- "S:/observed/gridded_products/srtm/srtm_v41_30s.tif"
-  
+wei_global <- "D:/cenavarro/yapu-sud/basedata-historical/soils/wei.tif"  
+
 if (!file.exists(rsMsk)) {
   ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
   dts_dump <- raster(paste0(iDirP, "/chirps-v2.0.1981.01.01.tif"))
@@ -1570,6 +1571,7 @@ cat(">. Croping CHIRPS ", ctrName, "\n")
 
 ## Load Mask (Adm0)
 ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
+ctrMsk0 <- raster(rsMsk)
 
 # Output directory
 if (!file.exists(paste0(oBDir, "/monthly-", ctrName))) {dir.create(paste0(oBDir, "/monthly-", ctrName), recursive = TRUE)}
@@ -1585,7 +1587,7 @@ for (m in 1:12){
     if (!file.exists(oNc)){
       
       ## Load CHIRPS data and cut by mask
-      dtsMsk <- mask(crop(raster(iNc), extent(ctrMsk)), ctrMsk)
+      dtsMsk <- mask(crop(raster(iNc), extent(ctrMsk0)), ctrMsk0)
       writeRaster(dtsMsk, oNc,  format="CDF",overwrite=T)
       
     }
@@ -1598,12 +1600,9 @@ for (m in 1:12){
 ## Load and reclassify soil data
 cly <- paste0(oBDirS, "/Clay_Percentage_rec.tif")
 slp <- paste0(oBDirS, "/Slope_percentage_res_rec.tif")
-wei <- paste0(oBDirS, "/ECU_SAGA_Wetness_Index_Norm_proj_res_idw_rec.tif")
+wei <- paste0(oBDirS, "/Wei_res_rec.tif")
 lco <- paste0(oBDirS, "/LU_LC_rec.tif")
 
-# Load raster mask 
-# rsMsk <- raster(rsMsk)
-ctrMsk0 <- raster(rsMsk)
 
 if (!file.exists(cly)) {
   
@@ -1622,45 +1621,50 @@ if (!file.exists(cly)) {
   
   sdAvg <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))
   sdAvg_crop <- crop(sdAvg, ctrMsk0)
-  sdAvg_rec <- reclassify(sdAvg_crop, c(-Inf,20,1, 20,40,2, 40,60,3, 60,80,4, 80,Inf,5))
+  sdAvg_crop[is.na(sdAvg_crop)] <- 0
+  sdAvg_res <- resample(sdAvg_crop, ctrMsk0)
+  sdAvg_rec <- reclassify(sdAvg_res, c(-Inf,20,1, 20,40,2, 40,60,3, 60,80,4, 80,Inf,5))
   writeRaster(sdAvg_rec, cly, format="GTiff", overwrite=T, datatype='INT2S')
               
 }
 
 if (!file.exists(lco)) {
   lco_crop <- crop(raster(lco_global), ctrMsk0)
-  writeRaster(lco_crop, lco, format="GTiff", overwrite=T, datatype='INT2S')
+  lco_crop[is.na(lco_crop)] <- 0
+  lco_res <- resample(lco_crop, ctrMsk0)
+  writeRaster(lco_res, lco, format="GTiff", overwrite=T, datatype='INT2S')
   
 }
 
 if (!file.exists(slp)) {
   dem_crop <- crop(raster(dem_global), ctrMsk0)
-  slp_dem <- terrain(dem_crop, opt='slope', unit='degrees')
-  slp_rec <- reclassify(slp_dem, c(-Inf,10,5, 10,20,4, 20,30,3, 30,40,2, 40,Inf,1))
+  slp_crop <- terrain(dem_crop, opt='slope', unit='degrees')
+  slp_crop[is.na(slp_crop)] <- 0
+  slp_res <- resample(slp_crop, ctrMsk0)
+  slp_rec <- reclassify(slp_res, c(-Inf,10,5, 10,20,4, 20,30,3, 30,40,2, 40,Inf,1))
   writeRaster(slp_rec, slp, format="GTiff", overwrite=T, datatype='INT2S')
   
 }
 
 if (!file.exists(wei)) {
-  dem_crop <- crop(raster(dem_global), ctrMsk0)
-  rsaga.wetness.index(dem_crop,"swi.sgrd")
+  # dem_crop <- crop(raster(dem_global), ctrMsk0)
+  # writeRaster(dem_crop, paste0(oBDirS, "/srtm.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+  wei_crop <- crop(raster(wei_global), ctrMsk0)
+  wei_res <- resample(wei_crop, ctrMsk0)
+  wei_res[is.na(wei_res)] <- 0
+  wei_rec <- reclassify(wei_res, c(-Inf,1,1, 1,2,2, 2,4,3, 4,8,4, 8,Inf,5))
+  writeRaster(wei_rec, wei, format="GTiff", overwrite=T, datatype='INT2S')
   
-  elev <- raster(grep('elev', rasterFiles, value=TRUE))
-  
-  # setting up appropriate RSAGA environment
-  sagaEnv <- RSAGA::rsaga.env(modules = '/usr/lib/x86_64-linux-gnu/saga/', cores = 2, 
-                              parallel = TRUE, version = "2.2.0")
-  topoWetnessIndex(dem_crop, sagaEnv)
 }
 
 
 
 if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
   
-  cly_res <- mask(resample(raster(cly), rsMsk, method='ngb'), rsMsk)
-  slp_res <- mask(resample(raster(slp), rsMsk, method='ngb'), rsMsk)
-  wei_res <- mask(resample(raster(wei), rsMsk, method='ngb'), rsMsk)
-  lco_res <- mask(resample(raster(lco), rsMsk, method='ngb'), rsMsk)
+  cly_res <- mask(raster(cly), ctrMsk0, method='ngb')
+  slp_res <- mask(raster(slp), ctrMsk0, method='ngb')
+  wei_res <- mask(raster(wei), ctrMsk0, method='ngb')
+  lco_res <- mask(raster(lco), ctrMsk0, method='ngb')
   
   writeRaster(cly_res, paste0(oIDirHFld, "/cly_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='INT2S')
   writeRaster(slp_res, paste0(oIDirHFld, "/slp_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='INT2S')
@@ -1671,9 +1675,10 @@ if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
 
 
 
+## Historical
 
 ## FLD Calcs all years all months
-cat(">. Calculating FLD ", ctrName, "\n")
+cat(">. Calculating FLD ", ctrName, " historical\n")
 
 prc_mag <- data.frame()
 
@@ -1682,7 +1687,7 @@ for (m in 1:12){
   if (!file.exists(paste0("fld_", ctrName, "_", m, "_normal.shp"))) {
     
     ## Load CHIRPS data and stack
-    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", yi:yf,  sprintf("%02d", m), "_", ctrName,"_monthly.nc")), rsMsk, method='ngb'), rsMsk)
+    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", yi:yf,  sprintf("%02d", m), "_", ctrName,"_monthly.nc")), ctrMsk0, method='ngb'), ctrMsk0)
     
     ## Remove -9999.9
     prcStk_yrs[which(prcStk_yrs[]<0)]=0
@@ -1695,11 +1700,19 @@ for (m in 1:12){
     # Quantiles by month
     q <- paste(summary(quantile(prcStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
     prc_mag <- rbind(prc_mag, c(m, round(as.numeric(gsub("  ", "", gsub("Mean   :","", q))))))
-    prc_mag_mtx <- matrix(c(-1, prc_mag[m, 2], 1,  
-                            prc_mag[m, 2], prc_mag[m, 3], 2,  
-                            prc_mag[m, 3], prc_mag[m, 4], 3, 
-                            prc_mag[m, 4], prc_mag[m, 5], 4, 
+    prc_mag_mtx <- matrix(c(-1, prc_mag[m, 2], 1,
+                            prc_mag[m, 2], prc_mag[m, 3], 2,
+                            prc_mag[m, 3], prc_mag[m, 4], 3,
+                            prc_mag[m, 4], prc_mag[m, 5], 4,
                             prc_mag[m, 5], 4000, 5), ncol=3, byrow=TRUE)
+
+    # prc_mag_mtx <- matrix(c(4000, prc_mag[m, 5], 5,  
+    #                         prc_mag[m, 5], prc_mag[m, 4], 4,  
+    #                         prc_mag[m, 4], prc_mag[m, 3], 3, 
+    #                         prc_mag[m, 3], prc_mag[m, 2], 2, 
+    #                         prc_mag[m, 2], -1, 1), ncol=3, byrow=TRUE)
+    
+    prc_mag_mtx[is.na(prc_mag_mtx)] <- 0
     
     ## El Nino, La Nina, Normal years selection 
     elnino_m <- subset(elnino, elnino$Month == m)
@@ -1711,9 +1724,9 @@ for (m in 1:12){
     
     
     ## Calculate mean monthly prec by condition
-    prc_elnino <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), rsMsk, method='ngb'), rsMsk)
-    prc_lanina <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), rsMsk, method='ngb'), rsMsk)
-    prc_normal <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), rsMsk, method='ngb'), rsMsk)
+    prc_elnino <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_lanina <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_normal <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
     
     prc_elnino[which(prc_elnino[]<0)]=0
     prc_lanina[which(prc_lanina[]<0)]=0
@@ -1776,7 +1789,7 @@ for (m in 1:12){
       writeOGR(ctrMsk, oIDirHFld, paste0("fld_", ctrName, "_", m, "_", enos, "_mun"), 
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
-      names(prc_mag) <- c("Month", "25%", "45%", "55%", "75%")
+      names(prc_mag) <- mag_labels
       write.csv(prc_mag, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
       
       cat(" . FLD Month ", m, " ", enos, "done\n")
@@ -1795,6 +1808,143 @@ for (m in 1:12){
 
 cat(">. FLD calcs done", "\n")
 
+
+
+## Recent-past
+
+## FLD Calcs all years all months
+cat(">. Calculating FLD Recent Past ", ctrName, "\n")
+
+## FLD output directory
+oIDirR <- paste0(oIDir, "/recent-past")
+oIDirRFld <- paste0(oIDirR, "/fld")
+if (!file.exists(paste0(oIDirRFld))) {dir.create(paste0(oIDirRFld), recursive = TRUE)}
+oFldR <- paste0(oIDirRFld, "/fld_", ctrName)
+
+elnino_r <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
+lanina_r <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
+normal_r <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
+
+for (m in 1:12){
+  
+  if (!file.exists(paste0("fld_", ctrName, "_", m, "_normal.shp"))) {
+    
+    ## Load CHIRPS data and stack
+    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", yi_r:yf_r,  sprintf("%02d", m), "_", ctrName,"_monthly.nc")), ctrMsk0, method='ngb'), ctrMsk0)
+    
+    ## Remove -9999.9
+    prcStk_yrs[which(prcStk_yrs[]<0)]=0
+    
+    # Var defs
+    varNm <- "fld"
+    varLn <- "Flooding.index"
+    unit <- "mag"
+    
+    # Quantiles by month
+    prc_mag <- read.csv(paste0(oIDirHCdd, "/prc_", ctrName, "_", m, "_normal_mag_class", ".csv"))
+    prc_mag_mtx <- matrix(c(-1, prc_mag[m, 2], 1,
+                            prc_mag[m, 2], prc_mag[m, 3], 2,
+                            prc_mag[m, 3], prc_mag[m, 4], 3,
+                            prc_mag[m, 4], prc_mag[m, 5], 4,
+                            prc_mag[m, 5], 4000, 5), ncol=3, byrow=TRUE)
+    
+    # prc_mag_mtx <- matrix(c(4000, prc_mag[m, 5], 5,  
+    #                         prc_mag[m, 5], prc_mag[m, 4], 4,  
+    #                         prc_mag[m, 4], prc_mag[m, 3], 3, 
+    #                         prc_mag[m, 3], prc_mag[m, 2], 2, 
+    #                         prc_mag[m, 2], -1, 1), ncol=3, byrow=TRUE)
+    
+    prc_mag_mtx[is.na(prc_mag_mtx)] <- 0
+    
+    ## El Nino, La Nina, Normal years selection 
+    elnino_m_r <- subset(elnino_r, elnino_r$Month == m)
+    lanina_m_r <- subset(lanina_r, lanina_r$Month == m)
+    normal_m_r <- subset(normal_r, normal_r$Month == m)
+
+    ## Calculate mean monthly prec by condition
+    prc_elnino <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_lanina <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_normal <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    
+    prc_elnino_r[which(prc_elnino_r[]<0)]=0
+    prc_lanina_r[which(prc_lanina_r[]<0)]=0
+    prc_normal_r[which(prc_normal_r[]<0)]=0
+    
+    writeRaster(prc_elnino_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(prc_lanina_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(prc_normal_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    
+    ## Load rec soil data
+    cly_rec <- raster(paste0(oIDirHFld, "/cly_", ctrName, ".tif"))
+    slp_rec <- raster(paste0(oIDirHFld, "/slp_", ctrName, ".tif"))
+    wei_rec <- raster(paste0(oIDirHFld, "/wei_", ctrName, ".tif"))
+    lco_rec <- raster(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))
+    
+    ## Convert to shape
+    for (enos in enosCond){
+      
+      ## Reclassify monthly precipitation 
+      prc_rec <- reclassify(raster(paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_", enos, ".tif")), prc_mag_mtx)
+      # writeRaster(prc_rec, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      
+      # ## Create shapefile (index values)
+      # dtsRs <- raster(paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, ".tif"))
+      # dtsRsShp <- rasterToPolygons(dtsRs)
+      # dtsRsShp <- createSPComment(dtsRsShp)
+      # names(dtsRsShp) <- varNm
+      # writeOGR(dtsRsShp, oIDirHFld, paste0("prc_", ctrName, "_", m, "_", enos),
+      #          driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      
+      ## Calc overlay
+      indStk <- stack(cly_rec, slp_rec, wei_rec, lco_rec, prc_rec)
+      indStkOvl <- overlay(indStk, fun=function(a,b,c,d,e) 0.15*a+0.15*b+0.15*c+0.15*d+0.4*e)
+      # indStkOvl_025 <- disaggregate(indStkOvl, fact=c(2,2), method='')
+      writeRaster(indStkOvl, paste0(oFldR, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      
+      ## Create shapefile (magnitude values)
+      dtsRsShp <- rasterToPolygons(prc_rec)
+      dtsRsShp@data <- data.frame(dtsRsShp@data, cly=data.frame(rasterToPolygons(mask(cly_rec, prc_rec))),
+                                  slp=data.frame(rasterToPolygons(mask(slp_rec, prc_rec))), 
+                                  wei=data.frame(rasterToPolygons(mask(wei_rec, prc_rec))), 
+                                  lco=data.frame(rasterToPolygons(mask(lco_rec, prc_rec))), 
+                                  vuln=round(data.frame(rasterToPolygons(indStkOvl)))
+      )
+      
+      names(dtsRsShp) <- c("prc", "cly", "slp", "wei", "lco", "vuln")
+      writeOGR(dtsRsShp, oIDirRFld, paste0("fld_", ctrName, "_", m, "_", enos, "_mag"), 
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      ## Load Mask (Adm2)
+      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      
+      ## Extract values inside polygons and calc avg 
+      oFldVals <- extract(indStkOvl, ctrMsk)
+      oFldVuln <- data.frame(oFldVuln=unlist(lapply(oFldVals, function(x) mean(x, na.rm=TRUE))))
+      
+      ## Join mean values to polygon data and write shapefile
+      ctrMsk@data <- data.frame(ctrMsk@data, vuln=as.numeric(round(oFldVuln$oFldVuln)) )
+      writeOGR(ctrMsk, oIDirRFld, paste0("fld_", ctrName, "_", m, "_", enos, "_mun"), 
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      names(prc_mag) <- mag_labels
+      write.csv(prc_mag, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
+      
+      cat(" . FLD Month ", m, " ", enos, "done\n")
+      
+    }
+    
+    cat(" . FLD Month ", m, "done\n")
+    
+  } else {
+    
+    cat(" . FLD Month ", m, "done\n")
+    
+  }
+  
+}
+
+cat(">. FLD calcs done", "\n")
 
 
 ##################################################
