@@ -1,6 +1,6 @@
 ######################################################################################################################
 #### Author : Carlos Navarro                                                                                      ####
-#### Date   : Jan 2021                                                                                            ####
+#### Date   : Dec 2022                                                                                            ####
 #### Contact: c.e.navarro@cgiar.org                                                                               ####
 #### OS     : Windows                                                                                             ####
 ######################################################################################################################
@@ -63,7 +63,12 @@ enosCond <- c("elnino", "lanina", "normal")
 vars <- c("prec", "tmin","tmax")
 resampling <- F
 # probs_q <- c(.25,.45,.55,.75)
-probs_q <- c(.01,.35,.65,.99)
+# probs_q <- c(.01,.35,.65,.99)
+probs_q <- c(.05,.35,.65,.95)
+mag_labels <- c("Month", "5%", "35%", "65%", "95%")
+
+cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content"
+lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912_V2.3_reclass.tif"
 
 if (!file.exists(rsMsk)) {
   ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
@@ -299,8 +304,6 @@ for (var in vars){
 ## Data Source: CHIRPS daily                   ###
 ##################################################
 
-probs_q <- c(.05,.35,.65,.95)
-
 ## Identify historical ENOS condition
 ensoCond <- read.csv(ensoFile, header=T, row.names = 1)
 ensoCond <- as.vector(cbind(Year=rownames(ensoCond)[row(ensoCond)], setNames(melt(ensoCond), c('Month', 'Values'))))
@@ -452,7 +455,7 @@ for (m in 1:12){
       cat(" . CDD Month ", m, " ", enos, "done\n")
     }
     
-    names(cdd_mag) <- c("Month", "25%", "45%", "55%", "75%")
+    names(cdd_mag) <- mag_labels
     write.csv(cdd_mag, paste0(oIDirHCdd, "/cdd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     cat(" . CDD Month ", m, "done\n")
@@ -481,11 +484,8 @@ elnino_r <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >
 lanina_r <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
 normal_r <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
 
-
 ## Load Mask (Adm0)
 ctrMsk0 <- raster(rsMsk)
-
-cdd_mag <- data.frame()
 
 for (m in 1:12){
   
@@ -506,6 +506,9 @@ for (m in 1:12){
     writeRaster(cdd_elnino_r, paste0(oCddR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
     writeRaster(cdd_lanina_r, paste0(oCddR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
     writeRaster(cdd_normal_r, paste0(oCddR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    
+    cdd_mag <- read.csv(paste0(oIDirHCdd, "/cdd_", ctrName, "_", m, "_normal_mag_class", ".csv"))
+    
     
     ## Convert to shape
     for (enos in enosCond){
@@ -574,7 +577,7 @@ for (m in 1:12){
       cat(" . CDD Month ", m, " ", enos, "done\n")
     }
     
-    names(cdd_mag) <- c("Month", "25%", "45%", "55%", "75%")
+    names(cdd_mag) <- mag_labels
     write.csv(cdd_mag, paste0(oIDirRCdd, "/cdd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     cat(" . CDD Month ", m, "done\n")
@@ -589,13 +592,13 @@ for (m in 1:12){
 
 cat(">. CDD calcs done", "\n")
 
+
+
 ##################################################
 ## DRD. Dry days calculation                   ###
 ## Vulnerability type: Drought                 ###
 ## Data Source: CHIRPS daily                   ###
 ##################################################
-
-probs_q <- c(.01,.35,.65,.99)
 
 ## Identify historical ENOS condition
 ensoCond <- read.csv(ensoFile, header=T, row.names = 1)
@@ -628,7 +631,6 @@ oWetW <- paste0(oBDirW, "/wet_", ctrName)
 oDrd <- paste0(oIDirHDrd, "/drd_", ctrName)
 
 ## Load Mask (Adm0)
-ctrMsk0 <- raster(rsMsk)
 
 drd_mag <- data.frame()
 
@@ -656,12 +658,9 @@ for (m in 1:12){
     
     ## El Nino, La Nina, Normal years selection 
     elnino_m <- subset(elnino, elnino$Month == m)
-    # elnino_m_yrs <- gsub(" ","", toString(elnino_m$Year))
     lanina_m <- subset(lanina, lanina$Month == m)
-    # lanina_m_yrs <- gsub(" ","", toString(lanina_m$Year))
     normal_m <- subset(normal, normal$Month == m)
-    # normal_m_yrs <- gsub(" ","", toString(normal_m$Year))
-    
+
     ## Calculate median consecutive dry days length by condition
     drd_elnino <- mean( abs(stack(paste0(oWetW, "_", elnino_m$Year, "_", m, ".nc")) - ndays[m]) )
     drd_lanina <- mean( abs(stack(paste0(oWetW, "_", lanina_m$Year, "_", m, ".nc")) - ndays[m]) )
@@ -692,11 +691,11 @@ for (m in 1:12){
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oDrdValsDf<- data.frame(getValues(dtsRs))
       oDrdValsDf <- oDrdValsDf %>% mutate(vuln =
-                                            case_when(oDrdValsDf >= as.numeric(cdd_mag[m, 5])  ~ "5", 
-                                                      (oDrdValsDf < as.numeric(cdd_mag[m, 5]) & oDrdValsDf >= as.numeric(cdd_mag[m, 4])) ~ "4",
-                                                      (oDrdValsDf < as.numeric(cdd_mag[m, 4]) & oDrdValsDf >= as.numeric(cdd_mag[m, 3])) ~ "3",
-                                                      (oDrdValsDf < as.numeric(cdd_mag[m, 3]) & oDrdValsDf >= as.numeric(cdd_mag[m, 2])) ~ "2",
-                                                      oDrdValsDf <= as.numeric(cdd_mag[m, 2]) ~ "1")
+                                            case_when(oDrdValsDf >= as.numeric(drd_mag[m, 5])  ~ "5", 
+                                                      (oDrdValsDf < as.numeric(drd_mag[m, 5]) & oDrdValsDf >= as.numeric(drd_mag[m, 4])) ~ "4",
+                                                      (oDrdValsDf < as.numeric(drd_mag[m, 4]) & oDrdValsDf >= as.numeric(drd_mag[m, 3])) ~ "3",
+                                                      (oDrdValsDf < as.numeric(drd_mag[m, 3]) & oDrdValsDf >= as.numeric(drd_mag[m, 2])) ~ "2",
+                                                      oDrdValsDf <= as.numeric(drd_mag[m, 2]) ~ "1")
       )
       
       ## Applied re-clasiffied values, cut and write raster (mag values)
@@ -723,11 +722,11 @@ for (m in 1:12){
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oDrdVuln <- data.frame(oDrdVuln=unlist(lapply(oDrdVals, FUN=mean)))
       oDrdVuln <- oDrdVuln %>% mutate(vuln =
-                                        case_when(oDrdVuln >= as.numeric(cdd_mag[m, 5])  ~ "5", 
-                                                  (oDrdVuln < as.numeric(cdd_mag[m, 5]) & oDrdVuln >= as.numeric(cdd_mag[m, 4])) ~ "4",
-                                                  (oDrdVuln < as.numeric(cdd_mag[m, 4]) & oDrdVuln >= as.numeric(cdd_mag[m, 3])) ~ "3",
-                                                  (oDrdVuln < as.numeric(cdd_mag[m, 3]) & oDrdVuln >= as.numeric(cdd_mag[m, 2])) ~ "2",
-                                                  oDrdVuln <= as.numeric(cdd_mag[m, 2]) ~ "1")
+                                        case_when(oDrdVuln >= as.numeric(drd_mag[m, 5])  ~ "5", 
+                                                  (oDrdVuln < as.numeric(drd_mag[m, 5]) & oDrdVuln >= as.numeric(drd_mag[m, 4])) ~ "4",
+                                                  (oDrdVuln < as.numeric(drd_mag[m, 4]) & oDrdVuln >= as.numeric(drd_mag[m, 3])) ~ "3",
+                                                  (oDrdVuln < as.numeric(drd_mag[m, 3]) & oDrdVuln >= as.numeric(drd_mag[m, 2])) ~ "2",
+                                                  oDrdVuln <= as.numeric(drd_mag[m, 2]) ~ "1")
       )
       
       ## Join mean values to polygon data and write shapefile
@@ -739,7 +738,7 @@ for (m in 1:12){
       
     }
     
-    names(drd_mag) <- c("Month", "25%", "45%", "55%", "75%")
+    names(drd_mag) <- mag_labels
     write.csv(drd_mag, paste0(oIDirHDrd, "/drd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     
@@ -774,8 +773,6 @@ normal_r <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as
 ## Load Mask (Adm0)
 ctrMsk0 <- raster(rsMsk)
 
-drd_mag <- data.frame()
-
 for (m in 1:12){
   
   if (!file.exists(paste0(oDrdR, "_", m, "_normal.shp"))) {
@@ -793,6 +790,9 @@ for (m in 1:12){
     writeRaster(drd_elnino_r, paste0(oDrdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
     writeRaster(drd_lanina_r, paste0(oDrdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
     writeRaster(drd_normal_r, paste0(oDrdR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    
+    drd_mag <- read.csv(paste0(oIDirHDrd, "/drd_", ctrName, "_", m, "_normal_mag_class", ".csv"))
+    
     
     ## Convert to shape
     for (enos in enosCond){
@@ -815,11 +815,11 @@ for (m in 1:12){
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oDrdValsDf<- data.frame(getValues(dtsRs))
       oDrdValsDf <- oDrdValsDf %>% mutate(vuln =
-                                            case_when(oDrdValsDf >= as.numeric(cdd_mag[m, 5])  ~ "5", 
-                                                      (oDrdValsDf < as.numeric(cdd_mag[m, 5]) & oDrdValsDf >= as.numeric(cdd_mag[m, 4])) ~ "4",
-                                                      (oDrdValsDf < as.numeric(cdd_mag[m, 4]) & oDrdValsDf >= as.numeric(cdd_mag[m, 3])) ~ "3",
-                                                      (oDrdValsDf < as.numeric(cdd_mag[m, 3]) & oDrdValsDf >= as.numeric(cdd_mag[m, 2])) ~ "2",
-                                                      oDrdValsDf <= as.numeric(cdd_mag[m, 2]) ~ "1")
+                                            case_when(oDrdValsDf >= as.numeric(drd_mag[m, 5])  ~ "5", 
+                                                      (oDrdValsDf < as.numeric(drd_mag[m, 5]) & oDrdValsDf >= as.numeric(drd_mag[m, 4])) ~ "4",
+                                                      (oDrdValsDf < as.numeric(drd_mag[m, 4]) & oDrdValsDf >= as.numeric(drd_mag[m, 3])) ~ "3",
+                                                      (oDrdValsDf < as.numeric(drd_mag[m, 3]) & oDrdValsDf >= as.numeric(drd_mag[m, 2])) ~ "2",
+                                                      oDrdValsDf <= as.numeric(drd_mag[m, 2]) ~ "1")
       )
       
       ## Applied re-clasiffied values, cut and write raster (mag values)
@@ -846,11 +846,11 @@ for (m in 1:12){
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oDrdVuln <- data.frame(oDrdVuln=unlist(lapply(oDrdVals, FUN=mean)))
       oDrdVuln <- oDrdVuln %>% mutate(vuln =
-                                        case_when(oDrdVuln >= as.numeric(cdd_mag[m, 5])  ~ "5", 
-                                                  (oDrdVuln < as.numeric(cdd_mag[m, 5]) & oDrdVuln >= as.numeric(cdd_mag[m, 4])) ~ "4",
-                                                  (oDrdVuln < as.numeric(cdd_mag[m, 4]) & oDrdVuln >= as.numeric(cdd_mag[m, 3])) ~ "3",
-                                                  (oDrdVuln < as.numeric(cdd_mag[m, 3]) & oDrdVuln >= as.numeric(cdd_mag[m, 2])) ~ "2",
-                                                  oDrdVuln <= as.numeric(cdd_mag[m, 2]) ~ "1")
+                                        case_when(oDrdVuln >= as.numeric(drd_mag[m, 5])  ~ "5", 
+                                                  (oDrdVuln < as.numeric(drd_mag[m, 5]) & oDrdVuln >= as.numeric(drd_mag[m, 4])) ~ "4",
+                                                  (oDrdVuln < as.numeric(drd_mag[m, 4]) & oDrdVuln >= as.numeric(drd_mag[m, 3])) ~ "3",
+                                                  (oDrdVuln < as.numeric(drd_mag[m, 3]) & oDrdVuln >= as.numeric(drd_mag[m, 2])) ~ "2",
+                                                  oDrdVuln <= as.numeric(drd_mag[m, 2]) ~ "1")
       )
       
       ## Join mean values to polygon data and write shapefile
@@ -862,7 +862,7 @@ for (m in 1:12){
       
     }
     
-    names(drd_mag) <- c("Month", "25%", "45%", "55%", "75%")
+    names(drd_mag) <- mag_labels
     write.csv(drd_mag, paste0(oIDirRDrd, "/drd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     
@@ -914,17 +914,17 @@ oP95WRef <- paste0(oBDirW, "/p95_", yi, "-", yf, "_", ctrName)
 oP95W <- paste0(oBDirW, "/p95_", ctrName)
 oP95 <- paste0(oIDirHP95, "/p95_", ctrName)
 
-if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
-  
-  ## Calc time-series wet days
-  system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, ".nc", " ", iNc, "_wet.nc"))
-  system(paste0(dircdo," -s -splitmon ", iNc, "_wet.nc", " ", iNc, "_wet", "_"))
-  
-}
-
 if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
   
   for (m in 1:12){
+    
+    if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+      
+      ## Calc time-series wet days
+      system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+      
+    }
+    
     
     # Calc yday p95 ref. period of wet days time-series
     system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
@@ -1069,7 +1069,7 @@ for (m in 1:12){
       
     }
     
-    names(p95_mag) <- c("Month", "5%", "10%", "15%", "20%")
+    names(p95_mag) <- c("Month", "5", "10", "15", "20")
     write.csv(p95_mag, paste0(oIDirHP95, "/p95_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     cat(" . P95 Month ", m, "done\n")
@@ -1098,8 +1098,6 @@ oP95R <- paste0(oIDirRP95, "/p95_", ctrName)
 elnino_r <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
 lanina_r <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
 normal_r <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
-
-p95_mag <- data.frame()
 
 ## Loop across months
 for (m in 1:12){
@@ -1198,9 +1196,6 @@ for (m in 1:12){
       
     }
     
-    names(p95_mag) <- c("Month", "5%", "10%", "15%", "20%")
-    write.csv(p95_mag, paste0(oIDirRP95, "/p95_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
-    
     cat(" . P95 Month ", m, "done\n")
     
   } else {
@@ -1272,7 +1267,7 @@ for (m in 1:12){
       
     }
     
-    ## Load CHIRPS data and stack
+    ## Load CHIRTS data and stack
     # frdStk_yrs <- stack(paste0(oFrdW, "_", yi:yf, "_", m, ".nc"))
     frdStk_yrs <- resample(stack(paste0(oFrdW, "_", yi:yf, "_", m, ".nc")), ctrMsk0)
     
@@ -1297,9 +1292,9 @@ for (m in 1:12){
     frd_lanina[is.na(frd_lanina[])] <- 0 
     frd_normal[is.na(frd_normal[])] <- 0 
     
-    writeRaster(frd_elnino * rsMsk, paste0(oFrd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(frd_lanina * rsMsk, paste0(oFrd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(frd_normal * rsMsk, paste0(oFrd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(frd_elnino * ctrMsk0, paste0(oFrd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(frd_lanina * ctrMsk0, paste0(oFrd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(frd_normal * ctrMsk0, paste0(oFrd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
     
     ## Convert to shape
     for (enos in enosCond){
@@ -1321,28 +1316,28 @@ for (m in 1:12){
       
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
-      frd_mag <- c(m, 1, 2, 3, 4)
+      frd_mag <- c(m, 0, 2, 4, 6)
       
       dtsRs[is.na(dtsRs[])] <- 0
       
-      oFrdValsDf<- data.frame(getValues(dtsRs* rsMsk))
+      oFrdValsDf<- data.frame(getValues(dtsRs* ctrMsk0))
       oFrdValsDf <- oFrdValsDf %>% mutate(vuln =
                                             case_when(oFrdValsDf == 0 ~ "1", 
-                                                      (oFrdValsDf <= 1 ) ~ "2",
-                                                      (oFrdValsDf > 1 & oFrdValsDf <= 2) ~ "3",
-                                                      (oFrdValsDf > 2 & oFrdValsDf <= 3) ~ "4",
-                                                      oFrdValsDf > 4  ~ "5")
+                                                      (oFrdValsDf <= 2 ) ~ "2",
+                                                      (oFrdValsDf > 2 & oFrdValsDf <= 4) ~ "3",
+                                                      (oFrdValsDf > 4 & oFrdValsDf <= 6) ~ "4",
+                                                      oFrdValsDf > 6  ~ "5")
       )
       
       ## Applied re-clasiffied values, cut and write raster (mag values)
-      dtsRs_vuln <- dtsRs * rsMsk
+      dtsRs_vuln <- dtsRs * ctrMsk0
       values(dtsRs_vuln) <- as.numeric(oFrdValsDf$vuln)
       crs(dtsRs_vuln) <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0" 
-      writeRaster(dtsRs_vuln * rsMsk, paste0(oIDirHFrd, "/frd_", ctrName, "_", m, "_", enos, "_mag.tif"), overwrite=T)
+      writeRaster(dtsRs_vuln * ctrMsk0, paste0(oIDirHFrd, "/frd_", ctrName, "_", m, "_", enos, "_mag.tif"), overwrite=T)
       
       ## Create shapefile (magnitude values)
       dtsRs_vuln[is.na(dtsRs_vuln[])] <- 1
-      dtsRs_vulnShp <- rasterToPolygons(dtsRs_vuln * rsMsk)
+      dtsRs_vulnShp <- rasterToPolygons(dtsRs_vuln * ctrMsk0)
       dtsRs_vulnShp <- createSPComment(dtsRs_vulnShp)
       names(dtsRs_vulnShp) <- "vuln"
       writeOGR(dtsRs_vulnShp, oIDirHFrd, paste0("frd_", ctrName, "_", m, "_", enos, "_mag"), 
@@ -1360,10 +1355,10 @@ for (m in 1:12){
       oFrdVuln <- data.frame(oFrdVuln=unlist(lapply(oFrdVals, FUN=max)))
       oFrdVuln <- oFrdVuln %>% mutate(vuln =
                                         case_when(oFrdVuln == 0 ~ "1", 
-                                                  (oFrdVuln <= 1 ) ~ "2",
-                                                  (oFrdVuln > 1 & oFrdVuln <= 2) ~ "3",
-                                                  (oFrdVuln > 2 & oFrdVuln <= 3) ~ "4",
-                                                  oFrdVuln > 4  ~ "5")
+                                                  (oFrdVuln <= 2 ) ~ "2",
+                                                  (oFrdVuln > 2 & oFrdVuln <= 4) ~ "3",
+                                                  (oFrdVuln > 4 & oFrdVuln <= 6) ~ "4",
+                                                  oFrdVuln > 6  ~ "5")
       )
       
       ## Join mean values to polygon data and write shapefile
@@ -1375,7 +1370,7 @@ for (m in 1:12){
       
     }
     
-    names(frd_mag) <- c("Month", "5%", "10%", "15%", "20%")
+    names(frd_mag) <- c("Month", "0", "2", "4", "6")
     write.csv(frd_mag, paste0(oIDirHFrd, "/frd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     cat(" . FRD Month ", m, "done\n")
@@ -1388,7 +1383,7 @@ for (m in 1:12){
   
 }
 
-write.csv(frd_nfeatures, paste0(oIDirHFrd, "/_nfeatures_describe.csv"), row.names=F)
+# write.csv(frd_nfeatures, paste0(oIDirHFrd, "/_nfeatures_describe.csv"), row.names=F)
 
 
 
@@ -1460,17 +1455,17 @@ for (m in 1:12){
       
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
-      frd_mag <- c(m, 1, 2, 3, 4)
+      # frd_mag <- c(m, 1, 2, 3, 4)
       
       dtsRs[is.na(dtsRs[])] <- 0
       
       oFrdValsDf<- data.frame(getValues(dtsRs* ctrMsk0))
       oFrdValsDf <- oFrdValsDf %>% mutate(vuln =
                                             case_when(oFrdValsDf == 0 ~ "1", 
-                                                      (oFrdValsDf <= 1 ) ~ "2",
-                                                      (oFrdValsDf > 1 & oFrdValsDf <= 2) ~ "3",
-                                                      (oFrdValsDf > 2 & oFrdValsDf <= 3) ~ "4",
-                                                      oFrdValsDf > 4  ~ "5")
+                                                      (oFrdValsDf <= 2 ) ~ "2",
+                                                      (oFrdValsDf > 2 & oFrdValsDf <= 4) ~ "3",
+                                                      (oFrdValsDf > 4 & oFrdValsDf <= 6) ~ "4",
+                                                      oFrdValsDf > 6  ~ "5")
       )
       
       ## Applied re-clasiffied values, cut and write raster (mag values)
@@ -1499,10 +1494,10 @@ for (m in 1:12){
       oFrdVuln <- data.frame(oFrdVuln=unlist(lapply(oFrdVals, FUN=max)))
       oFrdVuln <- oFrdVuln %>% mutate(vuln =
                                         case_when(oFrdVuln == 0 ~ "1", 
-                                                  (oFrdVuln <= 1 ) ~ "2",
-                                                  (oFrdVuln > 1 & oFrdVuln <= 2) ~ "3",
-                                                  (oFrdVuln > 2 & oFrdVuln <= 3) ~ "4",
-                                                  oFrdVuln > 4  ~ "5")
+                                                  (oFrdVuln <= 2 ) ~ "2",
+                                                  (oFrdVuln > 2 & oFrdVuln <= 4) ~ "3",
+                                                  (oFrdVuln > 4 & oFrdVuln <= 6) ~ "4",
+                                                  oFrdVuln > 6  ~ "5")
       )
       
       ## Join mean values to polygon data and write shapefile
@@ -1514,7 +1509,7 @@ for (m in 1:12){
       
     }
     
-    names(frd_mag) <- c("Month", "5%", "10%", "15%", "20%")
+    names(frd_mag) <- c("Month", "0", "2", "4", "6")
     write.csv(frd_mag, paste0(oIDirRFrd, "/frd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     cat(" . FRD Month ", m, "done\n")
@@ -1527,7 +1522,7 @@ for (m in 1:12){
   
 }
 
-write.csv(frd_nfeatures, paste0(oIDirRFrd, "/_nfeatures_describe.csv"), row.names=F)
+# write.csv(frd_nfeatures, paste0(oIDirRFrd, "/_nfeatures_describe.csv"), row.names=F)
 
 
 
@@ -1598,15 +1593,33 @@ for (m in 1:12){
 
 
 ## Load and reclassify soil data
-cly <- paste0(oBDirS, "/Clay_Percentage_idw_rec.tif")
+cly <- paste0(oBDirS, "/Clay_Percentage_rec.tif")
 slp <- paste0(oBDirS, "/Slope_percentage_res_idw_rec.tif")
 wei <- paste0(oBDirS, "/ECU_SAGA_Wetness_Index_Norm_proj_res_idw_rec.tif")
 lco <- paste0(oBDirS, "/LU_LC_rec.tif")
 
 # Load raster mask 
 # rsMsk <- raster(rsMsk)
-rsMsk <- raster(paste0(oBDir, "/daily-", ctrName, "/chirps-v2.0.", yi, ".", sprintf("%02d", 1), ".01.nc")) * 0 + 1
+ctrMsk0 <- raster(rsMsk)
 
+if (!file.exists(cly)) {
+  
+  if (!file.exists(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"))) {
+    
+  sd1 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd1_250m.tif"))
+  sd2 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd2_250m.tif"))
+  sd3 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd3_250m.tif"))
+  sd4 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd4_250m.tif"))
+  sd5 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd5_250m.tif"))
+  sd6 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd6_250m.tif"))
+  sdAvg <- ( (sd1 * 5) + (sd2 * 10)  + (sd3 * 15) + (sd4 * 30) + (sd5 * 40) + (sd6 * 100) ) / 200
+  writeRaster(sdAvg, paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+  
+  }
+  
+  sdAvg <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"))
+  
+}
 
 
 if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
