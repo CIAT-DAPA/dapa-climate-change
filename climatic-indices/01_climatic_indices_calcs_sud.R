@@ -23,6 +23,8 @@ require(rasterVis)
 require(RColorBrewer)
 require(rgeos)
 require(grid)
+require(RSAGA) 
+require(envirem)
 
 ## Params
 yi <- 1981
@@ -69,7 +71,8 @@ mag_labels <- c("Month", "5%", "35%", "65%", "95%")
 
 cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content"
 lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912_V2.3_reclass.tif"
-
+dem_global <- "S:/observed/gridded_products/srtm/srtm_v41_30s.tif"
+  
 if (!file.exists(rsMsk)) {
   ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
   dts_dump <- raster(paste0(iDirP, "/chirps-v2.0.1981.01.01.tif"))
@@ -1594,7 +1597,7 @@ for (m in 1:12){
 
 ## Load and reclassify soil data
 cly <- paste0(oBDirS, "/Clay_Percentage_rec.tif")
-slp <- paste0(oBDirS, "/Slope_percentage_res_idw_rec.tif")
+slp <- paste0(oBDirS, "/Slope_percentage_res_rec.tif")
 wei <- paste0(oBDirS, "/ECU_SAGA_Wetness_Index_Norm_proj_res_idw_rec.tif")
 lco <- paste0(oBDirS, "/LU_LC_rec.tif")
 
@@ -1604,7 +1607,7 @@ ctrMsk0 <- raster(rsMsk)
 
 if (!file.exists(cly)) {
   
-  if (!file.exists(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"))) {
+  if (!file.exists(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))) {
     
   sd1 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd1_250m.tif"))
   sd2 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd2_250m.tif"))
@@ -1617,9 +1620,39 @@ if (!file.exists(cly)) {
   
   }
   
-  sdAvg <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"))
+  sdAvg <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))
+  sdAvg_crop <- crop(sdAvg, ctrMsk0)
+  sdAvg_rec <- reclassify(sdAvg_crop, c(-Inf,20,1, 20,40,2, 40,60,3, 60,80,4, 80,Inf,5))
+  writeRaster(sdAvg_rec, cly, format="GTiff", overwrite=T, datatype='INT2S')
+              
+}
+
+if (!file.exists(lco)) {
+  lco_crop <- crop(raster(lco_global), ctrMsk0)
+  writeRaster(lco_crop, lco, format="GTiff", overwrite=T, datatype='INT2S')
   
 }
+
+if (!file.exists(slp)) {
+  dem_crop <- crop(raster(dem_global), ctrMsk0)
+  slp_dem <- terrain(dem_crop, opt='slope', unit='degrees')
+  slp_rec <- reclassify(slp_dem, c(-Inf,10,5, 10,20,4, 20,30,3, 30,40,2, 40,Inf,1))
+  writeRaster(slp_rec, slp, format="GTiff", overwrite=T, datatype='INT2S')
+  
+}
+
+if (!file.exists(wei)) {
+  dem_crop <- crop(raster(dem_global), ctrMsk0)
+  rsaga.wetness.index(dem_crop,"swi.sgrd")
+  
+  elev <- raster(grep('elev', rasterFiles, value=TRUE))
+  
+  # setting up appropriate RSAGA environment
+  sagaEnv <- RSAGA::rsaga.env(modules = '/usr/lib/x86_64-linux-gnu/saga/', cores = 2, 
+                              parallel = TRUE, version = "2.2.0")
+  topoWetnessIndex(dem_crop, sagaEnv)
+}
+
 
 
 if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
