@@ -23,6 +23,8 @@ require(rasterVis)
 require(RColorBrewer)
 require(rgeos)
 require(grid)
+require(terra)
+require(trend)
 # require(RSAGA) 
 # require(envirem)
 
@@ -595,6 +597,82 @@ for (m in 1:12){
 }
 
 cat(">. CDD calcs done", "\n")
+
+
+
+## Moving average ##
+
+## CDD output directory recent past
+oIDirM <- paste0(oIDir, "/moving-average")
+oIDirMCdd <- paste0(oIDirM, "/cdd")
+if (!file.exists(paste0(oIDirMCdd))) {dir.create(paste0(oIDirMCdd), recursive = TRUE)}
+
+## CDD Calcs all years all months
+cat(">. Calculating CDD Recent Past ", ctrName, "\n")
+oCddM <- paste0(oIDirMCdd, "/cdd_", ctrName)
+
+## Load Mask (Adm0)
+ctrMsk0 <- raster(rsMsk)
+
+for (yr in yi:yi_r){
+  
+  elnino_m <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >= yr & as.vector(ensoCond$Year) <= (yr + 19) )
+  lanina_m <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yr & as.vector(ensoCond$Year) <= (yr + 19))
+  normal_m <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yr & as.vector(ensoCond$Year) <= (yr + 19))
+  
+  for (m in 1:12){
+    
+    if (!file.exists(paste0(oCddM, yr, "_", yr+19, "_", m, "_normal.shp"))) {
+      
+      cat(" . CDD Month ", yr, "-", yr+19, " ",  m, "processing\n")
+      
+      ## El Nino, La Nina, Normal years selection 
+      elnino_m_m <- subset(elnino_m, elnino_m$Month == m)
+      lanina_m_m <- subset(lanina_m, lanina_m$Month == m)
+      normal_m_m <- subset(normal_m, normal_m$Month == m)
+      
+      ## Calculate mean consecutive dry days length by condition
+      cdd_elnino_m <- mean(stack(paste0(oCddW, "_", elnino_m_m$Year, "_", m, ".nc")))
+      cdd_lanina_m <- mean(stack(paste0(oCddW, "_", lanina_m_m$Year, "_", m, ".nc")))
+      cdd_normal_m <- mean(stack(paste0(oCddW, "_", normal_m_m$Year, "_", m, ".nc")))
+      
+      writeRaster(cdd_elnino_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      writeRaster(cdd_lanina_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      writeRaster(cdd_normal_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    }
+  }
+}
+
+for (m in 1:12){
+  
+  cddLs <-  list.files(path=paste0(oIDirMCdd), pattern=paste0("cdd_", ctrName), full.names = T,ignore.case=F)
+  cddLs_m <- cddLs[grepl(paste0("_", m, "_"),cddLs)]
+  
+  for (enos in enosCond){
+    
+    cddLs_m_enos <- cddLs_m[grepl(enos,cddLs_m)]
+    
+    cdd_stk <- rast(cddLs_m_enos)
+    cdd_beta <- terra::app(cdd_stk, fun = function(x){
+      x <- as.numeric(na.omit(x))
+      if(length(x) > 1){
+        y <- trend::sens.slope(x)$estimates
+      } else {
+        y <- NA
+      }
+      return(y)
+    })
+    cdd_pred <- cdd_beta * (length(cddLs_m_enos) + 1)
+    
+    
+    terra::writeRaster(cdd_beta, paste0(oCddM, "_beta", "_", m, "_", enos, ".tif"), overwrite=T)
+    terra::writeRaster(cdd_pred, paste0(oCddM, "_pred", "_", m, "_", enos, ".tif"), overwrite=T)
+    
+    
+  }
+  
+}
+
 
 
 
@@ -1513,9 +1591,6 @@ for (m in 1:12){
       
     }
     
-    names(frd_mag) <- c("Month", "0", "2", "4", "6")
-    write.csv(frd_mag, paste0(oIDirRFrd, "/frd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
-    
     cat(" . FRD Month ", m, "done\n")
     
   } else {
@@ -1955,6 +2030,7 @@ cat(">. FLD calcs done", "\n")
 # Set params
 varList <- c("cdd", "drd", "p95", "frd", "fld")
 id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+varList <- c("frd")
 
 ## General output directory
 oIDirH <- paste0(oIDir, "/recent-past")
@@ -2068,6 +2144,125 @@ for (var in varList){
     + layer(sp.polygons(ctrMskAdm2, lwd=0.5))
     )
     dev.off()
+    
+    
+  } 
+  
+}
+
+
+
+
+
+
+
+# Set params
+varList <- c("cdd", "drd", "p95", "frd", "fld")
+varList <- c("frd")
+id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+## General output directory
+oIDirH <- paste0(oIDir, "/moving-average")
+oIDirHChk <- paste0(oIDir, "/moving-average/_check")
+if (!file.exists(oIDirHChk)) {dir.create(oIDirHChk)}
+
+## Load Mask (Adm0)
+ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
+ctrMskAdm2 <- readOGR(ctrShpAdm2Sin,layer=ctrLyrAdm2Sin)
+
+stk_reclass <- stack()
+
+for (var in varList){
+  
+  setwd(paste0(oIDirH, "/", var))
+  
+  ## Convert to shape
+  for (enos in enosCond){
+    
+    ## Load data in stack
+    if (var == "fld") {
+      stk_crop <- stack(paste0(var, "_", ctrName, "_pred_", 1:12, "_", enos, "_mag.tif"))
+    } else {
+      stk_crop <- stack(paste0(var, "_", ctrName, "_pred_", 1:12, "_", enos, ".tif"))
+      stk_crop[which(stk_crop[]<0)]=0
+      
+    }
+    
+    plot <- setZ(stk_crop, id)
+    names(plot) <- id
+    
+    # plot_rec <- setZ(stk_reclass, id)
+    # names(plot_rec) <- id
+    
+    
+    ## Plot parms by var 
+    if (var == "cdd" || var == "drd"){
+      
+      zvalues <- c(0, 5, 10, 15, 20, 25, 31) # Define limits
+      myTheme <- BuRdTheme() # Define squeme of colors
+      myTheme$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
+      myTheme$strip.border$col = "white" # Eliminate frame from maps
+      myTheme$axis.line$col = 'white' # Eliminate frame from maps
+      unit <- "days"
+      
+    } else if ( var == "p95") {
+      
+      zvalues <- c(0, 5, 10, 15, 20, 100) # Define limits
+      myTheme <- BuRdTheme()
+      myTheme$regions$col=colorRampPalette(c("#d7191c", "#fdae61", "#ffffbf", "#abd9e9", "#2c7bb6"))(length(zvalues)-1) # Set new colors
+      myTheme$strip.border$col = "white"
+      myTheme$axis.line$col = 'white'
+      unit <- "percent"
+      
+    } else if ( var == "frd") {
+      
+      zvalues <- c(0, 1, 2, 3, 4, 10) # Define limits
+      myTheme <- BuRdTheme()
+      myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
+      myTheme$strip.border$col = "white"
+      myTheme$axis.line$col = 'white'
+      unit <- "days"
+      
+    } else if ( var == "fld") {
+      
+      zvalues <- c(0, 1, 2, 3, 4, 5) # Define limits
+      myTheme <- BuRdTheme()
+      myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
+      myTheme$strip.border$col = "white"
+      myTheme$axis.line$col = 'white'
+      unit <- "mag"
+      
+    }
+    
+    
+    ## Plot indices
+    tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit, "_v1.tif"),
+         width=1200, height=1200, pointsize=8, compression='lzw',res=200)
+    print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme, 
+                    colorkey = list(space = "bottom", width=1.2, height=1)
+    ) 
+    + layer(sp.polygons(ctrMsk, lwd=0.8))
+    )
+    dev.off()
+    
+    
+    # ## Plot magnitudes
+    # zvalues_rec <- c(0, 1, 2, 3, 4, 5) # Define limits
+    # myTheme_rec <- BuRdTheme() # Define squeme of colors
+    # myTheme_rec$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
+    # myTheme_rec$strip.border$col = "white" # Eliminate frame from maps
+    # myTheme_rec$axis.line$col = 'white' # Eliminate frame from maps
+    # unit_rec <- "mag_reclass"
+    # 
+    # 
+    # tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit_rec, "_v1.tif"),
+    #      width=1200, height=1200, pointsize=8, compression='lzw',res=200)
+    # print(levelplot(plot_rec, at = zvalues_rec, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme_rec, 
+    #                 colorkey = list(space = "bottom", width=1.2, height=1)
+    # ) 
+    # + layer(sp.polygons(ctrMskAdm2, lwd=0.5))
+    # )
+    # dev.off()
     
     
   } 
