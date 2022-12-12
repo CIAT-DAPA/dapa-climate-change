@@ -59,12 +59,12 @@ lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912
 dem_global <- "S:/observed/gridded_products/srtm/srtm_v41_30s.tif"
 wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 
-ctrLs = c("SDN", "DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF",  
-          "COM", "CIV", "DJI", "EGY", "GNQ", "ERI", "GAB", "GHA", "GIN", "GNB", 
-          "KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MAR", 
-          "NGA", "COG", "MOZ", "NAM", "RWA", "SHN", "ZAF", "TZA", "COD", "TCD",
-          "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE", "STP", "SEN", "SYC", "SLE", 
-          "SOM", "MYT", "GMB", "REU", "NER", "ETH", "SWZ")
+ctrLs = c("SDN", "DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF") 
+ctrLs = c("COM", "CIV", "DJI", "EGY", "GNQ", "ERI", "GAB", "GHA", "GIN", "GNB") 
+ctrLs = c("KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MAR") 
+ctrLs = c("NGA", "COG", "MOZ", "NAM", "RWA", "SHN", "ZAF", "TZA", "COD", "TCD")
+ctrLs = c("TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE", "STP", "SEN", "SYC", "SLE") 
+ctrLs = c("SOM", "MYT", "GMB", "REU", "NER", "ETH", "SWZ")
 
 for (ctrName in ctrLs){
   
@@ -154,9 +154,6 @@ for (ctrName in ctrLs){
       
     } 
     
-    ## Output file
-    oNc <- paste0(oBDir, "/", prefix, ".", yi, "-", yf, "_daily")
-    
     years <- paste(yi:yf, sep="", collapse="|")
     dtsLs_yrs_leap <- dtsLs[grepl(years,dtsLs)]
     dtsLs_yrs <- dtsLs_yrs_leap
@@ -178,7 +175,7 @@ for (ctrName in ctrLs){
       
       if (!file.exists(oTif)){
         
-        ## Load CHIRPS data and cut by mask
+        ## Load CHIRPS/CHIRTS data and cut by mask
         dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
         writeRaster(dtsMsk, oTif,  format="CDF",overwrite=F)
         
@@ -210,116 +207,120 @@ for (ctrName in ctrLs){
       
     }
     
-
+    ## Output file
+    oNc <- paste0(oBDir, "/daily/", prefix, ".", yi, "-", yf, "_daily")
     
-    # if (!file.exists(paste0(oNc, ".nc"))) {
-    
-    # if (!file.exists(paste0(oBDir, "/daily-", ctrName, "/", tail(basename(dtsLs_yrs), n=1)))) {
-    
-    ## Load CHIRPS data and stack
-    for (yr in yi:yf){
+    if (!file.exists(paste0(oNc, "_12.nc"))) {
       
-      if (!file.exists(paste0(oBDir, "/", prefix, ".", yr, "_daily.nc"))){
+      # if (!file.exists(paste0(oBDir, "/daily-", ctrName, "/", tail(basename(dtsLs_yrs), n=1)))) {
+      
+      ## Load CHIRPS data and stack
+      for (yr in yi:yf){
         
-        if (var == "prec"){
+        if (!file.exists(paste0(oBDir, "/daily/", prefix, ".", yr, "_daily.nc"))){
           
-          dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("chirps-v2.0.*.nc"), full.names = T,ignore.case=F)
+          if (var == "prec"){
+            
+            dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("chirps-v2.0.*.nc"), full.names = T,ignore.case=F)
+            
+          } else if (var == "tmin") {
+            
+            dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("Tmin.*.nc"), full.names = T,ignore.case=F)
+            
+          } else if (var == "tmax") {
+            
+            dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("Tmax.*.nc"), full.names = T,ignore.case=F)
+          }
           
-        } else if (var == "tmin") {
+          dtsLs_out_yr <- dtsLs_out[grepl(yr,dtsLs_out)]
+          dtsStk_out <- stack(dtsLs_out_yr)
           
-          dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("Tmin.*.nc"), full.names = T,ignore.case=F)
+          writeRaster(dtsStk_out, paste0(oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc"), format="CDF", overwrite=T)
           
-        } else if (var == "tmax") {
+          ## Init date
+          iDate <- as.Date(paste0(yr, "-01-01"))
           
-          dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("Tmax.*.nc"), full.names = T,ignore.case=F)
+          ## Add time component, variable name and unit
+          system(paste0(dircdo," -s -settaxis,", iDate, ",12:00:00,1day -chname,variable,", varLn, " -chunit,,", unit, " ",
+                        oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc", " ",
+                        oBDir, "/daily/", prefix, ".", yr, "_daily.nc"))
+          
+          ## Remove temporal file
+          unlink(paste0(oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc"))
+          
         }
         
-        dtsLs_out_yr <- dtsLs_out[grepl(yr,dtsLs_out)]
-        dtsStk_out <- stack(dtsLs_out_yr)
+      }
+      
+      
+      ## Split by months by year
+      for (yr in yi:yf){
         
-        writeRaster(dtsStk_out, paste0(oBDir, "/", prefix, ".", yr, "_daily_temp.nc"), format="CDF", overwrite=T)
+        oNc_yr <- paste0(oBDir, "/daily/", prefix, ".", yr, "_daily")
+        oNc_mth <- oNc_yr
         
-        ## Init date
-        iDate <- as.Date(paste0(yr, "-01-01"))
-        
-        ## Add time component, variable name and unit
-        system(paste0(dircdo," -s -settaxis,", iDate, ",12:00:00,1day -chname,variable,", varLn, " -chunit,,", unit, " ",
-                      oBDir, "/", prefix, ".", yr, "_daily_temp.nc", " ",
-                      oBDir, "/", prefix, ".", yr, "_daily.nc"))
-        
-        ## Remove temporal file
-        unlink(paste0(oBDir, "/", prefix, ".", yr, "_daily_temp.nc"))
+        if (!file.exists(paste0(oNc_mth, "_12.nc"))) {
+          system(paste0(dircdo," -s -splitmon ", oNc_yr, ".nc ", oNc_mth, "_"))
+          unlink(paste0(oNc_yr, ".nc"))
+          
+        }
         
       }
       
-    }
-    
-    
-    ## Split by months by year
-    for (yr in yi:yf){
       
-      oNc_mth <- paste0(oBDir, "/daily/", prefix, ".", yr, "_daily")
-      oNc_yr <- paste0(oBDir, "/", prefix, ".", yr, "_daily")
       
-      if (!file.exists(paste0(oNc_mth, "_12.nc"))) {
-        
-        system(paste0(dircdo," -s -splitmon ", oNc_yr, ".nc ", oNc_mth, "_"))
+      # Merge time-series all years by month
+      for (mth in months){
+        system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily/", prefix, ".", yi:yf, "_daily_", mth, ".nc"))), " ", 
+                      paste0(oNc, "_", mth), ".nc"))
         
       }
       
-    }
-    
-    # Merge time-series all years by month
-    for (mth in months){
-      system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily/", prefix, ".", yi:yf, "_daily_", mth, ".nc"))), " ", 
-                    paste0(oBDir, "/daily/", prefix, ".", yi, "-", yf, "_daily_", mth), ".nc"))
+      # # Merge time-series by 20-yr periods by month
+      # for (yr in yi:yf){
+      #   
+      #   if(yr<2003){
+      #     for (mth in months){
+      #       yrp <- yr+19
+      #       system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr:yrp, "_", ctrName, "_daily_", mth, ".nc"))), " ", 
+      #                     paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr, "-", yrp, "_", ctrName, "_daily_", mth), ".nc"))
+      #     }
+      #   }
+      #   
+      # }
+      
+      
+      ## Dissagregate to 0.025 and 0.01 deg (for smaller zones analyses)
+      if (resampling == T && !file.exists(paste0(oNc, "_res001.nc"))) {
+        
+        dtsMskDiss_025 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(2,2), method='')
+        oNcWrite <- writeRaster(dtsMskDiss_025, paste0(oNc, "_res0025.nc"), format="CDF", overwrite=T)
+        dtsMskDiss_001 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(5,5), method='')
+        oNcWrite <- writeRaster(dtsMskDiss_001, paste0(oNc, "_res001.nc"), format="CDF", overwrite=T)
+        
+        cat(" . Dissagregate done", ctrName, "\n")
+        
+      }
+      
+      
+      # ## Split by months 
+      # if (!file.exists(paste0(oNc, "_12.nc"))) {
+      #   
+      #   system(paste0(dircdo," -s -splitmon ", oNc, ".nc ", oNc, "_"))
+      #   
+      #   if (resampling == T){
+      #     system(paste0(dircdo," -s -splitmon ", oNc, "_res0025", ".nc ", oNc, "_res0025", "_"))
+      #     system(paste0(dircdo," -s -splitmon ", oNc, "_res001", ".nc ", oNc, "_res001", "_"))
+      #   }
+      #   
+      # }
       
     }
-    
-    # # Merge time-series by 20-yr periods by month
-    # for (yr in yi:yf){
-    #   
-    #   if(yr<2003){
-    #     for (mth in months){
-    #       yrp <- yr+19
-    #       system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr:yrp, "_", ctrName, "_daily_", mth, ".nc"))), " ", 
-    #                     paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr, "-", yrp, "_", ctrName, "_daily_", mth), ".nc"))
-    #     }
-    #   }
-    #   
-    # }
-    
-    
-    ## Dissagregate to 0.025 and 0.01 deg (for smaller zones analyses)
-    if (resampling == T && !file.exists(paste0(oNc, "_res001.nc"))) {
-      
-      dtsMskDiss_025 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(2,2), method='')
-      oNcWrite <- writeRaster(dtsMskDiss_025, paste0(oNc, "_res0025.nc"), format="CDF", overwrite=T)
-      dtsMskDiss_001 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(5,5), method='')
-      oNcWrite <- writeRaster(dtsMskDiss_001, paste0(oNc, "_res001.nc"), format="CDF", overwrite=T)
-      
-      cat(" . Dissagregate done", ctrName, "\n")
-      
-    }
-    
-    
-    # ## Split by months 
-    # if (!file.exists(paste0(oNc, "_12.nc"))) {
-    #   
-    #   system(paste0(dircdo," -s -splitmon ", oNc, ".nc ", oNc, "_"))
-    #   
-    #   if (resampling == T){
-    #     system(paste0(dircdo," -s -splitmon ", oNc, "_res0025", ".nc ", oNc, "_res0025", "_"))
-    #     system(paste0(dircdo," -s -splitmon ", oNc, "_res001", ".nc ", oNc, "_res001", "_"))
-    #   }
-    #   
-    # }
-    
-    ## Remove temporal daily files
-    unlink(paste0(oBDir, "/daily/tmp"))
     
   }
   
+  ## Remove temporal daily files
+  unlink(paste0(oBDir, "/daily/tmp"), recursive = T)
   
 }
 
