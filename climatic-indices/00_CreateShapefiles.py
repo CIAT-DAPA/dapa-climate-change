@@ -12,14 +12,23 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python 00_CreateShapefiles.py <dirbase> <scenario> <dirout> <resolution> <method>"
-	print "    - ie: python 00_CreateShapefiles.py S:\admin_boundaries\gadm\gadm41_0.shp F:\yapu_climate_risk\admin_boundaries GID_0 0"
+	print "    - ie: python 00_CreateShapefiles.py S:\admin_boundaries\gadm\gadm41_2.shp 	E:\yapu_climate_risk\admin_boundaries GID_0 2"
 	sys.exit(1)
 
 	
 # iso_list_af = "DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF", "TCD", "COM", "CIV", "DJI", "EGY", "GNQ", "ERI", "ETH", "GAB", "GMB", "GHA", "GIN", "GNB", "KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MYT", "MAR", "NER", "NGA", "COG", "MOZ", "NAM", "REU", "RWA", "SHN", "ZAF", "SDN", "SWZ", "TZA", "COD", "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE", "STP", "SEN", "SYC", "SLE", "SOM"
 
 # No adm2
-iso_list_af = "COM", "CPV", "ESH", "LBY", "LSO", "MUS", "MYT", "SYC"
+# iso_list_af = "COM", "CPV", "ESH", "LBY", "LSO", "MUS", "MYT", "SYC"
+
+iso_list_lam =  "ARG", "BOL", "BRA", "CHL", "COL", "CRI", "CUB", "DOM", "ECU", "SLV", "GUF", "GLP", "GTM", "GUY", "HTI", "HND", "MTQ", "MEX", "NIC", "PAN", "PRY", "PER", "SUR", "URY", "VEN", "VIR", "ATG"
+
+# No adm1
+iso_list_lam = "AIA", "ANT", "CUW", "FLK", "SXM", "XCL"
+
+# No adm2
+iso_list_lam = "AIA", "ABW", "ANT", "ATG", "BHS", "BLZ", "BRB", "CUW", "CYM", "DMA", "FLK", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI", "SXM", "TCA", "TTO", "UMI", "VCT", "VGB", "XCL"
+
 
 inshape = sys.argv[1]
 dirout = sys.argv[2]
@@ -40,7 +49,7 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~"
 # cur = gp.SearchCursor(inshape,"","",fieldname,"")
 # row = cur.Next()
 
-for iso in iso_list_af:
+for iso in iso_list_lam:
 	
 	print iso
 	diroutshape = dirout 
@@ -59,6 +68,8 @@ for iso in iso_list_af:
 
 	if level == '0':
 		outshape_buff = diroutshape + "\\gadm41_" + iso + "_" + level + "_buffer.shp"
-		gp.buffer(outshape, outshape_buff, "0.1 DecimalDegrees", "FULL")
+		
+		if not os.path.exists(outshape_buff):
+			gp.buffer(outshape, outshape_buff, "0.1 DecimalDegrees", "FULL")
 	
 
