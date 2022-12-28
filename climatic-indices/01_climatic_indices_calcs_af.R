@@ -2463,21 +2463,14 @@ for(scen in scenarios){
 }
 
 
-
-
-
-
-
-
-
-
-### Liberate memory and remove temp dirs
-unlink(paste0(oBDir, "/indices"), recursive = T)
-unlink(paste0(oBDir, "/soils"), recursive = T)
-unlink(paste0(oBDir, "/monthly"), recursive = T)
-rm(list = ls())
-
-## Compress daily base files
-system(paste0("7za a -mmt=4 " + oBDir, "/daily.zip" + " " + oBDir, "/daily"))
-# unlink(paste0(oBDir, "/daily"), recursive = T)
+# 
+# ### Liberate memory and remove temp dirs
+# unlink(paste0(oBDir, "/indices"), recursive = T)
+# unlink(paste0(oBDir, "/soils"), recursive = T)
+# unlink(paste0(oBDir, "/monthly"), recursive = T)
+# rm(list = ls())
+# 
+# ## Compress daily base files
+# system(paste0("7za a -mmt=4", oBDir, "/daily.zip", " ", oBDir, "/daily"))
+# # unlink(paste0(oBDir, "/daily"), recursive = T)
 
