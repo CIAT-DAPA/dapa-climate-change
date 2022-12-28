@@ -36,12 +36,13 @@ iDirP <- "S:/observed/gridded_products/chirps/daily"
 iDirT <- "U:/GLOBAL/Climate/observed/gridded_products/CHIRTS"
 iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
-iDirAdm <- "F:/yapu_climate_risk/admin_boundaries"
+iDirAdm <- "E:/yapu_climate_risk/admin_boundaries"
+iDir <- "E:/yapu_climate_risk"
 oDir <- "F:/yapu_climate_risk"
 
 # Climate params
-dircdo <- "F:/yapu_climate_risk/cdo/cdo"
-ensoFile <- "F:/yapu_climate_risk/enso_condition.csv"
+dircdo <- "E:/yapu_climate_risk/cdo/cdo"
+ensoFile <- "E:/yapu_climate_risk/enso_condition.csv"
 ndays <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
 enosCond <- c("elnino", "lanina", "normal")
@@ -101,7 +102,7 @@ ctrShpAdm2Sin <- paste0(iDirAdm, "/gadm41_", ctrName, "_2_sp.shp")
 ctrLyrAdm2Sin <- paste0("gadm41_", ctrName, "_2_sp")
 rsMsk <- paste0(iDirAdm, "/gadm41_", ctrName, "_rs_mask.tif")
 
-oBDir <- paste0(oDir, "/basedata/", ctrName)
+oBDir <- paste0(iDir, "/basedata/", ctrName)
 oIDir <- paste0(oDir, "/indices/", ctrName)
 
 if (!file.exists(rsMsk)) {
@@ -2475,4 +2476,8 @@ unlink(paste0(oBDir, "/indices"), recursive = T)
 unlink(paste0(oBDir, "/soils"), recursive = T)
 unlink(paste0(oBDir, "/monthly"), recursive = T)
 rm(list = ls())
- 
+
+## Compress daily base files
+system(paste0("7za a -mmt=4 " + oBDir, "/daily.zip" + " " + oBDir, "/daily"))
+# unlink(paste0(oBDir, "/daily"), recursive = T)
+
