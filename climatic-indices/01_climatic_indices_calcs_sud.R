@@ -56,7 +56,7 @@ iDirP <- "S:/observed/gridded_products/chirps/daily"
 iDirT <- "U:/GLOBAL/Climate/observed/gridded_products/CHIRTS"
 iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
 oBDir <- "D:/cenavarro/yapu-sud/basedata-historical"
-oIDir <- "D:/cenavarro/yapu-sud/indices_v1_0"
+oIDir <- "D:/cenavarro/yapu-sud/indices_v3_0"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
 
 mv <- -999
@@ -69,8 +69,11 @@ vars <- c("prec", "tmin","tmax")
 resampling <- F
 # probs_q <- c(.25,.45,.55,.75)
 # probs_q <- c(.01,.35,.65,.99)
-probs_q <- c(.05,.35,.65,.95)
-mag_labels <- c("Month", "5%", "35%", "65%", "95%")
+# probs_q <- c(.05,.35,.65,.95)
+# probs_q <- c(.023,.159,.841,.977)
+# mag_labels <- c("Month", "x-2sd", "x-1sd", "x+1sd", "x+2sd")
+probs_q <- c(.159,.309,.691,.841)
+mag_labels <- c("Month", "x-1sd", "x-0.5sd", "x+0.5sd", "x+1sd")
 
 cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content"
 lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912_V2.3_reclass.tif"
@@ -83,9 +86,9 @@ if (!file.exists(rsMsk)) {
   ctrMsk_rs <- writeRaster(mask(crop(dts_dump, ctrMsk), ctrMsk) * 0 + 1, rsMsk)
 }
 
-################################################
-## Extract CHRIPS by country                 ###
-################################################
+##################################################
+## Extract CHRIPS by country                   ###
+##################################################
 
 ## Loop across variables
 for (var in vars){
@@ -301,10 +304,6 @@ for (var in vars){
   
 }
 
-
-
-
-
 ##################################################
 ## CDD. Maximum number of consecutive dry days ###
 ## Vulnerability type: Drought                 ###
@@ -367,7 +366,7 @@ for (m in 1:12){
     
     # Quantiles by month
     q <- paste(summary(quantile(cddStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
-    cdd_mag <- rbind(cdd_mag, c(m, round(as.numeric(gsub("  ", "", gsub("Mean   :","", q))))))
+    cdd_mag <- rbind(cdd_mag, c(m, as.numeric(gsub("  ", "", gsub("Mean   :","", q)))))
     
     ## El Nino, La Nina, Normal years selection 
     elnino_m <- subset(elnino, elnino$Month == m)
@@ -382,9 +381,9 @@ for (m in 1:12){
     cdd_lanina <- mean(stack(paste0(oCddW, "_", lanina_m$Year, "_", m, ".nc")))
     cdd_normal <- mean(stack(paste0(oCddW, "_", normal_m$Year, "_", m, ".nc")))
     
-    writeRaster(cdd_elnino, paste0(oCdd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(cdd_lanina, paste0(oCdd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(cdd_normal, paste0(oCdd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(cdd_elnino, paste0(oCdd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(cdd_lanina, paste0(oCdd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(cdd_normal, paste0(oCdd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     ## Convert to shape
     for (enos in enosCond){
@@ -446,6 +445,9 @@ for (m in 1:12){
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oCddVuln <- data.frame(oCddVuln=unlist(lapply(oCddVals, FUN=mean)))
+      
+      oCddVuln_mean <- oCddVuln
+      
       oCddVuln <- oCddVuln %>% mutate(vuln =
                                         case_when(oCddVuln >= as.numeric(cdd_mag[m, 5])  ~ "5", 
                                                   (oCddVuln < as.numeric(cdd_mag[m, 5]) & oCddVuln >= as.numeric(cdd_mag[m, 4])) ~ "4",
@@ -460,12 +462,15 @@ for (m in 1:12){
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       cat(" . CDD Month ", m, " ", enos, "done\n")
+      
+      names(cdd_mag) <- mag_labels
+      write.csv(cdd_mag, paste0(oIDirHCdd, "/cdd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
+      
     }
     
-    names(cdd_mag) <- mag_labels
-    write.csv(cdd_mag, paste0(oIDirHCdd, "/cdd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
-    
     cat(" . CDD Month ", m, "done\n")
+
+    
     
   } else {
     
@@ -510,9 +515,9 @@ for (m in 1:12){
     cdd_lanina_r <- mean(stack(paste0(oCddW, "_", lanina_m_r$Year, "_", m, ".nc")))
     cdd_normal_r <- mean(stack(paste0(oCddW, "_", normal_m_r$Year, "_", m, ".nc")))
     
-    writeRaster(cdd_elnino_r, paste0(oCddR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(cdd_lanina_r, paste0(oCddR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(cdd_normal_r, paste0(oCddR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(cdd_elnino_r, paste0(oCddR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(cdd_lanina_r, paste0(oCddR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(cdd_normal_r, paste0(oCddR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     cdd_mag <- read.csv(paste0(oIDirHCdd, "/cdd_", ctrName, "_", m, "_normal_mag_class", ".csv"))
     
@@ -582,10 +587,9 @@ for (m in 1:12){
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       cat(" . CDD Month ", m, " ", enos, "done\n")
+      
     }
     
-    names(cdd_mag) <- mag_labels
-    write.csv(cdd_mag, paste0(oIDirRCdd, "/cdd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     cat(" . CDD Month ", m, "done\n")
     
@@ -637,9 +641,9 @@ cat(">. CDD calcs done", "\n")
 #       cdd_lanina_m <- mean(stack(paste0(oCddW, "_", lanina_m_m$Year, "_", m, ".nc")))
 #       cdd_normal_m <- mean(stack(paste0(oCddW, "_", normal_m_m$Year, "_", m, ".nc")))
 #       
-#       writeRaster(cdd_elnino_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-#       writeRaster(cdd_lanina_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-#       writeRaster(cdd_normal_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+#       writeRaster(cdd_elnino_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+#       writeRaster(cdd_lanina_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+#       writeRaster(cdd_normal_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
 #     }
 #   }
 # }
@@ -744,14 +748,14 @@ for (m in 1:12){
     lanina_m <- subset(lanina, lanina$Month == m)
     normal_m <- subset(normal, normal$Month == m)
 
-    ## Calculate median consecutive dry days length by condition
+    ## Calculate mean consecutive dry days length by condition
     drd_elnino <- mean( abs(stack(paste0(oWetW, "_", elnino_m$Year, "_", m, ".nc")) - ndays[m]) )
     drd_lanina <- mean( abs(stack(paste0(oWetW, "_", lanina_m$Year, "_", m, ".nc")) - ndays[m]) )
     drd_normal <- mean( abs(stack(paste0(oWetW, "_", normal_m$Year, "_", m, ".nc")) - ndays[m]) )
     
-    writeRaster(drd_elnino, paste0(oDrd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(drd_lanina, paste0(oDrd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(drd_normal, paste0(oDrd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(drd_elnino, paste0(oDrd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(drd_lanina, paste0(oDrd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(drd_normal, paste0(oDrd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     ## Convert to shape
     for (enos in enosCond){
@@ -865,14 +869,14 @@ for (m in 1:12){
     lanina_m_r <- subset(lanina_r, lanina_r$Month == m)
     normal_m_r <- subset(normal_r, normal_r$Month == m)
     
-    ## Calculate median consecutive dry days length by condition
+    ## Calculate mean consecutive dry days length by condition
     drd_elnino_r <- mean( abs(stack(paste0(oWetW, "_", elnino_m_r$Year, "_", m, ".nc")) - ndays[m]) )
     drd_lanina_r <- mean( abs(stack(paste0(oWetW, "_", lanina_m_r$Year, "_", m, ".nc")) - ndays[m]) )
     drd_normal_r <- mean( abs(stack(paste0(oWetW, "_", normal_m_r$Year, "_", m, ".nc")) - ndays[m]) )
     
-    writeRaster(drd_elnino_r, paste0(oDrdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(drd_lanina_r, paste0(oDrdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(drd_normal_r, paste0(oDrdR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(drd_elnino_r, paste0(oDrdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(drd_lanina_r, paste0(oDrdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(drd_normal_r, paste0(oDrdR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     drd_mag <- read.csv(paste0(oIDirHDrd, "/drd_", ctrName, "_", m, "_normal_mag_class", ".csv"))
     
@@ -1009,15 +1013,22 @@ if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
     }
     
     
-    # Calc yday p95 ref. period of wet days time-series
-    system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                  "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                  "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
-                  oP95WRef, "_", sprintf("%02d", m), ".nc"))
-    system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ",
-                  oP95WRef, "_noleap_",  sprintf("%02d", m),".nc"))
-    #system(paste0(dircdo," -s -splitmon ", oP95WRef, ".nc", " ", oP95WRef, "_"))
-    #system(paste0(dircdo," -s -splitmon ", oP95WRef, "_noleap.nc", " ", oP95WRef, "_noleap", "_"))
+    if (m == 2){
+      # Calc yday p95 ref. period of wet days time-series
+      system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                    "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                    "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
+                    oP95WRef, "_leap_", sprintf("%02d", m), ".nc"))
+      system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ",
+                    oP95WRef, "_",  sprintf("%02d", m),".nc"))
+    } else {
+      system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                    "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                    "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
+                    oP95WRef, "_", sprintf("%02d", m), ".nc"))
+    }
+
+
     
   }
   
@@ -1040,12 +1051,12 @@ for (m in 1:12){
     
     for (yr in yi:yf){
       
-      if (leap_year(yr) == T) {
+      if (leap_year(yr) == T && m == 2) {
         
         if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
           
           system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                        " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+                        " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
         }
         
       } else {
@@ -1053,7 +1064,7 @@ for (m in 1:12){
         if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
           
           system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                        " ", oP95WRef, "_noleap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+                        " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
         }
         
       }
@@ -1076,9 +1087,9 @@ for (m in 1:12){
       p95_lanina[is.na(p95_lanina[])] <- 0 
       p95_normal[is.na(p95_normal[])] <- 0 
       
-      writeRaster(p95_elnino * ctrMsk0, paste0(oP95, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-      writeRaster(p95_lanina * ctrMsk0, paste0(oP95, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-      writeRaster(p95_normal * ctrMsk0, paste0(oP95, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      writeRaster(p95_elnino * ctrMsk0, paste0(oP95, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+      writeRaster(p95_lanina * ctrMsk0, paste0(oP95, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+      writeRaster(p95_normal * ctrMsk0, paste0(oP95, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
       
     }
     
@@ -1133,7 +1144,7 @@ for (m in 1:12){
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       p95_mag <- c(m, 5, 10, 15, 20)
-      oP95Vuln <- data.frame(oP95Vuln=unlist(lapply(oP95Vals, FUN=max)))
+      oP95Vuln <- data.frame(oP95Vuln=unlist(lapply(oP95Vals, FUN=mean)))
       oP95Vuln <- oP95Vuln %>% mutate(vuln =
                                         case_when(is.na(oP95Vuln) ~ "1",
                                                   oP95Vuln <= 5 ~ "1", 
@@ -1203,9 +1214,9 @@ for (m in 1:12){
       p95_lanina_r[is.na(p95_lanina_r[])] <- 0 
       p95_normal_r[is.na(p95_normal_r[])] <- 0 
       
-      writeRaster(p95_elnino_r * ctrMsk0, paste0(oP95R, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-      writeRaster(p95_lanina_r * ctrMsk0, paste0(oP95R, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-      writeRaster(p95_normal_r * ctrMsk0, paste0(oP95R, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      writeRaster(p95_elnino_r * ctrMsk0, paste0(oP95R, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+      writeRaster(p95_lanina_r * ctrMsk0, paste0(oP95R, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+      writeRaster(p95_normal_r * ctrMsk0, paste0(oP95R, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
       
     }
     
@@ -1260,7 +1271,7 @@ for (m in 1:12){
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       p95_mag <- c(m, 5, 10, 15, 20)
-      oP95Vuln <- data.frame(oP95Vuln=unlist(lapply(oP95Vals, FUN=max)))
+      oP95Vuln <- data.frame(oP95Vuln=unlist(lapply(oP95Vals, FUN=mean)))
       oP95Vuln <- oP95Vuln %>% mutate(vuln =
                                         case_when(is.na(oP95Vuln) ~ "1",
                                                   oP95Vuln <= 5 ~ "1", 
@@ -1363,9 +1374,9 @@ for (m in 1:12){
     normal_m <- subset(normal, normal$Month == m)
 
     ## Calculate mean frost days  by condition
-    frd_elnino <- resample(max( stack(paste0(oFrdW, "_", elnino_m$Year, "_", m, ".nc")) ), ctrMsk0)
-    frd_lanina <- resample(max( stack(paste0(oFrdW, "_", lanina_m$Year, "_", m, ".nc")) ), ctrMsk0)
-    frd_normal <- resample(max( stack(paste0(oFrdW, "_", normal_m$Year, "_", m, ".nc")) ), ctrMsk0)
+    frd_elnino <- resample(mean( stack(paste0(oFrdW, "_", elnino_m$Year, "_", m, ".nc")) ), ctrMsk0)
+    frd_lanina <- resample(mean( stack(paste0(oFrdW, "_", lanina_m$Year, "_", m, ".nc")) ), ctrMsk0)
+    frd_normal <- resample(mean( stack(paste0(oFrdW, "_", normal_m$Year, "_", m, ".nc")) ), ctrMsk0)
     
     frd_elnino[which(frd_elnino[]>15)]=0
     frd_lanina[which(frd_lanina[]>15)]=0
@@ -1375,9 +1386,9 @@ for (m in 1:12){
     frd_lanina[is.na(frd_lanina[])] <- 0 
     frd_normal[is.na(frd_normal[])] <- 0 
     
-    writeRaster(frd_elnino * ctrMsk0, paste0(oFrd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(frd_lanina * ctrMsk0, paste0(oFrd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(frd_normal * ctrMsk0, paste0(oFrd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(frd_elnino * ctrMsk0, paste0(oFrd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(frd_lanina * ctrMsk0, paste0(oFrd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(frd_normal * ctrMsk0, paste0(oFrd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     ## Convert to shape
     for (enos in enosCond){
@@ -1435,7 +1446,7 @@ for (m in 1:12){
       # oFrdValsAvg <- round(unlist(lapply(oFrdVals, FUN=mean)))
       
       ## Reclassify by magnitude ranges based on quantiles
-      oFrdVuln <- data.frame(oFrdVuln=unlist(lapply(oFrdVals, FUN=max)))
+      oFrdVuln <- data.frame(oFrdVuln=unlist(lapply(oFrdVals, FUN=mean)))
       oFrdVuln <- oFrdVuln %>% mutate(vuln =
                                         case_when(oFrdVuln == 0 ~ "1", 
                                                   (oFrdVuln <= 2 ) ~ "2",
@@ -1502,9 +1513,9 @@ for (m in 1:12){
     normal_m_r <- subset(normal_r, normal_r$Month == m)
     
     ## Calculate mean frost days  by condition
-    frd_elnino_r <- resample(max( stack(paste0(oFrdW, "_", elnino_m_r$Year, "_", m, ".nc")) ), ctrMsk0)
-    frd_lanina_r <- resample(max( stack(paste0(oFrdW, "_", lanina_m_r$Year, "_", m, ".nc")) ), ctrMsk0)
-    frd_normal_r <- resample(max( stack(paste0(oFrdW, "_", normal_m_r$Year, "_", m, ".nc")) ), ctrMsk0)
+    frd_elnino_r <- resample(mean( stack(paste0(oFrdW, "_", elnino_m_r$Year, "_", m, ".nc")) ), ctrMsk0)
+    frd_lanina_r <- resample(mean( stack(paste0(oFrdW, "_", lanina_m_r$Year, "_", m, ".nc")) ), ctrMsk0)
+    frd_normal_r <- resample(mean( stack(paste0(oFrdW, "_", normal_m_r$Year, "_", m, ".nc")) ), ctrMsk0)
     
     frd_elnino_r[which(frd_elnino_r[]>15)]=0
     frd_lanina_r[which(frd_lanina_r[]>15)]=0
@@ -1514,9 +1525,9 @@ for (m in 1:12){
     frd_lanina_r[is.na(frd_lanina_r[])] <- 0 
     frd_normal_r[is.na(frd_normal_r[])] <- 0 
     
-    writeRaster(frd_elnino_r * ctrMsk0, paste0(oFrdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(frd_lanina_r * ctrMsk0, paste0(oFrdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(frd_normal_r * ctrMsk0, paste0(oFrdR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(frd_elnino_r * ctrMsk0, paste0(oFrdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(frd_lanina_r * ctrMsk0, paste0(oFrdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(frd_normal_r * ctrMsk0, paste0(oFrdR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     ## Convert to shape
     for (enos in enosCond){
@@ -1574,7 +1585,7 @@ for (m in 1:12){
       # oFrdValsAvg <- round(unlist(lapply(oFrdVals, FUN=mean)))
       
       ## Reclassify by magnitude ranges based on quantiles
-      oFrdVuln <- data.frame(oFrdVuln=unlist(lapply(oFrdVals, FUN=max)))
+      oFrdVuln <- data.frame(oFrdVuln=unlist(lapply(oFrdVals, FUN=mean)))
       oFrdVuln <- oFrdVuln %>% mutate(vuln =
                                         case_when(oFrdVuln == 0 ~ "1", 
                                                   (oFrdVuln <= 2 ) ~ "2",
@@ -1691,7 +1702,7 @@ if (!file.exists(cly)) {
   sd5 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd5_250m.tif"))
   sd6 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd6_250m.tif"))
   sdAvg <- ( (sd1 * 5) + (sd2 * 10)  + (sd3 * 15) + (sd4 * 30) + (sd5 * 40) + (sd6 * 100) ) / 200
-  writeRaster(sdAvg, paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+  writeRaster(sdAvg, paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
   
   }
   
@@ -1700,7 +1711,7 @@ if (!file.exists(cly)) {
   sdAvg_crop[is.na(sdAvg_crop)] <- 0
   sdAvg_res <- resample(sdAvg_crop, ctrMsk0)
   sdAvg_rec <- reclassify(sdAvg_res, c(-Inf,20,1, 20,40,2, 40,60,3, 60,80,4, 80,Inf,5))
-  writeRaster(sdAvg_rec, cly, format="GTiff", overwrite=T, datatype='INT2S')
+  writeRaster(sdAvg_rec, cly, format="GTiff", overwrite=T, datatype='FLT4S')
               
 }
 
@@ -1708,7 +1719,7 @@ if (!file.exists(lco)) {
   lco_crop <- crop(raster(lco_global), ctrMsk0)
   lco_crop[is.na(lco_crop)] <- 0
   lco_res <- resample(lco_crop, ctrMsk0)
-  writeRaster(lco_res, lco, format="GTiff", overwrite=T, datatype='INT2S')
+  writeRaster(lco_res, lco, format="GTiff", overwrite=T, datatype='FLT4S')
   
 }
 
@@ -1718,18 +1729,18 @@ if (!file.exists(slp)) {
   slp_crop[is.na(slp_crop)] <- 0
   slp_res <- resample(slp_crop, ctrMsk0)
   slp_rec <- reclassify(slp_res, c(-Inf,10,5, 10,20,4, 20,30,3, 30,40,2, 40,Inf,1))
-  writeRaster(slp_rec, slp, format="GTiff", overwrite=T, datatype='INT2S')
+  writeRaster(slp_rec, slp, format="GTiff", overwrite=T, datatype='FLT4S')
   
 }
 
 if (!file.exists(wei)) {
   # dem_crop <- crop(raster(dem_global), ctrMsk0)
-  # writeRaster(dem_crop, paste0(oBDirS, "/srtm.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+  # writeRaster(dem_crop, paste0(oBDirS, "/srtm.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
   wei_crop <- crop(raster(wei_global), ctrMsk0)
   wei_res <- resample(wei_crop, ctrMsk0)
   wei_res[is.na(wei_res)] <- 0
   wei_rec <- reclassify(wei_res, c(-Inf,1,1, 1,2,2, 2,4,3, 4,8,4, 8,Inf,5))
-  writeRaster(wei_rec, wei, format="GTiff", overwrite=T, datatype='INT2S')
+  writeRaster(wei_rec, wei, format="GTiff", overwrite=T, datatype='FLT4S')
   
 }
 
@@ -1742,10 +1753,10 @@ if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
   wei_res <- mask(raster(wei), ctrMsk0, method='ngb')
   lco_res <- mask(raster(lco), ctrMsk0, method='ngb')
   
-  writeRaster(cly_res, paste0(oIDirHFld, "/cly_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='INT2S')
-  writeRaster(slp_res, paste0(oIDirHFld, "/slp_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='INT2S')
-  writeRaster(wei_res, paste0(oIDirHFld, "/wei_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='INT2S')
-  writeRaster(lco_res, paste0(oIDirHFld, "/lco_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='INT2S')
+  writeRaster(cly_res, paste0(oIDirHFld, "/cly_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+  writeRaster(slp_res, paste0(oIDirHFld, "/slp_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+  writeRaster(wei_res, paste0(oIDirHFld, "/wei_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+  writeRaster(lco_res, paste0(oIDirHFld, "/lco_", ctrName, ".tif"), format="GTiff", overwrite=T, datatype='FLT4S')
   
 }
 
@@ -1808,9 +1819,9 @@ for (m in 1:12){
     prc_lanina[which(prc_lanina[]<0)]=0
     prc_normal[which(prc_normal[]<0)]=0
     
-    writeRaster(prc_elnino, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(prc_lanina, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(prc_normal, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(prc_elnino, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(prc_lanina, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(prc_normal, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     ## Load rec soil data
     cly_rec <- raster(paste0(oIDirHFld, "/cly_", ctrName, ".tif"))
@@ -1823,7 +1834,7 @@ for (m in 1:12){
       
       ## Reclassify monthly precipitation 
       prc_rec <- reclassify(raster(paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, ".tif")), prc_mag_mtx)
-      # writeRaster(prc_rec, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      # writeRaster(prc_rec, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
       
       # ## Create shapefile (index values)
       # dtsRs <- raster(paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, ".tif"))
@@ -1838,7 +1849,7 @@ for (m in 1:12){
       indStk <- stack(cly_rec, slp_rec, wei_rec, lco_rec, prc_rec)
       indStkOvl <- overlay(indStk, fun=function(a,b,c,d,e) 0.15*a+0.15*b+0.15*c+0.15*d+0.4*e)
       # indStkOvl_025 <- disaggregate(indStkOvl, fact=c(2,2), method='')
-      writeRaster(indStkOvl, paste0(oFld, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      writeRaster(indStkOvl, paste0(oFld, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
       
       ## Create shapefile (magnitude values)
       dtsRsShp <- rasterToPolygons(prc_rec)
@@ -1946,9 +1957,9 @@ for (m in 1:12){
     prc_lanina_r[which(prc_lanina_r[]<0)]=0
     prc_normal_r[which(prc_normal_r[]<0)]=0
     
-    writeRaster(prc_elnino_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(prc_lanina_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='INT2S')
-    writeRaster(prc_normal_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+    writeRaster(prc_elnino_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(prc_lanina_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(prc_normal_r, paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     
     ## Load rec soil data
     cly_rec <- raster(paste0(oIDirHFld, "/cly_", ctrName, ".tif"))
@@ -1961,7 +1972,7 @@ for (m in 1:12){
       
       ## Reclassify monthly precipitation 
       prc_rec <- reclassify(raster(paste0(oIDirRFld, "/prc_", ctrName, "_", m, "_", enos, ".tif")), prc_mag_mtx)
-      # writeRaster(prc_rec, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      # writeRaster(prc_rec, paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
       
       # ## Create shapefile (index values)
       # dtsRs <- raster(paste0(oIDirHFld, "/prc_", ctrName, "_", m, "_", enos, ".tif"))
@@ -1976,7 +1987,7 @@ for (m in 1:12){
       indStk <- stack(cly_rec, slp_rec, wei_rec, lco_rec, prc_rec)
       indStkOvl <- overlay(indStk, fun=function(a,b,c,d,e) 0.15*a+0.15*b+0.15*c+0.15*d+0.4*e)
       # indStkOvl_025 <- disaggregate(indStkOvl, fact=c(2,2), method='')
-      writeRaster(indStkOvl, paste0(oFldR, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='INT2S')
+      writeRaster(indStkOvl, paste0(oFldR, "_", m, "_", enos, "_mag.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
       
       ## Create shapefile (magnitude values)
       dtsRsShp <- rasterToPolygons(prc_rec)
@@ -2025,248 +2036,466 @@ cat(">. FLD calcs done", "\n")
 
 
 ##################################################
+## HWD. Heat Wave duration                     ###
+## Vulnerability type: Extreme heat            ###
+## Data Source: CHIRPS daily                   ###
+##################################################
+
+## Identify historical ENOS condition
+ensoCond <- read.csv(ensoFile, header=T, row.names = 1)
+ensoCond <- as.vector(cbind(Year=rownames(ensoCond)[row(ensoCond)], setNames(melt(ensoCond), c('Month', 'Values'))))
+ensoCond$Month <- gsub("X", "", ensoCond$Month)
+elnino <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >= yi & as.vector(ensoCond$Year) <= yf)
+lanina <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yi & as.vector(ensoCond$Year) <= yf)
+normal <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi & as.vector(ensoCond$Year) <= yf)
+
+## HWD output work directory
+oBDirW <- paste0(oBDir, "/indices", "-", ctrName)
+if (!file.exists(oBDirW)) {dir.create(oBDirW, recursive = TRUE)}
+
+
+## Historical ##
+
+## HWD output directory historical
+oIDirH <- paste0(oIDir, "/historical")
+oIDirHHwd <- paste0(oIDirH, "/hwd")
+if (!file.exists(paste0(oIDirHHwd))) {dir.create(paste0(oIDirHHwd), recursive = TRUE)}
+
+## HWD Calcs all years all months
+cat(">. Calculating HWD Historical ", ctrName, "\n")
+
+iNc <- paste0(oBDir, "/daily-", ctrName, "/by-month/Tmax.", yi, "-", yf, "_", ctrName, "_daily")
+oTxWRef <- paste0(oBDirW, "/txavg_", yi, "-", yf, "_", ctrName)
+
+oHwdW <- paste0(oBDirW, "/hwd_", ctrName)
+oHwd <- paste0(oIDirHHwd, "/hwd_", ctrName)
+
+## Load Mask (Adm0)
+ctrMsk0 <- raster(rsMsk)
+
+hwd_mag <- data.frame()
+
+for (m in 1:12){
+  
+  if (!file.exists(paste0(oHwd, "_", m, "_normal.shp"))) {
+    
+    cat(" . HWD Month ", m, "processing\n")
+    
+    # ## Calc Tx average ref period
+    # if (m == 2){
+    #   # Calc yday Tmax ref. period
+    #   system(paste0(dircdo," -s ydrunavg,5 ", iNc, "_", sprintf("%02d", m) ,".nc", " ",
+    #                 oTxWRef, "_leap_", sprintf("%02d", m), ".nc"))
+    #   system(paste0(dircdo," -s delete,month=2,day=29 ", oTxWRef, "_leap_", sprintf("%02d", m), ".nc", " ",
+    #                 oTxWRef, "_",  sprintf("%02d", m),".nc"))
+    # } else {
+    #   # Calc yday Tmax ref. period
+    #   system(paste0(dircdo," -s ydrunavg,5 ", iNc, "_", sprintf("%02d", m) ,".nc", " ",
+    #                 oTxWRef, "_", sprintf("%02d", m), ".nc"))
+    # }
+    
+    ## Calc heat waves for each year/month
+    for (yr in yi:yf){
+      
+      if (!file.exists(paste0(oHwdW, "_", yr, "_", m, ".nc"))) {
+
+          system(paste0(dircdo," -s -eca_hwdi,6,5 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", 
+                        iNc, "_", sprintf("%02d", m) ,".nc", " ", oHwdW, "_", yr, "_", m, "_tmp.nc"))
+
+          system(paste0(dircdo," -s -select,name=heat_waves_per_time_period ", oHwdW, "_", yr, "_", m, "_tmp.nc", " ", oHwdW, "_", yr, "_", m, ".nc"))
+
+          file.remove(paste0(oHwdW, "_", yr, "_", m, "_tmp.nc"))
+        
+      }
+    }
+    
+    ## Load CHIRPS data and stack
+    hwdStk_yrs <- stack(paste0(oHwdW, "_", yi:yf, "_", m, ".nc"))
+    writeRaster(hwdStk_yrs, paste0(oHwdW, "_", yi, "-", yf, "_", m, ".nc"), format="CDF", overwrite=T)
+    
+    # Quantiles by month
+    q <- paste(summary(quantile(hwdStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
+    hwd_mag <- rbind(hwd_mag, c(m, as.numeric(gsub("  ", "", gsub("Mean   :","", q)))))
+    
+    ## El Nino, La Nina, Normal years selection 
+    elnino_m <- subset(elnino, elnino$Month == m)
+    # elnino_m_yrs <- gsub(" ","", toString(elnino_m$Year))
+    lanina_m <- subset(lanina, lanina$Month == m)
+    # lanina_m_yrs <- gsub(" ","", toString(lanina_m$Year))
+    normal_m <- subset(normal, normal$Month == m)
+    # normal_m_yrs <- gsub(" ","", toString(normal_m$Year))
+    
+    ## Calculate heat wave duration average by condition
+    hwd_elnino <- mean(stack(paste0(oHwdW, "_", elnino_m$Year, "_", m, ".nc")))
+    hwd_lanina <- mean(stack(paste0(oHwdW, "_", lanina_m$Year, "_", m, ".nc")))
+    hwd_normal <- mean(stack(paste0(oHwdW, "_", normal_m$Year, "_", m, ".nc")))
+    
+    writeRaster(hwd_elnino, paste0(oHwd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(hwd_lanina, paste0(oHwd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(hwd_normal, paste0(oHwd, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    
+    ## Convert to shape
+    for (enos in enosCond){
+      
+      # Var defs
+      varNm <- "hwd"
+      varLn <- "heat.waves.index"
+      unit <- "day"
+      
+      ## Create shapefile (index values)
+      dtsRs <- raster(paste0(oHwd, "_", m, "_", enos, ".tif"))
+      dtsRsShp <- rasterToPolygons(dtsRs)
+      dtsRsShp <- createSPComment(dtsRsShp)
+      names(dtsRsShp) <- varNm
+      writeOGR(dtsRsShp, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos), 
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      ## Reclassify by magnitude ranges based on quantiles
+      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      oHwdValsDf<- data.frame(getValues(dtsRs))
+      # oHwdValsDf <- oHwdValsDf %>% mutate(vuln =
+      #                                       case_when(oHwdValsDf <= as.numeric(hwd_mag[m, 2]) ~ "1", 
+      #                                                 (oHwdValsDf > as.numeric(hwd_mag[m, 2]) & oHwdValsDf <= as.numeric(hwd_mag[m, 3])) ~ "2",
+      #                                                 (oHwdValsDf > as.numeric(hwd_mag[m, 3]) & oHwdValsDf <= as.numeric(hwd_mag[m, 4])) ~ "3",
+      #                                                 (oHwdValsDf > as.numeric(hwd_mag[m, 4]) & oHwdValsDf <= as.numeric(hwd_mag[m, 5])) ~ "4",
+      #                                                 oHwdValsDf > as.numeric(hwd_mag[m, 5])  ~ "5")
+      # )
+      # 
+      # 
+      oHwdValsDf <- oHwdValsDf %>% mutate(vuln =
+                                            case_when(oHwdValsDf >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                                      (oHwdValsDf < as.numeric(hwd_mag[m, 5]) & oHwdValsDf >= as.numeric(hwd_mag[m, 4])) ~ "4",
+                                                      (oHwdValsDf < as.numeric(hwd_mag[m, 4]) & oHwdValsDf >= as.numeric(hwd_mag[m, 3])) ~ "3",
+                                                      (oHwdValsDf < as.numeric(hwd_mag[m, 3]) & oHwdValsDf >= as.numeric(hwd_mag[m, 2])) ~ "2",
+                                                      oHwdValsDf <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      )
+      
+      ## Applied re-clasiffied values, cut and write raster (mag values)
+      dtsRs_vuln <- dtsRs
+      values(dtsRs_vuln) <- as.numeric(oHwdValsDf$vuln)
+      crs(dtsRs_vuln) <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0" 
+      writeRaster(dtsRs_vuln, paste0(oIDirHHwd, "/hwd_", ctrName, "_", m, "_", enos, "_mag.tif"), overwrite=T)
+      
+      ## Create shapefile (magnitude values)
+      dtsRs_vulnShp <- rasterToPolygons(dtsRs_vuln)
+      dtsRs_vulnShp <- createSPComment(dtsRs_vulnShp)
+      names(dtsRs_vulnShp) <- "vuln"
+      writeOGR(dtsRs_vulnShp, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mag"),
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      
+      ## Load Mask (Adm2)
+      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      
+      ## Extract values inside polygons and calc avg
+      oHwdVals <- extract(dtsRs, ctrMsk)
+      # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
+      
+      ## Reclassify by magnitude ranges based on quantiles
+      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
+      
+      oHwdVuln_mean <- oHwdVuln
+      
+      oHwdVuln <- oHwdVuln %>% mutate(vuln =
+                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
+                                                  oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      )
+      
+      ## Join mean values to polygon data and write shapefile
+      ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
+      writeOGR(ctrMsk, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      cat(" . HWD Month ", m, " ", enos, "done\n")
+      
+      names(hwd_mag) <- mag_labels
+      write.csv(hwd_mag, paste0(oIDirHHwd, "/hwd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
+      
+    }
+    
+    cat(" . HWD Month ", m, "done\n")
+    
+    
+    
+  } else {
+    
+    cat(" . HWD Month ", m, "done\n")
+    
+  }
+  
+}
+
+
+## Recent past ##
+
+## HWD output directory recent past
+oIDirR <- paste0(oIDir, "/recent-past")
+oIDirRHwd <- paste0(oIDirR, "/hwd")
+if (!file.exists(paste0(oIDirRHwd))) {dir.create(paste0(oIDirRHwd), recursive = TRUE)}
+
+## HWD Calcs all years all months
+cat(">. Calculating HWD Recent Past ", ctrName, "\n")
+oHwdR <- paste0(oIDirRHwd, "/hwd_", ctrName)
+
+elnino_r <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
+lanina_r <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
+normal_r <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi_r & as.vector(ensoCond$Year) <= yf_r)
+
+## Load Mask (Adm0)
+ctrMsk0 <- raster(rsMsk)
+
+for (m in 1:12){
+  
+  if (!file.exists(paste0(oHwdR, "_", m, "_normal.shp"))) {
+    
+    cat(" . HWD Month ", m, "processing\n")
+    
+    ## El Nino, La Nina, Normal years selection 
+    elnino_m_r <- subset(elnino_r, elnino_r$Month == m)
+    lanina_m_r <- subset(lanina_r, lanina_r$Month == m)
+    normal_m_r <- subset(normal_r, normal_r$Month == m)
+    
+    ## Calculate mean consecutive dry days length by condition
+    hwd_elnino_r <- mean(stack(paste0(oHwdW, "_", elnino_m_r$Year, "_", m, ".nc")))
+    hwd_lanina_r <- mean(stack(paste0(oHwdW, "_", lanina_m_r$Year, "_", m, ".nc")))
+    hwd_normal_r <- mean(stack(paste0(oHwdW, "_", normal_m_r$Year, "_", m, ".nc")))
+    
+    writeRaster(hwd_elnino_r, paste0(oHwdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(hwd_lanina_r, paste0(oHwdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    writeRaster(hwd_normal_r, paste0(oHwdR, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+    
+    hwd_mag <- read.csv(paste0(oIDirHHwd, "/hwd_", ctrName, "_", m, "_normal_mag_class", ".csv"))
+    
+    
+    ## Convert to shape
+    for (enos in enosCond){
+      
+      # Var defs
+      varNm <- "hwd"
+      varLn <- "heat.waves.index"
+      unit <- "day"
+      
+      ## Create shapefile (index values)
+      dtsRs <- raster(paste0(oHwdR, "_", m, "_", enos, ".tif"))
+      dtsRsShp <- rasterToPolygons(dtsRs)
+      dtsRsShp <- createSPComment(dtsRsShp)
+      names(dtsRsShp) <- varNm
+      writeOGR(dtsRsShp, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos), 
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      ## Reclassify by magnitude ranges based on quantiles
+      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      oHwdValsDf<- data.frame(getValues(dtsRs))
+      oHwdValsDf <- oHwdValsDf %>% mutate(vuln =
+                                            case_when(oHwdValsDf >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                                      (oHwdValsDf < as.numeric(hwd_mag[m, 5]) & oHwdValsDf >= as.numeric(hwd_mag[m, 4])) ~ "4",
+                                                      (oHwdValsDf < as.numeric(hwd_mag[m, 4]) & oHwdValsDf >= as.numeric(hwd_mag[m, 3])) ~ "3",
+                                                      (oHwdValsDf < as.numeric(hwd_mag[m, 3]) & oHwdValsDf >= as.numeric(hwd_mag[m, 2])) ~ "2",
+                                                      oHwdValsDf <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      )
+      
+      ## Applied re-clasiffied values, cut and write raster (mag values)
+      dtsRs_vuln <- dtsRs
+      values(dtsRs_vuln) <- as.numeric(oHwdValsDf$vuln)
+      crs(dtsRs_vuln) <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0" 
+      writeRaster(dtsRs_vuln, paste0(oIDirRHwd, "/hwd_", ctrName, "_", m, "_", enos, "_mag.tif"), overwrite=T)
+      
+      ## Create shapefile (magnitude values)
+      dtsRs_vulnShp <- rasterToPolygons(dtsRs_vuln)
+      dtsRs_vulnShp <- createSPComment(dtsRs_vulnShp)
+      names(dtsRs_vulnShp) <- "vuln"
+      writeOGR(dtsRs_vulnShp, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mag"),
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      
+      ## Load Mask (Adm2)
+      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      
+      ## Extract values inside polygons and calc avg
+      oHwdVals <- extract(dtsRs, ctrMsk)
+      # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
+      
+      ## Reclassify by magnitude ranges based on quantiles
+      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
+      oHwdVuln <- oHwdVuln %>% mutate(vuln =
+                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
+                                                  oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      )
+      
+      ## Join mean values to polygon data and write shapefile
+      ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
+      writeOGR(ctrMsk, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      cat(" . HWD Month ", m, " ", enos, "done\n")
+      
+    }
+    
+    
+    cat(" . HWD Month ", m, "done\n")
+    
+  } else {
+    
+    cat(" . HWD Month ", m, "done\n")
+    
+  }
+  
+}
+
+cat(">. HWD calcs done", "\n")
+
+
+
+
+
+##################################################
 ## Check indices                               ###
 ##################################################
 
 # Set params
 varList <- c("cdd", "drd", "p95", "frd", "fld")
+varList <- c("hwd")
 id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-varList <- c("frd")
+# varList <- c("frd")
 
-## General output directory
-oIDirH <- paste0(oIDir, "/recent-past")
-oIDirHChk <- paste0(oIDir, "/recent-past/_check")
-if (!file.exists(oIDirHChk)) {dir.create(oIDirHChk)}
 
-## Load Mask (Adm0)
-ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
-ctrMskAdm2 <- readOGR(ctrShpAdm2Sin,layer=ctrLyrAdm2Sin)
+scenarios <- c("historical", "recent-past")
 
-stk_reclass <- stack()
-
-for (var in varList){
+for(scen in scenarios){
   
-  setwd(paste0(oIDirH, "/", var))
+  ## General output directory
+  oIDirH <- paste0(oIDir, "/", scen)
+  oIDirHChk <- paste0(oIDir, "/", scen, "/_check")
+  if (!file.exists(oIDirHChk)) {dir.create(oIDirHChk)}
   
-  ## Convert to shape
-  for (enos in enosCond){
+  ## Load Mask (Adm0)
+  ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
+  ctrMskAdm2 <- readOGR(ctrShpAdm2Sin,layer=ctrLyrAdm2Sin)
+  
+  stk_reclass <- stack()
+  
+  for (var in varList){
     
-    ## Load data in stack
-    if (var == "fld") {
-      stk_crop <- stack(paste0(var, "_", ctrName, "_", 1:12, "_", enos, "_mag.tif"))
-    } else {
-      stk_crop <- stack(paste0(var, "_", ctrName, "_", 1:12, "_", enos, ".tif"))
-    }
+    setwd(paste0(oIDirH, "/", var))
     
-    
-    ##Rasterize polygons
-    for (m in 1:12){
+    ## Convert to shape
+    for (enos in enosCond){
       
-      shp <- readOGR(paste0(var, "_", ctrName, "_", m, "_", enos, "_mun.shp"))
-      r <- stk_crop[[1]]
-      extent(r) <- extent(shp)
-      rp <- rasterize(shp, r, 'vuln')
-      if (m==1){stk_reclass <- stack(rp)} else {stk_reclass <- addLayer(stk_reclass, rp)}
+      ## Load data in stack
+      if (var == "fld") {
+        stk_crop <- stack(paste0(var, "_", ctrName, "_", 1:12, "_", enos, "_mag.tif"))
+      } else {
+        stk_crop <- stack(paste0(var, "_", ctrName, "_", 1:12, "_", enos, ".tif"))
+      }
       
-    }
-    
-    plot <- setZ(stk_crop, id)
-    names(plot) <- id
-    
-    plot_rec <- setZ(stk_reclass, id)
-    names(plot_rec) <- id
-    
-    
-    ## Plot parms by var 
-    if (var == "cdd" || var == "drd"){
       
-      zvalues <- c(0, 5, 10, 15, 20, 25, 31) # Define limits
-      myTheme <- BuRdTheme() # Define squeme of colors
-      myTheme$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
-      myTheme$strip.border$col = "white" # Eliminate frame from maps
-      myTheme$axis.line$col = 'white' # Eliminate frame from maps
-      unit <- "days"
+      ##Rasterize polygons
+      for (m in 1:12){
+        
+        shp <- readOGR(paste0(var, "_", ctrName, "_", m, "_", enos, "_mun.shp"))
+        r <- stk_crop[[1]]
+        extent(r) <- extent(shp)
+        rp <- rasterize(shp, r, 'vuln')
+        if (m==1){stk_reclass <- stack(rp)} else {stk_reclass <- addLayer(stk_reclass, rp)}
+        
+      }
       
-    } else if ( var == "p95") {
+      plot <- setZ(stk_crop, id)
+      names(plot) <- id
       
-      zvalues <- c(0, 5, 10, 15, 20, 100) # Define limits
-      myTheme <- BuRdTheme()
-      myTheme$regions$col=colorRampPalette(c("#d7191c", "#fdae61", "#ffffbf", "#abd9e9", "#2c7bb6"))(length(zvalues)-1) # Set new colors
-      myTheme$strip.border$col = "white"
-      myTheme$axis.line$col = 'white'
-      unit <- "percent"
+      plot_rec <- setZ(stk_reclass, id)
+      names(plot_rec) <- id
       
-    } else if ( var == "frd") {
       
-      zvalues <- c(0, 1, 2, 3, 4, 10) # Define limits
-      myTheme <- BuRdTheme()
-      myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
-      myTheme$strip.border$col = "white"
-      myTheme$axis.line$col = 'white'
-      unit <- "days"
+      ## Plot parms by var 
+      if (var == "cdd" || var == "drd"){
+        
+        zvalues <- c(0, 5, 10, 15, 20, 25, 31) # Define limits
+        myTheme <- BuRdTheme() # Define squeme of colors
+        myTheme$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
+        myTheme$strip.border$col = "white" # Eliminate frame from maps
+        myTheme$axis.line$col = 'white' # Eliminate frame from maps
+        unit <- "days"
+        
+      } else if ( var == "p95") {
+        
+        zvalues <- c(0, 5, 10, 15, 20, 100) # Define limits
+        myTheme <- BuRdTheme()
+        myTheme$regions$col=colorRampPalette(c("#d7191c", "#fdae61", "#ffffbf", "#abd9e9", "#2c7bb6"))(length(zvalues)-1) # Set new colors
+        myTheme$strip.border$col = "white"
+        myTheme$axis.line$col = 'white'
+        unit <- "percent"
+        
+      } else if ( var == "frd") {
+        
+        zvalues <- c(0, 1, 2, 3, 4, 10) # Define limits
+        myTheme <- BuRdTheme()
+        myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
+        myTheme$strip.border$col = "white"
+        myTheme$axis.line$col = 'white'
+        unit <- "days"
+        
+      } else if ( var == "fld") {
+        
+        zvalues <- c(0, 1, 2, 3, 4, 5) # Define limits
+        myTheme <- BuRdTheme()
+        myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
+        myTheme$strip.border$col = "white"
+        myTheme$axis.line$col = 'white'
+        unit <- "mag"
+        
+      } else if ( var == "hwd") {
+        
+        zvalues <- c(0, 1, 2, 3, 4, 10) # Define limits
+        myTheme <- BuRdTheme()
+        myTheme$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
+        myTheme$strip.border$col = "white"
+        myTheme$axis.line$col = 'white'
+        unit <- "mag"
+        
+      }
       
-    } else if ( var == "fld") {
       
-      zvalues <- c(0, 1, 2, 3, 4, 5) # Define limits
-      myTheme <- BuRdTheme()
-      myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
-      myTheme$strip.border$col = "white"
-      myTheme$axis.line$col = 'white'
-      unit <- "mag"
+      ## Plot indices
+      tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit, "_v1.tif"),
+           width=1200, height=1200, pointsize=8, compression='lzw',res=200)
+      print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme, 
+                      colorkey = list(space = "bottom", width=1.2, height=1)
+      ) 
+      + layer(sp.polygons(ctrMsk, lwd=0.8))
+      )
+      dev.off()
       
-    }
+      
+      ## Plot magnitudes
+      zvalues_rec <- c(0, 1, 2, 3, 4, 5) # Define limits
+      myTheme_rec <- BuRdTheme() # Define squeme of colors
+      myTheme_rec$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
+      myTheme_rec$strip.border$col = "white" # Eliminate frame from maps
+      myTheme_rec$axis.line$col = 'white' # Eliminate frame from maps
+      unit_rec <- "mag_reclass"
+      
+      
+      tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit_rec, "_v1.tif"),
+           width=1200, height=1200, pointsize=8, compression='lzw',res=200)
+      print(levelplot(plot_rec, at = zvalues_rec, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme_rec, 
+                      colorkey = list(space = "bottom", width=1.2, height=1)
+      ) 
+      + layer(sp.polygons(ctrMskAdm2, lwd=0.5))
+      )
+      dev.off()
+      
+      
+    } 
     
-    
-    ## Plot indices
-    tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit, "_v1.tif"),
-         width=1200, height=1200, pointsize=8, compression='lzw',res=200)
-    print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme, 
-                    colorkey = list(space = "bottom", width=1.2, height=1)
-    ) 
-    + layer(sp.polygons(ctrMsk, lwd=0.8))
-    )
-    dev.off()
-    
-    
-    ## Plot magnitudes
-    zvalues_rec <- c(0, 1, 2, 3, 4, 5) # Define limits
-    myTheme_rec <- BuRdTheme() # Define squeme of colors
-    myTheme_rec$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
-    myTheme_rec$strip.border$col = "white" # Eliminate frame from maps
-    myTheme_rec$axis.line$col = 'white' # Eliminate frame from maps
-    unit_rec <- "mag_reclass"
-    
-    
-    tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit_rec, "_v1.tif"),
-         width=1200, height=1200, pointsize=8, compression='lzw',res=200)
-    print(levelplot(plot_rec, at = zvalues_rec, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme_rec, 
-                    colorkey = list(space = "bottom", width=1.2, height=1)
-    ) 
-    + layer(sp.polygons(ctrMskAdm2, lwd=0.5))
-    )
-    dev.off()
-    
-    
-  } 
+  }
   
 }
-
-
-
-
-
-
-
-# Set params
-varList <- c("cdd", "drd", "p95", "frd", "fld")
-varList <- c("frd")
-id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-
-## General output directory
-oIDirH <- paste0(oIDir, "/moving-average")
-oIDirHChk <- paste0(oIDir, "/moving-average/_check")
-if (!file.exists(oIDirHChk)) {dir.create(oIDirHChk)}
-
-## Load Mask (Adm0)
-ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
-ctrMskAdm2 <- readOGR(ctrShpAdm2Sin,layer=ctrLyrAdm2Sin)
-
-stk_reclass <- stack()
-
-for (var in varList){
-  
-  setwd(paste0(oIDirH, "/", var))
-  
-  ## Convert to shape
-  for (enos in enosCond){
-    
-    ## Load data in stack
-    if (var == "fld") {
-      stk_crop <- stack(paste0(var, "_", ctrName, "_pred_", 1:12, "_", enos, "_mag.tif"))
-    } else {
-      stk_crop <- stack(paste0(var, "_", ctrName, "_pred_", 1:12, "_", enos, ".tif"))
-      stk_crop[which(stk_crop[]<0)]=0
-      
-    }
-    
-    plot <- setZ(stk_crop, id)
-    names(plot) <- id
-    
-    # plot_rec <- setZ(stk_reclass, id)
-    # names(plot_rec) <- id
-    
-    
-    ## Plot parms by var 
-    if (var == "cdd" || var == "drd"){
-      
-      zvalues <- c(0, 5, 10, 15, 20, 25, 31) # Define limits
-      myTheme <- BuRdTheme() # Define squeme of colors
-      myTheme$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
-      myTheme$strip.border$col = "white" # Eliminate frame from maps
-      myTheme$axis.line$col = 'white' # Eliminate frame from maps
-      unit <- "days"
-      
-    } else if ( var == "p95") {
-      
-      zvalues <- c(0, 5, 10, 15, 20, 100) # Define limits
-      myTheme <- BuRdTheme()
-      myTheme$regions$col=colorRampPalette(c("#d7191c", "#fdae61", "#ffffbf", "#abd9e9", "#2c7bb6"))(length(zvalues)-1) # Set new colors
-      myTheme$strip.border$col = "white"
-      myTheme$axis.line$col = 'white'
-      unit <- "percent"
-      
-    } else if ( var == "frd") {
-      
-      zvalues <- c(0, 1, 2, 3, 4, 10) # Define limits
-      myTheme <- BuRdTheme()
-      myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
-      myTheme$strip.border$col = "white"
-      myTheme$axis.line$col = 'white'
-      unit <- "days"
-      
-    } else if ( var == "fld") {
-      
-      zvalues <- c(0, 1, 2, 3, 4, 5) # Define limits
-      myTheme <- BuRdTheme()
-      myTheme$regions$col=colorRampPalette(c("#f0f9e8", "#bae4bc", "#7bccc4", "#43a2ca", "#0868ac"))(length(zvalues)-1)
-      myTheme$strip.border$col = "white"
-      myTheme$axis.line$col = 'white'
-      unit <- "mag"
-      
-    }
-    
-    
-    ## Plot indices
-    tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit, "_v1.tif"),
-         width=1200, height=1200, pointsize=8, compression='lzw',res=200)
-    print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme, 
-                    colorkey = list(space = "bottom", width=1.2, height=1)
-    ) 
-    + layer(sp.polygons(ctrMsk, lwd=0.8))
-    )
-    dev.off()
-    
-    
-    # ## Plot magnitudes
-    # zvalues_rec <- c(0, 1, 2, 3, 4, 5) # Define limits
-    # myTheme_rec <- BuRdTheme() # Define squeme of colors
-    # myTheme_rec$regions$col=colorRampPalette(c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c"))(length(zvalues)-1) # Set new colors
-    # myTheme_rec$strip.border$col = "white" # Eliminate frame from maps
-    # myTheme_rec$axis.line$col = 'white' # Eliminate frame from maps
-    # unit_rec <- "mag_reclass"
-    # 
-    # 
-    # tiff(paste0(oIDirHChk, "/plot_monthly_", var, "_", enos, "_", unit_rec, "_v1.tif"),
-    #      width=1200, height=1200, pointsize=8, compression='lzw',res=200)
-    # print(levelplot(plot_rec, at = zvalues_rec, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme_rec, 
-    #                 colorkey = list(space = "bottom", width=1.2, height=1)
-    # ) 
-    # + layer(sp.polygons(ctrMskAdm2, lwd=0.5))
-    # )
-    # dev.off()
-    
-    
-  } 
-  
-}
-
