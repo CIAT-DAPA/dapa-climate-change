@@ -38,10 +38,11 @@ iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
 iDirAdm <- "E:/yapu_climate_risk/admin_boundaries"
 iDir <- "E:/yapu_climate_risk"
-oDir <- "F:/yapu_climate_risk"
+oDir <- "E:/yapu_climate_risk"
 
 # Climate params
 dircdo <- "E:/yapu_climate_risk/cdo/cdo"
+dircdo_1.6.0 <- "E:/yapu_climate_risk/cdo/v1_6_0/cdo"
 ensoFile <- "E:/yapu_climate_risk/enso_condition.csv"
 ndays <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
@@ -79,10 +80,11 @@ wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 # ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
 # ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
 
-# ctrName <- "SDN"
+ctrName <- "SLE"
+bigctr <- "no"
 
 cat("Processing ", ctrName)
-  
+
 ##################################################
 ## Load masks by country                       ###
 ##################################################
@@ -963,41 +965,115 @@ oP95WRef <- paste0(oBDirW, "/p95_", yi, "-", yf, "_", ctrName)
 oP95W <- paste0(oBDirW, "/p95_", ctrName)
 oP95 <- paste0(oIDirHP95, "/p95_", ctrName)
 
-if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
+ctrMsk0 <- raster(rsMsk)
+
+
+if(bigctr == "yes"){
   
-  for (m in 1:12){
+  if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
     
-    if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+    for (m in 1:12){
       
-      ## Calc time-series wet days
-      system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+      if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+        
+        ## Calc time-series wet days
+        system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+        
+      }
+      
+      system(paste0(dircdo," -s -sellonlatbox,", xmin(extent(ctrMsk0)), ",", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_", sprintf("%02d", m), "_a.nc"))
+      
+      system(paste0(dircdo," -s -sellonlatbox,", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", xmax(extent(ctrMsk0)), ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_", sprintf("%02d", m), "_b.nc"))
+      
+      
+      system(paste0(dircdo," -s -sellonlatbox,", xmin(extent(ctrMsk0)), ",", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_wet_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_wet_", sprintf("%02d", m), "_a.nc"))
+      
+      system(paste0(dircdo," -s -sellonlatbox,", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", xmax(extent(ctrMsk0)), ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_wet_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_wet_", sprintf("%02d", m), "_b.nc"))
+      
+      if (m == 2){
+        # Calc yday p95 ref. period of wet days time-series
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_a.nc", " ",
+                      oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc"))
+        
+        # Calc yday p95 ref. period of wet days time-series
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_b.nc", " ",
+                      oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc"))
+        
+        system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc", " ",
+                      oP95WRef, "_",  sprintf("%02d", m),"_a.nc"))
+        
+        system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc", " ",
+                      oP95WRef, "_",  sprintf("%02d", m),"_b.nc"))
+        
+        
+      } else {
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_a.nc", " ",
+                      oP95WRef, "_", sprintf("%02d", m), "_a.nc"))
+        
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_b.nc", " ",
+                      oP95WRef, "_", sprintf("%02d", m), "_b.nc"))
+        
+      }
+      
+      
       
     }
     
+  }
+  
+} else {
+  
+  if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
     
-    if (m == 2){
-      # Calc yday p95 ref. period of wet days time-series
-      system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
-                    oP95WRef, "_leap_", sprintf("%02d", m), ".nc"))
-      system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ",
-                    oP95WRef, "_",  sprintf("%02d", m),".nc"))
-    } else {
-      system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
-                    oP95WRef, "_", sprintf("%02d", m), ".nc"))
+    for (m in 1:12){
+      
+      if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+        
+        ## Calc time-series wet days
+        system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+        
+      }
+      
+      
+      if (m == 2){
+        # Calc yday p95 ref. period of wet days time-series
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
+                      oP95WRef, "_leap_", sprintf("%02d", m), ".nc"))
+        system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ",
+                      oP95WRef, "_",  sprintf("%02d", m),".nc"))
+      } else {
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
+                      oP95WRef, "_", sprintf("%02d", m), ".nc"))
+      }
+      
+      
+      
     }
-    
-    
     
   }
   
 }
 
-
-ctrMsk0 <- raster(rsMsk)
 
 
 ## Historical
@@ -1013,23 +1089,61 @@ for (m in 1:12){
     
     for (yr in yi:yf){
       
-      if (leap_year(yr) == T && m == 2) {
+      if(bigctr == "yes"){
         
-        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+        if (leap_year(yr) == T && m == 2) {
           
-          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                        " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
+                          " ", oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
+                          " ", oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
+            
+          }
+          
+        } else {
+          
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
+                          " ", oP95WRef, "_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
+                          " ", oP95WRef, "_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
+            
+          }
+          
         }
+        
+        writeRaster(merge(raster(paste0(oP95W, "_", yr, "_", m, "_a.nc")), raster(paste0(oP95W, "_", yr, "_", m, "_b.nc"))), 
+                    paste0(oP95W, "_", yr, "_", m, ".nc"), overwrite=T)
+        file.remove(paste0(oP95W, "_", yr, "_", m, "_a.nc"))
+        file.remove(paste0(oP95W, "_", yr, "_", m, "_b.nc"))
         
       } else {
         
-        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+        if (leap_year(yr) == T && m == 2) {
           
-          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                        " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
+                          " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          }
+          
+        } else {
+          
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
+                          " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          }
+          
         }
         
       }
+      
     }
     
     
@@ -1712,6 +1826,9 @@ if (!file.exists(wei)) {
 if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
   
   cly_res <- mask(raster(cly), ctrMsk0, method='ngb')
+  cly_res[is.na(cly_res)] <- 1
+  cly_res <- mask(cly_res, ctrMsk0, method='ngb')
+  
   slp_res <- mask(raster(slp), ctrMsk0, method='ngb')
   wei_res <- mask(raster(wei), ctrMsk0, method='ngb')
   lco_res <- mask(raster(lco), ctrMsk0, method='ngb')
