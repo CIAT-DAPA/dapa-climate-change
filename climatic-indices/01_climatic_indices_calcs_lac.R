@@ -25,6 +25,8 @@ require(stringr)
 require(rgeos)
 require(grid)
 
+rasterOptions(tmpdir="F:/temp")
+
 # Years
 yi <- 1981
 yf <- 2021
@@ -36,13 +38,13 @@ iDirP <- "S:/observed/gridded_products/chirps/daily"
 iDirT <- "U:/GLOBAL/Climate/observed/gridded_products/CHIRTS"
 iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
-iDirAdm <- "F:/yapu_climate_risk/admin_boundaries"
-iDir <- "F:/yapu_climate_risk"
+iDirAdm <- "E:/yapu_climate_risk/admin_boundaries"
+iDir <- "E:/yapu_climate_risk"
 oDir <- "F:/yapu_climate_risk"
 
 # Climate params
-dircdo <- "F:/yapu_climate_risk/cdo/cdo"
-ensoFile <- "F:/yapu_climate_risk/enso_condition.csv"
+dircdo <- "E:/yapu_climate_risk/cdo/cdo"
+ensoFile <- "E:/yapu_climate_risk/enso_condition.csv"
 ndays <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
 enosCond <- c("elnino", "lanina", "normal")
@@ -57,7 +59,7 @@ mag_labels <- c("Month", "x-1sd", "x-0.5sd", "x+0.5sd", "x+1sd")
 probs_q2 <- c(.023,.159,.841,.977)
 mag_labels2 <- c("Month", "x-2sd", "x-1sd", "x+1sd", "x+2sd")
 
-cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"
+cly_global <- "U:/GLOBAL/Biofisico/SoilGrids250m/Physical soil properties/Clay content (0-2 micro meter) mass fraction/CLYPPT_M_sAvg_250m_ll.tif"
 lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912_V2.3_reclass.tif"
 dem_global <- "S:/observed/gridded_products/srtm/srtm_v41_30s.tif"
 wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
@@ -79,7 +81,7 @@ wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 # ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
 # ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
 
-# ctrName <- "SDN"
+# ctrName <- "MEX"
 
 cat("Processing ", ctrName)
   
@@ -1657,16 +1659,20 @@ lco <- paste0(oBDirS, "/LU_LC_rec.tif")
 if (!file.exists(cly)) {
   
   # if (!file.exists(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))) {
-  #   
-  #   sd1 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd1_250m.tif"))
-  #   sd2 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd2_250m.tif"))
-  #   sd3 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd3_250m.tif"))
-  #   sd4 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd4_250m.tif"))
-  #   sd5 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd5_250m.tif"))
-  #   sd6 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd6_250m.tif"))
-  #   sdAvg <- ( (sd1 * 5) + (sd2 * 10)  + (sd3 * 15) + (sd4 * 30) + (sd5 * 40) + (sd6 * 100) ) / 200
-  #   writeRaster(sdAvg, paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
-  #   
+  # 
+  #   sd1 <- raster(paste0(cly_global, "/CLYPPT_M_sl1_250m_ll.tif"))
+  #   sd2 <- raster(paste0(cly_global, "/CLYPPT_M_sl2_250m_ll.tif"))
+  #   sd3 <- raster(paste0(cly_global, "/CLYPPT_M_sl3_250m_ll.tif"))
+  #   sd4 <- raster(paste0(cly_global, "/CLYPPT_M_sl4_250m_ll.tif"))
+  #   sd5 <- raster(paste0(cly_global, "/CLYPPT_M_sl5_250m_ll.tif"))
+  #   sd6 <- raster(paste0(cly_global, "/CLYPPT_M_sl6_250m_ll.tif"))
+  #   sd7 <- raster(paste0(cly_global, "/CLYPPT_M_sl7_250m_ll.tif"))
+  # 
+  #   sdAvg <- ( ( (sd1+sd2)/2 * 5) + ((sd2+sd3)/2 * 10)  + ((sd3+sd4)/2 * 15) + ((sd4+sd5)/2 * 30) + ((sd5+sd6)/2 * 40) + ((sd6+sd7)/2 * 100) ) / 200
+  #   # sdAvg <- ( (sd1 * 5) + (sd2 * 10)  + (sd3 * 15) + (sd4 * 30) + (sd5 * 40) + (sd6 * 100) ) / 200
+  # 
+  #   writeRaster(sdAvg, paste0(cly_global, "/CLYPPT_M_sAvg_250m_ll.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+  # 
   # }
   
   sdAvg <- raster(cly_global)
