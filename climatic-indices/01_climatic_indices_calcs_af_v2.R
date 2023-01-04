@@ -80,7 +80,7 @@ wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 # ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
 # ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
 
-# ctrName <- "SSD"
+# ctrName <- "MWI"
 bigctr <- "no"
 
 cat("Processing ", ctrName)
