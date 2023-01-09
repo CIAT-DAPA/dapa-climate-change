@@ -12,7 +12,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python 00_CreateShapefiles.py <dirbase> <scenario> <dirout> <resolution> <method>"
-	print "    - ie: python 00_CreateShapefiles.py S:\admin_boundaries\gadm\gadm41_2.shp 	E:\yapu_climate_risk\admin_boundaries GID_0 2"
+	print "    - ie: python 00_CreateShapefiles.py S:\admin_boundaries\gadm\gadm41_1.shp E:\yapu_climate_risk\admin_boundaries GID_0 1"
 	sys.exit(1)
 
 	
@@ -50,19 +50,19 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~"
 # row = cur.Next()
 
 for iso in iso_list_lam:
-	
+
 	print iso
 	diroutshape = dirout 
-	
+
 	if not os.path.exists(diroutshape):
 		os.system('mkdir ' + diroutshape)
 		
 	outshape = diroutshape + "\\gadm41_" + iso + "_" + level + ".shp"
 	outshape_sp = diroutshape + "\\gadm41_" + iso + "_" + level + "_sp.shp"
-	
+
 	if not os.path.exists(outshape):
 		gp.select_analysis(inshape, outshape, fieldname + " = '" + iso + "'")
-	
+
 	if not os.path.exists(outshape_sp):
 		gp.MultipartToSinglepart(outshape, outshape_sp)
 
@@ -71,5 +71,5 @@ for iso in iso_list_lam:
 		
 		if not os.path.exists(outshape_buff):
 			gp.buffer(outshape, outshape_buff, "0.1 DecimalDegrees", "FULL")
-	
+		
 

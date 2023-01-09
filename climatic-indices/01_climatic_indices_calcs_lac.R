@@ -48,7 +48,6 @@ ndays <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
 enosCond <- c("elnino", "lanina", "normal")
 vars <- c("prec", "tmin", "tmax")
-# vars <- c("tmax")
 mv <- -999
 resampling <- F
 # probs_q <- c(.25,.45,.55,.75)
@@ -81,7 +80,7 @@ wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 # ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
 # ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
 
-ctrName <- "CHL"
+ctrName <- "ARG"
 bigctr <- "yes"
 
 cat("Processing ", ctrName)
