@@ -56,7 +56,7 @@ iDirP <- "S:/observed/gridded_products/chirps/daily"
 iDirT <- "U:/GLOBAL/Climate/observed/gridded_products/CHIRTS"
 iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
 oBDir <- "D:/cenavarro/yapu-sud/basedata-historical"
-oIDir <- "D:/cenavarro/yapu-sud/indices_v3_0"
+oIDir <- "D:/cenavarro/yapu-sud/indices_v4_0"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
 
 mv <- -999
@@ -128,7 +128,7 @@ for (var in vars){
     ## List files by years
     dtsLsC <-  list.files(path=iDirTc, pattern=paste0("Temperature-Air-2m-Max-24h.*.nc"),full.names = T,ignore.case=F)
     prefix <- "Tmax"
-    varLn <- "MinimumTemperature"
+    varLn <- "MaximumTemperature"
     unit <- "CelsiusDegrees"
     
   } 
@@ -2094,25 +2094,25 @@ for (m in 1:12){
     #                 oTxWRef, "_", sprintf("%02d", m), ".nc"))
     # }
     
-    ## Calc heat waves for each year/month
-    for (yr in yi:yf){
-      
-      if (!file.exists(paste0(oHwdW, "_", yr, "_", m, ".nc"))) {
-
-          system(paste0(dircdo," -s -eca_hwdi,6,5 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", 
-                        iNc, "_", sprintf("%02d", m) ,".nc", " ", oHwdW, "_", yr, "_", m, "_tmp.nc"))
-
-          system(paste0(dircdo," -s -select,name=heat_waves_per_time_period ", oHwdW, "_", yr, "_", m, "_tmp.nc", " ", oHwdW, "_", yr, "_", m, ".nc"))
-
-          file.remove(paste0(oHwdW, "_", yr, "_", m, "_tmp.nc"))
-        
-      }
-    }
+    # ## Calc heat waves for each year/month
+    # for (yr in yi:yf){
+    #   
+    #   if (!file.exists(paste0(oHwdW, "_", yr, "_", m, ".nc"))) {
+    # 
+    #       system(paste0(dircdo," -s -eca_hwdi,6,5 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", 
+    #                     iNc, "_", sprintf("%02d", m) ,".nc", " ", oHwdW, "_", yr, "_", m, "_tmp.nc"))
+    # 
+    #       system(paste0(dircdo," -s -select,name=heat_waves_per_time_period ", oHwdW, "_", yr, "_", m, "_tmp.nc", " ", oHwdW, "_", yr, "_", m, ".nc"))
+    # 
+    #       file.remove(paste0(oHwdW, "_", yr, "_", m, "_tmp.nc"))
+    #     
+    #   }
+    # }
     
     ## Load CHIRPS data and stack
     hwdStk_yrs <- stack(paste0(oHwdW, "_", yi:yf, "_", m, ".nc"))
     writeRaster(hwdStk_yrs, paste0(oHwdW, "_", yi, "-", yf, "_", m, ".nc"), format="CDF", overwrite=T)
-    
+
     # Quantiles by month
     q <- paste(summary(quantile(hwdStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
     hwd_mag <- rbind(hwd_mag, c(m, as.numeric(gsub("  ", "", gsub("Mean   :","", q)))))
@@ -2127,8 +2127,16 @@ for (m in 1:12){
     
     ## Calculate heat wave duration average by condition
     hwd_elnino <- mean(stack(paste0(oHwdW, "_", elnino_m$Year, "_", m, ".nc")))
+    hwd_elnino[is.na(hwd_elnino[])] <- 0 
+    hwd_elnino <- mask(hwd_elnino, ctrMsk0)
+    
     hwd_lanina <- mean(stack(paste0(oHwdW, "_", lanina_m$Year, "_", m, ".nc")))
+    hwd_lanina[is.na(hwd_lanina[])] <- 0 
+    hwd_lanina <- mask(hwd_lanina, ctrMsk0)
+    
     hwd_normal <- mean(stack(paste0(oHwdW, "_", normal_m$Year, "_", m, ".nc")))
+    hwd_normal[is.na(hwd_normal[])] <- 0 
+    hwd_normal <- mask(hwd_normal, ctrMsk0)
     
     writeRaster(hwd_elnino, paste0(oHwd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     writeRaster(hwd_lanina, paste0(oHwd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
@@ -2184,34 +2192,34 @@ for (m in 1:12){
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       
-      ## Load Mask (Adm2)
-      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
-      
-      ## Extract values inside polygons and calc avg
-      oHwdVals <- extract(dtsRs, ctrMsk)
-      # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
-      
-      ## Reclassify by magnitude ranges based on quantiles
-      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
-      oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
-      
-      oHwdVuln_mean <- oHwdVuln
-      
-      oHwdVuln <- oHwdVuln %>% mutate(vuln =
-                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
-                                                  (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
-                                                  (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
-                                                  (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
-                                                  oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
-      )
-      
-      ## Join mean values to polygon data and write shapefile
-      ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
-      writeOGR(ctrMsk, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
-               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
-      
-      cat(" . HWD Month ", m, " ", enos, "done\n")
-      
+      # ## Load Mask (Adm2)
+      # ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      # 
+      # ## Extract values inside polygons and calc avg
+      # oHwdVals <- extract(dtsRs, ctrMsk)
+      # # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
+      # 
+      # ## Reclassify by magnitude ranges based on quantiles
+      # ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      # oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
+      # 
+      # oHwdVuln_mean <- oHwdVuln
+      # 
+      # oHwdVuln <- oHwdVuln %>% mutate(vuln =
+      #                                   case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
+      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
+      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
+      #                                             oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      # )
+      # 
+      # ## Join mean values to polygon data and write shapefile
+      # ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
+      # writeOGR(ctrMsk, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
+      #          driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      # 
+      # cat(" . HWD Month ", m, " ", enos, "done\n")
+      # 
       names(hwd_mag) <- mag_labels
       write.csv(hwd_mag, paste0(oIDirHHwd, "/hwd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
       
@@ -2261,8 +2269,16 @@ for (m in 1:12){
     
     ## Calculate mean consecutive dry days length by condition
     hwd_elnino_r <- mean(stack(paste0(oHwdW, "_", elnino_m_r$Year, "_", m, ".nc")))
+    hwd_elnino_r[is.na(hwd_elnino_r[])] <- 0 
+    hwd_elnino_r <- mask(hwd_elnino_r, ctrMsk0)
+    
     hwd_lanina_r <- mean(stack(paste0(oHwdW, "_", lanina_m_r$Year, "_", m, ".nc")))
+    hwd_lanina_r[is.na(hwd_lanina_r[])] <- 0 
+    hwd_lanina_r <- mask(hwd_lanina_r, ctrMsk0)
+    
     hwd_normal_r <- mean(stack(paste0(oHwdW, "_", normal_m_r$Year, "_", m, ".nc")))
+    hwd_normal_r[is.na(hwd_normal_r[])] <- 0 
+    hwd_normal_r <- mask(hwd_normal_r, ctrMsk0)
     
     writeRaster(hwd_elnino_r, paste0(oHwdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     writeRaster(hwd_lanina_r, paste0(oHwdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
@@ -2312,28 +2328,28 @@ for (m in 1:12){
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       
-      ## Load Mask (Adm2)
-      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
-      
-      ## Extract values inside polygons and calc avg
-      oHwdVals <- extract(dtsRs, ctrMsk)
-      # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
-      
-      ## Reclassify by magnitude ranges based on quantiles
-      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
-      oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
-      oHwdVuln <- oHwdVuln %>% mutate(vuln =
-                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
-                                                  (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
-                                                  (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
-                                                  (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
-                                                  oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
-      )
-      
-      ## Join mean values to polygon data and write shapefile
-      ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
-      writeOGR(ctrMsk, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
-               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      # ## Load Mask (Adm2)
+      # ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      # 
+      # ## Extract values inside polygons and calc avg
+      # oHwdVals <- extract(dtsRs, ctrMsk)
+      # # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
+      # 
+      # ## Reclassify by magnitude ranges based on quantiles
+      # ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      # oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
+      # oHwdVuln <- oHwdVuln %>% mutate(vuln =
+      #                                   case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
+      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
+      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
+      #                                             oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      # )
+      # 
+      # ## Join mean values to polygon data and write shapefile
+      # ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
+      # writeOGR(ctrMsk, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
+      #          driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       cat(" . HWD Month ", m, " ", enos, "done\n")
       

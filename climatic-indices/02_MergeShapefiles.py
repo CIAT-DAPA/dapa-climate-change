@@ -13,7 +13,7 @@ if len(sys.argv) < 6:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python 02_MergeShapefiles.py <dirbase> <dirout> <region>"
-	print "    - ie: python 02_MergeShapefiles.py E:\yapu_climate_risk\indices E:\yapu_climate_risk\continental\africa AF cdd recent-past"
+	print "    - ie: python 02_MergeShapefiles.py F:\yapu_climate_risk\indices F:\yapu_climate_risk\continental\latinamerica LAC cdd historical"
 	sys.exit(1)
 
 
@@ -23,8 +23,8 @@ region = sys.argv[3]
 index = sys.argv[4]
 scen = sys.argv[5]
 
-iso_list = "AGO", "BDI", "BEN", "BFA", "BWA", "CAF", "CIV", "CMR", "COD", "COG", "COM", "CPV", "DJI", "DZA", "EGY", "ERI", "ESH", "ETH", "GAB", "GHA", "GIN", "GMB", "GNB", "GNQ", "KEN", "LBR", "LBY", "LSO", "MAR", "MDG", "MLI", "MOZ", "MRT", "MUS", "MWI", "MYT", "NAM", "NER", "NGA", "REU", "RWA", "SDN", "SEN", "SLE", "SOM", "SSD", "STP", "SWZ", "SYC", "TCD", "TGO", "TUN", "TZA", "UGA", "ZAF", "ZMB", "ZWE" 
-# iso_list_lam = "AIA", "ABW", "ANT", "ATG", "BHS", "BLZ", "BRB", "CUW", "CYM", "DMA", "FLK", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI", "SXM", "TCA", "TTO", "UMI", "VCT", "VGB", "XCL"
+# iso_list = "AGO", "BDI", "BEN", "BFA", "BWA", "CAF", "CIV", "CMR", "COD", "COG", "COM", "CPV", "DJI", "DZA", "EGY", "ERI", "ESH", "ETH", "GAB", "GHA", "GIN", "GMB", "GNB", "GNQ", "KEN", "LBR", "LBY", "LSO", "MAR", "MDG", "MLI", "MOZ", "MRT", "MUS", "MWI", "MYT", "NAM", "NER", "NGA", "REU", "RWA", "SDN", "SEN", "SLE", "SOM", "SSD", "STP", "SWZ", "SYC", "TCD", "TGO", "TUN", "TZA", "UGA", "ZAF", "ZMB", "ZWE" 
+iso_list = "ABW", "AIA", "ARG", "ATG", "BHS", "BLZ", "BOL", "BRA1", "BRA2", "BRA3", "BRA4", "BRB", "CHL", "COL", "CRI", "CUB", "CUW", "CYM", "DMA", "DOM", "ECU", "GLP", "GRD", "GTM", "GUF", "GUY", "HND", "HTI", "JAM", "KNA", "LCA", "MEX", "MSR", "MTQ", "NIC", "PAN", "PER", "PRI", "PRY", "SLV", "SUR", "SXM", "TCA", "TTO", "URY", "VCT", "VEN", "VGB", "VIR"
 
 enosCond = "elnino", "lanina", "normal"
 # indices_list = "cdd", "drd", "fld", "frd", "hwd", "p95"

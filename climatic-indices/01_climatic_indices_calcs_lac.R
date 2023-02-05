@@ -80,7 +80,7 @@ wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 # ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
 # ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
 
-ctrName <- "ARG"
+ctrName <- "BRA2"
 bigctr <- "yes"
 
 cat("Processing ", ctrName)
@@ -2503,7 +2503,7 @@ for(scen in scenarios){
   if (!file.exists(oIDirHChk)) {dir.create(oIDirHChk)}
   
   ## Load Mask (Adm0)
-  ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
+  ctrMsk <- readOGR(ctrShpAdm1,layer=ctrLyrAdm1)
   ctrMskAdm2 <- readOGR(ctrShpAdm2Sin,layer=ctrLyrAdm2Sin)
   
   stk_reclass <- stack()
