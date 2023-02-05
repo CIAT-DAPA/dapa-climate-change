@@ -63,14 +63,6 @@ lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912
 dem_global <- "S:/observed/gridded_products/srtm/srtm_v41_30s.tif"
 wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 
-# ## Africa splitted list
-# ctrLs = c("SDN", "DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF") 
-# ctrLs = c("COM", "CIV", "DJI", "EGY", "GNQ", "ERI", "GAB", "GHA", "GIN", "GNB") 
-# ctrLs = c("KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MAR") 
-# ctrLs = c("NGA", "COG", "MOZ", "NAM", "RWA", "SHN", "ZAF", "TZA", "COD", "TCD")
-# ctrLs = c("TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE", "STP", "SEN", "SYC", "SLE") 
-# ctrLs = c("SOM", "MYT", "GMB", "REU", "NER", "ETH", "SWZ")
-# 
 # ## LAM splitted list
 # ctrLs = c("ARG", "BRA", "CHL")
 # ctrLs = c("BOL", "COL", "CRI", "CUB", "DOM", "ECU", "SLV") #Errors ARG BRA CHL
@@ -80,8 +72,8 @@ wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
 # ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
 # ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
 
-ctrName <- "BRA2"
-bigctr <- "yes"
+# ctrName <- "BRA2"
+bigctr <- "no"
 
 cat("Processing ", ctrName)
 
@@ -2254,8 +2246,16 @@ for (m in 1:12){
     
     ## Calculate heat wave duration average by condition
     hwd_elnino <- mean(stack(paste0(oHwdW, "_", elnino_m$Year, "_", m, ".nc")))
+    hwd_elnino[is.na(hwd_elnino[])] <- 0 
+    hwd_elnino <- mask(hwd_elnino, ctrMsk0)
+    
     hwd_lanina <- mean(stack(paste0(oHwdW, "_", lanina_m$Year, "_", m, ".nc")))
+    hwd_lanina[is.na(hwd_lanina[])] <- 0 
+    hwd_lanina <- mask(hwd_lanina, ctrMsk0)
+    
     hwd_normal <- mean(stack(paste0(oHwdW, "_", normal_m$Year, "_", m, ".nc")))
+    hwd_normal[is.na(hwd_normal[])] <- 0 
+    hwd_normal <- mask(hwd_normal, ctrMsk0)
     
     writeRaster(hwd_elnino, paste0(oHwd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     writeRaster(hwd_lanina, paste0(oHwd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
@@ -2313,25 +2313,25 @@ for (m in 1:12){
       
       ## Load Mask (Adm2)
       ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
-      
+
       ## Extract values inside polygons and calc avg
       oHwdVals <- extract(dtsRs, ctrMsk)
       # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
-      
+
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
-      
+
       oHwdVuln_mean <- oHwdVuln
-      
+
       oHwdVuln <- oHwdVuln %>% mutate(vuln =
-                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5",
                                                   (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
                                                   (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
                                                   (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
                                                   oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
       )
-      
+
       ## Join mean values to polygon data and write shapefile
       ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
       writeOGR(ctrMsk, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
@@ -2388,8 +2388,16 @@ for (m in 1:12){
     
     ## Calculate mean consecutive dry days length by condition
     hwd_elnino_r <- mean(stack(paste0(oHwdW, "_", elnino_m_r$Year, "_", m, ".nc")))
+    hwd_elnino_r[is.na(hwd_elnino_r[])] <- 0 
+    hwd_elnino_r <- mask(hwd_elnino_r, ctrMsk0)
+    
     hwd_lanina_r <- mean(stack(paste0(oHwdW, "_", lanina_m_r$Year, "_", m, ".nc")))
+    hwd_lanina_r[is.na(hwd_lanina_r[])] <- 0 
+    hwd_lanina_r <- mask(hwd_lanina_r, ctrMsk0)
+    
     hwd_normal_r <- mean(stack(paste0(oHwdW, "_", normal_m_r$Year, "_", m, ".nc")))
+    hwd_normal_r[is.na(hwd_normal_r[])] <- 0 
+    hwd_normal_r <- mask(hwd_normal_r, ctrMsk0)
     
     writeRaster(hwd_elnino_r, paste0(oHwdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     writeRaster(hwd_lanina_r, paste0(oHwdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
@@ -2441,22 +2449,22 @@ for (m in 1:12){
       
       ## Load Mask (Adm2)
       ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
-      
+
       ## Extract values inside polygons and calc avg
       oHwdVals <- extract(dtsRs, ctrMsk)
       # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
-      
+
       ## Reclassify by magnitude ranges based on quantiles
       ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
       oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
       oHwdVuln <- oHwdVuln %>% mutate(vuln =
-                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5",
                                                   (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
                                                   (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
                                                   (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
                                                   oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
       )
-      
+
       ## Join mean values to polygon data and write shapefile
       ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
       writeOGR(ctrMsk, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
