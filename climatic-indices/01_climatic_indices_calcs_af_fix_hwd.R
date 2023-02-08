@@ -24,7 +24,7 @@ require(stringr)
 require(rgeos)
 require(grid)
 
-rasterOptions(tmpdir="F:/temp")
+rasterOptions(tmpdir="E:/temp")
 
 # Years
 yi <- 1981
@@ -39,7 +39,7 @@ iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
 iDirAdm <- "E:/yapu_climate_risk/admin_boundaries"
 iDir <- "E:/yapu_climate_risk"
-oDir <- "F:/yapu_climate_risk"
+oDir <- "E:/yapu_climate_risk"
 
 # Climate params
 dircdo <- "E:/yapu_climate_risk/cdo/cdo"
