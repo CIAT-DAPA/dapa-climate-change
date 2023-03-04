@@ -12,7 +12,7 @@ if len(sys.argv) < 5:
 	os.system('cls')
 	print "\n Too few args"
 	print " Syntaxis python 00_CreateShapefiles.py <dirbase> <scenario> <dirout> <resolution> <method>"
-	print "    - ie: python 00_CreateShapefiles.py S:\admin_boundaries\gadm\gadm41_1.shp E:\yapu_climate_risk\admin_boundaries GID_0 1"
+	print "    - ie: python 00_CreateShapefiles_grid.py E:\yapu_climate_risk\admin_boundaries\gadm41_LAC_0_grid_buffer.shp E:\yapu_climate_risk\admin_boundaries GID_0 0"
 	sys.exit(1)
 
 	
@@ -60,19 +60,8 @@ for iso in iso_list_lam:
 	if not os.path.exists(diroutshape):
 		os.system('mkdir ' + diroutshape)
 		
-	outshape = diroutshape + "\\gadm41_" + iso + "_" + level + ".shp"
-	outshape_sp = diroutshape + "\\gadm41_" + iso + "_" + level + "_sp.shp"
-
+	outshape = diroutshape + "\\gadm41_" + iso + "_" + level + "_grid.shp"
+	
 	if not os.path.exists(outshape):
 		gp.select_analysis(inshape, outshape, fieldname + " = '" + iso + "'")
-
-	if not os.path.exists(outshape_sp):
-		gp.MultipartToSinglepart(outshape, outshape_sp)
-
-	if level == '0':
-		outshape_buff = diroutshape + "\\gadm41_" + iso + "_" + level + "_buffer.shp"
-		
-		if not os.path.exists(outshape_buff):
-			gp.buffer(outshape, outshape_buff, "0.1 DecimalDegrees", "FULL")
-		
 
