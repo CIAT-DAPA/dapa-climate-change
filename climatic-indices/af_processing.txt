@@ -1,0 +1,42 @@
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF cdd historical normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF drd historical normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF fld historical normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF frd historical normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF hwd historical normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF p95 historical normal
+                                                                                                                                                                 
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF cdd historical elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF drd historical elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF fld historical elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF frd historical elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF hwd historical elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF p95 historical elnino
+                                                                                                                                                                 
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF cdd historical lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF drd historical lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF fld historical lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF frd historical lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF hwd historical lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF p95 historical lanina
+                                                                                                                                                               
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF cdd recent-past normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF drd recent-past normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF fld recent-past normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF frd recent-past normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF hwd recent-past normal
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF p95 recent-past normal
+                                                                                                                                                                     
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF cdd recent-past elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF drd recent-past elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF fld recent-past elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF frd recent-past elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF hwd recent-past elnino
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF p95 recent-past elnino
+                                                                                                                                                                     
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF cdd recent-past lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF drd recent-past lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF fld recent-past lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF frd recent-past lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF hwd recent-past lanina
+python 02_MergeShapefiles_grid.py D:\cenavarro\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\africa E:\yapu_climate_risk\admin_boundaries AF p95 recent-past lanina
+
