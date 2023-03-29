@@ -1,0 +1,20 @@
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC cdd recent-past normal
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC drd recent-past normal
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC fld recent-past normal
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC frd recent-past normal
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC hwd recent-past normal
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC p95 recent-past normal
+                                                                                                                                                                     recent-past
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC cdd recent-past elnino
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC drd recent-past elnino
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC fld recent-past elnino
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC frd recent-past elnino
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC hwd recent-past elnino
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC p95 recent-past elnino
+                                                                                                                                                                     recent-past
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC cdd recent-past lanina
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC drd recent-past lanina
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC fld recent-past lanina
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC frd recent-past lanina
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC hwd recent-past lanina
+python 02_MergeShapefiles_grid.py F:\yapu_climate_risk\indices D:\cenavarro\yapu_climate_risk\continental\latinamerica E:\yapu_climate_risk\admin_boundaries LAC p95 recent-past lanina

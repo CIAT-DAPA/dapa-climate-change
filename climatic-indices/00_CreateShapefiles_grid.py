@@ -8,20 +8,21 @@ import arcgisscripting, os, sys, string, glob
 
 gp = arcgisscripting.create(9.3)
 
-if len(sys.argv) < 5:
+if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print " Syntaxis python 00_CreateShapefiles.py <dirbase> <scenario> <dirout> <resolution> <method>"
-	print "    - ie: python 00_CreateShapefiles.py S:\admin_boundaries\gadm\gadm41_1.shp E:\yapu_climate_risk\admin_boundaries GID_0 1"
+	print " Syntaxis python 03_MergeCtry.py <dirbase>"
+	print "    - ie: python 03_MergeCtry.py F:\yapu_climate_risk\indices"
 	sys.exit(1)
 
-	
+scen_list = "historical", "recent-past"
+index_list = "cdd", "drd", "fld", "frd", "hdw", "p95"
+enos_list = "elnino", "lanina", "normal"
+iso_list_lam = "ABW", "AIA", "ARG", "ATG", "BHS", "BLZ", "BOL", "BRA1", "BRA2", "BRA3", "BRA4", "BRB", "CHL", "COL", "CRI", "CUB", "CUW", "CYM", "DMA", "DOM", "ECU", "GLP", "GRD", "GTM", "GUF", "GUY", "HND", "HTI", "JAM", "KNA", "LCA", "MEX", "MSR", "MTQ", "NIC", "PAN", "PER", "PRI", "PRY", "SLV", "SUR", "SXM", "TCA", "TTO", "URY", "VCT", "VEN", "VGB", "VIR"
 # iso_list_af = "DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF", "TCD", "COM", "CIV", "DJI", "EGY", "GNQ", "ERI", "ETH", "GAB", "GMB", "GHA", "GIN", "GNB", "KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MYT", "MAR", "NER", "NGA", "COG", "MOZ", "NAM", "REU", "RWA", "SHN", "ZAF", "SDN", "SWZ", "TZA", "COD", "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE", "STP", "SEN", "SYC", "SLE", "SOM"
 
 # No adm2
 # iso_list_af = "COM", "CPV", "ESH", "LBY", "LSO", "MUS", "MYT", "SYC"
-
-iso_list_lam = "ABW", "AIA", "ARG", "ATG", "BHS", "BLZ", "BOL", "BRA", "BRB", "CHL", "COL", "CRI", "CUB", "CUW", "CYM", "DMA", "DOM", "ECU", "GLP", "GRD", "GTM", "GUF", "GUY", "HND", "HTI", "JAM", "KNA", "LCA", "MEX", "MSR", "MTQ", "NIC", "PAN", "PER", "PRI", "PRY", "SLV", "SUR", "SXM", "TCA", "TTO", "URY", "VCT", "VEN", "VGB", "VIR"
 
 # All adm
 # iso_list_lam =  "ARG", "BOL", "BRA", "CHL", "COL", "CRI", "CUB", "DOM", "ECU", "SLV", "GUF", "GLP", "GTM", "GUY", "HTI", "HND", "MTQ", "MEX", "NIC", "PAN", "PRY", "PER", "SUR", "URY", "VEN", "VIR", "ATG"
@@ -33,20 +34,14 @@ iso_list_lam = "ABW", "AIA", "ARG", "ATG", "BHS", "BLZ", "BOL", "BRA", "BRB", "C
 # iso_list_lam = "AIA", "ABW", "ANT", "ATG", "BHS", "BLZ", "BRB", "CUW", "CYM", "DMA", "FLK", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI", "SXM", "TCA", "TTO", "UMI", "VCT", "VGB", "XCL"
 
 
-inshape = sys.argv[1]
-dirout = sys.argv[2]
-if not os.path.exists(dirout):
-    os.system('mkdir ' + dirout)
-fieldname = sys.argv[3]
-level = sys.argv[4]
-
+dirbase = sys.argv[1]
 
 os.system('cls')
 gp.CheckOutExtension("Spatial")
 gp.toolbox = "analysis"
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
-print "    CREATE SHAPEFILES   "
+print "      MERGE COUNTRY     "
 print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # cur = gp.SearchCursor(inshape,"","",fieldname,"")
@@ -54,25 +49,29 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~"
 
 for iso in iso_list_lam:
 
-	print iso
-	diroutshape = dirout 
-
-	if not os.path.exists(diroutshape):
-		os.system('mkdir ' + diroutshape)
+	for scen in scen_list: 
+	
+		for index in index_list: 
 		
-	outshape = diroutshape + "\\gadm41_" + iso + "_" + level + ".shp"
-	outshape_sp = diroutshape + "\\gadm41_" + iso + "_" + level + "_sp.shp"
+			for enos in enos_list: 
 
-	if not os.path.exists(outshape):
-		gp.select_analysis(inshape, outshape, fieldname + " = '" + iso + "'")
+				for m in range(1, 12 + 1, 1): 
+				
+					print iso, scen, index
+					
+					inshape = sys.argv[1]
 
-	if not os.path.exists(outshape_sp):
-		gp.MultipartToSinglepart(outshape, outshape_sp)
+					index_rs = dirbase + "\\" + iso + "\\" + scen + "\\" + index + "\\" + index + "_" + iso + "_" + m + "_" + enos + ".tif"
+					index_rs = dirbase + "\\" + iso + "\\" + scen + "\\" + index + "\\" + index + "_" + iso + "_" + m + "_" + enos + ".tif"
 
-	if level == '0':
-		outshape_buff = diroutshape + "\\gadm41_" + iso + "_" + level + "_buffer.shp"
-		
-		if not os.path.exists(outshape_buff):
-			gp.buffer(outshape, outshape_buff, "0.1 DecimalDegrees", "FULL")
-		
+					inrs = dirbase + "\\" + iso + "\\" + scen + "\\" + index + "\\" + index + "_" + iso + "_" + m + "_" + enos + ".tif"
+
+
+					if not os.path.exists(diroutshape):
+						os.system('mkdir ' + diroutshape)
+						
+					outshape = diroutshape + "\\gadm41_" + iso + "_" + level + "_grid.shp"
+					
+					if not os.path.exists(outshape):
+						gp.select_analysis(inshape, outshape, fieldname + " = '" + iso + "'")
 

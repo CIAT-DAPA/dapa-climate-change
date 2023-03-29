@@ -13,7 +13,7 @@
 require(raster)
 require(maptools)
 require(rgdal)
-require(netCDF)
+# require(netCDF)
 require(ncdf4)
 require(reshape2)
 require(sp)
@@ -24,61 +24,88 @@ require(RColorBrewer)
 require(stringr)
 require(rgeos)
 require(grid)
-# require(terra)
-# require(trend)
-# require(RSAGA) 
-# require(envirem)
 
-## Params
+# Years
 yi <- 1981
 yf <- 2021
 yi_r <- 2003
 yf_r <- 2021
-ctrName <- "sud" 
 
-ctrShpAdm0 <- "D:/cenavarro/yapu-sud/admin_boundaries/gadm41_SDN_0.shp"
-ctrLyrAdm0 <- "gadm41_SDN_0"
-
-## Only consider continental part
-ctrShpAdm0Buf <- "D:/cenavarro/yapu-sud/admin_boundaries/gadm41_SDN_0_buffer.shp"
-ctrLyrAdm0Buf <- "gadm41_SDN_0_buffer"
-ctrShpAdm1 <- "D:/cenavarro/yapu-sud/admin_boundaries/gadm41_SDN_1.shp"
-ctrLyrAdm1 <- "gadm41_SDN_1"
-ctrShpAdm1Sin <- "D:/cenavarro/yapu-sud/admin_boundaries/gadm41_SDN_1_singlepart.shp"
-ctrLyrAdm1Sin <- "gadm41_SDN_1_singlepart"
-ctrShpAdm2 <- "D:/cenavarro/yapu-sud/admin_boundaries/gadm41_SDN_2.shp"
-ctrLyrAdm2 <- "gadm41_SDN_2"
-ctrShpAdm2Sin <- "D:/cenavarro/yapu-sud/admin_boundaries/gadm41_SDN_2_singlepart.shp"
-ctrLyrAdm2Sin <- "gadm41_SDN_2_singlepart"
-
-rsMsk <- "D:/cenavarro/yapu-sud/admin_boundaries/sud_rs_mask.tif"
+# Climate dirs
 iDirP <- "S:/observed/gridded_products/chirps/daily"
 iDirT <- "U:/GLOBAL/Climate/observed/gridded_products/CHIRTS"
 iDirTc <- "U:/observed/gridded_products/era5/sis-agromet/nc/2m_temperature"
-oBDir <- "D:/cenavarro/yapu-sud/basedata-historical"
-oIDir <- "D:/cenavarro/yapu-sud/indices_v4_0"
 iDirPm <- "S:/observed/gridded_products/chirps/monthly/world"
+iDirAdm <- "E:/yapu_climate_risk/admin_boundaries"
+iDir <- "E:/yapu_climate_risk"
+oDir <- "E:/yapu_climate_risk"
 
-mv <- -999
-dircdo <- "D:/cenavarro/yapu-sud/cdo/cdo"
-ensoFile <- "D:/cenavarro/yapu-sud/enso_condition.csv"
+# Climate params
+dircdo <- "E:/yapu_climate_risk/cdo/cdo"
+dircdo_1.6.0 <- "E:/yapu_climate_risk/cdo/v1_6_0/cdo"
+ensoFile <- "E:/yapu_climate_risk/enso_condition.csv"
 ndays <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
 enosCond <- c("elnino", "lanina", "normal")
 vars <- c("prec", "tmin","tmax")
+mv <- -999
 resampling <- F
 # probs_q <- c(.25,.45,.55,.75)
 # probs_q <- c(.01,.35,.65,.99)
 # probs_q <- c(.05,.35,.65,.95)
-# probs_q <- c(.023,.159,.841,.977)
-# mag_labels <- c("Month", "x-2sd", "x-1sd", "x+1sd", "x+2sd")
 probs_q <- c(.159,.309,.691,.841)
 mag_labels <- c("Month", "x-1sd", "x-0.5sd", "x+0.5sd", "x+1sd")
+probs_q2 <- c(.023,.159,.841,.977)
+mag_labels2 <- c("Month", "x-2sd", "x-1sd", "x+1sd", "x+2sd")
 
-cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content"
+cly_global <- "U:/GISDATA/AFRICA/Biofisico/clay_content/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"
 lco_global <- "U:/GISDATA/GLOBAL/Biofisico/LAND_COVER/GLOBCOVER_L4_200901_200912_V2.3_reclass.tif"
 dem_global <- "S:/observed/gridded_products/srtm/srtm_v41_30s.tif"
-wei_global <- "D:/cenavarro/yapu-sud/basedata-historical/soils/wei.tif"  
+wei_global <- "U:/GISDATA/GLOBAL/SAGA_wetness_index_global.tif"
+
+# ## Africa splitted list
+# ctrLs = c("SDN", "DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF") 
+# ctrLs = c("COM", "CIV", "DJI", "EGY", "GNQ", "ERI", "GAB", "GHA", "GIN", "GNB") 
+# ctrLs = c("KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MAR") 
+# ctrLs = c("NGA", "COG", "MOZ", "NAM", "RWA", "SHN", "ZAF", "TZA", "COD", "TCD")
+# ctrLs = c("TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE", "STP", "SEN", "SYC", "SLE") 
+# ctrLs = c("SOM", "MYT", "GMB", "REU", "NER", "ETH", "SWZ")
+# 
+# ## LAM splitted list
+# ctrLs = c("ARG", "BRA", "CHL")
+# ctrLs = c("BOL", "COL", "CRI", "CUB", "DOM", "ECU", "SLV") #Errors ARG BRA CHL
+# ctrLs = c("GUF", "GLP", "GTM", "GUY", "HTI", "HND", "MTQ", "MEX", "NIC", "PAN") 
+# ctrLs = c("PRY", "PER", "SUR", "URY", "VEN", "VIR", "ATG")
+# ctrLs = c("ABW", "AIA", "BHS", "BLZ", "BRB", "CUW", "CYM") #Errors ANT, FLK UMI
+# ctrLs = c("DMA", "GRD", "JAM", "KNA", "LCA", "MSR", "PRI")
+# ctrLs = c("SXM", "TCA", "TTO", "VCT", "VGB", "XCL")
+
+# ctrName <- "MWI"
+bigctr <- "no"
+
+cat("Processing ", ctrName)
+
+##################################################
+## Load masks by country                       ###
+##################################################
+
+## Only consider continental part
+ctrShpAdm0 <- paste0(iDirAdm, "/gadm41_", ctrName, "_0.shp")
+ctrLyrAdm0 <- paste0("gadm41_", ctrName, "_0")
+ctrShpAdm0Buf <- paste0(iDirAdm, "/gadm41_", ctrName, "_0_buffer.shp")
+ctrLyrAdm0Buf <- paste0("gadm41_", ctrName, "_0_buffer")
+ctrShpAdm1 <- paste0(iDirAdm, "/gadm41_", ctrName, "_1.shp")
+ctrLyrAdm1 <- paste0("gadm41_", ctrName, "_1")
+ctrShpAdm1Sin <- paste0(iDirAdm, "/gadm41_", ctrName, "_1_sp.shp")
+ctrLyrAdm1Sin <- paste0("gadm41_", ctrName, "_1_sp")
+ctrShpAdm2 <- paste0(iDirAdm, "/gadm41_", ctrName, "_2.shp")
+ctrLyrAdm2 <- paste0("gadm41_", ctrName, "_2")
+ctrShpAdm2Sin <- paste0(iDirAdm, "/gadm41_", ctrName, "_2_sp.shp")
+ctrLyrAdm2Sin <- paste0("gadm41_", ctrName, "_2_sp")
+rsMsk <- paste0(iDirAdm, "/gadm41_", ctrName, "_rs_mask.tif")
+
+oBDir <- paste0(iDir, "/basedata/", ctrName)
+oIDir <- paste0(oDir, "/indices/", ctrName)
 
 if (!file.exists(rsMsk)) {
   ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
@@ -86,223 +113,235 @@ if (!file.exists(rsMsk)) {
   ctrMsk_rs <- writeRaster(mask(crop(dts_dump, ctrMsk), ctrMsk) * 0 + 1, rsMsk)
 }
 
+
+
 ##################################################
 ## Extract CHRIPS by country                   ###
 ##################################################
 
 ## Loop across variables
 for (var in vars){
-  
+
   ## List files by years
-  cat(">. Listing files", "\n")
-  
+  cat(">. Listing available climate files", "\n")
+
   if (var == "prec"){
-    
+
+    cat(" . Croping CHIRPS ", ctrName, "\n")
+
     dtsLs <-  list.files(path=iDirP, pattern=paste0("chirps-v2.0.*.tif"),full.names = T,ignore.case=F)
     prefix <- "chirps-v2.0"
     varLn <- "Precipitation"
     unit <- "mm/day"
-    
+
   } else if (var == "tmin") {
-    
+
+    cat(" . Croping CHRITS/ERA5 ", ctrName, "\n")
+
     ## List files by years
     dtsLs <-  list.files(path=iDirT, pattern=paste0("Tmin.*.tif"),full.names = T,ignore.case=F)
     prefix <- "Tmin"
     varLn <- "MinimumTemperature"
     unit <- "CelsiusDegrees"
-    
+
     ## List files by years
     dtsLsC <-  list.files(path=iDirTc, pattern=paste0("Temperature-Air-2m-Min-24h.*.nc"),full.names = T,ignore.case=F)
     prefix <- "Tmin"
     varLn <- "MinimumTemperature"
     unit <- "CelsiusDegrees"
-    
+
   } else if (var == "tmax") {
-    
+
+    cat(" . Croping CHRITS/ERA5 ", ctrName, "\n")
+
     ## List files by years
     dtsLs <-  list.files(path=iDirT, pattern=paste0("Tmax.*.tif"),full.names = T,ignore.case=F)
     prefix <- "Tmax"
     varLn <- "MaximumTemperature"
     unit <- "CelsiusDegrees"
-    
+
     ## List files by years
     dtsLsC <-  list.files(path=iDirTc, pattern=paste0("Temperature-Air-2m-Max-24h.*.nc"),full.names = T,ignore.case=F)
     prefix <- "Tmax"
-    varLn <- "MaximumTemperature"
+    varLn <- "MinimumTemperature"
     unit <- "CelsiusDegrees"
-    
-  } 
-  
-  ## Output file
-  oNc <- paste0(oBDir, "/", prefix, ".", yi, "-", yf, "_", ctrName, "_daily")
-  
+
+  }
+
   years <- paste(yi:yf, sep="", collapse="|")
   dtsLs_yrs_leap <- dtsLs[grepl(years,dtsLs)]
   dtsLs_yrs <- dtsLs_yrs_leap
-  dtsLsC_yrs_leap <- dtsLsC[grepl(years,dtsLsC)]
-  dtsLsC_yrs <- dtsLsC_yrs_leap
-  # dtsLs_yrs <- dtsLs_yrs_leap[!grepl(".2.29.tif",dtsLs_yrs_leap)] #no leap
-  
-  ## Output directories
-  if (!file.exists(paste0(oBDir))) {dir.create(paste0(oBDir), recursive = TRUE)}
-  if (!file.exists(paste0(oBDir, "/daily-", ctrName))) {dir.create(paste0(oBDir, "/daily-", ctrName), recursive = TRUE)}
-  if (!file.exists(paste0(oBDir, "/daily-", ctrName, "/by-month"))) {dir.create(paste0(oBDir, "/daily-", ctrName, "/by-month"), recursive = TRUE)}
-  
-  #### Crop CHIRPS
-  cat(">. Croping CHIRPS/CHIRTS/ERA ", ctrName, "\n")
-  
-  
-  ## Load Mask (Adm0)
-  # ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
-  ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
-  
-  for (tif in dtsLs_yrs){
-    
-    ## Output file
-    oTif <- paste0(oBDir, "/daily-", ctrName, "/",  substr(basename(tif),1,nchar(basename(tif))-4), ".nc")
-    
-    if (!file.exists(oTif)){
-      
-      ## Load CHIRPS data and cut by mask
-      dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
-      writeRaster(dtsMsk, oTif,  format="CDF",overwrite=F)
-      
-    }
-    
-  }
-  
-  ## Complementary ERA data
-  for (tif in dtsLsC_yrs){
-    
-    ## Output file
-    date <- str_split(basename(tif), "_")[[1]][4]
-    oTif <- paste0(oBDir, "/daily-", ctrName, "/", prefix, ".", substr(date, 1, nchar(date)-4), ".", substr(date, 5, 6), ".", substr(date, 7, 8), ".nc")
-    
-    if (!file.exists(oTif)){
-      
-      ## Load CHIRPS data and cut by mask
-      dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
-      writeRaster(resample(dtsMsk, raster(rsMsk)) - 273.15, oTif,  format="CDF",overwrite=F)
-      
-    }
-    
-  }
-  
-  # if (!file.exists(paste0(oNc, ".nc"))) {
-  
-  # if (!file.exists(paste0(oBDir, "/daily-", ctrName, "/", tail(basename(dtsLs_yrs), n=1)))) {
-  
-  ## Load CHIRPS data and stack
-  for (yr in yi:yf){
-    
-    if (!file.exists(paste0(oBDir, "/", prefix, ".", yr, "_", ctrName, "_daily.nc"))){
-      
-      if (var == "prec"){
-        
-        dtsLs_out <-  list.files(path=paste0(oBDir, "/daily-", ctrName), pattern=paste0("chirps-v2.0.*.nc"), full.names = T,ignore.case=F)
-        
-      } else if (var == "tmin") {
-        
-        dtsLs_out <-  list.files(path=paste0(oBDir, "/daily-", ctrName), pattern=paste0("Tmin.*.nc"), full.names = T,ignore.case=F)
-        
-      } else if (var == "tmax") {
-        
-        dtsLs_out <-  list.files(path=paste0(oBDir, "/daily-", ctrName), pattern=paste0("Tmax.*.nc"), full.names = T,ignore.case=F)
+  dtsLs_yrs <- dtsLs_yrs_leap[!grepl(".2.29.tif",dtsLs_yrs_leap)] #no leap
+
+  ## Output file
+  oNc <- paste0(oBDir, "/daily/", prefix, ".", yi, "-", yf, "_daily")
+
+  ## Last file processed
+  if (!file.exists(paste0(oNc, "_12.nc"))){
+
+    ## Output directories
+    if (!file.exists(paste0(oBDir))) {dir.create(paste0(oBDir), recursive = TRUE)}
+    if (!file.exists(paste0(oBDir, "/daily"))) {dir.create(paste0(oBDir, "/daily"), recursive = TRUE)}
+    if (!file.exists(paste0(oBDir, "/daily/tmp"))) {dir.create(paste0(oBDir, "/daily/tmp"), recursive = TRUE)}
+
+    ## Load Mask (Adm0)
+    # ctrMsk <- readOGR(ctrShpAdm0,layer=ctrLyrAdm0)
+    ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
+
+    for (tif in dtsLs_yrs){
+
+      ## Output file
+      oTif <- paste0(oBDir, "/daily/tmp/",  substr(basename(tif),1,nchar(basename(tif))-4), ".nc")
+
+      if (!file.exists(oTif)){
+
+        ## Load CHIRPS/CHIRTS data and cut by mask
+        dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
+        writeRaster(dtsMsk, oTif,  format="CDF",overwrite=F)
+
       }
-      
-      dtsLs_out_yr <- dtsLs_out[grepl(yr,dtsLs_out)]
-      dtsStk_out <- stack(dtsLs_out_yr)
-      
-      writeRaster(dtsStk_out, paste0(oBDir, "/", prefix, ".", yr, "_", ctrName, "_daily_temp.nc"), format="CDF", overwrite=T)
-      
-      ## Init date
-      iDate <- as.Date(paste0(yr, "-01-01"))
-      
-      ## Add time component, variable name and unit
-      system(paste0(dircdo," -s -settaxis,", iDate, ",12:00:00,1day -chname,variable,", varLn, " -chunit,,", unit, " ",
-                    oBDir, "/", prefix, ".", yr, "_", ctrName, "_daily_temp.nc", " ",
-                    oBDir, "/", prefix, ".", yr, "_", ctrName, "_daily.nc"))
-      
-      ## Remove temporal file
-      unlink(paste0(oBDir, "/", prefix, ".", yr, "_", ctrName, "_daily_temp.nc"))
-      
+
     }
-    
-  }
-  
-  # Merge time-series all years
-  # system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/", prefix, ".", yi:yf, "_", ctrName, "_daily.nc"))), " ", oNc, ".nc"))
-  
-  cat(" . Croping done", ctrName, "\n")
-  
-  # } else {
-  #   
-  #   cat(" . Croping done", ctrName, "\n")
-  #   
-  # }
-  
-  
-  ## Split by months by year
-  for (yr in yi:yf){
-    
-    oNc_mth <- paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr, "_", ctrName, "_daily")
-    oNc_yr <- paste0(oBDir, "/", prefix, ".", yr, "_", ctrName, "_daily")
-    
-    if (!file.exists(paste0(oNc_mth, "_12.nc"))) {
-      
-      system(paste0(dircdo," -s -splitmon ", oNc_yr, ".nc ", oNc_mth, "_"))
-      
+
+    if (var == "tmax" || var == "tmin") {
+
+      dtsLsC_yrs_leap <- dtsLsC[grepl(years,dtsLsC)]
+      dtsLsC_yrs <- dtsLsC_yrs_leap
+
+      ## Complementary ERA data
+      for (tif in dtsLsC_yrs){
+
+        ## Output file
+        date <- str_split(basename(tif), "_")[[1]][4]
+        oTif <- paste0(oBDir, "/daily/tmp/", prefix, ".", substr(date, 1, nchar(date)-4), ".", substr(date, 5, 6), ".", substr(date, 7, 8), ".nc")
+
+        if (!file.exists(oTif)){
+
+          ## Load CHIRPS data and cut by mask
+          dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
+          writeRaster(resample(dtsMsk, raster(rsMsk)) - 273.15, oTif,  format="CDF",overwrite=F)
+
+        }
+
+      }
+
     }
-    
-  }
-  
-  # Merge time-series all years by month
-  for (mth in months){
-    system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yi:yf, "_", ctrName, "_daily_", mth, ".nc"))), " ", 
-                  paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yi, "-", yf, "_", ctrName, "_daily_", mth), ".nc"))
-    
-  }
-  
-  # Merge time-series by 20-yr periods by month
-  for (yr in yi:yf){
-    
-    if(yr<2003){
+
+
+
+    if (!file.exists(paste0(oNc, "_12.nc"))) {
+
+      # if (!file.exists(paste0(oBDir, "/daily-", ctrName, "/", tail(basename(dtsLs_yrs), n=1)))) {
+
+      ## Load CHIRPS data and stack
+      for (yr in yi:yf){
+
+        if (!file.exists(paste0(oBDir, "/daily/", prefix, ".", yr, "_daily.nc"))){
+
+          if (var == "prec"){
+
+            dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("chirps-v2.0.*.nc"), full.names = T,ignore.case=F)
+
+          } else if (var == "tmin") {
+
+            dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("Tmin.*.nc"), full.names = T,ignore.case=F)
+
+          } else if (var == "tmax") {
+
+            dtsLs_out <-  list.files(path=paste0(oBDir, "/daily/tmp"), pattern=paste0("Tmax.*.nc"), full.names = T,ignore.case=F)
+          }
+
+          dtsLs_out_yr <- dtsLs_out[grepl(yr,dtsLs_out)]
+          dtsStk_out <- stack(dtsLs_out_yr)
+
+          writeRaster(dtsStk_out, paste0(oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc"), format="CDF", overwrite=T)
+
+          ## Init date
+          iDate <- as.Date(paste0(yr, "-01-01"))
+
+          ## Add time component, variable name and unit
+          system(paste0(dircdo," -s -settaxis,", iDate, ",12:00:00,1day -chname,variable,", varLn, " -chunit,,", unit, " ",
+                        oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc", " ",
+                        oBDir, "/daily/", prefix, ".", yr, "_daily.nc"))
+
+          ## Remove temporal file
+          unlink(paste0(oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc"))
+
+        }
+
+      }
+
+
+      ## Split by months by year
+      for (yr in yi:yf){
+
+        oNc_yr <- paste0(oBDir, "/daily/", prefix, ".", yr, "_daily")
+        oNc_mth <- oNc_yr
+
+        if (!file.exists(paste0(oNc_mth, "_12.nc"))) {
+          system(paste0(dircdo," -s -splitmon ", oNc_yr, ".nc ", oNc_mth, "_"))
+          unlink(paste0(oNc_yr, ".nc"))
+
+        }
+
+      }
+
+
+
+      # Merge time-series all years by month
       for (mth in months){
-        yrp <- yr+19
-        system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr:yrp, "_", ctrName, "_daily_", mth, ".nc"))), " ", 
-                      paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr, "-", yrp, "_", ctrName, "_daily_", mth), ".nc"))
+        system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily/", prefix, ".", yi:yf, "_daily_", mth, ".nc"))), " ",
+                      paste0(oNc, "_", mth), ".nc"))
+
       }
+
+      # # Merge time-series by 20-yr periods by month
+      # for (yr in yi:yf){
+      #
+      #   if(yr<2003){
+      #     for (mth in months){
+      #       yrp <- yr+19
+      #       system(paste0(dircdo," -s mergetime ", gsub(", "," ", toString(paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr:yrp, "_", ctrName, "_daily_", mth, ".nc"))), " ",
+      #                     paste0(oBDir, "/daily-", ctrName, "-bymonth", "/", prefix, ".", yr, "-", yrp, "_", ctrName, "_daily_", mth), ".nc"))
+      #     }
+      #   }
+      #
+      # }
+
+
+      ## Dissagregate to 0.025 and 0.01 deg (for smaller zones analyses)
+      if (resampling == T && !file.exists(paste0(oNc, "_res001.nc"))) {
+
+        dtsMskDiss_025 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(2,2), method='')
+        oNcWrite <- writeRaster(dtsMskDiss_025, paste0(oNc, "_res0025.nc"), format="CDF", overwrite=T)
+        dtsMskDiss_001 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(5,5), method='')
+        oNcWrite <- writeRaster(dtsMskDiss_001, paste0(oNc, "_res001.nc"), format="CDF", overwrite=T)
+
+        cat(" . Dissagregate done", ctrName, "\n")
+
+      }
+
+
+      # ## Split by months
+      # if (!file.exists(paste0(oNc, "_12.nc"))) {
+      #
+      #   system(paste0(dircdo," -s -splitmon ", oNc, ".nc ", oNc, "_"))
+      #
+      #   if (resampling == T){
+      #     system(paste0(dircdo," -s -splitmon ", oNc, "_res0025", ".nc ", oNc, "_res0025", "_"))
+      #     system(paste0(dircdo," -s -splitmon ", oNc, "_res001", ".nc ", oNc, "_res001", "_"))
+      #   }
+      #
+      # }
     }
-    
+
+    ## Remove temporal daily files
+    unlink(paste0(oBDir, "/daily/tmp"), recursive = T)
+
   }
-  
-  
-  ## Dissagregate to 0.025 and 0.01 deg (for smaller zones analyses)
-  if (resampling == T && !file.exists(paste0(oNc, "_res001.nc"))) {
-    
-    dtsMskDiss_025 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(2,2), method='')
-    oNcWrite <- writeRaster(dtsMskDiss_025, paste0(oNc, "_res0025.nc"), format="CDF", overwrite=T)
-    dtsMskDiss_001 <- disaggregate(stack(paste0(oNc, ".nc")), fact=c(5,5), method='')
-    oNcWrite <- writeRaster(dtsMskDiss_001, paste0(oNc, "_res001.nc"), format="CDF", overwrite=T)
-    
-    cat(" . Dissagregate done", ctrName, "\n")
-    
-  }
-  
-  
-  # ## Split by months 
-  # if (!file.exists(paste0(oNc, "_12.nc"))) {
-  #   
-  #   system(paste0(dircdo," -s -splitmon ", oNc, ".nc ", oNc, "_"))
-  #   
-  #   if (resampling == T){
-  #     system(paste0(dircdo," -s -splitmon ", oNc, "_res0025", ".nc ", oNc, "_res0025", "_"))
-  #     system(paste0(dircdo," -s -splitmon ", oNc, "_res001", ".nc ", oNc, "_res001", "_"))
-  #   }
-  #   
-  # }
-  
+
 }
+
 
 ##################################################
 ## CDD. Maximum number of consecutive dry days ###
@@ -319,7 +358,7 @@ lanina <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >=
 normal <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi & as.vector(ensoCond$Year) <= yf)
 
 ## CDD output work directory
-oBDirW <- paste0(oBDir, "/indices", "-", ctrName)
+oBDirW <- paste0(oBDir, "/indices")
 if (!file.exists(oBDirW)) {dir.create(oBDirW, recursive = TRUE)}
 
 
@@ -333,7 +372,7 @@ if (!file.exists(paste0(oIDirHCdd))) {dir.create(paste0(oIDirHCdd), recursive = 
 ## CDD Calcs all years all months
 cat(">. Calculating CDD Historical ", ctrName, "\n")
 
-iNc <- paste0(oBDir, "/daily-", ctrName, "/by-month/chirps-v2.0.", yi, "-", yf, "_", ctrName, "_daily")
+iNc <- paste0(oBDir, "/daily/chirps-v2.0.", yi, "-", yf, "_daily")
 oCddW <- paste0(oBDirW, "/cdd_", ctrName)
 oCdd <- paste0(oIDirHCdd, "/cdd_", ctrName)
 
@@ -469,7 +508,7 @@ for (m in 1:12){
     }
     
     cat(" . CDD Month ", m, "done\n")
-
+    
     
     
   } else {
@@ -604,83 +643,6 @@ for (m in 1:12){
 cat(">. CDD calcs done", "\n")
 
 
-
-# ## Moving average ##
-# 
-# ## CDD output directory recent past
-# oIDirM <- paste0(oIDir, "/moving-average")
-# oIDirMCdd <- paste0(oIDirM, "/cdd")
-# if (!file.exists(paste0(oIDirMCdd))) {dir.create(paste0(oIDirMCdd), recursive = TRUE)}
-# 
-# ## CDD Calcs all years all months
-# cat(">. Calculating CDD Recent Past ", ctrName, "\n")
-# oCddM <- paste0(oIDirMCdd, "/cdd_", ctrName)
-# 
-# ## Load Mask (Adm0)
-# ctrMsk0 <- raster(rsMsk)
-# 
-# for (yr in yi:yi_r){
-#   
-#   elnino_m <- subset(ensoCond, ensoCond$Values >= 0.5 & as.vector(ensoCond$Year) >= yr & as.vector(ensoCond$Year) <= (yr + 19) )
-#   lanina_m <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >= yr & as.vector(ensoCond$Year) <= (yr + 19))
-#   normal_m <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yr & as.vector(ensoCond$Year) <= (yr + 19))
-#   
-#   for (m in 1:12){
-#     
-#     if (!file.exists(paste0(oCddM, yr, "_", yr+19, "_", m, "_normal.shp"))) {
-#       
-#       cat(" . CDD Month ", yr, "-", yr+19, " ",  m, "processing\n")
-#       
-#       ## El Nino, La Nina, Normal years selection 
-#       elnino_m_m <- subset(elnino_m, elnino_m$Month == m)
-#       lanina_m_m <- subset(lanina_m, lanina_m$Month == m)
-#       normal_m_m <- subset(normal_m, normal_m$Month == m)
-#       
-#       ## Calculate mean consecutive dry days length by condition
-#       cdd_elnino_m <- mean(stack(paste0(oCddW, "_", elnino_m_m$Year, "_", m, ".nc")))
-#       cdd_lanina_m <- mean(stack(paste0(oCddW, "_", lanina_m_m$Year, "_", m, ".nc")))
-#       cdd_normal_m <- mean(stack(paste0(oCddW, "_", normal_m_m$Year, "_", m, ".nc")))
-#       
-#       writeRaster(cdd_elnino_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
-#       writeRaster(cdd_lanina_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
-#       writeRaster(cdd_normal_m, paste0(oCddM, "_", yr, "_", yr+19, "_", m, "_normal.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
-#     }
-#   }
-# }
-# 
-# for (m in 1:12){
-#   
-#   cddLs <-  list.files(path=paste0(oIDirMCdd), pattern=paste0("cdd_", ctrName), full.names = T,ignore.case=F)
-#   cddLs_m <- cddLs[grepl(paste0("_", m, "_"),cddLs)]
-#   
-#   for (enos in enosCond){
-#     
-#     cddLs_m_enos <- cddLs_m[grepl(enos,cddLs_m)]
-#     
-#     cdd_stk <- rast(cddLs_m_enos)
-#     cdd_beta <- terra::app(cdd_stk, fun = function(x){
-#       x <- as.numeric(na.omit(x))
-#       if(length(x) > 1){
-#         y <- trend::sens.slope(x)$estimates
-#       } else {
-#         y <- NA
-#       }
-#       return(y)
-#     })
-#     cdd_pred <- cdd_beta * (length(cddLs_m_enos) + 1)
-#     
-#     
-#     terra::writeRaster(cdd_beta, paste0(oCddM, "_beta", "_", m, "_", enos, ".tif"), overwrite=T)
-#     terra::writeRaster(cdd_pred, paste0(oCddM, "_pred", "_", m, "_", enos, ".tif"), overwrite=T)
-#     
-#     
-#   }
-#   
-# }
-
-
-
-
 ##################################################
 ## DRD. Dry days calculation                   ###
 ## Vulnerability type: Drought                 ###
@@ -712,7 +674,7 @@ ctrMsk0 <- raster(rsMsk)
 ## DRD Calcs all years all months
 cat(">. Calculating DRD ", ctrName, " historical\n")
 
-iNc <- paste0(oBDir, "/daily-", ctrName, "/by-month/chirps-v2.0.", yi, "-", yf, "_", ctrName, "_daily")
+iNc <- paste0(oBDir, "/daily/chirps-v2.0.", yi, "-", yf, "_daily")
 oDrdW <- paste0(oBDirW, "/drd_", ctrName)
 oWetW <- paste0(oBDirW, "/wet_", ctrName)
 oDrd <- paste0(oIDirHDrd, "/drd_", ctrName)
@@ -740,14 +702,14 @@ for (m in 1:12){
     writeRaster(drdStk_yrs, paste0(oDrdW, "_", yi, "-", yf, "_", m, ".nc"), format="CDF", overwrite=T)
     
     # Quantiles by month
-    q <- paste(summary(quantile(drdStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
+    q <- paste(summary(quantile(drdStk_yrs, probs = probs_q2, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
     drd_mag <- rbind(drd_mag, c(m, round(as.numeric(gsub("  ", "", gsub("Mean   :","", q))))))
     
     ## El Nino, La Nina, Normal years selection 
     elnino_m <- subset(elnino, elnino$Month == m)
     lanina_m <- subset(lanina, lanina$Month == m)
     normal_m <- subset(normal, normal$Month == m)
-
+    
     ## Calculate mean consecutive dry days length by condition
     drd_elnino <- mean( abs(stack(paste0(oWetW, "_", elnino_m$Year, "_", m, ".nc")) - ndays[m]) )
     drd_lanina <- mean( abs(stack(paste0(oWetW, "_", lanina_m$Year, "_", m, ".nc")) - ndays[m]) )
@@ -949,7 +911,7 @@ for (m in 1:12){
       
     }
     
-    names(drd_mag) <- mag_labels
+    names(drd_mag) <- mag_labels2
     write.csv(drd_mag, paste0(oIDirRDrd, "/drd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
     
     
@@ -996,46 +958,120 @@ if (!file.exists(paste0(oIDirHP95))) {dir.create(paste0(oIDirHP95), recursive = 
 ## P95 Calcs all years all months
 cat(">. Calculating P95 ", ctrName, "\n")
 
-iNc <- paste0(oBDir, "/daily-", ctrName, "/by-month/chirps-v2.0.", yi, "-", yf, "_", ctrName, "_daily")
+iNc <- paste0(oBDir, "/daily/chirps-v2.0.", yi, "-", yf, "_daily")
 oP95WRef <- paste0(oBDirW, "/p95_", yi, "-", yf, "_", ctrName)
 oP95W <- paste0(oBDirW, "/p95_", ctrName)
 oP95 <- paste0(oIDirHP95, "/p95_", ctrName)
 
-if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
+ctrMsk0 <- raster(rsMsk)
+
+
+if(bigctr == "yes"){
   
-  for (m in 1:12){
+  if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
     
-    if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+    for (m in 1:12){
       
-      ## Calc time-series wet days
-      system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+      if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+        
+        ## Calc time-series wet days
+        system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+        
+      }
+      
+      system(paste0(dircdo," -s -sellonlatbox,", xmin(extent(ctrMsk0)), ",", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_", sprintf("%02d", m), "_a.nc"))
+      
+      system(paste0(dircdo," -s -sellonlatbox,", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", xmax(extent(ctrMsk0)), ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_", sprintf("%02d", m), "_b.nc"))
+      
+      
+      system(paste0(dircdo," -s -sellonlatbox,", xmin(extent(ctrMsk0)), ",", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_wet_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_wet_", sprintf("%02d", m), "_a.nc"))
+      
+      system(paste0(dircdo," -s -sellonlatbox,", (xmin(extent(ctrMsk0))+xmax(extent(ctrMsk0)))/2, ",", xmax(extent(ctrMsk0)), ",", ymin(extent(ctrMsk0)), ",", ymax(extent(ctrMsk0)), " ", 
+                    iNc, "_wet_", sprintf("%02d", m), ".nc", " ", 
+                    iNc, "_wet_", sprintf("%02d", m), "_b.nc"))
+      
+      if (m == 2){
+        # Calc yday p95 ref. period of wet days time-series
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_a.nc", " ",
+                      oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc"))
+        
+        # Calc yday p95 ref. period of wet days time-series
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_b.nc", " ",
+                      oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc"))
+        
+        system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc", " ",
+                      oP95WRef, "_",  sprintf("%02d", m),"_a.nc"))
+        
+        system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc", " ",
+                      oP95WRef, "_",  sprintf("%02d", m),"_b.nc"))
+        
+        
+      } else {
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_a.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_a.nc", " ",
+                      oP95WRef, "_", sprintf("%02d", m), "_a.nc"))
+        
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,"_b.nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), "_b.nc", " ",
+                      oP95WRef, "_", sprintf("%02d", m), "_b.nc"))
+        
+      }
+      
+      
       
     }
     
+  }
+  
+} else {
+  
+  if (!file.exists(paste0(oP95WRef, "_noleap", "_12.nc"))) {
     
-    if (m == 2){
-      # Calc yday p95 ref. period of wet days time-series
-      system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
-                    oP95WRef, "_leap_", sprintf("%02d", m), ".nc"))
-      system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ",
-                    oP95WRef, "_",  sprintf("%02d", m),".nc"))
-    } else {
-      system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
-                    "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
-                    oP95WRef, "_", sprintf("%02d", m), ".nc"))
+    for (m in 1:12){
+      
+      if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
+        
+        ## Calc time-series wet days
+        system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+        
+      }
+      
+      
+      if (m == 2){
+        # Calc yday p95 ref. period of wet days time-series
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
+                      oP95WRef, "_leap_", sprintf("%02d", m), ".nc"))
+        system(paste0(dircdo," -s delete,month=2,day=29 ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ",
+                      oP95WRef, "_",  sprintf("%02d", m),".nc"))
+      } else {
+        system(paste0(dircdo," -s ydrunpctl,95,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmin,5 ", iNc, "_wet_", sprintf("%02d", m) ,".nc", " ",
+                      "-ydrunmax,5 ", iNc, "_wet_", sprintf("%02d", m), ".nc", " ",
+                      oP95WRef, "_", sprintf("%02d", m), ".nc"))
+      }
+      
+      
+      
     }
-
-
     
   }
   
 }
 
-
-ctrMsk0 <- raster(rsMsk)
 
 
 ## Historical
@@ -1051,23 +1087,61 @@ for (m in 1:12){
     
     for (yr in yi:yf){
       
-      if (leap_year(yr) == T && m == 2) {
+      if(bigctr == "yes"){
         
-        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+        if (leap_year(yr) == T && m == 2) {
           
-          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                        " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
+                          " ", oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
+                          " ", oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
+            
+          }
+          
+        } else {
+          
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
+                          " ", oP95WRef, "_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
+                          " ", oP95WRef, "_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
+            
+          }
+          
         }
+        
+        writeRaster(merge(raster(paste0(oP95W, "_", yr, "_", m, "_a.nc")), raster(paste0(oP95W, "_", yr, "_", m, "_b.nc"))), 
+                    paste0(oP95W, "_", yr, "_", m, ".nc"), overwrite=T)
+        file.remove(paste0(oP95W, "_", yr, "_", m, "_a.nc"))
+        file.remove(paste0(oP95W, "_", yr, "_", m, "_b.nc"))
         
       } else {
         
-        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+        if (leap_year(yr) == T && m == 2) {
           
-          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                        " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
+                          " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          }
+          
+        } else {
+          
+          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+            
+            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
+                          " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+          }
+          
         }
         
       }
+      
     }
     
     
@@ -1075,7 +1149,7 @@ for (m in 1:12){
     elnino_m <- subset(elnino, elnino$Month == m)
     lanina_m <- subset(lanina, lanina$Month == m)
     normal_m <- subset(normal, normal$Month == m)
-
+    
     if (!file.exists(paste0(oP95, "_", m, "_normal.tif"))) {
       
       ## Calculate mean consecutive dry days length by condition
@@ -1333,7 +1407,7 @@ if (!file.exists(paste0(oIDirHFrd))) {dir.create(paste0(oIDirHFrd), recursive = 
 ## FRD Calcs all years all months
 cat(">. Calculating FRD ", ctrName, "\n")
 
-iNc <- paste0(oBDir, "/daily-", ctrName, "/by-month/Tmin.", yi, "-", yf, "_", ctrName, "_daily")
+iNc <- paste0(oBDir, "/daily/Tmin.", yi, "-", yf, "_daily")
 oFrdW <- paste0(oBDirW, "/frd_", ctrName)
 oFrd <- paste0(oIDirHFrd, "/frd_", ctrName)
 
@@ -1372,7 +1446,7 @@ for (m in 1:12){
     elnino_m <- subset(elnino, elnino$Month == m)
     lanina_m <- subset(lanina, lanina$Month == m)
     normal_m <- subset(normal, normal$Month == m)
-
+    
     ## Calculate mean frost days  by condition
     frd_elnino <- resample(mean( stack(paste0(oFrdW, "_", elnino_m$Year, "_", m, ".nc")) ), ctrMsk0)
     frd_lanina <- resample(mean( stack(paste0(oFrdW, "_", lanina_m$Year, "_", m, ".nc")) ), ctrMsk0)
@@ -1643,6 +1717,7 @@ if (!file.exists(oBDirW)) {dir.create(oBDirW, recursive = TRUE)}
 
 ## Soils data work directory
 oBDirS <- paste0(oBDir, "/soils")
+if (!file.exists(paste0(oBDirS))) {dir.create(paste0(oBDirS), recursive = TRUE)}
 
 ## FLD output directory
 oIDirH <- paste0(oIDir, "/historical")
@@ -1654,14 +1729,14 @@ oFld <- paste0(oIDirHFld, "/fld_", ctrName)
 
 
 #### Crop CHIRPS monthly
-cat(">. Croping CHIRPS ", ctrName, "\n")
+cat(">. Croping monthly CHIRPS ", ctrName, "\n")
 
 ## Load Mask (Adm0)
 ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
 ctrMsk0 <- raster(rsMsk)
 
 # Output directory
-if (!file.exists(paste0(oBDir, "/monthly-", ctrName))) {dir.create(paste0(oBDir, "/monthly-", ctrName), recursive = TRUE)}
+if (!file.exists(paste0(oBDir, "/monthly"))) {dir.create(paste0(oBDir, "/monthly"), recursive = TRUE)}
 
 
 for (m in 1:12){
@@ -1669,7 +1744,7 @@ for (m in 1:12){
   for (yr in yi:yf){
     
     iNc <- paste0(iDirPm, "/v2p0chirps", yr,  sprintf("%02d", m), ".bil")
-    oNc <- paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", yr,  sprintf("%02d", m), "_", ctrName, "_monthly.nc")
+    oNc <- paste0(oBDir, "/monthly/chirps-v2.0.", yr,  sprintf("%02d", m), "_monthly.nc")
     
     if (!file.exists(oNc)){
       
@@ -1693,26 +1768,26 @@ lco <- paste0(oBDirS, "/LU_LC_rec.tif")
 
 if (!file.exists(cly)) {
   
-  if (!file.exists(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))) {
-    
-  sd1 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd1_250m.tif"))
-  sd2 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd2_250m.tif"))
-  sd3 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd3_250m.tif"))
-  sd4 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd4_250m.tif"))
-  sd5 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd5_250m.tif"))
-  sd6 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd6_250m.tif"))
-  sdAvg <- ( (sd1 * 5) + (sd2 * 10)  + (sd3 * 15) + (sd4 * 30) + (sd5 * 40) + (sd6 * 100) ) / 200
-  writeRaster(sdAvg, paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+  # if (!file.exists(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))) {
+  #   
+  #   sd1 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd1_250m.tif"))
+  #   sd2 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd2_250m.tif"))
+  #   sd3 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd3_250m.tif"))
+  #   sd4 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd4_250m.tif"))
+  #   sd5 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd5_250m.tif"))
+  #   sd6 <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sd6_250m.tif"))
+  #   sdAvg <- ( (sd1 * 5) + (sd2 * 10)  + (sd3 * 15) + (sd4 * 30) + (sd5 * 40) + (sd6 * 100) ) / 200
+  #   writeRaster(sdAvg, paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
+  #   
+  # }
   
-  }
-  
-  sdAvg <- raster(paste0(cly_global, "/af_CLYPPT_T__M_sdAvg_250m_prj_res.tif"))
+  sdAvg <- raster(cly_global)
   sdAvg_crop <- crop(sdAvg, ctrMsk0)
   sdAvg_crop[is.na(sdAvg_crop)] <- 0
   sdAvg_res <- resample(sdAvg_crop, ctrMsk0)
   sdAvg_rec <- reclassify(sdAvg_res, c(-Inf,20,1, 20,40,2, 40,60,3, 60,80,4, 80,Inf,5))
   writeRaster(sdAvg_rec, cly, format="GTiff", overwrite=T, datatype='FLT4S')
-              
+  
 }
 
 if (!file.exists(lco)) {
@@ -1749,6 +1824,9 @@ if (!file.exists(wei)) {
 if (!file.exists(paste0(oIDirHFld, "/lco_", ctrName, ".tif"))) {
   
   cly_res <- mask(raster(cly), ctrMsk0, method='ngb')
+  cly_res[is.na(cly_res)] <- 1
+  cly_res <- mask(cly_res, ctrMsk0, method='ngb')
+  
   slp_res <- mask(raster(slp), ctrMsk0, method='ngb')
   wei_res <- mask(raster(wei), ctrMsk0, method='ngb')
   lco_res <- mask(raster(lco), ctrMsk0, method='ngb')
@@ -1774,7 +1852,7 @@ for (m in 1:12){
   if (!file.exists(paste0("fld_", ctrName, "_", m, "_normal.shp"))) {
     
     ## Load CHIRPS data and stack
-    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", yi:yf,  sprintf("%02d", m), "_", ctrName,"_monthly.nc")), ctrMsk0, method='ngb'), ctrMsk0)
+    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly/chirps-v2.0.", yi:yf,  sprintf("%02d", m), "_monthly.nc")), ctrMsk0, method='ngb'), ctrMsk0)
     
     ## Remove -9999.9
     prcStk_yrs[which(prcStk_yrs[]<0)]=0
@@ -1786,13 +1864,13 @@ for (m in 1:12){
     
     # Quantiles by month
     q <- paste(summary(quantile(prcStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
-    prc_mag <- rbind(prc_mag, c(m, round(as.numeric(gsub("  ", "", gsub("Mean   :","", q))))))
+    prc_mag <- rbind(prc_mag, c(m, as.numeric(gsub("  ", "", gsub("Mean   :","", q)))))
     prc_mag_mtx <- matrix(c(-1, prc_mag[m, 2], 1,
                             prc_mag[m, 2], prc_mag[m, 3], 2,
                             prc_mag[m, 3], prc_mag[m, 4], 3,
                             prc_mag[m, 4], prc_mag[m, 5], 4,
                             prc_mag[m, 5], 4000, 5), ncol=3, byrow=TRUE)
-
+    
     # prc_mag_mtx <- matrix(c(4000, prc_mag[m, 5], 5,  
     #                         prc_mag[m, 5], prc_mag[m, 4], 4,  
     #                         prc_mag[m, 4], prc_mag[m, 3], 3, 
@@ -1811,9 +1889,9 @@ for (m in 1:12){
     
     
     ## Calculate mean monthly prec by condition
-    prc_elnino <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
-    prc_lanina <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
-    prc_normal <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_elnino <- mask(resample(mean(stack(paste0(oBDir, "/monthly/chirps-v2.0.", elnino_m$Year, sprintf("%02d", m), "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_lanina <- mask(resample(mean(stack(paste0(oBDir, "/monthly/chirps-v2.0.", lanina_m$Year, sprintf("%02d", m), "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_normal <- mask(resample(mean(stack(paste0(oBDir, "/monthly/chirps-v2.0.", normal_m$Year, sprintf("%02d", m), "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
     
     prc_elnino[which(prc_elnino[]<0)]=0
     prc_lanina[which(prc_lanina[]<0)]=0
@@ -1917,7 +1995,7 @@ for (m in 1:12){
   if (!file.exists(paste0("fld_", ctrName, "_", m, "_normal.shp"))) {
     
     ## Load CHIRPS data and stack
-    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", yi_r:yf_r,  sprintf("%02d", m), "_", ctrName,"_monthly.nc")), ctrMsk0, method='ngb'), ctrMsk0)
+    prcStk_yrs <- mask(resample(stack(paste0(oBDir, "/monthly/chirps-v2.0.", yi_r:yf_r,  sprintf("%02d", m), "_monthly.nc")), ctrMsk0, method='ngb'), ctrMsk0)
     
     ## Remove -9999.9
     prcStk_yrs[which(prcStk_yrs[]<0)]=0
@@ -1947,11 +2025,11 @@ for (m in 1:12){
     elnino_m_r <- subset(elnino_r, elnino_r$Month == m)
     lanina_m_r <- subset(lanina_r, lanina_r$Month == m)
     normal_m_r <- subset(normal_r, normal_r$Month == m)
-
+    
     ## Calculate mean monthly prec by condition
-    prc_elnino_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", elnino_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
-    prc_lanina_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", lanina_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
-    prc_normal_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly-", ctrName, "/chirps-v2.0.", normal_m_r$Year, sprintf("%02d", m), "_", ctrName, "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_elnino_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly/chirps-v2.0.", elnino_m_r$Year, sprintf("%02d", m), "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_lanina_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly/chirps-v2.0.", lanina_m_r$Year, sprintf("%02d", m), "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
+    prc_normal_r <- mask(resample(mean(stack(paste0(oBDir, "/monthly/chirps-v2.0.", normal_m_r$Year, sprintf("%02d", m), "_monthly.nc"))), ctrMsk0, method='ngb'), ctrMsk0)
     
     prc_elnino_r[which(prc_elnino_r[]<0)]=0
     prc_lanina_r[which(prc_lanina_r[]<0)]=0
@@ -2050,7 +2128,7 @@ lanina <- subset(ensoCond, ensoCond$Values <= -0.5 & as.vector(ensoCond$Year) >=
 normal <- subset(ensoCond, ensoCond$Values < 0.5 & ensoCond$Values > -0.5 & as.vector(ensoCond$Year) >= yi & as.vector(ensoCond$Year) <= yf)
 
 ## HWD output work directory
-oBDirW <- paste0(oBDir, "/indices", "-", ctrName)
+oBDirW <- paste0(oBDir, "/indices")
 if (!file.exists(oBDirW)) {dir.create(oBDirW, recursive = TRUE)}
 
 
@@ -2064,8 +2142,8 @@ if (!file.exists(paste0(oIDirHHwd))) {dir.create(paste0(oIDirHHwd), recursive = 
 ## HWD Calcs all years all months
 cat(">. Calculating HWD Historical ", ctrName, "\n")
 
-iNc <- paste0(oBDir, "/daily-", ctrName, "/by-month/Tmax.", yi, "-", yf, "_", ctrName, "_daily")
-oTxWRef <- paste0(oBDirW, "/txavg_", yi, "-", yf, "_", ctrName)
+iNc <- paste0(oBDir, "/daily/Tmax.", yi, "-", yf, "_daily")
+oTxWRef <- paste0(oBDirW, "/txavg_", yi, "-", yf)
 
 oHwdW <- paste0(oBDirW, "/hwd_", ctrName)
 oHwd <- paste0(oIDirHHwd, "/hwd_", ctrName)
@@ -2094,25 +2172,25 @@ for (m in 1:12){
     #                 oTxWRef, "_", sprintf("%02d", m), ".nc"))
     # }
     
-    # ## Calc heat waves for each year/month
-    # for (yr in yi:yf){
-    #   
-    #   if (!file.exists(paste0(oHwdW, "_", yr, "_", m, ".nc"))) {
-    # 
-    #       system(paste0(dircdo," -s -eca_hwdi,6,5 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", 
-    #                     iNc, "_", sprintf("%02d", m) ,".nc", " ", oHwdW, "_", yr, "_", m, "_tmp.nc"))
-    # 
-    #       system(paste0(dircdo," -s -select,name=heat_waves_per_time_period ", oHwdW, "_", yr, "_", m, "_tmp.nc", " ", oHwdW, "_", yr, "_", m, ".nc"))
-    # 
-    #       file.remove(paste0(oHwdW, "_", yr, "_", m, "_tmp.nc"))
-    #     
-    #   }
-    # }
+    ## Calc heat waves for each year/month
+    for (yr in yi:yf){
+      
+      if (!file.exists(paste0(oHwdW, "_", yr, "_", m, ".nc"))) {
+        
+        system(paste0(dircdo," -s -eca_hwdi,6,5 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", 
+                      iNc, "_", sprintf("%02d", m) ,".nc", " ", oHwdW, "_", yr, "_", m, "_tmp.nc"))
+        
+        system(paste0(dircdo," -s -select,name=heat_waves_per_time_period ", oHwdW, "_", yr, "_", m, "_tmp.nc", " ", oHwdW, "_", yr, "_", m, ".nc"))
+        
+        file.remove(paste0(oHwdW, "_", yr, "_", m, "_tmp.nc"))
+        
+      }
+    }
     
     ## Load CHIRPS data and stack
     hwdStk_yrs <- stack(paste0(oHwdW, "_", yi:yf, "_", m, ".nc"))
     writeRaster(hwdStk_yrs, paste0(oHwdW, "_", yi, "-", yf, "_", m, ".nc"), format="CDF", overwrite=T)
-
+    
     # Quantiles by month
     q <- paste(summary(quantile(hwdStk_yrs, probs = probs_q, names = FALSE, na.rm=TRUE)))[c(4,10,16,22)]
     hwd_mag <- rbind(hwd_mag, c(m, as.numeric(gsub("  ", "", gsub("Mean   :","", q)))))
@@ -2127,16 +2205,8 @@ for (m in 1:12){
     
     ## Calculate heat wave duration average by condition
     hwd_elnino <- mean(stack(paste0(oHwdW, "_", elnino_m$Year, "_", m, ".nc")))
-    hwd_elnino[is.na(hwd_elnino[])] <- 0 
-    hwd_elnino <- mask(hwd_elnino, ctrMsk0)
-    
     hwd_lanina <- mean(stack(paste0(oHwdW, "_", lanina_m$Year, "_", m, ".nc")))
-    hwd_lanina[is.na(hwd_lanina[])] <- 0 
-    hwd_lanina <- mask(hwd_lanina, ctrMsk0)
-    
     hwd_normal <- mean(stack(paste0(oHwdW, "_", normal_m$Year, "_", m, ".nc")))
-    hwd_normal[is.na(hwd_normal[])] <- 0 
-    hwd_normal <- mask(hwd_normal, ctrMsk0)
     
     writeRaster(hwd_elnino, paste0(oHwd, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     writeRaster(hwd_lanina, paste0(oHwd, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
@@ -2192,34 +2262,34 @@ for (m in 1:12){
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       
-      # ## Load Mask (Adm2)
-      # ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
-      # 
-      # ## Extract values inside polygons and calc avg
-      # oHwdVals <- extract(dtsRs, ctrMsk)
-      # # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
-      # 
-      # ## Reclassify by magnitude ranges based on quantiles
-      # ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
-      # oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
-      # 
-      # oHwdVuln_mean <- oHwdVuln
-      # 
-      # oHwdVuln <- oHwdVuln %>% mutate(vuln =
-      #                                   case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
-      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
-      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
-      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
-      #                                             oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
-      # )
-      # 
-      # ## Join mean values to polygon data and write shapefile
-      # ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
-      # writeOGR(ctrMsk, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
-      #          driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
-      # 
-      # cat(" . HWD Month ", m, " ", enos, "done\n")
-      # 
+      ## Load Mask (Adm2)
+      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      
+      ## Extract values inside polygons and calc avg
+      oHwdVals <- extract(dtsRs, ctrMsk)
+      # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
+      
+      ## Reclassify by magnitude ranges based on quantiles
+      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
+      
+      oHwdVuln_mean <- oHwdVuln
+      
+      oHwdVuln <- oHwdVuln %>% mutate(vuln =
+                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
+                                                  oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      )
+      
+      ## Join mean values to polygon data and write shapefile
+      ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
+      writeOGR(ctrMsk, oIDirHHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      
+      cat(" . HWD Month ", m, " ", enos, "done\n")
+      
       names(hwd_mag) <- mag_labels
       write.csv(hwd_mag, paste0(oIDirHHwd, "/hwd_", ctrName, "_", m, "_", enos, "_mag_class", ".csv"), row.names=F)
       
@@ -2269,16 +2339,8 @@ for (m in 1:12){
     
     ## Calculate mean consecutive dry days length by condition
     hwd_elnino_r <- mean(stack(paste0(oHwdW, "_", elnino_m_r$Year, "_", m, ".nc")))
-    hwd_elnino_r[is.na(hwd_elnino_r[])] <- 0 
-    hwd_elnino_r <- mask(hwd_elnino_r, ctrMsk0)
-    
     hwd_lanina_r <- mean(stack(paste0(oHwdW, "_", lanina_m_r$Year, "_", m, ".nc")))
-    hwd_lanina_r[is.na(hwd_lanina_r[])] <- 0 
-    hwd_lanina_r <- mask(hwd_lanina_r, ctrMsk0)
-    
     hwd_normal_r <- mean(stack(paste0(oHwdW, "_", normal_m_r$Year, "_", m, ".nc")))
-    hwd_normal_r[is.na(hwd_normal_r[])] <- 0 
-    hwd_normal_r <- mask(hwd_normal_r, ctrMsk0)
     
     writeRaster(hwd_elnino_r, paste0(oHwdR, "_", m, "_elnino.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
     writeRaster(hwd_lanina_r, paste0(oHwdR, "_", m, "_lanina.tif"), format="GTiff", overwrite=T, datatype='FLT4S')
@@ -2328,28 +2390,28 @@ for (m in 1:12){
                driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       
-      # ## Load Mask (Adm2)
-      # ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
-      # 
-      # ## Extract values inside polygons and calc avg
-      # oHwdVals <- extract(dtsRs, ctrMsk)
-      # # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
-      # 
-      # ## Reclassify by magnitude ranges based on quantiles
-      # ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
-      # oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
-      # oHwdVuln <- oHwdVuln %>% mutate(vuln =
-      #                                   case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
-      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
-      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
-      #                                             (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
-      #                                             oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
-      # )
-      # 
-      # ## Join mean values to polygon data and write shapefile
-      # ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
-      # writeOGR(ctrMsk, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
-      #          driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
+      ## Load Mask (Adm2)
+      ctrMsk <- readOGR(ctrShpAdm2Sin, layer=ctrLyrAdm2Sin)
+      
+      ## Extract values inside polygons and calc avg
+      oHwdVals <- extract(dtsRs, ctrMsk)
+      # oHwdValsAvg <- round(unlist(lapply(oHwdVals, FUN=mean)))
+      
+      ## Reclassify by magnitude ranges based on quantiles
+      ## 1 - Very low; 2 - Low; 3 - Medium; 4 - High; 5 - Very high
+      oHwdVuln <- data.frame(oHwdVuln=unlist(lapply(oHwdVals, FUN=mean)))
+      oHwdVuln <- oHwdVuln %>% mutate(vuln =
+                                        case_when(oHwdVuln >= as.numeric(hwd_mag[m, 5])  ~ "5", 
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 5]) & oHwdVuln >= as.numeric(hwd_mag[m, 4])) ~ "4",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 4]) & oHwdVuln >= as.numeric(hwd_mag[m, 3])) ~ "3",
+                                                  (oHwdVuln < as.numeric(hwd_mag[m, 3]) & oHwdVuln >= as.numeric(hwd_mag[m, 2])) ~ "2",
+                                                  oHwdVuln <= as.numeric(hwd_mag[m, 2]) ~ "1")
+      )
+      
+      ## Join mean values to polygon data and write shapefile
+      ctrMsk@data <- data.frame(ctrMsk@data, hwd=round(oHwdVuln$oHwdVuln), vuln=as.numeric(oHwdVuln$vuln))
+      writeOGR(ctrMsk, oIDirRHwd, paste0("hwd_", ctrName, "_", m, "_", enos, "_mun"),
+               driver="ESRI Shapefile", check_exists=TRUE, overwrite_layer=TRUE)
       
       cat(" . HWD Month ", m, " ", enos, "done\n")
       
@@ -2377,8 +2439,7 @@ cat(">. HWD calcs done", "\n")
 ##################################################
 
 # Set params
-varList <- c("cdd", "drd", "p95", "frd", "fld")
-varList <- c("hwd")
+varList <- c("cdd", "drd", "p95", "frd", "fld", "hwd")
 id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 # varList <- c("frd")
 
@@ -2515,4 +2576,16 @@ for(scen in scenarios){
   }
   
 }
- 
+
+
+# 
+# ### Liberate memory and remove temp dirs
+# unlink(paste0(oBDir, "/indices"), recursive = T)
+# unlink(paste0(oBDir, "/soils"), recursive = T)
+# unlink(paste0(oBDir, "/monthly"), recursive = T)
+# rm(list = ls())
+# 
+# ## Compress daily base files
+# system(paste0("7za a -mmt=4", oBDir, "/daily.zip", " ", oBDir, "/daily"))
+# # unlink(paste0(oBDir, "/daily"), recursive = T)
+
