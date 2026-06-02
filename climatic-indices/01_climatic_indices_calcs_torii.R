@@ -182,42 +182,42 @@ for (var in vars){
     ctrMsk <- readOGR(ctrShpAdm0Buf,layer=ctrLyrAdm0Buf)
     
     for (tif in dtsLs_yrs){
-
+      
       ## Output file
       oTif <- paste0(oBDir, "/daily/tmp/",  substr(basename(tif),1,nchar(basename(tif))-4), ".nc")
-
+      
       if (!file.exists(oTif)){
-
+        
         ## Load CHIRPS/CHIRTS data and cut by mask
         dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
         writeRaster(resample(dtsMsk, raster(rsMsk)), oTif,  format="CDF",overwrite=F)
-
+        
       }
-
+      
     }
-
+    
     if (var == "tmax" || var == "tmin") {
-
+      
       dtsLsC_yrs_leap <- dtsLsC[grepl(years,dtsLsC)]
       dtsLsC_yrs <- dtsLsC_yrs_leap
-
+      
       ## Complementary ERA data
       for (tif in dtsLsC_yrs){
-
+        
         ## Output file
         date <- str_split(basename(tif), "_")[[1]][4]
         oTif <- paste0(oBDir, "/daily/tmp/", prefix, ".", substr(date, 1, nchar(date)-4), ".", substr(date, 5, 6), ".", substr(date, 7, 8), ".nc")
-
+        
         if (!file.exists(oTif)){
-
+          
           ## Load CHIRPS data and cut by mask
           dtsMsk <- mask(crop(raster(tif), extent(ctrMsk)), ctrMsk)
           writeRaster(resample(dtsMsk, raster(rsMsk)) - 273.15, oTif,  format="CDF",overwrite=F)
-
+          
         }
-
+        
       }
-
+      
     }
     
     
@@ -251,7 +251,7 @@ for (var in vars){
           
           writeRaster(dtsStk_out, paste0(oBDir, "/daily/", prefix, ".", yr, "_daily_temp.nc"), overwrite=T)
           
-            ## Init date
+          ## Init date
           iDate <- as.Date(paste0(yr, "-01-01"))
           
           ## Add time component, variable name and unit
@@ -426,23 +426,23 @@ cdd_mag <- data.frame()
 for (m in 1:12){
   
   # if (!file.exists(paste0(oCdd, "_", m, "_normal.shp"))) {
+  
+  cat(" . CDD Month ", m, "processing\n")
+  
+  for (yr in yi:yf){
     
-    cat(" . CDD Month ", m, "processing\n")
-    
-    for (yr in yi:yf){
+    if (!file.exists(paste0(oCddW, "_", yr, "_", m, ".nc"))) {
       
-      if (!file.exists(paste0(oCddW, "_", yr, "_", m, ".nc"))) {
-        
-        ## Calc consecutive dry days for each year/month
-        system(paste0(dircdo," -s -eca_cdd,1 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", oCddW, "_", yr, "_", m, ".nc"))
-        
-      }
-      
+      ## Calc consecutive dry days for each year/month
+      system(paste0(dircdo," -s -eca_cdd,1 -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ", oCddW, "_", yr, "_", m, ".nc"))
       
     }
+    
+    
+  }
   # }
 }
-  
+
 cat(">. CDD calcs done", "\n")
 
 
@@ -482,17 +482,17 @@ ctrMsk0 <- raster(rsMsk)
 
 
 
+
+for (m in 1:12){
   
-  for (m in 1:12){
+  if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
     
-    if (!file.exists(paste0(iNc, "_wet", "_12.nc"))) {
-      
-      ## Calc time-series wet days
-      system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
-      
-    }
+    ## Calc time-series wet days
+    system(paste0(dircdo," -s setrtomiss,0,0.999 ", iNc, "_", sprintf("%02d", m), ".nc", " ", iNc, "_wet_", sprintf("%02d", m), ".nc"))
+    
   }
-    
+}
+
 
 
 
@@ -504,62 +504,60 @@ p95_mag <- data.frame()
 for (m in 1:12){
   
   # if (!file.exists(paste0(oIDirHP95, "/p95_", ctrName, "_", m, "_normal.shp"))) {
+  
+  ## Calc % p95 for every year in month m
+  
+  for (yr in yi:yf){
     
-    ## Calc % p95 for every year in month m
-    
-    for (yr in yi:yf){
+    if(bigctr == "yes"){
       
-      if(bigctr == "yes"){
+      if (leap_year(yr) == T && m == 2) {
         
-        if (leap_year(yr) == T && m == 2) {
+        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
           
-          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
-            
-            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
-                          " ", oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
-            
-            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
-                          " ", oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
-            
-          }
+          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
+                        " ", oP95WRef, "_leap_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
           
-        } else {
-          
-          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
-            
-            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
-                          " ", oP95WRef, "_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
-            
-            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
-                          " ", oP95WRef, "_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
-            
-          }
+          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
+                        " ", oP95WRef, "_leap_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
           
         }
         
-        writeRaster(merge(raster(paste0(oP95W, "_", yr, "_", m, "_a.nc")), raster(paste0(oP95W, "_", yr, "_", m, "_b.nc"))), 
-                    paste0(oP95W, "_", yr, "_", m, ".nc"), overwrite=T)
-        file.remove(paste0(oP95W, "_", yr, "_", m, "_a.nc"))
-        file.remove(paste0(oP95W, "_", yr, "_", m, "_b.nc"))
+      } else {
+        
+        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+          
+          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_a.nc", " ",
+                        " ", oP95WRef, "_", sprintf("%02d", m), "_a.nc", " ", oP95W, "_", yr, "_", m, "_a.nc"))
+          
+          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), "_b.nc", " ",
+                        " ", oP95WRef, "_", sprintf("%02d", m), "_b.nc", " ", oP95W, "_", yr, "_", m, "_b.nc"))
+          
+        }
+        
+      }
+      
+      writeRaster(merge(raster(paste0(oP95W, "_", yr, "_", m, "_a.nc")), raster(paste0(oP95W, "_", yr, "_", m, "_b.nc"))), 
+                  paste0(oP95W, "_", yr, "_", m, ".nc"), overwrite=T)
+      file.remove(paste0(oP95W, "_", yr, "_", m, "_a.nc"))
+      file.remove(paste0(oP95W, "_", yr, "_", m, "_b.nc"))
+      
+    } else {
+      
+      if (leap_year(yr) == T && m == 2) {
+        
+        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
+          
+          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
+                        " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
+        }
         
       } else {
         
-        if (leap_year(yr) == T && m == 2) {
+        if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
           
-          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
-            
-            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                          " ", oP95WRef, "_leap_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
-          }
-          
-        } else {
-          
-          if (!file.exists(paste0(oP95W, "_", yr, "_", m, ".nc"))) {
-            
-            system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
-                          " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
-          }
-          
+          system(paste0(dircdo," -s eca_r95p -selyear,", yr, " ", iNc, "_", sprintf("%02d", m), ".nc", " ",
+                        " ", oP95WRef, "_", sprintf("%02d", m), ".nc", " ", oP95W, "_", yr, "_", m, ".nc"))
         }
         
       }
@@ -568,9 +566,11 @@ for (m in 1:12){
     
   }
   
+}
+
 # }
 
-  
+
 ##################################################
 ## FLD. Flooding                               ###
 ## Vulnerability type: Flooding                ###
@@ -736,7 +736,7 @@ prc_mag_mtx <- matrix(c(-1, prc_mag[m, 2], 1,
                         prc_mag[m, 3], prc_mag[m, 4], 3,
                         prc_mag[m, 4], prc_mag[m, 5], 4,
                         prc_mag[m, 5], 4000, 5), ncol=3, byrow=TRUE)
-  
+
 
 years <- 1981:2022
 
@@ -764,8 +764,8 @@ for (m in 1:12){
   }
   
 }
-    
-    
+
+
 cat(">. FLD calcs done", "\n")
 
 
@@ -789,11 +789,218 @@ for (idx in idxLs){
       #             paste0("D:/cenavarro/torii_climate_risk/raw_indices/", idx, "_", yr, "_", m, ".tif"), overwrite=T)
       
       writeRaster(disaggregate(raster(paste0("D:/cenavarro/torii_climate_risk/raw_indices/", idx, "_", yr, "_", m, ".tif")), fact=c(5, 5)), 
-                   paste0("D:/cenavarro/torii_climate_risk/raw_indices/", idx, "_", yr, "_", m, "_0_1.tif"), overwrite=T, datatype='INT1U')
+                  paste0("D:/cenavarro/torii_climate_risk/raw_indices/", idx, "_", yr, "_", m, "_0_1.tif"), overwrite=T, datatype='INT1U')
       
     }
   }
   
 }
+
+
+
+
+##################################################
+## Zonal Statistics by municipalities          ###
+##################################################
+
+require(raster)
+require(nc)
+require(maptools)
+require(rgdal)
+require(dismo)
+
+iDir <- "D:/cenavarro/torii_climate_risk"
+idxLs <- c("cdd", "fld", "p95")
+years <- 1981:2022
+months <- 1:12
+
+poly <- readOGR("D:/cenavarro/torii_climate_risk/admin_boundaries/ASA2municipalities.shp")
+poly$id <- 1:nrow(poly)
+yr_mth <- expand.grid(mth=months, yr=years, KEEP.OUT.ATTRS = FALSE)
+
+for(idx in idxLs){
+  
+  if (!file.exists(paste0(paste0(iDir, "/summary_indices/", idx, "_hr_max.csv")))){
+    
+    rs_stk <- stack(paste0(iDir, "/raw_indices/", idx, "_", yr_mth$yr, "_", yr_mth$mth, "_0_1.tif"))
+    
+    ## Rasterize polygon
+    cStk_crop <- crop(rs_stk, extent(poly))
+    extent(cStk_crop) <- extent(poly)
+    poly_rs <- rasterize(poly, cStk_crop[[1]], "id")
+    
+    fStk_stat_mean <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, zonal(cStk_crop, poly_rs, "mean"))
+    fStk_stat_min <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, zonal(cStk_crop, poly_rs, "min"))
+    fStk_stat_max <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, zonal(cStk_crop, poly_rs, "max"))
+    
+    # stats <- rbind(stats, cbind(names(rs_stk), fStk_stat)
+    write.csv(fStk_stat_mean, paste0(iDir, "/summary_indices/", idx, "_hr_mean.csv"), row.names=F)
+    write.csv(fStk_stat_min, paste0(iDir, "/summary_indices/", idx, "_hr_min.csv"), row.names=F)
+    write.csv(fStk_stat_max, paste0(iDir, "/summary_indices/", idx, "_hr_max.csv"), row.names=F)
+    
+  }
+  
+}
+
+
+
+#Growing season
+rs_stmz <- raster(paste0(iDir, "/crop_calendar/fill/maizeplant.start.nc"))
+rs_stmz <- disaggregate(rs_stmz, fact=c(50, 50))
+rs_enmz <- raster(paste0(iDir, "/crop_calendar/fill/maizeharvest.start.nc"))
+rs_enmz <- disaggregate(rs_enmz, fact=c(50, 50))
+rs_stbn <- raster(paste0(iDir, "/crop_calendar/fill/pulsesplant.start.nc"))
+rs_stbn <- disaggregate(rs_stbn, fact=c(50, 50))
+rs_enbn <- raster(paste0(iDir, "/crop_calendar/fill/pulsesharvest.end.nc"))
+rs_enbn <- disaggregate(rs_enbn, fact=c(50, 50))
+
+
+## rs_stmz
+rs_stmz_crop <- crop(rs_stmz, extent(poly))
+extent(rs_stmz_crop) <- extent(poly)
+poly_rs <- rasterize(poly, rs_stmz_crop, "id")
+
+rs_enmz_crop <- crop(rs_enmz, extent(poly))
+extent(rs_enmz_crop) <- extent(poly)
+# poly_rs <- rasterize(poly, rs_enmz_crop, "id")
+
+rs_stbn_crop <- crop(rs_stbn, extent(poly))
+extent(rs_stbn_crop) <- extent(poly)
+# poly_rs <- rasterize(poly, rs_stbn_crop, "id")
+
+rs_enbn_crop <- crop(rs_enbn, extent(poly))
+extent(rs_enbn_crop) <- extent(poly)
+# poly_rs <- rasterize(poly, rs_enbn_crop, "id")
+
+fStk_stat_mean <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, 
+                        Maize_Start=zonal(rs_stmz_crop, poly_rs, "mean"),
+                        Maize_End=zonal(rs_enmz_crop, poly_rs, "mean"),
+                        Beans_Start=zonal(rs_stbn_crop, poly_rs, "mean"),
+                        Beans_End=zonal(rs_enbn_crop, poly_rs, "mean")
+)
+
+fStk_stat_max <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, 
+                       Maize_Start=zonal(rs_stmz_crop, poly_rs, "max"),
+                       Maize_End=zonal(rs_enmz_crop, poly_rs, "max"),
+                       Beans_Start=zonal(rs_stbn_crop, poly_rs, "max"),
+                       Beans_End=zonal(rs_enbn_crop, poly_rs, "max")
+)
+
+fStk_stat_min <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, 
+                       Maize_Start=zonal(rs_stmz_crop, poly_rs, "min"),
+                       Maize_End=zonal(rs_enmz_crop, poly_rs, "min"),
+                       Beans_Start=zonal(rs_stbn_crop, poly_rs, "min"),
+                       Beans_End=zonal(rs_enbn_crop, poly_rs, "min")
+)
+
+
+# stats <- rbind(stats, cbind(names(rs_stk), fStk_stat)
+write.csv(fStk_stat_mean, paste0(iDir, "/summary_indices/crop_cal_mean.csv"), row.names=F)
+write.csv(fStk_stat_min, paste0(iDir, "/summary_indices/crop_cal_min.csv"), row.names=F)
+write.csv(fStk_stat_max, paste0(iDir, "/summary_indices/crop_cal_max.csv"), row.names=F)
+
+
+
+
+
+##################################################
+## Zonal Statistics by adm1 departments/states ###
+##################################################
+
+require(raster)
+require(nc)
+require(maptools)
+require(rgdal)
+require(dismo)
+
+iDir <- "D:/cenavarro/torii_climate_risk"
+idxLs <- c("cdd", "fld", "p95")
+years <- 1981:2022
+months <- 1:12
+
+poly <- readOGR("D:/cenavarro/torii_climate_risk/admin_boundaries/torii_adm1.shp")
+poly$id <- 1:nrow(poly)
+yr_mth <- expand.grid(mth=months, yr=years, KEEP.OUT.ATTRS = FALSE)
+
+for(idx in idxLs){
+  
+  if (!file.exists(paste0(paste0(iDir, "/summary_indices/", idx, "_adm1_max.csv")))){
+    
+    rs_stk <- stack(paste0(iDir, "/raw_indices/", idx, "_", yr_mth$yr, "_", yr_mth$mth, ".tif"))
+    
+    ## Rasterize polygon
+    cStk_crop <- crop(rs_stk, extent(poly))
+    extent(cStk_crop) <- extent(poly)
+    poly_rs <- rasterize(poly, cStk_crop[[1]], "id")
+    
+    fStk_stat_mean <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, zonal(cStk_crop, poly_rs, "mean"))
+    fStk_stat_min <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, zonal(cStk_crop, poly_rs, "min"))
+    fStk_stat_max <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, zonal(cStk_crop, poly_rs, "max"))
+    
+    # stats <- rbind(stats, cbind(names(rs_stk), fStk_stat)
+    write.csv(fStk_stat_mean, paste0(iDir, "/summary_indices/", idx, "_adm1_mean.csv"), row.names=F)
+    write.csv(fStk_stat_min, paste0(iDir, "/summary_indices/", idx, "_adm1_min.csv"), row.names=F)
+    write.csv(fStk_stat_max, paste0(iDir, "/summary_indices/", idx, "_amd1_max.csv"), row.names=F)
+    
+  }
+  
+}
+
+
+
+#Growing season
+rs_stmz <- raster(paste0(iDir, "/crop_calendar/fill/maizeplant.start.nc"))
+rs_stmz <- disaggregate(rs_stmz, fact=c(10, 10))
+rs_enmz <- raster(paste0(iDir, "/crop_calendar/fill/maizeharvest.start.nc"))
+rs_enmz <- disaggregate(rs_enmz, fact=c(10, 10))
+rs_stbn <- raster(paste0(iDir, "/crop_calendar/fill/pulsesplant.start.nc"))
+rs_stbn <- disaggregate(rs_stbn, fact=c(10, 10))
+rs_enbn <- raster(paste0(iDir, "/crop_calendar/fill/pulsesharvest.end.nc"))
+rs_enbn <- disaggregate(rs_enbn, fact=c(10, 10))
+
+
+## rs_stmz
+rs_stmz_crop <- crop(rs_stmz, extent(poly))
+extent(rs_stmz_crop) <- extent(poly)
+poly_rs <- rasterize(poly, rs_stmz_crop, "id")
+
+rs_enmz_crop <- crop(rs_enmz, extent(poly))
+extent(rs_enmz_crop) <- extent(poly)
+# poly_rs <- rasterize(poly, rs_enmz_crop, "id")
+
+rs_stbn_crop <- crop(rs_stbn, extent(poly))
+extent(rs_stbn_crop) <- extent(poly)
+# poly_rs <- rasterize(poly, rs_stbn_crop, "id")
+
+rs_enbn_crop <- crop(rs_enbn, extent(poly))
+extent(rs_enbn_crop) <- extent(poly)
+# poly_rs <- rasterize(poly, rs_enbn_crop, "id")
+
+fStk_stat_mean <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, 
+                        Maize_Start=zonal(rs_stmz_crop, poly_rs, "mean"),
+                        Maize_End=zonal(rs_enmz_crop, poly_rs, "mean"),
+                        Beans_Start=zonal(rs_stbn_crop, poly_rs, "mean"),
+                        Beans_End=zonal(rs_enbn_crop, poly_rs, "mean")
+)
+
+fStk_stat_max <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, 
+                       Maize_Start=zonal(rs_stmz_crop, poly_rs, "max"),
+                       Maize_End=zonal(rs_enmz_crop, poly_rs, "max"),
+                       Beans_Start=zonal(rs_stbn_crop, poly_rs, "max"),
+                       Beans_End=zonal(rs_enbn_crop, poly_rs, "max")
+)
+
+fStk_stat_min <- cbind(Country=poly$COUNTRY, Department=poly$NAME_1, Municipality=poly$NAME_2, 
+                       Maize_Start=zonal(rs_stmz_crop, poly_rs, "min"),
+                       Maize_End=zonal(rs_enmz_crop, poly_rs, "min"),
+                       Beans_Start=zonal(rs_stbn_crop, poly_rs, "min"),
+                       Beans_End=zonal(rs_enbn_crop, poly_rs, "min")
+)
+
+
+# stats <- rbind(stats, cbind(names(rs_stk), fStk_stat)
+write.csv(fStk_stat_mean, paste0(iDir, "/summary_indices/crop_cal_mean_adm1.csv"), row.names=F)
+write.csv(fStk_stat_min, paste0(iDir, "/summary_indices/crop_cal_min_adm1.csv"), row.names=F)
+write.csv(fStk_stat_max, paste0(iDir, "/summary_indices/crop_cal_max_adm1.csv"), row.names=F)
 
 

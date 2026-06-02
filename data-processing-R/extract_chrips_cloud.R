@@ -11,11 +11,11 @@ library(chirps)
 library(terra)
 
 # Set lon/lat of points
-lonlat <- data.frame(lon = c(-55.0281),
-                     lat = c(-2.8094))
+lonlat <- data.frame(lon = c(-76.087),
+                     lat = c(1.948))
 
 # Set dates
-dates <- c("2016-01-01", "2016-01-31")
+dates <- c("1982-01-01", "2024-12-31")
 
 ## Function to get CHIRPS data
 #dat <- get_chirps(lonlat, dates, server = "CHC", as.matrix = FALSE)
@@ -24,7 +24,7 @@ dates <- c("2016-01-01", "2016-01-31")
 datP <- get_chirps(lonlat, dates, server = "ClimateSERV", as.matrix = FALSE)
 
 # Write data
-outfile <- "/Users/cenavarro/Workspace/test_chirps.csv"
+outfile <- "D:/cenavarro/request/request_ee/01_baseline/col_salvajina_chirps.csv"
 write.csv(datP, outfile, row.names = F)
 
 

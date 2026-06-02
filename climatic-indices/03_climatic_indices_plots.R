@@ -26,7 +26,7 @@ require(grid)
 # Climate dirs
 iDirAdm <- "E:/yapu_climate_risk/admin_boundaries"
 iDirP <- "S:/observed/gridded_products/chirps/daily"
-oIDir <- "F:/yapu_climate_risk/continental/latinamerica"
+oIDir <- "D:/cenavarro/yapu_climate_risk/continental/latinamerica_v1_1"
 ctrName <- "LAC"
 
 cat("Processing ", ctrName)
@@ -42,7 +42,7 @@ cat("Processing ", ctrName)
 enosCond <- c("normal")
 id <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 # varList <- c("cdd")
-# scenarios <- c("historical")
+scenarios <- c("recent-past")
 
 
 ## Only consider continental part
