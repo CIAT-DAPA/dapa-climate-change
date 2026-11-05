@@ -11,29 +11,27 @@ library(chirps)
 library(terra)
 
 # Set lon/lat of points
-lonlat <- data.frame(lon = c(-55.0281),
-                     lat = c(-2.8094))
+lonlat <- data.frame(lon = c(-91.634722),
+                     lat = c(15.311111))
+site <- "santabarabara"
 
 # Set dates
-dates <- c("2016-01-01", "2016-01-31")
-
-## Function to get CHIRPS data
-#dat <- get_chirps(lonlat, dates, server = "CHC", as.matrix = FALSE)
+period <- "1990_2009"
+dates <- c("1990-01-01", "2009-12-31")
 
 #For a faster download of few datapoints (~ 10 datapoints), the argument server = "ClimateSERV" can be used
 datP <- get_chirps(lonlat, dates, server = "ClimateSERV", as.matrix = FALSE)
+datTx <- get_chirts(lonlat, dates, server = "ClimateSERV", var = "Tmax")
+datTm <- get_chirts(lonlat, dates, server = "ClimateSERV", var = "Tmin")
 
 # Write data
-outfile <- "/Users/cenavarro/Workspace/test_chirps.csv"
+outfile <- paste0("/Users/cenavarro/Workspace/", site, "_chirps_prec_", period, ".csv")
 write.csv(datP, outfile, row.names = F)
 
-
-## Function to get CHIRTS data
-# Data is currently available from 1983 to 2016
-outfile <- "/Users/cenavarro/Workspace/test_chirts_tx.csv"
-datTx <- get_chirts(lonlat, dates, var = "Tmax")
+outfile <- paste0("/Users/cenavarro/Workspace/", site, "_chirts_tmax_", period, ".csv")
 write.csv(datTx, outfile, row.names = F)
 
-outfile <- "/Users/cenavarro/Workspace/test_chirts_tn.csv"
-datTx <- get_chirts(lonlat, dates, var = "Tmin")
-write.csv(datTx, outfile, row.names = F)
+outfile <- paste0("/Users/cenavarro/Workspace/", site, "_chirts_tmin_", period, ".csv")
+write.csv(datTm, outfile, row.names = F)
+
+

@@ -1,0 +1,15 @@
+Validación local completada el 2026-11-05 — versión deciles.
+
+PASS: tests/test_indices.R
+PASS: tests/test_pipeline.R
+PASS: sintaxis de configuración, entrada y módulos R.
+
+Verificados: P10..P90 temporales por celda, diez niveles, independencia entre
+celdas, límites exactos y empates, series de ceros, referencias insuficientes,
+categorías anuales, frecuencias y grupos ENOS sin observaciones.
+La integración verifica también la clasificación uniforme de DRD y FLD,
+los seis índices, bloques vacíos, celda única, NoData, mallas diferentes,
+calendario bisiesto, continuidad de olas de calor y reanudación.
+
+Entorno: R 4.5.3 y terra (ver environment.txt), escritura RDS.
+Pendiente en equipo destino: R 4.6, Parquet/arrow y datos reales de X:.
