@@ -1,0 +1,15 @@
+Fuente: NOAA Climate Prediction Center, Oceanic Nino Index (ONI), ERSSTv6.
+URL: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/oni/v6/
+Consulta: 2026-11-05.
+Cobertura: enero de 1981 a diciembre de 2025, 540 filas.
+Columnas: year,month,oni. ONI en grados Celsius de anomalia.
+Asignacion: DJF=enero, JFM=febrero, FMA=marzo, MAM=abril, AMJ=mayo,
+MJJ=junio, JJA=julio, JAS=agosto, ASO=septiembre, SON=octubre,
+OND=noviembre, NDJ=diciembre. El anio corresponde al mes central.
+Se conservan los valores publicados con un decimal, sin interpolar.
+El indice es una media movil trimestral, no una anomalia mensual independiente.
+El codigo agrupa por >=0.5 / <=-0.5 / neutral. No exige persistencia
+de cinco temporadas solapadas para identificar episodios historicos de NOAA.
+La pagina indica que RONI se usa actualmente para monitoreo oficial;
+este archivo conserva ONI ERSSTv6, segun la fuente solicitada.
+SHA256 CSV: 98d781b95e7ad56f3bd80bb8302e161939af66bd9a366a00086aa49d136251a6

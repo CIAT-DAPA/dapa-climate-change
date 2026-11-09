@@ -1,0 +1,17 @@
+Validación local 2026-11-05 — versión snowfall.
+
+PASS: tests/test_indices.R
+PASS: tests/test_parallel.R
+PASS: sintaxis de start.R, run.R, config.R y todos los módulos.
+
+La integración SOCK real incluyó primero el pipeline secuencial y comparó
+con 2 trabajadores: referencias, bases, índices, clasificación, umbrales y
+resúmenes exactamente iguales. Verificó reanudación sin reescritura, cambio
+de workers sin invalidar la firma, error recuperable por bloque y liberación
+del bloqueo de corrida. El benchmark ejecutó 1, 2 y 4 trabajadores.
+
+Entorno en environment.txt. Almacenamiento RDS, datos sintéticos pequeños.
+El coste de arranque dominó la prueba corta: no permite inferir aceleración
+en el servidor ni sobre la unidad X:.
+Pendiente en destino: R 4.6, Windows, Parquet/arrow y datos globales reales.
+Aviso observado de snowfall: Unknown option on commandline: --file.

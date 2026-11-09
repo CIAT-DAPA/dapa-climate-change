@@ -6,8 +6,8 @@ cfg <- list(
     tmax = 'X:/Observed_Climate data/CHIRTS_ERA5/tmax_daily_1981_2026',
     tmin = 'X:/Observed_Climate data/CHIRTS_ERA5/tmin_daily_1981_2026'
   ),
-  output = 'F:/yapu_climate_risk/global_tables',
-  run_id = '1981_2025_deciles_v2',
+  output = 'C:/Users/cenavarro/Workspace/yapu-climate-risk',
+  run_id = '1981_2025_deciles',
   years = 1981:2025,
   reference_years = 1991:2020,
   periods = list(
@@ -31,7 +31,7 @@ cfg <- list(
   # La clasificación FINAL de fld_score también usa class_probs (P10..P90).
   flood_rain_probs = c(0.159, 0.309, 0.691, 0.841),
   # CSV normalizado: year,month,oni. Sin CSV, solo se resume condición 'all'.
-  enso_csv = 'F:/yapu_climate_risk/enso_monthly.csv',
+  enso_csv = "C:/Users/cenavarro/Workspace/yapu-climate-risk/enso/enso_monthly.csv",
   # Índice compuesto opcional. Las cuatro capas deben cubrir la malla CHIRPS.
   # clay: % arcilla; slope: pendiente en %; wetness: índice SAGA;
   # landcover: códigos ya reclasificados a susceptibilidad 1..5.
@@ -39,5 +39,5 @@ cfg <- list(
   static = list(clay = '', slope = '', wetness = '', landcover = ''),
   # Para ensayos: NULL procesa TODO. Un vector de IDs limita bloques.
   tile_ids = NULL,
-  tempdir = 'F:/yapu_climate_risk/terra_tmp'
+  tempdir = 'C:/Users/cenavarro/Workspace/terra_temp'
 )
